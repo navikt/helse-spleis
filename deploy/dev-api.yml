@@ -72,8 +72,6 @@ spec:
     value: "helse-spleis"
   - name: DATABASE_DATABASE
     value: "spleis"
-  - name: FORENKLE_REVURDERING
-    value: "true"
   - name: AVVIKSAKER
     value: "true"
 

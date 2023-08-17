@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Vedtaksperiode
@@ -247,21 +246,20 @@ data class BeregnetPeriode(
         return this.copy(periodetype = periodetype)
     }
 
-    internal fun sammeUtbetaling(other: BeregnetPeriode): Boolean {
-        if (this.utbetaling.id == other.utbetaling.id) return true
-        if (Toggle.ForenkleRevurdering.disabled) return false
-        return ingenEndringerMellom(other)
-    }
-
     /*
         finner ut om det har vært endringer i sykdomstidslinjen eller vilkårsgrunnlagene mellom periodene
         ved å se om det har vært endringer på den nye perioden
      */
-    private fun ingenEndringerMellom(other: BeregnetPeriode): Boolean {
+    internal fun ingenEndringerMellom(other: BeregnetPeriode): Boolean {
         checkNotNull(this.forrigeGenerasjon) { "forventet ikke at forrigeGenerasjon er null" }
-        if (this.vilkårsgrunnlagId != this.forrigeGenerasjon.vilkårsgrunnlagId) return false
+        // hvis vilkårsgrunnlaget har endret seg mellom forrige generasjon, så kan det likevel hende at 'other' (revurderingen før)
+        // har allerede laget ny rad - og derfor trenger vi ikke lage enda en
+        if (this.vilkårsgrunnlagId != this.forrigeGenerasjon.vilkårsgrunnlagId && this.vilkårsgrunnlagId != other.vilkårsgrunnlagId) return false
         return this.sammenslåttTidslinje
-            .zip(this.forrigeGenerasjon.sammenslåttTidslinje) { ny, gammel -> ny == gammel }
+            .zip(this.forrigeGenerasjon.sammenslåttTidslinje) { ny, gammel ->
+                ny == gammel // todo: vurdere om vi skal sammenligne uten utbetalingsinfo, altså ny.copy(utbetalingsinfo = null) == gammel.copy(utbetalingsinfo = null) for å unngå
+                             // at endringer i refusjon som treffer mange vedtaksperioder slår ut på alle sammen (og dermed medfører mange rader)
+            }
             .all { it }
     }
 

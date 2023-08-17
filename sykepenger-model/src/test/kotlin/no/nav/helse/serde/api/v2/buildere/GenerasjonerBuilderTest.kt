@@ -1110,38 +1110,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdering av tidligere skjæringstidspunkt - nyere revurdering med ingen endringer - uten toggle`() = Toggle.ForenkleRevurdering.disable {
-        nyttVedtak(1.januar, 31.januar)
-        nyttVedtak(1.mai, 31.mai)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
-        assertEquals(3, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING medTilstand Utbetalt fra (1.mai til 31.mai)
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.mai til 31.mai)
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
-        }
-        2.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.mai til 31.mai)
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.januar til 31.januar)
-        }
-    }
-
-    @Test
-    fun `revurdering av tidligere skjæringstidspunkt - nyere revurdering med ingen endringer`() = Toggle.ForenkleRevurdering.enable {
+    fun `revurdering av tidligere skjæringstidspunkt - nyere revurdering med ingen endringer`() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mai, 31.mai)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))

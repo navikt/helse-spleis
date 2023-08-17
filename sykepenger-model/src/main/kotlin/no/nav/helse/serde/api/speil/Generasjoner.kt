@@ -109,7 +109,7 @@ class Generasjoner {
 
         class RevurdertGenerasjon(private val revurderingen: BeregnetPeriode) : Byggetilstand {
             override fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
-                if (periode.sammeUtbetaling(revurderingen)) return generasjoner.leggTilNyPeriode(periode)
+                if (periode.ingenEndringerMellom(revurderingen)) return generasjoner.leggTilNyPeriode(periode)
                 generasjoner.leggTilNyRadOgPeriode(periode, RevurdertGenerasjon(periode))
             }
         }

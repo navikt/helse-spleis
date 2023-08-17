@@ -70,12 +70,14 @@ internal class GenerasjonerTest {
     fun `out of order - revurdering etter ny beregnet periode`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
+        val vedtaksperiode1 = beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1)
+        val vedtaksperiode2 = beregnetPeriode(10.april til 28.april, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2)
         val generasjoner = byggGenerasjoner(
-            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1),
-            beregnetPeriode(10.april til 28.april, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2),
+            vedtaksperiode1,
+            vedtaksperiode2,
             beregnetPeriode(1.januar til 31.januar, utbetaling(Utbetalingtype.UTBETALING)),
-            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING), vedtaksperiodeId1),
-            beregnetPeriode(10.april til 28.april, utbetaling(Utbetalingtype.REVURDERING), vedtaksperiodeId2)
+            beregnetPeriode(11.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING), vedtaksperiodeId1, forrigeGenerasjon = vedtaksperiode1),
+            beregnetPeriode(10.april til 28.april, utbetaling(Utbetalingtype.REVURDERING), vedtaksperiodeId2, forrigeGenerasjon = vedtaksperiode2)
         )
         generasjoner(3) {
             generasjon(0, 3) {
@@ -163,12 +165,16 @@ internal class GenerasjonerTest {
     fun `samme revurdering fortsetter på samme rad`() {
         val vedtaksperiodeId1 = UUID.randomUUID()
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val revurderingId = UUID.randomUUID()
+        val revurderingId1 = UUID.randomUUID()
+        val revurderingId2 = UUID.randomUUID()
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        val vedtaksperiode1 = beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1)
+        val vedtaksperiode2 = beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2)
         val generasjoner = byggGenerasjoner(
-            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1),
-            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2),
-            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING, utbetalingId = revurderingId), vedtaksperiodeId1),
-            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.REVURDERING, utbetalingId = revurderingId), vedtaksperiodeId2),
+            vedtaksperiode1,
+            vedtaksperiode2,
+            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING, utbetalingId = revurderingId1), vedtaksperiodeId1, vilkårsgrunnlagId, vedtaksperiode1),
+            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.REVURDERING, utbetalingId = revurderingId2), vedtaksperiodeId2, vilkårsgrunnlagId, vedtaksperiode2),
 
         )
         generasjoner(2) {
@@ -189,11 +195,13 @@ internal class GenerasjonerTest {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val revurderingId1 = UUID.randomUUID()
         val revurderingId2 = UUID.randomUUID()
+        val vedtaksperiode1 = beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1)
+        val vedtaksperiode2 = beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2)
         val generasjoner = byggGenerasjoner(
-            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId1),
-            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.UTBETALING), vedtaksperiodeId2),
-            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING, utbetalingId = revurderingId1), vedtaksperiodeId1),
-            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.REVURDERING, utbetalingId = revurderingId2), vedtaksperiodeId2),
+            vedtaksperiode1,
+            vedtaksperiode2,
+            beregnetPeriode(1.mars til 31.mars, utbetaling(Utbetalingtype.REVURDERING, utbetalingId = revurderingId1), vedtaksperiodeId1, forrigeGenerasjon = vedtaksperiode1),
+            beregnetPeriode(1.april til 30.april, utbetaling(Utbetalingtype.REVURDERING, utbetalingId = revurderingId2), vedtaksperiodeId2, forrigeGenerasjon = vedtaksperiode2),
 
         )
         generasjoner(3) {
@@ -292,7 +300,7 @@ internal class GenerasjonerTest {
         skjæringstidspunkt = periode.start,
         hendelser = emptyList()
     )
-    private fun beregnetPeriode(periode: Periode, utbetaling: Utbetaling, vedtaksperiodeId: UUID = UUID.randomUUID()) = BeregnetPeriode(
+    private fun beregnetPeriode(periode: Periode, utbetaling: Utbetaling, vedtaksperiodeId: UUID = UUID.randomUUID(), vilkårsgrunnlagId: UUID = UUID.randomUUID(), forrigeGenerasjon: BeregnetPeriode? = null) = BeregnetPeriode(
         vedtaksperiodeId = vedtaksperiodeId,
         fom = periode.start,
         tom = periode.endInclusive,
@@ -316,7 +324,8 @@ internal class GenerasjonerTest {
             BeregnetPeriode.Alder(30, true),
             BeregnetPeriode.Søknadsfrist(LocalDateTime.now(), periode.start, periode.endInclusive, true)
         ),
-        vilkårsgrunnlagId = UUID.randomUUID()
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
+        forrigeGenerasjon = forrigeGenerasjon
     )
 
     fun annullertPeriode(periode: Periode, utbetaling: Utbetaling, vedtaksperiodeId: UUID = UUID.randomUUID()) = AnnullertPeriode(
