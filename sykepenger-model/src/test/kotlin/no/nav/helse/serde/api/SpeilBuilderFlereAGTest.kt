@@ -28,6 +28,7 @@ import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
+import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -53,6 +54,7 @@ import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -739,7 +741,19 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         )
 
         val speilJson = serializePersonForSpeil(person)
-        val perioder = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a2 }?.ghostPerioder
+        val vilkårsgrunnlag = speilJson.vilkårsgrunnlag
+        assertEquals(1, vilkårsgrunnlag.size)
+
+        val arbeidsgiverA1 = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a1 }
+        assertEquals(1, arbeidsgiverA1?.generasjoner?.size)
+        assertEquals(1, arbeidsgiverA1?.generasjoner?.single()?.perioder?.size)
+        val uberegnetVilkårsprøvdPeriode = arbeidsgiverA1?.generasjoner?.single()?.perioder?.single()
+        assertInstanceOf(UberegnetVilkårsprøvdPeriode::class.java, uberegnetVilkårsprøvdPeriode)
+        assertEquals(vilkårsgrunnlag.entries.single().key, (uberegnetVilkårsprøvdPeriode as? UberegnetVilkårsprøvdPeriode)?.vilkårsgrunnlagId)
+
+        val arbeidsgiverA2 = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a2 }
+        assertEquals(0, arbeidsgiverA2?.generasjoner?.size)
+        val perioder = arbeidsgiverA2?.ghostPerioder
         val actual = perioder?.single()!!
         assertEquals(
             GhostPeriodeDTO(
@@ -752,8 +766,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             ),
             actual
         )
-        val vilkårsgrunnlag = speilJson.vilkårsgrunnlag
-        assertEquals(0, vilkårsgrunnlag.size)
     }
 
     @Test

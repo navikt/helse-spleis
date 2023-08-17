@@ -127,7 +127,6 @@ data class UberegnetVilkårsprøvdPeriode(
     override fun tilGenerasjon(generasjoner: Generasjoner) {
         generasjoner.uberegnetVilkårsprøvdPeriode(this)
     }
-
 }
 
 data class UberegnetPeriode(
@@ -157,7 +156,9 @@ data class UberegnetPeriode(
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
         organisasjonsnummer: String
     ): Tidslinjeperiode {
-        return vilkårsgrunnlaghistorikk.potensiellUBeregnetVilkårsprøvdPeriode(this, skjæringstidspunkt, organisasjonsnummer, vedtaksperiodeId) ?: this
+        val vilkårsgrunnlagId = vilkårsgrunnlaghistorikk.potensiellUBeregnetVilkårsprøvdPeriode(skjæringstidspunkt) ?: return this
+        val periodetype = vilkårsgrunnlaghistorikk.leggIBøtta(vilkårsgrunnlagId).utledPeriodetype(organisasjonsnummer, vedtaksperiodeId)
+        return UberegnetVilkårsprøvdPeriode(this, vilkårsgrunnlagId, periodetype)
     }
 
     internal class Builder(

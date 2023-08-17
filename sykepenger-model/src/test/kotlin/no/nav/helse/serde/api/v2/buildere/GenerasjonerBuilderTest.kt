@@ -71,6 +71,7 @@ import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.OVERGANG_FRA_IT
 import no.nav.helse.serde.api.dto.UberegnetPeriode
+import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.Utbetalingstatus.GodkjentUtenUtbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus.IkkeGodkjent
@@ -731,7 +732,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon {
             beregnetPeriode(0) er Ubetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
-            uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+            uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
         }
     }
 
@@ -758,12 +759,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon {
             beregnetPeriode(0) er Ubetalt avType REVURDERING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
-            uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+            uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
         }
 
         1.generasjon {
             beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand Utbetalt
-            uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+            uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
         }
     }
 
@@ -776,7 +777,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
             beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
         }
     }
@@ -841,7 +842,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner[0].perioder.size)
 
         0.generasjon {
-            uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
+            uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
         }
     }
@@ -861,7 +862,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, generasjoner[1].perioder.size)
 
         0.generasjon {
-            uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand VenterPåAnnenPeriode
+            uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand VenterPåAnnenPeriode
             beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
         }
 
@@ -1049,35 +1050,35 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
-            uberegnetPeriode(1) medTilstand ForberederGodkjenning
+            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetVilkårsprøvdPeriode(1) medTilstand ForberederGodkjenning
         }
 
         håndterYtelser(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
             beregnetPeriode(1) medTilstand ForberederGodkjenning
         }
 
         håndterSimulering(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
             beregnetPeriode(1) medTilstand TilGodkjenning
         }
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
             beregnetPeriode(1) medTilstand TilUtbetaling
         }
 
         håndterUtbetalt()
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand ForberederGodkjenning
+            uberegnetVilkårsprøvdPeriode(0) medTilstand ForberederGodkjenning
             beregnetPeriode(1) medTilstand Utbetalt
         }
     }
@@ -1215,7 +1216,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             this[0].apply {
                 assertEquals(2, perioder.size)
-                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand TilGodkjenning
             }
             this[1].apply {
@@ -1648,9 +1649,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, generasjoner.size)
         0.generasjon {
             assertEquals(3, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
             beregnetPeriode(1) avType UTBETALING medTilstand TilGodkjenning
-            uberegnetPeriode(2) medTilstand IngenUtbetaling
+            uberegnetVilkårsprøvdPeriode(2) medTilstand IngenUtbetaling
         }
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1897,12 +1898,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(3, perioder.size)
             beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 31.januar) medTilstand Utbetalt
-            uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
         1.generasjon {
             assertEquals(2, perioder.size)
             beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-            uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
         }
     }
 
@@ -2108,13 +2109,19 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private fun GenerasjonDTO.beregnetPeriode(index: Int): BeregnetPeriode {
         val periode = this.perioder[index]
-        require(periode is BeregnetPeriode) { "Perioden er ikke en beregnet periode!" }
+        require(periode is BeregnetPeriode) { "Perioden ${periode::class.simpleName} er ikke en beregnet periode!" }
         return periode
     }
 
     private fun GenerasjonDTO.uberegnetPeriode(index: Int): UberegnetPeriode {
         val periode = this.perioder[index]
-        require(periode is UberegnetPeriode) { "Perioden er ikke en uberegnet periode!" }
+        require(periode is UberegnetPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet periode!" }
+        return periode
+    }
+
+    private fun GenerasjonDTO.uberegnetVilkårsprøvdPeriode(index: Int): UberegnetVilkårsprøvdPeriode {
+        val periode = this.perioder[index]
+        require(periode is UberegnetVilkårsprøvdPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet vilkårsprøvd periode!" }
         return periode
     }
 }

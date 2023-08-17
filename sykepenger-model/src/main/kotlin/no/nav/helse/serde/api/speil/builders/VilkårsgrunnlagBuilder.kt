@@ -28,8 +28,6 @@ import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
-import no.nav.helse.serde.api.dto.UberegnetPeriode
-import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -223,19 +221,10 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
         }
     }
 
-    internal fun potensiellUBeregnetVilkårsprøvdPeriode(
-        uberegnetPeriode: UberegnetPeriode,
-        skjæringstidspunkt: LocalDate,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID
-    ): UberegnetVilkårsprøvdPeriode? {
-        if (Toggle.TjuefemprosentAvvik.disabled) return null
-        val (vilkårsgrunnlagId, vilkårsgrunnlag) = tilgjengeligeVilkårsgrunnlag[0]?.filterValues {
+    internal fun potensiellUBeregnetVilkårsprøvdPeriode(skjæringstidspunkt: LocalDate): UUID? {
+        return tilgjengeligeVilkårsgrunnlag[0]?.filterValues {
             it.skjæringstidspunkt == skjæringstidspunkt
-        }?.entries?.singleOrNull() ?: return null
-        leggIBøtta(vilkårsgrunnlagId)
-        val periodetype = vilkårsgrunnlag.utledPeriodetype(organisasjonsnummer, vedtaksperiodeId)
-        return UberegnetVilkårsprøvdPeriode(uberegnetPeriode, vilkårsgrunnlagId, periodetype)
+        }?.entries?.singleOrNull()?.key ?: return null
     }
 }
 
