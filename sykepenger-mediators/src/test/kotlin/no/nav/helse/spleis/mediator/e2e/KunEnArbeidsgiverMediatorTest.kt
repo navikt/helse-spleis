@@ -8,6 +8,7 @@ import io.mockk.verify
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -19,9 +20,9 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.mediator.TestHendelseMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
-import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
@@ -405,6 +406,34 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertEquals(1, testRapid.inspektør.meldinger("vedtak_fattet").size)
         assertEquals(vedtakFattetTidspunkt, testRapid.inspektør.siste("vedtak_fattet")["vedtakFattetTidspunkt"].asLocalDateTime())
+    }
+
+    @Test
+    fun `sender utkast til vedtak`() = Toggle.UTKAST_TIL_VEDTAK.enable {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0, true)
+        sendUtbetaling()
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET"
+        )
+        assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "OVERFØRT", "UTBETALT")
+        assertEquals(1, testRapid.inspektør.meldinger("utkast_til_vedtak").size)
     }
 
     @Test

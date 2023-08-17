@@ -9,6 +9,7 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
@@ -355,7 +356,8 @@ internal class PersonMediator(
     }
 
     override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
-        queueMessage(JsonMessage.newMessage("vedtak_fattet", mutableMapOf(
+        val eventName = if (Toggle.UTKAST_TIL_VEDTAK.enabled) "utkast_til_vedtak" else "vedtak_fattet"
+        queueMessage(JsonMessage.newMessage(eventName, mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "fom" to event.periode.start,
