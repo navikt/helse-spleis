@@ -257,8 +257,7 @@ data class BeregnetPeriode(
         if (this.vilkårsgrunnlagId != this.forrigeGenerasjon.vilkårsgrunnlagId && this.vilkårsgrunnlagId != other.vilkårsgrunnlagId) return false
         return this.sammenslåttTidslinje
             .zip(this.forrigeGenerasjon.sammenslåttTidslinje) { ny, gammel ->
-                ny == gammel // todo: vurdere om vi skal sammenligne uten utbetalingsinfo, altså ny.copy(utbetalingsinfo = null) == gammel.copy(utbetalingsinfo = null) for å unngå
-                             // at endringer i refusjon som treffer mange vedtaksperioder slår ut på alle sammen (og dermed medfører mange rader)
+                ny.copy(utbetalingsinfo = null) == gammel.copy(utbetalingsinfo = null)
             }
             .all { it }
     }
