@@ -188,6 +188,59 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun `fjerner en dag i starten av en linje i midten av et oppdrag`() {
+        val linje1 = 1.januar to 7.januar grad 80
+        val linje2 = 8.januar to 20.januar grad 100 pekerPå linje1
+        val linje3 = 21.januar to 31.januar grad 90 pekerPå linje2
+        val original = linjer(linje1, linje2, linje3)
+        val fjernetEnDag = linjer(1.januar to 7.januar grad 80, 9.januar to 20.januar grad 100, 21.januar to 31.januar grad 90)
+        val actual = fjernetEnDag - original
+        val linje4 = 21.januar to 31.januar grad 90 endrer original.last() opphører 8.januar
+        val linje5 = 9.januar to 20.januar grad 100 pekerPå linje4
+        val linje6 = 21.januar to 31.januar grad 90 pekerPå linje5
+        val expected = linjer(linje1.endringskode(UEND), linje4, linje5, linje6)
+        assertUtbetalinger(expected, actual)
+    }
+
+    @Test
+    fun `fjerner en dag i midten av en linje i midten av et oppdrag`() {
+        val linje1 = 1.januar to 7.januar grad 80
+        val linje2 = 8.januar to 20.januar grad 100 pekerPå linje1
+        val linje3 = 21.januar to 31.januar grad 90 pekerPå linje2
+        val original = linjer(linje1, linje2, linje3)
+        val fjernetEnDag = linjer(
+            1.januar to 7.januar grad 80,
+            8.januar to 9.januar grad 100,
+            11.januar to 20.januar grad 100,
+            21.januar to 31.januar grad 90
+        )
+        val actual = fjernetEnDag - original
+        val linje4 = 8.januar to 9.januar grad 100 pekerPå linje3
+        val linje5 = 11.januar to 20.januar grad 100 pekerPå linje4
+        val linje6 = 21.januar to 31.januar grad 90 pekerPå linje5
+        val expected = linjer(linje1.endringskode(UEND), linje4, linje5, linje6)
+        assertUtbetalinger(expected, actual)
+    }
+
+    @Test
+    fun `fjerner en dag i slutten av en linje i midten av et oppdrag`() {
+        val linje1 = 1.januar to 7.januar grad 80
+        val linje2 = 8.januar to 20.januar grad 100 pekerPå linje1
+        val linje3 = 21.januar to 31.januar grad 90 pekerPå linje2
+        val original = linjer(linje1, linje2, linje3)
+        val fjernetEnDag = linjer(
+            1.januar to 7.januar grad 80,
+            8.januar to 19.januar grad 100,
+            21.januar to 31.januar grad 90
+        )
+        val actual = fjernetEnDag - original
+        val linje4 = 8.januar to 19.januar grad 100 pekerPå linje3
+        val linje5 = 21.januar to 31.januar grad 90 pekerPå linje4
+        val expected = linjer(linje1.endringskode(UEND), linje4, linje5)
+        assertUtbetalinger(expected, actual)
+    }
+
+    @Test
     fun `kjeder seg på forrige oppdrag når sisteArbeidsgiverdag er lik`() {
         val original = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
         val recalculated = linjer(*emptyArray<TestUtbetalingslinje>(), sisteArbeidsgiverdag = 1.januar)

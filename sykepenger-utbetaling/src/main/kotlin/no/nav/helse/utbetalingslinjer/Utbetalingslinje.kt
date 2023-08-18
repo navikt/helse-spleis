@@ -194,8 +194,7 @@ class Utbetalingslinje(
                 this.datoStatusFom == other.datoStatusFom
 
     fun skalOpphøreOgErstatte(other: Utbetalingslinje, sisteLinjeITidligereOppdrag: Utbetalingslinje) =
-        other == sisteLinjeITidligereOppdrag &&
-                (this.fom > other.fom)
+        other == sisteLinjeITidligereOppdrag && (this.fom > other.fom)
 
     override fun hashCode(): Int {
         return fom.hashCode() * 37 +

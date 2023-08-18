@@ -11,11 +11,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
@@ -405,9 +405,14 @@ class Oppdrag private constructor(
             return medNyeLinjer.kopierMed(medNyeLinjer.linjer, endringskode = Endringskode.UEND)
         }
 
-        private fun opphørTidligereLinjeOgOpprettNy(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {
+        private fun opphørTidligereLinjeOgOpprettNy(
+            nåværende: Utbetalingslinje,
+            tidligere: Utbetalingslinje,
+            aktivitetslogg: IAktivitetslogg,
+            datoStatusFom: LocalDate = tidligere.fom
+        ): List<Utbetalingslinje> {
             linkTo = tidligere
-            val opphørslinje = tidligere.opphørslinje(tidligere.fom)
+            val opphørslinje = tidligere.opphørslinje(datoStatusFom)
             val linketTilForrige = nåværende.kobleTil(linkTo)
             tilstand = Ny()
             aktivitetslogg.varsel(RV_OS_3)
@@ -438,6 +443,7 @@ class Oppdrag private constructor(
             return when {
                 nåværende.kanEndreEksisterendeLinje(tidligere, sisteLinjeITidligereOppdrag) -> listOf(nåværende.endreEksisterendeLinje(tidligere))
                 nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere, aktivitetslogg)
+                nåværende.fom > tidligere.fom -> opphørTidligereLinjeOgOpprettNy(nåværende, sisteLinjeITidligereOppdrag, aktivitetslogg, tidligere.fom)
                 else -> listOf(opprettNyLinje(nåværende))
             }
         }
