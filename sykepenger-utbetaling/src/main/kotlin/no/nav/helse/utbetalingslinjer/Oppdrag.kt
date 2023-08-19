@@ -325,8 +325,7 @@ class Oppdrag private constructor(
     // Fordi linje "1. januar - 10. januar" opprettes som NY, medfører dette at oppdragsystemet opphører 11. januar til 31. januar automatisk
     private fun kjørFrem(tidligere: Oppdrag): Oppdrag {
         val sammenkoblet = this.kobleTil(tidligere)
-        val førsteNyLinje = sammenkoblet.first().kobleTil(tidligere.last())
-        val linjer = kjedeSammenLinjer(listOf(førsteNyLinje) + sammenkoblet.drop(1))
+        val linjer = kjedeSammenLinjer(sammenkoblet, tidligere.last())
         return sammenkoblet.kopierMed(linjer)
     }
 
@@ -400,9 +399,8 @@ class Oppdrag private constructor(
             this.linkTo = avtroppendeOppdrag.last()
             val kobletTil = påtroppendeOppdrag.kobleTil(avtroppendeOppdrag)
             val medLinkeLinjer = kopierLikeLinjer(kobletTil, avtroppendeOppdrag, aktivitetslogg)
-            val medNyeLinjer = håndterLengreNåværende(medLinkeLinjer, avtroppendeOppdrag)
-            if (medNyeLinjer.last().erForskjell()) return medNyeLinjer
-            return medNyeLinjer.kopierMed(medNyeLinjer.linjer, endringskode = Endringskode.UEND)
+            if (medLinkeLinjer.last().erForskjell()) return medLinkeLinjer
+            return medLinkeLinjer.kopierMed(medLinkeLinjer.linjer, endringskode = Endringskode.UEND)
         }
 
         private fun opphørTidligereLinjeOgOpprettNy(
@@ -414,6 +412,7 @@ class Oppdrag private constructor(
             linkTo = tidligere
             val opphørslinje = tidligere.opphørslinje(datoStatusFom)
             val linketTilForrige = nåværende.kobleTil(linkTo)
+            linkTo = linketTilForrige
             tilstand = Ny()
             aktivitetslogg.varsel(RV_OS_3)
             return listOf(opphørslinje, linketTilForrige)
@@ -425,18 +424,7 @@ class Oppdrag private constructor(
             val linjer = nytt.zip(tidligere).map { (a, b) -> tilstand.håndterForskjell(a, b, aktivitetslogg) }.flatten()
             val remaining = (nytt.size - minOf(nytt.size, tidligere.size)).coerceAtLeast(0)
             val nyeLinjer = nytt.takeLast(remaining)
-            return nytt.kopierMed(linjer + nyeLinjer)
-        }
-
-        private fun håndterLengreNåværende(nytt: Oppdrag, tidligere: Oppdrag): Oppdrag {
-            if (nytt.size <= tidligere.size) return nytt
-
-            val eldreLinjer = nytt.linjer.take(tidligere.size)
-            val nyeLinjer = nytt.linjer.drop(tidligere.size)
-
-            val koblingslinje = nyeLinjer.first().kobleTil(linkTo)
-            val kjedeLinjer = kjedeSammenLinjer(listOf(koblingslinje) + nyeLinjer.drop(1))
-            return nytt.kopierMed(eldreLinjer + kjedeLinjer)
+            return nytt.kopierMed(linjer + kjedeSammenLinjer(nyeLinjer, linjer.last()))
         }
 
         private fun håndterUlikhet(nåværende: Utbetalingslinje, tidligere: Utbetalingslinje, aktivitetslogg: IAktivitetslogg): List<Utbetalingslinje> {

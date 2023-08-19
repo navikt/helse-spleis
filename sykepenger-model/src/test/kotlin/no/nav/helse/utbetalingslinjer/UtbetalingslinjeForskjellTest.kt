@@ -193,12 +193,13 @@ internal class UtbetalingslinjeForskjellTest {
         val linje2 = 8.januar to 20.januar grad 100 pekerPå linje1
         val linje3 = 21.januar to 31.januar grad 90 pekerPå linje2
         val original = linjer(linje1, linje2, linje3)
-        val fjernetEnDag = linjer(1.januar to 7.januar grad 80, 9.januar to 20.januar grad 100, 21.januar to 31.januar grad 90)
+        val fjernetEnDag = linjer(1.januar to 7.januar grad 80, 9.januar to 20.januar grad 100, 21.januar to 25.januar grad 90, 26.januar to 31.januar grad 100)
         val actual = fjernetEnDag - original
         val linje4 = 21.januar to 31.januar grad 90 endrer original.last() opphører 8.januar
         val linje5 = 9.januar to 20.januar grad 100 pekerPå linje4
-        val linje6 = 21.januar to 31.januar grad 90 pekerPå linje5
-        val expected = linjer(linje1.endringskode(UEND), linje4, linje5, linje6)
+        val linje6 = 21.januar to 25.januar grad 90 pekerPå linje5
+        val linje7 = 26.januar to 31.januar grad 100 pekerPå linje6
+        val expected = linjer(linje1.endringskode(UEND), linje4, linje5, linje6, linje7)
         assertUtbetalinger(expected, actual)
     }
 

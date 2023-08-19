@@ -87,9 +87,10 @@ class Utbetalingslinje(
             linjer.filterNot { it.beløp == null || it.beløp == 0 }
 
         // oppdraget utgjør på sett og vis en linket liste hvor hver linje har et nummer, og peker tilbake på forrige linje
-        internal fun kjedeSammenLinjer(linjer: List<Utbetalingslinje>): List<Utbetalingslinje> {
+        internal fun kjedeSammenLinjer(linjer: List<Utbetalingslinje>, koblingslinje: Utbetalingslinje? = null): List<Utbetalingslinje> {
             if (linjer.isEmpty()) return emptyList()
-            var forrige = linjer.first()
+            val førstelinje = linjer.first().let { førstelinje -> koblingslinje?.let { førstelinje.kobleTil(it) } ?: førstelinje }
+            var forrige = førstelinje
             val result = mutableListOf(forrige)
             linjer.drop(1).forEach { linje ->
                 forrige = linje.kobleTil(forrige)
