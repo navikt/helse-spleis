@@ -96,13 +96,13 @@ class Generasjoner {
             }
         }
 
-        class UberegnetVilkårsprøvdPeriodeGenerasjon : Byggetilstand {
+        class UberegnetVilkårsprøvdPeriodeGenerasjon() : Byggetilstand {
             override fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
                 generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(periode))
             }
         }
 
-        class EndringITidligerePeriodeGenerasjon(private val outOfOrderPeriode: Tidslinjeperiode) : Byggetilstand {
+        class EndringITidligerePeriodeGenerasjon(private val outOfOrderPeriode: BeregnetPeriode) : Byggetilstand {
             override fun revurdertPeriode(generasjoner: Generasjoner, periode: BeregnetPeriode) {
                 val perioder = generasjoner.nåværendeGenerasjon.filter { it >= outOfOrderPeriode && it < periode }
                 generasjoner.nåværendeGenerasjon.removeAll(perioder)
