@@ -10,8 +10,8 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -60,8 +60,8 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
 
         nyttVedtak(1.januar, 17.januar)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
         assertIngenVarsel(RV_OO_2, 1.vedtaksperiode.filter())
@@ -84,14 +84,20 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Sykedag, 90)))
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt()
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVSLUTTET)

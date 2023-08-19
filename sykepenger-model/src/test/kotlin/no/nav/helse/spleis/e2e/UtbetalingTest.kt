@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -13,10 +12,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingTest : AbstractEndToEndTest() {
@@ -108,43 +105,5 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         assertEquals(1.vedtaksperiode.id(ORGNUMMER), førsteEvent.vedtaksperiodeIder.first())
         assertEquals(1, andreEvent.vedtaksperiodeIder.size)
         assertEquals(2.vedtaksperiode.id(ORGNUMMER), andreEvent.vedtaksperiodeIder.first())
-    }
-
-    @Test
-    fun `utbetaling_utbetalt tar med vedtaksperiode-ider for revurdering over flere perioder`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        forlengVedtak(1.februar, 28.februar)
-
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Inntektsmelding.Refusjon(
-                32000.månedlig,
-                null,
-                emptyList()
-            )
-        )
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt()
-
-        val utbetalingsevent = observatør.utbetalingMedUtbetalingEventer.last()
-
-        assertEquals(2, utbetalingsevent.vedtaksperiodeIder.size)
-        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(1.vedtaksperiode.id(ORGNUMMER)))
-        assertTrue(utbetalingsevent.vedtaksperiodeIder.contains(2.vedtaksperiode.id(ORGNUMMER)))
-    }
-
-    @Test
-    fun `utbetaling_utbetalt tar med vedtaksperiode-ider for forkastede perioder`() {
-        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = true)
-        håndterUtbetalt()
-
-        val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
-
-        assertEquals(1, utbetalingEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode.id(ORGNUMMER), utbetalingEvent.vedtaksperiodeIder.first())
     }
 }

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -131,17 +130,22 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `avvik i inntekt slik at dager avslås pga minsteinntekt`() {
-        nyttVedtak(1.januar, 31.januar)
+        val beregnetInntekt = halvG.beløp(1.januar)
+        nyttVedtak(1.januar, 31.januar, beregnetInntekt = beregnetInntekt)
         forlengVedtak(1.februar,  28.februar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = halvG.beløp(1.januar) - 1.daglig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt - 1.daglig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        generasjoner(ORGNUMMER).apply {
+        generasjoner {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) avType REVURDERING fra 1.februar til 28.februar medTilstand TilGodkjenning
-                beregnetPeriode(1) avType REVURDERING fra 1.januar til 31.januar medTilstand TilGodkjenning
+                beregnetPeriode(1) avType REVURDERING fra 1.januar til 31.januar medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(2, size)
@@ -152,7 +156,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere skjæringstidspunktet flere ganger før forlengelsene`() = Toggle.ForenkleRevurdering.enable {
+    fun `revurdere skjæringstidspunktet flere ganger før forlengelsene`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
@@ -164,7 +168,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT - 2.daglig)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        generasjoner(ORGNUMMER).apply {
+        generasjoner {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
@@ -187,7 +191,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere skjæringstidspunktet flere ganger`() = Toggle.ForenkleRevurdering.enable {
+    fun `revurdere skjæringstidspunktet flere ganger`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
@@ -207,7 +211,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT - 2.daglig)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        generasjoner(ORGNUMMER).apply {
+        generasjoner {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
@@ -235,17 +239,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
 
-        generasjoner(a1).apply {
+        generasjoner(a1) {
             assertEquals(1, this.size)
-            this[0].apply {
+            0.generasjon {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt medPeriodetype FORLENGELSE avType UTBETALING fra 1.februar til 28.februar medAntallDager 28 forkastet false medTilstand Utbetalt
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt medPeriodetype FØRSTEGANGSBEHANDLING avType UTBETALING fra 1.januar til 31.januar medAntallDager 31 forkastet false medTilstand Utbetalt
             }
         }
-        generasjoner(a2).apply {
+        generasjoner(a2) {
             assertEquals(1, this.size)
-            this[0].apply {
+            0.generasjon {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt medPeriodetype FORLENGELSE avType UTBETALING fra 1.februar til 28.februar medAntallDager 28 forkastet false medTilstand Utbetalt
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt medPeriodetype FØRSTEGANGSBEHANDLING avType UTBETALING fra 1.januar til 31.januar medAntallDager 31 forkastet false medTilstand Utbetalt
@@ -265,10 +269,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) fra 1.februar til 28.februar medTilstand ForberederGodkjenning medPeriodetype FORLENGELSE
-            beregnetPeriode(1) harTidslinje (1.januar til 31.januar to FORELDET_SYKEDAG) medTilstand IngenUtbetaling medPeriodetype FØRSTEGANGSBEHANDLING
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) fra 1.februar til 28.februar medTilstand ForberederGodkjenning medPeriodetype FORLENGELSE
+                beregnetPeriode(1) harTidslinje (1.januar til 31.januar to FORELDET_SYKEDAG) medTilstand IngenUtbetaling medPeriodetype FØRSTEGANGSBEHANDLING
+            }
         }
     }
 
@@ -282,19 +288,19 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         håndterAnnullerUtbetaling()
 
-        0.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Overført avType ANNULLERING medTilstand TilAnnullering
-        }
-
-        1.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
-        }
-
-        2.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+        generasjoner {
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Overført avType ANNULLERING medTilstand TilAnnullering
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
+            }
+            2.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+            }
         }
     }
 
@@ -303,7 +309,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         forkastAlle(hendelselogg)
-        assertEquals(0, generasjoner.size)
+        generasjoner {
+            assertEquals(0, size)
+        }
     }
 
     @Test
@@ -350,12 +358,14 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false)
 
-        0.generasjon(a1) {
-            val periode = beregnetPeriode(0)
-            val vilkårsgrunnlag = periode.vilkårsgrunnlag()
-            val omregnetÅrsinntekt = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
-            assertEquals(3, omregnetÅrsinntekt?.inntekterFraAOrdningen?.size)
-            assertTrue(omregnetÅrsinntekt?.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
+        generasjoner(a1) {
+            0.generasjon {
+                val periode = beregnetPeriode(0)
+                val vilkårsgrunnlag = periode.vilkårsgrunnlag()
+                val omregnetÅrsinntekt = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
+                assertEquals(3, omregnetÅrsinntekt?.inntekterFraAOrdningen?.size)
+                assertTrue(omregnetÅrsinntekt?.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
+            }
         }
     }
 
@@ -390,18 +400,20 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        0.generasjon(a1) {
-            val vilkårsgrunnlag = beregnetPeriode(0).vilkårsgrunnlag()
-            val inntektsgrunnlag = vilkårsgrunnlag.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
-            assertEquals(
-                Inntekt(
-                    Inntektkilde.IkkeRapportert,
-                    0.0,
-                    0.0,
-                    null
-                ),
-                inntektsgrunnlag?.omregnetÅrsinntekt
-            )
+        generasjoner(a1) {
+            0.generasjon {
+                val vilkårsgrunnlag = beregnetPeriode(0).vilkårsgrunnlag()
+                val inntektsgrunnlag = vilkårsgrunnlag.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
+                assertEquals(
+                    Inntekt(
+                        Inntektkilde.IkkeRapportert,
+                        0.0,
+                        0.0,
+                        null
+                    ),
+                    inntektsgrunnlag?.omregnetÅrsinntekt
+                )
+            }
         }
     }
 
@@ -410,10 +422,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `happy case med periode til godkjenning`() {
         tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
 
-        assertEquals(1, generasjoner.size)
-        assertEquals(1, generasjoner[0].perioder.size)
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+            }
         }
     }
 
@@ -422,11 +436,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        assertEquals(1, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        0.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -435,10 +451,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(2.februar, 28.februar)
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -448,16 +466,16 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(1, generasjoner[0].perioder.size)
-        assertEquals(1, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -470,16 +488,16 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(1, generasjoner[0].perioder.size)
-        assertEquals(1, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -491,18 +509,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((27.februar til 28.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -512,20 +530,20 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
-            beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand VenterPåAnnenPeriode
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -535,21 +553,21 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand TilGodkjenning
-            beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -559,30 +577,31 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellSykedag(it) })
         håndterYtelser(2.vedtaksperiode)
-        assertEquals(3, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-        assertEquals(2, generasjoner[2].perioder.size)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellSykedag(it) })
+        håndterYtelser(1.vedtaksperiode)
 
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
-            beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand VenterPåAnnenPeriode
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-
-        2.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            2.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -592,43 +611,49 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellSykedag(it) })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         håndterOverstyrTidslinje((27.februar til 28.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(4, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-        assertEquals(2, generasjoner[2].perioder.size)
-        assertEquals(2, generasjoner[3].perioder.size)
+        generasjoner {
+            assertEquals(4, size)
 
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
 
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
 
-        2.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
+            2.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
 
-        3.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            3.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -640,18 +665,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((27.februar til 28.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand ForberederGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand ForberederGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -660,16 +685,16 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterAnnullerUtbetaling()
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(1, generasjoner[0].perioder.size)
-        assertEquals(1, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -679,18 +704,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         håndterAnnullerUtbetaling()
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-            beregnetPeriode(1) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand TilAnnullering
+                beregnetPeriode(1) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -703,19 +728,19 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         nyttVedtak(1.april, 30.april)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(3, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 30.april) medAntallDager 30 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand Annullert
-            beregnetPeriode(2) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand Annullert
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 30.april) medAntallDager 30 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand Annullert
+                beregnetPeriode(2) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand Annullert
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -725,18 +750,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
         håndterAnnullerUtbetaling()
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Overført avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 0 forkastet true medTilstand TilAnnullering
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Overført avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 0 forkastet true medTilstand TilAnnullering
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -746,26 +771,28 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         forlengVedtak(1.mars, 31.mars)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(3, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false  medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false  medTilstand Utbetalt
+            }
         }
     }
 
@@ -775,10 +802,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         forlengVedtak(1.mars, 31.mars)
         håndterOverstyrTidslinje((1.mars til 31.mars).map { manuellFeriedag(it) })
@@ -787,26 +816,25 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(3, generasjoner.size)
-        assertEquals(3, generasjoner[0].perioder.size)
-        assertEquals(3, generasjoner[1].perioder.size)
-        assertEquals(2, generasjoner[2].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand IngenUtbetaling
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-
-        2.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand IngenUtbetaling
+                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            2.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -815,8 +843,10 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
 
-        0.generasjon {
-            uberegnetPeriode(0) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+        generasjoner {
+            0.generasjon {
+                uberegnetPeriode(0) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+            }
         }
     }
 
@@ -830,12 +860,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(1, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
-            uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
+                uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+            }
         }
     }
 
@@ -856,18 +887,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((13.februar til 14.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(2, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
-            uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand Utbetalt
-            uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
+                uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+            }
         }
     }
 
@@ -878,10 +909,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 21.februar, 100.prosent))
 
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+            }
         }
     }
 
@@ -892,10 +925,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand ManglerInformasjon
-            beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetPeriode(0) medTilstand ManglerInformasjon
+                beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+            }
         }
     }
 
@@ -913,14 +948,16 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        0.generasjon {
-            assertEquals(2, this.perioder.size)
-            uberegnetPeriode(0) medTilstand ManglerInformasjon
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
-        }
-        1.generasjon {
-            assertEquals(1, this.perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, this.perioder.size)
+                uberegnetPeriode(0) medTilstand ManglerInformasjon
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(1, this.perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -932,7 +969,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertEquals(emptyList<GenerasjonDTO>(), generasjoner)
+        generasjoner {
+            assertEquals(0, size)
+        }
     }
 
     @Test
@@ -940,17 +979,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertEquals(1, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-
-        0.generasjon {
-            uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
     @Test
-    fun `ventende periode etter revurdering`() = Toggle.ForenkleRevurdering.enable {
+    fun `ventende periode etter revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
@@ -959,7 +999,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        generasjoner(ORGNUMMER).apply {
+        generasjoner {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
@@ -983,17 +1023,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        assertEquals(2, generasjoner[0].perioder.size)
-        assertEquals(1, generasjoner[1].perioder.size)
-
-        0.generasjon {
-            uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
-        }
-
-        1.generasjon {
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+            }
         }
     }
 
@@ -1002,10 +1042,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertEquals(1, generasjoner.size)
-        assertEquals(1, generasjoner[0].perioder.size)
-        0.generasjon {
-            uberegnetPeriode(0) fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                uberegnetPeriode(0) fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand IngenUtbetaling
+            }
         }
     }
 
@@ -1014,10 +1056,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0).assertAldersvilkår(true, 26)
-            beregnetPeriode(1).assertAldersvilkår(true, 25)
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0).assertAldersvilkår(true, 26)
+                beregnetPeriode(1).assertAldersvilkår(true, 25)
+            }
         }
     }
 
@@ -1026,10 +1070,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
-            beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
+                beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
+            }
         }
     }
 
@@ -1038,10 +1084,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+            }
         }
     }
 
@@ -1052,23 +1100,25 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((27.februar til 28.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0).assertAldersvilkår(true, 26)
-            beregnetPeriode(1).assertAldersvilkår(true, 25)
-            beregnetPeriode(0).assertSykepengedagerVilkår(29, 219, 1.januar(2019), 1.januar, true)
-            beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
-            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
-            beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
-            beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
-            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0).assertAldersvilkår(true, 26)
+                beregnetPeriode(1).assertAldersvilkår(true, 25)
+                beregnetPeriode(0).assertSykepengedagerVilkår(29, 219, 1.januar(2019), 1.januar, true)
+                beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
+                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+                beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
+                beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
+                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+            }
         }
     }
 
@@ -1077,26 +1127,26 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
-        0.generasjon {
-            beregnetPeriode(0).assertAldersvilkår(true, 26)
-            beregnetPeriode(1).assertAldersvilkår(true, 25)
-            // Revurdering av tidligere periode medfører at alle perioder berørt av revurderingen deler den samme utbetalingen, og derfor ender opp med samme
-            // gjenstående dager, forbrukte dager og maksdato. Kan muligens skrives om i modellen slik at disse tallene kan fiskes ut fra utbetalingen gitt en
-            // periode
-            beregnetPeriode(0).assertSykepengedagerVilkår(29, 219, 1.januar(2019), 1.januar, true)
-            beregnetPeriode(1).assertSykepengedagerVilkår(29, 219, 1.januar(2019), 1.januar, true)
-            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
-        }
-        1.generasjon {
-            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
-            beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
-            beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
-            beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-            beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+        generasjoner {
+            0.generasjon {
+                uberegnetVilkårsprøvdPeriode(0) medTilstand  UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1).assertAldersvilkår(true, 25)
+                // Revurdering av tidligere periode medfører at alle perioder berørt av revurderingen deler den samme utbetalingen, og derfor ender opp med samme
+                // gjenstående dager, forbrukte dager og maksdato. Kan muligens skrives om i modellen slik at disse tallene kan fiskes ut fra utbetalingen gitt en
+                // periode
+                beregnetPeriode(1).assertSykepengedagerVilkår(9, 239, 1.januar(2019), 1.januar, true)
+                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+            }
+            1.generasjon {
+                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+                beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
+                beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
+                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
+                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
+            }
         }
     }
 
@@ -1115,12 +1165,14 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
-        0.generasjon {
-            assertEquals(1, perioder.size)
-            assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.arbeidsgiverbeløp)
-            assertEquals(1431, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.personbeløp)
-            assertEquals(0, beregnetPeriode(0).utbetaling.arbeidsgiverNettoBeløp)
-            assertEquals(15741, beregnetPeriode(0).utbetaling.personNettoBeløp)
+        generasjoner {
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.arbeidsgiverbeløp)
+                assertEquals(1431, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.personbeløp)
+                assertEquals(0, beregnetPeriode(0).utbetaling.arbeidsgiverNettoBeløp)
+                assertEquals(15741, beregnetPeriode(0).utbetaling.personNettoBeløp)
+            }
         }
     }
 
@@ -1128,13 +1180,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `ag2 venter på ag1 mens ag1 er til godkjenning`() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
 
-        0.generasjon(a1) {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) medTilstand TilGodkjenning
+        generasjoner(a1) {
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand TilGodkjenning
+            }
         }
-        0.generasjon(a2) {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
+        generasjoner(a2) {
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            }
         }
     }
 
@@ -1146,10 +1202,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er GodkjentUtenUtbetaling medTilstand IngenUtbetaling
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt medTilstand Utbetalt
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er GodkjentUtenUtbetaling medTilstand IngenUtbetaling
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt medTilstand Utbetalt
+            }
         }
     }
 
@@ -1160,52 +1218,66 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand ManglerInformasjon
-            uberegnetPeriode(1) medTilstand ManglerInformasjon
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetPeriode(0) medTilstand ManglerInformasjon
+                uberegnetPeriode(1) medTilstand ManglerInformasjon
+            }
         }
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
-            uberegnetPeriode(1) medTilstand ForberederGodkjenning
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(1) medTilstand ForberederGodkjenning
+            }
         }
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
-            uberegnetVilkårsprøvdPeriode(1) medTilstand ForberederGodkjenning
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetVilkårsprøvdPeriode(1) medTilstand ForberederGodkjenning
+            }
         }
 
         håndterYtelser(1.vedtaksperiode)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand ForberederGodkjenning
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand ForberederGodkjenning
+            }
         }
 
         håndterSimulering(1.vedtaksperiode)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand TilGodkjenning
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand TilGodkjenning
+            }
         }
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand TilUtbetaling
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand TilUtbetaling
+            }
         }
 
         håndterUtbetalt()
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand ForberederGodkjenning
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand ForberederGodkjenning
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1222,20 +1294,22 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
 
-        assertEquals(3, generasjoner.size)
-        0.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Annullert avType ANNULLERING medTilstand Annullert
-        }
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Annullert avType ANNULLERING medTilstand Annullert
+            }
 
-        1.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
-        }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
+            }
 
-        2.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+            2.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+            }
         }
     }
 
@@ -1246,23 +1320,30 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "", null, listOf(Triple(1.januar, null, INGEN)))
         ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.februar til 28.februar)
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.februar til 28.februar)
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.januar til 31.januar)
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.februar til 28.februar)
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.februar til 28.februar)
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.januar til 31.januar)
+            }
         }
     }
+
     @Test
     fun `revurdering av tidligere skjæringstidspunkt - nyere revurdering med ingen endringer`() {
         nyttVedtak(1.januar, 31.januar)
@@ -1276,16 +1357,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING medTilstand Utbetalt fra (1.mai til 31.mai)
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.mai til 31.mai)
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.januar til 31.januar)
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING medTilstand Utbetalt fra (1.mai til 31.mai)
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand Utbetalt fra (1.januar til 31.januar)
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.mai til 31.mai)
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt fra (1.januar til 31.januar)
+            }
         }
     }
 
@@ -1294,20 +1377,21 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
 
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
-            beregnetPeriode(1) er IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
-        }
-
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) er IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+            }
         }
     }
 
@@ -1318,9 +1402,11 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt(status = Oppdragstatus.FEIL)
 
         assertTilstand(1.vedtaksperiode, TIL_UTBETALING)
-        0.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Overført avType UTBETALING medTilstand TilUtbetaling
+        generasjoner {
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Overført avType UTBETALING medTilstand TilUtbetaling
+            }
         }
     }
 
@@ -1338,26 +1424,26 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        generasjoner(a1).apply {
+        generasjoner(a1) {
             assertEquals(2, size)
-            this[0].apply {
+            0.generasjon {
                 assertEquals(2, perioder.size)
                 uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand TilGodkjenning
             }
-            this[1].apply {
+            1.generasjon {
                 assertEquals(1, perioder.size)
                 beregnetPeriode(0) medTilstand Utbetalt
             }
         }
-        generasjoner(a2).apply {
+        generasjoner(a2) {
             assertEquals(2, size)
-            this[0].apply {
+            0.generasjon {
                 assertEquals(2, perioder.size)
-                beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
-                uberegnetVilkårsprøvdPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
             }
-            this[1].apply {
+            1.generasjon {
                 assertEquals(1, perioder.size)
                 beregnetPeriode(0) medTilstand Utbetalt
             }
@@ -1370,46 +1456,58 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar, a1, a2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)), orgnummer = a1)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        0.generasjon(a1) {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand ForberederGodkjenning
-            beregnetPeriode(1) medTilstand VenterPåAnnenPeriode
+        generasjoner(a1) {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand ForberederGodkjenning
+            }
         }
-        0.generasjon(a2) {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand VenterPåAnnenPeriode
-        }
-
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-
-        0.generasjon(a1) {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand TilGodkjenning
-            beregnetPeriode(1) medTilstand TilGodkjenning
-        }
-        0.generasjon(a2) {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand VenterPåAnnenPeriode
+        generasjoner(a2) {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+            }
         }
 
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        generasjoner(a1) {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand TilGodkjenning
+            }
+        }
+        generasjoner(a2) {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+            }
+        }
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
-        0.generasjon(a1) {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner(a1) {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
-        0.generasjon(a2) {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand TilGodkjenning
-            beregnetPeriode(1) medTilstand TilGodkjenning
+        generasjoner(a2) {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand TilGodkjenning
+            }
         }
     }
 
@@ -1425,15 +1523,16 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSimulering()
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
-        assertEquals(2, generasjoner.size)
-
-        0.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) medTilstand RevurderingFeilet
-        }
-        1.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand RevurderingFeilet
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1446,15 +1545,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) medTilstand IngenUtbetaling
-        }
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand IngenUtbetaling
+            }
 
-        1.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1475,16 +1576,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Utbetalt
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1498,16 +1601,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1531,16 +1636,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1569,23 +1676,25 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
-        assertEquals(3, generasjoner.size)
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Annullert
-        }
-        1.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Annullert
-        }
-        2.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Annullert
+            }
+            1.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Annullert
+            }
+            2.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1602,46 +1711,49 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
-        assertEquals(3, generasjoner.size)
-
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt
-        }
-        1.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt
-        }
-        2.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt
+            }
+            2.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
-        assertEquals(3, generasjoner.size)
 
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Annullert
-        }
-        1.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt
-        }
-        2.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Annullert
+            }
+            1.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt
+            }
+            2.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1664,64 +1776,67 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(4, generasjoner.size)
-
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt avType REVURDERING
-        }
-        1.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
-        }
-        2.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
-        }
-        3.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(4, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt avType REVURDERING
+            }
+            1.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
+            }
+            2.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
+            }
+            3.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
-        assertEquals(5, generasjoner.size)
 
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Annullert
-        }
-        1.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt avType REVURDERING
-        }
-        2.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Annullert
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
-        }
-        3.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Annullert
-            beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
-        }
-        4.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(5, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Annullert
+            }
+            1.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt avType REVURDERING
+            }
+            2.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Annullert
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
+            }
+            3.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
+            }
+            4.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1732,30 +1847,34 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
-            uberegnetVilkårsprøvdPeriode(1) medTilstand ForberederGodkjenning
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetVilkårsprøvdPeriode(1) medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
 
         håndterYtelser(1.vedtaksperiode)
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand ForberederGodkjenning
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1781,12 +1900,14 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        assertEquals(1, generasjoner.size)
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) avType UTBETALING medTilstand TilGodkjenning
-            uberegnetVilkårsprøvdPeriode(2) medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) avType UTBETALING medTilstand TilGodkjenning
+                uberegnetVilkårsprøvdPeriode(2) medTilstand IngenUtbetaling
+            }
         }
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1827,11 +1948,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        assertEquals(1, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) avType UTBETALING medTilstand TilGodkjenning
-            uberegnetPeriode(1) medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) avType UTBETALING medTilstand TilGodkjenning
+                uberegnetPeriode(1) medTilstand IngenUtbetaling
+            }
         }
 
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.januar)
@@ -1845,11 +1968,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
 
-        assertEquals(1, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) avType UTBETALING medTilstand ForberederGodkjenning
-            beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) avType UTBETALING medTilstand ForberederGodkjenning
+                beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
+            }
         }
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
@@ -1875,7 +2000,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
 
-        assertEquals(0, generasjoner.size)
+        generasjoner {
+            assertEquals(0, size)
+        }
     }
 
     @Test
@@ -1890,7 +2017,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
 
-        assertEquals(0, generasjoner.size)
+        generasjoner {
+            assertEquals(0, size)
+        }
     }
 
     @Test
@@ -1904,16 +2033,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand ForberederGodkjenning
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
-            beregnetPeriode(1) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1925,15 +2056,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) fra (1.mars til 31.mars) medTilstand UtbetaltVenterPåAnnenPeriode
-            beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medTilstand TilGodkjenning
-        }
-        1.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.mars til 31.mars) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medTilstand TilGodkjenning
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            }
         }
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1943,15 +2076,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medTilstand Utbetalt
-        }
-        1.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1966,10 +2101,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertEquals(1, generasjoner.size)
-        0.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 20.januar) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 20.januar) medTilstand Utbetalt
+            }
         }
     }
 
@@ -1981,11 +2118,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        assertEquals(1, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-            uberegnetPeriode(1) fra (5.januar til 19.januar) medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+                uberegnetPeriode(1) fra (5.januar til 19.januar) medTilstand IngenUtbetaling
+            }
         }
 
         håndterOverstyrTidslinje((1.januar til 4.januar).map {
@@ -2000,15 +2139,17 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 19.januar) medTilstand Utbetalt
-        }
-        1.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 19.januar) medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            }
         }
     }
 
@@ -2020,16 +2161,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            uberegnetVilkårsprøvdPeriode(0) fra (1.mars til 31.mars) medTilstand ForberederGodkjenning
-            uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-            uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.mars til 31.mars) medTilstand ForberederGodkjenning
+                uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+                uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            }
         }
 
         nyPeriode(16.januar til 31.januar, orgnummer = a1)
@@ -2042,22 +2185,24 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(3, generasjoner.size)
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 31.januar) medTilstand Utbetalt
-            uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
-        }
-        1.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-            beregnetPeriode(1) fra (16.januar til 31.januar) medTilstand Utbetalt
-            uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
-        }
-        2.generasjon {
-            assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 31.januar) medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+                beregnetPeriode(1) fra (16.januar til 31.januar) medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            }
+            2.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+            }
         }
     }
 
@@ -2073,30 +2218,34 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
-            uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+                uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            }
         }
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(10.april, Dagtype.Feriedag)))
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(3, generasjoner.size)
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.april til 10.april) medTilstand TilGodkjenning
-            beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
-            uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
-        }
-        1.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
-            uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.april til 10.april) medTilstand TilGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+                uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+                uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+            }
         }
     }
 
@@ -2123,17 +2272,19 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(2, generasjoner.size)
-        0.generasjon {
-            assertEquals(3, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (2.mars til 31.mars) medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medTilstand Utbetalt
-            beregnetPeriode(2) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
-        }
-        1.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.mars til 31.mars) medTilstand Utbetalt
-            beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(3, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (2.mars til 31.mars) medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medTilstand Utbetalt
+                beregnetPeriode(2) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.mars til 31.mars) medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+            }
         }
     }
 
@@ -2142,11 +2293,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         createOvergangFraInfotrygdPerson()
         forlengVedtak(1.mars, 31.mars, 100.prosent)
 
-        assertEquals(1, generasjoner.size)
-        0.generasjon {
-            assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra 1.mars til 31.mars medTilstand Utbetalt medPeriodetype INFOTRYGDFORLENGELSE
-            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra 1.februar til 28.februar medTilstand Utbetalt medPeriodetype OVERGANG_FRA_IT
+        generasjoner {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra 1.mars til 31.mars medTilstand Utbetalt medPeriodetype INFOTRYGDFORLENGELSE
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra 1.februar til 28.februar medTilstand Utbetalt medPeriodetype OVERGANG_FRA_IT
+            }
         }
     }
 
@@ -2181,12 +2334,94 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(expectedOppfylt, periodevilkår.søknadsfrist?.oppfylt)
     }
 
-    private val generasjoner get() = generasjoner(ORGNUMMER)
+    private class Arbeidsgivergenerasjoner(
+        private val orgnummer: String,
+        private val vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>,
+        private val generasjoner: List<GenerasjonDTO>
+    ) {
+        val size = generasjoner.size
 
-    // dette er vilkårsgrunnlag som pekes på av beregnede perioder
-    private lateinit var vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>
+        fun Int.generasjon(assertBlock: GenerasjonDTO.() -> Unit) {
+            require(this >= 0) { "Kan ikke være et negativt tall!" }
+            generasjoner[this].run(assertBlock)
+        }
 
-    private fun generasjoner(organisasjonsnummer: String): List<GenerasjonDTO> {
+        fun GenerasjonDTO.beregnetPeriode(index: Int): BeregnetPeriode {
+            val periode = this.perioder[index]
+            require(periode is BeregnetPeriode) { "Perioden ${periode::class.simpleName} er ikke en beregnet periode!" }
+            return periode
+        }
+
+        fun GenerasjonDTO.uberegnetPeriode(index: Int): UberegnetPeriode {
+            val periode = this.perioder[index]
+            require(periode is UberegnetPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet periode!" }
+            return periode
+        }
+
+        fun GenerasjonDTO.uberegnetVilkårsprøvdPeriode(index: Int): UberegnetVilkårsprøvdPeriode {
+            val periode = this.perioder[index]
+            require(periode is UberegnetVilkårsprøvdPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet vilkårsprøvd periode!" }
+            return periode
+        }
+
+        infix fun <T : Tidslinjeperiode> T.medAntallDager(antall: Int): T {
+            assertEquals(antall, sammenslåttTidslinje.size)
+            return this
+        }
+        infix fun <T : Tidslinjeperiode> T.harTidslinje(dager: Pair<Periode, SykdomstidslinjedagType>): T {
+            val (periode, dagtype) = dager
+            val periodeUtenHelg = periode.filterNot { it.erHelg() }
+            val tidslinjedager = this.sammenslåttTidslinje.filter { it.dagen in periodeUtenHelg }
+            assertEquals(periodeUtenHelg.toList().size, tidslinjedager.size)
+            assertTrue(tidslinjedager.all { it.sykdomstidslinjedagtype == dagtype })
+            return this
+        }
+
+        fun BeregnetPeriode.vilkårsgrunnlag(): Vilkårsgrunnlag {
+            return requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) { "Forventet å finne vilkårsgrunnlag for periode" }
+        }
+
+        infix fun <T : Tidslinjeperiode> T.forkastet(forkastet: Boolean): T {
+            assertEquals(forkastet, this.erForkastet)
+            return this
+        }
+
+        infix fun BeregnetPeriode.er(utbetalingstilstand: Utbetalingstatus): BeregnetPeriode {
+            assertEquals(utbetalingstilstand, this.utbetaling.status)
+            return this
+        }
+
+        infix fun BeregnetPeriode.avType(type: Utbetalingtype): BeregnetPeriode {
+            assertEquals(type, this.utbetaling.type)
+            return this
+        }
+
+        infix fun <T : Tidslinjeperiode> T.medTilstand(tilstand: Periodetilstand): T {
+            assertEquals(tilstand, this.periodetilstand)
+            return this
+        }
+
+        infix fun <T : Tidslinjeperiode> T.medPeriodetype(tidslinjeperiodetype: Tidslinjeperiodetype): T {
+            assertEquals(tidslinjeperiodetype, this.periodetype)
+            return this
+        }
+
+        infix fun <T : Tidslinjeperiode> T.fra(periode: Periode): T {
+            assertEquals(periode.start, this.fom)
+            assertEquals(periode.endInclusive, this.tom)
+            return this
+        }
+        infix fun <T : Tidslinjeperiode> T.fra(fom: LocalDate): T {
+            assertEquals(fom, this.fom)
+            return this
+        }
+        infix fun <T : Tidslinjeperiode> T.til(tom: LocalDate): T {
+            assertEquals(tom, this.tom)
+            return this
+        }
+    }
+
+    private fun generasjoner(organisasjonsnummer: String = ORGNUMMER, block: Arbeidsgivergenerasjoner.() -> Unit = {}) {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
         val generasjonerBuilder = GenerasjonerBuilder(
             organisasjonsnummer,
@@ -2196,86 +2431,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             vilkårsgrunnlagHistorikkBuilderResult
         )
         val generasjoner = generasjonerBuilder.build()
-        vilkårsgrunnlag = vilkårsgrunnlagHistorikkBuilderResult.toDTO()
-        return generasjoner
-    }
-
-    private fun Int.generasjon(organisasjonsnummer: String = ORGNUMMER, assertBlock: GenerasjonDTO.() -> Unit) {
-        require(this >= 0) { "Kan ikke være et negativt tall!" }
-        generasjoner(organisasjonsnummer)[this].run(assertBlock)
-    }
-
-    private infix fun <T : Tidslinjeperiode> T.medAntallDager(antall: Int): T {
-        assertEquals(antall, sammenslåttTidslinje.size)
-        return this
-    }
-    private infix fun <T : Tidslinjeperiode> T.harTidslinje(dager: Pair<Periode, SykdomstidslinjedagType>): T {
-        val (periode, dagtype) = dager
-        val periodeUtenHelg = periode.filterNot { it.erHelg() }
-        val tidslinjedager = this.sammenslåttTidslinje.filter { it.dagen in periodeUtenHelg }
-        assertEquals(periodeUtenHelg.toList().size, tidslinjedager.size)
-        assertTrue(tidslinjedager.all { it.sykdomstidslinjedagtype == dagtype })
-        return this
-    }
-
-    private fun BeregnetPeriode.vilkårsgrunnlag(): Vilkårsgrunnlag {
-        return requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) { "Forventet å finne vilkårsgrunnlag for periode" }
-    }
-
-    private infix fun <T : Tidslinjeperiode> T.forkastet(forkastet: Boolean): T {
-        assertEquals(forkastet, this.erForkastet)
-        return this
-    }
-
-    private infix fun BeregnetPeriode.er(utbetalingstilstand: Utbetalingstatus): BeregnetPeriode {
-        assertEquals(utbetalingstilstand, this.utbetaling.status)
-        return this
-    }
-
-    private infix fun BeregnetPeriode.avType(type: Utbetalingtype): BeregnetPeriode {
-        assertEquals(type, this.utbetaling.type)
-        return this
-    }
-
-    private infix fun <T : Tidslinjeperiode> T.medTilstand(tilstand: Periodetilstand): T {
-        assertEquals(tilstand, this.periodetilstand)
-        return this
-    }
-
-    private infix fun <T : Tidslinjeperiode> T.medPeriodetype(tidslinjeperiodetype: Tidslinjeperiodetype): T {
-        assertEquals(tidslinjeperiodetype, this.periodetype)
-        return this
-    }
-
-    private infix fun <T : Tidslinjeperiode> T.fra(periode: Periode): T {
-        assertEquals(periode.start, this.fom)
-        assertEquals(periode.endInclusive, this.tom)
-        return this
-    }
-    private infix fun <T : Tidslinjeperiode> T.fra(fom: LocalDate): T {
-        assertEquals(fom, this.fom)
-        return this
-    }
-    private infix fun <T : Tidslinjeperiode> T.til(tom: LocalDate): T {
-        assertEquals(tom, this.tom)
-        return this
-    }
-
-    private fun GenerasjonDTO.beregnetPeriode(index: Int): BeregnetPeriode {
-        val periode = this.perioder[index]
-        require(periode is BeregnetPeriode) { "Perioden ${periode::class.simpleName} er ikke en beregnet periode!" }
-        return periode
-    }
-
-    private fun GenerasjonDTO.uberegnetPeriode(index: Int): UberegnetPeriode {
-        val periode = this.perioder[index]
-        require(periode is UberegnetPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet periode!" }
-        return periode
-    }
-
-    private fun GenerasjonDTO.uberegnetVilkårsprøvdPeriode(index: Int): UberegnetVilkårsprøvdPeriode {
-        val periode = this.perioder[index]
-        require(periode is UberegnetVilkårsprøvdPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet vilkårsprøvd periode!" }
-        return periode
+        val vilkårsgrunnlag = vilkårsgrunnlagHistorikkBuilderResult.toDTO()
+        block(Arbeidsgivergenerasjoner(organisasjonsnummer, vilkårsgrunnlag, generasjoner))
     }
 }

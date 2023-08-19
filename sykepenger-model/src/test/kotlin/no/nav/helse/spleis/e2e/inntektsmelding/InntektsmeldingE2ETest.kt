@@ -35,7 +35,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -618,7 +617,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING
         )
         assertTilstander(
@@ -923,6 +921,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(7.februar, 7.februar, 100.prosent, null))
         håndterInntektsmelding(listOf(3.januar til 18.januar), 7.februar)
 
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1020,12 +1021,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
         håndterOverstyrInntekt(INNTEKT + 500.månedlig, skjæringstidspunkt = 1.januar)
-        håndterYtelser(4.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertSisteTilstand(4.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_REVURDERING)
 
         håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
 
@@ -1687,7 +1688,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET
@@ -1751,7 +1751,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET

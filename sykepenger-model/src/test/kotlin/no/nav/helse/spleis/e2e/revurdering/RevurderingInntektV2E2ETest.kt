@@ -18,7 +18,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
@@ -99,7 +98,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
     }
 
 
@@ -127,13 +126,11 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -150,46 +147,22 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
 
-        assertDiff(-15748)
+        assertDiff(-5588)
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
-        inspektør.utbetalinger(2.vedtaksperiode).also { utbetalinger ->
-            assertEquals(2, utbetalinger.size)
-            assertEquals(Utbetalingstatus.FORKASTET, utbetalinger.last().inspektør.tilstand)
-        }
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
 
-        assertDiff(-8587)
+        assertDiff(-3047)
 
-        assertTilstander(1.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING
-        )
-
-        assertTilstander(2.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING
-        )
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
     }
 
     @Test
@@ -205,11 +178,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -234,12 +205,10 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -263,54 +232,30 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
 
         håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
-        håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(
             dato = 22.januar,
             arbeidsgiverbeløp = INGEN,
             personbeløp = INGEN,
             aktuellDagsinntekt = INNTEKT
         )
-        håndterSimulering(2.vedtaksperiode)
 
         val overstyrtInntekt = 20000.månedlig
         håndterOverstyrInntekt(inntekt = overstyrtInntekt, skjæringstidspunkt = 1.januar)
-        håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
         assertDag<Sykedag, NavDag>(
             dato = 17.januar,
             arbeidsgiverbeløp = overstyrtInntekt.rundTilDaglig(),
             personbeløp = INGEN,
             aktuellDagsinntekt = overstyrtInntekt
         )
-        håndterSimulering(2.vedtaksperiode)
-        assertDiff(-21286)
+        assertDiff(-11126)
 
-        // 23075 = round((20000 * 12) / 260) * 25 (25 nav-dager i januar + februar 2018)
-        assertEquals(23075, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(33235, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
         assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-        assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
-
-        assertTilstander(1.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING
-        )
-
-        assertTilstander(2.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING
-        )
+        assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
     }
 
     @Test
@@ -368,7 +313,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -420,7 +364,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -483,7 +426,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
@@ -505,7 +447,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
@@ -527,7 +468,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -555,10 +495,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -642,7 +580,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -687,7 +624,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -767,14 +703,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertEquals(1, observatør.vedtakFattetEvent.size)
         assertNull(observatør.vedtakFattetEvent[2.vedtaksperiode.id(ORGNUMMER)])
         håndterUtbetalt()
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(
-            2.vedtaksperiode,
-            TIL_UTBETALING,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
-        )
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         assertEquals(2, observatør.vedtakFattetEvent.size)
         assertNotNull(observatør.vedtakFattetEvent[2.vedtaksperiode.id(ORGNUMMER)])
     }

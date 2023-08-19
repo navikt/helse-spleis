@@ -15,7 +15,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -148,8 +147,8 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterPåminnelse(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, skalReberegnes = true)
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
         assertEquals(1, observatør.overstyringIgangsatt.size)
         revurderingIgangsattEvent(0) {
             this bleForårsaketAv "KORRIGERT_SØKNAD"

@@ -913,7 +913,9 @@ internal class Vedtaksperiode private constructor(
         )
 
         if (Toggle.ForenkleRevurdering.enabled) {
-            return nyUtbetaling(grunnlagsdata, utbetaling, utbetalingstidslinje)
+            return nyUtbetaling(grunnlagsdata, utbetaling, utbetalingstidslinje).also {
+                loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(vedtaksperiodeSomBeregner.organisasjonsnummer, aktivitetslogg)
+            }
         }
 
         // finner vedtaksperiodene for samme ag som oss selv, som også skal få revurderingen
@@ -1626,6 +1628,8 @@ internal class Vedtaksperiode private constructor(
                     val sisteTomKlarTilBehandling = beregningsperioderFørstegangsbehandling(person, vedtaksperiode)
                     val beregningsperiode = vedtaksperiode.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: vedtaksperiode.periode
                     val beregningsperioder = listOf(Triple(vedtaksperiode.periode, ytelser, vedtaksperiode.jurist()))
+
+                    person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
 
                     val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                     vedtaksperiode.beregnUtbetalinger(

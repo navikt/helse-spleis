@@ -17,9 +17,9 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -144,21 +144,21 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
             håndterUtbetalt()
 
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Feriedag)))
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
 
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
             nullstillTilstandsendringer()
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
             håndterAnmodningOmForkasting(3.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         }
     }

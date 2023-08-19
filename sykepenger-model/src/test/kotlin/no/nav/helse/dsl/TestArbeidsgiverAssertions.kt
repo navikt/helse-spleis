@@ -27,16 +27,13 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     internal fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
         assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}:\n${personInspektør.aktivitetslogg}" }
         assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}\n${personInspektør.aktivitetslogg}" }
-        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id]) {
-            "Forventet ${tilstander.asList()} fikk ${observatør.tilstandsendringer[id]}\n"
-            personInspektør.aktivitetslogg.toString()
-        }
+        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }
 
     internal fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType) {
         assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
-        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id]) { personInspektør.aktivitetslogg.toString() }
+        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }
 
     internal fun assertHarHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) {

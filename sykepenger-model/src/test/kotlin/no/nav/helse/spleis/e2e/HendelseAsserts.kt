@@ -49,7 +49,7 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertEtterspurt(l�
     assertTrue(ikkeBesvarteBehov.remove(etterspurtBehov)) {
         "Forventer at $type skal være etterspurt før ${løsning.simpleName} håndteres. Perioden er i ${
             observatør.tilstandsendringer[vedtaksperiodeIdInnhenter.id(orgnummer)]?.last()
-        }.\nAktivitetsloggen:\n${person.personLogg}"
+        }."
     }
 }
 /*
@@ -75,10 +75,8 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspur
 
 internal inline fun <reified R : Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Int = 100) {
     dag.let {
-        it.økonomi.brukTotalGrad { totalGrad ->
-            assertEquals(expectedTotalgrad, totalGrad)
-        }
         assertEquals(it::class, expectedDagtype)
+        it.økonomi.brukTotalGrad { totalGrad -> assertEquals(expectedTotalgrad, totalGrad) }
     }
 }
 

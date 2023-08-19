@@ -49,7 +49,6 @@ internal class OverstyrArbeidsgiveropplysningerMediatorTest : AbstractEndToEndMe
             "TIL_UTBETALING",
             "AVSLUTTET",
             "AVVENTER_REVURDERING",
-            "AVVENTER_GJENNOMFØRT_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
             "AVVENTER_SIMULERING_REVURDERING"
         )

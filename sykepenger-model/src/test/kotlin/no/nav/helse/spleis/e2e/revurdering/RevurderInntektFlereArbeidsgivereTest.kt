@@ -22,7 +22,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -68,7 +67,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -86,7 +84,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -223,7 +220,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -241,7 +237,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -302,7 +297,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
@@ -351,7 +345,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
@@ -366,7 +359,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -432,33 +424,24 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterOverstyrInntekt(1.januar, 32000.månedlig)
             assertVarsel(RV_IV_2)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 32000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 20000.månedlig)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 {
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstander(
-                2.vedtaksperiode,
-                AVSLUTTET,
-                AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
-                AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
-            assertTilstander(
-                1.vedtaksperiode,
-                AVSLUTTET,
-                AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVSLUTTET
-            )
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         }
         a2 {
             håndterYtelser(2.vedtaksperiode)
@@ -469,20 +452,13 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 2.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertTilstander(
-                1.vedtaksperiode,
-                AVSLUTTET,
-                AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVSLUTTET
-            )
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         }
     }
 
@@ -500,13 +476,10 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING
             )
@@ -531,14 +504,11 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING
             )
@@ -564,15 +534,12 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING
             )

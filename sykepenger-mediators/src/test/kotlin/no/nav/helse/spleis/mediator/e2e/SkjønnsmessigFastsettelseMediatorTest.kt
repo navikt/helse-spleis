@@ -24,7 +24,6 @@ internal class SkjønnsmessigFastsettelseMediatorTest : AbstractEndToEndMediator
             "TIL_UTBETALING",
             "AVSLUTTET",
             "AVVENTER_REVURDERING",
-            "AVVENTER_GJENNOMFØRT_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
             "AVVENTER_GODKJENNING_REVURDERING" // Ingenting å simulere
         )
@@ -46,7 +45,6 @@ internal class SkjønnsmessigFastsettelseMediatorTest : AbstractEndToEndMediator
             "TIL_UTBETALING",
             "AVSLUTTET",
             "AVVENTER_REVURDERING",
-            "AVVENTER_GJENNOMFØRT_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
             "AVVENTER_SIMULERING_REVURDERING", // Her må det simuleres
             "AVVENTER_GODKJENNING_REVURDERING"

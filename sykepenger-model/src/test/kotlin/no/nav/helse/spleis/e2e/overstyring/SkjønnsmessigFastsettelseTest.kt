@@ -20,7 +20,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
@@ -86,7 +85,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `skjønnsmessig fastsette flere arbeidsgivere med forlengelser - kun første periode får varsel`() = Toggle.ForenkleRevurdering.enable {
+    fun `skjønnsmessig fastsette flere arbeidsgivere med forlengelser - kun første periode får varsel`() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar)
         (a1 og a2).forlengVedtak(1.februar til 28.februar)
         (a1 og a2).forlengVedtak(1.mars til 31.mars)
@@ -304,7 +303,6 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,

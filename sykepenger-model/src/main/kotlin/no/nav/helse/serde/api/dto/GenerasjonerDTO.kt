@@ -444,7 +444,9 @@ data class BeregnetPeriode(
                     periodetilstand in setOf(Vedtaksperiode.AvventerGodkjenningRevurdering, Vedtaksperiode.AvventerGodkjenning) -> Periodetilstand.TilGodkjenning
                     periodetilstand == Vedtaksperiode.AvventerGjennomførtRevurdering && klarTilGodkjenning(utbetalingDTO) -> Periodetilstand.TilGodkjenning
                     periodetilstand in setOf(Vedtaksperiode.AvventerSimulering, Vedtaksperiode.AvventerSimuleringRevurdering) -> ForberederGodkjenning
-                    else -> VenterPåAnnenPeriode
+                    periodetilstand == Vedtaksperiode.AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
+                    periodetilstand == Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
+                    else -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
                 }
                 Utbetalingstatus.GodkjentUtenUtbetaling -> when {
                     utbetalingDTO.type == Utbetalingtype.REVURDERING -> Utbetalt

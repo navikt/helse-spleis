@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
@@ -51,6 +52,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    @Disabled("gir bare mening når Revurdere en-og-en er AV")
     fun `tildeler utbetaling til vedtaksperioder som treffes av revurderingen`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
