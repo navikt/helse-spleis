@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
+internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtak med utbetaling`() {
@@ -33,7 +33,7 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
         @Language("JSON")
         val forventet = """
         {
-            "@event_name": "vedtak_fattet",
+            "@event_name": "utkast_til_vedtak",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
@@ -83,7 +83,7 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
         @Language("JSON")
         val forventet = """
         {
-            "@event_name": "vedtak_fattet",
+            "@event_name": "utkast_til_vedtak",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
@@ -131,7 +131,7 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
         @Language("JSON")
         val forventet = """
         {
-            "@event_name": "vedtak_fattet",
+            "@event_name": "utkast_til_vedtak",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
@@ -172,7 +172,7 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
         @Language("JSON")
         val forventet = """
         {
-            "@event_name": "vedtak_fattet",
+            "@event_name": "utkast_til_vedtak",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",

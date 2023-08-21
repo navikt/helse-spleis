@@ -356,8 +356,7 @@ internal class PersonMediator(
     }
 
     override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
-        val eventName = if (Toggle.UTKAST_TIL_VEDTAK.enabled) "utkast_til_vedtak" else "vedtak_fattet"
-        queueMessage(JsonMessage.newMessage(eventName, mutableMapOf(
+        queueMessage(JsonMessage.newMessage("utkast_til_vedtak", mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "fom" to event.periode.start,

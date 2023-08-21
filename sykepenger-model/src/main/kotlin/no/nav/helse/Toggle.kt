@@ -127,5 +127,4 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object TjuefemprosentAvvik : Toggle("AVVIKSAKER", false)
     object Egenmelding : Toggle("EGENMELDING", true)
     object STOPPE_TILSIG_AUU : Toggle("STOPPE_TILSIG_AUU", true)
-    object UTKAST_TIL_VEDTAK : Toggle("UTKAST_TIL_VEDTAK", false)
 }
