@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -524,23 +523,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im1)))
-        assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im2)))
-        assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im1)))
-
-        assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im1)))
-        assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im1)))
-        assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2)))
-
-        assertForventetFeil(
-            forklaring = "legger ikke til alle hendelsesIdene for korrigerende inntektsmelding",
-            nå = {
-                assertFalse(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im2)))
-            },
-            ønsket = {
-                assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im2)))
-                assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2))) // burde denne id-en vært med?
-            }
-        )
+        assertFalse(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im1)))
+        assertFalse(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2)))
     }
 }

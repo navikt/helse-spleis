@@ -2805,7 +2805,9 @@ internal class Vedtaksperiode private constructor(
                 }
 
                 internal fun List<Vedtaksperiode>.nyttVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Grunnlagsdata) =
-                    filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).forEach { vilkårsgrunnlag.leggTil(it.hendelseIder, it.organisasjonsnummer) }
+                    filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+                        .filter { it.tilstand != AvsluttetUtenUtbetaling }
+                        .forEach { vilkårsgrunnlag.leggTil(it.hendelseIder, it.organisasjonsnummer) }
             }
         }
 
