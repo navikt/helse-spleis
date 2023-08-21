@@ -69,6 +69,7 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
+import no.nav.helse.person.arbeidstaker.Arbeidstaker
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -174,7 +175,7 @@ class Person private constructor(
         håndterGjenoppta(anmodningOmForkasting)
     }
 
-    fun håndter(søknad: Søknad) {
+    fun håndter(søknad: Arbeidstaker) {
         registrer(søknad, "Behandler søknad")
         tidligereBehandlinger(søknad, søknad.periode())
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad)

@@ -31,7 +31,7 @@ abstract class SykdomstidslinjeHendelse(
     protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null, other.aktivitetslogg)
 
     private var forrigeTom: LocalDate = LocalDate.MIN
-    internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId(), opprettet)
+    internal abstract val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId(), opprettet)
 
     internal class Hendelseskilde(
         private val type: String,

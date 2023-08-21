@@ -58,7 +58,7 @@ class Søknad(
     private val egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag>,
     private val søknadstype: Søknadstype = Søknadstype.Arbeidstaker,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
+) {
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje
@@ -96,7 +96,7 @@ class Søknad(
 
     internal fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
 
-    override fun sykdomstidslinje(): Sykdomstidslinje {
+    internal fun sykdomstidslinje(): Sykdomstidslinje {
         val egenmeldingCutoffStart = egenmeldingsstart
         val egenmeldingCutoffEnd = egenmeldingsslutt
         if (Toggle.Egenmelding.enabled) {
@@ -130,23 +130,23 @@ class Søknad(
 
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
-    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
-        if (permittert) varsel(RV_SØ_1)
-        merknaderFraSykmelding.forEach { it.valider(this) }
+        if (permittert) aktivitetslogg.varsel(RV_SØ_1)
+        merknaderFraSykmelding.forEach { it.valider(aktivitetslogg) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {
             subsumsjonObserver.`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager)
-            varsel(RV_SØ_2)
+            aktivitetslogg.varsel(RV_SØ_2)
         }
         if (arbeidUtenforNorge) {
-            varsel(RV_MV_3)
+            aktivitetslogg.varsel(RV_MV_3)
         }
-        if (utenlandskSykmelding) funksjonellFeil(RV_SØ_29)
-        if (sendTilGosys) funksjonellFeil(RV_SØ_30)
-        if (yrkesskade) varsel(RV_YS_1)
-        return this
+        if (utenlandskSykmelding) aktivitetslogg.funksjonellFeil(RV_SØ_29)
+        if (sendTilGosys) aktivitetslogg.funksjonellFeil(RV_SØ_30)
+        if (yrkesskade) aktivitetslogg.varsel(RV_YS_1)
+        return aktivitetslogg
     }
 
     internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagElement?): IAktivitetslogg {
