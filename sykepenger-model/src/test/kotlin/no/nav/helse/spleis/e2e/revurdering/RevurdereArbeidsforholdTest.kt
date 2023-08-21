@@ -59,7 +59,7 @@ import org.junit.jupiter.api.Test
 internal class RevurderArbeidsforholdTest: AbstractDslTest() {
 
     @Test
-    fun `revurder arbeidsforhold i Avsluttet`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurder arbeidsforhold i Avsluttet`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -131,7 +131,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         }
     }
     @Test
-    fun `overstyrer forlengelse, førstegangsbehandling revurderes`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `overstyrer forlengelse, førstegangsbehandling revurderes`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -571,7 +571,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurderer arbeidsforhold i AvventerGjennomførtRevurdering`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurderer arbeidsforhold i AvventerGjennomførtRevurdering`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -622,7 +622,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurderer tidligere skjæringstidspunkt`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurderer tidligere skjæringstidspunkt`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -733,7 +733,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `flere arbeidsgivere med sykdom`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `flere arbeidsgivere med sykdom`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -898,7 +898,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         val inntekt = 33000.månedlig
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
@@ -937,7 +937,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving flere arbeidsgivere`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving flere arbeidsgivere`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         val inntekt = 23000.månedlig
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))

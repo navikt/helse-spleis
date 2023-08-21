@@ -140,7 +140,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inntektsmelding med korrigerende inntekt på én av to arbeidsgivere på ett av to skjæringstidspunkt`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `inntektsmelding med korrigerende inntekt på én av to arbeidsgivere på ett av to skjæringstidspunkt`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         nyeVedtak(1.april, 30.april, a1, a2)

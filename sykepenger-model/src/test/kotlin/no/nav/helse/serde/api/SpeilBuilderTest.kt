@@ -379,7 +379,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode til skjønnsfastsettelse`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `periode til skjønnsfastsettelse`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
@@ -394,7 +394,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode til skjønnsfastsettelse - revurdering`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `periode til skjønnsfastsettelse - revurdering`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
@@ -426,7 +426,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `legger ved skjønnsmessig fastsatt sykepengegrunnlag`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `legger ved skjønnsmessig fastsatt sykepengegrunnlag`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         val inntektIm = 31000.0
         val inntektSkatt = 31000.0 * 2
         val inntektSkjønnsfastsatt = 31000 * 1.5

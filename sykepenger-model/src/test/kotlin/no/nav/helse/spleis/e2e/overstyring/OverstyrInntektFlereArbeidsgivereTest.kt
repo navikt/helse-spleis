@@ -15,6 +15,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -300,9 +301,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
     }
 
     @Test
@@ -340,9 +340,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 

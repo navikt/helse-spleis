@@ -6,9 +6,9 @@ import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.TestMessageFactory
-import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernLocalDateTime
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernUUID
+import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
@@ -68,7 +68,7 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
     }
     @Test
-    fun `vedtak med utbetaling hvor sykepengegrunnlaget er fastsatt ved skjønn`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `vedtak med utbetaling hvor sykepengegrunnlaget er fastsatt ved skjønn`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))

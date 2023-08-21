@@ -13,12 +13,12 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -549,9 +549,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(31000.månedlig, it.rapportertInntekt)
         }
-        håndterYtelser(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
         assertVarsel(RV_IV_2, 1.vedtaksperiode.filter(a1)) // takk dent. (fredet kommentar)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test

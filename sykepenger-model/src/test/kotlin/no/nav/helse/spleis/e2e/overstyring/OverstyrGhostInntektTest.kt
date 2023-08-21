@@ -14,6 +14,7 @@ import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
@@ -32,6 +33,8 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
@@ -166,6 +169,15 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `asd`() {
+        nyPeriode(1.januar til 16.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val bbb = 123
+        nyttVedtak(17.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+        val abc = 123
+    }
+
+    @Test
     fun `overstyring av ghostinntekt som fører til 25 prosent avvik skal gi error`() {
         tilOverstyring(
             sammenligningsgrunnlag = mapOf(a1 to 30000.månedlig, a2 to 30000.månedlig),
@@ -206,9 +218,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
-
+        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
         assertVarsel(RV_IV_2)
         assertIngenFunksjonelleFeil()
     }

@@ -1284,14 +1284,14 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `omgjøring med funksjonell feil i vilkårsprøving`() {
+    fun `omgjøring med avvik`() {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
         nyttVedtak(18.januar, 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT*2)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
     }
 
     private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =

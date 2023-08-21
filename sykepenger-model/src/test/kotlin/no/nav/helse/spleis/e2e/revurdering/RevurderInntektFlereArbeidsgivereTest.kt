@@ -423,7 +423,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurderer forlengelse`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurderer forlengelse`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         (a1 og a2).nyeVedtak(1.januar til 31.januar)
         (a1 og a2).forlengVedtak(1.februar til 28.februar)
         nullstillTilstandsendringer()

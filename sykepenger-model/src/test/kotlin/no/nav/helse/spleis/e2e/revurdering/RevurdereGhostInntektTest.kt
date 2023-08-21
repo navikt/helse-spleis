@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test
 internal class RevurderGhostInntektTest: AbstractDslTest() {
 
     @Test
-    fun `revurder ghost-inntekt ned`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurder ghost-inntekt ned`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -221,7 +221,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurder ghost-inntekt til 0 kr`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurder ghost-inntekt til 0 kr`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

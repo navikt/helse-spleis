@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test
 internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
 
     @Test
-    fun `korrigerende inntektsmelding med halvering av inntekt setter riktig refusjonsbeløp fra nyeste inntektsmelding`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `korrigerende inntektsmelding med halvering av inntekt setter riktig refusjonsbeløp fra nyeste inntektsmelding`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         nyttVedtak(1.januar, 31.januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
@@ -90,7 +90,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av inntekt med nedjustering av inntekt uten nytt refusjonsbeløp`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `overstyring av inntekt med nedjustering av inntekt uten nytt refusjonsbeløp`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         nyttVedtak(1.januar, 31.januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
         assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 1.januar til 16.januar)
         assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)

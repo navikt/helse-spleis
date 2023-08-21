@@ -725,7 +725,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         }
     }
     @Test
-    fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             val inntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -782,7 +782,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
     }
 
     @Test
-    fun `gjenbruker grunnlaget for skjønnsmessig fastsettelse`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `gjenbruker grunnlaget for skjønnsmessig fastsettelse`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             val beregnetInntektIM = INNTEKT * 2
             val inntektSkatt = INNTEKT

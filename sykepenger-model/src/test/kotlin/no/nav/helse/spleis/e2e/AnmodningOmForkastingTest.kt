@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test
 internal class AnmodningOmForkastingTest: AbstractDslTest() {
 
     @Test
-    fun `anmodning om forkasting i avventer skjønnsmessig fastsettelse`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `anmodning om forkasting i avventer skjønnsmessig fastsettelse`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)

@@ -162,7 +162,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `førstegangsbehandling med mer enn 25% avvik`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `førstegangsbehandling med mer enn 25% avvik`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             nyPeriode(1.januar til 31.januar, a1)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
@@ -173,7 +173,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `endring til avvik`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `endring til avvik`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             tilGodkjenning(1.januar, 31.januar)
             nullstillTilstandsendringer()
@@ -207,7 +207,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `avvik i utgangspunktet - men så overstyres inntekt`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `avvik i utgangspunktet - men så overstyres inntekt`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             nyPeriode(1.januar til 31.januar, a1)
             håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
@@ -236,7 +236,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `skjønnsmessig fastsatt - men så skulle det være etter hovedregel`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `skjønnsmessig fastsatt - men så skulle det være etter hovedregel`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
@@ -291,7 +291,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Tidligere perioder revurderes mens nyere skjønnsmessig fastsettes`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `Tidligere perioder revurderes mens nyere skjønnsmessig fastsettes`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             nyPeriode(1.mars til 31.mars, a1)
@@ -351,7 +351,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Hindrer tilstandsendring hvis avvikssak som trenger fastsettelse ved skjønn godkjennes`() = Toggle.TjuefemprosentAvvik.disable {
+    fun `Hindrer tilstandsendring hvis avvikssak som trenger fastsettelse ved skjønn godkjennes`() = Toggle.AltAvTjuefemprosentAvvikssaker.disable {
         a1 {
             nyttVedtak(1.januar, 31.januar, beregnetInntekt = 20000.månedlig)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 9000.månedlig)
@@ -365,7 +365,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Hindrer tilstandsendring hvis avvikssak som trenger fastsettelse ved skjønn godkjennes - med senere uferdige periode`() = Toggle.TjuefemprosentAvvik.disable {
+    fun `Hindrer tilstandsendring hvis avvikssak som trenger fastsettelse ved skjønn godkjennes - med senere uferdige periode`() = Toggle.AltAvTjuefemprosentAvvikssaker.disable {
         nyttVedtak(1.januar, 31.januar, beregnetInntekt = 20000.månedlig)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))

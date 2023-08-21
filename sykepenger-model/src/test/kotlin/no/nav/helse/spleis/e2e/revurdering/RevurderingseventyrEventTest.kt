@@ -65,7 +65,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skjønnsfastsetting`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `skjønnsfastsetting`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 60000.månedlig)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 30000.månedlig)

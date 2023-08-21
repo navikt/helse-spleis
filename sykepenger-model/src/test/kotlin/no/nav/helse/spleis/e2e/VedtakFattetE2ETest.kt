@@ -151,7 +151,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender vedtak fattet etter skjønnsmessig fastsettelse med flere arbeidsgivere`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `sender vedtak fattet etter skjønnsmessig fastsettelse med flere arbeidsgivere`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a1)

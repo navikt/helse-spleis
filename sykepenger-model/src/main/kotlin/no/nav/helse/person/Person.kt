@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
@@ -808,10 +807,10 @@ class Person private constructor(
     internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
     internal fun forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu)
-    internal fun kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag: VilkårsgrunnlagElement) {
-        if (!vilkårsgrunnlag.kandidatForSkjønnsmessigFastsettelse()) return
-        if (!alder.kandidatForSkjønnsmessigFastsettelse()) return
-        sikkerLogg.info("Kandidat for skjønnsmessig fastsettelse {}", keyValue("fødselsnummer", "$personidentifikator"))
+    internal fun kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag: VilkårsgrunnlagElement): Boolean {
+        if (!vilkårsgrunnlag.kandidatForSkjønnsmessigFastsettelse()) return false
+        if (!alder.kandidatForSkjønnsmessigFastsettelse()) return false
+        return true
     }
 }
 

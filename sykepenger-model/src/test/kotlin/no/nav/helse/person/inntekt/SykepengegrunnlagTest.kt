@@ -61,7 +61,7 @@ internal class SykepengegrunnlagTest {
     }
 
     @Test
-    fun `kan ikke hente ut utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse når toggle er på`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `kan ikke hente ut utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse når toggle er på`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         val sykepengegrunnlag = 35000.månedlig.sykepengegrunnlag(UNG_PERSON_FØDSELSDATO.alder, "a1", 1.januar, skattInntekt = 50000.månedlig, refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 35000.månedlig).refusjonsopplysninger)
         assertEquals(30, sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(AvventerFastsettelseEtterSkjønn, sykepengegrunnlag.inspektør.tilstand)
@@ -73,7 +73,7 @@ internal class SykepengegrunnlagTest {
     }
 
     @Test
-    fun `kan hente ut utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse når toggle er av`() = Toggle.TjuefemprosentAvvik.disable {
+    fun `kan hente ut utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse når toggle er av`() = Toggle.AltAvTjuefemprosentAvvikssaker.disable {
         val sykepengegrunnlag = 35000.månedlig.sykepengegrunnlag(UNG_PERSON_FØDSELSDATO.alder, "a1", 1.januar, skattInntekt = 50000.månedlig, refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 35000.månedlig).refusjonsopplysninger)
         assertEquals(30, sykepengegrunnlag.inspektør.avviksprosent)
         assertEquals(AvventerFastsettelseEtterSkjønn, sykepengegrunnlag.inspektør.tilstand)

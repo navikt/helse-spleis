@@ -30,6 +30,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertInntektForDato
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
@@ -140,7 +141,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         tilGodkjenning(fom, 31.januar(2021), 100.prosent, fom)
 
         håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
-        håndterYtelser(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
 
         assertVarsel(Varselkode.RV_IV_2, AktivitetsloggFilter.person())
 
@@ -154,9 +155,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
+            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
         )
     }
 

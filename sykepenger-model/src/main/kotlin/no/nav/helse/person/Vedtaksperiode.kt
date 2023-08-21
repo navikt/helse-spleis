@@ -111,7 +111,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
@@ -1076,6 +1075,14 @@ internal class Vedtaksperiode private constructor(
         hendelse.barn().also { kopi ->
             this.kontekst(kopi)
         }
+
+    private fun skalFastsettesVedSkjønn(hendelse: IAktivitetslogg): Boolean {
+        if (Toggle.AltAvTjuefemprosentAvvikssaker.enabled) return true
+        if (tilstand != AvventerSkjønnsmessigFastsettelse) return false
+        // når saksbehandler overstyrer slik at det blir over 25% avvik vil vi at saksbehandler får resulatet presentert istedenfor at det forkastes og blir "borte" i Speil
+        if (hendelse is OverstyrArbeidsforhold || hendelse is OverstyrArbeidsgiveropplysninger) return true
+        return person.kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag!!)
+    }
 
     private fun utbetalingsperioder(strategi: Utbetalingstrategi): List<Pair<Vedtaksperiode, Utbetalingstrategi>> {
         val skjæringstidspunktet = this.skjæringstidspunkt
@@ -2074,13 +2081,15 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerSkjønnsmessigFastsettelse : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.TjuefemprosentAvvik.enabled) return
-            // omgjøringer må enn så lenge gå til godkjenning :/
-            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
-            // når saksbehandler overstyrer slik at det blir over 25% avvik vil vi at saksbehandler får resulatet presentert istedenfor at det forkastes og blir "borte" i Speil
-            if (hendelse is OverstyrArbeidsforhold || hendelse is OverstyrArbeidsgiveropplysninger) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
-            vedtaksperiode.person.kandidatForSkjønnsmessigFastsettelse(vedtaksperiode.vilkårsgrunnlag!!)
-            hendelse.funksjonellFeil(Varselkode.RV_IV_2)
+            if (vedtaksperiode.skalFastsettesVedSkjønn(hendelse)) {
+                return sikkerlogg.info(
+                    "Periode plukket ut som kandidat til skjønnsmessig fastsettelse {}, {}, {}",
+                    keyValue("aktørId", vedtaksperiode.aktørId),
+                    keyValue("vedtaksperiodeId", vedtaksperiode.id),
+                    keyValue("hendelse", hendelse::class.simpleName)
+                )
+            }
+            hendelse.funksjonellFeil(RV_IV_2)
             vedtaksperiode.forkast(hendelse)
         }
 
@@ -2124,7 +2133,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
 
         private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.TjuefemprosentAvvik.enabled && vedtaksperiode.trengerFastsettelseEtterSkjønn) return
+            if (Toggle.AltAvTjuefemprosentAvvikssaker.enabled && vedtaksperiode.trengerFastsettelseEtterSkjønn) return
             vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
     }

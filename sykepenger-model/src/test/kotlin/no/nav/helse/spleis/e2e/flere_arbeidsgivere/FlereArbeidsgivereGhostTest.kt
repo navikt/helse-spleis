@@ -28,6 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
@@ -1177,10 +1178,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(74, utbetaling1.utbetalingstidslinje[1.januar].økonomi.inspektør.totalGrad)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        val utbetaling2 = inspektør(a1).utbetaling(1).inspektør
-        assertEquals(100, utbetaling2.utbetalingstidslinje[1.januar].økonomi.inspektør.totalGrad)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
     }
 
     private fun assertInntektstype(skjæringstidspunkt: LocalDate, forventet: Map<String, KClass<out Inntektsopplysning>>) {

@@ -543,7 +543,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurder inntekt til under krav til minste sykepengegrunnlag slik at utbetaling opphører, og så revurder igjen til over krav til minste sykepengegrunnlag`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurder inntekt til under krav til minste sykepengegrunnlag slik at utbetaling opphører, og så revurder igjen til over krav til minste sykepengegrunnlag`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = 5000.månedlig)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)

@@ -665,7 +665,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere mens en forlengelse er til utbetaling`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurdere mens en forlengelse er til utbetaling`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         nullstillTilstandsendringer()
@@ -679,7 +679,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere mens en førstegangsbehandlingen er til utbetaling`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `revurdere mens en førstegangsbehandlingen er til utbetaling`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)

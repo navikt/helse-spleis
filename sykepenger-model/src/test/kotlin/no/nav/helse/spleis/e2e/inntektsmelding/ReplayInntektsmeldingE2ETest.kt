@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test
 internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `replay av IM medfører ikke at allerede revurdert skjæringstidspunkt revurderes på nytt`() = Toggle.TjuefemprosentAvvik.enable {
+    fun `replay av IM medfører ikke at allerede revurdert skjæringstidspunkt revurderes på nytt`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         nyttVedtak(1.mars, 31.mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT + 500.daglig)
 
