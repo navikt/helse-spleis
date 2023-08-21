@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -13,6 +14,7 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
@@ -500,5 +502,45 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
         assertFalse(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
+    }
+
+    @Test
+    fun `Skal legge til hendelsesid for korrigerende inntektsmelding på alle vedtaksperioder den treffer`() {
+        nyPeriode(1.januar til 10.januar)
+        val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        nyPeriode(11.januar til 31.januar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        val im2 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT*1.1)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im1)))
+        assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im2)))
+        assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im1)))
+
+        assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im1)))
+        assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im1)))
+        assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2)))
+
+        assertForventetFeil(
+            forklaring = "legger ikke til alle hendelsesIdene for korrigerende inntektsmelding",
+            nå = {
+                assertFalse(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im2)))
+            },
+            ønsket = {
+                assertTrue(inspektør.hendelser(2.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingDager(im2)))
+                assertTrue(inspektør.hendelser(1.vedtaksperiode).contains(Dokumentsporing.inntektsmeldingInntekt(im2))) // burde denne id-en vært med?
+            }
+        )
     }
 }
