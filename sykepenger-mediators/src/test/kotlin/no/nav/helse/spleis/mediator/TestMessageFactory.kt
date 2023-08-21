@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
@@ -88,6 +89,34 @@ internal class TestMessageFactory(
         return nyHendelse("ny_søknad", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
     }
 
+    fun lagNySøknadFrilanser(
+        vararg perioder: SoknadsperiodeDTO,
+        opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        fnr: String = fødselsnummer
+    ): Pair<String, String> {
+        val fom = perioder.minOfOrNull { it.fom!! }!!
+        val nySøknad = SykepengesoknadDTO(
+            status = SoknadsstatusDTO.NY,
+            id = UUID.randomUUID().toString(),
+            sykmeldingId = UUID.randomUUID().toString(),
+            fnr = fnr,
+            arbeidsgiver = null,
+            fom = fom,
+            tom = perioder.maxOfOrNull { it.tom!! },
+            type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
+            arbeidssituasjon = ArbeidssituasjonDTO.FRILANSER,
+            startSyketilfelle = LocalDate.now(),
+            sendtNav = null,
+            egenmeldinger = emptyList(),
+            fravar = emptyList(),
+            soknadsperioder = perioder.toList(),
+            opprettet = opprettet,
+            sykmeldingSkrevet = fom.atStartOfDay()
+        )
+        return nyHendelse("ny_søknad_frilanser", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+    }
+
     fun lagSøknadArbeidsgiver(
         perioder: List<SoknadsperiodeDTO>,
         historiskeFolkeregisteridenter: List<String> = emptyList()
@@ -154,6 +183,50 @@ internal class TestMessageFactory(
             egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
         )
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+    }
+
+    fun lagSøknadFrilanser(
+        fnr: String = fødselsnummer,
+        perioder: List<SoknadsperiodeDTO>,
+        fravær: List<FravarDTO> = emptyList(),
+        andreInntektskilder: List<InntektskildeDTO>? = null,
+        sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
+        korrigerer: UUID? = null,
+        opprinneligSendt: LocalDateTime? = null,
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        sendTilGosys: Boolean? = false,
+        egenmeldingerFraSykmelding: List<LocalDate> = emptyList()
+    ): Pair<String, String> {
+        val fom = perioder.minOfOrNull { it.fom!! }
+        val sendtSøknad = SykepengesoknadDTO(
+            status = SoknadsstatusDTO.SENDT,
+            id = UUID.randomUUID().toString(),
+            fnr = fnr,
+            arbeidsgiver = null,
+            fom = fom,
+            tom = perioder.maxOfOrNull { it.tom!! },
+            type = SoknadstypeDTO.SELVSTENDIGE_OG_FRILANSERE,
+            arbeidssituasjon = ArbeidssituasjonDTO.FRILANSER,
+            startSyketilfelle = LocalDate.now(),
+            sendtNav = sendtNav,
+            sendtArbeidsgiver = null,
+            papirsykmeldinger = emptyList(),
+            egenmeldinger = emptyList(),
+            fravar = fravær,
+            korrigerer = korrigerer?.toString(),
+            opprinneligSendt = opprinneligSendt,
+            andreInntektskilder = andreInntektskilder,
+            soknadsperioder = perioder.toList(),
+            opprettet = LocalDateTime.now(),
+            sykmeldingSkrevet = fom!!.atStartOfDay(),
+            merknaderFraSykmelding = listOf(
+                MerknadDTO("EN_MERKNADSTYPE", null),
+                MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse")
+            ),
+            sendTilGosys = sendTilGosys,
+            egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
+        )
+        return nyHendelse("sendt_søknad_frilanser", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
     }
 
     private fun lagInntektsmelding(

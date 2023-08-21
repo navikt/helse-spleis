@@ -130,6 +130,16 @@ internal abstract class AbstractEndToEndMediatorTest() {
         return id.toUUID()
     }
 
+    protected fun sendNySøknadFrilanser(
+        vararg perioder: SoknadsperiodeDTO,
+        meldingOpprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
+        fnr: String = UNG_PERSON_FNR_2018
+    ): UUID {
+        val (id, message) = meldingsfabrikk.lagNySøknadFrilanser(*perioder, opprettet = meldingOpprettet, fnr = fnr)
+        testRapid.sendTestMessage(message)
+        return id.toUUID()
+    }
+
     protected fun sendSøknad(
         fnr: String = UNG_PERSON_FNR_2018,
         perioder: List<SoknadsperiodeDTO>,
@@ -164,6 +174,44 @@ internal abstract class AbstractEndToEndMediatorTest() {
             val vedtaksperiodeIndeks = antallVedtaksperioderEtterSøknad - 1
             if (testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk)) {
                 sendUtbetalingshistorikk(vedtaksperiodeIndeks, orgnummer = orgnummer)
+            }
+        }
+        return id.toUUID()
+    }
+
+
+    protected fun sendFrilanssøknad(
+        fnr: String = UNG_PERSON_FNR_2018,
+        perioder: List<SoknadsperiodeDTO>,
+        fravær: List<FravarDTO> = emptyList(),
+        andreInntektskilder: List<InntektskildeDTO>? = null,
+        sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
+        korrigerer: UUID? = null,
+        opprinneligSendt: LocalDateTime? = null,
+        historiskeFolkeregisteridenter: List<String> = emptyList(),
+        sendTilGosys: Boolean? = false,
+        egenmeldingerFraSykmelding: List<LocalDate> = emptyList()
+    ): UUID {
+        val (id, message) = meldingsfabrikk.lagSøknadFrilanser(
+            fnr = fnr,
+            perioder = perioder,
+            fravær = fravær,
+            andreInntektskilder = andreInntektskilder,
+            sendtNav = sendtNav,
+            korrigerer = korrigerer,
+            opprinneligSendt = opprinneligSendt,
+            historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
+            sendTilGosys = sendTilGosys,
+            egenmeldingerFraSykmelding = egenmeldingerFraSykmelding
+        )
+
+        val antallVedtaksperioderFørSøknad = testRapid.inspektør.vedtaksperiodeteller
+        testRapid.sendTestMessage(message)
+        val antallVedtaksperioderEtterSøknad = testRapid.inspektør.vedtaksperiodeteller
+        if (antallVedtaksperioderFørSøknad < antallVedtaksperioderEtterSøknad) {
+            val vedtaksperiodeIndeks = antallVedtaksperioderEtterSøknad - 1
+            if (testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk)) {
+                sendUtbetalingshistorikk(vedtaksperiodeIndeks)
             }
         }
         return id.toUUID()

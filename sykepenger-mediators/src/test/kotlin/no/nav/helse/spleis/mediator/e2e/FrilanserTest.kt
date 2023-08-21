@@ -30,13 +30,15 @@ internal class FrilanserTest : AbstractEndToEndMediatorTest() {
                 )
             }
         )
-        assertTilstander(
-            0,
-            "AVVENTER_INFOTRYGDHISTORIKK",
-            "AVVENTER_INNTEKTSMELDING",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_VILKÅRSPRØVING",
-            "TIL_INFOTRYGD"
+        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "TIL_INFOTRYGD")
+    }
+
+    @Test
+    fun `frilansersøknad`() {
+        sendNySøknadFrilanser(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendFrilanssøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
+        // assertTilstander(0, "TIL_INFOTYRGD")
     }
 }
