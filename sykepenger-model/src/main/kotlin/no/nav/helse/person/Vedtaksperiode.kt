@@ -2294,6 +2294,11 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
+            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
+        }
+
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
