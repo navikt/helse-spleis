@@ -147,10 +147,12 @@ internal class ArbeidsgiverHendelsefabrikk(
         return inntektsmeldinggenerator()
     }
 
-    internal fun lagInntektsmeldingReplay(vedtaksperiodeId: UUID) =
-        inntektsmeldinger.map { (_, gen) ->
-            InntektsmeldingReplay(
-                wrapped = gen(),
+    internal fun lagInntektsmeldingReplay(vedtaksperiodeId: UUID, sammenhengendePeriode: Periode) =
+        inntektsmeldinger.mapNotNull { (_, gen) ->
+            val inntektsmelding = gen()
+            if (!inntektsmelding.aktuellForReplay(sammenhengendePeriode)) null
+            else InntektsmeldingReplay(
+                wrapped = inntektsmelding,
                 vedtaksperiodeId = vedtaksperiodeId
             )
         }

@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -198,8 +199,7 @@ internal class TestPerson(
                 }
             }) { vedtaksperioderSomHarBedtOmReplay ->
                 vedtaksperioderSomHarBedtOmReplay.forEach { vedtaksperiodeId ->
-                    // TODO: bør kanskje replaye for -alle- arbeidsgivere?
-                    håndterInntektsmeldingReplay(vedtaksperiodeId)
+                    håndterInntektsmeldingReplay(vedtaksperiodeId, inspektør.vedtaksperioder(vedtaksperiodeId).sammenhengendePeriode)
                 }
             }
 
@@ -233,9 +233,10 @@ internal class TestPerson(
         internal fun håndterAnmodningOmForkasting(vedtaksperiodeId: UUID) =
             arbeidsgiverHendelsefabrikk.lagAnmodningOmForkasting(vedtaksperiodeId).håndter(Person::håndter)
 
-        private fun håndterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
+        private fun håndterInntektsmeldingReplay(vedtaksperiodeId: UUID, sammenhengendePeriode: Periode) {
+
             behovsamler.bekreftOgKvitterReplay(vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(vedtaksperiodeId).forEach { replay ->
+            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(vedtaksperiodeId, sammenhengendePeriode).forEach { replay ->
                 replay.håndter(Person::håndter)
             }
             arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplayUtført(vedtaksperiodeId).håndter(Person::håndter)

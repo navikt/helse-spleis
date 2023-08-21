@@ -78,7 +78,7 @@ class Inntektsmelding(
     private var håndtertInntekt = false
     private val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else this.arbeidsgiverperioder.maxOf { it.start }
 
-    private companion object {
+    companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
             "BetvilerArbeidsufoerhet",
             "FiskerMedHyre",
@@ -87,7 +87,23 @@ class Inntektsmelding(
             "BeskjedGittForSent",
             "IkkeLoenn"
         )
+        fun aktuellForReplay(sammenhengendePeriode: Periode, førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode?, redusertUtbetaling: Boolean) : Boolean {
+            // en IM overlapper dersom dagene fra IM er "rett før" vedtaksperioden eller dersom
+            // vedtaksperioden er "rett før" inntektsmeldingen. utvider derfor søkeområdet med to dager
+            // i begge retninger for å hensynta evt. helg-forskyvning
+            val søkeområde = sammenhengendePeriode.start.minusDays(2) til sammenhengendePeriode.endInclusive.plusDays(2)
+            val overlapperMedRedusertUtbetaltAGP = (redusertUtbetaling && arbeidsgiverperiode == null && førsteFraværsdag in sammenhengendePeriode)
+
+            // inntekt fra inntektsmelding håndteres på arbeidsgivernivå når IM ankommer; derfor trenger vi i utgangspunktet
+            // kun replay av tidligere IM for å håndtere dager.
+            // en Vedtaksperiode overlapper med IM slik:
+            // 1) vedtaksperioden, eller den sammenhengende perioden, overlapper med dagene (AGP)
+            // 2) dersom IM har oppgitt reduksjon, og AGP er tom, da benyttes første fraværsdag som en nødløsning (TM)
+            return arbeidsgiverperiode?.overlapperMed(søkeområde) == true || overlapperMedRedusertUtbetaltAGP
+        }
     }
+
+    internal fun aktuellForReplay(sammenhengendePeriode: Periode) = Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
         if (ignorerDager) return Sykdomstidslinje()

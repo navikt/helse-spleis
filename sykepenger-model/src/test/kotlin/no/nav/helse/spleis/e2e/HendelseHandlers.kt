@@ -6,6 +6,7 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -452,6 +453,7 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
         inntektsmeldinger
             .mapValues { (_, gen) -> gen.first to gen.second() }
             .filterValues { (_, im) -> im.organisasjonsnummer() == orgnummer }
+            .filterValues { (_, im) -> im.aktuellForReplay(inspektør(orgnummer).vedtaksperioder(vedtaksperiodeId).sammenhengendePeriode)}
             .entries
             .sortedBy { (_, value) -> value.first }
             .forEach { (id, _) ->

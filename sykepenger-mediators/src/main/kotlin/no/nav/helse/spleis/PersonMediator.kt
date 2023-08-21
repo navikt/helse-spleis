@@ -10,6 +10,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
@@ -78,24 +79,13 @@ internal class PersonMediator(
     }
 
     override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {
-        // en IM overlapper dersom dagene fra IM er "rett før" vedtaksperioden eller dersom
-        // vedtaksperioden er "rett før" inntektsmeldingen. utvider derfor søkeområdet med to dager
-        // i begge retninger for å hensynta evt. helg-forskyvning
-        val søkeområde = sammenhengendePeriode.start.minusDays(2) til sammenhengendePeriode.endInclusive.plusDays(2)
         hendelseRepository.finnInntektsmeldinger(personidentifikator)
             .filter { it.path("virksomhetsnummer").asText() == organisasjonsnummer }
             .filter { inntektsmelding ->
                 val førsteFraværsdag = inntektsmelding.path("foersteFravaersdag").asOptionalLocalDate()
                 val redusertUtbetaling = inntektsmelding.path("begrunnelseForReduksjonEllerIkkeUtbetalt").asText().isNotBlank()
                 val arbeidsgiverperioder = inntektsmelding.path("arbeidsgiverperioder").map(::asPeriode).periode()
-                val overlapperMedRedusertUtbetaltAGP = (redusertUtbetaling && arbeidsgiverperioder == null && førsteFraværsdag in sammenhengendePeriode)
-
-                // inntekt fra inntektsmelding håndteres på arbeidsgivernivå når IM ankommer; derfor trenger vi i utgangspunktet
-                // kun replay av tidligere IM for å håndtere dager.
-                // en Vedtaksperiode overlapper med IM slik:
-                // 1) vedtaksperioden, eller den sammenhengende perioden, overlapper med dagene (AGP)
-                // 2) dersom IM har oppgitt reduksjon, og AGP er tom, da benyttes første fraværsdag som en nødløsning (TM)
-                arbeidsgiverperioder?.overlapperMed(søkeområde) == true || overlapperMedRedusertUtbetaltAGP
+                Inntektsmelding.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperioder, redusertUtbetaling)
             }
             .forEach { inntektsmelding -> createReplayMessage(inntektsmelding, vedtaksperiodeId) }
         createReplayUtførtMessage(personidentifikator, aktørId, organisasjonsnummer, vedtaksperiodeId)
