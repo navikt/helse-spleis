@@ -205,14 +205,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender ut signal om at inntektsmelding ikke er håndtert på nytt om ingen andre har håndtert den tidligere`() {
-        val inntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertEquals(listOf(inntektsmelding), observatør.inntektsmeldingIkkeHåndtert)
-        håndterSøknad(Sykdom(20.februar, 20.mars, 100.prosent))
-        assertEquals(listOf(inntektsmelding, inntektsmelding), observatør.inntektsmeldingIkkeHåndtert)
-    }
-
-    @Test
     fun `Inntektsmelding før søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         val id = håndterInntektsmelding(listOf(1.januar til 16.januar))

@@ -78,7 +78,7 @@ class Inntektsmelding(
     private var håndtertInntekt = false
     private val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else this.arbeidsgiverperioder.maxOf { it.start }
 
-    private companion object {
+    companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
             "BetvilerArbeidsufoerhet",
             "FiskerMedHyre",
@@ -87,7 +87,16 @@ class Inntektsmelding(
             "BeskjedGittForSent",
             "IkkeLoenn"
         )
+        fun aktuellForReplay(sammenhengendePeriode: Periode, førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode?, redusertUtbetaling: Boolean) : Boolean {
+            if (arbeidsgiverperiode == null) return redusertUtbetaling && førsteFraværsdag in sammenhengendePeriode // dersom IM har oppgitt reduksjon, og AGP er tom, da benyttes første fraværsdag som en nødløsning (TM)
+            if (arbeidsgiverperiode.overlapperMed(sammenhengendePeriode)) return true
+            if (arbeidsgiverperiode.erRettFør(sammenhengendePeriode)) return true // arbeidsgiverperiode f.eks. slutter på fredag & søknaden starter på mandag
+            if (sammenhengendePeriode.erRettFør(arbeidsgiverperiode)) return true // om f.eks. søknad slutter på fredag og arbedisgiverperiode starter på mandag
+            return false
+        }
     }
+
+    internal fun aktuellForReplay(sammenhengendePeriode: Periode) = Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
         if (ignorerDager) return Sykdomstidslinje()

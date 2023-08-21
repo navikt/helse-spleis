@@ -808,11 +808,12 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    internal val sammenhengendePeriode get() = checkNotNull(arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
+        .map { it.periode }
+        .periode())
+
     private fun trengerInntektsmeldingReplay() {
-        val sammenhengende = checkNotNull(arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
-            .map { it.periode }
-            .periode())
-        person.inntektsmeldingReplay(id, skjæringstidspunkt, organisasjonsnummer, sammenhengende)
+        person.inntektsmeldingReplay(id, skjæringstidspunkt, organisasjonsnummer, sammenhengendePeriode)
     }
 
     private fun emitVedtaksperiodeVenter(vedtaksperiodeVenter: VedtaksperiodeVenter) {

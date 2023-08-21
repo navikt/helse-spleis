@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -1137,32 +1138,38 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(30.januar, 5.februar, 100.prosent))
 
         assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
+        assertForventetFeil(
+            forklaring = "Replay av inntektsmelding replayer kun dagene",
+            nå = {
+                 assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            },
+            ønsket = {
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
+                håndterYtelser(2.vedtaksperiode)
+                håndterSimulering(2.vedtaksperiode)
+                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+                håndterUtbetalt()
 
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
+                assertTilstander(
+                    2.vedtaksperiode,
+                    START,
+                    AVVENTER_INFOTRYGDHISTORIKK,
+                    AVVENTER_INNTEKTSMELDING,
+                    AVVENTER_BLOKKERENDE_PERIODE,
+                    AVVENTER_VILKÅRSPRØVING,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_SIMULERING,
+                    AVVENTER_GODKJENNING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+                )
+            }
         )
 
     }
