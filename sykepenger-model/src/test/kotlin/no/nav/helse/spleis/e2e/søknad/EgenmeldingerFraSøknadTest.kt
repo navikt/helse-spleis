@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -25,7 +23,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.Egenmelding::class)
 internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
 
     @Test

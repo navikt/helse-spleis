@@ -3,7 +3,6 @@ package no.nav.helse.spleis.mediator.e2e
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -21,7 +20,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode
 internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved en enkel førstegangsbehandling`() = Toggle.Egenmelding.enable {
+    fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved en enkel førstegangsbehandling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),
@@ -76,7 +75,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         }
 
     @Test
-    fun `sender med inntekt fra forrige skjæringstidspunkt`() = Toggle.Egenmelding.enable {
+    fun `sender med inntekt fra forrige skjæringstidspunkt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 31.januar, sykmeldingsgrad = 100)),

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -548,7 +547,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Skal sende egenmeldingsdager fra søknad i forespørsel`() = Toggle.Egenmelding.enable {
+    fun `Skal sende egenmeldingsdager fra søknad i forespørsel`() {
         håndterSykmelding(Sykmeldingsperiode(5.januar, 31.januar))
         håndterSøknad(Sykdom(5.januar, 31.januar, 100.prosent), egenmeldinger = listOf(
             Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 4.januar)

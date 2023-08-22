@@ -7,7 +7,6 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Alder
-import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
@@ -99,15 +98,12 @@ class Søknad(
     override fun sykdomstidslinje(): Sykdomstidslinje {
         val egenmeldingCutoffStart = egenmeldingsstart
         val egenmeldingCutoffEnd = egenmeldingsslutt
-        if (Toggle.Egenmelding.enabled) {
-            return if (egenmeldingCutoffStart != null && egenmeldingCutoffEnd != null) {
-                egenmeldingstidslinje.subset(egenmeldingCutoffStart til egenmeldingCutoffEnd)
-                    .merge(sykdomstidslinje, replace)
-            } else {
-                sykdomstidslinje
-            }
+        return if (egenmeldingCutoffStart != null && egenmeldingCutoffEnd != null) {
+            egenmeldingstidslinje.subset(egenmeldingCutoffStart til egenmeldingCutoffEnd)
+                .merge(sykdomstidslinje, replace)
+        } else {
+            sykdomstidslinje
         }
-        return sykdomstidslinje
     }
 
     fun loggEgenmeldingsstrekking()  {
