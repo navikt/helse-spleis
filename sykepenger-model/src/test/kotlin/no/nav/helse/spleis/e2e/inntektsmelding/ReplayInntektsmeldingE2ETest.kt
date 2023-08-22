@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import java.time.LocalDate
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -45,7 +43,8 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - første fraværsdag kant-i-kant`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 100.prosent))
         val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar)
-        assertEquals(emptyList<LocalDate>(), inspektør.inntektInspektør.innteksdatoer) // Lagrer ingenting ettersom personen ikke er syk 21.januar
+        håndterInntektsmelding(inntektsmelding)
+        assertEquals(listOf(21.januar), inspektør.inntektInspektør.innteksdatoer) // Lagrer alltid på oppgitt innteksdato
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(21.januar, 31.januar, 100.prosent))
         assertTrue(inntektsmelding.aktuellForReplay(1.januar til 31.januar))
         assertEquals(listOf(1.januar, 21.januar), inspektør.inntektInspektør.innteksdatoer) // Replayer IM. Nå som personen er syk 21.januar lagres den både på 21.januar og alternativ inntektsdato (1.januar)
