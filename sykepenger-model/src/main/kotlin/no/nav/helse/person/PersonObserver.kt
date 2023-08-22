@@ -173,13 +173,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             fun List<ForespurtOpplysning>.toJsonMap() = map { forespurtOpplysning ->
                 when (forespurtOpplysning) {
                     is Arbeidsgiverperiode -> mapOf(
-                        "opplysningstype" to "Arbeidsgiverperiode",
-                        "forslag" to forespurtOpplysning.forslag.map { forslag ->
-                            mapOf(
-                                "fom" to forslag.start,
-                                "tom" to forslag.endInclusive
-                            )
-                        }
+                        "opplysningstype" to "Arbeidsgiverperiode"
                     )
 
                     is Inntekt -> mapOf(
@@ -224,7 +218,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     }
     data class Inntekt(val forslag: Inntektsforslag) : ForespurtOpplysning()
     data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
-    data class Arbeidsgiverperiode(val forslag: List<Periode>) : ForespurtOpplysning()
+    object Arbeidsgiverperiode : ForespurtOpplysning()
     data class Refusjon(val forslag: List<Refusjonsopplysning>) : ForespurtOpplysning()
 
     data class UtbetalingAnnullertEvent(

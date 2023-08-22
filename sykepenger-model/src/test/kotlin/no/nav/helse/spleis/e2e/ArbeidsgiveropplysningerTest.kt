@@ -116,7 +116,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 )
             ),
             PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT))),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(17.februar til 4.mars))
+            PersonObserver.Arbeidsgiverperiode
         )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
@@ -178,13 +178,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
-            PersonObserver.Arbeidsgiverperiode(
-                forslag = listOf(
-                    1.januar til 7.januar,
-                    9.januar til 14.januar,
-                    16.januar til 18.januar
-                )
-            )
+            PersonObserver.Arbeidsgiverperiode
         )
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
@@ -215,7 +209,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
             PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+            PersonObserver.Arbeidsgiverperiode
         )
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
@@ -259,7 +253,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.februar til 16.februar))
+            PersonObserver.Arbeidsgiverperiode
         )
 
         assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
@@ -297,7 +291,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
             PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+            PersonObserver.Arbeidsgiverperiode
         )
 
         assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
@@ -323,7 +317,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespurteOpplysninger = listOf(
         PersonObserver.FastsattInntekt(INNTEKT_FLERE_AG),
             PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG))),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+            PersonObserver.Arbeidsgiverperiode
         )
         assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
     }
@@ -346,7 +340,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
+            PersonObserver.Arbeidsgiverperiode
         )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
@@ -372,7 +366,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.januar til 16.januar))
+            PersonObserver.Arbeidsgiverperiode
         )
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
@@ -416,7 +410,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedForespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(INNTEKT),
             PersonObserver.Refusjon(emptyList()),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.februar til 16.februar))
+            PersonObserver.Arbeidsgiverperiode
         )
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
 
@@ -468,7 +462,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                             Refusjonsopplysning(inntektsmeldingId, 1.april, null, 15000.månedlig)
                         )
                     ),
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+                    PersonObserver.Arbeidsgiverperiode
                 )
 
                 assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
@@ -510,7 +504,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                             Refusjonsopplysning(inntektsmeldingId, 16.mars, null, INGEN)
                         )
                     ),
-                    PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+                    PersonObserver.Arbeidsgiverperiode
                 )
 
                 assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
@@ -642,7 +636,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
                 )
             ),
             PersonObserver.Refusjon(forslag = emptyList()),
-            PersonObserver.Arbeidsgiverperiode(forslag = listOf(1.mars til 16.mars))
+            PersonObserver.Arbeidsgiverperiode
         )
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger

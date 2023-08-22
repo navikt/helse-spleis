@@ -786,7 +786,7 @@ internal class Vedtaksperiode private constructor(
                 || arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
                 ?: false
 
-        if (trengerArbeidsgiverperiode) return PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiodeperioder)
+        if (trengerArbeidsgiverperiode) return PersonObserver.Arbeidsgiverperiode
         return null
     }
 

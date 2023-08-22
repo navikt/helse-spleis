@@ -289,13 +289,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               ]
             },
             {
-              "opplysningstype": "Arbeidsgiverperiode",
-              "forslag": [
-                {
-                  "fom": "2018-03-01",
-                  "tom": "2018-03-16"
-                }
-              ]
+              "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
           "aktørId": "42",
@@ -337,13 +331,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "forslag": []
             },
             {
-              "opplysningstype": "Arbeidsgiverperiode",
-              "forslag": [
-                {
-                  "fom": "2018-01-01",
-                  "tom": "2018-01-16"
-                }
-              ]
+              "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
           "aktørId": "42",
@@ -395,13 +383,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               ]
             },
             {
-              "opplysningstype": "Arbeidsgiverperiode",
-              "forslag": [
-                {
-                  "fom": "2018-03-01",
-                  "tom": "2018-03-16"
-                }
-              ]
+              "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
           "aktørId": "42",
@@ -448,13 +430,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               ]
             },
             {
-              "opplysningstype": "Arbeidsgiverperiode",
-              "forslag": [
-                {
-                  "fom": "2018-03-01",
-                  "tom": "2018-03-16"
-                }
-              ]
+              "opplysningstype": "Arbeidsgiverperiode"
             }
           ],
           "aktørId": "42",
