@@ -764,8 +764,18 @@ internal class Vedtaksperiode private constructor(
                 .orEmpty()
             return PersonObserver.Refusjon(forslag = refusjonsopplysninger)
 
+        } else {
+            val forrigeSkjæringstidspunkt = person.skjæringstidspunkter()
+                .filter { it != skjæringstidspunkt }
+                .maxOrNull()
+
+            val refusjonsopplysninger = forrigeSkjæringstidspunkt?.let { person
+                .vilkårsgrunnlagFor(forrigeSkjæringstidspunkt)
+                ?.overlappendeEllerSenereRefusjonsopplysninger(arbeidsgiver.organisasjonsnummer(), periode())
+            } ?: emptyList()
+
+            return PersonObserver.Refusjon(forslag = refusjonsopplysninger)
         }
-        return PersonObserver.Refusjon(forslag = emptyList())
     }
 
     private fun forespurtArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): PersonObserver.Arbeidsgiverperiode? {

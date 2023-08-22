@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import no.nav.helse.Toggle
+import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
@@ -119,7 +120,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "fødselsnummer"
         )
 
-        JSONAssert.assertEquals(forventetResultatMedInntektFraTidligereSkjæringstidpunkt, faktiskResultat, JSONCompareMode.STRICT)
+        JSONAssert.assertEquals(forventetResultatMedInntektFraForrigeSkjæringstidpunkt, faktiskResultat, JSONCompareMode.STRICT)
     }
 
     private fun forlengMedFebruar(a1: String) {
@@ -225,6 +226,40 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         JSONAssert.assertEquals(forventetResultatKortGap, faktiskResultat, JSONCompareMode.STRICT)
     }
 
+    @Test
+    fun `Sender med forrige refusjonsopplysninger i forespørsel`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        )
+        sendInntektsmelding(
+            arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
+            1.januar,
+            opphørsdatoForRefusjon = 1.april
+        )
+        sendVilkårsgrunnlag(0)
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
+        )
+
+        Assertions.assertEquals(2, testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver").size)
+        val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
+
+        val faktiskResultat = trengerOpplysningerEvent.json(
+            "@event_name",
+            "organisasjonsnummer",
+            "skjæringstidspunkt",
+            "sykmeldingsperioder",
+            "egenmeldingsperioder",
+            "forespurteOpplysninger",
+            "aktørId",
+            "fødselsnummer"
+        )
+
+        JSONAssert.assertEquals(forventetResultatOpphørAvRefusjon, faktiskResultat, JSONCompareMode.STRICT)
+    }
 
     @Language("json")
     val forventetResultatFastsattInntekt = """
@@ -317,7 +352,65 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         }"""
 
     @Language("json")
-    val forventetResultatMedInntektFraTidligereSkjæringstidpunkt = """
+    val forventetResultatOpphørAvRefusjon = """
+        {
+          "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
+          "organisasjonsnummer": "987654321",
+          "skjæringstidspunkt": "2018-03-01",
+          "sykmeldingsperioder": [
+            {
+              "fom": "2018-03-01",
+              "tom": "2018-03-31"
+            }
+          ],
+          "egenmeldingsperioder": [],
+          "forespurteOpplysninger": [
+            {
+              "opplysningstype": "Inntekt",
+              "forslag": {
+                "beregningsmåneder": [
+                  "2017-12",
+                  "2018-01",
+                  "2018-02"
+                ], 
+                "forrigeInntekt": {
+                  "skjæringstidspunkt": "2018-01-01",
+                  "kilde": "INNTEKTSMELDING",
+                  "beløp": 31000.0
+                }
+              }
+            },
+            {
+              "opplysningstype": "Refusjon",
+              "forslag": [
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-04-01", 
+                  "beløp": 31000.0
+                },
+                {
+                  "fom": "2018-04-02",
+                  "tom": null, 
+                  "beløp": 0.0
+                }
+              ]
+            },
+            {
+              "opplysningstype": "Arbeidsgiverperiode",
+              "forslag": [
+                {
+                  "fom": "2018-03-01",
+                  "tom": "2018-03-16"
+                }
+              ]
+            }
+          ],
+          "aktørId": "42",
+          "fødselsnummer": "12029240045"
+        }"""
+
+    @Language("json")
+    val forventetResultatMedInntektFraForrigeSkjæringstidpunkt = """
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "987654321",
@@ -347,7 +440,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             },
             {
               "opplysningstype": "Refusjon",
-              "forslag": []
+              "forslag": [
+              {                            
+                  "fom": "2018-01-01",       
+                  "tom": null, 
+                  "beløp": 31000.0
+                }                            
+              ]
             },
             {
               "opplysningstype": "Arbeidsgiverperiode",
@@ -399,14 +498,18 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             },
             {
               "opplysningstype": "Refusjon",
-              "forslag": []
+              "forslag": [
+                { 
+                  "fom": "2018-01-01", 
+                  "tom": null, 
+                  "beløp": 31000.0
+                }
+              ]
             }
           ],
           "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
-
-
 
     private companion object {
         private fun JsonNode.json(vararg behold: String) = (this as ObjectNode).let { json ->

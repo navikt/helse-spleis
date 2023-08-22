@@ -227,9 +227,10 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode>? = null,
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) }
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
+    inntektsmeldingId: UUID = UUID.randomUUID()
 ) {
-    tilGodkjent(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
+    tilGodkjent(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
     håndterUtbetalt(status = status, fnr = fnr, orgnummer = orgnummer)
 }
 
@@ -243,9 +244,10 @@ internal fun AbstractEndToEndTest.tilGodkjent(
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
-    arbeidsgiverperiode: List<Periode>? = null
+    arbeidsgiverperiode: List<Periode>? = null,
+    inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
-    val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
+    val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
     håndterUtbetalingsgodkjenning(id, true, fnr = fnr, orgnummer = orgnummer)
     return id
 }
@@ -261,8 +263,9 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null,
+    inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
-    val id = tilSimulering(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
+    val id = tilSimulering(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
     håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
     return id
 }
@@ -277,9 +280,10 @@ internal fun AbstractEndToEndTest.tilSimulering(
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
-    arbeidsgiverperiode: List<Periode>? = null
+    arbeidsgiverperiode: List<Periode>? = null,
+    inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
-    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
+    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
 }
 
 internal fun AbstractEndToEndTest.tilYtelser(
@@ -299,7 +303,8 @@ internal fun AbstractEndToEndTest.tilYtelser(
             }
         }, arbeidsforhold = emptyList()
     ),
-    arbeidsgiverperiode: List<Periode>? = null
+    arbeidsgiverperiode: List<Periode>? = null,
+    inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
     håndterSykmelding(Sykmeldingsperiode(fom, tom), fnr = fnr, orgnummer = orgnummer)
     håndterSøknad(Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
@@ -309,7 +314,8 @@ internal fun AbstractEndToEndTest.tilYtelser(
         fnr = fnr,
         orgnummer = orgnummer,
         refusjon = refusjon,
-        beregnetInntekt = beregnetInntekt
+        beregnetInntekt = beregnetInntekt,
+        id = inntektsmeldingId
     )
     val id = observatør.sisteVedtaksperiode()
     håndterVilkårsgrunnlag(
