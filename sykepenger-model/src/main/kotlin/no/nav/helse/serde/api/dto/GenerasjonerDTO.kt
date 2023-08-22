@@ -22,7 +22,9 @@ import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 data class GenerasjonDTO(
     val id: UUID, // Runtime
     val perioder: List<Tidslinjeperiode>
-)
+) {
+    val size = perioder.size
+}
 
 enum class Periodetilstand {
     TilUtbetaling,
@@ -75,7 +77,7 @@ abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
         return this
     }
     internal fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
-    internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon)
+    internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon, UtbetaltVenterPåAnnenPeriode)
 
     internal abstract fun tilGenerasjon(generasjoner: Generasjoner)
     override fun compareTo(other: Tidslinjeperiode) = tom.compareTo(other.tom)

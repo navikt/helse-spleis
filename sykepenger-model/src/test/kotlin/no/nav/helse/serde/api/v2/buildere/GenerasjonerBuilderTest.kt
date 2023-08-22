@@ -116,6 +116,7 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -125,6 +126,85 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `revurdere skjæringstidspunktet flere ganger før forlengelsene`() = Toggle.ForenkleRevurdering.enable {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT - 1.daglig)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT - 2.daglig)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        generasjoner(ORGNUMMER).apply {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(3, size)
+                uberegnetVilkårsprøvdPeriode(0) fra 1.mars til 31.mars medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetVilkårsprøvdPeriode(1) fra 1.februar til 28.februar medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(2) avType REVURDERING fra 1.januar til 31.januar medTilstand TilGodkjenning
+            }
+            1.generasjon {
+                // fordi de to andre ikke ble utbetalt før det startet ny revurdering
+                assertEquals(1, size)
+                beregnetPeriode(0) avType REVURDERING fra 1.januar til 31.januar medTilstand Utbetalt
+            }
+            2.generasjon {
+                assertEquals(3, size)
+                beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(2) avType UTBETALING medTilstand Utbetalt
+            }
+        }
+    }
+
+    @Test
+    fun `revurdere skjæringstidspunktet flere ganger`() = Toggle.ForenkleRevurdering.enable {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT - 1.daglig)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT - 2.daglig)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        generasjoner(ORGNUMMER).apply {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(3, size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetVilkårsprøvdPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+                beregnetPeriode(2) medTilstand TilGodkjenning
+            }
+            1.generasjon {
+                assertEquals(3, size)
+                beregnetPeriode(0) avType REVURDERING medTilstand Utbetalt
+                beregnetPeriode(1) avType REVURDERING medTilstand Utbetalt
+                beregnetPeriode(2) avType REVURDERING medTilstand Utbetalt
+            }
+            2.generasjon {
+                assertEquals(3, size)
+                beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(2) avType UTBETALING medTilstand Utbetalt
+            }
+        }
+    }
 
     @Test
     fun `happy case`() {
@@ -461,7 +541,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellSykedag(it) })
         håndterYtelser(2.vedtaksperiode)
-
         assertEquals(3, generasjoner.size)
         assertEquals(2, generasjoner[0].perioder.size)
         assertEquals(2, generasjoner[1].perioder.size)
@@ -833,9 +912,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ventende periode`() {
+    fun `ventende periode etter førstegangsbehandling`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertEquals(1, generasjoner.size)
@@ -844,6 +922,30 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         0.generasjon {
             uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+        }
+    }
+
+    @Test
+    fun `ventende periode etter revurdering`() = Toggle.ForenkleRevurdering.enable {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        generasjoner(ORGNUMMER).apply {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medTilstand ForberederGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(1, size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medTilstand Utbetalt
+            }
         }
     }
 
