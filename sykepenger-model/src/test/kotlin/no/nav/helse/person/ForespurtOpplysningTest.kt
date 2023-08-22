@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
@@ -28,7 +27,7 @@ class ForespurtOpplysningTest {
                 PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
             )
             ),
-            PersonObserver.Arbeidsgiverperiode(listOf(1.april til 16.april)),
+            PersonObserver.Arbeidsgiverperiode,
             PersonObserver.Refusjon(emptyList())
         )
 
@@ -41,7 +40,7 @@ class ForespurtOpplysningTest {
 
         val forespurteOpplysninger = listOf(
             PersonObserver.FastsattInntekt(30000.månedlig),
-            PersonObserver.Arbeidsgiverperiode(listOf(1.april til 16.april)),
+            PersonObserver.Arbeidsgiverperiode,
             PersonObserver.Refusjon(listOf(
                 Refusjonsopplysning(UUID.randomUUID(), fom = 1.januar, tom = 31.mars, 30000.månedlig),
                 Refusjonsopplysning(UUID.randomUUID(), fom = 1.april, tom = null, INGEN)
@@ -58,10 +57,7 @@ class ForespurtOpplysningTest {
             "fastsattInntekt" to 30000.0,
         ),
         mapOf(
-            "opplysningstype" to "Arbeidsgiverperiode",
-            "forslag" to listOf(
-                mapOf("fom" to 1.april, "tom" to 16.april)
-            )
+            "opplysningstype" to "Arbeidsgiverperiode"
         ),
         mapOf(
             "opplysningstype" to "Refusjon",
@@ -89,10 +85,7 @@ class ForespurtOpplysningTest {
             ),
         ),
         mapOf(
-            "opplysningstype" to "Arbeidsgiverperiode",
-            "forslag" to listOf(
-                mapOf("fom" to 1.april, "tom" to 16.april)
-            )
+            "opplysningstype" to "Arbeidsgiverperiode"
         ),
         mapOf(
             "opplysningstype" to "Refusjon",
