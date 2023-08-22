@@ -279,7 +279,7 @@ data class BeregnetPeriode(
         if (this.vilkårsgrunnlagId != this.forrigeGenerasjon.vilkårsgrunnlagId && this.vilkårsgrunnlagId != other.vilkårsgrunnlagId) return false
         return this.sammenslåttTidslinje
             .zip(this.forrigeGenerasjon.sammenslåttTidslinje) { ny, gammel ->
-                ny.copy(utbetalingsinfo = null) == gammel.copy(utbetalingsinfo = null)
+                ny.sammeGrunnlag(gammel)
             }
             .all { it }
     }

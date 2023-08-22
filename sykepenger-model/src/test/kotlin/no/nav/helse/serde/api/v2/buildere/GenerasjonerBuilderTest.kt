@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
@@ -126,6 +127,28 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `avvik i inntekt slik at dager avslås pga minsteinntekt`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar,  28.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = halvG.beløp(1.januar) - 1.daglig)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        generasjoner(ORGNUMMER).apply {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) avType REVURDERING fra 1.februar til 28.februar medTilstand TilGodkjenning
+                beregnetPeriode(1) avType REVURDERING fra 1.januar til 31.januar medTilstand TilGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
+            }
+        }
+    }
 
     @Test
     fun `revurdere skjæringstidspunktet flere ganger før forlengelsene`() = Toggle.ForenkleRevurdering.enable {

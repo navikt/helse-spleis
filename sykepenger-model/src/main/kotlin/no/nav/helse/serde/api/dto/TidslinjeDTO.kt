@@ -11,7 +11,17 @@ data class SammenslåttDag(
     val grad: Int? = null,
     val utbetalingsinfo: Utbetalingsinfo? = null,
     val begrunnelser: List<BegrunnelseDTO>? = null,
-)
+) {
+    /*
+        sammenligner ikke utbetalingsinfo (siden endring av beløp dekkes av sjekk på vilkårsgrunnlagId),
+        ei heller utbetalingstidslinjedagtypen siden den reflekterer både endring av sykdomstidslinje+vilkårsgrunnlag (og dekkes dermed fra før)
+     */
+    fun sammeGrunnlag(other: SammenslåttDag) =
+        this.dagen == other.dagen
+                && this.sykdomstidslinjedagtype == other.sykdomstidslinjedagtype
+                && this.kilde == other.kilde
+                && this.grad == grad
+}
 
 enum class SykdomstidslinjedagType {
     ARBEIDSDAG,
