@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -70,6 +71,20 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(2000.månedlig, null, emptyList()))
 
         assertVarsel(RV_IM_4)
+    }
+
+    @Test
+    fun `jaudå jaudå`() = Toggle.ForenkleRevurdering.enable {
+        nyPeriode(1.januar til 16.januar)
+        nyttVedtak(17.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 4.vedtaksperiode.filter())
     }
 
     @Test

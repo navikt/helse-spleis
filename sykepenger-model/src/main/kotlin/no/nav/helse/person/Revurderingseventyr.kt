@@ -50,7 +50,7 @@ class Revurderingseventyr private constructor(
 
     private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring, periode: Periode) : Boolean {
         if (periodeForEndring.starterEtter(periode)) return false
-        hvorfor.dersomInngått(hendelse)
+        hvorfor.dersomInngått(hendelse, vedtaksperioder.isEmpty())
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
         return true
     }
@@ -82,7 +82,7 @@ class Revurderingseventyr private constructor(
 
     private sealed interface RevurderingÅrsak {
 
-        fun dersomInngått(hendelse: IAktivitetslogg) {}
+        fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {}
 
         fun kanIgangsetteOverstyringIAvventerInntektsmelding() = true
 
@@ -136,8 +136,8 @@ class Revurderingseventyr private constructor(
 
         object KorrigertInntektsmeldingInntektsopplysninger : RevurderingÅrsak {
 
-            override fun dersomInngått(hendelse: IAktivitetslogg) {
-                hendelse.varsel(RV_IM_4, "Inngår i revurdering på grunn av korrigert inntektsmelding")
+            override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
+                if (ingenAndrePåmeldt) hendelse.varsel(RV_IM_4, "Inngår i revurdering på grunn av korrigert inntektsmelding")
                 hendelse.info("korrigert inntektsmelding trigget revurdering på grunn av inntektsopplysninger")
             }
 
@@ -146,7 +146,7 @@ class Revurderingseventyr private constructor(
 
         object KorrigertInntektsmeldingArbeidsgiverperiode : RevurderingÅrsak {
 
-            override fun dersomInngått(hendelse: IAktivitetslogg) {
+            override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
                 hendelse.info("korrigert inntektsmelding trigget revurdering på grunn av arbeidsgiverperiode")
             }
 
