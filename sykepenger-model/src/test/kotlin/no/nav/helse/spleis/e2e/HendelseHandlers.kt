@@ -6,7 +6,6 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.PersonHendelsefabrikk
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -491,24 +490,26 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
     førReplay: () -> Unit = {}
-): UUID {
-    håndterOgReplayInntektsmeldinger(orgnummer) {
-        inntektsmelding(
-            id,
-            arbeidsgiverperioder,
-            beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = førsteFraværsdag,
-            refusjon = refusjon,
-            orgnummer = orgnummer,
-            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            arbeidsforholdId = arbeidsforholdId,
-            fnr = fnr,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
-        ).håndter(Person::håndter)
+) = håndterInntektsmelding(inntektsmelding(
+    id,
+    arbeidsgiverperioder,
+    beregnetInntekt = beregnetInntekt,
+    førsteFraværsdag = førsteFraværsdag,
+    refusjon = refusjon,
+    orgnummer = orgnummer,
+    harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+    arbeidsforholdId = arbeidsforholdId,
+    fnr = fnr,
+    begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+    harFlereInntektsmeldinger = harFlereInntektsmeldinger
+), førReplay)
+
+internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}) : UUID {
+    håndterOgReplayInntektsmeldinger(inntektsmelding.organisasjonsnummer()) {
+        inntektsmelding.håndter(Person::håndter)
         førReplay()
     }
-    return id
+    return inntektsmelding.meldingsreferanseId()
 }
 
 private fun AbstractEndToEndTest.håndterInntektsmeldingReplay(

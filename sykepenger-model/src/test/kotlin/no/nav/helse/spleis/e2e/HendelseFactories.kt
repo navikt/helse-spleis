@@ -163,7 +163,7 @@ internal fun AbstractEndToEndTest.inntektsmeldingReplay(
 }
 
 internal fun AbstractEndToEndTest.inntektsmelding(
-    id: UUID,
+    id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,

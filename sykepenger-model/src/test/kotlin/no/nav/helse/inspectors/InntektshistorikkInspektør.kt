@@ -13,6 +13,7 @@ internal class InntektshistorikkInspektør(inntektshistorikk: Inntektshistorikk)
 
     private val inntektsopplysninger = mutableListOf<Opplysning>()
     internal val size get() = inntektsopplysninger.size
+    internal val innteksdatoer get() = inntektsopplysninger.map { it.dato }
     internal lateinit var inntektshistorikk: Inntektshistorikk
 
     class Opplysning(
