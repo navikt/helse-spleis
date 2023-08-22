@@ -942,18 +942,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(7.februar til 7.februar, inspektør.periode(3.vedtaksperiode))
         assertEquals(23.februar til 25.februar, inspektør.periode(4.vedtaksperiode))
 
-        assertForventetFeil(
-            forklaring = "Replay av inntektsmelding replayer kun dagene",
-            nå = {
-                assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            },
-            ønsket = {
-                håndterVilkårsgrunnlag(4.vedtaksperiode)
-                håndterYtelser(4.vedtaksperiode)
-                håndterSimulering(4.vedtaksperiode)
-                assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
-            }
-        )
+        håndterVilkårsgrunnlag(4.vedtaksperiode)
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     @Test

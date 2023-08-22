@@ -29,7 +29,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     @Test
     fun `legger inn beregnet inntekt i inntekthistorikk`() {
         val inntekthistorikk = Inntektshistorikk()
-        inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar).let { it.addInntekt(inntekthistorikk, NullObserver, it.sykdomstidslinje()) }
+        inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar).let { it.addInntekt(inntekthistorikk, NullObserver) }
         assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
     }
 

@@ -1144,34 +1144,25 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertForventetFeil(
-            forklaring = "Replay av inntektsmelding replayer kun dagene",
-            nå = {
-                 assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            },
-            ønsket = {
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                håndterUtbetalt()
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
 
-                assertTilstander(
-                    2.vedtaksperiode,
-                    START,
-                    AVVENTER_INFOTRYGDHISTORIKK,
-                    AVVENTER_INNTEKTSMELDING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_UTBETALING,
-                    AVSLUTTET
-                )
-            }
-        )
-
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
     }
 
     @Test

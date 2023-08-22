@@ -109,17 +109,9 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         // arbeidsgiver, også lengre tilbake i tid enn vedtaksperioden som blir truffet.
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent))
         assertTilstandFørInnteksmeldingHensyntas()
-        assertForventetFeil(
-            forklaring = "Replay av inntektsmelding replayer kun dagene",
-            nå = {
-                 assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            },
-            ønsket = {
-                håndterVilkårsgrunnlag(2.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
-            }
-        )
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
 

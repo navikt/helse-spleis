@@ -196,21 +196,10 @@ class Inntektsmelding(
         info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
 
-    internal fun addInntekt(
-        inntektshistorikk: Inntektshistorikk,
-        subsumsjonObserver: SubsumsjonObserver,
-        sykdomstidslinje: Sykdomstidslinje
-    ): Pair<LocalDate, Boolean> {
-        val sykdomstidslinjeperiode = sykdomstidslinje.sykdomsperiode()
-        if (sykdomstidslinjeperiode == null || inntektsdato !in sykdomstidslinjeperiode) {
-            info("Lagrer ikke inntekt på skjæringstidspunkt fordi inntektdato er oppgitt til å være utenfor den perioden arbeidsgiver har sykdom for")
-            return inntektsdato to false
-        }
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonObserver: SubsumsjonObserver): Pair<LocalDate, Boolean> {
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
-        val lagtTilNå = inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
-        if (!lagtTilNå) info("Inntekt allerede lagret i inntektshistorikken på arbeidsgiver")
-        return inntektsdato to lagtTilNå
+        return inntektsdato to inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
     }
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {

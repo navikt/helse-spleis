@@ -59,22 +59,13 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 100.prosent))
         val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
         håndterInntektsmelding(inntektsmelding)
-        assertEquals(emptyList<LocalDate>(), inspektør.inntektInspektør.innteksdatoer) // Lagrer ingenting ettersom personen ikke er syk 25.januar
+        assertEquals(listOf(25.januar), inspektør.inntektInspektør.innteksdatoer) // lagrer alltid på inntektsdato i IM
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent))
         assertFalse(inntektsmelding.aktuellForReplay(25.januar til 31.januar))
-        assertEquals(emptyList<LocalDate>(), inspektør.inntektInspektør.innteksdatoer) // Ingenting er blitt replayet
+        assertEquals(listOf(25.januar), inspektør.inntektInspektør.innteksdatoer) // Ingenting er blitt replayet
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertForventetFeil(
-            forklaring = "Replay av inntektsmelding replayer kun dagene",
-            nå = {
-                assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
-            }
-        )
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
