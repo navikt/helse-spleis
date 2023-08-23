@@ -42,6 +42,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -371,6 +372,23 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(expectedForespurteOpplysninger, trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Skal ikke be om arbeidsgiverperiode når vi allerede har motatt inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 25.januar))
+        håndterSøknad(Sykdom(20.januar, 25.januar, 100.prosent))
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+
+        assertForventetFeil("Skal ikke be om arbeidsgiverperiode når vi allerede har motatt inntektsmelding",
+            nå = { assertTrue(trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger.contains(PersonObserver.Arbeidsgiverperiode)) },
+            ønsket = { assertFalse(trengerArbeidsgiveropplysningerEvent.forespurteOpplysninger.contains(PersonObserver.Arbeidsgiverperiode)) }
+        )
     }
 
     @Test
