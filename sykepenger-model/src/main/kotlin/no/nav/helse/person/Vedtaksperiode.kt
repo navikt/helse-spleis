@@ -1711,10 +1711,6 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
             vedtaksperiode.trengerInntektsmelding()
-
-            vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
-                it.trengerIkkeArbeidsgiveropplysninger()
-            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1800,6 +1796,9 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
             if(vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
                 vedtaksperiode.trengerArbeidsgiveropplysninger()
+                vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
+                    it.trengerIkkeArbeidsgiveropplysninger()
+                }
             }
             vurderOmKanGåVidere(vedtaksperiode, inntektsmeldingReplayUtført)
         }

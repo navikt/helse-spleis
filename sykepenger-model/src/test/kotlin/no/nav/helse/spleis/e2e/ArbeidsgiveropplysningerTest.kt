@@ -773,18 +773,17 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(1.februar til 28.februar)
         nyPeriode(25.januar til 31.januar)
 
+        assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
+
         assertForventetFeil(
             forklaring = "Her burde februar-perioden sende ut en ny forespørsel",
             nå = {
                 assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                assertEquals(1, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
             },
             ønsket = {
                 assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
             }
         )
-
     }
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
