@@ -786,6 +786,16 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `Skal ikke sende ut forespørsler dersom vi er innenfor arbeidsgiverperioden`() {
+        nyPeriode(1.januar til 2.januar)
+        nyPeriode(3.januar til 6.januar)
+
+        håndterInntektsmelding(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(1.januar til 31.januar, a1)
         nyPeriode(1.januar til 31.januar, a2)
