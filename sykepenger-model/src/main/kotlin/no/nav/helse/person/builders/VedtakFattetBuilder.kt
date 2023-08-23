@@ -44,6 +44,7 @@ internal class VedtakFattetBuilder(
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }
 
     internal fun result(): PersonObserver.VedtakFattetEvent {
+        check((utbetalingId == null) || (sykepengegrunnlagsfakta != null)) { "Må ha sykepengegrunnlagsfakta dersom utbetalingsId er satt" }
         return PersonObserver.VedtakFattetEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
