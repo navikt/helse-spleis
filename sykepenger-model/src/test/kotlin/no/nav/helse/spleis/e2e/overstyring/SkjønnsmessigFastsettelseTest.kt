@@ -31,6 +31,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -40,6 +41,7 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSk
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterHovedregel
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterSkjønn
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -81,6 +83,28 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         assertEquals(0, sykepengegrunnlag.avviksprosent)
         assertEquals(INNTEKT * 2, sykepengegrunnlag.beregningsgrunnlag)
         assertEquals(INNTEKT, sykepengegrunnlag.omregnetÅrsinntekt)
+    }
+
+    @Test
+    fun `skjønnsmessig fastsette flere arbeidsgivere med forlengelser - kun første periode får varsel`() = Toggle.ForenkleRevurdering.enable {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2).forlengVedtak(1.februar til 28.februar)
+        (a1 og a2).forlengVedtak(1.mars til 31.mars)
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT + 500.daglig)
+        }
+
+        a1 {
+            assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+            assertIngenVarsel(RV_IV_2, 2.vedtaksperiode.filter())
+            assertIngenVarsel(RV_IV_2, 3.vedtaksperiode.filter())
+        }
+
+        a2 {
+            assertIngenVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+            assertIngenVarsel(RV_IV_2, 2.vedtaksperiode.filter())
+            assertIngenVarsel(RV_IV_2, 3.vedtaksperiode.filter())
+        }
     }
 
     @Test

@@ -668,6 +668,8 @@ internal class Vedtaksperiode private constructor(
         }
         inntektsmeldingHåndtert(dager)
         person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt = skjæringstidspunkt, periodeForEndring = periode))
+        // setter kontekst tilbake siden igangsettelsen over kan endre på kontekstene
+        kontekst(dager)
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, tilstandUtenAvvik: Vedtaksperiodetilstand, tilstandMedAvvik: Vedtaksperiodetilstand) {
