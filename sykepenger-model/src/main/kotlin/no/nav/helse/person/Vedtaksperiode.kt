@@ -739,6 +739,15 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
+    private fun trengerIkkeArbeidsgiveropplysninger() {
+        person.trengerIkkeArbeidsgiveropplysninger(
+            PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent(
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = id
+            )
+        )
+    }
+
     private fun forespurtInntekt(fastsattInntekt: Inntekt?): PersonObserver.Inntekt? {
         val beregningsmåneder = 3.downTo(1).map {
             YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
@@ -1702,6 +1711,10 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
             vedtaksperiode.trengerInntektsmelding()
+
+            vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
+                it.trengerIkkeArbeidsgiveropplysninger()
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {

@@ -502,6 +502,9 @@ class Person private constructor(
         observers.forEach { it.trengerArbeidsgiveropplysninger(event) }
     }
 
+    internal fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
+        observers.forEach { it.trengerIkkeArbeidsgiveropplysninger(event) }
+    }
 
     internal fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {
         observers.forEach { it.arbeidsgiveropplysningerKorrigert(event) }

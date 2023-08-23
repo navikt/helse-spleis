@@ -3,6 +3,7 @@ package no.nav.helse.spleis.mediator.e2e
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -13,7 +14,9 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 
@@ -228,9 +231,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Sender med forrige refusjonsopplysninger i forespørsel`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
-        )
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(
             arbeidsgiverperiode = listOf(Periode(1.januar, 16.januar)),
             1.januar,
@@ -258,6 +259,20 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         )
 
         JSONAssert.assertEquals(forventetResultatOpphørAvRefusjon, faktiskResultat, JSONCompareMode.STRICT)
+    }
+
+    @Test
+    fun `sender ut trenger_ikke_opplysninger_fra_arbeidsgiver ved out-of-order som fører til at vi ikke trenger opplysninger på siste periode`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+
+        Assertions.assertEquals(1, testRapid.inspektør.meldinger("trenger_ikke_opplysninger_fra_arbeidsgiver").size)
+        val trengerIkkeOpplysningerEvent = testRapid.inspektør.siste("trenger_ikke_opplysninger_fra_arbeidsgiver")
+        assertDoesNotThrow { UUID.fromString(trengerIkkeOpplysningerEvent["vedtaksperiodeId"].asText()) }
+        assertTrue(trengerIkkeOpplysningerEvent["organisasjonsnummer"].asText().isNotBlank())
     }
 
     @Language("json")

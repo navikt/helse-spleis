@@ -9,13 +9,11 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.SykefraværstilfelleeventyrObserver
 import no.nav.helse.person.TilstandType
@@ -431,6 +429,10 @@ internal class PersonMediator(
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
+    }
+
+    override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
+        queueMessage(JsonMessage.newMessage("trenger_ikke_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }
 
     override fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {

@@ -154,6 +154,17 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             )
     }
 
+    class TrengerIkkeArbeidsgiveropplysningerEvent(
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID
+    ) {
+        fun toJsonMap(): Map<String, Any> =
+            mapOf(
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId
+            )
+    }
+
     data class ArbeidsgiveropplysningerKorrigertEvent(
         val korrigertInntektsmeldingId: UUID,
         val korrigerendeInntektsopplysningId: UUID,
@@ -649,6 +660,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
+    fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}
     fun arbeidsgiveropplysningerKorrigert(event: ArbeidsgiveropplysningerKorrigertEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(event: UtbetalingUtbetaltEvent) {}

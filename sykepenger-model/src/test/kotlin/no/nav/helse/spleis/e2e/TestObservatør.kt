@@ -22,6 +22,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.ManglendeInntektsmeldingEvent>()
     val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeInntektsmeldingEvent>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerArbeidsgiveropplysningerEvent>()
+    val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent>()
     val arbeidsgiveropplysningerKorrigert = mutableListOf<PersonObserver.ArbeidsgiveropplysningerKorrigertEvent>()
     val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
@@ -127,6 +128,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
+    }
+
+    override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
+        trengerIkkeArbeidsgiveropplysningerVedtaksperioder.add(event)
     }
 
     override fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {
