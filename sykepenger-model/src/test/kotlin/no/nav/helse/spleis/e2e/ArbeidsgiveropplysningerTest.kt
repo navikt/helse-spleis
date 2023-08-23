@@ -768,6 +768,25 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
+    @Test
+    fun `Sender ikke trenger_ikke_opplysninger_fra_arbeidsgiver-event for out-of-order som ikke fører til en ny forespørsel`() {
+        nyPeriode(1.februar til 28.februar)
+        nyPeriode(25.januar til 31.januar)
+
+        assertForventetFeil(
+            forklaring = "Her burde februar-perioden sende ut en ny forespørsel",
+            nå = {
+                assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                assertEquals(1, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
+            },
+            ønsket = {
+                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
+            }
+        )
+
+    }
+
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(1.januar til 31.januar, a1)
         nyPeriode(1.januar til 31.januar, a2)
