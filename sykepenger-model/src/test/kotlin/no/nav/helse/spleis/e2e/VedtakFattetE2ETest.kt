@@ -3,7 +3,10 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -16,6 +19,7 @@ import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattIInfotrygd
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -206,5 +210,25 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val event = observatør.vedtakFattetEvent.values.single()
         val forventetSykepengegrunnlagsfakta = FastsattIInfotrygd(372000.0)
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
+    }
+
+    @Test
+    fun `legger ikke til utbetalingsId dersom status er forkastet`(){
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "noe", refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()))
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        val liste = (1..16).map{
+            ManuellOverskrivingDag(it.januar, Dagtype.Feriedag)
+        }
+        håndterOverstyrTidslinje(liste)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        val utbetaling = inspektør.utbetalinger.single()
+        assertEquals(Utbetalingstatus.FORKASTET, utbetaling.inspektør.tilstand)
+        val event = observatør.vedtakFattetEvent.values.single()
+        assertEquals(null, event.utbetalingId)
     }
 }

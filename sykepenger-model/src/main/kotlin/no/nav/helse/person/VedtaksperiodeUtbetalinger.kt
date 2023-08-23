@@ -88,6 +88,7 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
     }
 
     internal fun build(builder: VedtakFattetBuilder) {
+        if (!harUtbetaling()) return
         siste?.build(builder)
     }
 
