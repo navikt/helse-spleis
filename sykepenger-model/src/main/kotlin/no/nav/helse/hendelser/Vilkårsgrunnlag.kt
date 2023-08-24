@@ -24,7 +24,7 @@ class Vilkårsgrunnlag(
     private val inntektsvurdering: Inntektsvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
-    arbeidsforhold: List<Arbeidsforhold>
+    private val arbeidsforhold: List<Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
     private val opptjening = arbeidsforhold.opptjening(skjæringstidspunkt)
@@ -45,6 +45,7 @@ class Vilkårsgrunnlag(
         val sykepengegrunnlagOk = sykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
+        arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
         val opptjening = opptjening.opptjening(skjæringstidspunkt, subsumsjonObserver)
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
@@ -79,6 +80,16 @@ class Vilkårsgrunnlag(
 
         init {
             check(orgnummer.isNotBlank())
+        }
+
+        fun loggFrilans(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, andre: List<Arbeidsforhold>) {
+            if (type != Arbeidsforholdtype.FRILANSER) return
+            if (skjæringstidspunkt !in ansettelseperiode) return
+            aktivitetslogg.info("Vedkommende har et aktivt frilansoppdrag på skjæringstidspunktet")
+
+            if (andre.count { it.orgnummer == this.orgnummer && it.ansettelseperiode.overlapperMed(this.ansettelseperiode) } > 1) {
+                aktivitetslogg.info("Vedkommende har andre overlappende arbeidsforhold i samme virksomhet hvor vedkommende har frilansoppdrag")
+            }
         }
 
         internal fun tilDomeneobjekt() = Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
