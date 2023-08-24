@@ -24,8 +24,7 @@ internal class Opptjening private constructor(
     private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
     private val opptjeningsperiode: Periode
 ) {
-    // subsetter til dagen før skjæringstidspunktet frem til det er migrert i json
-    private val opptjeningsdager by lazy { opptjeningsperiode.subset(LocalDate.MIN til skjæringstidspunkt.forrigeDag).count() }
+    private val opptjeningsdager by lazy { opptjeningsperiode.count() }
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
