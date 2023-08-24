@@ -1,9 +1,11 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.sammenhengende
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
@@ -11,13 +13,11 @@ import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsfor
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.aktiver
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.arbeidsforholdForJurist
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.deaktiver
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.startdatoFor
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.forrigeDag
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 
 internal class Opptjening private constructor(
     private val skjæringstidspunkt: LocalDate,
@@ -94,6 +94,7 @@ internal class Opptjening private constructor(
             internal fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
 
             private fun periode(skjæringstidspunkt: LocalDate): Periode? {
+                if (deaktivert) return null
                 val opptjeningsperiode = LocalDate.MIN til skjæringstidspunkt.forrigeDag
                 if (ansettelseperiode.starterEtter(opptjeningsperiode)) return null
                 return ansettelseperiode.subset(opptjeningsperiode)
@@ -125,10 +126,17 @@ internal class Opptjening private constructor(
 
             companion object {
 
-                internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
-                    .filter { !it.deaktivert }
-                    .mapNotNull { it.periode(skjæringstidspunkt) }
-                    .sammenhengende(skjæringstidspunkt.forrigeDag)
+                internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate): Periode {
+                    val grunnlag = this
+                        .mapNotNull { it.periode(skjæringstidspunkt) }
+                        .sortedByDescending { it.endInclusive }
+                    val dagenFør = skjæringstidspunkt.forrigeDag.somPeriode()
+                    if (grunnlag.firstOrNull()?.erRettFør(skjæringstidspunkt) != true) return dagenFør
+                    return grunnlag.fold(dagenFør) { resultat, periode ->
+                        if (!resultat.overlapperMed(periode) && !periode.erRettFør(resultat)) resultat
+                        else resultat + periode
+                    }
+                }
 
                 internal fun Collection<Arbeidsforhold>.ansattVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = any { it.gjelder(skjæringstidspunkt) }
 

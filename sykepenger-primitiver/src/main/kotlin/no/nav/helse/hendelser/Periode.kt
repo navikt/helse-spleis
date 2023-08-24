@@ -42,12 +42,6 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
             .plusElement(nyPeriode)
             .sortedBy { it.start }
 
-        fun List<Periode>.sammenhengende(dato: LocalDate) = this
-            .grupperSammenhengendePerioderMedHensynTilHelg()
-            .firstOrNull { dato in it || it.erRettFør(dato) }
-            ?.let { it.start til dato }
-            ?: dato.somPeriode()
-
         val Iterable<LocalDate>.omsluttendePeriode get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
 
         fun Iterable<LocalDate>.periodeRettFør(dato: LocalDate): Periode? {
