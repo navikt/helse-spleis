@@ -495,7 +495,7 @@ internal class SykepengegrunnlagTest {
         val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val sluttdatoA1 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(1)
-        val startdatoA2 = skjæringstidspunkt
+        val startdatoA2 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(2)
 
         val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
@@ -538,7 +538,7 @@ internal class SykepengegrunnlagTest {
             tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
         )
 
-        val opptjening = Opptjening(listOf(
+        val opptjening = Opptjening.nyOpptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
                 Arbeidsforhold(
                     ansattFom = LocalDate.EPOCH,
@@ -701,7 +701,7 @@ internal class SykepengegrunnlagTest {
             tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
         )
 
-        val opptjeningUtenA2 = Opptjening(listOf(
+        val opptjeningUtenA2 = Opptjening.nyOpptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
                 Arbeidsforhold(
                     ansattFom = LocalDate.EPOCH,
@@ -710,7 +710,7 @@ internal class SykepengegrunnlagTest {
                 )
             ))
         ), skjæringstidspunkt, NullObserver)
-        val opptjeningMedA2 = Opptjening(listOf(
+        val opptjeningMedA2 = Opptjening.nyOpptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
                 Arbeidsforhold(
                     ansattFom = LocalDate.EPOCH,

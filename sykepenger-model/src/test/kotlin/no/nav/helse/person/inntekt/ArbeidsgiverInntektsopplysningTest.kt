@@ -39,7 +39,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `overstyr inntekter`() {
         val skjæringstidspunkt = 1.januar
-        val opptjening = Opptjening(emptyList(), skjæringstidspunkt, NullObserver)
+        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, NullObserver)
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
         val a1Overstyrt = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig, "", null, LocalDateTime.now()), Refusjonsopplysninger())
@@ -63,7 +63,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val ansattFom = 1.januar
         val orgnummer = "a1"
 
-        val opptjening = Opptjening(listOf(
+        val opptjening = Opptjening.nyOpptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, listOf(
                 Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
                     ansattFom,

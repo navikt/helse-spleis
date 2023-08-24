@@ -7,8 +7,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
@@ -22,12 +20,12 @@ class ArbeidsgiverInntekt(
     private val arbeidsgiver: String,
     private val inntekter: List<MånedligInntekt>
 ) {
-    internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, ansattPerioder: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold> = emptyList()) =
+    internal fun tilSykepengegrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) =
         SkattSykepengegrunnlag(
             hendelseId = meldingsreferanseId,
             dato = skjæringstidspunkt,
             inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
-            ansattPerioder = ansattPerioder.somAnsattPerioder(),
+            ansattPerioder = emptyList(),
             tidsstempel = LocalDateTime.now()
         )
 
@@ -41,23 +39,15 @@ class ArbeidsgiverInntekt(
         internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(
             hendelse: IAktivitetslogg,
             person: Person,
-            opptjening: Map<String, List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>>,
+            rapporterteArbeidsforhold: Map<String, SkattSykepengegrunnlag>,
             skjæringstidspunkt: LocalDate,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             meldingsreferanseId: UUID,
             subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
-            val rapporteArbeidsforhold = opptjening.mapValues { (_, ansattPerioder) ->
-                SkattSykepengegrunnlag(
-                    hendelseId = meldingsreferanseId,
-                    dato = skjæringstidspunkt,
-                    inntektsopplysninger = emptyList(),
-                    ansattPerioder = ansattPerioder.somAnsattPerioder()
-                )
-            }
             val rapporterteInntekter = this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
             // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
-            val inntekterMedOpptjening = rapporteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) -> ikkeRapportert + rapporterteInntekter[orgnummer] }
+            val inntekterMedOpptjening = rapporterteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) -> ikkeRapportert + rapporterteInntekter[orgnummer] }
             return person.avklarSykepengegrunnlag(
                 hendelse,
                 skjæringstidspunkt,

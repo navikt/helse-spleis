@@ -7,11 +7,11 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.avklarSykepengegrunnlag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
-import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import org.slf4j.LoggerFactory
 
 class InntektForSykepengegrunnlag(
@@ -29,13 +29,13 @@ class InntektForSykepengegrunnlag(
     internal fun avklarSykepengegrunnlag(
         hendelse: IAktivitetslogg,
         person: Person,
-        opptjening: Map<String, List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold>>,
+        rapporterteArbeidsforhold: Map<String, SkattSykepengegrunnlag>,
         skjæringstidspunkt: LocalDate,
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         meldingsreferanseId: UUID,
         subsumsjonObserver: SubsumsjonObserver
     ) =
-        inntekter.avklarSykepengegrunnlag(hendelse, person, opptjening, skjæringstidspunkt, sammenligningsgrunnlag, meldingsreferanseId, subsumsjonObserver)
+        inntekter.avklarSykepengegrunnlag(hendelse, person, rapporterteArbeidsforhold, skjæringstidspunkt, sammenligningsgrunnlag, meldingsreferanseId, subsumsjonObserver)
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

@@ -4,14 +4,13 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.Periode.Companion.sammenhengende
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjening
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.inntekt.AnsattPeriode
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
 class Vilkårsgrunnlag(
@@ -27,7 +26,8 @@ class Vilkårsgrunnlag(
     private val arbeidsforhold: List<Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
-    private val opptjening = arbeidsforhold.opptjening(skjæringstidspunkt)
+
+    private val opptjeningsgrunnlag = arbeidsforhold.opptjeningsgrunnlag()
 
     internal fun erRelevant(other: UUID, skjæringstidspunktVedtaksperiode: LocalDate): Boolean {
         if (other.toString() != vedtaksperiodeId) return false
@@ -36,9 +36,27 @@ class Vilkårsgrunnlag(
         return false
     }
 
+    private fun opptjening(subsumsjonObserver: SubsumsjonObserver): Opptjening {
+        return Opptjening.nyOpptjening(
+            grunnlag = opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
+                Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
+            },
+            skjæringstidspunkt = skjæringstidspunkt,
+            subsumsjonObserver = subsumsjonObserver
+        )
+    }
+
     internal fun avklarSykepengegrunnlag(person: Person, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+        val rapporterteArbeidsforhold = opptjeningsgrunnlag.mapValues { (_, ansattPerioder) ->
+            SkattSykepengegrunnlag(
+                hendelseId = meldingsreferanseId(),
+                dato = skjæringstidspunkt,
+                inntektsopplysninger = emptyList(),
+                ansattPerioder = ansattPerioder.map { it.somAnsattPeriode() }
+            )
+        }
         val sammenligningsgrunnlag = inntektsvurdering.sammenligningsgrunnlag(skjæringstidspunkt, meldingsreferanseId(), subsumsjonObserver)
-        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, opptjening, skjæringstidspunkt, sammenligningsgrunnlag, meldingsreferanseId(), subsumsjonObserver)
+        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, sammenligningsgrunnlag, meldingsreferanseId(), subsumsjonObserver)
     }
 
     internal fun valider(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
@@ -46,7 +64,7 @@ class Vilkårsgrunnlag(
         inntektsvurderingForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
         arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
-        val opptjening = opptjening.opptjening(skjæringstidspunkt, subsumsjonObserver)
+        val opptjening = opptjening(subsumsjonObserver)
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
@@ -98,26 +116,16 @@ class Vilkårsgrunnlag(
             deaktivert = false
         )
 
+        internal fun somAnsattPeriode() =
+            AnsattPeriode(ansattFom = ansettelseperiode.start, ansattTom = ansettelseperiode.endInclusive.takeUnless { it == LocalDate.MAX })
+
         private fun kanBrukes() = type != Arbeidsforholdtype.FRILANSER // filtrerer ut frilans-arbeidsforhold enn så lenge
 
-        internal fun erDelAvOpptjeningsperiode(opptjeningsperiode: Periode) = kanBrukes() && ansettelseperiode.overlapperMed(opptjeningsperiode)
-
-        private fun periode(skjæringstidspunkt: LocalDate): Periode? {
-            if (!kanBrukes()) return null
-            val opptjeningsperiode = LocalDate.MIN til skjæringstidspunkt.forrigeDag
-            if (ansettelseperiode.starterEtter(opptjeningsperiode)) return null
-            return ansettelseperiode.subset(opptjeningsperiode)
-        }
-
         internal companion object {
-            private fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
-                .mapNotNull { it.periode(skjæringstidspunkt) }
-                .sammenhengende(skjæringstidspunkt.forrigeDag)
-
-            internal fun Iterable<Arbeidsforhold>.opptjening(skjæringstidspunkt: LocalDate) = opptjeningsperiode(skjæringstidspunkt).let { opptjeningsperiode ->
-                this
-                    .filter { it.erDelAvOpptjeningsperiode(opptjeningsperiode) }
-                    .groupBy({ it.orgnummer }) { it.tilDomeneobjekt() }
+            internal fun Iterable<Arbeidsforhold>.opptjeningsgrunnlag(): Map<String, List<Arbeidsforhold>> {
+                return this
+                    .filter { it.kanBrukes() }
+                    .groupBy { it.orgnummer }
             }
         }
     }

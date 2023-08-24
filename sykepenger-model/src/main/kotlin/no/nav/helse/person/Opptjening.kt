@@ -16,25 +16,16 @@ import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.inntekt.AnsattPeriode
+import no.nav.helse.forrigeDag
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
 
 internal class Opptjening private constructor(
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
     private val opptjeningsperiode: Periode
 ) {
-    private val opptjeningsdager by lazy { opptjeningsperiode.dagerMellom() }
-
-    internal constructor(arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) : this(skjæringstidspunkt, arbeidsforhold, arbeidsforhold.opptjeningsperiode(skjæringstidspunkt)) {
-        val arbeidsforholdForJurist = arbeidsforhold.arbeidsforholdForJurist()
-        subsumsjonObserver.`§ 8-2 ledd 1`(
-            oppfylt = erOppfylt(),
-            skjæringstidspunkt = skjæringstidspunkt,
-            tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
-            arbeidsforhold = arbeidsforholdForJurist,
-            antallOpptjeningsdager = opptjeningsdager
-        )
-    }
+    // subsetter til dagen før skjæringstidspunktet frem til det er migrert i json
+    private val opptjeningsdager by lazy { opptjeningsperiode.subset(LocalDate.MIN til skjæringstidspunkt.forrigeDag).count() }
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
@@ -61,11 +52,11 @@ internal class Opptjening private constructor(
     }
 
     internal fun deaktiver(orgnummer: String, subsumsjonObserver: SubsumsjonObserver): Opptjening {
-        return Opptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt, subsumsjonObserver)
+        return Opptjening.nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt, subsumsjonObserver)
     }
 
     internal fun aktiver(orgnummer: String, subsumsjonObserver: SubsumsjonObserver): Opptjening {
-        return Opptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, subsumsjonObserver)
+        return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, subsumsjonObserver)
     }
 
     internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforhold>) {
@@ -88,12 +79,25 @@ internal class Opptjening private constructor(
             return ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.deaktiver() })
         }
 
+        private fun inngårIOpptjening(opptjeningsperiode: Periode): ArbeidsgiverOpptjeningsgrunnlag? {
+            val perioder = ansattPerioder.filter { it.inngårIOpptjening(opptjeningsperiode) }.takeUnless { it.isEmpty() } ?: return null
+            return ArbeidsgiverOpptjeningsgrunnlag(this.orgnummer, perioder)
+        }
+
         internal class Arbeidsforhold(
             private val ansattFom: LocalDate,
             private val ansattTom: LocalDate?,
             private val deaktivert: Boolean
         ) {
+            private val ansettelseperiode = ansattFom til (ansattTom ?: LocalDate.MAX)
+
             internal fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
+
+            private fun periode(skjæringstidspunkt: LocalDate): Periode? {
+                val opptjeningsperiode = LocalDate.MIN til skjæringstidspunkt.forrigeDag
+                if (ansettelseperiode.starterEtter(opptjeningsperiode)) return null
+                return ansettelseperiode.subset(opptjeningsperiode)
+            }
 
             override fun equals(other: Any?) = other is Arbeidsforhold
                     && ansattFom == other.ansattFom
@@ -115,16 +119,16 @@ internal class Opptjening private constructor(
 
             internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = false)
 
-            private fun somAnsattPeriode() = AnsattPeriode(ansattFom = ansattFom, ansattTom = ansattTom)
+            internal fun inngårIOpptjening(opptjeningsperiode: Periode): Boolean {
+                return deaktivert || this.ansettelseperiode.overlapperMed(opptjeningsperiode)
+            }
 
             companion object {
 
                 internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
                     .filter { !it.deaktivert }
-                    .map { it.ansattFom til (it.ansattTom ?: skjæringstidspunkt) }
-                    .sammenhengende(skjæringstidspunkt)
-
-                internal fun Collection<Arbeidsforhold>.somAnsattPerioder() = this.map { it.somAnsattPeriode() }
+                    .mapNotNull { it.periode(skjæringstidspunkt) }
+                    .sammenhengende(skjæringstidspunkt.forrigeDag)
 
                 internal fun Collection<Arbeidsforhold>.ansattVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = any { it.gjelder(skjæringstidspunkt) }
 
@@ -140,13 +144,6 @@ internal class Opptjening private constructor(
         }
 
         companion object {
-            internal fun Map<String, List<Arbeidsforhold>>.opptjening(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
-                val arbeidsforhold = this
-                    .filterValues { it.isNotEmpty() }
-                    .map { (orgnr, arbeidsforhold) -> Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnr, arbeidsforhold) }
-                return Opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
-            }
-
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.aktiver(orgnummer: String) = map { it.aktiver(orgnummer) }
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.deaktiver(orgnummer: String) = map { it.deaktiver(orgnummer) }
 
@@ -158,16 +155,34 @@ internal class Opptjening private constructor(
 
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) =
                 flatMap { it.ansattPerioder }.opptjeningsperiode(skjæringstidspunkt)
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.inngårIOpptjening(opptjeningsperiode: Periode) =
+                mapNotNull { it.inngårIOpptjening(opptjeningsperiode) }
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() =
                 flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
         }
     }
 
     companion object {
-        private fun Periode.dagerMellom() = count() - 1 // 😭
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
         internal fun gjenopprett(skjæringstidspunkt: LocalDate, arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) =
             Opptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
+
+
+        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
+            val opptjeningsperiode = grunnlag.opptjeningsperiode(skjæringstidspunkt)
+            val arbeidsforhold = grunnlag.inngårIOpptjening(opptjeningsperiode)
+
+            val opptjening = Opptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
+            val arbeidsforholdForJurist = arbeidsforhold.arbeidsforholdForJurist()
+            subsumsjonObserver.`§ 8-2 ledd 1`(
+                oppfylt = opptjening.erOppfylt(),
+                skjæringstidspunkt = skjæringstidspunkt,
+                tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
+                arbeidsforhold = arbeidsforholdForJurist,
+                antallOpptjeningsdager = opptjening.opptjeningsdager
+            )
+            return opptjening
+        }
     }
 }

@@ -8,8 +8,6 @@ import no.nav.helse.februar
 import no.nav.helse.forrigeDag
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.yearMonth
@@ -56,9 +54,7 @@ internal class SkattSykepengegrunnlagTest {
                     tidsstempel = LocalDateTime.now()
                 )
             ),
-            ansattPerioder = listOf(
-                Arbeidsforhold(EPOCH, null, false)
-            ).somAnsattPerioder()
+            ansattPerioder = listOf(AnsattPeriode(EPOCH, null))
         )
         assertNull(emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
             skjæringstidspunkt.forrigeDag,
@@ -98,9 +94,7 @@ internal class SkattSykepengegrunnlagTest {
                     tidsstempel = LocalDateTime.now()
                 )
             ),
-            ansattPerioder = listOf(
-                Arbeidsforhold(EPOCH, null, false)
-            ).somAnsattPerioder()
+            ansattPerioder = listOf(AnsattPeriode(EPOCH, null))
         )
         val skattSykepengegrunnlag2 = SkattSykepengegrunnlag(
             hendelseId = UUID.randomUUID(),
@@ -116,9 +110,7 @@ internal class SkattSykepengegrunnlagTest {
                     tidsstempel = LocalDateTime.now()
                 )
             ),
-            ansattPerioder = listOf(
-                Arbeidsforhold(EPOCH, null, false)
-            ).somAnsattPerioder()
+            ansattPerioder = listOf(AnsattPeriode(EPOCH, null))
         )
         assertTrue(skattSykepengegrunnlag1 === emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
             skjæringstidspunkt,
@@ -139,17 +131,13 @@ internal class SkattSykepengegrunnlagTest {
             hendelseId = UUID.randomUUID(),
             dato = skjæringstidspunkt,
             inntektsopplysninger = emptyList(),
-            ansattPerioder = listOf(
-                Arbeidsforhold(1.februar, null, false)
-            ).somAnsattPerioder()
+            ansattPerioder = listOf(AnsattPeriode(1.februar, null))
         )
         val skattSykepengegrunnlag2 = SkattSykepengegrunnlag(
             hendelseId = UUID.randomUUID(),
             dato = skjæringstidspunkt,
             inntektsopplysninger = emptyList(),
-            ansattPerioder = listOf(
-                Arbeidsforhold(1.januar, null, false)
-            ).somAnsattPerioder()
+            ansattPerioder = listOf(AnsattPeriode(1.januar, null))
         )
         val resultat = emptyList<Inntektsmelding>().avklarSykepengegrunnlag(
             skjæringstidspunkt,

@@ -15,8 +15,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
-import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.somAnsattPerioder
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -66,9 +64,7 @@ internal class InntektshistorikkTest {
                 hendelseId = UUID.randomUUID(),
                 dato = 1.februar,
                 inntektsopplysninger = emptyList(),
-                ansattPerioder = listOf(
-                    Arbeidsforhold(1.januar, null, false)
-                ).somAnsattPerioder()
+                ansattPerioder = listOf(AnsattPeriode(1.januar, null))
             )
         )
         assertNotNull(opplysning)
@@ -85,9 +81,7 @@ internal class InntektshistorikkTest {
                 hendelseId = UUID.randomUUID(),
                 dato = 1.februar,
                 inntektsopplysninger = emptyList(),
-                ansattPerioder = listOf(
-                    Arbeidsforhold(1.januar, null, true)
-                ).somAnsattPerioder()
+                ansattPerioder = listOf(AnsattPeriode(1.januar, null))
             )
         )
         assertNotNull(opplysning)
@@ -140,8 +134,8 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 22000
             }
         }
-            .map { it.tilSykepengegrunnlag(31.desember(2017), UUID.randomUUID(), listOf(Arbeidsforhold(1.november(2017), null, false))) }
-            .single()
+            .map { it.tilSykepengegrunnlag(31.desember(2017), UUID.randomUUID()) }
+            .single() + SkattSykepengegrunnlag(UUID.randomUUID(), 1.desember, emptyList(), listOf(AnsattPeriode(1.november(2017), null)))
 
         assertEquals(256000.årlig, historikk.avklarSykepengegrunnlag(31.desember(2017), 31.desember(2017), skattSykepengegrunnlag)?.inspektør?.beløp)
     }
@@ -163,8 +157,8 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt 22000
             }
         }
-            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID(), listOf(Arbeidsforhold(1.desember(2016), null, false))) }
-            .single()
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .single() + SkattSykepengegrunnlag(UUID.randomUUID(), 1.desember, emptyList(), listOf(AnsattPeriode(1.desember(2016), null)))
         assertEquals(392000.årlig, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag)?.inspektør?.beløp)
     }
 
@@ -178,8 +172,8 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt INNTEKT
             }
         }
-            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID(), listOf(Arbeidsforhold(1.desember(2016), null, false))) }
-            .single()
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .single() + SkattSykepengegrunnlag(UUID.randomUUID(), 1.desember, emptyList(), listOf(AnsattPeriode(1.desember(2016), null)))
         assertEquals(INNTEKT, historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag)?.inspektør?.beløp)
     }
 
@@ -190,8 +184,8 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt INNTEKT * -1
             }
         }
-            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID(), listOf(Arbeidsforhold(1.oktober(2017), null, false))) }
-            .single()
+            .map { it.tilSykepengegrunnlag(1.januar, UUID.randomUUID()) }
+            .single() + SkattSykepengegrunnlag(UUID.randomUUID(), 1.desember, emptyList(), listOf(AnsattPeriode(1.oktober(2017), null)))
         val inntektsopplysning = historikk.avklarSykepengegrunnlag(1.januar, 1.januar, skattSykepengegrunnlag)
         assertTrue(inntektsopplysning is SkattSykepengegrunnlag)
         assertEquals(INGEN, inntektsopplysning?.inspektør?.beløp)
