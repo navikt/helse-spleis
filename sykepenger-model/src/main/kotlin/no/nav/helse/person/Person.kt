@@ -810,10 +810,15 @@ class Person private constructor(
     internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
     internal fun forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu)
+
     internal fun kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag: VilkårsgrunnlagElement): Boolean {
+        // slått av midlertidig
+        return false
+        /*
         if (!vilkårsgrunnlag.kandidatForSkjønnsmessigFastsettelse()) return false
         if (!alder.kandidatForSkjønnsmessigFastsettelse()) return false
         return true
+        */
     }
 }
 
