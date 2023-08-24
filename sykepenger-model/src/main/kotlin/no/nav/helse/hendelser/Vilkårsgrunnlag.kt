@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjening
 import no.nav.helse.person.Opptjening
@@ -44,7 +45,6 @@ class Vilkårsgrunnlag(
         val sykepengegrunnlagOk = sykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
-
         val opptjening = opptjening.opptjening(skjæringstidspunkt, subsumsjonObserver)
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
@@ -65,8 +65,7 @@ class Vilkårsgrunnlag(
 
     class Arbeidsforhold(
         private val orgnummer: String,
-        private val ansattFom: LocalDate,
-        private val ansattTom: LocalDate? = null,
+        private val ansettelseperiode: Periode,
         private val type: Arbeidsforholdtype
     ) {
         enum class Arbeidsforholdtype {
@@ -76,33 +75,33 @@ class Vilkårsgrunnlag(
             ORDINÆRT
         }
 
+        constructor(orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate? = null, type: Arbeidsforholdtype) : this(orgnummer, ansattFom til (ansattTom ?: LocalDate.MAX), type)
+
         init {
             check(orgnummer.isNotBlank())
         }
 
         internal fun tilDomeneobjekt() = Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold(
-            ansattFom = ansattFom,
-            ansattTom = ansattTom,
+            ansattFom = ansettelseperiode.start,
+            ansattTom = ansettelseperiode.endInclusive.takeUnless { it == LocalDate.MAX },
             deaktivert = false
         )
 
-        private fun erSøppel() =
-            (ansattTom != null && ansattTom < ansattFom) || type == Arbeidsforholdtype.FRILANSER // filtrerer ut frilans-arbeidsforhold enn så lenge
+        private fun kanBrukes() = type != Arbeidsforholdtype.FRILANSER // filtrerer ut frilans-arbeidsforhold enn så lenge
 
-        internal fun erDelAvOpptjeningsperiode(opptjeningsperiode: Periode) = !erSøppel() && ansattFom in opptjeningsperiode
-
-        private fun erGyldig(skjæringstidspunkt: LocalDate) =
-            ansattFom < skjæringstidspunkt && !erSøppel()
+        internal fun erDelAvOpptjeningsperiode(opptjeningsperiode: Periode) = kanBrukes() && ansettelseperiode.overlapperMed(opptjeningsperiode)
 
         private fun periode(skjæringstidspunkt: LocalDate): Periode? {
-            if (!erGyldig(skjæringstidspunkt)) return null
-            return ansattFom til (ansattTom ?: skjæringstidspunkt)
+            if (!kanBrukes()) return null
+            val opptjeningsperiode = LocalDate.MIN til skjæringstidspunkt.forrigeDag
+            if (ansettelseperiode.starterEtter(opptjeningsperiode)) return null
+            return ansettelseperiode.subset(opptjeningsperiode)
         }
 
         internal companion object {
             private fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
                 .mapNotNull { it.periode(skjæringstidspunkt) }
-                .sammenhengende(skjæringstidspunkt)
+                .sammenhengende(skjæringstidspunkt.forrigeDag)
 
             internal fun Iterable<Arbeidsforhold>.opptjening(skjæringstidspunkt: LocalDate) = opptjeningsperiode(skjæringstidspunkt).let { opptjeningsperiode ->
                 this

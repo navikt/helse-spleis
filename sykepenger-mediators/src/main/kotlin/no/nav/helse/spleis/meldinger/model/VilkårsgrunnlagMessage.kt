@@ -48,6 +48,10 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
 
     private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
         .filterNot { it["orgnummer"].asText().isBlank() }
+        .filter {
+            val til = it["ansattTil"].asOptionalLocalDate()
+            til == null || it["ansattSiden"].asLocalDate() <= til
+        }
         .map {
             Vilkårsgrunnlag.Arbeidsforhold(
                 orgnummer = it["orgnummer"].asText(),

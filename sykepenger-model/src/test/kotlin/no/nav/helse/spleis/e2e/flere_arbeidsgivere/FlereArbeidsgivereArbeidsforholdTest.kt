@@ -306,7 +306,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, 1.januar, Arbeidsforholdtype.ORDINÆRT),
             Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT), // Skal gjelde
             Vilkårsgrunnlag.Arbeidsforhold(a1, 28.februar, 1.mars, Arbeidsforholdtype.ORDINÆRT), // Skal gjelde
-            Vilkårsgrunnlag.Arbeidsforhold(a1, 1.mars, 31.mars, Arbeidsforholdtype.ORDINÆRT), // Skal gjelde
+            Vilkårsgrunnlag.Arbeidsforhold(a1, 1.mars, 31.mars, Arbeidsforholdtype.ORDINÆRT), // Skal ikke gjelde fordi ansettelsetidspunktet er på skjæringstidspunktet
             Vilkårsgrunnlag.Arbeidsforhold(a1, 1.februar, 28.februar, Arbeidsforholdtype.ORDINÆRT),
             Vilkårsgrunnlag.Arbeidsforhold(a1, 2.mars, 31.mars, Arbeidsforholdtype.ORDINÆRT) // Gjelder ikke etter endring
         )
@@ -320,7 +320,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold1
         )
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
-        assertEquals(5, grunnlagsdata.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a1).size)
+        assertEquals(4, grunnlagsdata.inspektør.opptjening.inspektør.arbeidsforhold.getValue(a1).size)
     }
 
     @Test
