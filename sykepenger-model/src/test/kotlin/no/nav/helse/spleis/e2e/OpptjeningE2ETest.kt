@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -29,7 +30,7 @@ import org.junit.jupiter.api.Test
 internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening`() {
-        personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null))
+        personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT))
         assertHarArbeidsforhold(1.januar, a1)
         assertHarIkkeArbeidsforhold(1.januar, a2)
     }
@@ -37,8 +38,8 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
     fun `lagrer flere arbeidsforhold brukt til opptjening`() {
         personMedArbeidsforhold(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         assertHarArbeidsforhold(1.januar, a1)
         assertHarArbeidsforhold(1.januar, a2)
@@ -47,8 +48,8 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening om tilstøtende`() {
         personMedArbeidsforhold(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, 20.desember(2017), null),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 19.desember(2017))
+            Vilkårsgrunnlag.Arbeidsforhold(a1, 20.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 19.desember(2017), Arbeidsforholdtype.ORDINÆRT)
         )
 
         assertHarArbeidsforhold(1.januar, a1)
@@ -58,8 +59,8 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening ved overlapp`() {
         personMedArbeidsforhold(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017), null),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 24.desember(2017))
+            Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 24.desember(2017), Arbeidsforholdtype.ORDINÆRT)
         )
         assertHarArbeidsforhold(1.januar, a1)
         assertHarArbeidsforhold(1.januar, a2)
@@ -67,7 +68,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `opptjening er ikke oppfylt siden det ikke er nok opptjeningsdager`() {
-        personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 31.desember(2017), ansattTom = null))
+        personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 31.desember(2017), ansattTom = null, Arbeidsforholdtype.ORDINÆRT))
         val grunnlagsdata = person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
         assertEquals(1, grunnlagsdata.opptjening.opptjeningsdager())
         assertEquals(false, grunnlagsdata.opptjening.erOppfylt())
@@ -86,8 +87,8 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017))
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), 31.desember(2017), Arbeidsforholdtype.ORDINÆRT)
         )
 
         håndterVilkårsgrunnlag(

@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
@@ -51,7 +52,14 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             Vilkårsgrunnlag.Arbeidsforhold(
                 orgnummer = it["orgnummer"].asText(),
                 ansattFom = it["ansattSiden"].asLocalDate(),
-                ansattTom = it["ansattTil"].asOptionalLocalDate()
+                ansattTom = it["ansattTil"].asOptionalLocalDate(),
+                type = when (it["type"].asText()) {
+                    "FORENKLET_OPPGJØRSORDNING" -> Arbeidsforholdtype.FORENKLET_OPPGJØRSORDNING
+                    "FRILANSER" -> Arbeidsforholdtype.FRILANSER
+                    "MARITIMT" -> Arbeidsforholdtype.MARITIMT
+                    "ORDINÆRT" -> Arbeidsforholdtype.ORDINÆRT
+                    else -> error("har ikke mappingregel for arbeidsforholdtype: ${it["type"].asText()}")
+                }
             )
         }
 

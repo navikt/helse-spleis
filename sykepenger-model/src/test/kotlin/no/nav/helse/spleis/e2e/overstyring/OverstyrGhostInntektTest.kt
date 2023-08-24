@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -61,8 +62,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             sammenligningsgrunnlag = mapOf(a1 to 30000.månedlig, a2 to 1000.månedlig),
             sykepengegrunnlag = mapOf(a1 to 30000.månedlig, a2 to 1000.månedlig),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Arbeidsforhold(a2, 1.november(2017), null)
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, 1.november(2017), null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
@@ -107,8 +108,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             sammenligningsgrunnlag = mapOf(a1 to 3750.månedlig, a2 to 416.månedlig),
             sykepengegrunnlag = mapOf(a1 to 3750.månedlig, a2 to 416.månedlig),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Arbeidsforhold(a2, 1.november(2017), null)
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, 1.november(2017), null, Arbeidsforholdtype.ORDINÆRT)
             ),
             beregnetInntekt = 3750.månedlig
         )
@@ -131,8 +132,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             sammenligningsgrunnlag = mapOf(a1 to 30000.månedlig),
             sykepengegrunnlag = mapOf(a1 to 30000.månedlig),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Arbeidsforhold(a2, 1.desember(2017), null)
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
@@ -183,8 +184,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             sammenligningsgrunnlag = mapOf(a1 to 30000.månedlig, a2 to 30000.månedlig),
             sykepengegrunnlag = mapOf(a1 to 30000.månedlig, a2 to 30000.månedlig),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Arbeidsforhold(a2, 1.november(2017), null)
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, 1.november(2017), null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)

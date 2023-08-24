@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -273,8 +274,8 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                     ), arbeidsforhold = emptyList()
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -402,8 +403,8 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                     ), arbeidsforhold = emptyList()
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -629,8 +630,8 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                     ), arbeidsforhold = emptyList()
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(1.vedtaksperiode)

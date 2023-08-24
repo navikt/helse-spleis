@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -90,8 +91,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 }
             }, arbeidsforhold = listOf()),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(haandtverkerne, 1.januar(2017)),
-                Vilkårsgrunnlag.Arbeidsforhold(aadvokatene, 1.januar(2017))
+                Vilkårsgrunnlag.Arbeidsforhold(haandtverkerne, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(aadvokatene, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
             )
         )
         håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)

@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -340,8 +341,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
                 }
             }, arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH),
-                Arbeidsforhold(a2, LocalDate.EPOCH)
+                Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
             ),
             orgnummer = a1
         )
@@ -382,8 +383,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
                 emptyList()
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Arbeidsforhold(a2, 1.desember(2017), null)
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

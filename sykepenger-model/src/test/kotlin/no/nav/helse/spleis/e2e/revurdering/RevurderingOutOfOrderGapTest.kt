@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -509,8 +510,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 }
             }, arbeidsforhold = listOf()),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, 1.januar(2017)),
-                Arbeidsforhold(a2, 1.januar(2017))
+                Arbeidsforhold(a1, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -588,9 +589,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             ), emptyList()
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null),
-            Arbeidsforhold(a3, LocalDate.EPOCH, null)
+            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -630,9 +631,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             ), emptyList()
         )
         val arbeidsforhold2 = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null),
-            Arbeidsforhold(a3, LocalDate.EPOCH, null)
+            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -678,9 +679,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             ), emptyList()
         )
         val arbeidsforhold = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null),
-            Arbeidsforhold(a3, LocalDate.EPOCH, null)
+            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -719,9 +720,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             ), emptyList()
         )
         val arbeidsforhold2 = listOf(
-            Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Arbeidsforhold(a2, LocalDate.EPOCH, null),
-            Arbeidsforhold(a3, LocalDate.EPOCH, null)
+            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -1059,8 +1060,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
                 ), arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
 

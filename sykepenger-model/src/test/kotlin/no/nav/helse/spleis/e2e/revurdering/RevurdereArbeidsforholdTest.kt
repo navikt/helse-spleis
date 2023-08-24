@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -749,9 +750,9 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
                 ),
                 inntektsvurdering = Inntektsvurdering(
                     listOf(
@@ -954,9 +955,9 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
                 ),
                 inntektsvurdering = Inntektsvurdering(
                     listOf(
@@ -1044,8 +1045,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiode,
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
             ),
             inntektsvurdering = Inntektsvurdering(
                 listOf(

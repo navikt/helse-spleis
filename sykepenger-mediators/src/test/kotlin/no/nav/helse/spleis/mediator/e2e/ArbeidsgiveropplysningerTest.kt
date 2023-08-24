@@ -10,6 +10,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.spleis.mediator.TestMessageFactory
+import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.intellij.lang.annotations.Language
@@ -171,8 +172,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
                 )
             ),
             arbeidsforhold = listOf(
-                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
             ),
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 1.januar, listOf(

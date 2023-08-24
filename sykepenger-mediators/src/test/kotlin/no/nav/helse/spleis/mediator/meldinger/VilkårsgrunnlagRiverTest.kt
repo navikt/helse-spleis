@@ -14,6 +14,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import no.nav.helse.januar
+import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 
@@ -45,7 +46,7 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                     arbeidsforhold = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Arbeidsforhold(ORGNUMMER, "frilanserOppdragstakerHonorarPersonerMm"))
                 )),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null))
+                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT))
             )
         )
     }
@@ -65,7 +66,7 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                     arbeidsforhold = emptyList()
                 )),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null))
+                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT))
             )
         )
     }

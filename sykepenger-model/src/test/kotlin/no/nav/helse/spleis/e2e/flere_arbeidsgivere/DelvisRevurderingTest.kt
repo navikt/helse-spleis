@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -46,8 +47,8 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
                 inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -94,8 +95,8 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
                     ), 1.januar
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(1.vedtaksperiode)
@@ -146,8 +147,8 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
                     ), 1.januar
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(2.vedtaksperiode)
@@ -186,8 +187,8 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
                 inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to 30000.månedlig, a2 to 35000.månedlig), 1.januar),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 30000.månedlig, a2 to 35000.månedlig), 1.januar),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH)
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(1.vedtaksperiode)

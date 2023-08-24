@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.ArbeidsgiveropplysningerKorrigertEvent
@@ -109,8 +109,8 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             inntektsvurdering = inntektsvurdering(INNTEKT, 1.januar, a1, a2),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag(INNTEKT, 1.januar, a1, a2),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -170,8 +170,8 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
             inntektsvurdering = inntektsvurdering(INNTEKT, 1.januar, a1, a2),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag(INNTEKT, 1.januar, a1, a2),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

@@ -6,7 +6,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -306,8 +305,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(AG1, LocalDate.EPOCH, null),
-            Arbeidsforhold(AG2, LocalDate.EPOCH, null)
+            Arbeidsforhold(AG1, LocalDate.EPOCH, null, Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(AG2, LocalDate.EPOCH, null, Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)
         )
 
         håndterVilkårsgrunnlag(

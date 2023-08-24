@@ -47,6 +47,7 @@ internal class VilkårsgrunnlagRiver(
         }
         message.requireArray("@løsning.${ArbeidsforholdV2.name}"){
             requireKey("orgnummer")
+            requireAny("type", listOf("FORENKLET_OPPGJØRSORDNING", "FRILANSER", "MARITIMT", "ORDINÆRT"))
             require("ansattSiden", JsonNode::asLocalDate)
             interestedIn("ansattTil", JsonNode::asLocalDate)
         }

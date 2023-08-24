@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -100,10 +101,10 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 }
             },
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a4, LocalDate.EPOCH, null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a4, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
             )
         ).håndter(Person::håndter)
 
@@ -129,9 +130,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         }
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null),
-            Vilkårsgrunnlag.Arbeidsforhold(a4, LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a4, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         nyPeriode(1.januar til 31.januar, a1, INNTEKT)
 
@@ -183,8 +184,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         }
 
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
 
@@ -220,8 +221,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             }
         }
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
@@ -348,7 +349,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList()
             ),
             arbeidsforhold = arbeidsforhold ?: listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))
+                Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
             )
         ).apply {
             hendelselogg = this

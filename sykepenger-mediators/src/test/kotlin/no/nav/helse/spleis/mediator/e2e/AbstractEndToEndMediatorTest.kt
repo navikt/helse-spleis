@@ -389,11 +389,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
             inntekter = listOf(InntekterForSammenligningsgrunnlagFraLøsning.Inntekt(INNTEKT, orgnummer))
         ),
         arbeidsforhold: List<Arbeidsforhold> = listOf(
-            Arbeidsforhold(
-                orgnummer,
-                1.januar(2010),
-                null
-            )
+            Arbeidsforhold(orgnummer, 1.januar(2010), null, Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)
         ),
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning> = sykepengegrunnlag(

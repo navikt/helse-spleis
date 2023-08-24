@@ -37,6 +37,7 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategori
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -311,8 +312,8 @@ class JsonBuilderTest {
                 vilkårsgrunnlag(
                     vedtaksperiodeId = vedtaksperiodeId,
                     arbeidsforhold = listOf(
-                        Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)),
-                        Vilkårsgrunnlag.Arbeidsforhold("987654326", 1.desember(2017))
+                        Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold("987654326", 1.desember(2017), type = Arbeidsforholdtype.ORDINÆRT)
                     )
                 )
             )
@@ -524,8 +525,8 @@ class JsonBuilderTest {
                         }
                     },
                     arbeidsforhold = listOf(
-                        Vilkårsgrunnlag.Arbeidsforhold(orgnummer, LocalDate.EPOCH, null),
-                        Vilkårsgrunnlag.Arbeidsforhold("654321987", LocalDate.EPOCH, null)
+                        Vilkårsgrunnlag.Arbeidsforhold(orgnummer, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                        Vilkårsgrunnlag.Arbeidsforhold("654321987", LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
                     )
                 )
             )
@@ -631,7 +632,7 @@ class JsonBuilderTest {
                 orgnummer inntekt 31000.månedlig
             }
         },
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT))
     ) = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,

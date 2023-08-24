@@ -66,8 +66,16 @@ class Vilkårsgrunnlag(
     class Arbeidsforhold(
         private val orgnummer: String,
         private val ansattFom: LocalDate,
-        private val ansattTom: LocalDate? = null
+        private val ansattTom: LocalDate? = null,
+        private val type: Arbeidsforholdtype
     ) {
+        enum class Arbeidsforholdtype {
+            FORENKLET_OPPGJØRSORDNING,
+            FRILANSER,
+            MARITIMT,
+            ORDINÆRT
+        }
+
         init {
             check(orgnummer.isNotBlank())
         }
@@ -79,9 +87,9 @@ class Vilkårsgrunnlag(
         )
 
         private fun erSøppel() =
-            ansattTom != null && ansattTom < ansattFom
+            (ansattTom != null && ansattTom < ansattFom) || type == Arbeidsforholdtype.FRILANSER // filtrerer ut frilans-arbeidsforhold enn så lenge
 
-        internal fun erDelAvOpptjeningsperiode(opptjeningsperiode: Periode) = ansattFom in opptjeningsperiode
+        internal fun erDelAvOpptjeningsperiode(opptjeningsperiode: Periode) = !erSøppel() && ansattFom in opptjeningsperiode
 
         private fun erGyldig(skjæringstidspunkt: LocalDate) =
             ansattFom < skjæringstidspunkt && !erSøppel()

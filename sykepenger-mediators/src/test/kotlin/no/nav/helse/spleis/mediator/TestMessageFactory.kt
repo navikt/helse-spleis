@@ -491,8 +491,16 @@ internal class TestMessageFactory(
     data class Arbeidsforhold(
         val orgnummer: String,
         val ansattSiden: LocalDate,
-        val ansattTil: LocalDate?
-    )
+        val ansattTil: LocalDate?,
+        val type: Arbeidsforholdtype
+    ) {
+        enum class Arbeidsforholdtype {
+            FORENKLET_OPPGJØRSORDNING,
+            FRILANSER,
+            MARITIMT,
+            ORDINÆRT
+        }
+    }
 
     data class ArbeidsforholdOverstyrt(
         val orgnummer: String,
@@ -718,7 +726,8 @@ internal class TestMessageFactory(
                     mapOf(
                         "orgnummer" to it.orgnummer,
                         "ansattSiden" to it.ansattSiden,
-                        "ansattTil" to it.ansattTil
+                        "ansattTil" to it.ansattTil,
+                        "type" to it.type
                     )
                 }
             ),

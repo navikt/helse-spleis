@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -1032,8 +1033,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
@@ -1090,8 +1091,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null, type = Arbeidsforholdtype.ORDINÆRT)
         )
 
         håndterVilkårsgrunnlag(
@@ -1470,8 +1471,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 }
             }, arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(
-              Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-              Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+              Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+              Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
             ),
             orgnummer = a1
         )
@@ -1568,8 +1569,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 }
             }, arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(
-              Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-              Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+              Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+              Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
             ),
             orgnummer = a1
         )
@@ -1667,8 +1668,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 }
             }, arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
             ),
             orgnummer = a1
         )
@@ -1703,9 +1704,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 }
             }, arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017)),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, 1.oktober(2017))
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017), type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a3, 1.oktober(2017), type = Arbeidsforholdtype.ORDINÆRT)
             ),
             orgnummer = a1
         )
@@ -1741,8 +1742,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 ), 1.januar
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ),
             orgnummer = a1
         )
@@ -1789,8 +1790,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
                 Pair(a2, inntektA2)
             ), 1.mai(2023)),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
             ),
             orgnummer = a1)
 

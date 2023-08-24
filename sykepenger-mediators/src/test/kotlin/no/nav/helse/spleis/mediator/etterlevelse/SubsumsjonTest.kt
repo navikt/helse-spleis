@@ -8,6 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spleis.mediator.TestMessageFactory
+import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.mediator.TestMessageFactory.Subsumsjon
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
@@ -251,8 +252,8 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
                 )
             ),
             arbeidsforhold = listOf(
-                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                TestMessageFactory.Arbeidsforhold(a2, fom.minusMonths(1), null)
+                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                TestMessageFactory.Arbeidsforhold(a2, fom.minusMonths(1), null, Arbeidsforholdtype.ORDINÆRT)
             ),
             inntekterForSykepengegrunnlag = sykepengegrunnlag(
                 fom, listOf(
