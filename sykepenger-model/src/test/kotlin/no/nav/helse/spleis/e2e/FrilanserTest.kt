@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -36,6 +37,23 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class FrilanserTest : AbstractDslTest() {
+
+    @Test
+    fun `frilanssøknad gir error`() {
+        frilans {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+            assertForventetFeil(forklaring = "søknad for frilans skal gi error",
+                nå = {
+                   assertIngenFunksjonelleFeil()
+                },
+                ønsket = {
+                    assertFunksjonelleFeil()
+                    assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
+                }
+            )
+        }
+    }
 
     @Test
     fun `frilansarbeidsforhold med feriepenger siste tre måneder før skjæringstidspunktet`() {
