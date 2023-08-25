@@ -511,12 +511,19 @@ internal class Arbeidsgiver private constructor(
         håndter(anmodningOmForkasting, Vedtaksperiode::håndter)
     }
 
-    internal fun harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
+    internal fun vurderOmSøknadKanHåndteres(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         // sjekker først egen arbeidsgiver først
-        return this.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode)
+        return erFrilans(hendelse) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode)
                 || arbeidsgivere.any { it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode) }
                 || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse, vedtaksperiode)
     }
+
+    private fun erFrilans(hendelse: IAktivitetslogg): Boolean {
+        if (organisasjonsnummer != Frilans) return false
+        hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
+        return true
+    }
+
     private fun harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {
         return ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse, vedtaksperiode)
                 || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, hendelse)
@@ -526,7 +533,6 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
         søknad.kontekst(this)
         søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
-        if (organisasjonsnummer == Frilans) søknad.funksjonellFeil(Varselkode.RV_SØ_39)
         opprettVedtaksperiodeOgHåndter(søknad, arbeidsgivere)
     }
 

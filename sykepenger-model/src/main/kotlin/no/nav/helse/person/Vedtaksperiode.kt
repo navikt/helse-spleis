@@ -1348,7 +1348,7 @@ internal class Vedtaksperiode private constructor(
             if (harSenereUtbetalinger || harSenereAUU) {
                 søknad.varsel(RV_OO_1)
             }
-            vedtaksperiode.arbeidsgiver.harForkastetVedtaksperiodeSomBlokkererBehandling(søknad, vedtaksperiode, arbeidsgivere)
+            vedtaksperiode.arbeidsgiver.vurderOmSøknadKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
             vedtaksperiode.håndterSøknad(søknad) {
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
