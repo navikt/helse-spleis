@@ -104,8 +104,20 @@ sealed class HendelseDTO(val type: String, val hendelseId: String) {
         val fom: LocalDate = LocalDate.parse(json.path("fom").asText())
         val tom: LocalDate = LocalDate.parse(json.path("tom").asText())
     }
+    class NyFrilansSøknadDTO(json: JsonNode) : HendelseDTO("NY_FRILANS_SØKNAD", json.path("@id").asText()) {
+        val rapportertdato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
+        val fom: LocalDate = LocalDate.parse(json.path("fom").asText())
+        val tom: LocalDate = LocalDate.parse(json.path("tom").asText())
+    }
 
     class SendtSøknadNavDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_NAV", json.path("@id").asText()) {
+        val rapportertdato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
+        val sendtNav: LocalDateTime = LocalDateTime.parse(json.path("sendtNav").asText())
+        val fom: LocalDate = LocalDate.parse(json.path("fom").asText())
+        val tom: LocalDate = LocalDate.parse(json.path("tom").asText())
+    }
+
+    class SendtSøknadFrilansDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_FRILANS", json.path("@id").asText()) {
         val rapportertdato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
         val sendtNav: LocalDateTime = LocalDateTime.parse(json.path("sendtNav").asText())
         val fom: LocalDate = LocalDate.parse(json.path("fom").asText())

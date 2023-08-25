@@ -12,30 +12,8 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKASTING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FORKAST_SYKMELDINGSPERIODER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GJENOPPLIV_VILKÅRSGRUNNLAG
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.IDENT_OPPHØRT
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSFORHOLD
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSGIVEROPPLYSNINGER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRINNTEKT
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SKJØNNSMESSIG_FASTSETTELSE
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_FOR_FERIEPENGER
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
+import no.nav.helse.spleis.meldinger.SendtFrilansSøknaderRiver
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
@@ -49,6 +27,7 @@ import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
@@ -56,6 +35,7 @@ import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
@@ -127,8 +107,10 @@ internal class HendelseRepository(private val dataSource: DataSource) {
 
     private fun meldingstype(melding: HendelseMessage) = when (melding) {
         is NySøknadMessage -> NY_SØKNAD
+        is NyFrilansSøknadMessage -> NY_FRILANS_SØKNAD
         is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
+        is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
         is InntektsmeldingMessage -> INNTEKTSMELDING
         is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
         is YtelserMessage -> YTELSER
@@ -177,8 +159,10 @@ internal class HendelseRepository(private val dataSource: DataSource) {
 
     private enum class Meldingstype {
         NY_SØKNAD,
+        NY_FRILANS_SØKNAD,
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_NAV,
+        SENDT_SØKNAD_FRILANS,
         INNTEKTSMELDING,
         PÅMINNELSE,
         PERSONPÅMINNELSE,

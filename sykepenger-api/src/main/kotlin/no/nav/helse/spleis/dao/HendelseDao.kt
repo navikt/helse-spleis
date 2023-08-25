@@ -31,7 +31,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             SELECT melding_type, data FROM melding 
-            WHERE fnr=? AND melding_type IN ('NY_SØKNAD', 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_ARBEIDSGIVER', 'INNTEKTSMELDING')
+            WHERE fnr=? AND melding_type IN ('NY_SØKNAD', 'NY_FRILANS_SØKNAD', 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_ARBEIDSGIVER', 'INNTEKTSMELDING')
         """
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(statement, fødselsnummer).map { row ->
@@ -41,7 +41,9 @@ internal class HendelseDao(private val dataSource: DataSource) {
             objectMapper.readTree(data)?.let { node ->
                 when (type) {
                     Meldingstype.NY_SØKNAD -> HendelseDTO.NySøknadDTO(node)
+                    Meldingstype.NY_FRILANS_SØKNAD -> HendelseDTO.NyFrilansSøknadDTO(node)
                     Meldingstype.SENDT_SØKNAD_NAV -> HendelseDTO.SendtSøknadNavDTO(node)
+                    Meldingstype.SENDT_SØKNAD_FRILANS -> HendelseDTO.SendtSøknadFrilansDTO(node)
                     Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER -> HendelseDTO.SendtSøknadArbeidsgiverDTO(node)
                     Meldingstype.INNTEKTSMELDING -> HendelseDTO.InntektsmeldingDTO(node)
                 }
@@ -69,7 +71,9 @@ internal class HendelseDao(private val dataSource: DataSource) {
 
     internal enum class Meldingstype {
         NY_SØKNAD,
+        NY_FRILANS_SØKNAD,
         SENDT_SØKNAD_NAV,
+        SENDT_SØKNAD_FRILANS,
         SENDT_SØKNAD_ARBEIDSGIVER,
         INNTEKTSMELDING
     }

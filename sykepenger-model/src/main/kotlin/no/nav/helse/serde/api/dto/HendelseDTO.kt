@@ -38,6 +38,22 @@ data class SøknadNavDTO(
     }
 }
 
+data class SøknadFrilansDTO(
+    override val id: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val rapportertdato: LocalDateTime,
+    val sendtNav: LocalDateTime
+) : HendelseDTO {
+    override val type = "SENDT_SØKNAD_FRILANS"
+
+    internal fun søknadsfristOppfylt(): Boolean {
+        val søknadSendtMåned = sendtNav.toLocalDate().withDayOfMonth(1)
+        val senesteMuligeSykedag = fom.plusMonths(3)
+        return søknadSendtMåned < senesteMuligeSykedag.plusDays(1)
+    }
+}
+
 data class SøknadArbeidsgiverDTO(
     override val id: String,
     val fom: LocalDate,
@@ -55,4 +71,13 @@ data class SykmeldingDTO(
     val rapportertdato: LocalDateTime
 ) : HendelseDTO {
     override val type = "NY_SØKNAD"
+}
+
+data class SykmeldingFrilansDTO(
+    override val id: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val rapportertdato: LocalDateTime
+) : HendelseDTO {
+    override val type = "NY_FRILANS_SØKNAD"
 }
