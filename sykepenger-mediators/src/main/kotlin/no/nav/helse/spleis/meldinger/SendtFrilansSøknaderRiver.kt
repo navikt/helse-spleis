@@ -18,10 +18,7 @@ internal class SendtFrilansSøknaderRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey("id")
         message.forbid("arbeidsgiver.orgnummer")
-        message.requireArray("papirsykmeldinger") {
-            require("fom", JsonNode::asLocalDate)
-            require("tom", JsonNode::asLocalDate)
-        }
+        message.forbid("papirsykmeldinger")
         message.forbid("fravar")
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
