@@ -188,7 +188,6 @@ internal class TestMessageFactory(
     fun lagSøknadFrilanser(
         fnr: String = fødselsnummer,
         perioder: List<SoknadsperiodeDTO>,
-        fravær: List<FravarDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         korrigerer: UUID? = null,
@@ -211,8 +210,8 @@ internal class TestMessageFactory(
             sendtNav = sendtNav,
             sendtArbeidsgiver = null,
             papirsykmeldinger = emptyList(),
-            egenmeldinger = emptyList(),
-            fravar = fravær,
+            egenmeldinger = null,
+            fravar = null,
             korrigerer = korrigerer?.toString(),
             opprinneligSendt = opprinneligSendt,
             andreInntektskilder = andreInntektskilder,

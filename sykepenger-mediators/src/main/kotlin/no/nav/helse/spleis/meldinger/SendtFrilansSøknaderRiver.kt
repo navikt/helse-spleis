@@ -22,11 +22,7 @@ internal class SendtFrilansSøknaderRiver(
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        message.requireArray("fravar") {
-            requireAny("type", listOf("UTDANNING_FULLTID", "UTDANNING_DELTID", "PERMISJON", "FERIE", "UTLANDSOPPHOLD"))
-            require("fom", JsonNode::asLocalDate)
-            interestedIn("tom") { it.asLocalDate() }
-        }
+        message.forbid("fravar")
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
         message.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")

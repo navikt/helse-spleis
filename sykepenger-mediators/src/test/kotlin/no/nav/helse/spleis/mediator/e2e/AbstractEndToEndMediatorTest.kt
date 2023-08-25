@@ -183,7 +183,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected fun sendFrilanssøknad(
         fnr: String = UNG_PERSON_FNR_2018,
         perioder: List<SoknadsperiodeDTO>,
-        fravær: List<FravarDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         korrigerer: UUID? = null,
@@ -195,7 +194,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
         val (id, message) = meldingsfabrikk.lagSøknadFrilanser(
             fnr = fnr,
             perioder = perioder,
-            fravær = fravær,
             andreInntektskilder = andreInntektskilder,
             sendtNav = sendtNav,
             korrigerer = korrigerer,
