@@ -110,11 +110,9 @@ internal abstract class AbstractDslTest {
     }
     protected fun List<String>.nyeVedtak(
         periode: Periode, grad: Prosentdel = 100.prosent, inntekt: Inntekt = 20000.månedlig,
-        inntekterBlock: Inntektperioder.() -> Unit = {
-            this@nyeVedtak.forEach {
-                lagInntektperioder(it, periode.start, inntekt)
-            }
-        }
+        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(map { it to inntekt }, periode.start),
+        sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(map { it to inntekt }, periode.start),
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = map { orgnr -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null, Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT) }
     ) {
         forEach {
             it {
@@ -126,11 +124,7 @@ internal abstract class AbstractDslTest {
             håndterInntektsmelding(listOf(periode.start til periode.start.plusDays(15)), beregnetInntekt = inntekt)
         }}
         (first()){
-            håndterVilkårsgrunnlag(observatør.sisteVedtaksperiodeId(orgnummer), inntektsvurdering = Inntektsvurdering(
-                inntektperioderForSammenligningsgrunnlag {
-                    inntekterBlock()
-                })
-            )
+            håndterVilkårsgrunnlag(observatør.sisteVedtaksperiodeId(orgnummer), inntektsvurdering = sammenligningsgrunnlag, inntektsvurderingForSykepengegrunnlag = sykepengegrunnlagSkatt, arbeidsforhold = arbeidsforhold)
             håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterSimulering(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
@@ -287,9 +281,10 @@ internal abstract class AbstractDslTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(this@nyttVedtak, fom, beregnetInntekt) }
+        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag),
+        sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock) }
+        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag) }
 
     protected fun String.tilGodkjenning(
         fom: LocalDate,
@@ -300,9 +295,10 @@ internal abstract class AbstractDslTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(this@tilGodkjenning, fom, beregnetInntekt) }
+        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag),
+        sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock) }
+        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag) }
 
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
@@ -423,9 +419,10 @@ internal abstract class AbstractDslTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(a1, fom, beregnetInntekt) }
+        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, beregnetInntekt, førsteFraværsdag),
+        sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(a1, beregnetInntekt, førsteFraværsdag)
     ) =
-        bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock)
+        bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag)
 
     protected fun serializeForSpeil() = testperson.serializeForSpeil()
 

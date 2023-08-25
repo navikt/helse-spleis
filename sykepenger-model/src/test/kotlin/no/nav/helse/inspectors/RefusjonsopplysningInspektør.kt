@@ -2,6 +2,8 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.økonomi.Inntekt
@@ -26,6 +28,8 @@ internal class RefusjonsopplysningInspektør(refusjonsopplysning: Refusjonsopply
         private set
     lateinit var beløp: Inntekt
         private set
+    lateinit var periode: Periode
+        private set
     init {
         refusjonsopplysning.accept(this)
     }
@@ -33,5 +37,6 @@ internal class RefusjonsopplysningInspektør(refusjonsopplysning: Refusjonsopply
     override fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {
         this.meldingsreferanseId = meldingsreferanseId
         this.beløp = beløp
+        this.periode = fom til (tom ?: LocalDate.MAX)
     }
 }

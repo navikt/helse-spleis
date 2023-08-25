@@ -1,13 +1,19 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -58,8 +64,12 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
@@ -89,6 +99,62 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+    }
+
+    @Test
+    fun `out of order ag1 - binder sammen skjæringstidspunkt mellom ag1 og ag2`() {
+        val inntekt = 20000.månedlig
+        val inntekter = listOf(a1 to inntekt, a2 to inntekt)
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+        )
+        listOf(a1).nyeVedtak(1.januar til 31.januar, inntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.januar), sammenligningsgrunnlag = lagStandardSammenligningsgrunnlag(inntekter, 1.januar), arbeidsforhold = arbeidsforhold)
+        listOf(a1).forlengVedtak(1.februar til 28.februar)
+        a2 {
+            tilGodkjenning(1.april, 30.april, beregnetInntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.april), sammenligningsgrunnlag = lagStandardSammenligningsgrunnlag(inntekter, 1.april), arbeidsforhold = arbeidsforhold)
+        }
+        listOf(a1).forlengVedtak(1.mars til 31.mars)
+
+        assertForventetFeil("Mangler refusjonsopplysninger etter at out-of-order-perioden har slått sammen skjæringstidspunktene",
+            nå = {
+                a2 {
+                    val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "forventet å finne vilkårsgrunnlag" }
+                    val a2opplysninger = vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør
+                    assertInstanceOf(SkattSykepengegrunnlag::class.java, a2opplysninger.inntektsopplysning)
+                    val refusjonsopplysningerInspektør = a2opplysninger.refusjonsopplysninger.inspektør
+                    assertEquals(0, refusjonsopplysningerInspektør.refusjonsopplysninger.size)
+                }
+            },
+            ønsket = {
+                a2 {
+                    val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "forventet å finne vilkårsgrunnlag" }
+                    val a2opplysninger = vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør
+                    assertInstanceOf(SkattSykepengegrunnlag::class.java, a2opplysninger.inntektsopplysning)
+                    val refusjonsopplysningerInspektør = a2opplysninger.refusjonsopplysninger.inspektør
+                    assertEquals(2, refusjonsopplysningerInspektør.refusjonsopplysninger.size)
+                    refusjonsopplysningerInspektør.refusjonsopplysninger[0].inspektør.also { refusjonsopplysning ->
+                        assertEquals(1.januar til 31.mars, refusjonsopplysning.periode)
+                        assertEquals(INGEN, refusjonsopplysning.beløp)
+                    }
+                    refusjonsopplysningerInspektør.refusjonsopplysninger[1].inspektør.also { refusjonsopplysning ->
+                        assertEquals(1.april til LocalDate.MAX, refusjonsopplysning.periode)
+                        assertEquals(inntekt, refusjonsopplysning.beløp)
+                    }
+                }
+            }
+        )
+
+        a2 {
+            assertForventetFeil("Mangler refusjonsopplysninger etter at out-of-order-perioden har slått sammen skjæringstidspunktene",
+                nå = {
+                    assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }
+                },
+                ønsket = {
+                    assertDoesNotThrow { håndterYtelser(1.vedtaksperiode) }
+                }
+            )
         }
     }
 
