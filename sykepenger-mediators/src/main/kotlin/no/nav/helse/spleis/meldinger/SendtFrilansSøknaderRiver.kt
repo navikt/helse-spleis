@@ -6,17 +6,18 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 
-internal class SendtNavSøknaderRiver(
+internal class SendtFrilansSøknaderRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : SøknadRiver(rapidsConnection, messageMediator) {
-    override val eventName = "sendt_søknad_nav"
-    override val riverName = "Sendt søknad Nav"
+    override val eventName = "sendt_søknad_frilans"
+    override val riverName = "Sendt søknad Frilans"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("id", "arbeidsgiver.orgnummer")
+        message.requireKey("id")
+        message.forbid("arbeidsgiver.orgnummer")
         message.requireArray("papirsykmeldinger") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
@@ -31,5 +32,5 @@ internal class SendtNavSøknaderRiver(
         message.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
     }
 
-    override fun createMessage(packet: JsonMessage) = SendtSøknadNavMessage(packet)
+    override fun createMessage(packet: JsonMessage) = SendtSøknadFrilansMessage(packet)
 }

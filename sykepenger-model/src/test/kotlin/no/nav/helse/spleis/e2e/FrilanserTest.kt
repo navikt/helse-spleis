@@ -42,16 +42,8 @@ internal class FrilanserTest : AbstractDslTest() {
     fun `frilanssøknad gir error`() {
         frilans {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-
-            assertForventetFeil(forklaring = "søknad for frilans skal gi error",
-                nå = {
-                   assertIngenFunksjonelleFeil()
-                },
-                ønsket = {
-                    assertFunksjonelleFeil()
-                    assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
-                }
-            )
+            assertFunksjonelleFeil()
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 

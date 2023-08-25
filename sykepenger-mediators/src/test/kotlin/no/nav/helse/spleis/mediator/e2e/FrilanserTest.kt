@@ -39,6 +39,6 @@ internal class FrilanserTest : AbstractEndToEndMediatorTest() {
         sendFrilanssøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
-        // assertTilstander(0, "TIL_INFOTYRGD")
+        assertTilstander(0, "TIL_INFOTRYGD")
     }
 }

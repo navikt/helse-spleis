@@ -98,6 +98,7 @@ class Person private constructor(
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
     companion object {
+        const val Frilans = "FRILANS"
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         internal fun ferdigPerson(
             aktørId: String,

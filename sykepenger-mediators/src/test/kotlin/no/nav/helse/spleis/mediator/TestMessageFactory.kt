@@ -114,7 +114,7 @@ internal class TestMessageFactory(
             opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad_frilanser", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("ny_frilans_søknad", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
     }
 
     fun lagSøknadArbeidsgiver(
@@ -226,7 +226,7 @@ internal class TestMessageFactory(
             sendTilGosys = sendTilGosys,
             egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
         )
-        return nyHendelse("sendt_søknad_frilanser", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("sendt_søknad_frilans", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
     }
 
     private fun lagInntektsmelding(

@@ -21,15 +21,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
-import no.nav.helse.spleis.e2e.lagInntektperioder
-import no.nav.helse.testhelpers.Inntektperioder
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -52,7 +50,7 @@ internal abstract class AbstractDslTest {
         @JvmStatic
         protected val a3 = "a3"
         @JvmStatic
-        protected val frilans = "FRILANS"
+        protected val frilans = Person.Frilans
         @JvmStatic
         @Deprecated("må bruke a1")
         protected val ORGNUMMER = a1

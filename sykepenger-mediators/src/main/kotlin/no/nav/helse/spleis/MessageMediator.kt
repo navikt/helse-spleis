@@ -20,6 +20,7 @@ import no.nav.helse.spleis.meldinger.InntektsmeldingReplayUtførtRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
+import no.nav.helse.spleis.meldinger.NyeFrilansSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeSøknaderRiver
 import no.nav.helse.spleis.meldinger.OverstyrArbeidsforholdRiver
 import no.nav.helse.spleis.meldinger.OverstyrArbeidsgiveropplysningerRiver
@@ -28,6 +29,7 @@ import no.nav.helse.spleis.meldinger.PersonAvstemmingRiver
 import no.nav.helse.spleis.meldinger.PersonPåminnelserRiver
 import no.nav.helse.spleis.meldinger.PåminnelserRiver
 import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
+import no.nav.helse.spleis.meldinger.SendtFrilansSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import no.nav.helse.spleis.meldinger.SimuleringerRiver
 import no.nav.helse.spleis.meldinger.SkjønnsmessigFastsettelseRiver
@@ -40,6 +42,7 @@ import no.nav.helse.spleis.meldinger.UtbetalingshistorikkRiver
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import org.slf4j.LoggerFactory
 
 internal class MessageMediator(
@@ -55,8 +58,10 @@ internal class MessageMediator(
     init {
         DelegatedRapid(rapidsConnection).also {
             NyeSøknaderRiver(it, this)
+            NyeFrilansSøknaderRiver(it, this)
             SendtArbeidsgiverSøknaderRiver(it, this)
             SendtNavSøknaderRiver(it, this)
+            SendtFrilansSøknaderRiver(it, this)
             InntektsmeldingerRiver(it, this)
             InntektsmeldingerReplayRiver(it, this)
             InntektsmeldingReplayUtførtRiver(it, this)

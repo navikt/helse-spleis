@@ -64,6 +64,10 @@ object HendelseProbe {
         tell("SøknadNav")
     }
 
+    fun onSøknadFrilans() {
+        tell("SøknadFrilans")
+    }
+
     fun onSøknadArbeidsgiver() {
         tell("SøknadArbeidsgiver")
     }

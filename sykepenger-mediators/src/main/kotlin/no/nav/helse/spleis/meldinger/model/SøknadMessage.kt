@@ -11,7 +11,11 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 
 // Understands a JSON message representing a Søknad
-internal abstract class SøknadMessage(private val packet: JsonMessage, private val builder: SøknadBuilder) :
+internal abstract class SøknadMessage(
+    private val packet: JsonMessage,
+    private val builder: SøknadBuilder,
+    private val organisasjonsnummer: String = packet["arbeidsgiver.orgnummer"].asText()
+) :
     HendelseMessage(packet) {
 
     private val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
@@ -37,7 +41,7 @@ internal abstract class SøknadMessage(private val packet: JsonMessage, private 
             .aktørId(packet["aktorId"].asText())
             .fødselsdato(packet["fødselsdato"].asLocalDate())
             .sykmeldingSkrevet(sykmeldingSkrevet)
-            .organisasjonsnummer(packet["arbeidsgiver.orgnummer"].asText())
+            .organisasjonsnummer(organisasjonsnummer)
             .fom(packet["fom"].asLocalDate())
             .tom(packet["tom"].asLocalDate())
             .arbeidUtenforNorge(packet["arbeidUtenforNorge"].asBoolean())
