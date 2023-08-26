@@ -442,7 +442,6 @@ data class BeregnetPeriode(
                 }
                 Utbetalingstatus.Ubetalt -> when {
                     periodetilstand in setOf(Vedtaksperiode.AvventerGodkjenningRevurdering, Vedtaksperiode.AvventerGodkjenning) -> Periodetilstand.TilGodkjenning
-                    periodetilstand == Vedtaksperiode.AvventerGjennomførtRevurdering && klarTilGodkjenning(utbetalingDTO) -> Periodetilstand.TilGodkjenning
                     periodetilstand in setOf(Vedtaksperiode.AvventerSimulering, Vedtaksperiode.AvventerSimuleringRevurdering) -> ForberederGodkjenning
                     periodetilstand == Vedtaksperiode.AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
                     periodetilstand == Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
@@ -456,10 +455,6 @@ data class BeregnetPeriode(
                 Utbetalingstatus.Overført -> Periodetilstand.TilUtbetaling
                 else -> error("har ikke mappingregel for ${utbetalingDTO.status}")
             }
-        private fun klarTilGodkjenning(utbetalingDTO: Utbetaling): Boolean {
-            return utbetalingDTO.oppdrag.any { it.value.simulering != null }
-                    || utbetalingDTO.oppdrag.all { it.value.utbetalingslinjer.all { it.endringskode == EndringskodeDTO.UEND } }
-        }
 
         private fun List<Utbetalingstidslinjedag>.sisteNavDag() =
             lastOrNull { it.type == UtbetalingstidslinjedagType.NavDag }
