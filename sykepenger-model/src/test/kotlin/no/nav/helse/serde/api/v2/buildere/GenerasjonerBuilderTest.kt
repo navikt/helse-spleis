@@ -1451,6 +1451,30 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `lage generasjoner når a2 er i Avventer historikk revurdering og har blitt tildelt utbetaling`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
+        generasjoner(a1) {
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand Utbetalt
+            }
+        }
+        generasjoner(a2) {
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) medTilstand ForberederGodkjenning
+            }
+        }
+    }
+
+    @Test
     fun `revurdering av flere arbeidsgivere`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
