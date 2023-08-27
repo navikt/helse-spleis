@@ -1,0 +1,59 @@
+{
+  "arbeidsgivere": [
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        }
+      ]
+    },
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        }
+      ]
+    },
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        }
+      ]
+    },
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        }
+      ]
+    },
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        }
+      ]
+    },
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 258
+}
