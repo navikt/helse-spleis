@@ -74,7 +74,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `jaudå jaudå`() = Toggle.ForenkleRevurdering.enable {
+    fun `bare varsel på første periode`() {
         nyPeriode(1.januar til 16.januar)
         nyttVedtak(17.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
         forlengVedtak(1.februar, 28.februar)
