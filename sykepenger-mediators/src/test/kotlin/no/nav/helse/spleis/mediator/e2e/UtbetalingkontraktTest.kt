@@ -52,6 +52,54 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    @Disabled("gir bare mening når Revurdere en-og-en er AV")
+    fun `tildeler utbetaling til vedtaksperioder som treffes av revurderingen`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        )
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 26.februar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 26.februar, sykmeldingsgrad = 100))
+        )
+        sendYtelser(1)
+        sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(1)
+        sendUtbetaling()
+
+        assertEquals(2, testRapid.inspektør.meldinger("vedtaksperiode_ny_utbetaling").size)
+
+        sendOverstyringTidslinje(listOf(ManuellOverskrivingDag(25.januar, Dagtype.Feriedag)))
+        sendYtelser(1)
+
+        val revurdering = testRapid.inspektør.siste("utbetaling_endret")
+
+        val utbetalingId = revurdering.path("utbetalingId").asText()
+        val vedtaksperiodeId1 = testRapid.inspektør.vedtaksperiodeId(0)
+        val vedtaksperiodeId2 = testRapid.inspektør.vedtaksperiodeId(1)
+
+        val nyeUtbetalinger = testRapid.inspektør.meldinger("vedtaksperiode_ny_utbetaling")
+        assertEquals(4, nyeUtbetalinger.size)
+
+        val fordelteRevurderinger = nyeUtbetalinger.takeLast(2)
+
+        fordelteRevurderinger.first().also { førsteTildeling ->
+            assertEquals(utbetalingId, førsteTildeling.path("utbetalingId").asText())
+            assertEquals(vedtaksperiodeId1.toString(), førsteTildeling.path("vedtaksperiodeId").asText())
+        }
+        fordelteRevurderinger.last().also { andreTildeling ->
+            assertEquals(utbetalingId, andreTildeling.path("utbetalingId").asText())
+            assertEquals(vedtaksperiodeId2.toString(), andreTildeling.path("vedtaksperiodeId").asText())
+        }
+    }
+
+    @Test
     fun `utbetaling utbetalt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
