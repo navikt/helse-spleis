@@ -1,13 +1,11 @@
 package no.nav.helse.økonomi
 
-import java.math.MathContext
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.memoize
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt> {
@@ -23,12 +21,11 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     }
 
     companion object {
-        private val mc = MathContext.DECIMAL128
         //8-10 ledd 3
         private const val ARBEIDSDAGER_PER_ÅR = 260
 
         fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
-            return parene.map { it.first to it.second.årlig.toBigDecimal(mc) }.average()
+            return parene.map { it.first to it.second.årlig }.average()
         }
 
         val Number.månedlig get() = Inntekt(this.toDouble() * 12)

@@ -1,8 +1,6 @@
 package no.nav.helse.økonomi
 
 import java.math.BigDecimal
-import java.math.BigDecimal.ONE
-import java.math.BigDecimal.ZERO
 import java.math.MathContext
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 
@@ -24,10 +22,10 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
             subsumsjonObserver.block(GRENSE.toDouble())
         }
 
-        internal fun Collection<Pair<Prosentdel, BigDecimal>>.average(): Prosentdel {
+        internal fun Collection<Pair<Prosentdel, Double>>.average(): Prosentdel {
             val total = this.sumOf { it.second }
-            if (total <= ZERO) return map { it.first to ONE }.average()
-            return Prosentdel(this.sumOf { it.first.brøkdel.multiply(it.second, mc) }.divide(total, mc))
+            if (total <= 0.0) return map { it.first to 1.0 }.average()
+            return Prosentdel(this.sumOf { it.first.brøkdel.multiply(it.second.toBigDecimal(mc), mc) }.divide(total.toBigDecimal(mc), mc))
         }
 
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
