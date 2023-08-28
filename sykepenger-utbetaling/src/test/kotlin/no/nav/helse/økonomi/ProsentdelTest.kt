@@ -1,7 +1,7 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel.Companion.average
 import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,6 +12,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class ProsentdelTest {
+
+    @Test
+    fun `total sykdomsgrad - flyttall`() {
+        val inntekter = listOf(
+            100.prosent to 502400.04,
+            100.prosent to 70065.12
+        )
+        val result = inntekter.average()
+        assertEquals(100.prosent, result)
+    }
 
     @Test fun equality() {
         assertEquals(fraRatio(0.25), 25.0.prosent )
@@ -56,7 +66,6 @@ internal class ProsentdelTest {
         val dobbelomvendt = !!karakterMedAvrunding
         assertEquals(karakterMedAvrunding, dobbelomvendt)
         assertEquals(karakterMedAvrunding, karakterMedAvrunding)
-        assertEquals(karakterMedAvrunding.get<Double>("brøkdel"), (dobbelomvendt).get<Double>("brøkdel"))
         assertEquals(karakterMedAvrunding.hashCode(), (dobbelomvendt).hashCode())
     }
 

@@ -6,7 +6,9 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 
 class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
     init {
-        require(brøkdel.toDouble() in 0.0..1.0) { "Må være prosent mellom 0 og 100" }
+        require(brøkdel.toDouble() in 0.0..1.0) {
+            "Må være prosent mellom 0 og 100"
+        }
     }
 
     companion object {
@@ -23,9 +25,13 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         }
 
         internal fun Collection<Pair<Prosentdel, Double>>.average(): Prosentdel {
+            return map { it.first to it.second.toBigDecimal(mc) }.average()
+        }
+
+        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(): Prosentdel {
             val total = this.sumOf { it.second }
-            if (total <= 0.0) return map { it.first to 1.0 }.average()
-            return Prosentdel(this.sumOf { it.first.brøkdel.multiply(it.second.toBigDecimal(mc), mc) }.divide(total.toBigDecimal(mc), mc))
+            if (total <= BigDecimal.ZERO) return map { it.first to BigDecimal.ONE }.average()
+            return Prosentdel(this.sumOf { it.first.brøkdel.multiply(it.second, mc) }.divide(total, mc))
         }
 
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
