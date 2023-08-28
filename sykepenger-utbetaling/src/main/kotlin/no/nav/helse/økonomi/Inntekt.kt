@@ -1,12 +1,12 @@
 package no.nav.helse.økonomi
 
-import java.math.BigDecimal
 import java.math.MathContext
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.memoize
-import no.nav.helse.økonomi.Prosent.Companion.prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.average
+import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -68,14 +68,15 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     }
 
     operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
-    internal operator fun times(scalar: BigDecimal) = Inntekt(scalar.multiply(this.årlig.toBigDecimal(mc), mc).toDouble())
 
-    operator fun times(prosentdel: Prosentdel) = prosentdel.times(this)
+    operator fun times(prosentdel: Prosentdel) = prosentdel.times(this.årlig).årlig
 
     operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
-    operator fun div(other: Prosentdel) = other.reciproc(this)
+    operator fun div(other: Prosentdel) = other.reciproc(this.årlig).årlig
 
-    infix fun ratio(other: Inntekt) = this.årlig / other.årlig
+    infix fun ratio(other: Inntekt) =
+        if (this.årlig >= other.årlig) 100.prosent
+        else fraRatio(this.årlig / other.årlig)
 
     operator fun plus(other: Inntekt) = Inntekt(this.årlig + other.årlig)
 
@@ -94,7 +95,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     }
 
     fun avviksprosent(other: Inntekt): Prosent {
-        if (other == INGEN) return 100.prosent
+        if (other == INGEN) return Prosent.ratio(1.0)
         return Prosent.ratio((this.årlig - other.årlig).absoluteValue / other.årlig)
     }
 

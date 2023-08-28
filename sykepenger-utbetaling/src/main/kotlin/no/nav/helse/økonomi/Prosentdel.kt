@@ -49,11 +49,11 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         return "${(toDouble())} %"
     }
 
-    fun reciproc(other: Inntekt) = other.times(inverse())
+    fun reciproc(other: Double) = other.toBigDecimal(mc).times(inverse()).toDouble()
 
     private fun inverse(): BigDecimal = SIKKER_BRØK.divide(this.brøkdel, mc)
 
-    internal fun times(other: Inntekt) = other.times(brøkdel)
+    internal fun times(other: Double) = (other.toBigDecimal(mc) * brøkdel).toDouble()
 
     fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
 

@@ -101,7 +101,7 @@ class Økonomi private constructor(
 
         private fun reduksjon(grense: Inntekt, total: Inntekt): Prosentdel {
             if (total == INGEN) return 0.prosent
-            return fraRatio((grense ratio total).coerceAtMost(1.0))
+            return grense ratio total
         }
 
         private fun total(økonomiList: List<Økonomi>, strategi: (Økonomi) -> Inntekt): Inntekt =

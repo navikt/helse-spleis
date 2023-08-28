@@ -24,11 +24,11 @@ internal class ProsentdelTest {
     fun reciprok() {
         val gradertVerdi = 5.daglig
         val grad = 50.prosent
-        assertEquals(10.daglig, grad.reciproc(gradertVerdi))
+        assertEquals(10.daglig, gradertVerdi.div(grad))
         val inntekt = 100.daglig
         val enTredjedel = fraRatio(1/3.0)
         val gradertInntekt = inntekt.times(enTredjedel)
-        assertEquals(inntekt, enTredjedel.reciproc(gradertInntekt))
+        assertEquals(inntekt, gradertInntekt / enTredjedel)
     }
 
     @Test
