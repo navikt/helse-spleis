@@ -193,8 +193,8 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `rekkefølge respekteres ved deserialisering`() {
         val perioder = listOf(
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig),
-            ArbeidsgiverUtbetalingsperiode("orgnr", 1.februar,  28.februar, 100.prosent, 25000.månedlig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 1154.daglig),
+            ArbeidsgiverUtbetalingsperiode("orgnr", 1.februar,  28.februar, 100.prosent, 1154.daglig),
             Friperiode(1.mars,  31.mars)
         )
         val nå = LocalDateTime.now()
@@ -204,8 +204,8 @@ internal class InfotrygdhistorikkTest {
             hendelseId = UUID.randomUUID(),
             ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
             arbeidsgiverutbetalingsperioder = listOf(
-                PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar, 100, 25000.0),
-                PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100, 25000.0)
+                PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar, 100.0, 1154),
+                PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100.0, 1154)
             ),
             personutbetalingsperioder = emptyList(),
             inntekter = emptyList(),

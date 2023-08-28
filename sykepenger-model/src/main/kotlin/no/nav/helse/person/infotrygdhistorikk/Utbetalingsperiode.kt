@@ -24,6 +24,10 @@ abstract class Utbetalingsperiode(
     protected val grad: Prosentdel,
     protected val inntekt: Inntekt
 ) : Infotrygdperiode(fom, tom) {
+    companion object {
+        // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
+        fun inntekt(inntekt: Inntekt, grad: Prosentdel) = (inntekt / grad).rundTilDaglig()
+    }
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, kilde)
     }
@@ -78,7 +82,7 @@ abstract class Utbetalingsperiode(
 }
 
 class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
-    Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
+    Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
 
     override fun accept(visitor: InfotrygdperiodeVisitor) {
         visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
@@ -86,7 +90,7 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
 }
 
 class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
-    Utbetalingsperiode(orgnr, fom, tom, grad, inntekt.rundTilDaglig()) {
+    Utbetalingsperiode(orgnr, fom, tom, grad, inntekt) {
 
     override fun accept(visitor: InfotrygdperiodeVisitor) {
         visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)

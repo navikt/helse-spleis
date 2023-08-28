@@ -37,8 +37,6 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
         val Number.daglig get() = Inntekt(this.toDouble() * ARBEIDSDAGER_PER_ÅR)
 
-        fun Number.daglig(grad: Prosentdel) = this.daglig / grad
-
         fun Collection<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
 
         val INGEN = 0.daglig
@@ -75,7 +73,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     operator fun times(prosentdel: Prosentdel) = prosentdel.times(this)
 
     operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
-    internal operator fun div(other: Prosentdel) = other.reciproc(this)
+    operator fun div(other: Prosentdel) = other.reciproc(this)
 
     infix fun ratio(other: Inntekt) = this.årlig / other.årlig
 

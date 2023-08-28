@@ -84,6 +84,7 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.SpleisPe
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -172,15 +173,15 @@ internal data class PersonData(
             private val orgnr: String,
             private val fom: LocalDate,
             private val tom: LocalDate,
-            private val grad: Int,
-            private val inntekt: Double
+            private val grad: Double,
+            private val inntekt: Int
         ) {
             internal fun parsePeriode() = PersonUtbetalingsperiode(
                 orgnr = orgnr,
                 fom = fom,
                 tom = tom,
                 grad = grad.prosent,
-                inntekt = inntekt.månedlig
+                inntekt = inntekt.daglig
             )
         }
 
@@ -188,15 +189,15 @@ internal data class PersonData(
             private val orgnr: String,
             private val fom: LocalDate,
             private val tom: LocalDate,
-            private val grad: Int,
-            private val inntekt: Double
+            private val grad: Double,
+            private val inntekt: Int
         ) {
             internal fun parsePeriode() = ArbeidsgiverUtbetalingsperiode(
                 orgnr = orgnr,
                 fom = fom,
                 tom = tom,
                 grad = grad.prosent,
-                inntekt = inntekt.månedlig
+                inntekt = inntekt.daglig
             )
         }
 

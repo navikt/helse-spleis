@@ -678,8 +678,8 @@ internal class JsonBuilder : AbstractBuilder() {
                 "orgnr" to orgnr,
                 "fom" to fom,
                 "tom" to tom,
-                "grad" to grad.roundToInt(),
-                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
+                "grad" to grad.toDouble(),
+                "inntekt" to inntekt.reflection { _, _, _, dagligInt -> dagligInt }
             ))
         }
 
@@ -695,8 +695,8 @@ internal class JsonBuilder : AbstractBuilder() {
                 "orgnr" to orgnr,
                 "fom" to fom,
                 "tom" to tom,
-                "grad" to grad.roundToInt(),
-                "inntekt" to inntekt.reflection { _, månedlig, _, _ -> månedlig }
+                "grad" to grad.toDouble(),
+                "inntekt" to inntekt.reflection { _, _, _, dagligInt -> dagligInt }
             ))
         }
 

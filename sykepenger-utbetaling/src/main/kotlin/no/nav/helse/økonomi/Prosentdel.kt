@@ -5,7 +5,6 @@ import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
 import java.math.MathContext
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import kotlin.math.roundToInt
 
 class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
     init {
@@ -57,8 +56,6 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
     internal fun times(other: Inntekt) = other.times(brøkdel)
 
     fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
-
-    fun roundToInt() = toDouble().roundToInt()
 
     fun erUnderGrensen() = this < GRENSE
 }

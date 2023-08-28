@@ -11,6 +11,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -35,15 +36,13 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
                 when (utbetaling["typeKode"].asText()) {
                     "0", "1" -> {
                         val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-                        // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
-                        val inntekt = utbetaling["dagsats"].asInt().daglig(grad)
+                        val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
                         val orgnummer = utbetaling["orgnummer"].asText()
                         PersonUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
                     }
                     "5", "6" -> {
                         val grad = utbetaling["utbetalingsGrad"].asInt().prosent
-                        // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
-                        val inntekt = utbetaling["dagsats"].asInt().daglig(grad)
+                        val inntekt = Utbetalingsperiode.inntekt(utbetaling["dagsats"].asInt().daglig, grad)
                         val orgnummer = utbetaling["orgnummer"].asText()
                         ArbeidsgiverUtbetalingsperiode(orgnummer, fom, tom, grad, inntekt)
                     }

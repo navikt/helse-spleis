@@ -24,7 +24,7 @@ internal class UtbetalingsperiodeTest {
     @Test
     fun `arbeidsgiverutbetaling er ikke lik brukerutbetaling`() {
         val prosent = 100.prosent
-        val inntekt1 = 100.daglig(prosent)
+        val inntekt1 = Utbetalingsperiode.inntekt(100.daglig, prosent)
         val orgnr = "orgnr"
         val fom = 1.januar
         val tom = 2.januar
@@ -51,11 +51,11 @@ internal class UtbetalingsperiodeTest {
     @Test
     fun `lik periode - avrunding - arbeidsgiver`() {
         val prosent = 30.prosent
-        val inntekt1 = 505.daglig(prosent)
+        val inntekt1 = Utbetalingsperiode.inntekt(505.daglig, prosent)
         val inntekt2 = inntekt1.reflection { _, månedlig, _, _ -> månedlig }.månedlig
         val periode1 = ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt1)
         val periode2 = ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt2)
-        assertNotEquals(inntekt1, inntekt2)
+        assertEquals(inntekt1, inntekt2)
         assertEquals(periode1, periode2)
     }
 
@@ -63,11 +63,11 @@ internal class UtbetalingsperiodeTest {
     @Test
     fun `lik periode - avrunding - bruker`() {
         val prosent = 30.prosent
-        val inntekt1 = 505.daglig(prosent)
+        val inntekt1 = Utbetalingsperiode.inntekt(505.daglig, prosent)
         val inntekt2 = inntekt1.reflection { _, månedlig, _, _ -> månedlig }.månedlig
         val periode1 = PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt1)
         val periode2 = PersonUtbetalingsperiode("orgnr", 1.januar, 1.januar, prosent, inntekt2)
-        assertNotEquals(inntekt1, inntekt2)
+        assertEquals(inntekt1, inntekt2)
         assertEquals(periode1, periode2)
     }
 

@@ -1,0 +1,27 @@
+{
+  "infotrygdhistorikk": [
+    {
+      "arbeidsgiverutbetalingsperioder": [
+        {
+          "grad": 75,
+          "inntekt": 30008.333333333332
+        }
+      ],
+      "personutbetalingsperioder": []
+    },
+    {
+      "arbeidsgiverutbetalingsperioder": [
+        {
+          "grad": 75,
+          "inntekt": 21681.833333333333
+        }
+      ],
+      "personutbetalingsperioder": [
+        {
+          "grad": 100,
+          "inntekt": 25000.0
+        }
+      ]
+    }
+  ]
+}
