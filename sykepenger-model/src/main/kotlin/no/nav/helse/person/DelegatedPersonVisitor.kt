@@ -51,7 +51,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
@@ -111,7 +111,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sykepengegrunnlag1: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
-        avviksprosent: Prosent,
+        avviksprosent: Avviksprosent,
         totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
@@ -141,7 +141,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sykepengegrunnlag1: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
-        avviksprosent: Prosent,
+        avviksprosent: Avviksprosent,
         totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,

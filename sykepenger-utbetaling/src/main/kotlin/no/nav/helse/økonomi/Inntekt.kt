@@ -94,10 +94,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         return "[Årlig: $årlig, Månedlig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
     }
 
-    fun avviksprosent(other: Inntekt): Prosent {
-        if (other == INGEN) return Prosent.ratio(1.0)
-        return Prosent.ratio((this.årlig - other.årlig).absoluteValue / other.årlig)
-    }
+    fun avviksprosent(other: Inntekt) = Avviksprosent.avvik(this.årlig, other.årlig)
 
 }
 

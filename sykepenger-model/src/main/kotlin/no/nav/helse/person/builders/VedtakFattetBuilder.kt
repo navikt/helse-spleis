@@ -14,8 +14,8 @@ import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.utbetalingslinjer.UtbetalingVedtakFattetBuilder
+import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 
 internal class VedtakFattetBuilder(
     private val fødselsnummer: String,
@@ -79,16 +79,16 @@ internal class VedtakFattetBuilder(
     }
     sealed class FastsattISpleisBuilder(
         protected val omregnetÅrsinntekt: Inntekt,
-        protected val avviksprosent: Prosent,
+        protected val avviksprosent: Avviksprosent,
         protected val `6G`: Inntekt,
         begrensning: Begrensning
     ) : SykepengegrunnlagsfaktaBuilder() {
         protected val tags: Set<Tag> = begrensning.takeIf { it == ER_6G_BEGRENSET }?.let { setOf(Tag.`6GBegrenset`) } ?: emptySet()
         protected lateinit var innrapportertÅrsinntekt: Inntekt
         internal fun innrapportertÅrsinntekt(innrapportertÅrsinntekt: Inntekt) = apply { this.innrapportertÅrsinntekt = innrapportertÅrsinntekt }
-        protected val Prosent.avrundet get() = prosent().toDesimaler
+        protected val Avviksprosent.avrundet get() = rundTilToDesimaler()
     }
-    internal class FastsattEtterHovedregelBuilder(omregnetÅrsinntekt: Inntekt, avviksprosent: Prosent, `6G`: Inntekt, begrensning: Begrensning) : FastsattISpleisBuilder(omregnetÅrsinntekt, avviksprosent, `6G`, begrensning) {
+    internal class FastsattEtterHovedregelBuilder(omregnetÅrsinntekt: Inntekt, avviksprosent: Avviksprosent, `6G`: Inntekt, begrensning: Begrensning) : FastsattISpleisBuilder(omregnetÅrsinntekt, avviksprosent, `6G`, begrensning) {
         private val arbeidsgivere = mutableListOf<FastsattEtterHovedregel.Arbeidsgiver>()
         internal fun arbeidsgiver(arbeidsgiver: String, omregnetÅrsinntekt: Inntekt) = apply { arbeidsgivere.add(FastsattEtterHovedregel.Arbeidsgiver(arbeidsgiver, omregnetÅrsinntekt.årlig)) }
         override fun build() = FastsattEtterHovedregel(
@@ -100,7 +100,7 @@ internal class VedtakFattetBuilder(
             arbeidsgivere = arbeidsgivere.toList()
         )
     }
-    internal class FastsattEtterSkjønnBuilder(omregnetÅrsinntekt: Inntekt, avviksprosent: Prosent, `6G`: Inntekt, begrensning: Begrensning, private val skjønnsfastsatt: Inntekt) : FastsattISpleisBuilder(omregnetÅrsinntekt, avviksprosent, `6G`, begrensning) {
+    internal class FastsattEtterSkjønnBuilder(omregnetÅrsinntekt: Inntekt, avviksprosent: Avviksprosent, `6G`: Inntekt, begrensning: Begrensning, private val skjønnsfastsatt: Inntekt) : FastsattISpleisBuilder(omregnetÅrsinntekt, avviksprosent, `6G`, begrensning) {
         private val arbeidsgivere = mutableListOf<FastsattEtterSkjønn.Arbeidsgiver>()
         internal fun arbeidsgiver(arbeidsgiver: String, omregnetÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt) = apply { arbeidsgivere.add(FastsattEtterSkjønn.Arbeidsgiver(arbeidsgiver, omregnetÅrsinntekt.årlig, skjønnsfastsatt.årlig)) }
         override fun build() = FastsattEtterSkjønn(

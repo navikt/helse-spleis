@@ -1,26 +1,16 @@
 package no.nav.helse.person.inntekt
 
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattISpleisBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 
 internal class Sammenligningsgrunnlag(
     internal val sammenligningsgrunnlag: Inntekt,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>,
 ) {
 
-    internal fun avviksprosent(beregningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) =
-        beregningsgrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
-            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(
-                maksimaltTillattAvvikPåÅrsinntekt = Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
-                grunnlagForSykepengegrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                avvik = avvik.prosent()
-            )
-        }
+    internal fun avviksprosent(beregningsgrunnlag: Inntekt) = beregningsgrunnlag.avviksprosent(sammenligningsgrunnlag)
 
     internal constructor(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) : this(
         arbeidsgiverInntektsopplysninger.sammenligningsgrunnlag(),

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Opptjening
@@ -30,7 +29,7 @@ import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Avviksprosent
 import kotlin.properties.Delegates
 
 internal class ISykepengegrunnlag(
@@ -345,7 +344,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            avviksprosent: Prosent,
+            avviksprosent: Avviksprosent,
             totalOmregnetÅrsinntekt: Inntekt,
             beregningsgrunnlag: Inntekt,
             `6G`: Inntekt,

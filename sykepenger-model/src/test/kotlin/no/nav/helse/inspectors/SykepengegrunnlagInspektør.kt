@@ -6,7 +6,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Avviksprosent
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
@@ -41,7 +41,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         sykepengegrunnlag1: Sykepengegrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
-        avviksprosent: Prosent,
+        avviksprosent: Avviksprosent,
         totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,

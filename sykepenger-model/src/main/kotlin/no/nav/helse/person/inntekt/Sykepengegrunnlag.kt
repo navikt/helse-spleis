@@ -22,7 +22,6 @@ import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfa
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -63,8 +62,6 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Prosent
-import no.nav.helse.økonomi.Prosent.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
 
@@ -94,7 +91,7 @@ internal class Sykepengegrunnlag private constructor(
     private val forhøyetInntektskrav = alder.forhøyetInntektskrav(skjæringstidspunkt)
     private val minsteinntekt = (if (forhøyetInntektskrav) `2G` else halvG).minsteinntekt(skjæringstidspunkt)
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
-    private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt, SubsumsjonObserver.NullObserver)
+    private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt)
 
     private var tilstand: Tilstand = tilstand ?: tilstand(Start)
 
@@ -129,14 +126,7 @@ internal class Sykepengegrunnlag private constructor(
                     minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
         }
 
-        subsumsjonObserver.apply {
-            `§ 8-30 ledd 2 punktum 1`(
-                maksimaltTillattAvvikPåÅrsinntekt = Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
-                grunnlagForSykepengegrunnlagÅrlig = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
-                sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                avvik = avviksprosent.prosent()
-            )
-        }
+        avviksprosent.validerAvvik(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
     }
 
     internal fun kandidatForSkjønnsmessigFastsettelse() = arbeidsgiverInntektsopplysninger.size == 1
@@ -221,11 +211,8 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     internal fun validerAvvik(aktivitetslogg: IAktivitetslogg) {
-        if (!harAkseptabeltAvvik()) return aktivitetslogg.varsel(RV_IV_2)
-        aktivitetslogg.info("Har %d.0 %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, avviksprosent.prosent())
+        avviksprosent.validerAvvik(aktivitetslogg)
     }
-
-    private fun harAkseptabeltAvvik() = this.avviksprosent <= Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent
 
     internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
         deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonObserver)
@@ -247,13 +234,7 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         return hendelse.overstyr(this, subsumsjonObserver).apply {
-            validerAvvik(hendelse)
-            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(
-                maksimaltTillattAvvikPåÅrsinntekt = Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
-                grunnlagForSykepengegrunnlagÅrlig = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
-                sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                avvik = avviksprosent.prosent()
-            )
+            avviksprosent.validerAvvik(hendelse, omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
         }
     }
 
@@ -303,13 +284,7 @@ internal class Sykepengegrunnlag private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
-            validerAvvik(hendelse)
-            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(
-                maksimaltTillattAvvikPåÅrsinntekt = Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT,
-                grunnlagForSykepengegrunnlagÅrlig = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
-                sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                avvik = avviksprosent.prosent()
-            )
+            avviksprosent.validerAvvik(hendelse, omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
         }
     }
 
@@ -503,7 +478,7 @@ internal class Sykepengegrunnlag private constructor(
         override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
             val tilstand = when {
                 sykepengegrunnlag.arbeidsgiverInntektsopplysninger.erSkjønnsmessigFastsatt() -> FastsattEtterSkjønn
-                sykepengegrunnlag.harAkseptabeltAvvik() -> FastsattEtterHovedregel
+                sykepengegrunnlag.avviksprosent.harAkseptabeltAvvik() -> FastsattEtterHovedregel
                 else -> AvventerFastsettelseEtterSkjønn
             }
             sykepengegrunnlag.tilstand(tilstand)

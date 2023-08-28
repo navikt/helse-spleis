@@ -75,7 +75,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.ØkonomiBuilder
@@ -822,7 +822,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            avviksprosent: Prosent,
+            avviksprosent: Avviksprosent,
             totalOmregnetÅrsinntekt: Inntekt,
             beregningsgrunnlag: Inntekt,
             `6G`: Inntekt,
@@ -861,7 +861,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            avviksprosent: Prosent,
+            avviksprosent: Avviksprosent,
             totalOmregnetÅrsinntekt: Inntekt,
             beregningsgrunnlag: Inntekt,
             `6G`: Inntekt,
@@ -929,7 +929,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            avviksprosent: Prosent,
+            avviksprosent: Avviksprosent,
             totalOmregnetÅrsinntekt: Inntekt,
             beregningsgrunnlag: Inntekt,
             `6G`: Inntekt,
