@@ -3,6 +3,7 @@ package no.nav.helse.økonomi
 import java.math.BigDecimal
 import java.math.MathContext
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import kotlin.math.roundToInt
 
 class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
     init {
@@ -17,8 +18,8 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         private val HUNDRE_PROSENT = 100.0.toBigDecimal(mc)
         private val GRENSE = 20.prosent
 
-        fun fraRatio(ratio: Double) = Prosentdel(ratio.toBigDecimal(mc))
-        fun fraRatio(ratio: String) = Prosentdel(ratio.toBigDecimal(mc))
+        internal fun ratio(a: Double, b: Double) =
+            Prosentdel(if (a < b) a.toBigDecimal(mc).divide(b.toBigDecimal(mc), mc) else SIKKER_BRØK)
 
         fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, block: SubsumsjonObserver.(Double) -> Unit) {
             subsumsjonObserver.block(GRENSE.toDouble())
@@ -53,13 +54,11 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         return "${(toDouble())} %"
     }
 
-    fun reciproc(other: Double) = other.toBigDecimal(mc).times(inverse()).toDouble()
-
-    private fun inverse(): BigDecimal = SIKKER_BRØK.divide(this.brøkdel, mc)
+    internal fun gradér(beløp: Double) = beløp.toBigDecimal(mc).divide(this.brøkdel, mc).toDouble().roundToInt().toDouble()
 
     internal fun times(other: Double) = (other.toBigDecimal(mc) * brøkdel).toDouble()
 
     fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
 
-    fun erUnderGrensen() = this < GRENSE
+    internal fun erUnderGrensen() = this < GRENSE
 }

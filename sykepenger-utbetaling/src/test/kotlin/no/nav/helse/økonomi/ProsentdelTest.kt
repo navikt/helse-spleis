@@ -2,8 +2,8 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.average
-import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.ratio
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -24,21 +24,21 @@ internal class ProsentdelTest {
     }
 
     @Test fun equality() {
-        assertEquals(fraRatio(0.25), 25.0.prosent )
-        assertNotEquals(fraRatio(0.25), 75.0.prosent )
-        assertNotEquals(fraRatio(0.25), Any() )
-        assertNotEquals(fraRatio(0.25), null )
+        assertEquals(ratio(1.0, 4.0), 25.0.prosent )
+        assertNotEquals(ratio(1.0, 4.0), 75.0.prosent )
+        assertNotEquals(ratio(1.0, 4.0), Any() )
+        assertNotEquals(ratio(1.0, 4.0), null )
     }
 
     @Test
     fun reciprok() {
         val gradertVerdi = 5.daglig
         val grad = 50.prosent
-        assertEquals(10.daglig, gradertVerdi.div(grad))
+        assertEquals(10.daglig, Inntekt.fraGradert(gradertVerdi, grad))
         val inntekt = 100.daglig
-        val enTredjedel = fraRatio(1/3.0)
-        val gradertInntekt = inntekt.times(enTredjedel)
-        assertEquals(inntekt, gradertInntekt / enTredjedel)
+        val enTredjedel = ratio(1.0, 3.0)
+        val gradertInntekt = inntekt * enTredjedel
+        assertEquals(inntekt, Inntekt.fraGradert(gradertInntekt, enTredjedel))
     }
 
     @Test
@@ -47,14 +47,12 @@ internal class ProsentdelTest {
             assertEquals(n, n.prosent)
             assertEquals(100 - n, n.prosent.not())
         }
-        assertEquals(fraRatio("0"), 0.prosent)
-        assertEquals(fraRatio("1.0"), 0.prosent.not())
-        assertEquals(fraRatio("1"), 100.prosent)
-        assertEquals(fraRatio("0.0"), 100.prosent.not())
+        assertEquals(ratio(0.0, 1.0), 0.prosent)
+        assertEquals(ratio(100.0, 100.0), 0.prosent.not())
     }
 
     private fun assertEquals(n: Int, prosentdel: Prosentdel) {
-        val forventet = fraRatio("0.${n.toString().padStart(2, '0').removeSuffix("0")}")
+        val forventet = ratio(n.toDouble(), 100.0)
         assertEquals(forventet, prosentdel)
         assertEquals(n, prosentdel.toDouble().toInt())
     }

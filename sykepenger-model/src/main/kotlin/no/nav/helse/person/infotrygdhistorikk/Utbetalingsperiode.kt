@@ -26,7 +26,7 @@ abstract class Utbetalingsperiode(
 ) : Infotrygdperiode(fom, tom) {
     companion object {
         // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
-        fun inntekt(inntekt: Inntekt, grad: Prosentdel) = (inntekt / grad).rundTilDaglig()
+        fun inntekt(inntekt: Inntekt, grad: Prosentdel) = Inntekt.fraGradert(inntekt, grad)
     }
     override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, kilde)

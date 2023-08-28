@@ -4,8 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.memoize
 import no.nav.helse.økonomi.Prosentdel.Companion.average
-import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import kotlin.math.roundToInt
 
 class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt> {
@@ -26,6 +24,10 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
         fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
             return parene.map { it.first to it.second.årlig }.average()
+        }
+
+        fun fraGradert(inntekt: Inntekt, grad: Prosentdel): Inntekt {
+            return grad.gradér(inntekt.tilDagligDouble()).daglig
         }
 
         val Number.månedlig get() = Inntekt(this.toDouble() * 12)
@@ -69,11 +71,8 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     operator fun times(prosentdel: Prosentdel) = prosentdel.times(this.årlig).årlig
 
     operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
-    operator fun div(other: Prosentdel) = other.reciproc(this.årlig).årlig
 
-    infix fun ratio(other: Inntekt) =
-        if (this.årlig >= other.årlig) 100.prosent
-        else fraRatio(this.årlig / other.årlig)
+    infix fun ratio(other: Inntekt) = Prosentdel.ratio(this.årlig, other.årlig)
 
     operator fun plus(other: Inntekt) = Inntekt(this.årlig + other.årlig)
 

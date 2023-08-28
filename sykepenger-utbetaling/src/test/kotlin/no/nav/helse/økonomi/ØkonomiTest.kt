@@ -1,25 +1,20 @@
 package no.nav.helse.økonomi
 
-import java.math.MathContext
+import java.time.LocalDate
 import no.nav.helse.Grunnbeløp.Companion.`6G`
-import no.nav.helse.assertForventetFeil
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.ratio
 import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNotSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -55,19 +50,6 @@ internal class ØkonomiTest {
             50.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = INGEN, `6G` = `6G`.beløp(1.januar))
         )
         assertEquals(75.prosent, økonomi.totalSykdomsgrad())
-    }
-
-    @Test
-    fun `overskriver ikke arbeidsgiverperiode`() {
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
-        val økonomi = Økonomi.ikkeBetalt()
-            .inntekt(INGEN, `6G` = `6G`.beløp(1.januar)) // spesifiserer ikke agp
-
-        val builder = object : ØkonomiBuilder() {
-            fun arbeidsgiverperiode() = arbeidsgiverperiode
-        }
-        økonomi.builder(builder)
-        assertNotNull(builder.arbeidsgiverperiode())
     }
 
     @Test
@@ -327,7 +309,7 @@ internal class ØkonomiTest {
         val b = 80.prosent.sykdomsgrad.inntekt(10000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 10000.månedlig * 90.prosent)
         val c = 20.prosent.sykdomsgrad.inntekt(31000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 31000.månedlig * 25.prosent)
         val betalte = listOf(a, b, c).betal()
-        val forventet = fraRatio(247.0.toBigDecimal().divide(620.0.toBigDecimal(), MathContext.DECIMAL128).toString())
+        val forventet = ratio(247.0, 620.0)
         val faktisk = betalte.totalSykdomsgrad()
         assertEquals(forventet, faktisk)
         // grense = 864
@@ -343,7 +325,7 @@ internal class ØkonomiTest {
         val b = 20.prosent.sykdomsgrad.inntekt(10000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 10000.månedlig * 20.prosent)
         val c = 20.prosent.sykdomsgrad.inntekt(31000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 31000.månedlig * 25.prosent)
         val betalte = listOf(a, b, c).betal().also {
-            assertEquals(fraRatio(187.0.toBigDecimal().divide(620.0.toBigDecimal(), MathContext.DECIMAL128).toString()), it.totalSykdomsgrad())
+            assertEquals(ratio(187.0, 620.0), it.totalSykdomsgrad())
             // grense = 864
         }
         betalte.forEach {
@@ -468,4 +450,25 @@ internal class ØkonomiTest {
 
     private fun Økonomi.inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, `6G`: Inntekt) =
         inntekt(aktuellDagsinntekt, dekningsgrunnlag, `6G`, aktuellDagsinntekt)
+}
+
+private val Int.januar get() = LocalDate.of(2018, 1, this)
+
+private const val ØnsketOppførsel = "✅ Koden oppfører seg nå som ønsket! Fjern bruken av 'assertForventetFeil', og behold kun assertions for ønsket oppførsel ✅"
+private const val FeilITestkode = "☠️️ Feil i testkoden, feiler ikke på assertions ☠️️"
+
+private fun Throwable.håndterNåOppførselFeil(harØnsketOppførsel: Boolean) {
+    if (harØnsketOppførsel) throw AssertionError(ØnsketOppførsel)
+    if (this is AssertionError) throw AssertionError("⚠️ Koden har endret nå-oppførsel, men ikke til ønsket oppførsel ⚠️️️", this)
+    throw AssertionError(FeilITestkode, this)
+}
+
+private fun Throwable.håndterØnsketOppførselFeil(forklaring: String?)= when (this) {
+    is AssertionError -> println("☹️ Det er kjent at vi ikke har ønsket oppførsel for ${forklaring?:"denne testen"} ☹️️")
+    else -> throw AssertionError(FeilITestkode, this)
+}
+
+private fun assertForventetFeil(forklaring: String? = null, nå: () -> Unit, ønsket: () -> Unit) {
+    runCatching(nå).exceptionOrNull()?.håndterNåOppførselFeil(harØnsketOppførsel = runCatching(ønsket).isSuccess)
+    assertThrows<Throwable>(ØnsketOppførsel) { ønsket() }.håndterØnsketOppførselFeil(forklaring)
 }
