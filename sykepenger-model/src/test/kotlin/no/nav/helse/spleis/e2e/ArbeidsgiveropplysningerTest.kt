@@ -801,14 +801,14 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar, a2)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            beregnetInntekt = INNTEKT_FLERE_AG
+            beregnetInntekt = INNTEKT_FLERE_AG,
+            orgnummer = a1
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT_FLERE_AG,
             refusjon = refusjon,
-            orgnummer = a2,
-            beregnetInntekt = INNTEKT_FLERE_AG
+            orgnummer = a2
         )
 
         fraVilkårsprøvingTilGodkjent(INNTEKT_FLERE_AG)
@@ -828,13 +828,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(ag1Periode.start til ag1Periode.start.plusDays(15)),
-            orgnummer = a1,
-            beregnetInntekt = inntekt
+            beregnetInntekt = inntekt,
+            orgnummer = a1
         )
         håndterInntektsmelding(
             listOf(ag2Periode.start til ag2Periode.start.plusDays(15)),
-            orgnummer = a2,
-            beregnetInntekt = inntekt
+            beregnetInntekt = inntekt,
+            orgnummer = a2
         )
 
         fraVilkårsprøvingTilGodkjent(inntekt)

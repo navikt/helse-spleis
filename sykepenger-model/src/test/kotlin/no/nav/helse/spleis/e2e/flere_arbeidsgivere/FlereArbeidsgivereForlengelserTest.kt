@@ -121,9 +121,9 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            orgnummer = a1,
             beregnetInntekt = 30000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList()),
+            orgnummer = a1
         )
 
         val inntekter = listOf(
@@ -160,9 +160,9 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
             førsteFraværsdag = 1.februar,
-            orgnummer = a2,
             beregnetInntekt = 30000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList()),
+            orgnummer = a2
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)

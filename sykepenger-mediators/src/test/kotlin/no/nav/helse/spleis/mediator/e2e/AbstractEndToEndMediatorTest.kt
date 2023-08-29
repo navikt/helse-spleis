@@ -58,6 +58,7 @@ import no.nav.helse.spleis.mediator.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -251,7 +252,8 @@ internal abstract class AbstractEndToEndMediatorTest() {
         beregnetInntekt: Double = INNTEKT,
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = ORGNUMMER,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        avsenderSystem: AvsenderSystem? = AvsenderSystem("NAV_NO", "1.0")
     ): Pair<UUID, String> {
         return meldingsfabrikk.lagInnteksmelding(
             arbeidsgiverperiode,
@@ -260,7 +262,8 @@ internal abstract class AbstractEndToEndMediatorTest() {
             beregnetInntekt,
             opphørsdatoForRefusjon,
             orgnummer,
-            begrunnelseForReduksjonEllerIkkeUtbetalt
+            begrunnelseForReduksjonEllerIkkeUtbetalt,
+            avsenderSystem
         ).let { (id, message) ->
             testRapid.sendTestMessage(message)
             id.toUUID() to message

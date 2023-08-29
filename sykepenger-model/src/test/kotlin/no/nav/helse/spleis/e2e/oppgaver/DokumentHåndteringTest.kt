@@ -144,7 +144,10 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         observatør.inntektsmeldingIkkeHåndtert.clear()
         observatør.inntektsmeldingHåndtert.clear()
-        val korrigertInntektsmelding2 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
+        val korrigertInntektsmelding2 = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT * 1.1
+        )
         assertEquals(listOf(korrigertInntektsmelding2, korrigertInntektsmelding2), observatør.inntektsmeldingHåndtert.map { it.first })
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
     }
@@ -162,7 +165,11 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val februarA2DokumentIderFør = inspektør(a2).hendelseIder(2.vedtaksperiode)
         val aprilA2DokumentIderFør = inspektør(a2).hendelseIder(3.vedtaksperiode)
 
-        val a1KorrigertInntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, orgnummer = a1)
+        val a1KorrigertInntektsmelding = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT * 1.1,
+            orgnummer = a1
+        )
         assertVarsel(RV_IV_2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
         val skjønnsmessigFastsettelse = håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1), OverstyrtArbeidsgiveropplysning(a2, INNTEKT)))
@@ -346,7 +353,10 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
 
         val søknad2 = håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-        val im = håndterInntektsmelding(listOf(10.januar til 26.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
+        val im = håndterInntektsmelding(
+            listOf(10.januar til 26.januar),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
+        )
         assertFunksjonellFeil(RV_IM_8)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
@@ -501,7 +511,11 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `sender ut inntektsmelding ikke håndtert på im med funksjonelle feil ved revurdering av dager`() {
         nyttVedtak(1.januar, 31.januar)
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, harOpphørAvNaturalytelser = true)
+        val inntektsmeldingId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            harOpphørAvNaturalytelser = true
+        )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
     }

@@ -8,6 +8,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -319,7 +320,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             beregnetInntekt = inntekt,
             førsteFraværsdag = periode.start,
-            orgnummer = orgnummer
+            orgnummer = orgnummer,
+            avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
         ).håndter(Person::håndter)
     }
 

@@ -31,7 +31,11 @@ internal class SerialiseringAvRefusjonsopplysningerE2ETest : AbstractEndToEndTes
     @Test
     fun `lagrer refusjonsopplysninger i vilkårsgrunnlag for to arbeidsgivere`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
-        håndterInntektsmelding(orgnummer = a2, arbeidsgiverperioder = listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(15000.månedlig, opphørsdato = null))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(15000.månedlig, opphørsdato = null),
+            orgnummer = a2
+        )
         inspektør(a1).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, 20000.månedlig)
         inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, 15000.månedlig)
         val json = person.serialize().json

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -68,7 +67,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i refusjonsbeløp`() {
         nyttVedtak(1.januar, 31.januar)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(2000.månedlig, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(2000.månedlig, null, emptyList())
+        )
 
         assertVarsel(RV_IM_4)
     }
@@ -275,7 +277,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         nyttVedtak(10.januar, 31.januar)
         val agpFør = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)
-        håndterInntektsmelding(listOf(12.januar til 28.januar))
+        håndterInntektsmelding(listOf(12.januar til 28.januar), avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
         val agpEtter = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)
 
         assertEquals(Arbeidsgiverperiode(listOf(1.januar til 5.januar, 10.januar til 26.januar)), agpFør)

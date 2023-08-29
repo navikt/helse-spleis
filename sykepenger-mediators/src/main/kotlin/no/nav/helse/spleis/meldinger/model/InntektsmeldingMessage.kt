@@ -42,6 +42,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     private val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
     private val personopplysninger = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato, dødsdato)
+    private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem()
 
     protected val inntektsmelding
         get() = Inntektsmelding(
@@ -56,8 +57,9 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            mottatt = mottatt,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            avsendersystem = avsendersystem,
+            mottatt = mottatt
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
@@ -94,5 +96,19 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             private fun alleTegnErSiffer(string: String) = string.matches(Regex("\\d*"))
         }
     }
+
+    private fun JsonNode.tilAvsendersystem(): Inntektsmelding.Avsendersystem? =
+        takeIf(JsonNode::isTextual)
+            ?.let {
+                it["navn"]
+                    .takeIf(JsonNode::isTextual)?.asText()
+                    ?.let { avsendersystemNavn ->
+                        when (avsendersystemNavn) {
+                            "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO
+                            "AltinnPortal" -> Inntektsmelding.Avsendersystem.ALTINN
+                            else -> Inntektsmelding.Avsendersystem.LPS
+                        }
+                    }
+            }
 }
 

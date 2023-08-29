@@ -154,7 +154,10 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), refusjon = Refusjon(INNTEKT, 20.januar, emptyList()))
+        håndterInntektsmelding(
+            listOf(Periode(3.januar, 18.januar)),
+            refusjon = Refusjon(INNTEKT, 20.januar, emptyList())
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         assertTilstander(

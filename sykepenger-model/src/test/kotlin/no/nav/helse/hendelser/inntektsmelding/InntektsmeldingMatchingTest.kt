@@ -295,7 +295,8 @@ internal class InntektsmeldingMatchingTest {
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
-            mottatt = LocalDateTime.now()
+            avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
+            mottatt = LocalDateTime.now(),
         ).let { inntektsmelding ->
             DagerFraInntektsmelding(inntektsmelding)
         }

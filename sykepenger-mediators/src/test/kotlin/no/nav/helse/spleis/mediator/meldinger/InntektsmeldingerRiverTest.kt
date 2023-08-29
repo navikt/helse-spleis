@@ -5,17 +5,23 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.IMessageMediator
-import no.nav.inntektsmeldingkontrakt.*
-import no.nav.inntektsmeldingkontrakt.Naturalytelse.*
-import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.mai
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
+import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.AvsenderSystem
+import no.nav.inntektsmeldingkontrakt.EndringIRefusjon
+import no.nav.inntektsmeldingkontrakt.Naturalytelse.ELEKTRONISKKOMMUNIKASJON
+import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
+import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.Status
+import org.junit.jupiter.api.Test
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal class InntektsmeldingerRiverTest : RiverTest() {
@@ -42,7 +48,9 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         arkivreferanse = "",
         ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
         foersteFravaersdag = LocalDate.now(),
-        mottattDato = LocalDateTime.now()
+        mottattDato = LocalDateTime.now(),
+        naerRelasjon = null,
+        avsenderSystem = AvsenderSystem("NAV_NO", "1.0")
     ).asObjectNode()
     private val ValidInntektsmeldingUtenRefusjon = Inntektsmeldingkontrakt(
         inntektsmeldingId = UUID.randomUUID().toString(),
@@ -63,7 +71,8 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         arkivreferanse = "",
         ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
         foersteFravaersdag = LocalDate.now(),
-        mottattDato = LocalDateTime.now()
+        mottattDato = LocalDateTime.now(),
+        naerRelasjon = null
     ).asObjectNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()

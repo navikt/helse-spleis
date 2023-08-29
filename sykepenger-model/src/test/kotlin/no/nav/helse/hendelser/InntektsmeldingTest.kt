@@ -15,6 +15,7 @@ import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
@@ -109,10 +110,12 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `padder ikke med arbeidsdager mellom siste arbeidsgiverperiode og første fraværsdag`() {
-        inntektsmelding(listOf(
-            1.januar til 7.januar,
-            10.januar til 18.januar
-        ), førsteFraværsdag = 25.januar)
+        inntektsmelding(
+            listOf(
+                1.januar til 7.januar,
+                10.januar til 18.januar
+            ), førsteFraværsdag = 25.januar
+        )
         inntektsmelding.padLeft(1.januar)
         val tidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, tidslinje.førsteDag())
@@ -125,10 +128,12 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `padder ikke med arbeidsdager mellom dato og første fraværsdag`() {
-        inntektsmelding(listOf(
-            1.januar til 7.januar,
-            10.januar til 18.januar
-        ), førsteFraværsdag = 25.januar)
+        inntektsmelding(
+            listOf(
+                1.januar til 7.januar,
+                10.januar til 18.januar
+            ), førsteFraværsdag = 25.januar
+        )
         inntektsmelding.padLeft(20.januar)
         val tidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, tidslinje.førsteDag())
@@ -142,10 +147,12 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `padder med arbeidsdager før arbeidsgiverperiode, men ikke mellom dato og første fraværsdag`() {
-        inntektsmelding(listOf(
-            1.januar til 7.januar,
-            10.januar til 18.januar
-        ), førsteFraværsdag = 25.januar)
+        inntektsmelding(
+            listOf(
+                1.januar til 7.januar,
+                10.januar til 18.januar
+            ), førsteFraværsdag = 25.januar
+        )
         inntektsmelding.padLeft(31.desember(2017))
         val tidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(31.desember(2017), tidslinje.førsteDag())
@@ -221,7 +228,11 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag & begrunnelseForReduksjonEllerIkkeUtbetalt satt`() {
-        inntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre")
+        inntektsmelding(
+            emptyList(),
+            førsteFraværsdag = 1.januar,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FiskerMedHyre"
+        )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         inntektsmelding.valider(1.januar til 31.januar, NullObserver)
         aktivitetslogg.assertInfo("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: FiskerMedHyre")
@@ -434,7 +445,12 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `lagrer inntekt for periodens skjæringstidspunkt dersom det er annerledes enn inntektmeldingens skjæringstidspunkt`() {
-        inntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 3.februar)
+        inntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            refusjonBeløp = 2000.månedlig,
+            beregnetInntekt = 2000.månedlig,
+            førsteFraværsdag = 3.februar
+        )
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar)
         assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.februar, 1.februar, null)?.inspektør?.beløp)
@@ -443,7 +459,12 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `lagrer inntekt på første dag i arbeidsgiverpeiroden`() {
-        inntektsmelding(listOf(1.januar til 10.januar, 11.januar til 16.januar), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 1.januar)
+        inntektsmelding(
+            listOf(1.januar til 10.januar, 11.januar til 16.januar),
+            refusjonBeløp = 2000.månedlig,
+            beregnetInntekt = 2000.månedlig,
+            førsteFraværsdag = 1.januar
+        )
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, NullObserver)
         assertEquals(2000.månedlig, inntektshistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
@@ -451,9 +472,23 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `uenige om arbeidsgiverperiode`() {
-        inntektsmelding(listOf(2.januar til 17.januar))
+        inntektsmelding(listOf(2.januar til 17.januar), avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
         inntektsmelding.validerArbeidsgiverperiode(1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertVarsel(RV_IM_3)
+    }
+
+    @Test
+    fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
+        inntektsmelding(listOf(2.januar til 17.januar), avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO)
+        inntektsmelding.validerArbeidsgiverperiode(1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
+        aktivitetslogg.assertVarsel(RV_IM_3)
+    }
+
+    @Test
+    fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() {
+        inntektsmelding(emptyList(), avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO)
+        inntektsmelding.validerArbeidsgiverperiode(1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
+        aktivitetslogg.assertIngenVarsel(RV_IM_3)
     }
 
     private fun inntektsmelding(
@@ -464,7 +499,8 @@ internal class InntektsmeldingTest {
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
         arbeidsforholdId: String? = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
     ) {
         aktivitetslogg = Aktivitetslogg()
         inntektsmelding = hendelsefabrikk.lagInntektsmelding(
@@ -474,7 +510,8 @@ internal class InntektsmeldingTest {
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg,
+            avsendersystem = avsendersystem
         )
     }
 }

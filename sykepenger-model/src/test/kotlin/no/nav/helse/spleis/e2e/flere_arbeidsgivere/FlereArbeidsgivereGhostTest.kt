@@ -161,7 +161,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     fun `Korrigerende refusjonsopplysninger på arbeidsgiver med skatteinntekt i sykepengegrunnlaget`() {
         utbetalPeriodeMedGhost()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
-        val inntektsmelding = håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = 32000.månedlig)
+        val inntektsmelding = håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            beregnetInntekt = 32000.månedlig,
+            orgnummer = a2
+        )
         assertVarsel(RV_RE_1, 1.vedtaksperiode.filter(a2))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
@@ -177,10 +181,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         val korrigerendeInntektsmelding = håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.februar til 16.februar),
-            orgnummer = a2,
-            beregnetInntekt = 32000.månedlig,
             førsteFraværsdag = 20.februar,
-            refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null)
+            beregnetInntekt = 32000.månedlig,
+            refusjon = Inntektsmelding.Refusjon(beløp = 30000.månedlig, null),
+            orgnummer = a2
         )
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to SkattSykepengegrunnlag::class))
 
@@ -211,7 +215,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(26.mars, 10.april), orgnummer = a1)
         håndterSøknad(Sykdom(26.mars, 10.april, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
             førsteFraværsdag = 26.mars,
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1

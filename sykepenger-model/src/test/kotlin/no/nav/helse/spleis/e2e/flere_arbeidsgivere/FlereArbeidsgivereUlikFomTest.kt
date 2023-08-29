@@ -124,7 +124,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(listOf(28.februar til 15.mars), førsteFraværsdag = 28.februar, orgnummer = a1) // ff 1 mars
-        håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, beregnetInntekt = INNTEKT, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(5.mars til 20.mars),
+            førsteFraværsdag = 5.mars,
+            beregnetInntekt = INNTEKT,
+            orgnummer = a2
+        )
 
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
@@ -264,7 +269,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(listOf(28.februar til 15.mars), førsteFraværsdag = 28.februar, orgnummer = a1)
-        håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, beregnetInntekt = INNTEKT, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(5.mars til 20.mars),
+            førsteFraværsdag = 5.mars,
+            beregnetInntekt = INNTEKT,
+            orgnummer = a2
+        )
 
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
@@ -1239,8 +1249,18 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars, beregnetInntekt = 31000.månedlig, orgnummer = a1)
-        håndterInntektsmelding(listOf(5.mars til 20.mars), førsteFraværsdag = 5.mars, beregnetInntekt = 21000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            førsteFraværsdag = 1.mars,
+            beregnetInntekt = 31000.månedlig,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(5.mars til 20.mars),
+            førsteFraværsdag = 5.mars,
+            beregnetInntekt = 21000.månedlig,
+            orgnummer = a2
+        )
 
         val inntekterFraSkatt = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
@@ -1392,7 +1412,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 22.januar, beregnetInntekt = 32000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 22.januar,
+            beregnetInntekt = 32000.månedlig,
+            orgnummer = a2
+        )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -1769,9 +1794,10 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         nyPeriode(1.mai(2023) til 30.mai(2023), orgnummer = a1)
         nyPeriode(1.mai(2023) til 31.mai(2023), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.mai(2023) til 16.mai(2023)), orgnummer = a1, beregnetInntekt = inntektA1)
-        håndterInntektsmelding(listOf(1.mai(2023) til 16.mai(2023)), orgnummer = a2, beregnetInntekt = inntektA2, refusjon = Refusjon(
-            INGEN, null, emptyList())
+        håndterInntektsmelding(listOf(1.mai(2023) til 16.mai(2023)), beregnetInntekt = inntektA1, orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.mai(2023) til 16.mai(2023)), beregnetInntekt = inntektA2, refusjon = Refusjon(
+                INGEN, null, emptyList()), orgnummer = a2
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode,

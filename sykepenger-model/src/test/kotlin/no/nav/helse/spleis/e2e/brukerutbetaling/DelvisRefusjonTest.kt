@@ -627,8 +627,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, refusjon = Inntektsmelding.Refusjon(
-            INNTEKT, 20.januar))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(
+                INNTEKT, 20.januar), orgnummer = a2
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -687,7 +689,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Første utbetalte dag er før første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(), førsteFraværsdag = 17.januar)
+        håndterInntektsmelding(listOf(), førsteFraværsdag = 17.januar, avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -743,8 +745,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, refusjon = Inntektsmelding.Refusjon(
-            INNTEKT, 15.januar, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(
+                INNTEKT, 15.januar, emptyList()), orgnummer = a2
+        )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
                 listOf(

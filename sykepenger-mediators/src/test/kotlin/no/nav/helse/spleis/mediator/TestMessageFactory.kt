@@ -29,6 +29,7 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -235,7 +236,8 @@ internal class TestMessageFactory(
         beregnetInntekt: Double = inntekt,
         orgnummer: String,
         opphørsdatoForRefusjon: LocalDate? = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        avsenderSystem: AvsenderSystem?
     ) = Inntektsmelding(
         inntektsmeldingId = UUID.randomUUID().toString(),
         arbeidstakerFnr = fødselsnummer,
@@ -256,7 +258,9 @@ internal class TestMessageFactory(
         ferieperioder = emptyList(),
         foersteFravaersdag = førsteFraværsdag,
         mottattDato = LocalDateTime.now(),
-        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        naerRelasjon = null,
+        avsenderSystem = avsenderSystem
     )
 
     fun lagInnteksmelding(
@@ -266,7 +270,8 @@ internal class TestMessageFactory(
         beregnetInntekt: Double = inntekt,
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = organisasjonsnummer,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        avsenderSystem: AvsenderSystem? = AvsenderSystem("NAV_NO", "1.0")
     ) = nyHendelse(
         "inntektsmelding", lagInntektsmelding(
             arbeidsgiverperiode,
@@ -275,7 +280,8 @@ internal class TestMessageFactory(
             beregnetInntekt,
             orgnummer,
             opphørsdatoForRefusjon,
-            begrunnelseForReduksjonEllerIkkeUtbetalt
+            begrunnelseForReduksjonEllerIkkeUtbetalt,
+            avsenderSystem
         ).toMapMedFelterFraSpedisjon(fødselsdato, aktørId)
     )
 

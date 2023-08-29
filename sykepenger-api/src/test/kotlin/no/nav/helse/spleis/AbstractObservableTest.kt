@@ -126,7 +126,8 @@ abstract class AbstractObservableTest {
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         fnr: String = UNG_PERSON_FNR,
-        harFlereInntektsmeldinger: Boolean = false
+        harFlereInntektsmeldinger: Boolean = false,
+        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,
@@ -140,6 +141,7 @@ abstract class AbstractObservableTest {
         begrunnelseForReduksjonEllerIkkeUtbetalt = null,
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+        avsendersystem = avsendersystem,
         mottatt = LocalDateTime.now()
     )
 

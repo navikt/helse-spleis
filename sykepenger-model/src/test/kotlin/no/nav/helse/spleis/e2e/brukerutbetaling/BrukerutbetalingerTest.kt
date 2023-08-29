@@ -29,9 +29,9 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
-            refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+            refusjon = Inntektsmelding.Refusjon(0.månedlig, null)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
@@ -47,9 +47,9 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
-            refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+            refusjon = Inntektsmelding.Refusjon(20000.månedlig, null)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
@@ -69,9 +69,9 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
-            refusjon = Inntektsmelding.Refusjon(INNTEKT /2, null),
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+            refusjon = Inntektsmelding.Refusjon(INNTEKT /2, null)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()

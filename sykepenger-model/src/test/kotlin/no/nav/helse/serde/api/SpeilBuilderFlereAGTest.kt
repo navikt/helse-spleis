@@ -119,7 +119,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterInntektsmelding(listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
+        håndterInntektsmelding(listOf(4.januar til 19.januar), beregnetInntekt = 5000.månedlig, orgnummer = a2)
 
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -967,8 +967,16 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar, orgnummer = a1)
 
-        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 1.februar, orgnummer = a2)
-        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), førsteFraværsdag = 13.mars, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(17.januar til 26.januar, 1.februar til 6.februar),
+            førsteFraværsdag = 1.februar,
+            orgnummer = a2
+        )
+        håndterInntektsmelding(
+            listOf(17.januar til 26.januar, 1.februar til 6.februar),
+            førsteFraværsdag = 13.mars,
+            orgnummer = a2
+        )
 
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
