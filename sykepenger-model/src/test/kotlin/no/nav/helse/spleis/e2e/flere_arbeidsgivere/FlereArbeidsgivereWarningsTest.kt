@@ -108,7 +108,12 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2, beregnetInntekt = 1000.månedlig)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = 1000.månedlig,
+            orgnummer = a2
+        )
 
         assertTilstander(
             1.vedtaksperiode,

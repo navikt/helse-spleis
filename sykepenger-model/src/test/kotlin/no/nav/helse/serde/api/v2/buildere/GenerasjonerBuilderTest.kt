@@ -323,12 +323,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a1)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
+            beregnetInntekt = 1000.månedlig,
             refusjon = Inntektsmelding.Refusjon(
                 beløp = 1000.månedlig,
                 opphørsdato = null,
                 endringerIRefusjon = emptyList()
             ),
-            beregnetInntekt = 1000.månedlig,
             orgnummer = a1
         )
 
@@ -1155,9 +1155,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
-            refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+            refusjon = Inntektsmelding.Refusjon(0.månedlig, null)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()

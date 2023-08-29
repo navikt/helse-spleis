@@ -12,8 +12,16 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
+        val githubPassword: String by project
         mavenCentral()
         maven("https://jitpack.io")
+        maven {
+            url = uri("https://maven.pkg.github.com/navikt/*")
+            credentials {
+                username = "x-access-token"
+                password = githubPassword
+            }
+        }
     }
 
     /*

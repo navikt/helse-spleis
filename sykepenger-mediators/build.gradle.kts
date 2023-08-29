@@ -6,7 +6,7 @@ plugins {
 
 val mainClass = "no.nav.helse.AppKt"
 
-val innteksmeldingKontraktVersion = "2020.04.06-ab8f786"
+val innteksmeldingKontraktVersion = "2023.06.20-08-54-d1c6c"
 val syfokafkaVersion = "2023.04.26-09.43-58888de2"
 val mockkVersion = "1.12.4"
 val jsonSchemaValidatorVersion = "1.0.70"
@@ -22,7 +22,7 @@ dependencies {
         exclude("com.fasterxml.jackson.core")
     }
     testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
-    testImplementation("com.github.navikt:inntektsmelding-kontrakt:$innteksmeldingKontraktVersion")
+    testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:$innteksmeldingKontraktVersion")
     testImplementation("com.github.navikt:sykepengesoknad-kafka:$syfokafkaVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")

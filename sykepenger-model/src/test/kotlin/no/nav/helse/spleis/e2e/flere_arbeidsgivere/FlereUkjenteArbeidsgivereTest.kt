@@ -107,7 +107,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        håndterInntektsmelding(listOf(1.mars til 16.mars), begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet", orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            orgnummer = a2,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet"
+        )
         nullstillTilstandsendringer()
         nyPeriode(1.mars til 20.mars, a2)
 
@@ -278,7 +282,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         // a2 sent til festen
-        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        val id = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a2,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
+        )
         assertEquals(id, observatør.inntektsmeldingIkkeHåndtert.single())
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -320,7 +328,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         // a2 sent til festen
-        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        val imId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a2,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
+        )
         assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -356,7 +368,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `to arbeidsgivere - ny overlappende førstegangsbehandling hos ag2 som først var antatt å være frisk - men tidlig inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        val imId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            orgnummer = a2,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ja"
+        )
         assertEquals(imId, observatør.inntektsmeldingIkkeHåndtert.single())
 
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)

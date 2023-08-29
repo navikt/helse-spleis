@@ -68,7 +68,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertInntektForDato(INNTEKT, fom, inspektør = inspektør)
 
-        håndterInntektsmelding(listOf(fom til fom.plusDays(15)), beregnetInntekt = overstyrtInntekt, refusjon = Refusjon(overstyrtInntekt, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(fom til fom.plusDays(15)),
+            beregnetInntekt = overstyrtInntekt,
+            refusjon = Refusjon(overstyrtInntekt, null, emptyList())
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -167,7 +171,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = OverMinstegrense)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = OverMinstegrense
+        )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(

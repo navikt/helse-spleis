@@ -123,7 +123,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID(),
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-        harFlereInntektsmeldinger: Boolean = false
+        harFlereInntektsmeldinger: Boolean = false,
+        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
@@ -139,6 +140,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+                avsendersystem = avsendersystem,
                 mottatt = LocalDateTime.now(),
                 aktivitetslogg = aktivitetslogg
             )

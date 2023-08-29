@@ -158,7 +158,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(1.juni, 30.juni)
 
         håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
-        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 1.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        håndterInntektsmelding(
+            listOf(1.juni til 16.juni),
+            førsteFraværsdag = 1.august,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
+        )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

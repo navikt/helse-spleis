@@ -160,8 +160,16 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = 45000.månedlig, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = 44000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar(2020) til 16.januar(2020)),
+            beregnetInntekt = 45000.månedlig,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar(2020) til 16.januar(2020)),
+            beregnetInntekt = 44000.månedlig,
+            orgnummer = a2
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -215,7 +223,11 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `legger ikke til utbetalingsId dersom status er forkastet`(){
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "noe", refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"
+        )
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

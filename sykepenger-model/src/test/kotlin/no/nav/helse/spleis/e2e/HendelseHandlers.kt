@@ -312,11 +312,11 @@ internal fun AbstractEndToEndTest.tilYtelser(
     håndterInntektsmelding(
         arbeidsgiverperiode ?: listOf(Periode(fom, fom.plusDays(15))),
         førsteFraværsdag = førsteFraværsdag,
-        fnr = fnr,
-        orgnummer = orgnummer,
-        refusjon = refusjon,
         beregnetInntekt = beregnetInntekt,
-        id = inntektsmeldingId
+        refusjon = refusjon,
+        orgnummer = orgnummer,
+        id = inntektsmeldingId,
+        fnr = fnr
     )
     val id = observatør.sisteVedtaksperiode()
     håndterVilkårsgrunnlag(
@@ -479,9 +479,19 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
     harOpphørAvNaturalytelser: Boolean = false,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
+    avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
 ): UUID {
     assertIkkeEtterspurt(Inntektsmelding::class, Behovtype.InntekterForSammenligningsgrunnlag, vedtaksperiodeIdInnhenter, orgnummer)
-    return håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag, beregnetInntekt = beregnetInntekt, refusjon, harOpphørAvNaturalytelser = harOpphørAvNaturalytelser, orgnummer = orgnummer, fnr = fnr)
+    return håndterInntektsmelding(
+        arbeidsgiverperioder,
+        førsteFraværsdag,
+        beregnetInntekt = beregnetInntekt,
+        refusjon,
+        orgnummer = orgnummer,
+        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+        fnr = fnr,
+        avsendersystem = avsendersystem
+    )
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
@@ -496,6 +506,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     harFlereInntektsmeldinger: Boolean = false,
+    avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
     førReplay: () -> Unit = {}
 ) = håndterInntektsmelding(inntektsmelding(
     id,
@@ -508,7 +519,8 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     arbeidsforholdId = arbeidsforholdId,
     fnr = fnr,
     begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-    harFlereInntektsmeldinger = harFlereInntektsmeldinger
+    harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+    avsendersystem = avsendersystem
 ), førReplay)
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Inntektsmelding, førReplay: () -> Unit = {}) : UUID {

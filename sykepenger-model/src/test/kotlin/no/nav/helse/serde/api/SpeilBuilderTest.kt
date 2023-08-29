@@ -291,8 +291,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `endring i refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
-            Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar))))
+        val inntektsmeldingId = håndterInntektsmelding(
+            listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
+                Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar)))
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -320,7 +322,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `korrigert inntektsmelding i Avsluttet, velger opprinnelig refusjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),  refusjon = Inntektsmelding.Refusjon(20000.månedlig, null))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(20000.månedlig, null)
+        )
 
         val speil = speilApi()
         val generasjoner = speil.arbeidsgivere.first().generasjoner
@@ -345,7 +350,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.februar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            1.februar,
+            refusjon = Inntektsmelding.Refusjon(INGEN, null)
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()

@@ -26,7 +26,10 @@ internal class GodkjenningsbehovTagsTest : AbstractEndToEndTest() {
     @Test
     fun `personutbetaling`() {
         nyPeriode(1.januar til 31.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null)
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -36,7 +39,10 @@ internal class GodkjenningsbehovTagsTest : AbstractEndToEndTest() {
     @Test
     fun `delvis refusjon`() {
         nyPeriode(1.januar til 31.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT/2, opphørsdato = null))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT/2, opphørsdato = null)
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

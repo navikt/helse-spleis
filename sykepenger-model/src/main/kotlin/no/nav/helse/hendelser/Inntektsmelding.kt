@@ -51,6 +51,7 @@ class Inntektsmelding(
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
     private val harFlereInntektsmeldinger: Boolean,
+    private val avsendersystem: Avsendersystem?,
     mottatt: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : SykdomstidslinjeHendelse(
@@ -187,6 +188,7 @@ class Inntektsmelding(
 
     private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
         if (arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
+        if (avsendersystem == Avsendersystem.NAV_NO && arbeidsgiverperioder.isEmpty()) return
         varsel(RV_IM_3)
     }
 
@@ -230,6 +232,11 @@ class Inntektsmelding(
 
     }
 
+    enum class Avsendersystem {
+        NAV_NO,
+        ALTINN,
+        LPS
+    }
 
     class Refusjon(
         private val beløp: Inntekt?,

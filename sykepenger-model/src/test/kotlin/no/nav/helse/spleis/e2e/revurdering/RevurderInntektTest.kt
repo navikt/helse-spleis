@@ -89,7 +89,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurder inntekt happy case`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Refusjon(32000.månedlig, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 32000.månedlig,
+            refusjon = Refusjon(32000.månedlig, null, emptyList())
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -138,14 +142,22 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt flere ganger`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Refusjon(32000.månedlig, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 32000.månedlig,
+            refusjon = Refusjon(32000.månedlig, null, emptyList())
+        )
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, refusjon = Refusjon(31000.månedlig, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 31000.månedlig,
+            refusjon = Refusjon(31000.månedlig, null, emptyList())
+        )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -399,7 +411,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Refusjon(32000.månedlig, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = 32000.månedlig,
+            refusjon = Refusjon(32000.månedlig, null, emptyList())
+        )
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         håndterYtelser(1.vedtaksperiode)
@@ -440,7 +456,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `Ved revurdering av inntekt til under krav til minste sykepengegrunnlag skal utbetaling opphøres`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = 50000.årlig)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = 50000.årlig
+        )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
@@ -471,7 +491,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = OverMinstegrense)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = OverMinstegrense
+        )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
@@ -656,7 +680,10 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurdere inntekt slik at det blir delvis refusjon`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(25000.månedlig, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(25000.månedlig, null, emptyList())
+        )
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)

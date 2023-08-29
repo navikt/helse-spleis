@@ -64,6 +64,7 @@ internal abstract class AbstractPersonTest {
                     arbeidsforholdId = null,
                     begrunnelseForReduksjonEllerIkkeUtbetalt = null,
                     harFlereInntektsmeldinger = false,
+                    avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
                     mottatt = LocalDateTime.now()
                 )
             )

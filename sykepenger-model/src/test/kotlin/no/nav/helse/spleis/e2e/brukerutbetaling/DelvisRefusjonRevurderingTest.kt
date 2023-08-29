@@ -111,8 +111,18 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         val a1Inntekt = 50000.månedlig
         val a2Inntekt = 10000.månedlig
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = a1Inntekt, refusjon = Inntektsmelding.Refusjon(a1Inntekt, null, emptyList()))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = a2Inntekt, refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = a1Inntekt,
+            refusjon = Inntektsmelding.Refusjon(a1Inntekt, null, emptyList()),
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = a2Inntekt,
+            refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()),
+            orgnummer = a2
+        )
 
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
@@ -170,9 +180,9 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            orgnummer = a1,
             beregnetInntekt = a1Inntekt / 2,
-            refusjon = Inntektsmelding.Refusjon(a1Inntekt / 2, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(a1Inntekt / 2, null, emptyList()),
+            orgnummer = a1
         )
         håndterOverstyrInntekt(
             inntekt = a1Inntekt / 2,

@@ -175,7 +175,8 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
-    harFlereInntektsmeldinger: Boolean = false
+    harFlereInntektsmeldinger: Boolean = false,
+    avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
         ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagInntektsmelding(
@@ -187,7 +188,8 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            avsendersystem = avsendersystem
         )
     }
     inntektsmeldinger[id] = LocalDateTime.now() to inntektsmeldinggenerator

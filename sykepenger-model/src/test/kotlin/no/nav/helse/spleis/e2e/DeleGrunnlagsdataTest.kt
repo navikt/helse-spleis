@@ -44,7 +44,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(5.april, 30.april, 100.prosent))
         val inntektsmelding1Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)))
-        val inntektsmelding2Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 5.april)
+        val inntektsmelding2Id = håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+            førsteFraværsdag = 5.april
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

@@ -203,11 +203,13 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        håndterInntektsmelding(listOf(
-            1.januar til 5.januar,
-            6.januar til 9.januar, // lager et tredagers opphold (10. januar - 12. januar) som forskyver agp
-            13.januar til 19.januar // til å slutte 19. januar. Periode nr 3. forlenger derfor kun helg, og skal også avsluttes uten utbetaling
-        ), førsteFraværsdag = 13.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 5.januar,
+                6.januar til 9.januar, // lager et tredagers opphold (10. januar - 12. januar) som forskyver agp
+                13.januar til 19.januar // til å slutte 19. januar. Periode nr 3. forlenger derfor kun helg, og skal også avsluttes uten utbetaling
+            ), førsteFraværsdag = 13.januar
+        )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
@@ -226,10 +228,12 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(listOf(
-            1.januar til 7.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 3
-            15.januar til 23.januar  // haver innenfor arbeidsgiverperioden likevel
-        ), førsteFraværsdag = 15.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 7.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 3
+                15.januar til 23.januar  // haver innenfor arbeidsgiverperioden likevel
+            ), førsteFraværsdag = 15.januar
+        )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
@@ -242,10 +246,12 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 21.januar))
         håndterSøknad(Sykdom(17.januar, 21.januar, 100.prosent))
-        håndterInntektsmelding(listOf(
-            1.januar til 8.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 2
-            12.januar til 19.januar  // haver innenfor arbeidsgiverperioden likevel
-        ), førsteFraværsdag = 12.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 8.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 2
+                12.januar til 19.januar  // haver innenfor arbeidsgiverperioden likevel
+            ), førsteFraværsdag = 12.januar
+        )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
     }
@@ -414,11 +420,13 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
 
-        håndterInntektsmelding(listOf(
-            1.januar til 5.januar,
-            9.januar til 12.januar,
-            16.januar til 22.januar
-        ), førsteFraværsdag = 16.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 5.januar,
+                9.januar til 12.januar,
+                16.januar til 22.januar
+            ), førsteFraværsdag = 16.januar
+        )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -432,11 +440,13 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(
-            1.januar til 5.januar,
-            9.januar til 12.januar,
-            16.januar til 22.januar
-        ), førsteFraværsdag = 16.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 5.januar,
+                9.januar til 12.januar,
+                16.januar til 22.januar
+            ), førsteFraværsdag = 16.januar
+        )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -464,10 +474,12 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
         håndterSøknad(Sykdom(13.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(
-            1.januar til 5.januar,
-            9.januar til 19.januar
-        ), førsteFraværsdag = 9.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 5.januar,
+                9.januar til 19.januar
+            ), førsteFraværsdag = 9.januar
+        )
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -496,11 +508,13 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
         håndterSykmelding(Sykmeldingsperiode(9.januar, 12.januar))
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
-        håndterInntektsmelding(listOf(
-            1.januar til 5.januar,
-            9.januar til 12.januar,
-            16.januar til 22.januar
-        ), førsteFraværsdag = 16.januar)
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 5.januar,
+                9.januar til 12.januar,
+                16.januar til 22.januar
+            ), førsteFraværsdag = 16.januar
+        )
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))

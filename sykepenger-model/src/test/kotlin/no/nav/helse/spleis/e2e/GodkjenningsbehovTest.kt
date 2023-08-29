@@ -58,7 +58,10 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "Agp skal utbetales av NAV!!")
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "Agp skal utbetales av NAV!!"
+        )
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
