@@ -30,7 +30,7 @@ internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
             }
             val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
             val harAvvisteDager = avvisteDager.isNotEmpty()
-            subsumsjonObserver.`§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }, tidslinjerForSubsumsjon)
+            subsumsjonObserver.`§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.toSortedSet(), tidslinjerForSubsumsjon)
             if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)
             else aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
         }

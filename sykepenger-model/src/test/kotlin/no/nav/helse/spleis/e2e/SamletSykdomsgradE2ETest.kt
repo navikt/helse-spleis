@@ -1,9 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -26,6 +28,17 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
+
+    @Test
+    fun `hele perioden avvises`() {
+        nyeVedtak(1.januar, 4.februar, a1, a2)
+        nyPeriode(5.februar til 9.februar, a1, 10.prosent)
+        nyPeriode(5.februar til 9.februar, a2, 10.prosent)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        inspektør(a1).utbetaling(1).inspektør.also {
+            assertEquals(listOf(5.februar, 6.februar, 7.februar, 8.februar, 9.februar), it.utbetalingstidslinje.inspektør.avvistedatoer)
+        }
+    }
 
     @Test
     fun `avviser dager under 20 prosent`() {

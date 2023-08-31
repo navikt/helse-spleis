@@ -3,6 +3,7 @@ package no.nav.helse.etterlevelse
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.Year
+import java.util.SortedSet
 
 interface SubsumsjonObserver {
 
@@ -161,7 +162,7 @@ interface SubsumsjonObserver {
      * @param avvisteDager dager som vilkåret ikke er oppfylt for, hvis noen
      * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
      */
-    fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {}
+    fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: SortedSet<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {}
 
     /**
      * Vurdering av sykepengenes størrelse

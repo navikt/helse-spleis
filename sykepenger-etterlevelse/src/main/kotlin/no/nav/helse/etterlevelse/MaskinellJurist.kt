@@ -5,6 +5,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Year
 import java.time.format.DateTimeFormatter
+import java.util.SortedSet
 import java.util.UUID
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
@@ -307,8 +308,8 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {
-        fun logg(utfall: Utfall, dager: List<LocalDate>) {
+    override fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: SortedSet<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {
+        fun logg(utfall: Utfall, dager: Iterable<LocalDate>) {
             dager.forEach { dagen ->
                 leggTil(
                     GrupperbarSubsumsjon(
@@ -992,7 +993,7 @@ internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iter
 
     internal companion object {
         // forutsetter at <other> er sortert
-        fun ClosedRange<LocalDate>.trim(other: List<LocalDate>): List<ClosedRange<LocalDate>> {
+        fun ClosedRange<LocalDate>.trim(other: SortedSet<LocalDate>): List<ClosedRange<LocalDate>> {
             return other.fold(listOf(this)) { result, date ->
                 val siste = result.last()
                 // ingen trim
