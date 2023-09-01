@@ -149,12 +149,6 @@ internal class Arbeidsgiver private constructor(
             alleVedtaksperioder.auuGruppering(auu)?.forkast(hendelse, alleVedtaksperioder)
         }
 
-        internal fun List<Arbeidsgiver>.identifiserAUUSomErUtbetaltISpleis() {
-            flatMap { it.vedtaksperioder }.gruppérAuuer(AUU_SOM_VIL_UTBETALES).forEach {
-                it.identifiserAUUSomErUtbetaltISpleis()
-            }
-        }
-
         internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
            filter { arbeidsgiver ->
                vilkårsgrunnlag?.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) == true

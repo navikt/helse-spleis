@@ -2595,8 +2595,6 @@ internal class Vedtaksperiode private constructor(
 
             abstract fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>): Boolean
 
-            abstract fun identifiserAUUSomErUtbetaltISpleis()
-
             abstract fun identifiserForkastingScenarioer(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, alleVedtaksperioder: List<Vedtaksperiode>)
 
             internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>, årsak: String = "${hendelse::class.simpleName}") {
@@ -2675,13 +2673,6 @@ internal class Vedtaksperiode private constructor(
                 .filter { it.periode.starterEtter(sisteAuu.periode) }
                 .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
 
-            override fun identifiserAUUSomErUtbetaltISpleis() {
-                when (arbeidsgiver.utbetalingssituasjon(arbeidsgiverperiode, perioder)) {
-                    IKKE_UTBETALT -> sikkerLogg("det er utbetalingsdager som ikke er utbetalt")
-                    INGENTING_Å_UTBETALE -> sikkerLogg("det er ingen utbetalingsdager")
-                    UTBETALT -> sikkerLogg("alle utbetalingsdager er allerede utbetalt")
-                }
-            }
 
             override fun identifiserForkastingScenarioer(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, alleVedtaksperioder: List<Vedtaksperiode>) {
                 val auuGrupperingsperiode = førsteAuu.periode.start til sisteAuu.periode.endInclusive
@@ -2713,15 +2704,6 @@ internal class Vedtaksperiode private constructor(
                 )
             }
 
-            private fun sikkerLogg(melding: String) {
-                val vedtaksperiode = auuer.firstOrNull { it.forventerInntekt(NullObserver) } ?: førsteAuu
-                val fiktiv = if (arbeidsgiverperiode.fiktiv()) " (fiktiv)" else ""
-                sikkerlogg.info("AuuerMedSammeAGP som vil utbetales: $melding. Perioder=$perioder, arbeidsgiverperiode=${arbeidsgiverperiode.grupperSammenhengendePerioder()}${fiktiv}, {}, {}, {}",
-                    keyValue("fødselsnummer", vedtaksperiode.fødselsnummer),
-                    keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
-                    keyValue("vedtaksperiodeId", "${vedtaksperiode.id}"),
-                )
-            }
         }
 
         internal class AuuUtenAGP(
@@ -2732,7 +2714,6 @@ internal class Vedtaksperiode private constructor(
                 check(auu.finnArbeidsgiverperiode() == null) { "Vedtaksperiodens arbeidsgiverperiode må være null" }
             }
             override fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>) = false
-            override fun identifiserAUUSomErUtbetaltISpleis() {}
             override fun identifiserForkastingScenarioer(
                 hendelse: IAktivitetslogg,
                 infotrygdhistorikk: Infotrygdhistorikk,

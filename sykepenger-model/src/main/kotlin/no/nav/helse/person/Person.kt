@@ -47,7 +47,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forkastAUUSomErUtbetaltIInfotr
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
-import no.nav.helse.person.Arbeidsgiver.Companion.identifiserAUUSomErUtbetaltISpleis
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
@@ -361,7 +360,6 @@ class Person private constructor(
         påminnelse.kontekst(aktivitetslogg, this)
         påminnelse.info("Håndterer påminnelse for person")
         arbeidsgivere.forkastAUUSomErUtbetaltIInfotrygd(påminnelse, infotrygdhistorikk)
-        arbeidsgivere.identifiserAUUSomErUtbetaltISpleis()
         håndterGjenoppta(påminnelse)
     }
 
