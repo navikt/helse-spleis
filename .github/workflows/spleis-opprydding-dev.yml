@@ -11,6 +11,9 @@ on:
       - '.github/workflows/spleis-opprydding-dev.yml'
       - 'deploy/dev-opprydding.yml'
 
+env:
+  ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   set_version:
     name: set image name
