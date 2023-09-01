@@ -43,7 +43,7 @@ jobs:
           java-version: '17.x'
           cache: 'gradle'
       - name: test and build
-        run: ./gradlew clean test build
+        run: ./gradlew clean test build -PgithubPassword=${{ secrets.GITHUB_TOKEN }}
       - name: build docker image
         run: docker build -f Dockerfile sykepenger-mediators --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
