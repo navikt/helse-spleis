@@ -2674,11 +2674,14 @@ internal class Vedtaksperiode private constructor(
             init {
                 check(auuer.all { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }) { "Alle vedtaksperidoer må ha samme arbeidsgiverperioder" }
             }
-            override fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>) = alleVedtaksperioder
-                .filter { it.organisasjonsnummer == organisasjonsnummer }
-                .filter { it.tilstand != AvsluttetUtenUtbetaling }
-                .filter { it.periode.starterEtter(sisteAuu.periode) }
-                .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
+            override fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>): Boolean {
+                if (arbeidsgiverperiode.fiktiv()) return false // Om AGP er fiktiv er AGP gjennomført i Infotrygd, og periode i Spleis skal ikke påvirke AGP (🤞)
+                return alleVedtaksperioder
+                    .filter { it.organisasjonsnummer == organisasjonsnummer }
+                    .filter { it.tilstand != AvsluttetUtenUtbetaling }
+                    .filter { it.periode.starterEtter(sisteAuu.periode) }
+                    .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
+            }
 
 
             override fun identifiserForkastingScenarioer(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk, alleVedtaksperioder: List<Vedtaksperiode>) {
