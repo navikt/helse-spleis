@@ -43,7 +43,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
-import no.nav.helse.person.Arbeidsgiver.Companion.håndterAuuerSomVilUtbetales
+import no.nav.helse.person.Arbeidsgiver.Companion.forkastAUUSomErUtbetaltIInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -359,7 +359,7 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse) {
         påminnelse.kontekst(aktivitetslogg, this)
         påminnelse.info("Håndterer påminnelse for person")
-        arbeidsgivere.håndterAuuerSomVilUtbetales(påminnelse, infotrygdhistorikk)
+        arbeidsgivere.forkastAUUSomErUtbetaltIInfotrygd(påminnelse, infotrygdhistorikk)
         håndterGjenoppta(påminnelse)
     }
 

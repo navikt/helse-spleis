@@ -134,18 +134,11 @@ internal class Arbeidsgiver private constructor(
             return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
         }
 
-        internal fun List<Arbeidsgiver>.håndterAuuerSomVilUtbetales(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
+        internal fun List<Arbeidsgiver>.forkastAUUSomErUtbetaltIInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
+
             alleVedtaksperioder.gruppérAuuer(AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach {
                 it.forkast(hendelse, alleVedtaksperioder, "overlappende utbetaling i Infotrygd")
-            }
-
-            alleVedtaksperioder.gruppérAuuer(AUU_SOM_VIL_UTBETALES).forEach {
-                it.forkastGamleAuuerSomVilUtbetales(hendelse, alleVedtaksperioder, "Perioder som står i AUU og VIL_UTBETALES, i tillegg til å ha gått inn i AUU før 2023")
-            }
-
-            alleVedtaksperioder.gruppérAuuer(AUU_SOM_VIL_UTBETALES).forEach {
-                it.identifiserForkastingScenarioer(hendelse, infotrygdhistorikk, alleVedtaksperioder)
             }
         }
 
