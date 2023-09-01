@@ -2601,7 +2601,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Forkaste AUU: Vurderer om periodene $perioder kan forkastes på grunn av $årsak")
                 if (!kanForkastes(hendelse, alleVedtaksperioder)) return
                 hendelse.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak")
-                sikkerlogg.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak", keyValue("aktørId", sisteAuu.aktørId), keyValue("fom", førsteAuu.periode.start), keyValue("tom", sisteAuu.periode.endInclusive))
+                sikkerlogg.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak", keyValue("aktørId", sisteAuu.aktørId), keyValue("fom", "${førsteAuu.periode.start}"), keyValue("tom", "${sisteAuu.periode.endInclusive}"))
                 val forkastes = auuer.map { it.id }
                 person.søppelbøtte(hendelse) { it.id in forkastes }
             }
