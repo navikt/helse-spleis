@@ -781,9 +781,8 @@ internal class Arbeidsgiver private constructor(
 
     private fun sykdomstidslinjeInkludertForkastet(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         return  forkastede
-            .slåSammenSykdomstidslinjer()
+            .slåSammenSykdomstidslinjer(sykdomstidslinje)
             .merge(sykdomstidslinje(), replace)
-            .merge(sykdomstidslinje, replace)
     }
 
     internal fun sykdomstidslinjeUten(sykdomstidslinjer: List<Sykdomstidslinje>) = sykdomstidslinjer.fold(sykdomstidslinje()) { acc, sykdomstidslinje ->
