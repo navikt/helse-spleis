@@ -2601,6 +2601,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Forkaste AUU: Vurderer om periodene $perioder kan forkastes på grunn av $årsak")
                 if (!kanForkastes(hendelse, alleVedtaksperioder)) return
                 hendelse.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak")
+                sikkerlogg.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak", keyValue("aktørId", sisteAuu.aktørId), keyValue("fom", førsteAuu.periode.start), keyValue("tom", sisteAuu.periode.endInclusive))
                 val forkastes = auuer.map { it.id }
                 person.søppelbøtte(hendelse) { it.id in forkastes }
             }
@@ -2625,6 +2626,12 @@ internal class Vedtaksperiode private constructor(
                 }
                 return false
             }
+
+            abstract fun forkastGamleAuuerSomVilUtbetales(
+                hendelse: IAktivitetslogg,
+                alleVedtaksperioder: List<Vedtaksperiode>,
+                årsak: String
+            )
 
             internal companion object {
                 internal fun List<Vedtaksperiode>.gruppérAuuer(filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) =
@@ -2704,6 +2711,16 @@ internal class Vedtaksperiode private constructor(
                 )
             }
 
+            override fun forkastGamleAuuerSomVilUtbetales(
+                hendelse: IAktivitetslogg,
+                alleVedtaksperioder: List<Vedtaksperiode>,
+                årsak: String
+            ) {
+                if (sisteAuu.oppdatert.year >= 2023) return
+                if (arbeidsgiver.utbetalingssituasjon(arbeidsgiverperiode, perioder) != IKKE_UTBETALT) return
+                forkast(hendelse, alleVedtaksperioder, "AuuerMedSammeAGP: $årsak")
+            }
+
         }
 
         internal class AuuUtenAGP(
@@ -2719,6 +2736,15 @@ internal class Vedtaksperiode private constructor(
                 infotrygdhistorikk: Infotrygdhistorikk,
                 alleVedtaksperioder: List<Vedtaksperiode>
             ) {}
+
+            override fun forkastGamleAuuerSomVilUtbetales(
+                hendelse: IAktivitetslogg,
+                alleVedtaksperioder: List<Vedtaksperiode>,
+                årsak: String
+            ) {
+                if (sisteAuu.oppdatert.year >= 2023) return
+                forkast(hendelse, alleVedtaksperioder, "AuuUtenAgp: $årsak")
+            }
         }
 
         internal fun List<Vedtaksperiode>.venter(nestemann: Vedtaksperiode) {
