@@ -666,7 +666,7 @@ internal class MaksimumSykepengedagerfilterTest {
             Periode::plus)
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, NormalArbeidstaker, personTidslinje)
         avvisteTidslinjer = maksimumSykepengedagerfilter.filter(this, filterperiode, aktivitetslogg, NullObserver)
-        maksimumSykepenger = maksimumSykepengedagerfilter.maksimumSykepenger()
+        maksimumSykepenger = maksimumSykepengedagerfilter.maksimumSykepenger
         return avvisteTidslinjer.flatMap { it.inspektør.avvistedatoer }
     }
 }

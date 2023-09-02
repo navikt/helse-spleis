@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -24,6 +25,14 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
     private val utbetalinger = utbetalinger.toMutableList()
     private val sisteVilkårsgrunnlag get() = utbetalinger.lastOrNull()?.first
     private val siste get() = utbetalinger.lastOrNull()?.second
+
+    // er førstegangsvurdering dersom vedtaksperioden har 0 eller 1 avsluttede utbetalinger
+    internal fun erFørstegangsvurdering(): Boolean {
+        if (this.utbetalinger.isEmpty()) return true
+        val antall = utbetalingene.filter { it.erAvsluttet() }
+        if (antall.isEmpty()) return true
+        return antall.size == 1 && siste === antall.single()
+    }
 
     internal fun accept(visitor: VedtaksperiodeUtbetalingVisitor) {
         visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
@@ -127,4 +136,46 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
             kanAvvises = kanAvvises
         )
     }
+
+    internal fun nyUtbetalingstrategi(vedtaksperiodeSomLagerUtbetaling: UUID, fødselsnummer: String, arbeidsgiver: Arbeidsgiver, sykdomstidslinje: Sykdomstidslinje, periode: Periode): Utbetalingstrategi {
+        val strategi =
+            if (this.harAvsluttede()) revurderingstrategi(fødselsnummer, arbeidsgiver, periode)
+            else førstegangsvurderingstrategi(fødselsnummer, arbeidsgiver, periode)
+
+        return { hendelse: IAktivitetslogg, arbeidsgiverSomBeregner: Arbeidsgiver, grunnlagsdata: VilkårsgrunnlagElement, maksimumSykepenger: Alder.MaksimumSykepenger, utbetalingstidslinje: Utbetalingstidslinje ->
+            val denNyeUtbetalingen = strategi(hendelse, arbeidsgiverSomBeregner, maksimumSykepenger, utbetalingstidslinje)
+            nyUtbetaling(vedtaksperiodeSomLagerUtbetaling, grunnlagsdata, sykdomstidslinje, periode, denNyeUtbetalingen, utbetalingstidslinje)
+            utbetalingstidslinje.subset(periode)
+        }
+    }
+
+    private fun revurderingstrategi(fødselsnummer: String, arbeidsgiver: Arbeidsgiver, periode: Periode) =
+        { hendelse: IAktivitetslogg, arbeidsgiverSomBeregner: Arbeidsgiver, maksimumSykepenger: Alder.MaksimumSykepenger, utbetalingstidslinje: Utbetalingstidslinje ->
+            arbeidsgiver.lagRevurdering(
+                aktivitetslogg = hendelse,
+                fødselsnummer = fødselsnummer,
+                orgnummerTilDenSomBeregner = arbeidsgiverSomBeregner,
+                utbetalingstidslinje = utbetalingstidslinje,
+                maksdato = maksimumSykepenger.sisteDag(),
+                forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
+                gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
+                periode = periode
+            )
+        }
+
+    private fun førstegangsvurderingstrategi(fødselsnummer: String, arbeidsgiver: Arbeidsgiver, periode: Periode) =
+        { hendelse: IAktivitetslogg, arbeidsgiverSomBeregner: Arbeidsgiver, maksimumSykepenger: Alder.MaksimumSykepenger, utbetalingstidslinje: Utbetalingstidslinje ->
+            arbeidsgiver.lagUtbetaling(
+                aktivitetslogg = hendelse,
+                fødselsnummer = fødselsnummer,
+                orgnummerTilDenSomBeregner = arbeidsgiverSomBeregner,
+                utbetalingstidslinje = utbetalingstidslinje,
+                maksdato = maksimumSykepenger.sisteDag(),
+                forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
+                gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
+                periode = periode
+            )
+        }
 }
+
+internal typealias Utbetalingstrategi = (IAktivitetslogg, Arbeidsgiver, VilkårsgrunnlagElement, Alder.MaksimumSykepenger, Utbetalingstidslinje) -> Utbetalingstidslinje

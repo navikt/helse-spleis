@@ -11,7 +11,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 internal class ArbeidsgiverUtbetalinger(
     regler: ArbeidsgiverRegler,
     alder: Alder,
-    private val arbeidsgivere: Map<Arbeidsgiver, (LocalDate, Periode) -> Utbetalingstidslinje>,
+    private val arbeidsgivere: (LocalDate, Periode, SubsumsjonObserver, IAktivitetslogg) -> Map<Arbeidsgiver, Utbetalingstidslinje>,
     infotrygdUtbetalingstidslinje: Utbetalingstidslinje,
     vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) {
@@ -23,24 +23,23 @@ internal class ArbeidsgiverUtbetalinger(
         maksimumSykepengedagerfilter,
         MaksimumUtbetalingFilter(),
     )
-    internal val maksimumSykepenger by lazy { maksimumSykepengedagerfilter.maksimumSykepenger() }
+    internal val maksimumSykepenger by lazy { maksimumSykepengedagerfilter.maksimumSykepenger }
 
     internal fun beregn(
         skjæringstidspunkt: LocalDate,
         beregningsperiode: Periode,
-        perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
+        vedtaksperiode: Periode,
+        subsumsjonObserver: SubsumsjonObserver,
+        aktivitetslogg: IAktivitetslogg
     ): Pair<Alder.MaksimumSykepenger, Map<Arbeidsgiver, Utbetalingstidslinje>> {
-        val tidslinjerPerArbeidsgiver = filtere.fold(tidslinjer(skjæringstidspunkt, beregningsperiode)) { tidslinjer, filter ->
+        val arbeidsgivertidslinjer = arbeidsgivere(skjæringstidspunkt, beregningsperiode, subsumsjonObserver, aktivitetslogg)
+        val tidslinjerPerArbeidsgiver = filtere.fold(arbeidsgivertidslinjer) { tidslinjer, filter ->
             val input = tidslinjer.entries.map { (key, value) -> key to value }
-            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, perioder)
+            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, vedtaksperiode, aktivitetslogg, subsumsjonObserver)
             input.zip(result) { (arbeidsgiver, _), utbetalingstidslinje ->
                 arbeidsgiver to utbetalingstidslinje
             }.toMap()
         }
         return maksimumSykepenger to tidslinjerPerArbeidsgiver
     }
-
-    private fun tidslinjer(skjæringstidspunkt: LocalDate, periode: Periode) = arbeidsgivere
-        .mapValues { (_, builder) -> builder(skjæringstidspunkt, periode) }
-
 }
