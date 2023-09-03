@@ -36,7 +36,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -565,8 +564,6 @@ internal class Vedtaksperiode private constructor(
         hendelse.kontekst(this.tilstand)
     }
 
-    private fun sykefraværstilfelle() = person.sykefraværstilfelle(skjæringstidspunkt)
-
     private fun tilstand(
         event: IAktivitetslogg,
         nyTilstand: Vedtaksperiodetilstand,
@@ -691,7 +688,7 @@ internal class Vedtaksperiode private constructor(
         person.gjenopptaBehandling(hendelse)
     }
 
-    private fun trengerYtelser(hendelse: IAktivitetslogg, periode: Periode = periode()) {
+    private fun trengerYtelser(hendelse: IAktivitetslogg) {
         val søkevinduFamilieytelser = periode.familieYtelserPeriode
         foreldrepenger(hendelse, søkevinduFamilieytelser)
         pleiepenger(hendelse, søkevinduFamilieytelser)
@@ -1427,8 +1424,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne revurdering" }
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
-            val periode = vedtaksperiode.sykefraværstilfelle()
-            vedtaksperiode.trengerYtelser(hendelse, periode)
+            vedtaksperiode.trengerYtelser(hendelse)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
@@ -1440,8 +1436,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.skalReberegnes())
                 return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
-            val periode = vedtaksperiode.sykefraværstilfelle()
-            vedtaksperiode.trengerYtelser(påminnelse, periode)
+            vedtaksperiode.trengerYtelser(påminnelse)
         }
 
         override fun håndter(
@@ -2727,11 +2722,6 @@ internal class Vedtaksperiode private constructor(
             oppdatert = oppdatert,
             jurist = medVedtaksperiode
         )
-
-        internal fun List<Vedtaksperiode>.sykefraværstilfelle(skjæringstidspunkt: LocalDate): Periode {
-            val sisteDato = filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxOf { it.periode.endInclusive }
-            return skjæringstidspunkt til sisteDato
-        }
 
         private fun List<Vedtaksperiode>.manglendeUtbetalingsopplysninger(dag: LocalDate, melding: String) {
             val vedtaksperiode = firstOrNull { dag in it.periode } ?: return

@@ -50,7 +50,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.sykefraværstilfelle
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerFastsettelseEtterSkjønn
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
@@ -276,9 +275,6 @@ internal class Arbeidsgiver private constructor(
         ) {
             arbeidsgivere.flatMap { it.søppelbøtte(hendelse, filter) }.forEach { it.buildAndEmit() }
         }
-
-        internal fun List<Arbeidsgiver>.sykefraværstilfelle(skjæringstidspunkt: LocalDate) =
-            flatMap { it.vedtaksperioder }.sykefraværstilfelle(skjæringstidspunkt)
 
         internal fun List<Arbeidsgiver>.nyttVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Grunnlagsdata) =
             flatMap { it.vedtaksperioder }.nyttVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)

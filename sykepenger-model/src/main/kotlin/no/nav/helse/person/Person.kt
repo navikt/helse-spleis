@@ -53,7 +53,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nyttVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
-import no.nav.helse.person.Arbeidsgiver.Companion.sykefraværstilfelle
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
@@ -790,9 +789,6 @@ class Person private constructor(
         arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
-
-    internal fun sykefraværstilfelle(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.sykefraværstilfelle(skjæringstidspunkt)
 
     internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
