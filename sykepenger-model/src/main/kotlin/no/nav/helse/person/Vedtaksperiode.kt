@@ -871,55 +871,12 @@ internal class Vedtaksperiode private constructor(
         person.vedtakFattet(builder.result())
     }
 
-    private fun lagUtbetaling(hendelse: IAktivitetslogg, vedtaksperiodeSomBeregner: Vedtaksperiode, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, maksimumSykepenger: Alder.MaksimumSykepenger, utbetalingstidslinje: Utbetalingstidslinje) {
-        val utbetaling = arbeidsgiver.lagUtbetaling(
-            aktivitetslogg = hendelse,
-            fødselsnummer = fødselsnummer,
-            orgnummerTilDenSomBeregner = vedtaksperiodeSomBeregner.organisasjonsnummer,
-            utbetalingstidslinje = utbetalingstidslinje,
-            maksdato = maksimumSykepenger.sisteDag(),
-            forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
-            gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
-            periode = periode
-        )
-        nyUtbetaling(grunnlagsdata, utbetaling, utbetalingstidslinje)
-    }
-
-    private fun nyUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: Utbetaling, utbetalingstidslinjeKilde: Utbetalingstidslinje) {
-        utbetalingstidslinje = utbetalinger.nyUtbetaling(id, grunnlagsdata, sykdomstidslinje, periode, utbetaling, utbetalingstidslinjeKilde)
-    }
-
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {
         utbetalinger.harUtbetalinger() -> tilstand(hendelse, simuleringtilstand) {
             hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
         }
         else -> tilstand(hendelse, godkjenningtilstand) {
             hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
-        }
-    }
-
-    internal fun lagRevurdering(aktivitetslogg: IAktivitetslogg, vedtaksperiodeSomBeregner: Vedtaksperiode, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, maksimumSykepenger: Alder.MaksimumSykepenger, utbetalingstidslinje: Utbetalingstidslinje) {
-        val utbetaling = arbeidsgiver.lagRevurdering(
-            aktivitetslogg = aktivitetslogg,
-            fødselsnummer = fødselsnummer,
-            orgnummerTilDenSomBeregner = vedtaksperiodeSomBeregner.organisasjonsnummer,
-            utbetalingstidslinje = utbetalingstidslinje,
-            maksdato = maksimumSykepenger.sisteDag(),
-            forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
-            gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
-            periode = periode
-        )
-
-        return nyUtbetaling(grunnlagsdata, utbetaling, utbetalingstidslinje).also {
-            loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(vedtaksperiodeSomBeregner.organisasjonsnummer, aktivitetslogg)
-        }
-    }
-
-    private fun loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(orgnummer: String, aktivitetslogg: IAktivitetslogg) {
-        if (!utbetalinger.trekkerTilbakePenger()) return
-
-        if (orgnummer != organisasjonsnummer || person.blitt6GBegrensetSidenSist(skjæringstidspunkt)) {
-            aktivitetslogg.info("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere")
         }
     }
 
@@ -1053,40 +1010,46 @@ internal class Vedtaksperiode private constructor(
         return person.kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag!!)
     }
 
-    private fun utbetalingsperioder(strategi: Utbetalingstrategi): List<Pair<Vedtaksperiode, Utbetalingstrategi>> {
-        val skjæringstidspunktet = this.skjæringstidspunkt
-        val førstegangsvurderinger: List<Pair<Vedtaksperiode, Utbetalingstrategi>> = person.nåværendeVedtaksperioder {
-            it.arbeidsgiver !== this.arbeidsgiver
-                    && it.tilstand in setOf(AvventerBlokkerendePeriode, AvventerRevurdering)
-                    && this.periode.overlapperMed(it.periode)
-                    && skjæringstidspunktet == it.skjæringstidspunkt
-        }
-        .map {
-            it to (if (it.tilstand == AvventerBlokkerendePeriode) Vedtaksperiode::lagUtbetaling else Vedtaksperiode::lagRevurdering)
-        }
-        return listOf(this to strategi) + førstegangsvurderinger
-    }
-
-    private fun beregnUtbetalinger(
-        hendelse: PersonHendelse,
-        arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
-        segSelvUtbetalingstrategi: Utbetalingstrategi
-    ): Boolean {
-        val sisteTomKlarTilBehandling = beregningsperioderFørstegangsbehandling(person, this)
-        val beregningsperiode = this.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: this.periode
-
-        val utbetalingsperioder = utbetalingsperioder(segSelvUtbetalingstrategi)
-        check(utbetalingsperioder.all { (it) -> it.skjæringstidspunkt == this.skjæringstidspunkt }) {
-            "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
-        }
+    private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksimumSykepenger: Alder.MaksimumSykepenger) {
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
+        this.utbetalingstidslinje = utbetalinger.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, arbeidsgiverSomBeregner, this.sykdomstidslinje, this.periode, hendelse, grunnlagsdata, maksimumSykepenger, utbetalingstidslinje)
+        loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, hendelse)
+    }
+
+    private fun loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner: Arbeidsgiver, aktivitetslogg: IAktivitetslogg) {
+        if (!utbetalinger.trekkerTilbakePenger()) return
+        if (this.arbeidsgiver === arbeidsgiverSomBeregner && !person.blitt6GBegrensetSidenSist(skjæringstidspunkt)) return
+        aktivitetslogg.info("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere")
+    }
+
+    private fun utbetalingsperioder(): List<Vedtaksperiode> {
+        val skjæringstidspunktet = this.skjæringstidspunkt
+        // lag utbetaling for seg selv + andre overlappende perioder hos andre arbeidsgivere (som ikke er utbetalt/avsluttet allerede)
+        return person.nåværendeVedtaksperioder {
+            it === this || (
+                    it.arbeidsgiver !== this.arbeidsgiver
+                            && it.tilstand in setOf(AvventerBlokkerendePeriode, AvventerRevurdering)
+                            && this.periode.overlapperMed(it.periode)
+                            && skjæringstidspunktet == it.skjæringstidspunkt
+                    )
+        }
+    }
+
+    private fun beregnUtbetalinger(hendelse: PersonHendelse, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
+        val sisteTomKlarTilBehandling = beregningsperioderFørstegangsbehandling(person, this)
+        val beregningsperiode = this.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: this.periode
+
+        val utbetalingsperioder = utbetalingsperioder()
+        check(utbetalingsperioder.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
+            "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
+        }
         try {
             val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = arbeidsgiverUtbetalinger.beregn(skjæringstidspunkt, beregningsperiode, this.periode, hendelse, this.jurist)
-            utbetalingsperioder.forEach { (other, utbetalingStrategy) ->
+            utbetalingsperioder.forEach { other ->
                 val utbetalingstidslinje = tidslinjerPerArbeidsgiver.getValue(other.arbeidsgiver)
-                utbetalingStrategy(other, other.aktivitetsloggkopi(hendelse), this, grunnlagsdata, maksimumSykepenger, utbetalingstidslinje)
+                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksimumSykepenger)
             }
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(hendelse)
@@ -1484,11 +1447,7 @@ internal class Vedtaksperiode private constructor(
 
             håndterRevurdering(ytelser) {
                 person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
-                vedtaksperiode.beregnUtbetalinger(
-                    ytelser,
-                    arbeidsgiverUtbetalinger,
-                    Vedtaksperiode::lagRevurdering
-                )
+                vedtaksperiode.beregnUtbetalinger(ytelser, arbeidsgiverUtbetalinger)
 
                 infotrygdhistorikk.valider(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
                 ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag())
@@ -1900,11 +1859,7 @@ internal class Vedtaksperiode private constructor(
                         person.valider(this, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
                     }
                     valider(RV_UT_16) {
-                        vedtaksperiode.beregnUtbetalinger(
-                            ytelser,
-                            arbeidsgiverUtbetalinger,
-                            Vedtaksperiode::lagUtbetaling
-                        )
+                        vedtaksperiode.beregnUtbetalinger(ytelser, arbeidsgiverUtbetalinger)
                     }
                     valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag()) }
                     onSuccess {
@@ -2833,8 +2788,6 @@ internal class Vedtaksperiode private constructor(
 
     }
 }
-
-private typealias Utbetalingstrategi = (Vedtaksperiode, IAktivitetslogg, Vedtaksperiode, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, Alder.MaksimumSykepenger, Utbetalingstidslinje) -> Unit
 
 enum class ForlengelseFraInfotrygd {
     IKKE_ETTERSPURT,

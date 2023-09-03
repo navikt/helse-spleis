@@ -365,25 +365,25 @@ internal class Arbeidsgiver private constructor(
     internal fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
-        orgnummerTilDenSomBeregner: String,
+        orgnummerTilDenSomBeregner: Arbeidsgiver,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode
-    ) = lagUtbetaling(aktivitetslogg, fødselsnummer, orgnummerTilDenSomBeregner, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
+    ) = lagNyUtbetaling(aktivitetslogg, fødselsnummer, orgnummerTilDenSomBeregner, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
 
     internal fun lagRevurdering(
-        utbetalingstidslinje: Utbetalingstidslinje,
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
-        orgnummerTilDenSomBeregner: String,
+        orgnummerTilDenSomBeregner: Arbeidsgiver,
+        utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode
     ): Utbetaling {
-        return lagUtbetaling(
+        return lagNyUtbetaling(
             aktivitetslogg,
             fødselsnummer,
             orgnummerTilDenSomBeregner,
@@ -396,10 +396,10 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    private fun lagUtbetaling(
+    private fun lagNyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
-        orgnummerTilDenSomBeregner: String,
+        orgnummerTilDenSomBeregner: Arbeidsgiver,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
@@ -409,7 +409,7 @@ internal class Arbeidsgiver private constructor(
     ): Utbetaling {
         val sykdomshistorikkId = sykdomshistorikk.nyesteId()
         val vilkårsgrunnlagHistorikkId = person.nyesteIdForVilkårsgrunnlagHistorikk()
-        lagreUtbetalingstidslinjeberegning(orgnummerTilDenSomBeregner, utbetalingstidslinje, sykdomshistorikkId, vilkårsgrunnlagHistorikkId)
+        lagreUtbetalingstidslinjeberegning(orgnummerTilDenSomBeregner.organisasjonsnummer, utbetalingstidslinje, sykdomshistorikkId, vilkårsgrunnlagHistorikkId)
         val (utbetalingen, annulleringer) = Utbetalingstidslinjeberegning.lagUtbetaling(
             beregnetUtbetalingstidslinjer,
             utbetalinger,

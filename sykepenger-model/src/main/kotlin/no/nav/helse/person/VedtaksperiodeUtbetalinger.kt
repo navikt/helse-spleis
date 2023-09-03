@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -73,20 +74,6 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
         siste?.forkast(hendelse)
     }
 
-    internal fun nyUtbetaling(
-        vedtaksperiodeId: UUID,
-        grunnlagsdata: VilkårsgrunnlagElement,
-        sykdomstidslinje: Sykdomstidslinje,
-        periode: Periode,
-        utbetaling: Utbetaling,
-        utbetalingstidslinje: Utbetalingstidslinje
-    ): Utbetalingstidslinje {
-        check(utbetaling !== siste) { "kan ikke legge til lik utbetaling som forrige" }
-        utbetaling.nyVedtaksperiodeUtbetaling(vedtaksperiodeId)
-        utbetalinger.add(Triple(grunnlagsdata, utbetaling, sykdomstidslinje))
-        return utbetalingstidslinje.subset(periode)
-    }
-
     internal fun build(builder: VedtakFattetBuilder) {
         if (!harUtbetaling()) return
         siste?.build(builder)
@@ -126,5 +113,24 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
             tagBuilder = tagBuilder,
             kanAvvises = kanAvvises
         )
+    }
+
+    internal fun nyUtbetaling(
+        vedtaksperiodeSomLagerUtbetaling: UUID,
+        fødselsnummer: String,
+        arbeidsgiver: Arbeidsgiver,
+        arbeidsgiverSomBeregner: Arbeidsgiver,
+        sykdomstidslinje: Sykdomstidslinje,
+        periode: Periode,
+        hendelse: IAktivitetslogg,
+        grunnlagsdata: VilkårsgrunnlagElement,
+        maksimumSykepenger: Alder.MaksimumSykepenger,
+        utbetalingstidslinje: Utbetalingstidslinje
+    ): Utbetalingstidslinje {
+        val strategi = if (this.harAvsluttede()) Arbeidsgiver::lagRevurdering else Arbeidsgiver::lagUtbetaling
+        val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, arbeidsgiverSomBeregner, utbetalingstidslinje, maksimumSykepenger.sisteDag(), maksimumSykepenger.forbrukteDager(), maksimumSykepenger.gjenståendeDager(), periode)
+        denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
+        utbetalinger.add(Triple(grunnlagsdata, denNyeUtbetalingen, sykdomstidslinje))
+        return utbetalingstidslinje.subset(periode)
     }
 }
