@@ -14,7 +14,9 @@ internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
-        perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
+        periode: Periode,
+        aktivitetslogg: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
     ): List<Utbetalingstidslinje> {
         val tidslinjerForSubsumsjon = tidslinjer.subsumsjonsformat()
 
@@ -24,16 +26,14 @@ internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
 
         val avvisteTidslinjer = avvis(oppdaterte, dagerUnderGrensen, listOf(Begrunnelse.MinimumSykdomsgrad))
 
-        perioder.forEach { (periode, aktivitetslogg, subsumsjonObserver) ->
-            Prosentdel.subsumsjon(subsumsjonObserver) { grense ->
-                `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, dagerUnderGrensen)
-            }
-            val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
-            val harAvvisteDager = avvisteDager.isNotEmpty()
-            subsumsjonObserver.`§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.toSortedSet(), tidslinjerForSubsumsjon)
-            if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)
-            else aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
+        Prosentdel.subsumsjon(subsumsjonObserver) { grense ->
+            `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, dagerUnderGrensen)
         }
+        val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
+        val harAvvisteDager = avvisteDager.isNotEmpty()
+        subsumsjonObserver.`§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.toSortedSet(), tidslinjerForSubsumsjon)
+        if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)
+        else aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
         return avvisteTidslinjer
     }
 }

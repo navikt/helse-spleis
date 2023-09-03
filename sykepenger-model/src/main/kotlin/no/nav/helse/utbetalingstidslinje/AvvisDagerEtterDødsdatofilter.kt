@@ -12,14 +12,14 @@ internal class AvvisDagerEtterDødsdatofilter(
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
-        perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
+        periode: Periode,
+        aktivitetslogg: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
     ): List<Utbetalingstidslinje> {
         val avvisteTidslinjer = alder.avvisDager(tidslinjer)
 
-        perioder.forEach { (periode, aktivitetslogg, _) ->
-            val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.EtterDødsdato)
-            if (avvisteDager.isNotEmpty()) aktivitetslogg.info("Utbetaling stoppet etter ${avvisteDager.first().dato} grunnet dødsfall")
-        }
+        val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.EtterDødsdato)
+        if (avvisteDager.isNotEmpty()) aktivitetslogg.info("Utbetaling stoppet etter ${avvisteDager.first().dato} grunnet dødsfall")
 
         return avvisteTidslinjer
     }

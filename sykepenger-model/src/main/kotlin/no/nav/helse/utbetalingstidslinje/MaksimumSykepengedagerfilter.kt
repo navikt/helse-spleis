@@ -32,6 +32,7 @@ internal class MaksimumSykepengedagerfilter(
     private val avvisteDager get() = begrunnelserForAvvisteDager.values.flatten().toSet()
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
+    private var subsumsjonObserver: SubsumsjonObserver = NullObserver
 
     private val tidslinjegrunnlagsubsumsjon by lazy { tidslinjegrunnlag.subsumsjonsformat() }
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
@@ -74,19 +75,14 @@ internal class MaksimumSykepengedagerfilter(
         override fun `§ 8-3 ledd 1 punktum 2`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
     }
 
-    private var perioder = emptyList<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>()
-    private fun subsumsjonObserver(dagen: LocalDate): SubsumsjonObserver {
-        return perioder.firstOrNull { dagen in it.first }?.third ?: NullObserver
-    }
-
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
-        perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
+        periode: Periode,
+        aktivitetslogg: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
     ): List<Utbetalingstidslinje> {
-        val sisteDato = perioder.maxOf {
-            it.first.endInclusive
-        }
-        this.perioder = perioder
+        val sisteDato = periode.endInclusive
+        this.subsumsjonObserver = subsumsjonObserver
         beregnetTidslinje = tidslinjer
             .reduce(Utbetalingstidslinje::plus)
             .plus(infotrygdtidslinje).kutt(sisteDato)
@@ -96,25 +92,23 @@ internal class MaksimumSykepengedagerfilter(
         beregnetTidslinje.accept(this)
 
         maksimumSykepenger = teller.maksimumSykepenger(sisteDag).also {
-            perioder.forEach { (periode, _, jurist) -> it.sisteDag(karantenesporing(periode, jurist)) }
+            it.sisteDag(karantenesporing(periode, subsumsjonObserver))
         }
 
         val avvisteTidslinjer = begrunnelserForAvvisteDager.entries.fold(tidslinjer) { result, (begrunnelse, dager) ->
             Utbetalingstidslinje.avvis(result, dager.grupperSammenhengendePerioder(), listOf(begrunnelse))
         }
 
-        perioder.forEach { (periode, aktivitetslogg, subsumsjonObserver) ->
-            // TODO: logge juridisk vurdering for 70 år i "karantenesporing"
-            alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, subsumsjonObserver)
+        // TODO: logge juridisk vurdering for 70 år i "karantenesporing"
+        alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, subsumsjonObserver)
 
-            if (begrunnelserForAvvisteDager[Begrunnelse.NyVilkårsprøvingNødvendig]?.any { it in periode } == true) {
-                aktivitetslogg.funksjonellFeil(RV_VV_9)
-            }
-            if (avvisteDager in periode)
-                aktivitetslogg.info("Maks antall sykepengedager er nådd i perioden")
-            else
-                aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
+        if (begrunnelserForAvvisteDager[Begrunnelse.NyVilkårsprøvingNødvendig]?.any { it in periode } == true) {
+            aktivitetslogg.funksjonellFeil(RV_VV_9)
         }
+        if (avvisteDager in periode)
+            aktivitetslogg.info("Maks antall sykepengedager er nådd i perioden")
+        else
+            aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
 
         return avvisteTidslinjer
     }
@@ -205,7 +199,7 @@ internal class MaksimumSykepengedagerfilter(
     private fun nextState(dagen: LocalDate): State? {
         val maksimumSykepenger = teller.maksimumSykepenger(dagen)
         (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).let { harTilstrekkeligOpphold ->
-            subsumsjonObserver(dagen).`§ 8-12 ledd 2`(
+            subsumsjonObserver.`§ 8-12 ledd 2`(
                 oppfylt = harTilstrekkeligOpphold,
                 dato = dagen,
                 gjenståendeSykepengedager = maksimumSykepenger.gjenståendeDager(),

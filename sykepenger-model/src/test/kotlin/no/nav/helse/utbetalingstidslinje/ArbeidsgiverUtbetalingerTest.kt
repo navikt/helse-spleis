@@ -354,7 +354,9 @@ internal class ArbeidsgiverUtbetalingerTest {
         val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = utbetalinger.beregn(
             1.januar,
             Periode(1.januar, 31.desember(2019)),
-            listOf(Triple(Periode(1.januar, 31.desember(2019)), aktivitetslogg, SubsumsjonObserver.NullObserver))
+            Periode(1.januar, 31.desember(2019)),
+            aktivitetslogg,
+            SubsumsjonObserver.NullObserver
         )
         maksdato = maksimumSykepenger.sisteDag()
         gjenståendeSykedager = maksimumSykepenger.gjenståendeDager()

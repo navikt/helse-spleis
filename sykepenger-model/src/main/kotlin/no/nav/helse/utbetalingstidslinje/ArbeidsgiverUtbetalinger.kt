@@ -28,11 +28,13 @@ internal class ArbeidsgiverUtbetalinger(
     internal fun beregn(
         skjæringstidspunkt: LocalDate,
         beregningsperiode: Periode,
-        perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
+        vedtaksperiode: Periode,
+        aktivitetslogg: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
     ): Pair<Alder.MaksimumSykepenger, Map<Arbeidsgiver, Utbetalingstidslinje>> {
         val tidslinjerPerArbeidsgiver = filtere.fold(tidslinjer(skjæringstidspunkt, beregningsperiode)) { tidslinjer, filter ->
             val input = tidslinjer.entries.map { (key, value) -> key to value }
-            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, perioder)
+            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, vedtaksperiode, aktivitetslogg, subsumsjonObserver)
             input.zip(result) { (arbeidsgiver, _), utbetalingstidslinje ->
                 arbeidsgiver to utbetalingstidslinje
             }.toMap()
