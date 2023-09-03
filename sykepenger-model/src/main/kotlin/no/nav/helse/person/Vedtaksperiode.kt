@@ -1425,6 +1425,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne revurdering" }
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
             val periode = vedtaksperiode.sykefraværstilfelle()
             vedtaksperiode.trengerYtelser(hendelse, periode)
@@ -1451,10 +1452,6 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
-            if (vedtaksperiode.vilkårsgrunnlag == null) return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
-                ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
-            }
-
             håndterRevurdering(ytelser) {
                 validation(ytelser) {
                     valider { vedtaksperiode.kalkulerUtbetalinger(this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
