@@ -109,12 +109,11 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
@@ -133,7 +132,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_36
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_16
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
@@ -1010,6 +1008,17 @@ internal class Vedtaksperiode private constructor(
         return person.kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag!!)
     }
 
+    private fun kalkulerUtbetalinger(aktivitetslogg: IAktivitetslogg, ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
+        val vilkårsgrunnlag = requireNotNull(vilkårsgrunnlag)
+        aktivitetslogg.kontekst(vilkårsgrunnlag)
+
+        person.valider(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt)
+        infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, organisasjonsnummer)
+        val maksimumSykepenger = beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger) ?: return false
+        ytelser.valider(periode, skjæringstidspunkt, maksimumSykepenger.sisteDag())
+        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
+    }
+
     private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksimumSykepenger: Alder.MaksimumSykepenger) {
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
@@ -1037,7 +1046,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun beregnUtbetalinger(hendelse: PersonHendelse, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
+    private fun beregnUtbetalinger(hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Alder.MaksimumSykepenger? {
         val sisteTomKlarTilBehandling = beregningsperioderFørstegangsbehandling(person, this)
         val beregningsperiode = this.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: this.periode
 
@@ -1051,10 +1060,11 @@ internal class Vedtaksperiode private constructor(
                 val utbetalingstidslinje = tidslinjerPerArbeidsgiver.getValue(other.arbeidsgiver)
                 other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksimumSykepenger)
             }
+            return maksimumSykepenger
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(hendelse)
         }
-        return !hendelse.harFunksjonelleFeilEllerVerre()
+        return null
     }
 
     internal fun sykefraværsfortelling(list: List<Sykefraværstilfelleeventyr>) =
@@ -1441,17 +1451,15 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
-            val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag ?: return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
+            if (vedtaksperiode.vilkårsgrunnlag == null) return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
                 ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
             }
 
             håndterRevurdering(ytelser) {
-                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
-                vedtaksperiode.beregnUtbetalinger(ytelser, arbeidsgiverUtbetalinger)
-
-                infotrygdhistorikk.valider(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
-                ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag())
-                vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
+                validation(ytelser) {
+                    valider { vedtaksperiode.kalkulerUtbetalinger(this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
+                    onSuccess { vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering) }
+                }
             }
         }
 
@@ -1817,6 +1825,19 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: UtbetalingshistorikkEtterInfotrygdendring,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
+            infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
+            if (hendelse.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(hendelse)
+            if (vedtaksperiode.vilkårsgrunnlag != null) return
+            hendelse.funksjonellFeil(Varselkode.RV_IT_33)
+            vedtaksperiode.forkast(hendelse)
+        }
+
+        override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
@@ -1826,45 +1847,10 @@ internal class Vedtaksperiode private constructor(
         ) {
             håndterFørstegangsbehandling(ytelser, vedtaksperiode) {
                 validation(ytelser) {
-                    onValidationFailed {
-                        if (!ytelser.harFunksjonelleFeilEllerVerre()) funksjonellFeil(RV_AY_10)
-                        vedtaksperiode.forkast(ytelser)
-                    }
-                    onSuccess {
-                        vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode)
-                    }
-                    valider {
-                        infotrygdhistorikk.valider(
-                            this,
-                            vedtaksperiode.periode,
-                            vedtaksperiode.skjæringstidspunkt,
-                            vedtaksperiode.organisasjonsnummer
-                        )
-                    }
-
-                    // skal ikke mangle vilkårsgrunnlag her med mindre skjæringstidspunktet har endret seg som følge
-                    // av historikk fra IT
-                    valider(RV_IT_33) {
-                        (vedtaksperiode.vilkårsgrunnlag != null).also {
-                            if (!it) info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
-                        }
-                    }
-
-                    lateinit var vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-                    onSuccess {
-                        vilkårsgrunnlag = requireNotNull(vedtaksperiode.vilkårsgrunnlag)
-                        ytelser.kontekst(vilkårsgrunnlag)
-                    }
-                    valider {
-                        person.valider(this, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
-                    }
-                    valider(RV_UT_16) {
-                        vedtaksperiode.beregnUtbetalinger(ytelser, arbeidsgiverUtbetalinger)
-                    }
-                    valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, arbeidsgiverUtbetalinger.maksimumSykepenger.sisteDag()) }
-                    onSuccess {
-                        vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning)
-                    }
+                    onValidationFailed { vedtaksperiode.forkast(ytelser) }
+                    onSuccess { vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode) }
+                    valider { vedtaksperiode.kalkulerUtbetalinger(this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
+                    onSuccess { vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning) }
                 }
             }
         }

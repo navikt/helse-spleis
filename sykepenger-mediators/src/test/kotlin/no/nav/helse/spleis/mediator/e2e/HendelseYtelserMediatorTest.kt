@@ -143,7 +143,6 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
                 )
             )
         )))
-        sendYtelser(0)
 
         assertTilstander(
             0,

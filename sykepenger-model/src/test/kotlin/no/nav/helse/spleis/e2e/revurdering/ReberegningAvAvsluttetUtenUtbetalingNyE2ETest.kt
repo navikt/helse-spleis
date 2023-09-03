@@ -275,7 +275,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
                 Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, false)
             )
         )
-        håndterYtelser(1.vedtaksperiode)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)

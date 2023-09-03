@@ -186,7 +186,7 @@ enum class Varselkode(
     RV_AY_7("Det er utbetalt omsorgspenger i samme periode."),
     RV_AY_8("Det er utbetalt opplæringspenger i samme periode."),
     RV_AY_9("Det er institusjonsopphold i perioden. Vurder retten til sykepenger."),
-    RV_AY_10("Behandling av Ytelser feilet, årsak ukjent"),
+    RV_AY_10("Behandling av Ytelser feilet, årsak ukjent", avviklet = true),
 
     // SI: Simulering
     RV_SI_1("Feil under simulering", avviklet = true),
@@ -213,7 +213,7 @@ enum class Varselkode(
     RV_UT_13("Forventet ikke å lage godkjenning på utbetaling"),
     RV_UT_14("Gir opp å prøve utbetaling på nytt", avviklet = true),
     RV_UT_15("Kan ikke annullere: hendelsen er ikke relevant"),
-    RV_UT_16("Feil ved kalkulering av utbetalingstidslinjer"),
+    RV_UT_16("Feil ved kalkulering av utbetalingstidslinjer", avviklet = true),
     RV_UT_17("Utbetaling feilet", avviklet = true),
     RV_UT_18("Utbetaling markert som ikke godkjent automatisk"),
     RV_UT_19("Utbetaling markert som ikke godkjent av saksbehandler"),

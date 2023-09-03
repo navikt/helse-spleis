@@ -45,6 +45,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -110,6 +111,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
         håndterYtelser(3.vedtaksperiode)
 
+        assertEquals(5, inspektør.utbetalinger.size)
         inspektør.utbetaling(2).inspektør.also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).inspektør.korrelasjonsId)
             assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId())
@@ -121,8 +123,10 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
             assertEquals(20.januar, it.arbeidsgiverOppdrag[1].inspektør.fom)
             assertEquals(31.januar, it.arbeidsgiverOppdrag[1].inspektør.tom)
         }
-
         inspektør.utbetaling(3).inspektør.also {
+            assertEquals(Utbetalingstatus.FORKASTET, it.tilstand)
+        }
+        inspektør.utbetaling(4).inspektør.also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).inspektør.korrelasjonsId)
             assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
             assertEquals(1, it.arbeidsgiverOppdrag.size)
