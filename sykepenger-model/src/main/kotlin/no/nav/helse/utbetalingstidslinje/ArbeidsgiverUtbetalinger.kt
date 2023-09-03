@@ -11,7 +11,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 internal class ArbeidsgiverUtbetalinger(
     regler: ArbeidsgiverRegler,
     alder: Alder,
-    private val arbeidsgivere: Map<Arbeidsgiver, (LocalDate, Periode) -> Utbetalingstidslinje>,
+    private val arbeidsgivere: (LocalDate, Periode, SubsumsjonObserver, IAktivitetslogg) -> Map<Arbeidsgiver, Utbetalingstidslinje>,
     infotrygdUtbetalingstidslinje: Utbetalingstidslinje,
     vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) {
@@ -32,7 +32,8 @@ internal class ArbeidsgiverUtbetalinger(
         aktivitetslogg: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
     ): Pair<Alder.MaksimumSykepenger, Map<Arbeidsgiver, Utbetalingstidslinje>> {
-        val tidslinjerPerArbeidsgiver = filtere.fold(tidslinjer(skjæringstidspunkt, beregningsperiode)) { tidslinjer, filter ->
+        val arbeidsgivertidslinjer = arbeidsgivere(skjæringstidspunkt, beregningsperiode, subsumsjonObserver, aktivitetslogg)
+        val tidslinjerPerArbeidsgiver = filtere.fold(arbeidsgivertidslinjer) { tidslinjer, filter ->
             val input = tidslinjer.entries.map { (key, value) -> key to value }
             val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, vedtaksperiode, aktivitetslogg, subsumsjonObserver)
             input.zip(result) { (arbeidsgiver, _), utbetalingstidslinje ->
@@ -41,8 +42,4 @@ internal class ArbeidsgiverUtbetalinger(
         }
         return maksimumSykepenger to tidslinjerPerArbeidsgiver
     }
-
-    private fun tidslinjer(skjæringstidspunkt: LocalDate, periode: Periode) = arbeidsgivere
-        .mapValues { (_, builder) -> builder(skjæringstidspunkt, periode) }
-
 }

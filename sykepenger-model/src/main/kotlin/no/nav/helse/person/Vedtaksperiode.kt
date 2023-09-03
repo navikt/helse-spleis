@@ -373,7 +373,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(
         ytelser: Ytelser,
         infotrygdhistorikk: Infotrygdhistorikk,
-        arbeidsgiverUtbetalinger: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+        arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
     ) {
         if (!ytelser.erRelevant(id)) return
         kontekst(ytelser)
@@ -1208,7 +1208,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             ytelser.info("Forventet ikke ytelsehistorikk i %s".format(type.name))
         }
@@ -1476,7 +1476,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag ?: return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
                 ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
@@ -1484,7 +1484,6 @@ internal class Vedtaksperiode private constructor(
 
             håndterRevurdering(ytelser) {
                 person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
-                val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 vedtaksperiode.beregnUtbetalinger(
                     ytelser,
                     arbeidsgiverUtbetalinger,
@@ -1864,7 +1863,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             håndterFørstegangsbehandling(ytelser, vedtaksperiode) {
                 validation(ytelser) {
@@ -1900,10 +1899,7 @@ internal class Vedtaksperiode private constructor(
                     valider {
                         person.valider(this, vilkårsgrunnlag, vedtaksperiode.organisasjonsnummer, vedtaksperiode.skjæringstidspunkt)
                     }
-                    lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                     valider(RV_UT_16) {
-                        arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
-
                         vedtaksperiode.beregnUtbetalinger(
                             ytelser,
                             arbeidsgiverUtbetalinger,

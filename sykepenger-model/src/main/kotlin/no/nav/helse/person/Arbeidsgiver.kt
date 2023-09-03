@@ -559,7 +559,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(
         ytelser: Ytelser,
         infotrygdhistorikk: Infotrygdhistorikk,
-        arbeidsgiverUtbetalinger: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
+        arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
     ) {
         ytelser.kontekst(this)
         håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
@@ -921,13 +921,14 @@ internal class Arbeidsgiver private constructor(
         return sykdomstidslinje().sisteSkjæringstidspunktTidligereEnn(inntektsdato)?.takeUnless { it == inntektsdato }
     }
 
-    internal fun builder(
+    internal fun beregnUtbetalingstidslinje(
+        skjæringstidspunkt: LocalDate,
+        periode: Periode,
         regler: ArbeidsgiverRegler,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
         infotrygdhistorikk: Infotrygdhistorikk,
-        subsumsjonObserver: SubsumsjonObserver,
-        hendelse: IAktivitetslogg
-    ): (LocalDate, Periode) -> Utbetalingstidslinje {
+        subsumsjonObserver: SubsumsjonObserver
+    ): Utbetalingstidslinje {
         val inntekter = Inntekter(
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = regler,
@@ -935,18 +936,14 @@ internal class Arbeidsgiver private constructor(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperioder = vedtaksperioder
         )
-        return { skjæringstidspunkt, periode ->
-            if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)!!.erArbeidsgiverRelevant(this.organisasjonsnummer))
-                sykdomshistorikk.fyllUtGhosttidslinje(skjæringstidspunkt til periode.endInclusive)
+        if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)!!.erArbeidsgiverRelevant(this.organisasjonsnummer))
+            sykdomshistorikk.fyllUtGhosttidslinje(skjæringstidspunkt til periode.endInclusive)
 
-            val sykdomstidslinje = sykdomstidslinje()
-            if (sykdomstidslinje.count() == 0) Utbetalingstidslinje()
-            else {
-                val builder = UtbetalingstidslinjeBuilder(inntekter, periode)
-                infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
-                builder.result()
-            }
-        }
+        val sykdomstidslinje = sykdomstidslinje()
+        if (sykdomstidslinje.count() == 0) return Utbetalingstidslinje()
+        val builder = UtbetalingstidslinjeBuilder(inntekter, periode)
+        infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
+        return builder.result()
     }
 
     private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {

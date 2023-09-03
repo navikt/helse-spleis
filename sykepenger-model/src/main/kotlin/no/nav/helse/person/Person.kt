@@ -320,9 +320,23 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
-        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk) { subsumsjonObserver ->
-            arbeidsgiverUtbetalinger(subsumsjonObserver = subsumsjonObserver, hendelse = ytelser)
-        }
+        val arbeidsgiverUtbetalinger = ArbeidsgiverUtbetalinger(
+            regler = regler,
+            alder = alder,
+            arbeidsgivere = { skjæringstidspunkt: LocalDate, beregningsperiode: Periode, subsumsjonObserver: SubsumsjonObserver, hendelse: IAktivitetslogg ->
+                arbeidsgivere.associateWith { it.beregnUtbetalingstidslinje(
+                    skjæringstidspunkt,
+                    beregningsperiode,
+                    regler,
+                    vilkårsgrunnlagHistorikk,
+                    infotrygdhistorikk,
+                    subsumsjonObserver
+                ) }
+            },
+            infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
+        )
+        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
         håndterGjenoppta(ytelser)
     }
 
@@ -436,21 +450,6 @@ class Person private constructor(
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
         return periodebuilder.result()
-    }
-
-    private fun arbeidsgiverUtbetalinger(
-        subsumsjonObserver: SubsumsjonObserver,
-        hendelse: IAktivitetslogg
-    ): ArbeidsgiverUtbetalinger {
-        return ArbeidsgiverUtbetalinger(
-            regler = regler,
-            alder = alder,
-            arbeidsgivere = arbeidsgivere.associateWith {
-                it.builder(regler, vilkårsgrunnlagHistorikk, infotrygdhistorikk, subsumsjonObserver, hendelse)
-            },
-            infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
-        )
     }
 
     internal fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {

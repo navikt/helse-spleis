@@ -347,7 +347,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val utbetalinger = ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
             fødselsdato.alder,
-            mapOf(person.arbeidsgiver(ORGNUMMER) to { _, _ -> arbeidsgiverTidslinje }),
+            { _, _, _, _ -> mapOf(person.arbeidsgiver(ORGNUMMER) to arbeidsgiverTidslinje) },
             historiskTidslinje,
             vilkårsgrunnlagHistorikk
         )
