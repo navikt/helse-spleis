@@ -12,8 +12,10 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.IKKE_UTBETALT
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.INGENTING_Å_UTBETALE
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.UTBETALT
@@ -150,6 +152,14 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         if (other == null) return false
         if (this.toSet().containsAll(other.toSet())) return true
         return false
+    }
+
+    internal fun validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode: Periode, aktivitetslogg: IAktivitetslogg): IAktivitetslogg {
+        val sisteDagAgp = perioder.lastOrNull()?.endInclusive ?: return aktivitetslogg
+        // Om det er én eller fler ukedager mellom beregnet AGP og vedtaksperioden som overlapper med dager fra inntektsmeldingen
+        // tyder det på at arbeidsgiver tror det er ny arbeidsgiverperiode, men vi har beregnet at det _ikke_ er ny arbeidsgiverperiode.
+        if (ukedager(sisteDagAgp, vedtaksperiode.start) > 0) aktivitetslogg.varsel(RV_IM_3)
+        return aktivitetslogg
     }
 
     internal companion object {

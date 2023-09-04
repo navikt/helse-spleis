@@ -125,17 +125,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
+        assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
-
-        assertForventetFeil(
-            forklaring = "Unngå at første vedtaksperiode blir automatisert",
-            nå = {
-                assertIngenVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-            },
-            ønsket = {
-                assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-            }
-        )
     }
 
     @Test

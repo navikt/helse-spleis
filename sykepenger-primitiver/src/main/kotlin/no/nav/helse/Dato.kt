@@ -62,13 +62,14 @@ fun LocalDate.erRettFør(other: LocalDate): Boolean {
 }
 
 // antall ukedager mellom start og endInclusive, ikke medregnet endInclusive i seg selv
-fun ClosedRange<LocalDate>.ukedager(): Int {
-    val epochStart = start.toEpochDay()
-    val epochEnd = endInclusive.toEpochDay()
+fun ukedager(fom: LocalDate, tom: LocalDate): Int {
+    val epochStart = fom.toEpochDay()
+    val epochEnd = tom.toEpochDay()
     if (epochStart >= epochEnd) return 0
     val dagerMellom = (epochEnd - epochStart).toInt()
-    val heleHelger = (dagerMellom + start.dayOfWeek.value - 1) / 7 * 2
-    val justerFørsteHelg = if (start.dayOfWeek == SUNDAY) 1 else 0
-    val justerSisteHelg = if (endInclusive.dayOfWeek == SUNDAY) 1 else 0
+    val heleHelger = (dagerMellom + fom.dayOfWeek.value - 1) / 7 * 2
+    val justerFørsteHelg = if (fom.dayOfWeek == SUNDAY) 1 else 0
+    val justerSisteHelg = if (tom.dayOfWeek == SUNDAY) 1 else 0
     return dagerMellom - heleHelger + justerFørsteHelg - justerSisteHelg
 }
+fun ClosedRange<LocalDate>.ukedager() = ukedager(start, endInclusive)

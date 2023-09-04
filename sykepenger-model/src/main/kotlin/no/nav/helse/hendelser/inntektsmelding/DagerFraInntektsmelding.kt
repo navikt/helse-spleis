@@ -95,7 +95,10 @@ internal class DagerFraInntektsmelding(
     internal fun håndter(periode: Periode, arbeidsgiverperiode: () -> Arbeidsgiverperiode?, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
         val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
         val arbeidsgiverSykdomstidslinje = håndter(overlappendeDager.omsluttendePeriode!!, oppdaterSykdom)
-        if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode())
+        arbeidsgiverperiode().let { beregnetArbeidsgiverperiode ->
+            if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
+            else beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(periode, this)
+        }
         return arbeidsgiverSykdomstidslinje.subset(periode)
     }
 
