@@ -113,6 +113,32 @@ import org.junit.jupiter.api.Test
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `når arbeidsgiver feilaktig tror det er ny arbeidsgiverperiode må alle periodene få varsel`() {
+        nyttVedtak(1.januar, 18.januar)
+        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        håndterInntektsmelding(listOf(25.januar til 9.februar))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
+
+        assertForventetFeil(
+            forklaring = "Unngå at første vedtaksperiode blir automatisert",
+            nå = {
+                assertIngenVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+            },
+            ønsket = {
+                assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+            }
+        )
+    }
+
+    @Test
     fun `periode som begynner på siste dag i arbeidsgiverperioden`() {
         håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.februar, 27.februar, 100.prosent))
