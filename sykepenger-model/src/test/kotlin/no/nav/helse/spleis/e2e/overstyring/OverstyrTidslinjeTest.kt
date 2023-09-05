@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -474,6 +475,23 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør
         assertEquals(12, utbetalingstidslinje.avvistDagTeller)
+    }
+
+    @Test
+    fun `overstyring av egenmeldingsdager til arbeidsdager`(){
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
+        håndterInntektsmelding(listOf(10.februar til 26.februar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertEquals("HH SSSSSHH SUUUUGG UAA", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
+        håndterOverstyrTidslinje((20..26).map { ManuellOverskrivingDag(it.februar, Dagtype.Arbeidsdag) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertEquals("HH SSSSSHH SAAAARR AAA", inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).toShortString())
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
     }
 
     @Test
