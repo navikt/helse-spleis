@@ -106,24 +106,6 @@ class Søknad(
         }
     }
 
-    fun loggEgenmeldingsstrekking()  {
-        if(egenmeldingstidslinje.periode() != null) {
-            val egenmeldingCutoffStart = egenmeldingsstart
-            val egenmeldingCutoffEnd = egenmeldingsslutt
-            val nySykdomstidslinje = if (egenmeldingCutoffStart != null && egenmeldingCutoffEnd != null) {
-                egenmeldingstidslinje.subset(egenmeldingCutoffStart til egenmeldingCutoffEnd)
-                    .merge(sykdomstidslinje, replace)
-            } else {
-                sykdomstidslinje
-            }
-
-            sikkerlogg.info("Sykdomstidslinjen ble strukket av egenmelding med {}.\ngammelSykdomstidslinje=$sykdomstidslinje\negenmeldingstidslinje=$egenmeldingstidslinje\nnySykdomstidslinje=$nySykdomstidslinje\n{}",
-                StructuredArguments.keyValue("dager", if(nySykdomstidslinje.periode() != null && sykdomstidslinje.periode() != null) ChronoUnit.DAYS.between(nySykdomstidslinje.førsteDag(), sykdomstidslinje.førsteDag()) else "N/A"),
-                StructuredArguments.keyValue("søknadId", meldingsreferanseId())
-            )
-        }
-    }
-
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {

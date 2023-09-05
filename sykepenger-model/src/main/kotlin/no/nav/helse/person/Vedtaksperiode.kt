@@ -607,7 +607,6 @@ internal class Vedtaksperiode private constructor(
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             return forkast(søknad)
         }
-        søknad.loggEgenmeldingsstrekking()
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 
@@ -708,28 +707,30 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerArbeidsgiveropplysninger() {
-        val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
-        val arbeidsgiverperiode = finnArbeidsgiverperiode()
-        val relevanteSykmeldingsperioder =
-            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykmeldingsperiode }
+        if(forventerInntekt() && !erForlengelse()) {
+            val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
+            val arbeidsgiverperiode = finnArbeidsgiverperiode()
+            val relevanteSykmeldingsperioder =
+                arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykmeldingsperiode }
 
-        val forespurteOpplysninger = listOfNotNull(
-            forespurtInntekt(fastsattInntekt),
-            forespurtFastsattInntekt(fastsattInntekt),
-            forespurtRefusjon(fastsattInntekt),
-            forespurtArbeidsgiverperiode(arbeidsgiverperiode)
-        )
-
-        person.trengerArbeidsgiveropplysninger(
-            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = id,
-                skjæringstidspunkt = skjæringstidspunkt,
-                sykmeldingsperioder = relevanteSykmeldingsperioder,
-                egenmeldingsperioder = sykdomstidslinje.egenmeldingerFraSøknad(),
-                forespurteOpplysninger = forespurteOpplysninger
+            val forespurteOpplysninger = listOfNotNull(
+                forespurtInntekt(fastsattInntekt),
+                forespurtFastsattInntekt(fastsattInntekt),
+                forespurtRefusjon(fastsattInntekt),
+                forespurtArbeidsgiverperiode(arbeidsgiverperiode)
             )
-        )
+
+            person.trengerArbeidsgiveropplysninger(
+                PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                    organisasjonsnummer = organisasjonsnummer,
+                    vedtaksperiodeId = id,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    sykmeldingsperioder = relevanteSykmeldingsperioder,
+                    egenmeldingsperioder = sykdomstidslinje.egenmeldingerFraSøknad(),
+                    forespurteOpplysninger = forespurteOpplysninger
+                )
+            )
+        }
     }
 
     private fun trengerIkkeArbeidsgiveropplysninger() {
@@ -1549,6 +1550,9 @@ internal class Vedtaksperiode private constructor(
         
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
+            if(vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
+                sikkerlogg.info("Her ville vi sendt ut en oppdatert forespørsel pga en korrigerende søknad, vedtaksperiodeId: ${vedtaksperiode.id}")
+            }
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
@@ -1582,8 +1586,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
+            vedtaksperiode.trengerArbeidsgiveropplysninger()
             if(vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
-                vedtaksperiode.trengerArbeidsgiveropplysninger()
+                // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
                     it.trengerIkkeArbeidsgiveropplysninger()
                 }
