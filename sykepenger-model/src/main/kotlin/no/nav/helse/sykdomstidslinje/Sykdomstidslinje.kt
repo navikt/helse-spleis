@@ -186,8 +186,8 @@ internal class Sykdomstidslinje private constructor(
     private fun førsteSykedagEtterEllerLik(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
-    internal fun førsteSykedagEtter(dato: LocalDate) =
-        periode?.firstOrNull { it > dato && erEnSykedag(this[it]) }
+    internal fun førsteSykehverdagEtter(dato: LocalDate) =
+        periode?.firstOrNull { it > dato && erEnSykedag(this[it]) && !this[it].erHelg()}
 
     internal fun førsteArbeidsgiverdagEtter(dato: LocalDate) =
         periode?.firstOrNull { it > dato && erEnArbeidsgiverdag(this[it]) }

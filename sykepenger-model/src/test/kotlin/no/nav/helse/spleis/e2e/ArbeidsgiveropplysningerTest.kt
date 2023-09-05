@@ -796,6 +796,28 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
+    @Test
+    fun `forlengelse av auu som slutter på en lørdag skal be om agp`() {
+        nyPeriode(4.januar til 20.januar)
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        nyPeriode(21.januar til 31.januar)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
+        val expectedForespurteOpplysninger = listOf(
+            PersonObserver.Inntekt(
+                PersonObserver.Inntektsforslag(
+                    listOf(oktober(2017), november(2017), desember(2017)),
+                    null
+                )
+            ),
+            PersonObserver.Refusjon(forslag = emptyList()),
+            PersonObserver.Arbeidsgiverperiode
+        )
+        val actualForespurteOpplysninger =
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
+        assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
+    }
+
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(1.januar til 31.januar, a1)
         nyPeriode(1.januar til 31.januar, a2)

@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.erHelg
 import no.nav.helse.økonomi.Økonomi
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
@@ -55,6 +56,8 @@ internal sealed class Dag(
     }
 
     internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)
+
+    internal fun erHelg() = dato.erHelg()
 
     internal fun problem(other: Dag, melding: String = "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}."): Dag =
         ProblemDag(dato, kilde, other.kilde, melding)

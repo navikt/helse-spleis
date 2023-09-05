@@ -784,7 +784,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun forespurtArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): PersonObserver.Arbeidsgiverperiode? {
         val arbeidsgiverperiodeperioder = arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder().orEmpty()
-        val trengerArbeidsgiverperiode = arbeidsgiver.erFørsteSykedagEtter(periode().start, arbeidsgiverperiode)
+        val trengerArbeidsgiverperiode = arbeidsgiver.tidligerePeriodeHarIkkeForespurtPeriode(periode().start, arbeidsgiverperiode)
                 || arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
                 ?: false
 
