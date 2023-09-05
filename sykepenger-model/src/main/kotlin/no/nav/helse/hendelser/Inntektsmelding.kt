@@ -19,6 +19,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
@@ -182,6 +183,7 @@ class Inntektsmelding(
         info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(begrunnelseForReduksjonEllerIkkeUtbetalt))
         if (arbeidsgiverperioder.size > 1 && !førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) funksjonellFeil(RV_IM_23)
         if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) funksjonellFeil(RV_IM_8)
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt == "FerieEllerAvspasering") varsel(RV_IM_25)
         else varsel(RV_IM_8)
         return this
     }

@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
@@ -37,6 +38,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
@@ -45,6 +47,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -414,7 +417,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_25, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -435,7 +438,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_25, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -497,6 +500,31 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertUtbetalingsdag(inspektør.sisteUtbetalingUtbetalingstidslinje()[2.januar], expectedDagtype = Utbetalingsdag.AvvistDag::class, 11)
+    }
+
+    @Test
+    fun `eget varsel ved oppgitt begrunnelse FerieEllerAvspasering`() {
+        nyttVedtak(1.juni, 30.juni)
+
+        håndterSøknad(Sykdom(1.august, 31.august, 50.prosent))
+        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 1.august, begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering")
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertIngenVarsel(RV_IM_8)
+        assertVarsel(RV_IM_25)
+
+        håndterOverstyrTidslinje((1..31).map {
+            ManuellOverskrivingDag(
+                it.juli,
+                Dagtype.FerieUtenSykmeldingDag
+            )
+        } + listOf(
+            ManuellOverskrivingDag(1.august, Dagtype.Sykedag, 50)
+        ))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
     }
 
     @Test

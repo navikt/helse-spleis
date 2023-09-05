@@ -91,6 +91,7 @@ enum class Varselkode(
     RV_IM_22("Det er mottatt flere inntektsmeldinger på kort tid for samme arbeidsgiver"),
     RV_IM_23("Arbeidsgiver har oppgitt hullete arbeidsgiverperiode og begrunnelse for redusert utbetaling i arbeidsgiverperiode"),
     RV_IM_24("Det har kommet ny inntektsmelding, vurder om arbeidsgiverperiode er riktig"),
+    RV_IM_25("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden grunnet ferie eller avspasering"),
 
     // ST: Sykdomstidslinje
     RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag."),
