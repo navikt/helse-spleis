@@ -1548,6 +1548,9 @@ internal class Vedtaksperiode private constructor(
         
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
+            if(vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
+                sikkerlogg.info("Her ville vi sendt ut en oppdatert forespørsel pga en korrigerende søknad, vedtaksperiodeId: ${vedtaksperiode.id}")
+            }
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
