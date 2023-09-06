@@ -615,6 +615,7 @@ internal class Vedtaksperiode private constructor(
             søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
             return forkast(søknad)
         }
+        søknad.info("Håndterer overlappende søknad")
         håndterSøknad(søknad) { nesteTilstand }
     }
 
