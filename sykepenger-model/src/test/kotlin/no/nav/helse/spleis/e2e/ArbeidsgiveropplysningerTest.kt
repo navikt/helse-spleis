@@ -872,6 +872,24 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(expectedForespørsel.sykmeldingsperioder, actualForespørsel.sykmeldingsperioder)
     }
 
+    @Test
+    fun `Korrigerende søknad fjerner ikke egenmeldingsdager, er det tiltenkt`() = Toggle.OPPDATERE_FORESPØRSLER.enable {
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar))
+        håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)))
+        håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent))
+
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        assertForventetFeil(
+            forklaring = "Vi fjerner ikke egenmeldingsdager dersom korrigerende søknad ikke har egenmeldinger, er dette tiltenkt?",
+            nå = {
+                assertEquals(listOf(1.januar til 1.januar), actualForespørsel.egenmeldingsperioder)
+            },
+            ønsket = {
+                fail("""\_(ツ)_/¯""")
+            }
+        )
+    }
+
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(1.januar til 31.januar, a1)
         nyPeriode(1.januar til 31.januar, a2)
