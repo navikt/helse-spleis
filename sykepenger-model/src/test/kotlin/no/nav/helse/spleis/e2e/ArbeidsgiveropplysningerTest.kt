@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -837,6 +838,33 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        assertEquals(expectedForespørsel.forespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
+        assertEquals(expectedForespørsel.skjæringstidspunkt, actualForespørsel.skjæringstidspunkt)
+        assertEquals(expectedForespørsel.egenmeldingsperioder, actualForespørsel.egenmeldingsperioder)
+        assertEquals(expectedForespørsel.sykmeldingsperioder, actualForespørsel.sykmeldingsperioder)
+    }
+
+    @Test
+    fun `Sender ny forespørsel når korrigerende søknad kommer før vi har fått svar på forrige forespørsel`() = Toggle.OPPDATERE_FORESPØRSLER.enable {
+        nyPeriode(2.januar til 31.januar)
+        håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)))
+
+        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+            skjæringstidspunkt = 1.januar,
+            sykmeldingsperioder = listOf(2.januar til 31.januar),
+            egenmeldingsperioder = listOf(1.januar til 1.januar),
+            forespurteOpplysninger = listOf(
+                PersonObserver.Inntekt(PersonObserver.Inntektsforslag(beregningsmåneder = listOf(oktober(2017), november(2017), desember(2017)), forrigeInntekt = null)),
+                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Arbeidsgiverperiode
+            )
+        )
+
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespørsel.forespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
         assertEquals(expectedForespørsel.skjæringstidspunkt, actualForespørsel.skjæringstidspunkt)
