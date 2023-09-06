@@ -3,9 +3,7 @@ package no.nav.helse.hendelser
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
@@ -103,24 +101,6 @@ class Søknad(
                 .merge(sykdomstidslinje, replace)
         } else {
             sykdomstidslinje
-        }
-    }
-
-    fun loggEgenmeldingsstrekking()  {
-        if(egenmeldingstidslinje.periode() != null) {
-            val egenmeldingCutoffStart = egenmeldingsstart
-            val egenmeldingCutoffEnd = egenmeldingsslutt
-            val nySykdomstidslinje = if (egenmeldingCutoffStart != null && egenmeldingCutoffEnd != null) {
-                egenmeldingstidslinje.subset(egenmeldingCutoffStart til egenmeldingCutoffEnd)
-                    .merge(sykdomstidslinje, replace)
-            } else {
-                sykdomstidslinje
-            }
-
-            sikkerlogg.info("Sykdomstidslinjen ble strukket av egenmelding med {}.\ngammelSykdomstidslinje=$sykdomstidslinje\negenmeldingstidslinje=$egenmeldingstidslinje\nnySykdomstidslinje=$nySykdomstidslinje\n{}",
-                StructuredArguments.keyValue("dager", if(nySykdomstidslinje.periode() != null && sykdomstidslinje.periode() != null) ChronoUnit.DAYS.between(nySykdomstidslinje.førsteDag(), sykdomstidslinje.førsteDag()) else "N/A"),
-                StructuredArguments.keyValue("søknadId", meldingsreferanseId())
-            )
         }
     }
 

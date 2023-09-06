@@ -607,7 +607,6 @@ internal class Vedtaksperiode private constructor(
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             return forkast(søknad)
         }
-        søknad.loggEgenmeldingsstrekking()
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 
