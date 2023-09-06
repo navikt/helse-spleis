@@ -162,7 +162,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender med riktig sykmeldingsperioder og forslag til arbeidsgiverperiode når arbeidsgiverperioden er stykket opp i flere korte perioder`() {
+    fun `sender med riktig sykmeldingsperioder når arbeidsgiverperioden er stykket opp i flere korte perioder`() {
         nyPeriode(1.januar til 7.januar)
         nyPeriode(9.januar til 14.januar)
         nyPeriode(16.januar til 21.januar)
@@ -816,6 +816,32 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
+    }
+
+    @Test
+    fun `Kort periode som blir lang pga korrigerende søknad med egenmeldingsdager skal sende ut forespørsel`() {
+        nyPeriode(2.januar til 17.januar)
+        håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)))
+
+        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+            skjæringstidspunkt = 1.januar,
+            sykmeldingsperioder = listOf(2.januar til 17.januar),
+            egenmeldingsperioder = listOf(1.januar til 1.januar),
+            forespurteOpplysninger = listOf(
+                PersonObserver.Inntekt(PersonObserver.Inntektsforslag(beregningsmåneder = listOf(oktober(2017), november(2017), desember(2017)), forrigeInntekt = null)),
+                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Arbeidsgiverperiode
+            )
+        )
+
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        assertEquals(expectedForespørsel.forespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
+        assertEquals(expectedForespørsel.skjæringstidspunkt, actualForespørsel.skjæringstidspunkt)
+        assertEquals(expectedForespørsel.egenmeldingsperioder, actualForespørsel.egenmeldingsperioder)
+        assertEquals(expectedForespørsel.sykmeldingsperioder, actualForespørsel.sykmeldingsperioder)
     }
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
