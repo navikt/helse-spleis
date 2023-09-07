@@ -13,7 +13,7 @@ import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.Alder
 
-internal class PersonBuilder(
+internal class  PersonBuilder(
     builder: AbstractBuilder,
     private val personidentifikator: Personidentifikator,
     private val aktørId: String,
