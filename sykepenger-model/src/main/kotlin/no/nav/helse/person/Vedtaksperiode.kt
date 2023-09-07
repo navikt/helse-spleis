@@ -2577,7 +2577,7 @@ internal class Vedtaksperiode private constructor(
                 val arbeidsgiversSykdomstidslinjeUtenAuuene = arbeidsgiver.sykdomstidslinjeUten(auuer.map { it.sykdomstidslinje })
 
                 vedtaksperioderSomMåBeholdeSkjæringstidspunkt.forEach { vedtaksperiode ->
-                    if (vedtaksperiode.skjæringstidspunkt != person.skjæringstidspunkt(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene, vedtaksperiode.periode)) {
+                    if (vedtaksperiode.vilkårsgrunnlag != null && vedtaksperiode.skjæringstidspunkt != person.skjæringstidspunkt(arbeidsgiver, arbeidsgiversSykdomstidslinjeUtenAuuene, vedtaksperiode.periode)) {
                         hendelse?.info("Forkaste AUU: Kan ikke forkaste, vedtaksperioden ${vedtaksperiode.periode} på ${vedtaksperiode.organisasjonsnummer} ville fått endret skjæringstidspunkt")
                         return true
                     }

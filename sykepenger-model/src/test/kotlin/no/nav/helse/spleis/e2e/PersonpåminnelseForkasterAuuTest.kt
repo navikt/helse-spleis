@@ -18,9 +18,11 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -390,12 +392,19 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
             infotrygdUtbetalingUtenFunksjonelleFeil(17.januar til 17.januar)
             nullstillTilstandsendringer()
             håndterPersonPåminnelse()
-            assertEquals(10.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(12.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            assertEquals(17.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
 
         }
 
         a1 {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+
+        a2 {
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
         }
     }
 
