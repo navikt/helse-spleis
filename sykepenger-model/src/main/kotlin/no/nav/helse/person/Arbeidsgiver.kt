@@ -50,6 +50,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.overlappendeVedtaksperioderMedSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerFastsettelseEtterSkjønn
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
@@ -278,7 +279,17 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.nyttVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Grunnlagsdata) =
             flatMap { it.vedtaksperioder }.nyttVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
+
+        internal fun List<Arbeidsgiver>.overlappendeVedtaksperioderMedSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode) =
+            flatMap { it.vedtaksperioder }.overlappendeVedtaksperioderMedSkjæringstidspunkt(vedtaksperiode)
+
+        internal fun List<Arbeidsgiver>.håndterEndringAvSkjæringstidspunkter(hendelse: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, skjæringstidspunkter: List<LocalDate>) {
+            forEach { it.håndterEndringAvSkjæringstidspunkter(hendelse, arbeidsgiver, skjæringstidspunkter) }
+        }
     }
+
+    private fun håndterEndringAvSkjæringstidspunkter(hendelse: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, skjæringstidspunkter: List<LocalDate>) =
+        håndter(hendelse) { håndterEndringAvSkjæringstidspunkter(hendelse, arbeidsgiver, skjæringstidspunkter)}
 
     /* hvorvidt arbeidsgiver ikke inngår i sykepengegrunnlaget som er på et vilkårsgrunnlag,
         for eksempel i saker hvor man var syk på én arbeidsgiver på skjæringstidspunktet, også blir man
@@ -765,8 +776,9 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+        val skjæringstidspunkter = person.skjæringstidspunkter()
         val sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
-        person.sykdomshistorikkEndret(hendelse)
+        person.sykdomshistorikkEndret(hendelse, this, skjæringstidspunkter)
         return sykdomstidslinje
     }
 

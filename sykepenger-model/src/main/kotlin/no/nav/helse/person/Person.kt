@@ -47,11 +47,13 @@ import no.nav.helse.person.Arbeidsgiver.Companion.forkastAUUSomErUtbetaltIInfotr
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterEndringAvSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nyttVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
+import no.nav.helse.person.Arbeidsgiver.Companion.overlappendeVedtaksperioderMedSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
@@ -651,18 +653,22 @@ class Person private constructor(
         )
     }
 
-    internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
-        val skjæringstidspunkter = skjæringstidspunkter()
-        arbeidsgivere.fold(skjæringstidspunkter.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
+    internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, skjæringstidspunkterFørEndring: List<LocalDate>) {
+        val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
+        arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
             arbeidsgiver.sykefraværsfortelling(acc)
         }.varsleObservers(observers)
-        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter)
+        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkterEtterEndring)
+        val nyeSkjæringstidspunkter = skjæringstidspunkterEtterEndring - skjæringstidspunkterFørEndring.toSet()
+        if (nyeSkjæringstidspunkter.isEmpty()) return
+        arbeidsgivere.håndterEndringAvSkjæringstidspunkter(aktivitetslogg.barn(), arbeidsgiver, nyeSkjæringstidspunkter)
     }
 
-    internal fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
+    internal fun søppelbøtte(arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
+        val skjæringstidspunkterFørEndring = skjæringstidspunkter()
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
-        sykdomshistorikkEndret(hendelse)
+        sykdomshistorikkEndret(hendelse, arbeidsgiver, skjæringstidspunkterFørEndring)
         gjenopptaBehandling(hendelse)
     }
 
@@ -701,6 +707,9 @@ class Person private constructor(
 
     internal fun relevanteArbeidsgivere(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.relevanteArbeidsgivere(vilkårsgrunnlagFor(skjæringstidspunkt))
+
+    internal fun overlappendeVedtaksperioderMedSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode) =
+        arbeidsgivere.overlappendeVedtaksperioderMedSkjæringstidspunkt(vedtaksperiode)
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         skjæringstidspunkt: LocalDate,

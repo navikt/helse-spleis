@@ -1,7 +1,8 @@
-package no.nav.helse.spleis.e2e
+package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -36,6 +37,31 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
+import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.grunnlag
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyeVedtak
+import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -48,6 +74,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.OPPDATERE_FORESPØRSLER::class)
 internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     private val INNTEKT_FLERE_AG = 20000.månedlig
@@ -574,7 +601,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Skal ikke sende med skjønnsfastsatt sykpengegrunnlag som inntektForrigeSkjæringstidspunkt` () {
         val inntektsmeldingId = UUID.randomUUID()
         nyttVedtak(1.januar, 31.januar, inntektsmeldingId = inntektsmeldingId)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT*2)))
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT *2)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -667,7 +694,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar)
         val id = håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, 1.april, endringerIRefusjon = listOf(
+            refusjon = Inntektsmelding.Refusjon(
+                INNTEKT, 1.april, endringerIRefusjon = listOf(
                 Inntektsmelding.Refusjon.EndringIRefusjon(29000.månedlig, 20.januar),
                 Inntektsmelding.Refusjon.EndringIRefusjon(28000.månedlig, 30.januar),
                 Inntektsmelding.Refusjon.EndringIRefusjon(27000.månedlig, 20.februar)
@@ -839,55 +867,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertEquals(expectedForespørsel.forespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
-        assertEquals(expectedForespørsel.skjæringstidspunkt, actualForespørsel.skjæringstidspunkt)
-        assertEquals(expectedForespørsel.egenmeldingsperioder, actualForespørsel.egenmeldingsperioder)
-        assertEquals(expectedForespørsel.sykmeldingsperioder, actualForespørsel.sykmeldingsperioder)
-    }
-
-    @Test
-    fun `Sender ny forespørsel når korrigerende søknad kommer før vi har fått svar på forrige forespørsel`() = Toggle.OPPDATERE_FORESPØRSLER.enable {
-        nyPeriode(2.januar til 31.januar)
-        håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)))
-
-        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
-            skjæringstidspunkt = 1.januar,
-            sykmeldingsperioder = listOf(2.januar til 31.januar),
-            egenmeldingsperioder = listOf(1.januar til 1.januar),
-            forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(PersonObserver.Inntektsforslag(beregningsmåneder = listOf(oktober(2017), november(2017), desember(2017)), forrigeInntekt = null)),
-                PersonObserver.Refusjon(forslag = emptyList()),
-                PersonObserver.Arbeidsgiverperiode
-            )
-        )
-
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertEquals(expectedForespørsel.forespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
-        assertEquals(expectedForespørsel.skjæringstidspunkt, actualForespørsel.skjæringstidspunkt)
-        assertEquals(expectedForespørsel.egenmeldingsperioder, actualForespørsel.egenmeldingsperioder)
-        assertEquals(expectedForespørsel.sykmeldingsperioder, actualForespørsel.sykmeldingsperioder)
-    }
-
-    @Test
-    fun `Korrigerende søknad fjerner ikke egenmeldingsdager, er det tiltenkt`() = Toggle.OPPDATERE_FORESPØRSLER.enable {
-        håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar))
-        håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)))
-        håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent))
-
-        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
-        assertForventetFeil(
-            forklaring = "Vi fjerner ikke egenmeldingsdager dersom korrigerende søknad ikke har egenmeldinger, er dette tiltenkt?",
-            nå = {
-                assertEquals(listOf(1.januar til 1.januar), actualForespørsel.egenmeldingsperioder)
-            },
-            ønsket = {
-                fail("""\_(ツ)_/¯""")
-            }
-        )
+        assertEquals(expectedForespørsel, actualForespørsel)
     }
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {

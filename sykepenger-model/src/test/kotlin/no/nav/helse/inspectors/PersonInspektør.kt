@@ -3,18 +3,20 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.VedtaksperiodeFilter
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
-import no.nav.helse.Alder
-import no.nav.helse.hendelser.til
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 
@@ -22,7 +24,10 @@ internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
 
 internal fun Person.søppelbøtte(hendelse: IAktivitetslogg, periode: Periode) =
-    søppelbøtte(hendelse) { it.periode().start >= periode.start }
+    søppelbøtte(Arbeidsgiver(this, "orgnummer", MaskinellJurist()), hendelse) { it.periode().start >= periode.start }
+
+internal fun Person.søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) =
+    søppelbøtte(Arbeidsgiver(this, "orgnummer", MaskinellJurist()), hendelse, filter)
 
 internal class PersonInspektør(person: Person): PersonVisitor {
     internal val arbeidsgiverteller get() = arbeidsgivere.size

@@ -53,8 +53,6 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.spleis.e2e.lagInntektperioder
-import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -116,10 +114,6 @@ internal class TestPerson(
         return this
     }
 
-    internal fun forkastAlle() {
-        person.søppelbøtte(forrigeHendelse) { true }
-    }
-
     internal fun bekreftBehovOppfylt() {
         behovsamler.bekreftBehovOppfylt()
     }
@@ -177,7 +171,8 @@ internal class TestPerson(
             orgnummer: String = "",
             søknadId: UUID = UUID.randomUUID(),
             utenlandskSykmelding: Boolean = false,
-            søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker
+            søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
+            sendTilGosys: Boolean = false
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode {
@@ -190,7 +185,8 @@ internal class TestPerson(
                         id = søknadId,
                         yrkesskade = yrkesskade,
                         utenlandskSykmelding = utenlandskSykmelding,
-                        søknadstype = søknadstype
+                        søknadstype = søknadstype,
+                        sendTilGosys = sendTilGosys
                     ).håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)){

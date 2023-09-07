@@ -445,6 +445,13 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    internal fun håndterEndringAvSkjæringstidspunkter(hendelse: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, skjæringstidspunkter: List<LocalDate>) {
+        if (skjæringstidspunkt in skjæringstidspunkter && this.arbeidsgiver !== arbeidsgiver) {
+            kontekst(hendelse)
+            tilstand.håndterEndringAvSkjæringstidspunkter(this, hendelse)
+        }
+    }
+
     private fun påvirkerArbeidsgiverperioden(ny: Vedtaksperiode): Boolean {
         val dagerMellom = ny.periode.periodeMellom(this.periode.start)?.count() ?: return false
         return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
@@ -524,7 +531,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forkast(hendelse: IAktivitetslogg) {
-        person.søppelbøtte(hendelse, TIDLIGERE_OG_ETTERGØLGENDE(this))
+        person.søppelbøtte(arbeidsgiver, hendelse, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
@@ -708,7 +715,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerArbeidsgiveropplysninger() {
-        if(forventerInntekt() && !erForlengelse()) {
+        val skalOppdatere = forventerInntekt() && !erForlengelse()
+        if(skalOppdatere) {
             val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
             val arbeidsgiverperiode = finnArbeidsgiverperiode()
             val relevanteSykmeldingsperioder =
@@ -1142,6 +1150,8 @@ internal class Vedtaksperiode private constructor(
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {}
 
+        fun håndterEndringAvSkjæringstidspunkter(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
         }
@@ -1248,6 +1258,7 @@ internal class Vedtaksperiode private constructor(
                     else -> AvventerInfotrygdHistorikk
                 }
             }
+
             søknad.info("Fullført behandling av søknad")
             if (søknad.harFunksjonelleFeilEllerVerre()) return
             vedtaksperiode.person.igangsettOverstyring(søknad, Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
@@ -1547,6 +1558,13 @@ internal class Vedtaksperiode private constructor(
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
+        }
+
+        override fun håndterEndringAvSkjæringstidspunkter(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.OPPDATERE_FORESPØRSLER.enabled) {
+                vedtaksperiode.trengerArbeidsgiveropplysninger()
+                hendelse.info("Søknaden har flyttet skjæringstidspunkt hos en annen arbeidsgiver")
+            }
         }
         
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
@@ -2539,7 +2557,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak")
                 sikkerlogg.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak", keyValue("aktørId", sisteAuu.aktørId), keyValue("fom", "${førsteAuu.periode.start}"), keyValue("tom", "${sisteAuu.periode.endInclusive}"))
                 val forkastes = auuer.map { it.id }
-                person.søppelbøtte(hendelse) { it.id in forkastes }
+                person.søppelbøtte(arbeidsgiver, hendelse) { it.id in forkastes }
             }
 
             private fun kanForkastes(hendelse: IAktivitetslogg?, alleVedtaksperioder: List<Vedtaksperiode>, sjekkAgp: Boolean): Boolean {
@@ -2761,6 +2779,12 @@ internal class Vedtaksperiode private constructor(
             manglendeUtbetalingsopplysninger(dag, "inngår ikke i sykepengegrunnlaget")
         internal fun List<Vedtaksperiode>.manglerRefusjonsopplysninger(dag: LocalDate) =
             manglendeUtbetalingsopplysninger(dag, "mangler refusjonsopplysninger")
+
+        internal fun List<Vedtaksperiode>.overlappendeVedtaksperioderMedSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode) =
+            mapNotNull {
+                if (it != vedtaksperiode && it.periode().overlapperMed(vedtaksperiode.periode())) it.skjæringstidspunkt to it
+                else null
+            }
 
         private fun beregningsperioderFørstegangsbehandling(person: Person, vedtaksperiode: Vedtaksperiode) = (
                 listOf(vedtaksperiode) + person

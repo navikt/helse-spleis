@@ -748,8 +748,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     @Test
     fun `oppretter ikke ny vedtaksperiode ved søknad som overlapper med forkastet periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        forkastAlle()
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = true)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

@@ -125,7 +125,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val søknadIder: Set<UUID>
     )
 
-    class TrengerArbeidsgiveropplysningerEvent(
+    data class TrengerArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val skjæringstidspunkt: LocalDate,
