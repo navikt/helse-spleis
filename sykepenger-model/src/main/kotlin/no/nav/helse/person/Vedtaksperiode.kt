@@ -2535,7 +2535,7 @@ internal class Vedtaksperiode private constructor(
 
         internal abstract class AuuGruppering protected constructor(
             protected val organisasjonsnummer: String,
-            protected val auuer: List<Vedtaksperiode>
+            auuer: List<Vedtaksperiode>
         ) {
             init {
                 check(auuer.isNotEmpty()) { "Må inneholde minst en vedtaksperiode" }
@@ -2543,6 +2543,7 @@ internal class Vedtaksperiode private constructor(
                 check(auuer.all { it.organisasjonsnummer == organisasjonsnummer }) { "Alle vedtaksperioder må høre til samme arbeidsgiver" }
             }
 
+            private val auuer = auuer.filter { it.arbeidsgiver.kanForkastes(it) }
             protected val førsteAuu = auuer.min()
             protected val sisteAuu = auuer.max()
             protected val perioder = auuer.map { it.periode }
@@ -2565,7 +2566,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             private fun kanForkastes(hendelse: IAktivitetslogg?, alleVedtaksperioder: List<Vedtaksperiode>, sjekkAgp: Boolean, sjekkSkjæringstidspunkt: Boolean): Boolean {
-                if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver") }
+                // if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver") }
                 if (sjekkAgp && påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder)) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver") }
                 if (sjekkSkjæringstidspunkt && påvirkerForkastingSkjæringstidspunktPåPerson(hendelse, alleVedtaksperioder)) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen") }
                 return true
