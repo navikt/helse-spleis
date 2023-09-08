@@ -140,6 +140,12 @@ internal class Arbeidsgiver private constructor(
             alleVedtaksperioder.gruppérAuuer(infotrygdhistorikk, AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach {
                 it.forkast(hendelse, alleVedtaksperioder, "overlappende utbetaling i Infotrygd", sjekkAgp = false, sjekkSkjæringstidspunkt = false)
             }
+            alleVedtaksperioder.gruppérAuuer(infotrygdhistorikk, AUU_SOM_VIL_UTBETALES).forEach {
+                it.forkast(hendelse, alleVedtaksperioder, "Perioder som står i AUU og VIL_UTBETALES, i tillegg til å ha gått inn i AUU før 2023")
+            }
+            alleVedtaksperioder.gruppérAuuer(infotrygdhistorikk, AUU_SOM_VIL_UTBETALES).forEach {
+                it.forkast(hendelse, alleVedtaksperioder)
+            }
         }
 
         internal fun List<Arbeidsgiver>.forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk) {

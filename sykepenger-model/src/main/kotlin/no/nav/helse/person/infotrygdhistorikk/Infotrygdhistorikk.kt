@@ -148,4 +148,9 @@ internal class Infotrygdhistorikk private constructor(
         if (!harHistorikk()) return false
         return siste.villeBlittFiktiv(organisasjonsnummer, arbeidsgiverperiode)
     }
+
+    fun ingenUtbetalingerMellom(organisasjonsnummer: String, periode: Periode): Boolean {
+        if (!harHistorikk()) return true
+        return siste.ingenUtbetalingerMellom(organisasjonsnummer, periode)
+    }
 }

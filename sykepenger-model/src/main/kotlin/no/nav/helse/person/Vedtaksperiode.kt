@@ -2645,7 +2645,7 @@ internal class Vedtaksperiode private constructor(
                     .filter { it.organisasjonsnummer == organisasjonsnummer }
                     .filter { it.tilstand != AvsluttetUtenUtbetaling }
                     .filter { it.periode.starterEtter(sisteAuu.periode) }
-                    .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
+                    .any { it.finnArbeidsgiverperiode() == arbeidsgiverperiode && infotrygdhistorikk.ingenUtbetalingerMellom(organisasjonsnummer, sisteAuu.periode.oppdaterTom(it.periode))}
             }
         }
 

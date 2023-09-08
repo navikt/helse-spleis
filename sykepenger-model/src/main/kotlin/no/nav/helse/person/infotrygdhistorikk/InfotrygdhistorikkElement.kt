@@ -188,5 +188,12 @@ class InfotrygdhistorikkElement private constructor(
         return arbeidsgiverperiode.villeBlittFiktiv(perioder)
     }
 
+    fun ingenUtbetalingerMellom(organisasjonsnummer: String, periode: Periode): Boolean {
+        val perioder = perioder.utbetalingsperioder(organisasjonsnummer)
+        return !perioder.any { utbetalingsperiode ->
+            utbetalingsperiode.overlapperMed(periode)
+        }
+    }
+
 }
 
