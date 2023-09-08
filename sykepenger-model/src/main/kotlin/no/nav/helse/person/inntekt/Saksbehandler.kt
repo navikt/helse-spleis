@@ -112,21 +112,6 @@ class Saksbehandler internal constructor(
 
     }
 
-    override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
-        organisasjonsnummer: String,
-        forklaring: String,
-        oppfylt: Boolean
-    ) = apply {
-        subsumsjonObserver.`§ 8-15`(
-            dato,
-            organisasjonsnummer,
-            emptyList(),
-            forklaring,
-            oppfylt
-        )
-    }
-
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }

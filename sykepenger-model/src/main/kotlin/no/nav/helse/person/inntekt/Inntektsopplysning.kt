@@ -84,7 +84,15 @@ abstract class Inntektsopplysning protected constructor(
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean
-    ): Inntektsopplysning? = null
+    ) = apply {
+        subsumsjonObserver.`§ 8-15`(
+            skjæringstidspunkt = dato,
+            organisasjonsnummer = organisasjonsnummer,
+            inntekterSisteTreMåneder = emptyList(),
+            forklaring = forklaring,
+            oppfylt = oppfylt
+        )
+    }
 
     internal open fun lagreTidsnærInntekt(
         skjæringstidspunkt: LocalDate,
