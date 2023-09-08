@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.ArbeidstakerHendelse
 import java.time.LocalDate
 import java.util.*
 
-class Grunnbeløpsregulering(
+class Grunnbeløpsregulering( // Slett
     meldingsreferanseId: UUID,
     aktørId: String,
     fødselsnummer: String,

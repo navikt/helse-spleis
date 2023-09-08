@@ -250,6 +250,8 @@ internal abstract class AbstractDslTest {
         this { håndterIdentOpphørt(nyttFnr, nyAktørId) }
     protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
         this { håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt) }
+    protected fun String.håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
+        this { håndterGrunnbeløpsregulering(skjæringstidspunkt) }
     protected fun nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
     protected fun String.assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         this { assertTilstander(id, *tilstander) }
@@ -371,6 +373,9 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).håndterIdentOpphørt(nyttFnr, nyAktørId)
     protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
         bareÈnArbeidsgiver(a1).håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
+
+    protected fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
+        bareÈnArbeidsgiver(a1).håndterGrunnbeløpsregulering(skjæringstidspunkt)
 
     protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
         testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }

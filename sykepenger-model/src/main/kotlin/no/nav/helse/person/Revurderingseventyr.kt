@@ -7,6 +7,7 @@ import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeDat
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Grunnbeløpsregulering
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingArbeidsgiverperiode
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingInntektsopplysninger
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
@@ -37,6 +38,8 @@ class Revurderingseventyr private constructor(
         fun arbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
         fun korrigertInntektsmeldingInntektsopplysninger(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode())
         fun korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
+        fun grunnbeløpsregulering(skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode())
+
     }
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
@@ -117,6 +120,9 @@ class Revurderingseventyr private constructor(
 
         object Arbeidsforhold : RevurderingÅrsak {
             override fun navn() = "ARBEIDSFORHOLD"
+        }
+        object Grunnbeløpsregulering : RevurderingÅrsak {
+            override fun navn() = "GRUNNBELØPSREGULERING"
         }
 
         object Reberegning : RevurderingÅrsak {

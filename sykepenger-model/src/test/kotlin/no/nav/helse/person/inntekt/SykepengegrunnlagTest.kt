@@ -334,7 +334,7 @@ internal class SykepengegrunnlagTest {
     @Test
     fun `justerer grunnbeløpet`() {
         val sykepengegrunnlag = 60000.månedlig.sykepengegrunnlag("orgnr", 1.mai(2020), 1.mai(2020))
-        val justert = sykepengegrunnlag.justerGrunnbeløp()
+        val justert = sykepengegrunnlag.grunnbeløpsregulering()
         assertNotEquals(sykepengegrunnlag, justert)
         assertNotEquals(sykepengegrunnlag.inspektør.sykepengegrunnlag, justert.inspektør.sykepengegrunnlag)
         assertNotEquals(sykepengegrunnlag.inspektør.`6G`, justert.inspektør.`6G`)
@@ -810,7 +810,7 @@ internal class SykepengegrunnlagTest {
             tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
         )
 
-        assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.justerGrunnbeløp()) { "grunnbeløpet trenger ikke justering" }
+        assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.grunnbeløpsregulering()) { "grunnbeløpet trenger ikke justering" }
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag.ferdigSykepengegrunnlag(

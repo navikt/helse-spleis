@@ -302,10 +302,11 @@ internal class Sykepengegrunnlag private constructor(
             tilstand = tilstand
         )
 
-    internal fun justerGrunnbeløp() = kopierSykepengegrunnlag(
+    internal fun grunnbeløpsregulering() = kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger,
         deaktiverteArbeidsforhold
     )
+
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
         visitor.preVisitSykepengegrunnlag(
             this,

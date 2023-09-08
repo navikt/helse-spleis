@@ -324,6 +324,11 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
+        internal fun håndterGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) {
+            arbeidsgiverHendelsefabrikk.lagGrunnbeløpsregulering(skjæringstidspunkt)
+                .håndter(Person::håndter)
+        }
+
         internal fun håndterPersonPåminnelse() {
             personHendelsefabrikk.lagPåminnelse()
                 .håndter(Person::håndter)

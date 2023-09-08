@@ -7,6 +7,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -256,6 +257,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonObserver: SubsumsjonObserver
         ): VilkårsgrunnlagElement?
 
+        abstract fun grunnbeløpsregulering(
+            hendelse: Grunnbeløpsregulering,
+            subsumsjonObserver: SubsumsjonObserver
+        ): VilkårsgrunnlagElement?
+
         internal fun nyeArbeidsgiverInntektsopplysninger(
             person: Person,
             inntektsmelding: Inntektsmelding,
@@ -455,6 +461,19 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonObserver: SubsumsjonObserver
         ) = kopierMed(hendelse, sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver), opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver), subsumsjonObserver)
 
+        override fun grunnbeløpsregulering(
+            hendelse: Grunnbeløpsregulering,
+            subsumsjonObserver: SubsumsjonObserver
+        ): VilkårsgrunnlagElement? {
+            val nyttSykepengegrunnlag = sykepengegrunnlag.grunnbeløpsregulering()
+            if (nyttSykepengegrunnlag == sykepengegrunnlag) {
+                hendelse.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
+                return null
+            }
+            hendelse.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt korrigeres til rett beløp.")
+            return kopierMed(hendelse, nyttSykepengegrunnlag, opptjening, subsumsjonObserver)
+        }
+
         override fun kopierMed(
             hendelse: IAktivitetslogg,
             sykepengegrunnlag: Sykepengegrunnlag,
@@ -491,6 +510,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
+            subsumsjonObserver: SubsumsjonObserver
+        ): Grunnlagsdata? {
+            hendelse.funksjonellFeil(RV_VV_11)
+            return null
+        }
+
+        override fun grunnbeløpsregulering(
+            hendelse: Grunnbeløpsregulering,
             subsumsjonObserver: SubsumsjonObserver
         ): Grunnlagsdata? {
             hendelse.funksjonellFeil(RV_VV_11)

@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
+import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -36,7 +37,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -436,6 +436,9 @@ class Person private constructor(
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(aktivitetslogg, this)
+        check(arbeidsgivere.håndter(hendelse)) {
+            "Ingen vedtaksperioder håndterte grunnbeløpsregulering"
+        }
         håndterGjenoppta(hendelse)
     }
 
@@ -745,7 +748,6 @@ class Person private constructor(
         igangsettOverstyring(hendelse, eventyr)
     }
 
-
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
         hendelse: OverstyrArbeidsforhold,
         skjæringstidspunkt: LocalDate,
@@ -754,6 +756,18 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
         igangsettOverstyring(hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
+    }
+
+    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+        hendelse: Grunnbeløpsregulering,
+        skjæringstidspunkt: LocalDate,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
+        grunnlag.grunnbeløpsregulering(hendelse, subsumsjonObserver)?.let { grunnbeløpsregulert ->
+            nyttVilkårsgrunnlag(hendelse, grunnbeløpsregulert)
+            igangsettOverstyring(hendelse, Revurderingseventyr.grunnbeløpsregulering(skjæringstidspunkt))
+        }
     }
 
     private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {

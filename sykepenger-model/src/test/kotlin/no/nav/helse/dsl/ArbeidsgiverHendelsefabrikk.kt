@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -357,6 +358,14 @@ internal class ArbeidsgiverHendelsefabrikk(
             tilstandsendringstidspunkt,
             LocalDateTime.now(),
             LocalDateTime.now()
+        )
+
+    internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
+        Grunnbeløpsregulering(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId,
+            personidentifikator.toString(),
+            skjæringstidspunkt = skjæringstidspunkt
         )
 
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
