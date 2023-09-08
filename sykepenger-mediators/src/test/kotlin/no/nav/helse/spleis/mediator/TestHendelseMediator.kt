@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
@@ -27,7 +28,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
-import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -38,7 +38,7 @@ import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
+import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -127,7 +127,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestReplayHendelser = false
         private set
-    internal var lestEtterbetaling = false
+    internal var lestGrunnbeløpsregulering = false
         private set
     internal var lestInfotrygdendring = false
         private set
@@ -156,7 +156,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestAnnullerUtbetaling = false
         lestAvstemming = false
         lestOverstyrTidslinje = false
-        lestEtterbetaling = false
+        lestGrunnbeløpsregulering = false
         lestInfotrygdendring = false
         utbetalingshistorikkEtterInfotrygdendringMessage = false
         lestAnmodningOmForkasting = false
@@ -315,8 +315,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestOverstyrArbeidsforhold = true
     }
 
-    override fun behandle(message: EtterbetalingMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext) {
-        lestEtterbetaling = true
+    override fun behandle(message: GrunnbeløpsreguleringMessage, grunnbeløpsregulering: Grunnbeløpsregulering, context: MessageContext) {
+        lestGrunnbeløpsregulering = true
     }
 
     override fun behandle(

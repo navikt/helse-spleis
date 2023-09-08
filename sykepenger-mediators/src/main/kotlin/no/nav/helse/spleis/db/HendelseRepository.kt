@@ -13,12 +13,11 @@ import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
-import no.nav.helse.spleis.meldinger.SendtFrilansSøknaderRiver
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
+import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -119,7 +118,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
         is UtbetalingMessage -> UTBETALING
         is AnnulleringMessage -> KANSELLER_UTBETALING
-        is EtterbetalingMessage -> GRUNNBELØPSREGULERING
+        is GrunnbeløpsreguleringMessage -> GRUNNBELØPSREGULERING
         is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
         is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
         is OverstyrArbeidsgiveropplysningerMessage -> OVERSTYRARBEIDSGIVEROPPLYSNINGER

@@ -10,8 +10,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
-import no.nav.helse.spleis.meldinger.EtterbetalingerRiver
-import no.nav.helse.spleis.meldinger.EtterbetalingerRiverMedHistorikk
+import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
 import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
 import no.nav.helse.spleis.meldinger.GjenopplivVilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
@@ -42,7 +41,6 @@ import no.nav.helse.spleis.meldinger.UtbetalingshistorikkRiver
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import org.slf4j.LoggerFactory
 
 internal class MessageMediator(
@@ -79,8 +77,7 @@ internal class MessageMediator(
             PersonAvstemmingRiver(it, this)
             MigrateRiver(it, this)
             OverstyrTidlinjeRiver(it, this)
-            EtterbetalingerRiver(it, this)
-            EtterbetalingerRiverMedHistorikk(it, this)
+            GrunnbeløpsreguleringRiver(it, this)
             OverstyrArbeidsforholdRiver(it, this)
             OverstyrArbeidsgiveropplysningerRiver(it, this)
             InfotrygdendringerRiver(it, this)
