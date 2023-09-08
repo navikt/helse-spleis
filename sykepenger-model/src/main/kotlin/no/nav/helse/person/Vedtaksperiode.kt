@@ -489,7 +489,13 @@ internal class Vedtaksperiode private constructor(
         if (tilstand == Start) return true // For vedtaksperioder som forkates på "direkten"
         if (!utbetalinger.kanForkastes(arbeidsgiverUtbetalinger)) return false
         val overlappendeUtbetalinger = arbeidsgiverUtbetalinger.filter { it.overlapperMed(periode) }
-        return Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)
+        val kanForkastes = Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)
+        if (kanForkastes) return true
+        val overlappendeOppdrag = arbeidsgiverUtbetalinger.filter { it.overlapperMedUtbetaling(periode) }
+        if (!Utbetaling.kanForkastes(overlappendeOppdrag, arbeidsgiverUtbetalinger)) return false // forkaster ikke om perioden har utbetalinger
+        // om perioden kun er auu, og er utbetalt i infotrygd, så er det greit
+        if (tilstand != AvsluttetUtenUtbetaling) return false
+        return person.erBetaltInfotrygd(this.periode)
     }
 
     internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): VedtaksperiodeForkastetEventBuilder? {
