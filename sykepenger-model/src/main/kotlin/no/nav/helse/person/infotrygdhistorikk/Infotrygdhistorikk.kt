@@ -11,6 +11,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingsh
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
@@ -141,5 +142,10 @@ internal class Infotrygdhistorikk private constructor(
     internal fun harUtbetaltI(periode: Periode): Boolean {
         if (!harHistorikk()) return false
         return siste.harUtbetaltI(periode)
+    }
+
+    fun villeBlittFiktiv(organisasjonsnummer: String, arbeidsgiverperiode: Arbeidsgiverperiode): Boolean {
+        if (!harHistorikk()) return false
+        return siste.villeBlittFiktiv(organisasjonsnummer, arbeidsgiverperiode)
     }
 }
