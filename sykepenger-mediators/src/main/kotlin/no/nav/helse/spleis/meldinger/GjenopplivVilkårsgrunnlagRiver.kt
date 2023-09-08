@@ -20,6 +20,7 @@ internal class GjenopplivVilkårsgrunnlagRiver(
             "fødselsnummer",
             "vilkårsgrunnlagId"
         )
+        message.interestedIn("nyttSkjæringstidspunkt")
     }
 
     override fun createMessage(packet: JsonMessage) = GjenopplivVilkårsgrunnlagMessage(packet)

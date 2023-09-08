@@ -184,7 +184,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 hendelse: IAktivitetslogg,
                 sykepengegrunnlag: Sykepengegrunnlag,
                 opptjening: Opptjening?,
-                subsumsjonObserver: SubsumsjonObserver
+                subsumsjonObserver: SubsumsjonObserver,
+                nyttSkjæringstidspunkt: LocalDate?
             ): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
                 throw IllegalStateException()
             }

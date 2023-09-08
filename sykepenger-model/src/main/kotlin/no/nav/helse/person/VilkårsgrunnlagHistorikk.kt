@@ -53,9 +53,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         historikk.add(0, nytt)
     }
 
-    internal fun gjenoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID) {
-        if (sisteInnlag()?.gjennoppliv(hendelse, vilkårsgrunnlagId) != null) return hendelse.info("Kan ikke gjenopplive. Vilkårsgrunnlaget lever!")
-        val gjenopplivet = historikk.firstNotNullOfOrNull { it.gjennoppliv(hendelse, vilkårsgrunnlagId) } ?: return hendelse.info("Fant ikke vilkårsgrunnlag å gjenopplive")
+    internal fun gjenoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?) {
+        if (sisteInnlag()?.gjennoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) != null) return hendelse.info("Kan ikke gjenopplive. Vilkårsgrunnlaget lever!")
+        val gjenopplivet = historikk.firstNotNullOfOrNull { it.gjennoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) } ?: return hendelse.info("Fant ikke vilkårsgrunnlag å gjenopplive")
         lagre(gjenopplivet)
     }
 
@@ -179,7 +179,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return Innslag(gyldigeVilkårsgrunnlag)
         }
 
-        internal fun gjennoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID)  = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, vilkårsgrunnlagId) }
+        internal fun gjennoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?)  = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) }
 
         internal companion object {
             fun gjenopprett(
@@ -249,7 +249,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             hendelse: IAktivitetslogg,
             sykepengegrunnlag: Sykepengegrunnlag,
             opptjening: Opptjening?,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonObserver: SubsumsjonObserver,
+            nyttSkjæringstidspunkt: LocalDate? = null
         ): VilkårsgrunnlagElement
 
         abstract fun overstyrArbeidsforhold(
@@ -323,9 +324,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun tags(tagBuilder: TagBuilder) = sykepengegrunnlag.tags(tagBuilder)
 
-        internal fun gjenoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID): VilkårsgrunnlagElement? {
+        internal fun gjenoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): VilkårsgrunnlagElement? {
             if (this.vilkårsgrunnlagId != vilkårsgrunnlagId) return null
-            return kopierMed(hendelse, this.sykepengegrunnlag, this.opptjening, NullObserver)
+            return kopierMed(hendelse, this.sykepengegrunnlag, this.opptjening, NullObserver, nyttSkjæringstidspunkt)
         }
 
         internal fun kandidatForSkjønnsmessigFastsettelse() = sykepengegrunnlag.kandidatForSkjønnsmessigFastsettelse()
@@ -459,7 +460,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
             subsumsjonObserver: SubsumsjonObserver
-        ) = kopierMed(hendelse, sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver), opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver), subsumsjonObserver)
+        ) = kopierMed(
+            hendelse,
+            sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver),
+            opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver),
+            subsumsjonObserver,
+        )
 
         override fun grunnbeløpsregulering(
             hendelse: Grunnbeløpsregulering,
@@ -478,13 +484,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             hendelse: IAktivitetslogg,
             sykepengegrunnlag: Sykepengegrunnlag,
             opptjening: Opptjening?,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonObserver: SubsumsjonObserver,
+            nyttSkjæringstidspunkt: LocalDate?
         ): VilkårsgrunnlagElement {
             val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
             val opptjeningOk = opptjening?.valider(hendelse)
             return Grunnlagsdata(
-                skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag,
+                skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
+                sykepengegrunnlag = nyttSkjæringstidspunkt?.let { sykepengegrunnlag.gjenoppliv(it) } ?: sykepengegrunnlag,
                 opptjening = opptjening ?: this.opptjening,
                 medlemskapstatus = medlemskapstatus,
                 vurdertOk = vurdertOk && sykepengegrunnlagOk && (opptjeningOk ?: true),
@@ -528,11 +535,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             hendelse: IAktivitetslogg,
             sykepengegrunnlag: Sykepengegrunnlag,
             opptjening: Opptjening?,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonObserver: SubsumsjonObserver,
+            nyttSkjæringstidspunkt: LocalDate?
         ): InfotrygdVilkårsgrunnlag {
             return InfotrygdVilkårsgrunnlag(
-                skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag,
+                skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
+                sykepengegrunnlag = nyttSkjæringstidspunkt?.let { sykepengegrunnlag.gjenoppliv(it) } ?: sykepengegrunnlag,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }

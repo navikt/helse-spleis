@@ -291,10 +291,11 @@ internal class Sykepengegrunnlag private constructor(
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-        tilstand: Tilstand? = null
+        tilstand: Tilstand? = null,
+        nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt
     ) = Sykepengegrunnlag(
             alder = alder,
-            skjæringstidspunkt = skjæringstidspunkt,
+            skjæringstidspunkt = nyttSkjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
@@ -305,6 +306,12 @@ internal class Sykepengegrunnlag private constructor(
     internal fun grunnbeløpsregulering() = kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger,
         deaktiverteArbeidsforhold
+    )
+
+    internal fun gjenoppliv(nyttSkjæringstidspunkt: LocalDate) = kopierSykepengegrunnlag(
+        nyttSkjæringstidspunkt = nyttSkjæringstidspunkt,
+        arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
+        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
     )
 
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
