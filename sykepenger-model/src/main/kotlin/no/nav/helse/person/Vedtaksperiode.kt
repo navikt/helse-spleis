@@ -2593,7 +2593,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             internal companion object {
-                internal fun List<Vedtaksperiode>.gruppérAuuer(filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) =
+                internal fun List<Vedtaksperiode>.gruppérAuuer(infotrygdhistorikk: Infotrygdhistorikk, filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) =
                     this
                         .groupBy { it.organisasjonsnummer }
                         .flatMap { (organisasjonsnummer, vedtaksperioder) ->
@@ -2602,20 +2602,20 @@ internal class Vedtaksperiode private constructor(
                                 .groupBy { it.finnArbeidsgiverperiode() }
                                 .flatMap { (arbeidsgiverperiode, vedtaksperioder) ->
                                     if (arbeidsgiverperiode == null) vedtaksperioder.map { AuuUtenAGP(organisasjonsnummer, it) }
-                                    else listOf(AuuerMedSammeAGP(organisasjonsnummer, vedtaksperioder, arbeidsgiverperiode))
+                                    else listOf(AuuerMedSammeAGP(infotrygdhistorikk, organisasjonsnummer, vedtaksperioder, arbeidsgiverperiode))
                                 }
 
                         }
                         .filter { auuer -> auuer.auuer.any(filter) }
                         .sortedByDescending { it.sisteAuu }
-                internal fun List<Vedtaksperiode>.auuGruppering(vedtaksperiode: Vedtaksperiode): AuuGruppering? {
+                internal fun List<Vedtaksperiode>.auuGruppering(vedtaksperiode: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk): AuuGruppering? {
                     if (vedtaksperiode.tilstand != AvsluttetUtenUtbetaling) return null
                     val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return AuuUtenAGP(vedtaksperiode.organisasjonsnummer, vedtaksperiode)
                     return this
                         .filter { it.organisasjonsnummer == vedtaksperiode.organisasjonsnummer }
                         .filter { it.tilstand == AvsluttetUtenUtbetaling }
                         .filter { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
-                        .let { AuuerMedSammeAGP(vedtaksperiode.organisasjonsnummer, it, arbeidsgiverperiode) }
+                        .let { AuuerMedSammeAGP(infotrygdhistorikk, vedtaksperiode.organisasjonsnummer, it, arbeidsgiverperiode) }
                 }
 
                 internal fun List<Vedtaksperiode>.nyttVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Grunnlagsdata) =
@@ -2626,6 +2626,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal class AuuerMedSammeAGP(
+            private val infotrygdhistorikk: Infotrygdhistorikk,
             organisasjonsnummer: String,
             auuer: List<Vedtaksperiode>,
             private val arbeidsgiverperiode: Arbeidsgiverperiode
@@ -2635,6 +2636,11 @@ internal class Vedtaksperiode private constructor(
             }
             override fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>): Boolean {
                 if (arbeidsgiverperiode.fiktiv()) return false // Om AGP er fiktiv er AGP gjennomført i Infotrygd, og periode i Spleis skal ikke påvirke AGP (🤞)
+                // om arbeidsgiverperioden blir fiktiv, f.eks. at vi har registrert en auu, også har IT utbetalt overlappende/rett etterpå.
+                // da kan auuen forkastes siden agp fortsatt vil bli riktig
+                // Hvis infotrygd har utbetalt arbeidsgiverperioden, eller rett etterpå, så vil arbeidsgiverperioden
+                // fremdeles kunne bli regnet ut riktig for evt. vedtak i spleis som kommer etter IT-periodene
+                if (infotrygdhistorikk.villeBlittFiktiv(organisasjonsnummer, arbeidsgiverperiode)) return false
                 return alleVedtaksperioder
                     .filter { it.organisasjonsnummer == organisasjonsnummer }
                     .filter { it.tilstand != AvsluttetUtenUtbetaling }

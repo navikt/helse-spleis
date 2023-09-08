@@ -16,6 +16,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -182,6 +183,10 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
+    internal fun villeBlittFiktiv(organisasjonsnummer: String, arbeidsgiverperiode: Arbeidsgiverperiode): Boolean {
+        val perioder = perioder.utbetalingsperioder(organisasjonsnummer)
+        return arbeidsgiverperiode.villeBlittFiktiv(perioder)
+    }
 
 }
 

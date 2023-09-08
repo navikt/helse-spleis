@@ -826,7 +826,7 @@ class Person private constructor(
     }
     internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
-    internal fun forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu)
+    internal fun forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu, infotrygdhistorikk)
 
     internal fun erBetaltInfotrygd(vedtaksperiode: Periode): Boolean {
         return infotrygdhistorikk.harUtbetaltI(vedtaksperiode)
