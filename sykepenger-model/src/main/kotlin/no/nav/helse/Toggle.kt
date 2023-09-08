@@ -125,5 +125,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object SendFeriepengeOppdrag : Toggle("SEND_FERIEPENGEOPPDRAG")
     object AltAvTjuefemprosentAvvikssaker : Toggle("AVVIKSAKER", false)
     object STOPPE_TILSIG_AUU : Toggle("STOPPE_TILSIG_AUU", true)
-    object OPPDATERE_FORESPØRSLER : Toggle("OPPDATERE_FORESPOERSEL", false)
+    object OPPDATERE_FORESPØRSLER : Toggle("OPPDATERE_FORESPOERSEL", true)
 }
