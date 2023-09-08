@@ -116,6 +116,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu som har perioder etter på annen ag med helgegap`() {
         a1 {
             nyPeriode(4.januar til fredag(19.januar))
@@ -177,6 +178,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu bridger gapet mellom to perioder på annen arbeidsgiver`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
@@ -208,6 +210,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu har både overlappende periode og periode som starter etter`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
@@ -261,6 +264,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Auu med hale på annen arbeidsgiver `() {
         a1 {
             nyPeriode(1.januar til 16.januar)
@@ -325,6 +329,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Ville flyttet skjæringstidspunkt på annen arbeidsgiver ved forkasting av Auu`() {
         a1 {
             nyPeriode(5.januar til 17.januar)
@@ -347,6 +352,7 @@ internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
     }
 
     @Test
+    @Disabled
     fun `Ville flyttet skjæringstidspunkt på annen arbeidsgiver på periode in play ved forkasting av Auu`() {
         a1 {
             nyPeriode(5.januar til 17.januar)

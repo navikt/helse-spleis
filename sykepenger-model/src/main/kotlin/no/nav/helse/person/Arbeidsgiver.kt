@@ -138,7 +138,7 @@ internal class Arbeidsgiver private constructor(
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
 
             alleVedtaksperioder.gruppérAuuer(AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach {
-                it.forkast(hendelse, alleVedtaksperioder, "overlappende utbetaling i Infotrygd", sjekkAgp = false)
+                it.forkast(hendelse, alleVedtaksperioder, "overlappende utbetaling i Infotrygd", sjekkAgp = false, sjekkSkjæringstidspunkt = false)
             }
         }
 

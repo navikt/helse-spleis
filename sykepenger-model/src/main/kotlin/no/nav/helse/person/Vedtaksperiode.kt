@@ -2558,9 +2558,9 @@ internal class Vedtaksperiode private constructor(
 
             abstract fun påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder: List<Vedtaksperiode>): Boolean
 
-            internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>, årsak: String = "${hendelse::class.simpleName}", sjekkAgp: Boolean = true) {
+            internal fun forkast(hendelse: IAktivitetslogg, alleVedtaksperioder: List<Vedtaksperiode>, årsak: String = "${hendelse::class.simpleName}", sjekkAgp: Boolean = true, sjekkSkjæringstidspunkt: Boolean = true) {
                 hendelse.info("Forkaste AUU: Vurderer om periodene $perioder kan forkastes på grunn av $årsak")
-                if (!kanForkastes(hendelse, alleVedtaksperioder, sjekkAgp, sjekkSkjæringstidspunkt = true)) {
+                if (!kanForkastes(hendelse, alleVedtaksperioder, sjekkAgp, sjekkSkjæringstidspunkt = sjekkSkjæringstidspunkt)) {
                     if (kanForkastes(null, alleVedtaksperioder, sjekkAgp, sjekkSkjæringstidspunkt = false))
                         hendelse.info("Forkaste AUU: Kunne blitt forkastet om man ignorerte endring av skjæringstidspunktet")
                     return
