@@ -5,6 +5,16 @@
       "vedtaksperioder": [
         {
           "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2020-08-05",
+          "utbetalinger": [
+            {
+              "utbetalingId": "f6651bc4-da2c-42e9-a774-9294e693cd75",
+              "vilkårsgrunnlagId": "eea8fd37-2d64-4f6e-8466-364229acbb7b"
+            }
+          ]
+        },
+        {
+          "tilstand": "AVSLUTTET",
           "skjæringstidspunkt": "2018-03-05",
           "utbetalinger": [
             {
@@ -44,6 +54,37 @@
   "vilkårsgrunnlagHistorikk": [
     {
       "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2020-08-05",
+          "type": "Vilkårsprøving",
+          "opptjening": {
+            "opptjeningFom": "2015-11-12",
+            "opptjeningTom": "2020-08-04"
+          },
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "xx",
+                "inntektsopplysning": {
+                  "beløp": 31000,
+                  "hendelseId": "01fc8807-fed6-4f17-a6be-94ee483b51ff"
+                },
+                "refusjonsopplysninger": [
+                  {
+                    "fom": "2020-08-01",
+                    "tom": "2020-08-02",
+                    "beløp": 500
+                  },
+                  {
+                    "fom": "2020-08-03",
+                    "tom": null,
+                    "beløp": 500
+                  }
+                ]
+              }
+            ]
+          }
+        },
         {
           "skjæringstidspunkt": "2018-03-05",
           "type": "Vilkårsprøving",
@@ -100,6 +141,38 @@
             ]
           },
           "vilkårsgrunnlagId": "69b9495d-49cf-4fad-860d-eb1a52500d4e"
+        },
+        {
+          "skjæringstidspunkt": "2020-08-01",
+          "type": "Vilkårsprøving",
+          "opptjening": {
+            "opptjeningFom": "2015-11-12",
+            "opptjeningTom": "2020-08-01"
+          },
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "xx",
+                "inntektsopplysning": {
+                  "beløp": 31000,
+                  "hendelseId": "01fc8807-fed6-4f17-a6be-94ee483b51ff"
+                },
+                "refusjonsopplysninger": [
+                  {
+                    "fom": "2020-08-01",
+                    "tom": "2020-08-02",
+                    "beløp": 500
+                  },
+                  {
+                    "fom": "2020-08-03",
+                    "tom": null,
+                    "beløp": 500
+                  }
+                ]
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "eea8fd37-2d64-4f6e-8466-364229acbb7b"
         }
       ]
     }

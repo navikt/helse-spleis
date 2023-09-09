@@ -91,7 +91,10 @@ internal class V262FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(versi
     }
 
     private fun justerFomPåEksisterendeRefusjonsopplysning(refusjonsopplysninger: ArrayNode, nyttSkjæringstidspunkt: LocalDate) {
-        (refusjonsopplysninger[0] as ObjectNode).put("fom", nyttSkjæringstidspunkt.toString())
+        val refusjonsopplysning = refusjonsopplysninger[0] as ObjectNode
+        val tom = refusjonsopplysning.path("tom")
+        if (tom.isTextual && tom.asLocalDate() < nyttSkjæringstidspunkt) return
+        refusjonsopplysning.put("fom", nyttSkjæringstidspunkt.toString())
     }
 
     private fun leggTilNyRefusjonsopplysning(opplysning: JsonNode, refusjonsopplysninger: ArrayNode, nyttSkjæringstidspunkt: LocalDate) {
