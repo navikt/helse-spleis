@@ -7,8 +7,8 @@ metadata:
   name: spleis-migrate
   namespace: tbd
 spec:
-  image: {{image}}
-  parallelism: 1
+  image: ghcr.io/navikt/helse-spleis/spleis-jobs:653ac70
+  parallelism: 30
   resources:
     limits:
       memory: 4096Mi
@@ -34,5 +34,5 @@ spec:
     #- name: RUNTIME_OPTS
     #  value: "migrate"    # gjør migrering ved å pushe events på kafka, og lar spleis gjøre jobben (lager nedetid)
     - name: RUNTIME_OPTS
-      value: "migrate_v2 193"   # gjør migrering direkte mot databasen ved at alle personer løftes opp til versjon angitt som argument nr 2
+      value: "migrate_v2 262"   # gjør migrering direkte mot databasen ved at alle personer løftes opp til versjon angitt som argument nr 2
                                  # NB! NB! Da er det lurt å sette opp 'parallelism' til endel høyere, kanskje 30?

@@ -28,8 +28,13 @@ internal class V262FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(versi
                 .filter { vedtaksperiode -> vedtaksperiode.path("tilstand").asText() == "AVSLUTTET" }
                 .filter { vedtaksperiode -> vedtaksperiode.path("skjæringstidspunkt").asLocalDate() !in aktiveVilkårsgrunnlag }
                 .forEach { vedtaksperiode ->
-                    val forrigeVilkårsgrunnlag = vedtaksperiode.path("utbetalinger").last().path("vilkårsgrunnlagId").asUUID()
-                    gjenopplivVilkårsgrunnlag(aktørId, vilkårsgrunnlaghistorikk, vedtaksperiode.path("skjæringstidspunkt").asLocalDate(), forrigeVilkårsgrunnlag)
+                    val forrigeVilkårsgrunnlag = vedtaksperiode.path("utbetalinger").lastOrNull()?.path("vilkårsgrunnlagId")?.asUUID()
+                    if (forrigeVilkårsgrunnlag == null) {
+                        val vedtaksperiodeId = vedtaksperiode.path("id").asText()
+                        sikkerlogg.info("V262 {} {} har ikke utbetalinger, men er i AVSLUTTET", keyValue("aktørId", aktørId), keyValue("vedtaksperiodeId", vedtaksperiodeId))
+                    } else {
+                        gjenopplivVilkårsgrunnlag(aktørId, vilkårsgrunnlaghistorikk, vedtaksperiode.path("skjæringstidspunkt").asLocalDate(), forrigeVilkårsgrunnlag)
+                    }
                 }
         }
     }
