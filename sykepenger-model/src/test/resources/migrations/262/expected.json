@@ -24,6 +24,11 @@
           ]
         },
         {
+          "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2015-03-05",
+          "utbetalinger": []
+        },
+        {
           "tilstand": "AVVENTER_REVURDERING",
           "skjæringstidspunkt": "2018-05-15",
           "utbetalinger": [
