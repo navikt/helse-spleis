@@ -1,0 +1,85 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "xx",
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2018-03-05",
+          "utbetalinger": [
+            {
+              "utbetalingId": "f6651bc4-da2c-42e9-a774-9294e693cd75",
+              "vilkårsgrunnlagId": "69b9495d-49cf-4fad-860d-eb1a52500d4e"
+            }
+          ]
+        },
+        {
+          "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2018-03-05",
+          "utbetalinger": [
+            {
+              "utbetalingId": "f6651bc4-da2c-42e9-a774-9294e693cd75",
+              "vilkårsgrunnlagId": "69b9495d-49cf-4fad-860d-eb1a52500d4e"
+            }
+          ]
+        },
+        {
+          "tilstand": "AVVENTER_REVURDERING",
+          "skjæringstidspunkt": "2018-05-15",
+          "utbetalinger": [
+            {
+              "utbetalingId": "a906af3a-0c54-47dd-9eb9-69c9f4ece5b5",
+              "vilkårsgrunnlagId": "30306dec-ec0b-4dc5-b4cb-c8f816066951"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-03-05",
+          "type": "Infortrygd"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-05-15",
+          "type": "Infortrygd",
+          "vilkårsgrunnlagId": "c8f585ad-6ce6-4f10-8da9-55e8f0bc623a"
+        },
+        {
+          "skjæringstidspunkt": "2018-03-21",
+          "type": "Vilkårsprøving",
+          "opptjening": {
+            "opptjeningFom": "2015-11-12",
+            "opptjeningTom": "2018-03-20"
+          },
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "xx",
+                "inntektsopplysning": {
+                  "beløp": 31000,
+                  "hendelseId": "01fc8807-fed6-4f17-a6be-94ee483b51ff"
+                },
+                "refusjonsopplysninger": []
+              }
+            ]
+          },
+          "vilkårsgrunnlagId": "69b9495d-49cf-4fad-860d-eb1a52500d4e"
+        },
+        {
+          "skjæringstidspunkt": "2018-03-05",
+          "type": "Infortrygd",
+          "vilkårsgrunnlagId": "d5826745-27fa-444e-8a33-88b0ed8cb3aa"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 262
+}

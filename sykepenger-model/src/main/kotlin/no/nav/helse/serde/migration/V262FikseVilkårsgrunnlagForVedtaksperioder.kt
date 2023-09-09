@@ -37,7 +37,7 @@ internal class V262FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(versi
     private fun gjenopplivVilkårsgrunnlag(aktørId: String, vilkårsgrunnlaghistorikk: ArrayNode, nyttSkjæringstidspunkt: LocalDate, forrigeVilkårsgrunnlagId: UUID) {
         if (erMigrertFraFør(vilkårsgrunnlaghistorikk, nyttSkjæringstidspunkt)) return
 
-        val forrigeVilkårsgrunnlag = finnVilkårsgrunnlaget(vilkårsgrunnlaghistorikk, forrigeVilkårsgrunnlagId)
+        val forrigeVilkårsgrunnlag = finnVilkårsgrunnlaget(vilkårsgrunnlaghistorikk, nyttSkjæringstidspunkt, forrigeVilkårsgrunnlagId)
 
         sikkerlogg.info("V262 {} gjenoppliver skjæringstidspunkt=${forrigeVilkårsgrunnlag.path("skjæringstidspunkt").asText()} til=$nyttSkjæringstidspunkt fra vilkårsgrunnlagId=$forrigeVilkårsgrunnlagId", keyValue("aktørId", aktørId))
 
@@ -54,9 +54,11 @@ internal class V262FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(versi
             grunnlag.any { it.path("skjæringstidspunkt").asLocalDate() == nyttSkjæringstidspunkt }
         }
 
-    private fun finnVilkårsgrunnlaget(vilkårsgrunnlaghistorikk: ArrayNode, forrigeVilkårsgrunnlagId: UUID) =
+    private fun finnVilkårsgrunnlaget(vilkårsgrunnlaghistorikk: ArrayNode, nyttSkjæringstidspunkt: LocalDate, forrigeVilkårsgrunnlagId: UUID) =
         vilkårsgrunnlaghistorikk.firstNotNullOf { vilkårsgrunnlagelement ->
             vilkårsgrunnlagelement.path("vilkårsgrunnlag").firstOrNull { grunnlag ->
+                grunnlag.path("skjæringstidspunkt").asLocalDate() == nyttSkjæringstidspunkt
+            } ?: vilkårsgrunnlagelement.path("vilkårsgrunnlag").firstOrNull { grunnlag ->
                 grunnlag.path("vilkårsgrunnlagId").asUUID() == forrigeVilkårsgrunnlagId
             }
         }

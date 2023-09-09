@@ -13,4 +13,13 @@ internal class V262FikseVilkårsgrunnlagForVedtaksperioderTest: MigrationTest(V2
             jsonCompareMode = JSONCompareMode.STRICT_ORDER
         )
     }
+
+    @Test
+    fun `velger vilkårsgrunnlag med samme skjæringstidspunkt før vilkårsgrunnlagId`() {
+        assertMigration(
+            expectedJson = "/migrations/262/expected-samme_skjæringstidspunkt.json",
+            originalJson = "/migrations/262/original-samme_skjæringstidspunkt.json",
+            jsonCompareMode = JSONCompareMode.STRICT_ORDER
+        )
+    }
 }
