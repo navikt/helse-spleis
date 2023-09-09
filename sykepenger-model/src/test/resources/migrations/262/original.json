@@ -25,6 +25,16 @@
         },
         {
           "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2020-11-01",
+          "utbetalinger": [
+            {
+              "utbetalingId": "b895c290-98f0-4e58-80a4-b64e62494f16",
+              "vilkårsgrunnlagId": "76d1eac9-c76f-46ed-86c1-dcd37489ecb7"
+            }
+          ]
+        },
+        {
+          "tilstand": "AVSLUTTET",
           "skjæringstidspunkt": "2018-03-05",
           "utbetalinger": [
             {
@@ -114,6 +124,15 @@
             ]
           },
           "vilkårsgrunnlagId": "eea8fd37-2d64-4f6e-8466-364229acbb7b"
+        },
+        {
+          "skjæringstidspunkt": "2020-12-01",
+          "type": "Vilkårsprøving",
+          "opptjening": {
+            "opptjeningFom": "2020-11-30",
+            "opptjeningTom": "2020-11-30"
+          },
+          "vilkårsgrunnlagId": "76d1eac9-c76f-46ed-86c1-dcd37489ecb7"
         }
       ]
     }

@@ -108,7 +108,11 @@ internal class V262FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(versi
 
     private fun justerOpptjeningsperiode(nytt: ObjectNode, nyttSkjæringstidspunkt: LocalDate) {
         if (nytt.path("type").asText() != "Vilkårsprøving") return
-        (nytt.path("opptjening") as ObjectNode).put("opptjeningTom", nyttSkjæringstidspunkt.minusDays(1).toString())
+        val opptjening = nytt.path("opptjening") as ObjectNode
+        val fom = opptjening.path("opptjeningFom").asLocalDate()
+        val opptjeningTom = nyttSkjæringstidspunkt.minusDays(1)
+        if (opptjeningTom < fom) opptjening.put("opptjeningFom", opptjeningTom.toString())
+        opptjening.put("opptjeningTom", opptjeningTom.toString())
     }
 
     private companion object {
