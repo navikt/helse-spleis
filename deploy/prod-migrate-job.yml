@@ -7,7 +7,7 @@ metadata:
   name: spleis-migrate
   namespace: tbd
 spec:
-  image: ghcr.io/navikt/helse-spleis/spleis-jobs:653ac70
+  image: {{ image }}
   parallelism: 30
   resources:
     limits:

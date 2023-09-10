@@ -150,7 +150,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk) {
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
-            alleVedtaksperioder.auuGruppering(auu, infotrygdhistorikk)?.forkast(hendelse, alleVedtaksperioder, sjekkSkjæringstidspunkt = false)
+            alleVedtaksperioder.auuGruppering(auu, infotrygdhistorikk)?.forkast(hendelse, alleVedtaksperioder)
         }
 
         internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
