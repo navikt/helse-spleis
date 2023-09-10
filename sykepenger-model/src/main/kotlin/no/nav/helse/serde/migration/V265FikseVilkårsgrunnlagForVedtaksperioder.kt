@@ -8,7 +8,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.LoggerFactory
 
-internal class V262FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(version = 262) {
+internal class V265FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(version = 265) {
     override val description = "sørger for at alle vedtaksperioder med utbetaling har et aktivt vilkårsgrunnlag"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -31,7 +31,7 @@ internal class V262FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(versi
                     val forrigeVilkårsgrunnlag = vedtaksperiode.path("utbetalinger").lastOrNull()?.path("vilkårsgrunnlagId")?.asUUID()
                     if (forrigeVilkårsgrunnlag == null) {
                         val vedtaksperiodeId = vedtaksperiode.path("id").asText()
-                        sikkerlogg.info("V262 {} {} har ikke utbetalinger, men er i AVSLUTTET", keyValue("aktørId", aktørId), keyValue("vedtaksperiodeId", vedtaksperiodeId))
+                        sikkerlogg.info("V265 {} {} har ikke utbetalinger, men er i AVSLUTTET", keyValue("aktørId", aktørId), keyValue("vedtaksperiodeId", vedtaksperiodeId))
                     } else {
                         gjenopplivVilkårsgrunnlag(aktørId, vilkårsgrunnlaghistorikk, vedtaksperiode.path("skjæringstidspunkt").asLocalDate(), forrigeVilkårsgrunnlag)
                     }
@@ -44,7 +44,7 @@ internal class V262FikseVilkårsgrunnlagForVedtaksperioder : JsonMigration(versi
 
         val forrigeVilkårsgrunnlag = finnVilkårsgrunnlaget(vilkårsgrunnlaghistorikk, nyttSkjæringstidspunkt, forrigeVilkårsgrunnlagId)
 
-        sikkerlogg.info("V262 {} gjenoppliver skjæringstidspunkt=${forrigeVilkårsgrunnlag.path("skjæringstidspunkt").asText()} til=$nyttSkjæringstidspunkt fra vilkårsgrunnlagId=$forrigeVilkårsgrunnlagId", keyValue("aktørId", aktørId))
+        sikkerlogg.info("V265 {} gjenoppliver skjæringstidspunkt=${forrigeVilkårsgrunnlag.path("skjæringstidspunkt").asText()} til=$nyttSkjæringstidspunkt fra vilkårsgrunnlagId=$forrigeVilkårsgrunnlagId", keyValue("aktørId", aktørId))
 
         val nytt = kopierVilkårsgrunnlagMedNyttSkjæringtsidspunkt(nyttSkjæringstidspunkt, forrigeVilkårsgrunnlag)
         leggTilNyttVilkårsgrunnlag(vilkårsgrunnlaghistorikk, nytt)
