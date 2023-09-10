@@ -12,6 +12,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
@@ -495,7 +496,13 @@ internal class Vedtaksperiode private constructor(
         if (!Utbetaling.kanForkastes(overlappendeOppdrag, arbeidsgiverUtbetalinger)) return false // forkaster ikke om perioden har utbetalinger
         // om perioden kun er auu, og er utbetalt i infotrygd, så er det greit
         if (tilstand != AvsluttetUtenUtbetaling) return false
-        return person.erBetaltInfotrygd(this.periode)
+        // auuen overlapper ikke med et oppdrag, men overlapper med perioden til en aktiv utbetaling
+        // I utgangspunktet må vi anta at auuen derfor påvirker utfallet av arbeidsgiverperiode-beregningen, og kan ikke forkastes
+        // unntak er dersom perioden overlapper med en infotrygdutbetaling, eller dersom det foreligger en utbetaling i Infotrygd mellom
+        // auuen og første oppdragslinje/vedtak
+        val nesteVedtak = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(finnArbeidsgiverperiode()).firstOrNull { it.tilstand != AvsluttetUtenUtbetaling }
+        val periodeSomKanVæreUtbetaltIInfotrygd = if (nesteVedtak == null) this.periode else this.periode.oppdaterTom(nesteVedtak.periode.start.forrigeDag)
+        return person.erBetaltInfotrygd(periodeSomKanVæreUtbetaltIInfotrygd)
     }
 
     internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): VedtaksperiodeForkastetEventBuilder? {
