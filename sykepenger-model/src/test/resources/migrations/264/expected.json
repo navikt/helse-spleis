@@ -27,7 +27,7 @@
         {
           "id": "ac476cce-05fb-4cec-84b7-31eaf1ed0924",
           "korrelasjonsId": "5d88fb13-8eda-41a2-8b2e-e37ec4a2fb65",
-          "status": "GODKJENT_UTEN_UTBETALING"
+          "status": "FORKASTET"
         },
         {
           "id": "0ff090fc-6bb7-431a-b4a0-1783f1833428",
@@ -82,5 +82,5 @@
       ]
     }
   ],
-  "skjemaVersjon": 263
+  "skjemaVersjon": 264
 }

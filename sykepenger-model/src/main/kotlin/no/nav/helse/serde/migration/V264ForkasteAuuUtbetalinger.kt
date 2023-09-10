@@ -5,7 +5,7 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
 
-internal class V263ForkasteAuuUtbetalinger : JsonMigration(version = 263) {
+internal class V264ForkasteAuuUtbetalinger : JsonMigration(version = 264) {
     override val description = "forkaster utbetalinger som skulle vært forkastet"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -24,19 +24,11 @@ internal class V263ForkasteAuuUtbetalinger : JsonMigration(version = 263) {
                         val ufiltrertGruppe = utbetalinger.entries.first { (_, utbetalingerMedSammeKorrelasjonsId) ->
                             utbetalingerMedSammeKorrelasjonsId.any { it.path("id").asText().uuid == utbetalingId }
                         }.value
-                        val gruppe = ufiltrertGruppe
-                            .filter { it.path("status").asText() != "FORKASTET" }
-                            .filter { it.path("status").asText() != "IKKE_GODKJENT" }
-
-                        val utbetalte = gruppe.count { it.path("status").asText() != "GODKJENT_UTEN_UTBETALING" }
-                        if (gruppe.size > 1 && utbetalte > 0) {
-                            sikkerlogg.info("V263 {} {} i AUU har utbetaling som består av en gruppe med ${gruppe.size} utbetalinger hvorav $utbetalte er utbetalte", kv("aktørId", aktørId), kv("vedtaksperiodeId", periode.path("id").asText()))
-                        } else {
-                            val utbetalingen = ufiltrertGruppe.first { it.path("id").asText().uuid == utbetalingId } as ObjectNode
-                            if (utbetalingen.path("status").asText() != "FORKASTET") {
-                                utbetalingen.put("status", "FORKASTET")
-                                sikkerlogg.info("V263 {} {} i AUU har utbetaling som kan forkastes", kv("aktørId", aktørId), kv("vedtaksperiodeId", periode.path("id").asText()))
-                            }
+                        val utbetalingen = ufiltrertGruppe.first { it.path("id").asText().uuid == utbetalingId } as ObjectNode
+                        val status = utbetalingen.path("status").asText()
+                        if (status != "FORKASTET") {
+                            utbetalingen.put("status", "FORKASTET")
+                            sikkerlogg.info("V263 {} {} i AUU har utbetaling med status=$status som kan forkastes", kv("aktørId", aktørId), kv("vedtaksperiodeId", periode.path("id").asText()))
                         }
                     }
                 }
