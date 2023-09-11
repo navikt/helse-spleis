@@ -1,6 +1,6 @@
 package no.nav.helse.serde.api.speil.builders
 
-import no.nav.helse.serde.api.dto.SykdomstidslinjedagType.FERIE_UTEN_SYKMELDINGDAG
+import no.nav.helse.serde.api.dto.SykdomstidslinjedagType.ARBEID_IKKE_GJENOPPTATT_DAG
 import no.nav.helse.testhelpers.J
 import no.nav.helse.testhelpers.resetSeed
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,7 +19,7 @@ internal class SykdomstidslinjeBuilderTest() {
         val builder = SykdomstidslinjeBuilder(7.J)
         val build = builder.build()
         assertEquals(7, build.size)
-        build.forEach { assertEquals(FERIE_UTEN_SYKMELDINGDAG, it.type) }
+        build.forEach { assertEquals(ARBEID_IKKE_GJENOPPTATT_DAG, it.type) }
     }
 }
 

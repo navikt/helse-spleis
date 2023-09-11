@@ -141,7 +141,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         is Dag.Arbeidsdag -> SykdomstidslinjedagType.ARBEIDSDAG
         is Dag.Arbeidsgiverdag -> SykdomstidslinjedagType.ARBEIDSGIVERDAG
         is Dag.Feriedag -> SykdomstidslinjedagType.FERIEDAG
-        is Dag.ArbeidIkkeGjenopptattDag -> SykdomstidslinjedagType.FERIE_UTEN_SYKMELDINGDAG
+        is Dag.ArbeidIkkeGjenopptattDag -> SykdomstidslinjedagType.ARBEID_IKKE_GJENOPPTATT_DAG
         is Dag.FriskHelgedag -> SykdomstidslinjedagType.FRISK_HELGEDAG
         is Dag.ArbeidsgiverHelgedag -> SykdomstidslinjedagType.ARBEIDSGIVERDAG
         is Dag.ForeldetSykedag -> SykdomstidslinjedagType.FORELDET_SYKEDAG
