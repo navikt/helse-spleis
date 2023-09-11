@@ -777,7 +777,7 @@ internal data class PersonData(
                         Dag.Arbeidsgiverdag(dato, økonomi, hendelseskilde)
                     }
                     JsonDagType.FERIEDAG -> Dag.Feriedag(dato, hendelseskilde)
-                    JsonDagType.FERIE_UTEN_SYKMELDINGDAG -> Dag.ArbeidIkkeGjenopptattDag(dato, hendelseskilde)
+                    JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG -> Dag.ArbeidIkkeGjenopptattDag(dato, hendelseskilde)
                     JsonDagType.FRISK_HELGEDAG -> Dag.FriskHelgedag(dato, hendelseskilde)
                     JsonDagType.FORELDET_SYKEDAG -> Dag.ForeldetSykedag(dato, økonomi, hendelseskilde)
                     JsonDagType.PERMISJONSDAG -> Dag.Permisjonsdag(dato, hendelseskilde)
@@ -804,7 +804,7 @@ internal data class PersonData(
                 ARBEIDSGIVERDAG,
 
                 FERIEDAG,
-                FERIE_UTEN_SYKMELDINGDAG,
+                ARBEID_IKKE_GJENOPPTATT_DAG,
                 FRISK_HELGEDAG,
                 FORELDET_SYKEDAG,
                 PERMISJONSDAG,

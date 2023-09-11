@@ -34,6 +34,7 @@ enum class Dagtype {
     Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag;
 
     companion object {
+        // TODO: Dette trenger vi frem til Speil begynner å sende ArbeidIkkeGjenopptattDag istedenfor FerieUtenSykmeldingDag
         val gyldigeTyper = Dagtype.values().map { it.name }.plus("FerieUtenSykmeldingDag")
         val String.dagtype get() = when (this) {
             "FerieUtenSykmeldingDag" -> ArbeidIkkeGjenopptattDag

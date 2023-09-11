@@ -1894,7 +1894,7 @@ internal class JsonBuilder : AbstractBuilder() {
             leggTilDag(dato, DagJsonBuilder(FERIEDAG, kilde))
 
         override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde)  =
-            leggTilDag(dato, DagJsonBuilder(FERIE_UTEN_SYKMELDINGDAG, kilde))
+            leggTilDag(dato, DagJsonBuilder(ARBEID_IKKE_GJENOPPTATT_DAG, kilde))
 
         override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) =
             leggTilDag(dato, DagJsonBuilder(PERMISJONSDAG, kilde))

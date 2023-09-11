@@ -15,7 +15,7 @@ internal class BesteDagTest {
         private val arbeidsdagFraSøknad = Dag.Arbeidsdag(1.januar, TestEvent.søknad)
         private val arbeidsdagFraInntektsmelding = Dag.Arbeidsdag(1.januar, TestEvent.inntektsmelding)
         private val ferieFraInntektsmelding = Dag.Feriedag(1.januar, TestEvent.inntektsmelding)
-        private val ferieUtenSykmeldingdag = Dag.ArbeidIkkeGjenopptattDag(1.januar, TestEvent.saksbehandler)
+        private val arbeidIkkeGjenopptattDag = Dag.ArbeidIkkeGjenopptattDag(1.januar, TestEvent.saksbehandler)
         private val arbeidsgiverdagFraInntektsmelding = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.inntektsmelding)
         private val ferieFraSøknad = Dag.Feriedag(1.januar, TestEvent.søknad)
         private val ferieFraSaksbehandler = Dag.Feriedag(1.januar, TestEvent.saksbehandler)
@@ -56,20 +56,20 @@ internal class BesteDagTest {
 
     @Test
     fun `ferie uten sykmelding`() {
-        assertWinnerBidirectional(arbeidsdagFraSøknad, ferieUtenSykmeldingdag, arbeidsdagFraSøknad)
-        assertWinnerBidirectional(arbeidsdagFraInntektsmelding, ferieUtenSykmeldingdag, arbeidsdagFraInntektsmelding)
-        assertWinnerBidirectional(sykedagFraSøknad, ferieUtenSykmeldingdag, sykedagFraSøknad)
-        assertWinnerBidirectional(ferieFraSøknad, ferieUtenSykmeldingdag, ferieFraSøknad)
-        assertWinnerBidirectional(arbeidsgiverdagFraInntektsmelding, ferieUtenSykmeldingdag, arbeidsgiverdagFraInntektsmelding)
+        assertWinnerBidirectional(arbeidsdagFraSøknad, arbeidIkkeGjenopptattDag, arbeidsdagFraSøknad)
+        assertWinnerBidirectional(arbeidsdagFraInntektsmelding, arbeidIkkeGjenopptattDag, arbeidsdagFraInntektsmelding)
+        assertWinnerBidirectional(sykedagFraSøknad, arbeidIkkeGjenopptattDag, sykedagFraSøknad)
+        assertWinnerBidirectional(ferieFraSøknad, arbeidIkkeGjenopptattDag, ferieFraSøknad)
+        assertWinnerBidirectional(arbeidsgiverdagFraInntektsmelding, arbeidIkkeGjenopptattDag, arbeidsgiverdagFraInntektsmelding)
 
-        assertWinner(ferieFraSaksbehandler, ferieUtenSykmeldingdag, ferieUtenSykmeldingdag)
-        assertWinner(ferieUtenSykmeldingdag, ferieFraSaksbehandler, ferieFraSaksbehandler)
+        assertWinner(ferieFraSaksbehandler, arbeidIkkeGjenopptattDag, arbeidIkkeGjenopptattDag)
+        assertWinner(arbeidIkkeGjenopptattDag, ferieFraSaksbehandler, ferieFraSaksbehandler)
 
-        assertWinner(sykedagNavFraSaksbehandler, ferieUtenSykmeldingdag, ferieUtenSykmeldingdag)
-        assertWinner(ferieUtenSykmeldingdag, sykedagNavFraSaksbehandler, sykedagNavFraSaksbehandler)
+        assertWinner(sykedagNavFraSaksbehandler, arbeidIkkeGjenopptattDag, arbeidIkkeGjenopptattDag)
+        assertWinner(arbeidIkkeGjenopptattDag, sykedagNavFraSaksbehandler, sykedagNavFraSaksbehandler)
 
-        assertWinner(sykedagFraSaksbehandler, ferieUtenSykmeldingdag, ferieUtenSykmeldingdag)
-        assertWinner(ferieUtenSykmeldingdag, sykedagFraSaksbehandler, sykedagFraSaksbehandler)
+        assertWinner(sykedagFraSaksbehandler, arbeidIkkeGjenopptattDag, arbeidIkkeGjenopptattDag)
+        assertWinner(arbeidIkkeGjenopptattDag, sykedagFraSaksbehandler, sykedagFraSaksbehandler)
     }
 
     @Test

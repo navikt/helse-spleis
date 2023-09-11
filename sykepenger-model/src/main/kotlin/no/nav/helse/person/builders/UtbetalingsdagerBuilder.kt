@@ -40,7 +40,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
         val dagtype = when (sykdomstidslinje[dato]) {
             is Dag.Permisjonsdag -> PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
             is Dag.Feriedag,
-            is Dag.ArbeidIkkeGjenopptattDag -> PersonObserver.Utbetalingsdag.Dagtype.Feriedag
+            is Dag.ArbeidIkkeGjenopptattDag -> PersonObserver.Utbetalingsdag.Dagtype.Feriedag // TODO: Når Flex er klar å ta imot ny dagtype må vi mappe om dette til noe annet
             else -> PersonObserver.Utbetalingsdag.Dagtype.Fridag
         }
         utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, dagtype))
