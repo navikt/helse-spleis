@@ -15,7 +15,7 @@ internal class BesteDagTest {
         private val arbeidsdagFraSøknad = Dag.Arbeidsdag(1.januar, TestEvent.søknad)
         private val arbeidsdagFraInntektsmelding = Dag.Arbeidsdag(1.januar, TestEvent.inntektsmelding)
         private val ferieFraInntektsmelding = Dag.Feriedag(1.januar, TestEvent.inntektsmelding)
-        private val ferieUtenSykmeldingdag = Dag.FerieUtenSykmeldingDag(1.januar, TestEvent.saksbehandler)
+        private val ferieUtenSykmeldingdag = Dag.ArbeidIkkeGjenopptattDag(1.januar, TestEvent.saksbehandler)
         private val arbeidsgiverdagFraInntektsmelding = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.inntektsmelding)
         private val ferieFraSøknad = Dag.Feriedag(1.januar, TestEvent.søknad)
         private val ferieFraSaksbehandler = Dag.Feriedag(1.januar, TestEvent.saksbehandler)

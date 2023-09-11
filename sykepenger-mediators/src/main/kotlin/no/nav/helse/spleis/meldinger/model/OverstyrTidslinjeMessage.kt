@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
-import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Dagtype.Companion.dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -17,7 +17,7 @@ internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessa
         .map {
             ManuellOverskrivingDag(
                 dato = it["dato"].asLocalDate(),
-                type = Dagtype.valueOf(it["type"].asText()),
+                type = it["type"].asText().dagtype,
                 grad = it["grad"]?.intValue()
             )
         }

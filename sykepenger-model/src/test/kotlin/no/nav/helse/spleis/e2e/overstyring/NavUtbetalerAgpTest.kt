@@ -517,7 +517,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje((1..31).map {
             ManuellOverskrivingDag(
                 it.juli,
-                Dagtype.FerieUtenSykmeldingDag
+                Dagtype.ArbeidIkkeGjenopptattDag
             )
         } + listOf(
             ManuellOverskrivingDag(1.august, Dagtype.Sykedag, 50)

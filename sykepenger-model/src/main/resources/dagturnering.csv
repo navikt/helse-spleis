@@ -1,4 +1,4 @@
-,UkjentDag,Arbeidsdag_SØ,Arbeidsdag_IM,Sykedag_SØ,ForeldetSykedag,Feriedag_SØ,Feriedag_IM,Permisjonsdag_SØ,SykHelgedag_SØ,Arbeidsgiverdag_IM,ArbeidsgiverHelgedag_IM,Arbeidsgiverdag_SØ,ArbeidsgiverHelgedag_SØ,Saksbehandlerdag,UbestemtDag,Arbeidsgiverdag_SB,Arbeidsdag_SB,SykedagNav_IM,FerieUtenSykmeldingdag
+,UkjentDag,Arbeidsdag_SØ,Arbeidsdag_IM,Sykedag_SØ,ForeldetSykedag,Feriedag_SØ,Feriedag_IM,Permisjonsdag_SØ,SykHelgedag_SØ,Arbeidsgiverdag_IM,ArbeidsgiverHelgedag_IM,Arbeidsgiverdag_SØ,ArbeidsgiverHelgedag_SØ,Saksbehandlerdag,UbestemtDag,Arbeidsgiverdag_SB,Arbeidsdag_SB,SykedagNav_IM,ArbeidIkkeGjenopptattDag
 UkjentDag,L,,,,,,,,,,,,,,,,,,
 Arbeidsdag_SØ,R,L,,,,,,,,,,,,,,,,,
 Arbeidsdag_IM,R,L,L,,,,,,,,,,,,,,,,
@@ -17,4 +17,4 @@ UbestemtDag,U,U,U,U,U,U,U,U,U,U,U,U,U,C,U,,,,
 Arbeidsgiverdag_SB,R,R,R,C,C,C,C,C,C,C,C,C,C,L,U,L,,,
 Arbeidsdag_SB,R,R,R,R,R,R,R,R,R,R,R,R,R,L,R,L,L,,
 SykedagNav_IM,R,L,L,R,C,R,L,R,C,L,L,R,R,C,U,C,C,L,
-FerieUtenSykmeldingdag,R,C,C,C,C,C,C,C,C,C,C,C,C,L,C,L,L,C,L
+ArbeidIkkeGjenopptattDag,R,C,C,C,C,C,C,C,C,C,C,C,C,L,C,L,L,C,L

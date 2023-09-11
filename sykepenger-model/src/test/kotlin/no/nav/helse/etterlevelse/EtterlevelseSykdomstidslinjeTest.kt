@@ -19,7 +19,7 @@ internal class EtterlevelseSykdomstidslinjeTest {
             2.januar.ikkeSubsummérbar { Dag.Arbeidsdag(it, INGEN) },
             3.januar.ikkeSubsummérbar { Dag.ArbeidsgiverHelgedag(it, Økonomi.ikkeBetalt(), INGEN) },
             4.januar.ikkeSubsummérbar { Dag.Arbeidsgiverdag(it, Økonomi.ikkeBetalt(), INGEN) },
-            5.januar.ikkeSubsummérbar { Dag.FerieUtenSykmeldingDag(it, INGEN) },
+            5.januar.ikkeSubsummérbar { Dag.ArbeidIkkeGjenopptattDag(it, INGEN) },
             6.januar.subsummérbar { Dag.Feriedag(it, INGEN) },
             7.januar.ikkeSubsummérbar { Dag.ForeldetSykedag(it, Økonomi.ikkeBetalt(), INGEN) },
             8.januar.ikkeSubsummérbar { Dag.FriskHelgedag(it, INGEN) },

@@ -17,15 +17,11 @@ internal class OverstyrTidlinjeRiver(
         message.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
         message.requireArray("dager") {
             requireKey("dato")
-            requireAny("type", gyldigeTyper)
+            requireAny("type", Dagtype.gyldigeTyper)
             interestedIn("grad")
         }
         message.require("dager") { require(!it.isEmpty) }
     }
 
     override fun createMessage(packet: JsonMessage) = OverstyrTidslinjeMessage(packet)
-
-    private companion object {
-        private val gyldigeTyper = Dagtype.values().map { it.name }
-    }
 }

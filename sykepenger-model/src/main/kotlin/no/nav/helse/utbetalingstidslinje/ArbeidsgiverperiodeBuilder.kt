@@ -108,7 +108,7 @@ internal class ArbeidsgiverperiodeBuilder(
         tilstand.feriedag(this, dato)
     }
 
-    override fun visitDag(dag: Dag.FerieUtenSykmeldingDag, dato: LocalDate, kilde: Hendelseskilde) {
+    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
         tilstand.feriedag(this, dato)
     }
 

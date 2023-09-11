@@ -22,7 +22,7 @@ internal enum class Turneringsnøkkel {
     ForeldetSykedag,
     Feriedag_SØ,
     Feriedag_IM,
-    FerieUtenSykmeldingdag,
+    ArbeidIkkeGjenopptattDag,
     Permisjonsdag_SØ,
     SykHelgedag_SØ,
     Arbeidsgiverdag_IM,
@@ -40,7 +40,7 @@ internal enum class Turneringsnøkkel {
         fun fraDag(dag: Dag) = when {
             dag is Arbeidsgiverdag && dag.kommerFra(OverstyrTidslinje::class) -> Arbeidsgiverdag_SB
             dag is Arbeidsdag && dag.kommerFra(OverstyrTidslinje::class) -> Arbeidsdag_SB
-            dag is Dag.FerieUtenSykmeldingDag -> FerieUtenSykmeldingdag
+            dag is Dag.ArbeidIkkeGjenopptattDag -> ArbeidIkkeGjenopptattDag
             dag.kommerFra(OverstyrTidslinje::class) -> Saksbehandlerdag
             dag is Arbeidsdag && dag.kommerFra(Inntektsmelding::class) -> Arbeidsdag_IM
             dag is Arbeidsdag && dag.kommerFra(Søknad::class) -> Arbeidsdag_SØ

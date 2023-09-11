@@ -5,7 +5,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
 
@@ -41,7 +40,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
         val dagtype = when (sykdomstidslinje[dato]) {
             is Dag.Permisjonsdag -> PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
             is Dag.Feriedag,
-            is Dag.FerieUtenSykmeldingDag -> PersonObserver.Utbetalingsdag.Dagtype.Feriedag
+            is Dag.ArbeidIkkeGjenopptattDag -> PersonObserver.Utbetalingsdag.Dagtype.Feriedag
             else -> PersonObserver.Utbetalingsdag.Dagtype.Fridag
         }
         utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, dagtype))

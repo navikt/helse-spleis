@@ -27,7 +27,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
-import no.nav.helse.sykdomstidslinje.Dag.FerieUtenSykmeldingDag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -209,7 +209,7 @@ internal class Sykdomstidslinje private constructor(
     }
 
     private fun erOppholdsdagtype(dato: LocalDate) =
-        this[dato] is Arbeidsdag || this[dato] is FriskHelgedag || this[dato] is FerieUtenSykmeldingDag || this[dato] is AndreYtelser
+        this[dato] is Arbeidsdag || this[dato] is FriskHelgedag || this[dato] is ArbeidIkkeGjenopptattDag || this[dato] is AndreYtelser
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false
@@ -257,7 +257,7 @@ internal class Sykdomstidslinje private constructor(
                     is Arbeidsgiverdag -> "U"
                     is ArbeidsgiverHelgedag -> "G"
                     is Feriedag -> "F"
-                    is FerieUtenSykmeldingDag -> "J"
+                    is ArbeidIkkeGjenopptattDag -> "J"
                     is Permisjonsdag -> "P"
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
@@ -427,14 +427,14 @@ internal class Sykdomstidslinje private constructor(
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { Feriedag(it, kilde) }))
             )
 
-        internal fun feriedagerUtenSykmelding(
+        internal fun arbeidIkkeGjenopptatt(
             førsteDato: LocalDate,
             sisteDato: LocalDate,
             kilde: Hendelseskilde
         ) =
             Sykdomstidslinje(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
-                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { FerieUtenSykmeldingDag(it, kilde) }))
+                    .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ArbeidIkkeGjenopptattDag(it, kilde) }))
             )
 
         internal fun permisjonsdager(

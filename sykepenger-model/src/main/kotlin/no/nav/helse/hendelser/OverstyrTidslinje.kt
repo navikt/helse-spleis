@@ -30,8 +30,16 @@ data class ManuellOverskrivingDag(
 }
 
 enum class Dagtype {
-    Sykedag, Feriedag, FerieUtenSykmeldingDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav,
-    Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag
+    Sykedag, Feriedag, ArbeidIkkeGjenopptattDag, Egenmeldingsdag, Permisjonsdag, Arbeidsdag, SykedagNav,
+    Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag;
+
+    companion object {
+        val gyldigeTyper = Dagtype.values().map { it.name }.plus("FerieUtenSykmeldingDag")
+        val String.dagtype get() = when (this) {
+            "FerieUtenSykmeldingDag" -> ArbeidIkkeGjenopptattDag
+            else -> Dagtype.valueOf(this)
+        }
+    }
 }
 
 class OverstyrTidslinje(
@@ -60,7 +68,7 @@ class OverstyrTidslinje(
                     sisteDato = it.dato,
                     kilde = kilde
                 )
-                Dagtype.FerieUtenSykmeldingDag -> Sykdomstidslinje.feriedagerUtenSykmelding(
+                Dagtype.ArbeidIkkeGjenopptattDag -> Sykdomstidslinje.arbeidIkkeGjenopptatt(
                     førsteDato = it.dato,
                     sisteDato = it.dato,
                     kilde = kilde

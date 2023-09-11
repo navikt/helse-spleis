@@ -170,7 +170,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((1.juli til 31.juli).map { ManuellOverskrivingDag(it, Dagtype.FerieUtenSykmeldingDag) })
+        håndterOverstyrTidslinje((1.juli til 31.juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 

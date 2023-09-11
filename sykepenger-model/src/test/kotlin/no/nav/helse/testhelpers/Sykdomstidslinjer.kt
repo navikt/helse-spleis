@@ -107,7 +107,7 @@ internal val Int.F
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.J
-    get() = Sykdomstidslinje.feriedagerUtenSykmelding(
+    get() = Sykdomstidslinje.arbeidIkkeGjenopptatt(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
         SykdomstidslinjeHendelse.Hendelseskilde.INGEN

@@ -47,7 +47,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         leggTilDag(dag, dato, null, kilde)
 
     override fun visitDag(
-        dag: Dag.FerieUtenSykmeldingDag,
+        dag: Dag.ArbeidIkkeGjenopptattDag,
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) = leggTilDag(dag, dato, null, kilde)
@@ -141,7 +141,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         is Dag.Arbeidsdag -> SykdomstidslinjedagType.ARBEIDSDAG
         is Dag.Arbeidsgiverdag -> SykdomstidslinjedagType.ARBEIDSGIVERDAG
         is Dag.Feriedag -> SykdomstidslinjedagType.FERIEDAG
-        is Dag.FerieUtenSykmeldingDag -> SykdomstidslinjedagType.FERIE_UTEN_SYKMELDINGDAG
+        is Dag.ArbeidIkkeGjenopptattDag -> SykdomstidslinjedagType.FERIE_UTEN_SYKMELDINGDAG
         is Dag.FriskHelgedag -> SykdomstidslinjedagType.FRISK_HELGEDAG
         is Dag.ArbeidsgiverHelgedag -> SykdomstidslinjedagType.ARBEIDSGIVERDAG
         is Dag.ForeldetSykedag -> SykdomstidslinjedagType.FORELDET_SYKEDAG

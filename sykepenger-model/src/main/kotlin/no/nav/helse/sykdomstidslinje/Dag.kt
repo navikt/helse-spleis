@@ -109,7 +109,7 @@ internal sealed class Dag(
             visitor.visitDag(this, dato, kilde)
     }
 
-    internal class FerieUtenSykmeldingDag(
+    internal class ArbeidIkkeGjenopptattDag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) : Dag(dato, kilde) {
@@ -218,7 +218,7 @@ internal interface SykdomstidslinjeDagVisitor {
 
     fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
 
-    fun visitDag(dag: Dag.FerieUtenSykmeldingDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
+    fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
 
     fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {}
     fun visitDag(
