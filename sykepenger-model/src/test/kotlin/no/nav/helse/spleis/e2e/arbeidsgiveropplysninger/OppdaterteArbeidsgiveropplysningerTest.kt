@@ -93,7 +93,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "Vi fjerner ikke egenmeldingsdager dersom korrigerende søknad ikke har egenmeldinger, er dette tiltenkt?",
             nå = {
-                Assertions.assertEquals(listOf(1.januar til 1.januar), actualForespørsel.egenmeldingsperioder)
+                assertEquals(listOf(1.januar til 1.januar), actualForespørsel.egenmeldingsperioder)
             },
             ønsket = {
                 Assertions.fail("""\_(ツ)_/¯""")

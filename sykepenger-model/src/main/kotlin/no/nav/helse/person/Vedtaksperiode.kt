@@ -1425,6 +1425,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
         }
+
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.trengerIkkeInntektsmelding()
+        }
     }
 
     private val trengerFastsettelseEtterSkjønn get() = vilkårsgrunnlag?.trengerFastsettelseEtterSkjønn() == true
