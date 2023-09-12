@@ -107,12 +107,12 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse"
         )
 
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_IM_23, 1.vedtaksperiode.filter())
 
-        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S", inspektør.sykdomstidslinje.toShortString())
+        assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(innteksmeldingId))
     }
