@@ -1,0 +1,39 @@
+{
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2022-03-10",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "foo"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2020-04-05",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": []
+          }
+        },
+        {
+          "skjæringstidspunkt": "2022-03-10",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "foo"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 268
+}
