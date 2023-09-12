@@ -545,6 +545,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forkast(hendelse: IAktivitetslogg) {
+        if (!arbeidsgiver.kanForkastes(this)) return hendelse.info("Kan ikke etterkomme forkasting")
         person.søppelbøtte(arbeidsgiver, hendelse, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 
@@ -2325,10 +2326,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            /*if (!vedtaksperiode.forventerInntekt(NullObserver)) return
+            if (!vedtaksperiode.forventerInntekt(NullObserver)) return
             if (!påminnelse.skalReberegnes()) return
             påminnelse.varsel(RV_IT_38)
-            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))*/
+            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
