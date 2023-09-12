@@ -2350,14 +2350,9 @@ internal class Vedtaksperiode private constructor(
             }
 
             val situasjon = vedtaksperiode.arbeidsgiver.utbetalingssituasjon(vedtaksperiode.finnArbeidsgiverperiode()!!, listOf(vedtaksperiode.periode))
-            if (problemer.isEmpty()) {
-                sikkerlogg.info("{} {} $situasjon ville ikke fått varsler som følge av omgjøring", kv("aktørId", vedtaksperiode.aktørId), kv("vedtaksperiodeId", vedtaksperiode.id))
-            } else {
-                sikkerlogg.info("{} {} $situasjon ville fått varsler som følge av omgjøring: ${problemer.joinToString()}", kv("aktørId", vedtaksperiode.aktørId), kv("vedtaksperiodeId", vedtaksperiode.id))
-            }
+            if (problemer.isNotEmpty()) return sikkerlogg.info("{} {} $situasjon ville fått varsler som følge av omgjøring: ${problemer.joinToString()}", kv("aktørId", vedtaksperiode.aktørId), kv("vedtaksperiodeId", vedtaksperiode.id))
 
-            /* påminnelse.varsel(RV_IT_38)
-            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)) */
+            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
