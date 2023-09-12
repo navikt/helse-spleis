@@ -573,6 +573,24 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Periode etter kort gap skal ikke sende forespørsel dersom inntektsmeldingen allerede er mottatt`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 5.mars))
+        håndterSøknad(Sykdom(10.februar, 5.mars, sykmeldingsgrad = 100.prosent))
+
+        assertForventetFeil("Her skal vi ikke sende ut en ny forespørsel ettersom vi allerede har fått IM",
+            nå = {
+                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            },
+            ønsket = {
+                assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            }
+        )
+    }
+
+    @Test
     fun `Skal ikke sende ut forespørsel for en periode som allerede har mottatt inntektsmelding -- selv om håndteringen feiler`() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), harOpphørAvNaturalytelser = true)
         nyPeriode(1.januar til 31.januar)
