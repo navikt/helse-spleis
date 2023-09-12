@@ -191,6 +191,7 @@ import no.nav.helse.serde.migration.V263None
 import no.nav.helse.serde.migration.V264ForkasteAuuUtbetalinger
 import no.nav.helse.serde.migration.V266FerieUtenSykmeldingTilArbeidIkkeGjenopptatt
 import no.nav.helse.serde.migration.V267SpissetMigreringForÅForkasteUtbetaling
+import no.nav.helse.serde.migration.V268ForkasteVilkårsgrunnlagUtenInntekter
 import no.nav.helse.serde.migration.V26SykdomshistorikkMerge
 import no.nav.helse.serde.migration.V27CachetSykdomstidslinjePåVedtaksperiode
 import no.nav.helse.serde.migration.V28HendelsesIderPåVedtaksperiode
@@ -543,7 +544,8 @@ class SerialisertPerson(val json: String) {
             V264ForkasteAuuUtbetalinger(),
             V265FikseVilkårsgrunnlagForVedtaksperioder(),
             V266FerieUtenSykmeldingTilArbeidIkkeGjenopptatt(),
-            V267SpissetMigreringForÅForkasteUtbetaling()
+            V267SpissetMigreringForÅForkasteUtbetaling(),
+            V268ForkasteVilkårsgrunnlagUtenInntekter()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
