@@ -1,0 +1,48 @@
+{
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "id": "bc0800a7-d2dc-4f79-a232-502041aec30e",
+          "status": "GODKJENT_UTEN_UTBETALING",
+          "type": "UTBETALING"
+        },
+        {
+          "id": "460fe30b-3d47-4da0-a1d6-3eacab7a344e",
+          "status": "GODKJENT_UTEN_UTBETALING",
+          "type": "UTBETALING"
+        },
+        {
+          "id": "fbbd5903-f42f-4b4d-9f54-dd9f7dec330d",
+          "status": "GODKJENT_UTEN_UTBETALING",
+          "type": "UTBETALING"
+        },
+        {
+          "id": "f5313387-c87a-4a7e-9f58-f1413b11c17d",
+          "status": "GODKJENT_UTEN_UTBETALING",
+          "type": "REVURDERING"
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "utbetalinger": [
+            {
+              "utbetalingId": "bc0800a7-d2dc-4f79-a232-502041aec30e"
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "utbetalinger": [
+              {
+                "utbetalingId": "460fe30b-3d47-4da0-a1d6-3eacab7a344e"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
