@@ -6,8 +6,8 @@ import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Grunnbeløpsregulering
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -499,9 +499,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
-
-        internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, organisasjonsnummer: String) =
-            sykepengegrunnlag.leggTil(hendelseIder, organisasjonsnummer)
     }
 
     internal class InfotrygdVilkårsgrunnlag(
