@@ -95,7 +95,6 @@ import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_AVSLUTTES
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_UTBETALES
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -690,10 +689,13 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, tilstandUtenAvvik: Vedtaksperiodetilstand, tilstandMedAvvik: Vedtaksperiodetilstand) {
         val sykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist())
+        sykepengegrunnlag.leggTil(hendelseIder, organisasjonsnummer) { inntektsmeldingId ->
+            person.emitInntektsmeldingHåndtert(inntektsmeldingId, id, organisasjonsnummer)
+        }
         vilkårsgrunnlag.valider(sykepengegrunnlag, jurist())
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
         grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
-        person.lagreVilkårsgrunnlag(skjæringstidspunkt, grunnlagsdata)
+        person.lagreVilkårsgrunnlag(grunnlagsdata)
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
         if (sykepengegrunnlag.avventerFastsettelseEtterSkjønn()) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
@@ -2649,11 +2651,6 @@ internal class Vedtaksperiode private constructor(
                         .filter { it.finnArbeidsgiverperiode() == arbeidsgiverperiode }
                         .let { AuuerMedSammeAGP(infotrygdhistorikk, vedtaksperiode.organisasjonsnummer, it, arbeidsgiverperiode) }
                 }
-
-                internal fun List<Vedtaksperiode>.nyttVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Grunnlagsdata) =
-                    filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-                        .filter { it.tilstand != AvsluttetUtenUtbetaling }
-                        .forEach { vilkårsgrunnlag.leggTil(it.hendelseIder, it.organisasjonsnummer) }
             }
         }
 

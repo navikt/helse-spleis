@@ -92,8 +92,9 @@ internal class Inntektsmelding(
         saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, hendelseId)
     }
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
-        hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(hendelseId))
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, block: (inntektsmeldingId: UUID) -> Unit) {
+        if (!hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(hendelseId))) return
+        block(hendelseId)
     }
 
     internal fun kopierTidsnærOpplysning(nyDato: LocalDate, hendelse: IAktivitetslogg, oppholdsperiodeMellom: Periode?): Inntektsmelding {

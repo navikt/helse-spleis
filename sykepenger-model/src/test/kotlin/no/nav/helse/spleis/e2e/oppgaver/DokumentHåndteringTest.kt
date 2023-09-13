@@ -49,6 +49,17 @@ import org.junit.jupiter.api.Test
 internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
+    fun `sender ut inntektsmelding håndtert også når inntektsmelding kommer før søknad og dagene håndteres av en tidligere periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        observatør.inntektsmeldingHåndtert.clear()
+        val inntektsmelding = håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)
+        val søknad = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertEquals(inntektsmelding to 2.vedtaksperiode.id(ORGNUMMER), observatør.inntektsmeldingHåndtert.single())
+        assertEquals(setOf(søknad, inntektsmelding), inspektør.hendelseIder(2.vedtaksperiode))
+    }
+
+    @Test
     fun `Inntektsmelding kommer mellom AUU og søknad for førstegangsbehandling`() {
         val søknad1 = håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         val inntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar))

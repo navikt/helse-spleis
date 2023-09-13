@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -263,7 +264,10 @@ class ArbeidsgiverInntektsopplysning(
             }
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.leggTil(hendelseIder: MutableSet<Dokumentsporing>, organisasjonsnummer: String) =
-            singleOrNull { it.gjelder(organisasjonsnummer) }?.inntektsopplysning?.leggTil(hendelseIder)
+        internal fun List<ArbeidsgiverInntektsopplysning>.leggTil(
+            hendelseIder: MutableSet<Dokumentsporing>,
+            organisasjonsnummer: String,
+            block: (inntektsmeldingId: UUID) -> Unit
+        ) = single { it.gjelder(organisasjonsnummer) }.inntektsopplysning.leggTil(hendelseIder, block)
     }
 }

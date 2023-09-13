@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
@@ -453,8 +454,8 @@ internal class Sykepengegrunnlag private constructor(
         return false
     }
 
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, organisasjonsnummer: String) =
-        arbeidsgiverInntektsopplysninger.leggTil(hendelseIder, organisasjonsnummer)
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, organisasjonsnummer: String, block: (inntektsmeldingId: UUID) -> Unit) =
+        arbeidsgiverInntektsopplysninger.leggTil(hendelseIder, organisasjonsnummer, block)
 
     private fun tilstand(nyTilstand: Tilstand): Tilstand {
         if (tilstand == nyTilstand) return tilstand

@@ -39,7 +39,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.gruppérAuuer
-import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.nyttVilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_AVVENTENDE_GODKJENNING
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
@@ -54,7 +53,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.overlappendeVedtaksperioderM
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerFastsettelseEtterSkjønn
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -282,9 +280,6 @@ internal class Arbeidsgiver private constructor(
         ) {
             arbeidsgivere.flatMap { it.søppelbøtte(hendelse, filter) }.forEach { it.buildAndEmit() }
         }
-
-        internal fun List<Arbeidsgiver>.nyttVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Grunnlagsdata) =
-            flatMap { it.vedtaksperioder }.nyttVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
 
         internal fun List<Arbeidsgiver>.overlappendeVedtaksperioderMedSkjæringstidspunkt(vedtaksperiode: Vedtaksperiode) =
             flatMap { it.vedtaksperioder }.overlappendeVedtaksperioderMedSkjæringstidspunkt(vedtaksperiode)

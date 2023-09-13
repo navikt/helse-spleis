@@ -115,7 +115,7 @@ abstract class Inntektsopplysning protected constructor(
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {}
 
-    internal open fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}
+    internal open fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, block: (inntektsmeldingId: UUID) -> Unit) {}
 
     internal companion object {
 
