@@ -5113,6 +5113,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "ArbeidIkkeGjenopptattDag",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "ForeldetSykedag",
           "description" : null,
           "isDeprecated" : false,
