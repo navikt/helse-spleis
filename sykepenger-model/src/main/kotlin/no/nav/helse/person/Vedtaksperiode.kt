@@ -117,7 +117,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
@@ -731,8 +730,8 @@ internal class Vedtaksperiode private constructor(
         medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
-    private fun trengerArbeidsgiveropplysninger() {
-        val skalOppdatere = forventerInntekt() && !erForlengelse()
+    private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg) {
+        val skalOppdatere = forventerInntekt() && !erForlengelse() && !harTilstrekkeligInformasjonTilUtbetaling(hendelse)
         if(skalOppdatere) {
             val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
             val arbeidsgiverperiode = finnArbeidsgiverperiode()
@@ -1583,7 +1582,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndterEndringAvSkjæringstidspunkter(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (Toggle.OPPDATERE_FORESPØRSLER.enabled) {
-                vedtaksperiode.trengerArbeidsgiveropplysninger()
+                vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)
                 hendelse.info("Søknaden har flyttet skjæringstidspunkt hos en annen arbeidsgiver")
             }
         }
@@ -1591,7 +1590,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
             if(Toggle.OPPDATERE_FORESPØRSLER.enabled) {
-                vedtaksperiode.trengerArbeidsgiveropplysninger()
+                vedtaksperiode.trengerArbeidsgiveropplysninger(søknad)
             }
             if(vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
                 sikkerlogg.info("Her ville vi sendt ut en oppdatert forespørsel pga en korrigerende søknad, vedtaksperiodeId: ${vedtaksperiode.id}")
@@ -1629,8 +1628,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-            vedtaksperiode.trengerArbeidsgiveropplysninger()
-            if(vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
+            vedtaksperiode.trengerArbeidsgiveropplysninger(inntektsmeldingReplayUtført)
+            if (vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse() && !vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(inntektsmeldingReplayUtført)) {
                 // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
                     it.trengerIkkeArbeidsgiveropplysninger()

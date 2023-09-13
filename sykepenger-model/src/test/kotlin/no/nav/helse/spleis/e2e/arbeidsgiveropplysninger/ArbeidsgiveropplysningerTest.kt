@@ -580,14 +580,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(10.februar, 5.mars))
         håndterSøknad(Sykdom(10.februar, 5.mars, sykmeldingsgrad = 100.prosent))
 
-        assertForventetFeil("Her skal vi ikke sende ut en ny forespørsel ettersom vi allerede har fått IM",
-            nå = {
-                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            },
-            ønsket = {
-                assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            }
-        )
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
     @Test
