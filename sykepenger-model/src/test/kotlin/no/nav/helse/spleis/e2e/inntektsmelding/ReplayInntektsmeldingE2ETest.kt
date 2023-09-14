@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -41,11 +43,11 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - første fraværsdag kant-i-kant`() {
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 21.januar)
         håndterInntektsmelding(inntektsmelding)
         assertEquals(listOf(21.januar), inspektør.inntektInspektør.innteksdatoer) // Lagrer alltid på oppgitt innteksdato
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(21.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         assertTrue(inntektsmelding.aktuellForReplay(1.januar til 31.januar))
         assertEquals(listOf(1.januar, 21.januar), inspektør.inntektInspektør.innteksdatoer) // Replayer IM. Nå som personen er syk 21.januar lagres den både på 21.januar og alternativ inntektsdato (1.januar)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -55,16 +57,40 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Avhengig av replay av inntektsmelding for inntekt også i ikke-ghost-situasjon - gap til første fraværsdag`() {
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
         håndterInntektsmelding(inntektsmelding)
         assertEquals(listOf(25.januar), inspektør.inntektInspektør.innteksdatoer) // lagrer alltid på inntektsdato i IM
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         assertFalse(inntektsmelding.aktuellForReplay(25.januar til 31.januar))
-        assertEquals(listOf(25.januar), inspektør.inntektInspektør.innteksdatoer) // Ingenting er blitt replayet
+        assertEquals(listOf(25.januar), inspektør.inntektInspektør.innteksdatoer)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+    }
+
+    @Test
+    fun `Når arbeidsgiver bommer med første fraværsdag, og IM kommer før søknad er vi avhengig av replay-sjekk mot første fraværsdag for å gå videre når søknaden kommer`() {
+        nyttVedtak(1.januar, 31.januar)
+        val inntektsmelding = inntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 13.februar)
+        håndterInntektsmelding(inntektsmelding)
+        assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.innteksdatoer)
+        håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
+
+        assertForventetFeil(
+            forklaring = "Kommer seg ikke videre ettersom replay-sjekken kun replayer dager",
+            nå = {
+                assertFalse(inntektsmelding.aktuellForReplay(12.februar til 28.februar))
+                assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.innteksdatoer) // Lagrer ikke på alternativ inntektsdato ettersom det ikke blir replayet
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            },
+            ønsket = {
+                assertTrue(inntektsmelding.aktuellForReplay(12.februar til 28.februar))
+                assertEquals(listOf(12.februar, 13.februar, 1.januar), inspektør.inntektInspektør.innteksdatoer) // Lagrer nå på alternativ inntektsdato nå som vi har søknad
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            }
+        )
+
     }
 
     @Test
