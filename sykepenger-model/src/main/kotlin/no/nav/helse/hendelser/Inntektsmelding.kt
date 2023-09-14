@@ -94,6 +94,7 @@ class Inntektsmelding(
             if (arbeidsgiverperiode.overlapperMed(sammenhengendePeriode)) return true
             if (arbeidsgiverperiode.erRettFør(sammenhengendePeriode)) return true // arbeidsgiverperiode f.eks. slutter på fredag & søknaden starter på mandag
             if (sammenhengendePeriode.erRettFør(arbeidsgiverperiode)) return true // om f.eks. søknad slutter på fredag og arbedisgiverperiode starter på mandag
+            if (førsteFraværsdag in sammenhengendePeriode) return true
             return false
         }
     }
