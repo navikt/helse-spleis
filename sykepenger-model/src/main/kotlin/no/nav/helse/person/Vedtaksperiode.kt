@@ -1586,20 +1586,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndterEndringAvSkjæringstidspunkter(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.OPPDATERE_FORESPØRSLER.enabled) {
-                vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)
-                hendelse.info("Søknaden har flyttet skjæringstidspunkt hos en annen arbeidsgiver")
-            }
+            vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)
+            hendelse.info("Søknaden har flyttet skjæringstidspunkt hos en annen arbeidsgiver")
         }
         
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
-            if(Toggle.OPPDATERE_FORESPØRSLER.enabled) {
-                vedtaksperiode.trengerArbeidsgiveropplysninger(søknad)
-            }
-            if(vedtaksperiode.forventerInntekt() && !vedtaksperiode.erForlengelse()) {
-                sikkerlogg.info("Her ville vi sendt ut en oppdatert forespørsel pga en korrigerende søknad, vedtaksperiodeId: ${vedtaksperiode.id}")
-            }
+            vedtaksperiode.trengerArbeidsgiveropplysninger(søknad)
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {

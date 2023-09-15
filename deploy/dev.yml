@@ -56,5 +56,3 @@ spec:
     value: "true"
   - name: AVVIKSAKER
     value: "true"
-  - name: OPPDATERE_FORESPOERSEL
-    value: "true"
