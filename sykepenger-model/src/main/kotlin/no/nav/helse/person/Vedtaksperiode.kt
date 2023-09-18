@@ -1941,6 +1941,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (!påminnelse.skalReberegnes()) return
+            vedtaksperiode.forkast(påminnelse)
+        }
+
         private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (vedtaksperiode.trengerFastsettelseEtterSkjønn) return
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
