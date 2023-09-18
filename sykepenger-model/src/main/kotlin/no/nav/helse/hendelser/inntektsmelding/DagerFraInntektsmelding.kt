@@ -97,7 +97,7 @@ internal class DagerFraInntektsmelding(
         val arbeidsgiverSykdomstidslinje = håndter(overlappendeDager.omsluttendePeriode!!, oppdaterSykdom)
         arbeidsgiverperiode().let { beregnetArbeidsgiverperiode ->
             if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
-            else beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(periode, this)
+            else inntektsmelding.validerFeilaktigNyArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
         }
         return arbeidsgiverSykdomstidslinje.subset(periode)
     }

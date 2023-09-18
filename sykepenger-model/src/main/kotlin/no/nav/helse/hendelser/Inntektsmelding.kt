@@ -195,6 +195,11 @@ class Inntektsmelding(
         varsel(RV_IM_3)
     }
 
+    internal fun validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
+        if (avsendersystem == Avsendersystem.NAV_NO && arbeidsgiverperioder.isEmpty()) return
+        beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode, this)
+    }
+
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
         if (alternativInntektsdato == this.inntektsdato) return
         if (!inntektshistorikk.leggTil(Inntektsmelding(alternativInntektsdato, meldingsreferanseId(), beregnetInntekt))) return
