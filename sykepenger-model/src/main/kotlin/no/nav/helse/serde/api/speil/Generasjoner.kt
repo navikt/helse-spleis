@@ -5,7 +5,7 @@ import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
-import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.sorterEtterPeriode
+import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.utledPeriodetyper
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 
@@ -41,7 +41,7 @@ class Generasjoner {
 
     private fun byggGenerasjon(periodene: List<Tidslinjeperiode>) {
         if (periodene.isEmpty()) return
-        generasjoner.add(0, GenerasjonDTO(UUID.randomUUID(), periodene.sorterEtterPeriode()))
+        generasjoner.add(0, GenerasjonDTO(UUID.randomUUID(), periodene.utledPeriodetyper()))
     }
 
     private fun leggTilNyRad() {

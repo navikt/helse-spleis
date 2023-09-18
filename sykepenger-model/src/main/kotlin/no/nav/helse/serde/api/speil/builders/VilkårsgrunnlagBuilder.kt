@@ -26,10 +26,9 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterSkjønn
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.Refusjonselement
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Avviksprosent
+import no.nav.helse.økonomi.Inntekt
 import kotlin.properties.Delegates
 
 internal class ISykepengegrunnlag(
@@ -60,7 +59,6 @@ internal abstract class IVilkårsgrunnlag(
     val refusjonsopplysningerPerArbeidsgiver: List<IArbeidsgiverrefusjon>,
     val id: UUID
 ) {
-    private val vedtaksperioder = mutableMapOf<String, MutableList<UUID>>()
     private val arbeidsgivereMedInntekt = inntekter.filter { it.omregnetÅrsinntekt != null }
     abstract fun toDTO(): Vilkårsgrunnlag
     fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = inntekter.none { it.arbeidsgiver == organisasjonsnummer }
@@ -81,14 +79,6 @@ internal abstract class IVilkårsgrunnlag(
         )
     }
 
-    fun utledPeriodetype(organisasjonsnummer: String, vedtaksperiodeId: UUID): Tidslinjeperiodetype {
-        val perioder = vedtaksperioder.getOrPut(organisasjonsnummer) { mutableListOf() }
-        val erFørste = perioder.isEmpty()
-        perioder.add(vedtaksperiodeId)
-        return utledPeriodetype(erFørste)
-    }
-
-    protected abstract fun utledPeriodetype(førstePeriodeMedUtbetaling: Boolean): Tidslinjeperiodetype
 }
 
 internal class ISpleisGrunnlag(
@@ -110,12 +100,6 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sammenligningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, id) {
-    override fun utledPeriodetype(førstePeriodeMedUtbetaling: Boolean): Tidslinjeperiodetype {
-        return when (førstePeriodeMedUtbetaling) {
-            true -> Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING
-            else -> Tidslinjeperiodetype.FORLENGELSE
-        }
-    }
 
     override fun toDTO(): Vilkårsgrunnlag {
         return SpleisVilkårsgrunnlag(
@@ -165,12 +149,6 @@ internal class IInfotrygdGrunnlag(
     sykepengegrunnlag: Double,
     id: UUID
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sammenligningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, id) {
-    override fun utledPeriodetype(førstePeriodeMedUtbetaling: Boolean): Tidslinjeperiodetype {
-        return when (førstePeriodeMedUtbetaling) {
-            true -> Tidslinjeperiodetype.OVERGANG_FRA_IT
-            else -> Tidslinjeperiodetype.INFOTRYGDFORLENGELSE
-        }
-    }
 
     override fun toDTO(): Vilkårsgrunnlag {
         return no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag(

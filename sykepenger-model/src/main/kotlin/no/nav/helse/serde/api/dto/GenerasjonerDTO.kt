@@ -76,6 +76,8 @@ abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
     internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): Tidslinjeperiode {
         return this
     }
+
+    internal abstract fun medPeriodetype(periodetype: Tidslinjeperiodetype): Tidslinjeperiode
     internal fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
     internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon, UtbetaltVenterPåAnnenPeriode)
 
@@ -85,8 +87,19 @@ abstract class Tidslinjeperiode : Comparable<Tidslinjeperiode> {
     internal companion object {
         fun List<Tidslinjeperiode>.sorterEtterHendelse() = this
             .sortedBy { it.sorteringstidspunkt }
-        fun List<Tidslinjeperiode>.sorterEtterPeriode() = this
-            .sortedByDescending { it.fom }
+
+        fun List<Tidslinjeperiode>.utledPeriodetyper(): List<Tidslinjeperiode> {
+            val out = mutableListOf<Tidslinjeperiode>()
+            val sykefraværstilfeller = this.sortedBy { it.fom }.groupBy { it.skjæringstidspunkt }
+            sykefraværstilfeller.forEach { (_, perioder) ->
+                out.add(perioder.first().medPeriodetype(Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING))
+                perioder.zipWithNext { forrige, nåværende ->
+                    if (forrige is BeregnetPeriode) out.add(nåværende.medPeriodetype(Tidslinjeperiodetype.FORLENGELSE))
+                    else out.add(nåværende.medPeriodetype(Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING))
+                }
+            }
+            return out.sortedByDescending { it.fom }
+        }
     }
 }
 
@@ -128,6 +141,10 @@ data class UberegnetVilkårsprøvdPeriode(
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
             )
 
+    override fun medPeriodetype(periodetype: Tidslinjeperiodetype): Tidslinjeperiode {
+        return this.copy(periodetype = periodetype)
+    }
+
     override fun tilGenerasjon(generasjoner: Generasjoner) {
         generasjoner.uberegnetVilkårsprøvdPeriode(this)
     }
@@ -161,8 +178,12 @@ data class UberegnetPeriode(
         organisasjonsnummer: String
     ): Tidslinjeperiode {
         val vilkårsgrunnlagId = vilkårsgrunnlaghistorikk.potensiellUBeregnetVilkårsprøvdPeriode(skjæringstidspunkt) ?: return this
-        val periodetype = vilkårsgrunnlaghistorikk.leggIBøtta(vilkårsgrunnlagId).utledPeriodetype(organisasjonsnummer, vedtaksperiodeId)
+        vilkårsgrunnlaghistorikk.leggIBøtta(vilkårsgrunnlagId)
         return UberegnetVilkårsprøvdPeriode(this, vilkårsgrunnlagId, periodetype)
+    }
+
+    override fun medPeriodetype(periodetype: Tidslinjeperiodetype): Tidslinjeperiode {
+        return this.copy(periodetype = periodetype)
     }
 
     internal class Builder(
@@ -260,11 +281,13 @@ data class BeregnetPeriode(
     override fun venter(): Boolean = super.venter() && periodetilstand != Utbetalt
 
     override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
-        val periodetype = vilkårsgrunnlagId?.let {
-            vilkårsgrunnlaghistorikk
-                .leggIBøtta(it)
-                .utledPeriodetype(organisasjonsnummer, vedtaksperiodeId)
+        vilkårsgrunnlagId?.let {
+            vilkårsgrunnlaghistorikk.leggIBøtta(it)
         } ?: return this
+        return this
+    }
+
+    override fun medPeriodetype(periodetype: Tidslinjeperiodetype): Tidslinjeperiode {
         return this.copy(periodetype = periodetype)
     }
 
@@ -594,6 +617,9 @@ data class AnnullertPeriode(
     override val periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING // feltet gir ikke mening for annullert periode
     override val inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER // feltet gir ikke mening for annullert periode
     override val sorteringstidspunkt = beregnet
+    override fun medPeriodetype(periodetype: Tidslinjeperiodetype): Tidslinjeperiode {
+        return this
+    }
 
     override fun tilGenerasjon(generasjoner: Generasjoner) {
         generasjoner.annullertPeriode(this)
