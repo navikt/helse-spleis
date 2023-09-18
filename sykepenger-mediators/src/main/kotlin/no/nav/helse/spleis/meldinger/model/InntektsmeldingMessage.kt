@@ -67,19 +67,14 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     }
 
     internal companion object {
-        internal fun JsonNode.tilAvsendersystem(): Inntektsmelding.Avsendersystem? =
-            takeIf(JsonNode::isTextual)
-                ?.let {
-                    it["navn"]
-                        .takeIf(JsonNode::isTextual)?.asText()
-                        ?.let { avsendersystemNavn ->
-                            when (avsendersystemNavn) {
-                                "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO
-                                "AltinnPortal" -> Inntektsmelding.Avsendersystem.ALTINN
-                                else -> Inntektsmelding.Avsendersystem.LPS
-                            }
-                        }
-                }
+        internal fun JsonNode.tilAvsendersystem(): Inntektsmelding.Avsendersystem? {
+            val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return null
+            return when (navn) {
+                "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO
+                "AltinnPortal" -> Inntektsmelding.Avsendersystem.ALTINN
+                else -> Inntektsmelding.Avsendersystem.LPS
+            }
+        }
     }
 
     @Deprecated("Denne skal fjernes så fort vi ikke trenger å gjøre replay av inntektsmeldinger uten fødselsdato. 23.November 2022 skal vi ikke lengre trenge å gjøre replay av så gamle inntektsmeldinger")

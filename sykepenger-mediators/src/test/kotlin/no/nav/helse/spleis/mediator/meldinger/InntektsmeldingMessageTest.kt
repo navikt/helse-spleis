@@ -1,7 +1,11 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.ALTINN
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.LPS
+import no.nav.helse.hendelser.Inntektsmelding.Avsendersystem.NAV_NO
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage.Companion.tilAvsendersystem
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
@@ -13,10 +17,9 @@ internal class InntektsmeldingMessageTest {
         assertNull(objectMapper.missingNode().tilAvsendersystem())
         assertNull(objectMapper.readTree(mangler).tilAvsendersystem())
         assertNull(objectMapper.readTree(sattTilNull).tilAvsendersystem())
-        assertNull(objectMapper.readTree(navNo).tilAvsendersystem())
-        assertNull(objectMapper.readTree(altinn).tilAvsendersystem())
-        assertNull(objectMapper.readTree(hvaSomHelst).tilAvsendersystem())
-
+        assertEquals(NAV_NO, objectMapper.readTree(navNo).tilAvsendersystem())
+        assertEquals(ALTINN, objectMapper.readTree(altinn).tilAvsendersystem())
+        assertEquals(LPS, objectMapper.readTree(hvaSomHelst).tilAvsendersystem())
     }
 
     private companion object {
