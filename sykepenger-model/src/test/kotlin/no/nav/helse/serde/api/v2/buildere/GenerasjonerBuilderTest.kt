@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -255,7 +256,38 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt medPeriodetype FØRSTEGANGSBEHANDLING avType UTBETALING fra 1.januar til 31.januar medAntallDager 31 forkastet false medTilstand Utbetalt
             }
         }
+    }
 
+    @Test
+    fun `periodetype ved enkel revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT - 50.0.månedlig)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        generasjoner {
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                assertForventetFeil(
+                    forklaring = "Feil periodetype",
+                    nå = {
+                        uberegnetVilkårsprøvdPeriode(0) fra 1.februar til 28.februar medTilstand UtbetaltVenterPåAnnenPeriode medPeriodetype FØRSTEGANGSBEHANDLING
+                        beregnetPeriode(1) fra 1.januar til 31.januar medTilstand TilGodkjenning medPeriodetype FORLENGELSE
+                    },
+                    ønsket = {
+                        uberegnetVilkårsprøvdPeriode(0) fra 1.februar til 28.februar medTilstand UtbetaltVenterPåAnnenPeriode medPeriodetype FORLENGELSE
+                        beregnetPeriode(1) fra 1.januar til 31.januar medTilstand TilGodkjenning medPeriodetype FØRSTEGANGSBEHANDLING
+                    }
+                )
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) fra 1.februar til 28.februar medTilstand Utbetalt medPeriodetype FORLENGELSE
+                beregnetPeriode(1) fra 1.januar til 31.januar medTilstand Utbetalt medPeriodetype FØRSTEGANGSBEHANDLING
+            }
+        }
     }
 
     @Test

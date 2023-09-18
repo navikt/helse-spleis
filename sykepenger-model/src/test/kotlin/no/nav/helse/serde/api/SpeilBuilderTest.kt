@@ -3,7 +3,6 @@ package no.nav.helse.serde.api
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -22,9 +21,7 @@ import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
@@ -43,8 +40,6 @@ import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FORLENGELSE
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Utbetalingsinfo
@@ -118,44 +113,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             )
         )
         assertEquals(forventetFørstedag, tidslinje.first())
-    }
-
-    @Test
-    fun `periodetype ved enkel revurdering`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT - 50.0.månedlig)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        val speilJson = serializePersonForSpeil(person)
-        val førsteGenerasjon = speilJson.arbeidsgivere.single().generasjoner.last()
-        val andreGenerasjon = speilJson.arbeidsgivere.single().generasjoner.first()
-        assertEquals(1.januar til 31.januar, førsteGenerasjon.perioder.last().fom til førsteGenerasjon.perioder.last().tom)
-        assertEquals(FØRSTEGANGSBEHANDLING, førsteGenerasjon.perioder.last().periodetype)
-        assertEquals(1.februar til 28.februar, førsteGenerasjon.perioder.first().fom til førsteGenerasjon.perioder.first().tom)
-        assertEquals(FORLENGELSE, førsteGenerasjon.perioder.first().periodetype)
-        assertEquals(1.januar til 31.januar, andreGenerasjon.perioder.last().fom til andreGenerasjon.perioder.last().tom)
-        assertForventetFeil(
-            forklaring = "feil periodetype",
-            nå = {
-                assertEquals(FORLENGELSE, andreGenerasjon.perioder.last().periodetype)
-            },
-            ønsket = {
-                assertEquals(FØRSTEGANGSBEHANDLING, andreGenerasjon.perioder.last().periodetype)
-            }
-        )
-        assertEquals(1.februar til 28.februar, andreGenerasjon.perioder.first().fom til andreGenerasjon.perioder.first().tom)
-        assertForventetFeil(
-            forklaring = "feil periodetype",
-            nå = {
-                assertEquals(FØRSTEGANGSBEHANDLING, andreGenerasjon.perioder.first().periodetype)
-            },
-            ønsket = {
-                assertEquals(FORLENGELSE, andreGenerasjon.perioder.first().periodetype)
-            }
-        )
     }
 
     @Test
