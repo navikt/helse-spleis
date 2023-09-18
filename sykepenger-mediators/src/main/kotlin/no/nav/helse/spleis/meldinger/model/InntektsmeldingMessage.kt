@@ -66,6 +66,22 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         mediator.behandle(personopplysninger, this, inntektsmelding, context)
     }
 
+    internal companion object {
+        internal fun JsonNode.tilAvsendersystem(): Inntektsmelding.Avsendersystem? =
+            takeIf(JsonNode::isTextual)
+                ?.let {
+                    it["navn"]
+                        .takeIf(JsonNode::isTextual)?.asText()
+                        ?.let { avsendersystemNavn ->
+                            when (avsendersystemNavn) {
+                                "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO
+                                "AltinnPortal" -> Inntektsmelding.Avsendersystem.ALTINN
+                                else -> Inntektsmelding.Avsendersystem.LPS
+                            }
+                        }
+                }
+    }
+
     @Deprecated("Denne skal fjernes så fort vi ikke trenger å gjøre replay av inntektsmeldinger uten fødselsdato. 23.November 2022 skal vi ikke lengre trenge å gjøre replay av så gamle inntektsmeldinger")
     private class Fødselsnummer private constructor(private val value: String) {
         private val individnummer = value.substring(6, 9).toInt()
@@ -96,19 +112,5 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             private fun alleTegnErSiffer(string: String) = string.matches(Regex("\\d*"))
         }
     }
-
-    private fun JsonNode.tilAvsendersystem(): Inntektsmelding.Avsendersystem? =
-        takeIf(JsonNode::isTextual)
-            ?.let {
-                it["navn"]
-                    .takeIf(JsonNode::isTextual)?.asText()
-                    ?.let { avsendersystemNavn ->
-                        when (avsendersystemNavn) {
-                            "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO
-                            "AltinnPortal" -> Inntektsmelding.Avsendersystem.ALTINN
-                            else -> Inntektsmelding.Avsendersystem.LPS
-                        }
-                    }
-            }
 }
 
