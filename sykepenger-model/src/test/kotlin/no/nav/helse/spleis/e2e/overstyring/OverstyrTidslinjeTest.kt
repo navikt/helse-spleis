@@ -195,6 +195,9 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
                 assertEquals(1.august til 31.august, linje.fom til linje.tom)
             }
         }
+
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
     }
 
     @Test
