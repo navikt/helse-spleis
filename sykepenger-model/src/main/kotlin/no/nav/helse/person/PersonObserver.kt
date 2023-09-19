@@ -579,7 +579,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val utbetalingId: UUID?,
         val sykepengegrunnlagsbegrensning: String,
         val vedtakFattetTidspunkt: LocalDateTime,
-        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?
+        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?,
+        val tags: Set<Tag>
     ) {
         enum class Fastsatt {
             EtterHovedregel,
@@ -588,7 +589,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         }
 
         enum class Tag {
-            `6GBegrenset`
+            `6GBegrenset`,
+            IngenNyArbeidsgiverperiode
         }
 
         sealed class Sykepengegrunnlagsfakta {

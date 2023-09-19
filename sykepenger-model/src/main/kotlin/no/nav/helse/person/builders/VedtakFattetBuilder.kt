@@ -24,7 +24,8 @@ internal class VedtakFattetBuilder(
     private val vedtaksperiodeId: UUID,
     private val periode: Periode,
     private val hendelseIder: Set<UUID>,
-    private val skjæringstidspunkt: LocalDate
+    private val skjæringstidspunkt: LocalDate,
+    private val tags: MutableSet<Tag> = mutableSetOf()
 ): UtbetalingVedtakFattetBuilder {
     private var sykepengegrunnlag =  Inntekt.INGEN
     private var beregningsgrunnlag = Inntekt.INGEN
@@ -39,6 +40,7 @@ internal class VedtakFattetBuilder(
     internal fun beregningsgrunnlag(beregningsgrunnlag: Inntekt) = apply { this.beregningsgrunnlag = beregningsgrunnlag }
     internal fun begrensning(begrensning: Begrensning) = apply { this.begrensning = begrensning }
     internal fun omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiverÅrlig: Map<String, Double>) = apply { this.omregnetÅrsinntektPerArbeidsgiverÅrlig = omregnetÅrsinntektPerArbeidsgiverÅrlig }
+    internal fun ingenNyArbeidsgiverperiode() = apply { tags.add(Tag.IngenNyArbeidsgiverperiode) }
 
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }
@@ -65,7 +67,8 @@ internal class VedtakFattetBuilder(
                 else -> "VET_IKKE"
             },
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta
+            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
+            tags = tags
         )
     }
 

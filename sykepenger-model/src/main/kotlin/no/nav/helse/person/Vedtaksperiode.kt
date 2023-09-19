@@ -470,7 +470,7 @@ internal class Vedtaksperiode private constructor(
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
-    internal fun erForlengelse() = arbeidsgiver
+    private fun erForlengelse(): Boolean = arbeidsgiver
         .finnVedtaksperiodeRettFør(this)
         ?.takeIf { it.forventerInntekt() } != null
 
@@ -892,6 +892,9 @@ internal class Vedtaksperiode private constructor(
             hendelseIder(),
             skjæringstidspunkt
         )
+
+        this.finnArbeidsgiverperiode()?.tags(periode, builder, erForlengelse())
+
         utbetalinger.build(builder)
         person.build(skjæringstidspunkt, builder)
         person.vedtakFattet(builder.result())

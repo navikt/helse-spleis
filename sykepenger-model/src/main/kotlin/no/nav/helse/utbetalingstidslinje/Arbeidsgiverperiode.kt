@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.ukedager
@@ -40,7 +41,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     private val sisteKjente get() = listOfNotNull(perioder.lastOrNull()?.endInclusive, utbetalingsdager.lastOrNull()?.endInclusive, kjenteDager.lastOrNull()?.endInclusive).maxOf { it }
     private val innflytelseperioden get() = førsteKjente til sisteKjente
 
-    internal fun fiktiv() = perioder.isEmpty()
+    internal fun fiktiv() = perioder.isEmpty() // Arbeidsperioden er gjennomført i Infotrygd
 
     internal fun villeBlittFiktiv(perioderUtbetaltInfotrygd: List<Periode>): Boolean {
         if (perioder.isEmpty()) return true
@@ -102,6 +103,13 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         // …eller dersom det ikke har vært gap siden forrige utbetaling
         val forrigeUtbetaling = utbetalingsdager.lastOrNull { other -> other.endInclusive < periode.endInclusive } ?: return false
         return oppholdsdager.none { it.overlapperMed(forrigeUtbetaling.endInclusive til periode.endInclusive) }
+    }
+
+    internal fun tags(periode: Periode, vedtakFattetBuilder: VedtakFattetBuilder, erForlengelse: Boolean) :VedtakFattetBuilder {
+        if (fiktiv() || erForlengelse) return vedtakFattetBuilder
+        if (periode.start < arbeidsgiverperioden.endInclusive) return vedtakFattetBuilder
+        vedtakFattetBuilder.ingenNyArbeidsgiverperiode()
+        return vedtakFattetBuilder
     }
 
     override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.førsteKjente == this.førsteKjente
