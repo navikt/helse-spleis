@@ -130,6 +130,20 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Feilaktiv RV_IM_3?`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        nyPeriode(2.februar til 28.februar)
+        håndterInntektsmelding(emptyList(), førsteFraværsdag = 2.februar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        assertIngenVarsel(RV_IM_3, 2.vedtaksperiode.filter())
+    }
+
+    @Test
     fun `periode som begynner på siste dag i arbeidsgiverperioden`() {
         håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent))
         håndterSøknad(Sykdom(16.februar, 27.februar, 100.prosent))

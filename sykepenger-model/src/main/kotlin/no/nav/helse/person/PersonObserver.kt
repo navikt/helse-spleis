@@ -590,7 +590,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
 
         enum class Tag {
             `6GBegrenset`,
-            IngenAGPpgaAIG
+            IngenNyArbeidsgiverperiode
         }
 
         sealed class Sykepengegrunnlagsfakta {

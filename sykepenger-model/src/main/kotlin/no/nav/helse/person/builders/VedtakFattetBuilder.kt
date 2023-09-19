@@ -40,7 +40,7 @@ internal class VedtakFattetBuilder(
     internal fun beregningsgrunnlag(beregningsgrunnlag: Inntekt) = apply { this.beregningsgrunnlag = beregningsgrunnlag }
     internal fun begrensning(begrensning: Begrensning) = apply { this.begrensning = begrensning }
     internal fun omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiverÅrlig: Map<String, Double>) = apply { this.omregnetÅrsinntektPerArbeidsgiverÅrlig = omregnetÅrsinntektPerArbeidsgiverÅrlig }
-    internal fun agpIkkeUtbetaltPgaArbeidIkkeGjenopptatt() = apply { tags.add(Tag.IngenAGPpgaAIG) }
+    internal fun ikkeNyArbeidsgiverperiodePgaArbeidIkkeGjenopptatt() = apply { tags.add(Tag.IngenNyArbeidsgiverperiode) }
 
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }

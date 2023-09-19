@@ -893,16 +893,12 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt
         )
 
-        if (this.utbetalingstidslinje.harUtbetalingsdager() && !inneholderAGP() && !erForlengelse()) {
-            builder.agpIkkeUtbetaltPgaArbeidIkkeGjenopptatt()
-        }
+        this.finnArbeidsgiverperiode()?.tags(periode, builder, erForlengelse())
 
         utbetalinger.build(builder)
         person.build(skjæringstidspunkt, builder)
         person.vedtakFattet(builder.result())
     }
-
-    private fun inneholderAGP(): Boolean = this.finnArbeidsgiverperiode()?.erFørsteUtbetalingsdagFørEllerLik(this.periode) ?: false
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {
         utbetalinger.harUtbetalinger() -> tilstand(hendelse, simuleringtilstand) {
