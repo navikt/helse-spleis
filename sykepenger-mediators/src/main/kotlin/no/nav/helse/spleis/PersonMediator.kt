@@ -356,7 +356,8 @@ internal class PersonMediator(
             "grunnlagForSykepengegrunnlagPerArbeidsgiver" to event.omregnetÅrsinntektPerArbeidsgiver,
             "begrensning" to event.sykepengegrunnlagsbegrensning,
             "inntekt" to event.inntekt,
-            "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt
+            "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
+            "tags" to event.tags
         ).apply {
             event.utbetalingId?.let { this["utbetalingId"] = it }
             event.sykepengegrunnlagsfakta?.let {

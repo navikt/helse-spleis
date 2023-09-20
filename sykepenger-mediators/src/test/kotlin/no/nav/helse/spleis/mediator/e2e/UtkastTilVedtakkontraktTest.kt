@@ -61,8 +61,8 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
                   "omregnetÅrsinntekt": 372000.0
                 }
               ]
-            }
-            
+            },
+            "tags": []
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
@@ -115,7 +115,8 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
                     "skjønnsfastsatt": 570000.0
                   }
                 ]
-            }
+            },
+            "tags": []
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
@@ -143,7 +144,8 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
             "inntekt" : 0.0,
             "grunnlagForSykepengegrunnlagPerArbeidsgiver": {},
             "hendelser": ["$søknadId"],
-            "begrensning" : "VET_IKKE"
+            "begrensning" : "VET_IKKE",
+            "tags": []
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = null)
@@ -200,7 +202,8 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
                   "omregnetÅrsinntekt": 372000.0
                 }
               ]
-            }
+            },
+            "tags": []
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_uten_utbetaling")
