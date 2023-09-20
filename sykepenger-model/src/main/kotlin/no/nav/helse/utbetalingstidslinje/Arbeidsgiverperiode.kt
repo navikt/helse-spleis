@@ -17,6 +17,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.ukedager
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.IKKE_UTBETALT
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.INGENTING_Å_UTBETALE
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.UTBETALT
@@ -105,9 +106,11 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return oppholdsdager.none { it.overlapperMed(forrigeUtbetaling.endInclusive til periode.endInclusive) }
     }
 
-    internal fun tags(periode: Periode, vedtakFattetBuilder: VedtakFattetBuilder, erForlengelse: Boolean) :VedtakFattetBuilder {
+    private val gjennomført get() = NormalArbeidstaker.arbeidsgiverperiodenGjennomført(perioder.flatten().count())
+    internal fun tags(periode: Periode, vedtakFattetBuilder: VedtakFattetBuilder, erForlengelse: Boolean): VedtakFattetBuilder {
         if (fiktiv() || erForlengelse) return vedtakFattetBuilder
         if (periode.start < arbeidsgiverperioden.endInclusive) return vedtakFattetBuilder
+        if (!gjennomført) return vedtakFattetBuilder
         vedtakFattetBuilder.ingenNyArbeidsgiverperiode()
         return vedtakFattetBuilder
     }

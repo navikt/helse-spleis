@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -311,15 +310,21 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga Infotrygforlengelse`() {
         createOvergangFraInfotrygdPerson()
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
 
-        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
+        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
     }
 
     @Test
     fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga Infotrygovergang - revurdering`() {
         createOvergangFraInfotrygdPerson()
-        // TODO
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Sykedag, 50)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
     }
 
 
@@ -342,19 +347,39 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det kun er ferie hele perioden`() {
+    fun `Sender med tag IngenNyArbeidsgiverperiode når det kun er ferie hele perioden`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Ferie(10.februar, 28.februar))
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
+        assertEquals(setOf(IngenNyArbeidsgiverperiode), 2.vedtaksperiode.vedtakFattetEvent.tags)
+    }
 
-        assertForventetFeil(
-            forklaring = "Er det bare feil testnavn? 🤔",
-            nå = { assertEquals(setOf(IngenNyArbeidsgiverperiode), 2.vedtaksperiode.vedtakFattetEvent.tags) },
-            ønsket = { assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags) }
-        )
+    @Test
+    fun `Periode med kun ferie etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(15.januar, 31.januar))
+        håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent), Ferie(15.januar, 31.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
+        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
+    }
+
+    @Test
+    fun `Periode med utbetaling etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        nyttVedtak(15.januar, 31.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
+        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
     }
 
     private val IdInnhenter.vedtakFattetEvent get() = observatør.vedtakFattetEvent.values.single {
