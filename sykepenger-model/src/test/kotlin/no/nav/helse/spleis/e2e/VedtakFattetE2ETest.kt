@@ -382,6 +382,16 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
     }
 
+    @Test
+    fun `Forlengelse av auu skal ikke tagges med IngenNyArbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        nyttVedtak(17.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+
+        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
+        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
+    }
+
     private val IdInnhenter.vedtakFattetEvent get() = observatør.vedtakFattetEvent.values.single {
         it.vedtaksperiodeId == id(ORGNUMMER)
     }

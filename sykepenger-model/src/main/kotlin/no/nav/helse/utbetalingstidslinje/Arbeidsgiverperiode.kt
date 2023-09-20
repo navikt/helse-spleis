@@ -107,8 +107,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     private val gjennomført get() = NormalArbeidstaker.arbeidsgiverperiodenGjennomført(perioder.flatten().count())
-    internal fun tags(periode: Periode, vedtakFattetBuilder: VedtakFattetBuilder, erForlengelse: Boolean): VedtakFattetBuilder {
-        if (fiktiv() || erForlengelse) return vedtakFattetBuilder
+    internal fun tags(periode: Periode, vedtakFattetBuilder: VedtakFattetBuilder, harPeriodeRettFør: Boolean): VedtakFattetBuilder {
+        if (fiktiv() || harPeriodeRettFør) return vedtakFattetBuilder
         if (periode.start < arbeidsgiverperioden.endInclusive) return vedtakFattetBuilder
         if (!gjennomført) return vedtakFattetBuilder
         vedtakFattetBuilder.ingenNyArbeidsgiverperiode()

@@ -893,7 +893,8 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt
         )
 
-        this.finnArbeidsgiverperiode()?.tags(periode, builder, erForlengelse())
+        val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
+        this.finnArbeidsgiverperiode()?.tags(periode, builder, harPeriodeRettFør)
 
         utbetalinger.build(builder)
         person.build(skjæringstidspunkt, builder)
