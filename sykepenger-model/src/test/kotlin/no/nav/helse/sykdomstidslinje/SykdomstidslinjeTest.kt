@@ -16,7 +16,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.J
+import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestEvent
@@ -253,7 +253,7 @@ internal class SykdomstidslinjeTest {
 
     @Test
     fun `feriedager uten sykmelding`() {
-        val tidslinje = 7.J
+        val tidslinje = 7.AIG
         assertEquals("JJJJJJJ", tidslinje.toShortString())
     }
 

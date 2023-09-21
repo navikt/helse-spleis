@@ -19,7 +19,7 @@ import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.HELG
-import no.nav.helse.testhelpers.J
+import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.NAP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.P
@@ -58,7 +58,7 @@ internal class UtbetalingsdagerBuilderTest {
 
     @Test
     fun `tidslinje med fridager`() {
-        val builder = UtbetalingsdagerBuilder(1.P + 3.F + 1.J + 1.UK)
+        val builder = UtbetalingsdagerBuilder(1.P + 3.F + 1.AIG + 1.UK)
         val utbetalingstidslinje = tidslinjeOf(6.FRI)
         utbetalingstidslinje.accept(builder)
         assertEquals(

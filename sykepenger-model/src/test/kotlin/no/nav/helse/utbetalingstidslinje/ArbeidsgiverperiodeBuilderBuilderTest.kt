@@ -9,7 +9,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.J
+import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
@@ -72,7 +72,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
 
     @Test
     fun `ferie uten sykmelding i agp`() {
-        undersøke(5.S + 5.J + 10.S)
+        undersøke(5.S + 5.AIG + 10.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
         assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
@@ -96,7 +96,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
 
     @Test
     fun `arbeid etter ferie uten sykmelding i agp`() {
-        undersøke(5.S + 5.J + 5.A + 11.S + 1.J + 13.S)
+        undersøke(5.S + 5.AIG + 5.A + 11.S + 1.AIG + 13.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 5.januar, 16.januar til 26.januar), perioder.first())
         assertTrue(perioder.first().forventerInntekt(29.januar til 31.januar, Sykdomstidslinje(), NullObserver))

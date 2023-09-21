@@ -106,7 +106,7 @@ internal val Int.F
         SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.J
+internal val Int.AIG
     get() = Sykdomstidslinje.arbeidIkkeGjenopptatt(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
