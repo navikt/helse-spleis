@@ -303,6 +303,8 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
         nyttVedtak(16.februar, 28.februar)
 
+        assertEquals("NNNNNHH NNNNNHH NNSSSHH SSSSSHH SSS???? ??????? ????SHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+
         assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
         assertEquals(setOf(IngenNyArbeidsgiverperiode), 2.vedtaksperiode.vedtakFattetEvent.tags)
     }
