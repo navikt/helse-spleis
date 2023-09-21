@@ -1,6 +1,7 @@
 package no.nav.helse.person.builders
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -39,8 +40,8 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
     override fun visit(dag: Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
         val dagtype = when (sykdomstidslinje[dato]) {
             is Dag.Permisjonsdag -> PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
-            is Dag.Feriedag,
-            is Dag.ArbeidIkkeGjenopptattDag -> PersonObserver.Utbetalingsdag.Dagtype.Feriedag // TODO: Når Flex er klar å ta imot ny dagtype må vi mappe om dette til noe annet
+            is Dag.Feriedag -> PersonObserver.Utbetalingsdag.Dagtype.Feriedag
+            is Dag.ArbeidIkkeGjenopptattDag -> if (Toggle.AIG.enabled) PersonObserver.Utbetalingsdag.Dagtype.ArbeidIkkeGjenopptattDag else PersonObserver.Utbetalingsdag.Dagtype.Feriedag
             else -> PersonObserver.Utbetalingsdag.Dagtype.Fridag
         }
         utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, dagtype))

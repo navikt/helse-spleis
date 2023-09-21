@@ -393,7 +393,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             UkjentDag,
             ForeldetDag,
             Permisjonsdag,
-            Feriedag
+            Feriedag,
+            ArbeidIkkeGjenopptattDag
         }
 
         enum class EksternBegrunnelseDTO {

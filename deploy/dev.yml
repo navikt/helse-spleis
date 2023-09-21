@@ -56,3 +56,5 @@ spec:
     value: "true"
   - name: AVVIKSAKER
     value: "true"
+  - name: AIG
+    value: "true"

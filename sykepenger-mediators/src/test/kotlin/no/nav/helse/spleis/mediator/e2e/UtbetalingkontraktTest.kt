@@ -11,7 +11,10 @@ import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjern
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernLocalDateTime
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernUUID
@@ -23,7 +26,6 @@ import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
@@ -104,6 +106,35 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         val utbetaltEvent = testRapid.inspektør.siste("utbetaling_utbetalt")
         assertTrue(utbetaltEvent["automatiskBehandling"].booleanValue())
+    }
+
+    @Test
+    fun `arbeid ikke gjenopptatt`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 0, automatiskBehandling = true)
+        sendUtbetaling()
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
+        sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
+        sendInntektsmelding(listOf(Periode(fom = 1.mars, tom = 16.mars)), førsteFraværsdag = 1.mars)
+        sendVilkårsgrunnlag(1)
+        sendYtelser(1)
+        sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
+
+        sendOverstyringTidslinje((1.februar til 28.februar).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
+        sendYtelser(1)
+        sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks = 1, automatiskBehandling = true)
+        sendUtbetaling()
+
+        val utbetaltEvent = testRapid.inspektør.siste("utbetaling_utbetalt")
+        val utbetalingsdager = utbetaltEvent["utbetalingsdager"].associate { it.path("dato").asLocalDate() to it.path("type").asText() }
+        (1.februar til 28.februar).forEach { assertEquals("Feriedag", utbetalingsdager[it]) }
     }
 
     @Test
