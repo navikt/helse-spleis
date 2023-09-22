@@ -11,6 +11,7 @@ import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Fridag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
@@ -67,7 +68,7 @@ internal class UtbetalingsdagerBuilderTest {
                 Utbetalingsdag(2.januar, Feriedag),
                 Utbetalingsdag(3.januar, Feriedag),
                 Utbetalingsdag(4.januar, Feriedag),
-                Utbetalingsdag(5.januar, Feriedag),
+                Utbetalingsdag(5.januar, ArbeidIkkeGjenopptattDag),
                 Utbetalingsdag(6.januar, Fridag)
             ), builder.result()
         )

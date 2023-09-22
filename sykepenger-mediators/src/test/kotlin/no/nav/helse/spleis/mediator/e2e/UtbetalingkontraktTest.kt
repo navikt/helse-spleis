@@ -134,7 +134,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
         val utbetaltEvent = testRapid.inspektør.siste("utbetaling_utbetalt")
         val utbetalingsdager = utbetaltEvent["utbetalingsdager"].associate { it.path("dato").asLocalDate() to it.path("type").asText() }
-        (1.februar til 28.februar).forEach { assertEquals("Feriedag", utbetalingsdager[it]) }
+        (1.februar til 28.februar).forEach { assertEquals("ArbeidIkkeGjenopptattDag", utbetalingsdager[it]) }
     }
 
     @Test
