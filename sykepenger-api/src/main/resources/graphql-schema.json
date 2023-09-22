@@ -5108,11 +5108,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "FerieUtenSykmeldingDag",
-          "description" : null,
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "ArbeidIkkeGjenopptattDag",
           "description" : null,
           "isDeprecated" : false,

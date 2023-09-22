@@ -79,7 +79,7 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
         SykdomstidslinjedagType.ARBEIDSDAG -> GraphQLSykdomsdagtype.Arbeidsdag
         SykdomstidslinjedagType.ARBEIDSGIVERDAG -> GraphQLSykdomsdagtype.Arbeidsgiverdag
         SykdomstidslinjedagType.FERIEDAG -> GraphQLSykdomsdagtype.Feriedag
-        SykdomstidslinjedagType.ARBEID_IKKE_GJENOPPTATT_DAG -> GraphQLSykdomsdagtype.FerieUtenSykmeldingDag // TODO: Endre mapping når Speil er klar
+        SykdomstidslinjedagType.ARBEID_IKKE_GJENOPPTATT_DAG -> GraphQLSykdomsdagtype.ArbeidIkkeGjenopptattDag
         SykdomstidslinjedagType.FORELDET_SYKEDAG -> GraphQLSykdomsdagtype.ForeldetSykedag
         SykdomstidslinjedagType.FRISK_HELGEDAG -> GraphQLSykdomsdagtype.FriskHelgedag
         SykdomstidslinjedagType.PERMISJONSDAG -> GraphQLSykdomsdagtype.Permisjonsdag

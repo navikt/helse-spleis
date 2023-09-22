@@ -22,8 +22,7 @@ enum class GraphQLSykdomsdagtype {
     Arbeidsdag,
     Arbeidsgiverdag,
     Feriedag,
-    FerieUtenSykmeldingDag,
-    ArbeidIkkeGjenopptattDag, // TODO: Skal erstatte FerieUtenSykmeldingDag
+    ArbeidIkkeGjenopptattDag,
     ForeldetSykedag,
     FriskHelgedag,
     Permisjonsdag,
