@@ -229,11 +229,13 @@ private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
 private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse) {
     is InntektsmeldingDTO -> GraphQLInntektsmelding(
         id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
         mottattDato = hendelse.mottattDato,
         beregnetInntekt = hendelse.beregnetInntekt
     )
     is SøknadNavDTO -> GraphQLSoknadNav(
         id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
         fom = hendelse.fom,
         tom = hendelse.tom,
         rapportertDato = hendelse.rapportertdato,
@@ -241,6 +243,7 @@ private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse) {
     )
     is SøknadArbeidsgiverDTO -> GraphQLSoknadArbeidsgiver(
         id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
         fom = hendelse.fom,
         tom = hendelse.tom,
         rapportertDato = hendelse.rapportertdato,
@@ -248,12 +251,14 @@ private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse) {
     )
     is SykmeldingDTO -> GraphQLSykmelding(
         id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
         fom = hendelse.fom,
         tom = hendelse.tom,
         rapportertDato = hendelse.rapportertdato
     )
     else -> object : GraphQLHendelse {
         override val id = hendelse.id
+        override val eksternDokumentId = hendelse.eksternDokumentId
         override val type = GraphQLHendelsetype.Ukjent
     }
 }

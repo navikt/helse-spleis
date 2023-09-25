@@ -15,11 +15,13 @@ enum class GraphQLHendelsetype {
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
 interface GraphQLHendelse {
     val id: String
+    val eksternDokumentId: String
     val type: GraphQLHendelsetype
 }
 
 data class GraphQLInntektsmelding(
     override val id: String,
+    override val eksternDokumentId: String,
     val mottattDato: LocalDateTime,
     val beregnetInntekt: Double
 ) : GraphQLHendelse {
@@ -28,6 +30,7 @@ data class GraphQLInntektsmelding(
 
 data class GraphQLSoknadNav(
     override val id: String,
+    override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertDato: LocalDateTime,
@@ -38,6 +41,7 @@ data class GraphQLSoknadNav(
 
 data class GraphQLSoknadArbeidsgiver(
     override val id: String,
+    override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertDato: LocalDateTime,
@@ -48,6 +52,7 @@ data class GraphQLSoknadArbeidsgiver(
 
 data class GraphQLSykmelding(
     override val id: String,
+    override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertDato: LocalDateTime

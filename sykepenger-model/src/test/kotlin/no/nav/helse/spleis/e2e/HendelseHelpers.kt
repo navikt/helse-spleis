@@ -71,6 +71,7 @@ internal val AbstractEndToEndTest.søknadDTOer get() = søknader.map { (id, trip
     val søknadsperiode = Søknadsperiode.søknadsperiode(triple.third.toList())!!
     SøknadNavDTO(
         id = id.toString(),
+        eksternDokumentId = UUID.randomUUID().toString(),
         fom = søknadsperiode.first(),
         tom = søknadsperiode.last(),
         rapportertdato = triple.first.atStartOfDay(),
@@ -82,6 +83,7 @@ private val AbstractEndToEndTest.sykmeldingDTOer get() = sykmeldinger.map { (id,
     val sykmeldingsperiode = Sykmeldingsperiode.periode(perioder.toList())!!
     SykmeldingDTO(
         id = id.toString(),
+        eksternDokumentId = UUID.randomUUID().toString(),
         fom = sykmeldingsperiode.first(),
         tom = sykmeldingsperiode.last(),
         rapportertdato = sykmeldingsperiode.last().atStartOfDay()
@@ -91,6 +93,7 @@ private val AbstractEndToEndTest.sykmeldingDTOer get() = sykmeldinger.map { (id,
 private val AbstractEndToEndTest.inntektsmeldingDTOer get() = inntektsmeldinger.map { (id, _) ->
     InntektsmeldingDTO(
         id = id.toString(),
+        eksternDokumentId = UUID.randomUUID().toString(),
         mottattDato = LocalDateTime.now(),
         beregnetInntekt = inntekter.getValue(id).reflection { årlig, _, _, _ -> årlig }
     )

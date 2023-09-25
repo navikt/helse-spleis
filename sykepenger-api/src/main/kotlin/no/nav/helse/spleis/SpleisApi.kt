@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
@@ -14,8 +13,6 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import kotlinx.coroutines.Dispatchers
@@ -95,45 +92,4 @@ private fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao): Lo
     }
     val aktorid = call.request.header("aktorId")?.toLong() ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
     return personDao.hentFødselsnummer(aktorid) ?: throw NotFoundException("Fant ikke aktør-ID")
-}
-
-sealed class HendelseDTO(val type: String, val hendelseId: String) {
-
-    class NySøknadDTO(json: JsonNode) : HendelseDTO("NY_SØKNAD", json.path("@id").asText()) {
-        val rapportertdato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
-        val fom: LocalDate = LocalDate.parse(json.path("fom").asText())
-        val tom: LocalDate = LocalDate.parse(json.path("tom").asText())
-    }
-    class NyFrilansSøknadDTO(json: JsonNode) : HendelseDTO("NY_FRILANS_SØKNAD", json.path("@id").asText()) {
-        val rapportertdato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
-        val fom: LocalDate = LocalDate.parse(json.path("fom").asText())
-        val tom: LocalDate = LocalDate.parse(json.path("tom").asText())
-    }
-
-    class SendtSøknadNavDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_NAV", json.path("@id").asText()) {
-        val rapportertdato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
-        val sendtNav: LocalDateTime = LocalDateTime.parse(json.path("sendtNav").asText())
-        val fom: LocalDate = LocalDate.parse(json.path("fom").asText())
-        val tom: LocalDate = LocalDate.parse(json.path("tom").asText())
-    }
-
-    class SendtSøknadFrilansDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_FRILANS", json.path("@id").asText()) {
-        val rapportertdato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
-        val sendtNav: LocalDateTime = LocalDateTime.parse(json.path("sendtNav").asText())
-        val fom: LocalDate = LocalDate.parse(json.path("fom").asText())
-        val tom: LocalDate = LocalDate.parse(json.path("tom").asText())
-    }
-
-    class SendtSøknadArbeidsgiverDTO(json: JsonNode) : HendelseDTO("SENDT_SØKNAD_ARBEIDSGIVER", json.path("@id").asText()) {
-        val rapportertdato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
-        val sendtArbeidsgiver: LocalDateTime = LocalDateTime.parse(json.path("sendtArbeidsgiver").asText())
-        val fom: LocalDate = LocalDate.parse(json.path("fom").asText())
-        val tom: LocalDate = LocalDate.parse(json.path("tom").asText())
-    }
-
-    class InntektsmeldingDTO(json: JsonNode) : HendelseDTO("INNTEKTSMELDING", json.path("@id").asText()) {
-        val beregnetInntekt: Number = json.path("beregnetInntekt").asDouble()
-        val førsteFraværsdag: LocalDate? = json.path("foersteFravaersdag").takeIf(JsonNode::isTextual)?.let { LocalDate.parse(it.asText()) }
-        val mottattDato: LocalDateTime = LocalDateTime.parse(json.path("@opprettet").asText())
-    }
 }

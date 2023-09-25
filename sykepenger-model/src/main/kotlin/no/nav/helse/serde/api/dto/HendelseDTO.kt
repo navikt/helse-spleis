@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 interface HendelseDTO {
     val id: String
+    val eksternDokumentId: String
     val type: String
 
     companion object {
@@ -16,6 +17,7 @@ interface HendelseDTO {
 
 data class InntektsmeldingDTO(
     override val id: String,
+    override val eksternDokumentId: String,
     val mottattDato: LocalDateTime,
     val beregnetInntekt: Double
 ) : HendelseDTO {
@@ -24,6 +26,7 @@ data class InntektsmeldingDTO(
 
 data class SøknadNavDTO(
     override val id: String,
+    override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime,
@@ -40,22 +43,18 @@ data class SøknadNavDTO(
 
 data class SøknadFrilansDTO(
     override val id: String,
+    override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime,
     val sendtNav: LocalDateTime
 ) : HendelseDTO {
     override val type = "SENDT_SØKNAD_FRILANS"
-
-    internal fun søknadsfristOppfylt(): Boolean {
-        val søknadSendtMåned = sendtNav.toLocalDate().withDayOfMonth(1)
-        val senesteMuligeSykedag = fom.plusMonths(3)
-        return søknadSendtMåned < senesteMuligeSykedag.plusDays(1)
-    }
 }
 
 data class SøknadArbeidsgiverDTO(
     override val id: String,
+    override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime,
@@ -66,6 +65,7 @@ data class SøknadArbeidsgiverDTO(
 
 data class SykmeldingDTO(
     override val id: String,
+    override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime
@@ -75,6 +75,7 @@ data class SykmeldingDTO(
 
 data class SykmeldingFrilansDTO(
     override val id: String,
+    override val eksternDokumentId: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val rapportertdato: LocalDateTime
