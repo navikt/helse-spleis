@@ -541,7 +541,7 @@ internal class Arbeidsgiver private constructor(
         val dager = DagerFraInntektsmelding(inntektsmelding)
         håndter(inntektsmelding) { håndter(dager) }
 
-        addInntektsmelding(inntektsmelding, jurist)
+        addInntektsmelding(inntektsmelding)
 
         inntektsmelding.ikkeHåndert(person, vedtaksperioder, sykmeldingsperioder, dager)
     }
@@ -826,11 +826,8 @@ internal class Arbeidsgiver private constructor(
         return sammenhengendePerioder
     }
 
-    private fun addInntektsmelding(
-        inntektsmelding: Inntektsmelding,
-        subsumsjonObserver: SubsumsjonObserver
-    ) {
-        val (inntektsdato, lagtTilNå) = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonObserver)
+    private fun addInntektsmelding(inntektsmelding: Inntektsmelding) {
+        val (inntektsdato, lagtTilNå) = inntektsmelding.addInntekt(inntektshistorikk, inntektsmelding.jurist(jurist))
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
         if (sykdomstidslinjeperiode != null && inntektsdato !in sykdomstidslinjeperiode)
@@ -840,7 +837,7 @@ internal class Arbeidsgiver private constructor(
             inntektsmelding.addInntekt(inntektshistorikk, it)
         }
         if (!lagtTilNå) inntektsmelding.info("Tidligere ville ikke denne inntektsmeldingen endret det eventuelle vilkårsgrunnlaget")
-        person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonObserver)
+        person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, jurist)
         håndter(inntektsmelding) { håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }
     }
 

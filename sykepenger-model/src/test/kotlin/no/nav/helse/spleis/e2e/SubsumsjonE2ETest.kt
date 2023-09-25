@@ -498,12 +498,15 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val inntekt = 260000.årlig
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_3,
             versjon = 1.januar(2020),
+            sporing = mapOf(
+                im.toString() to KontekstType.Inntektsmelding
+            ),
             input = mapOf("årligInntekt" to 260000.0),
             output = mapOf("dagligInntekt" to 1000.0)
         )

@@ -80,6 +80,10 @@ class MaskinellJurist private constructor(
             periode
         )
 
+    fun medInntektsmelding(inntektsmeldingId: UUID) = kopierMedKontekst(mapOf(
+        inntektsmeldingId.toString() to KontekstType.Inntektsmelding
+    ) + kontekster)
+
     private fun kopierMedKontekst(kontekster: Map<String, KontekstType>, periode: ClosedRange<LocalDate>? = null) = MaskinellJurist(this, kontekster, periode)
 
     override fun `§ 8-2 ledd 1`(
