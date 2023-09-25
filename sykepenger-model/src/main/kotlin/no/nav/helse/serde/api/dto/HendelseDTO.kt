@@ -3,75 +3,99 @@ package no.nav.helse.serde.api.dto
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-interface HendelseDTO {
-    val id: String
-    val eksternDokumentId: String
+enum class HendelsetypeDto {
+    NY_SØKNAD,
+    NY_FRILANS_SØKNAD,
+    SENDT_SØKNAD_NAV,
+    SENDT_SØKNAD_FRILANS,
+    SENDT_SØKNAD_ARBEIDSGIVER,
+    INNTEKTSMELDING
+}
+
+data class HendelseDTO(
+    val type: HendelsetypeDto,
+    val id: String,
+    val eksternDokumentId: String,
+
+    // Inntektsmelding-spesifikk
+    val mottattDato: LocalDateTime? = null,
+    val beregnetInntekt: Double? = null,
+
+    // Flex-søknad-spesifikk
+    val fom: LocalDate? = null,
+    val tom: LocalDate? = null,
+    val rapportertdato: LocalDateTime? = null,
+    val sendtNav: LocalDateTime? = null,
+    val sendtArbeidsgiver: LocalDateTime? = null,
+) {
 
     companion object {
-        internal inline fun <reified T : HendelseDTO> List<HendelseDTO>.finn(): T? {
-            return filterIsInstance<T>().firstOrNull()
+        fun nySøknad(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime) = HendelseDTO(
+            type = HendelsetypeDto.NY_SØKNAD,
+            id = id,
+            eksternDokumentId = eksternDokumentId,
+            fom = fom,
+            tom = tom,
+            rapportertdato = rapportertdato,
+        )
+        fun nyFrilanssøknad(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime) = HendelseDTO(
+            type = HendelsetypeDto.NY_FRILANS_SØKNAD,
+            id = id,
+            eksternDokumentId = eksternDokumentId,
+            fom = fom,
+            tom = tom,
+            rapportertdato = rapportertdato,
+        )
+        fun sendtSøknadNav(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
+            type = HendelsetypeDto.SENDT_SØKNAD_NAV,
+            id = id,
+            eksternDokumentId = eksternDokumentId,
+            fom = fom,
+            tom = tom,
+            rapportertdato = rapportertdato,
+            sendtNav = sendtNav,
+        )
+        fun sendtSøknadFrilans(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
+            type = HendelsetypeDto.SENDT_SØKNAD_FRILANS,
+            id = id,
+            eksternDokumentId = eksternDokumentId,
+            fom = fom,
+            tom = tom,
+            rapportertdato = rapportertdato,
+            sendtNav = sendtNav,
+        )
+        fun sendtSøknadArbeidsgiver(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtArbeidsgiver: LocalDateTime) = HendelseDTO(
+            type = HendelsetypeDto.SENDT_SØKNAD_ARBEIDSGIVER,
+            id = id,
+            eksternDokumentId = eksternDokumentId,
+            fom = fom,
+            tom = tom,
+            rapportertdato = rapportertdato,
+            sendtArbeidsgiver = sendtArbeidsgiver,
+        )
+        fun inntektsmelding(id: String, eksternDokumentId: String, mottattDato: LocalDateTime, beregnetInntekt: Double) = HendelseDTO(
+            type = HendelsetypeDto.INNTEKTSMELDING,
+            id = id,
+            eksternDokumentId = eksternDokumentId,
+            mottattDato = mottattDato,
+            beregnetInntekt = beregnetInntekt
+        )
+
+        internal fun List<HendelseDTO>.søknadsfristOppfylt(): BeregnetPeriode.Søknadsfrist? {
+            val søknad = firstOrNull { it.type == HendelsetypeDto.SENDT_SØKNAD_NAV } ?: return null
+            val sendtNav = søknad.sendtNav ?: return null
+            val fom = søknad.fom ?: return null
+            val tom = søknad.tom ?: return null
+            val søknadSendtMåned = sendtNav.toLocalDate()?.withDayOfMonth(1) ?: return null
+            val senesteMuligeSykedag = fom.plusMonths(3) ?: return null
+            val kravOppfylt = søknadSendtMåned < senesteMuligeSykedag.plusDays(1)
+
+            return BeregnetPeriode.Søknadsfrist(
+                sendtNav = sendtNav,
+                søknadFom = fom,
+                søknadTom = tom,
+                oppfylt = kravOppfylt
+            )
         }
     }
-}
-
-data class InntektsmeldingDTO(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val mottattDato: LocalDateTime,
-    val beregnetInntekt: Double
-) : HendelseDTO {
-}
-
-data class SøknadNavDTO(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertdato: LocalDateTime,
-    val sendtNav: LocalDateTime
-) : HendelseDTO {
-
-    internal fun søknadsfristOppfylt(): Boolean {
-        val søknadSendtMåned = sendtNav.toLocalDate().withDayOfMonth(1)
-        val senesteMuligeSykedag = fom.plusMonths(3)
-        return søknadSendtMåned < senesteMuligeSykedag.plusDays(1)
-    }
-}
-
-data class SøknadFrilansDTO(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertdato: LocalDateTime,
-    val sendtNav: LocalDateTime
-) : HendelseDTO {
-}
-
-data class SøknadArbeidsgiverDTO(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertdato: LocalDateTime,
-    val sendtArbeidsgiver: LocalDateTime
-) : HendelseDTO {
-}
-
-data class SykmeldingDTO(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertdato: LocalDateTime
-) : HendelseDTO {
-}
-
-data class SykmeldingFrilansDTO(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertdato: LocalDateTime
-) : HendelseDTO {
 }

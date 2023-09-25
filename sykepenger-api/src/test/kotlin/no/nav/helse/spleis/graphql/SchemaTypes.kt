@@ -18,7 +18,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
-import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.dto.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
@@ -30,13 +29,10 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsutbetaling
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadNav
 import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkildetype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagtype
-import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetVilkarsprovdPeriode
@@ -125,10 +121,6 @@ private fun SchemaBuilder.arbeidsgiverTypes() {
 private fun SchemaBuilder.hendelseTypes() {
     enum<GraphQLHendelsetype>()
     type<GraphQLHendelse>()
-    type<GraphQLInntektsmelding>()
-    type<GraphQLSoknadNav>()
-    type<GraphQLSoknadArbeidsgiver>()
-    type<GraphQLSykmelding>()
 }
 
 private fun SchemaBuilder.inntektsgrunnlagTypes() {
@@ -186,28 +178,7 @@ private fun SchemaBuilder.tidslinjeperiodeTypes() {
     type<GraphQLPeriodevilkar.Sykepengedager>()
     type<GraphQLPeriodevilkar.Alder>()
     type<GraphQLPeriodevilkar.Soknadsfrist>()
-    type<GraphQLBeregnetPeriode>() {
-        property<List<GraphQLInntektsmelding>>("inntektsmeldinger") {
-            resolver { periode ->
-                periode.hendelser.filterIsInstance<GraphQLInntektsmelding>()
-            }
-        }
-        property<List<GraphQLSoknadNav>>("soknaderNav") {
-            resolver { periode ->
-                periode.hendelser.filterIsInstance<GraphQLSoknadNav>()
-            }
-        }
-        property<List<GraphQLSoknadArbeidsgiver>>("soknaderArbeidsgiver") {
-            resolver { periode ->
-                periode.hendelser.filterIsInstance<GraphQLSoknadArbeidsgiver>()
-            }
-        }
-        property<List<GraphQLSykmelding>>("sykmeldinger") {
-            resolver { periode ->
-                periode.hendelser.filterIsInstance<GraphQLSykmelding>()
-            }
-        }
-    }
+    type<GraphQLBeregnetPeriode>()
 }
 
 private fun SchemaBuilder.vilkarsgrunnlagTypes() {

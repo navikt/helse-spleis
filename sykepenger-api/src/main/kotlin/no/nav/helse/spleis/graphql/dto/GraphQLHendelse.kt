@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.graphql.dto
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -11,51 +11,41 @@ enum class GraphQLHendelsetype {
     NySoknad,
     Ukjent
 }
+enum class GraphQLHendelsetypename {
+    GraphQLSoknadNav,
+    GraphQLInntektsmelding,
+    GraphQLSoknadArbeidsgiver,
+    GraphQLSykmelding,
+    __Unknown;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
-interface GraphQLHendelse {
-    val id: String
-    val eksternDokumentId: String
-    val type: GraphQLHendelsetype
+    internal companion object {
+        fun fra(type: GraphQLHendelsetype) = when (type) {
+            GraphQLHendelsetype.Inntektsmelding -> GraphQLInntektsmelding
+            GraphQLHendelsetype.SendtSoknadNav -> GraphQLSoknadNav
+            GraphQLHendelsetype.SendtSoknadArbeidsgiver -> GraphQLSoknadArbeidsgiver
+            GraphQLHendelsetype.NySoknad -> GraphQLSykmelding
+            GraphQLHendelsetype.Ukjent -> __Unknown
+        }.name
+    }
 }
 
-data class GraphQLInntektsmelding(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val mottattDato: LocalDateTime,
-    val beregnetInntekt: Double
-) : GraphQLHendelse {
-    override val type = GraphQLHendelsetype.Inntektsmelding
-}
+data class GraphQLHendelse(
+    val id: String,
+    val eksternDokumentId: String,
+    val type: GraphQLHendelsetype,
 
-data class GraphQLSoknadNav(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertDato: LocalDateTime,
-    val sendtNav: LocalDateTime
-) : GraphQLHendelse {
-    override val type = GraphQLHendelsetype.SendtSoknadNav
-}
+    // for å være bakoverkompatibel. Kan fjernes når/hvis spesialist ikke forventer denne
+    @JsonProperty("__typename")
+    val typename: String = GraphQLHendelsetypename.fra(type),
 
-data class GraphQLSoknadArbeidsgiver(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertDato: LocalDateTime,
-    val sendtArbeidsgiver: LocalDateTime
-) : GraphQLHendelse {
-    override val type = GraphQLHendelsetype.SendtSoknadArbeidsgiver
-}
+    // Inntektsmelding-spesifikk
+    val mottattDato: LocalDateTime? = null,
+    val beregnetInntekt: Double? = null,
 
-data class GraphQLSykmelding(
-    override val id: String,
-    override val eksternDokumentId: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val rapportertDato: LocalDateTime
-) : GraphQLHendelse {
-    override val type = GraphQLHendelsetype.NySoknad
-}
+    // Flex-søknad-spesifikk
+    val fom: LocalDate? = null,
+    val tom: LocalDate? = null,
+    val rapportertDato: LocalDateTime? = null,
+    val sendtNav: LocalDateTime? = null,
+    val sendtArbeidsgiver: LocalDateTime? = null,
+)

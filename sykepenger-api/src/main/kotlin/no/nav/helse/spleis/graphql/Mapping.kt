@@ -6,19 +6,16 @@ import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.HendelseDTO
+import no.nav.helse.serde.api.dto.HendelsetypeDto
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.Inntektkilde
-import no.nav.helse.serde.api.dto.InntektsmeldingDTO
 import no.nav.helse.serde.api.dto.Periodetilstand
 import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
-import no.nav.helse.serde.api.dto.SykmeldingDTO
-import no.nav.helse.serde.api.dto.SøknadArbeidsgiverDTO
-import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.serde.api.dto.Tidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
@@ -37,7 +34,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
-import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.dto.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLOppdrag
@@ -50,14 +46,11 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsutbetaling
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadNav
 import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkildetype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykepengegrunnlagsgrense
-import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetVilkarsprovdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
@@ -226,42 +219,24 @@ private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
     }
 )
 
-private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse) {
-    is InntektsmeldingDTO -> GraphQLInntektsmelding(
-        id = hendelse.id,
-        eksternDokumentId = hendelse.eksternDokumentId,
-        mottattDato = hendelse.mottattDato,
-        beregnetInntekt = hendelse.beregnetInntekt
-    )
-    is SøknadNavDTO -> GraphQLSoknadNav(
-        id = hendelse.id,
-        eksternDokumentId = hendelse.eksternDokumentId,
-        fom = hendelse.fom,
-        tom = hendelse.tom,
-        rapportertDato = hendelse.rapportertdato,
-        sendtNav = hendelse.sendtNav
-    )
-    is SøknadArbeidsgiverDTO -> GraphQLSoknadArbeidsgiver(
-        id = hendelse.id,
-        eksternDokumentId = hendelse.eksternDokumentId,
-        fom = hendelse.fom,
-        tom = hendelse.tom,
-        rapportertDato = hendelse.rapportertdato,
-        sendtArbeidsgiver = hendelse.sendtArbeidsgiver
-    )
-    is SykmeldingDTO -> GraphQLSykmelding(
-        id = hendelse.id,
-        eksternDokumentId = hendelse.eksternDokumentId,
-        fom = hendelse.fom,
-        tom = hendelse.tom,
-        rapportertDato = hendelse.rapportertdato
-    )
-    else -> object : GraphQLHendelse {
-        override val id = hendelse.id
-        override val eksternDokumentId = hendelse.eksternDokumentId
-        override val type = GraphQLHendelsetype.Ukjent
-    }
-}
+private fun mapHendelse(hendelse: HendelseDTO) = GraphQLHendelse(
+    id = hendelse.id,
+    eksternDokumentId = hendelse.eksternDokumentId,
+    type = when (hendelse.type) {
+        HendelsetypeDto.NY_SØKNAD -> GraphQLHendelsetype.NySoknad
+        HendelsetypeDto.SENDT_SØKNAD_NAV -> GraphQLHendelsetype.SendtSoknadNav
+        HendelsetypeDto.SENDT_SØKNAD_ARBEIDSGIVER -> GraphQLHendelsetype.SendtSoknadArbeidsgiver
+        HendelsetypeDto.INNTEKTSMELDING -> GraphQLHendelsetype.Inntektsmelding
+        else -> GraphQLHendelsetype.Ukjent
+    },
+    mottattDato = hendelse.mottattDato,
+    beregnetInntekt = hendelse.beregnetInntekt,
+    fom = hendelse.fom,
+    tom = hendelse.tom,
+    rapportertDato = hendelse.rapportertdato,
+    sendtNav = hendelse.sendtNav,
+    sendtArbeidsgiver = hendelse.sendtArbeidsgiver
+)
 
 private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLPeriodevilkar(
     sykepengedager = vilkår.sykepengedager.let {

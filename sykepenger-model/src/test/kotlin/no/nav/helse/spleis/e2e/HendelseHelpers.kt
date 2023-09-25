@@ -9,9 +9,6 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.serde.api.dto.HendelseDTO
-import no.nav.helse.serde.api.dto.InntektsmeldingDTO
-import no.nav.helse.serde.api.dto.SykmeldingDTO
-import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 
 internal class EtterspurtBehov(
@@ -69,7 +66,7 @@ internal fun AbstractEndToEndTest.speilApi(hendelser: List<HendelseDTO> = søkna
 
 internal val AbstractEndToEndTest.søknadDTOer get() = søknader.map { (id, triple) ->
     val søknadsperiode = Søknadsperiode.søknadsperiode(triple.third.toList())!!
-    SøknadNavDTO(
+    HendelseDTO.sendtSøknadNav(
         id = id.toString(),
         eksternDokumentId = UUID.randomUUID().toString(),
         fom = søknadsperiode.first(),
@@ -81,7 +78,7 @@ internal val AbstractEndToEndTest.søknadDTOer get() = søknader.map { (id, trip
 
 private val AbstractEndToEndTest.sykmeldingDTOer get() = sykmeldinger.map { (id, perioder) ->
     val sykmeldingsperiode = Sykmeldingsperiode.periode(perioder.toList())!!
-    SykmeldingDTO(
+    HendelseDTO.nySøknad(
         id = id.toString(),
         eksternDokumentId = UUID.randomUUID().toString(),
         fom = sykmeldingsperiode.first(),
@@ -91,7 +88,7 @@ private val AbstractEndToEndTest.sykmeldingDTOer get() = sykmeldinger.map { (id,
 }
 
 private val AbstractEndToEndTest.inntektsmeldingDTOer get() = inntektsmeldinger.map { (id, _) ->
-    InntektsmeldingDTO(
+    HendelseDTO.inntektsmelding(
         id = id.toString(),
         eksternDokumentId = UUID.randomUUID().toString(),
         mottattDato = LocalDateTime.now(),

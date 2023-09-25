@@ -23,12 +23,8 @@ import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
-import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadNav
 import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
-import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.nyObjectmapper
@@ -51,10 +47,6 @@ internal object Api {
     private val graphQLV2ObjectMapper = nyObjectmapper.also {
         it.registerSubtypes(NamedType(GraphQLBeregnetPeriode::class.java))
         it.registerSubtypes(NamedType(GraphQLUberegnetPeriode::class.java))
-        it.registerSubtypes(NamedType(GraphQLInntektsmelding::class.java))
-        it.registerSubtypes(NamedType(GraphQLSykmelding::class.java))
-        it.registerSubtypes(NamedType(GraphQLSoknadNav::class.java))
-        it.registerSubtypes(NamedType(GraphQLSoknadArbeidsgiver::class.java))
         it.registerSubtypes(NamedType(GraphQLInfotrygdVilkarsgrunnlag::class.java))
         it.registerSubtypes(NamedType(GraphQLSpleisVilkarsgrunnlag::class.java))
         it.setMixIns(mapOf(

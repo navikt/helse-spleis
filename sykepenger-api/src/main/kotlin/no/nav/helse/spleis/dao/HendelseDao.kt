@@ -7,12 +7,6 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.serde.api.dto.HendelseDTO
-import no.nav.helse.serde.api.dto.InntektsmeldingDTO
-import no.nav.helse.serde.api.dto.SykmeldingDTO
-import no.nav.helse.serde.api.dto.SykmeldingFrilansDTO
-import no.nav.helse.serde.api.dto.SøknadArbeidsgiverDTO
-import no.nav.helse.serde.api.dto.SøknadFrilansDTO
-import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.objectMapper
@@ -48,29 +42,21 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }.mapNotNull { (type, data) ->
             objectMapper.readTree(data)?.let { node ->
                 when (type) {
-                    Meldingstype.NY_SØKNAD -> SykmeldingDTO(
+                    Meldingstype.NY_SØKNAD -> HendelseDTO.nySøknad(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
                         fom = LocalDate.parse(node.path("fom").asText()),
                         tom = LocalDate.parse(node.path("tom").asText()),
                         rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
                     )
-                    Meldingstype.NY_FRILANS_SØKNAD -> SykmeldingFrilansDTO(
+                    Meldingstype.NY_FRILANS_SØKNAD -> HendelseDTO.nyFrilanssøknad(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
                         fom = LocalDate.parse(node.path("fom").asText()),
                         tom = LocalDate.parse(node.path("tom").asText()),
                         rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
                     )
-                    Meldingstype.SENDT_SØKNAD_NAV -> SøknadNavDTO(
-                        id = node.path("@id").asText(),
-                        eksternDokumentId = node.path("id").asText(),
-                        fom = LocalDate.parse(node.path("fom").asText()),
-                        tom = LocalDate.parse(node.path("tom").asText()),
-                        rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
-                        sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
-                    )
-                    Meldingstype.SENDT_SØKNAD_FRILANS -> SøknadFrilansDTO(
+                    Meldingstype.SENDT_SØKNAD_NAV -> HendelseDTO.sendtSøknadNav(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
                         fom = LocalDate.parse(node.path("fom").asText()),
@@ -78,7 +64,15 @@ internal class HendelseDao(private val dataSource: DataSource) {
                         rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
                         sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
                     )
-                    Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER -> SøknadArbeidsgiverDTO(
+                    Meldingstype.SENDT_SØKNAD_FRILANS -> HendelseDTO.sendtSøknadFrilans(
+                        id = node.path("@id").asText(),
+                        eksternDokumentId = node.path("id").asText(),
+                        fom = LocalDate.parse(node.path("fom").asText()),
+                        tom = LocalDate.parse(node.path("tom").asText()),
+                        rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
+                        sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
+                    )
+                    Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER -> HendelseDTO.sendtSøknadArbeidsgiver(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
                         fom = LocalDate.parse(node.path("fom").asText()),
@@ -86,7 +80,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
                         rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
                         sendtArbeidsgiver = LocalDateTime.parse(node.path("sendtArbeidsgiver").asText())
                     )
-                    Meldingstype.INNTEKTSMELDING -> InntektsmeldingDTO(
+                    Meldingstype.INNTEKTSMELDING -> HendelseDTO.inntektsmelding(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("inntektsmeldingId").asText(),
                         mottattDato = LocalDateTime.parse(node.path("@opprettet").asText()),

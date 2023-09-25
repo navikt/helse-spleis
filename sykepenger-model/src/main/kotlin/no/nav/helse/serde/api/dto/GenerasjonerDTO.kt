@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.serde.api.dto.HendelseDTO.Companion.finn
+import no.nav.helse.serde.api.dto.HendelseDTO.Companion.søknadsfristOppfylt
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.TilSkjønnsfastsettelse
@@ -493,15 +493,7 @@ data class BeregnetPeriode(
             val alderSisteSykepengedag = alder.let {
                 Alder(it.alderPåDato(sisteSykepengedag), it.innenfor70årsgrense(sisteSykepengedag))
             }
-            val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {
-                Søknadsfrist(
-                    sendtNav = it.sendtNav,
-                    søknadFom = it.fom,
-                    søknadTom = it.tom,
-                    oppfylt = it.søknadsfristOppfylt()
-                )
-            }
-
+            val søknadsfrist = hendelser.søknadsfristOppfylt()
             return Vilkår(sykepengedager, alderSisteSykepengedag, søknadsfrist)
         }
 
