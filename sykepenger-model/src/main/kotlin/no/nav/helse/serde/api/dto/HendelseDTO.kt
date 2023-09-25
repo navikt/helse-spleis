@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 interface HendelseDTO {
     val id: String
     val eksternDokumentId: String
-    val type: String
 
     companion object {
         internal inline fun <reified T : HendelseDTO> List<HendelseDTO>.finn(): T? {
@@ -21,7 +20,6 @@ data class InntektsmeldingDTO(
     val mottattDato: LocalDateTime,
     val beregnetInntekt: Double
 ) : HendelseDTO {
-    override val type = "INNTEKTSMELDING"
 }
 
 data class SøknadNavDTO(
@@ -32,7 +30,6 @@ data class SøknadNavDTO(
     val rapportertdato: LocalDateTime,
     val sendtNav: LocalDateTime
 ) : HendelseDTO {
-    override val type = "SENDT_SØKNAD_NAV"
 
     internal fun søknadsfristOppfylt(): Boolean {
         val søknadSendtMåned = sendtNav.toLocalDate().withDayOfMonth(1)
@@ -49,7 +46,6 @@ data class SøknadFrilansDTO(
     val rapportertdato: LocalDateTime,
     val sendtNav: LocalDateTime
 ) : HendelseDTO {
-    override val type = "SENDT_SØKNAD_FRILANS"
 }
 
 data class SøknadArbeidsgiverDTO(
@@ -60,7 +56,6 @@ data class SøknadArbeidsgiverDTO(
     val rapportertdato: LocalDateTime,
     val sendtArbeidsgiver: LocalDateTime
 ) : HendelseDTO {
-    override val type = "SENDT_SØKNAD_ARBEIDSGIVER"
 }
 
 data class SykmeldingDTO(
@@ -70,7 +65,6 @@ data class SykmeldingDTO(
     val tom: LocalDate,
     val rapportertdato: LocalDateTime
 ) : HendelseDTO {
-    override val type = "NY_SØKNAD"
 }
 
 data class SykmeldingFrilansDTO(
@@ -80,5 +74,4 @@ data class SykmeldingFrilansDTO(
     val tom: LocalDate,
     val rapportertdato: LocalDateTime
 ) : HendelseDTO {
-    override val type = "NY_FRILANS_SØKNAD"
 }
