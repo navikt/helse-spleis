@@ -483,10 +483,6 @@ internal class Vedtaksperiode private constructor(
         .finnVedtaksperiodeRettFør(this)
         ?.takeIf { it.forventerInntekt() } != null
 
-    private fun erForlengelseAvForkastet() = arbeidsgiver
-        .finnForkastetVedtaksperiodeRettFør(this)
-        ?.takeIf { it.forventerInntektHensyntarForkastede() } != null
-
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
         person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
 
@@ -520,7 +516,7 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
-        val trengerArbeidsgiveropplysninger = forventerInntektHensyntarForkastede() && !erForlengelse() && !erForlengelseAvForkastet()
+        val trengerArbeidsgiveropplysninger = finnArbeidsgiverperiodeHensyntarForkastede()?.forventerOpplysninger(periode) ?: false
         val sykmeldingsperioder = sykmeldingsperioderKnyttetTilArbeidsgiverperiode()
         val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger, sykmeldingsperioder)
         tilstand(hendelse, TilInfotrygd)
@@ -933,10 +929,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun forventerInntekt(subsumsjonObserver: SubsumsjonObserver = jurist()): Boolean {
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, subsumsjonObserver)
-    }
-
-    internal fun forventerInntektHensyntarForkastede(): Boolean {
-        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiodeHensyntarForkastede(), periode, sykdomstidslinje, null)
     }
 
     private fun loggInnenforArbeidsgiverperiode() {

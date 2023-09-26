@@ -277,15 +277,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         nyPeriode(31.januar til 31.januar)
-        assertForventetFeil(
-            forklaring = "Falsk positiv",
-            nå = {
-                assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
-            },
-            ønsket = {
-                assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
-            }
-        )
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 31.januar, 31.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
     }
 

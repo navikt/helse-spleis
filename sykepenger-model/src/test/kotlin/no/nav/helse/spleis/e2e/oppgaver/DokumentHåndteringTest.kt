@@ -429,7 +429,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 tom = 28.februar,
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
-                trengerArbeidsgiveropplysninger = true,
+                trengerArbeidsgiveropplysninger = false,
                 sykmeldingsperioder = listOf(1.januar til 31.januar, 28.januar til 28.februar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }

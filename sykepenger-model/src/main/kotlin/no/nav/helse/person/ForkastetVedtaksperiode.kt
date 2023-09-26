@@ -16,11 +16,6 @@ internal class ForkastetVedtaksperiode(
         visitor.postVisitForkastetPeriode(vedtaksperiode)
     }
 
-    fun erVedtaksperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
-        this.vedtaksperiode.erVedtaksperiodeRettFør(vedtaksperiode)
-
-    fun forventerInntektHensyntarForkastede() = this.vedtaksperiode.forventerInntektHensyntarForkastede()
-
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
 
