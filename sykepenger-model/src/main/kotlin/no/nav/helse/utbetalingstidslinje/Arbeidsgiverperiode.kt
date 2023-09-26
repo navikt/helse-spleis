@@ -76,6 +76,29 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return false
     }
 
+    /* forventer opplysninger fra arbeidsgiver om første utbetalingsdag etter agp eller opphold er i perioden */
+    internal fun forventerOpplysninger(periode: Periode): Boolean {
+        if (dekkesAvArbeidsgiver(periode)) return false // trenger ikke opplysninger om perioden er innenfor agp
+        val utbetalingsperiode = utbetalingsperiodeForPeriode(periode) ?: return false
+        val utbetalingsperiodeFør = forrigeUtbetalingsperiode(periode) ?: return true
+        return erOppholdMellom(utbetalingsperiodeFør, utbetalingsperiode)
+    }
+
+    private fun utbetalingsperiodeForPeriode(periode: Periode) =
+        utbetalingsdager
+            .firstOrNull { utbetalingsperiode -> utbetalingsperiode.start in periode }
+
+    private fun forrigeUtbetalingsperiode(periode: Periode) =
+        utbetalingsdager.lastOrNull { utbetalingsperiode -> utbetalingsperiode.endInclusive < periode.start }
+
+    // krever at det foreligger opphold mellom utbetalingsperiodene for at vi skal forvente nye opplysninger
+    private fun erOppholdMellom(a: Periode, b: Periode): Boolean {
+        val mellomliggendePeriode = checkNotNull(a.periodeMellom(b.start)) {
+            "forventer at det skal være dager mellom to utbetalingsperioder, enten pga. helg eller andre oppholdsdager"
+        }
+        return oppholdsdager.any { oppholdsperiode -> oppholdsperiode.overlapperMed(mellomliggendePeriode) }
+    }
+
     internal fun dekkesAvArbeidsgiver(periode: Periode): Boolean {
         if (fiktiv()) return false
         val arbeidsgiversAnsvar = dagerSomarbeidsgiverUtbetaler() ?: return false

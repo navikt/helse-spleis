@@ -739,10 +739,10 @@ internal class Vedtaksperiode private constructor(
         medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
-    private fun skalForespørreArbeidsgiveropplysninger(hendelse: IAktivitetslogg) = forventerInntekt() && !erForlengelse() && !harTilstrekkeligInformasjonTilUtbetaling(hendelse)
+    private fun skalForespørreArbeidsgiveropplysninger() = finnArbeidsgiverperiode()?.forventerOpplysninger(periode) == true
 
-    private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg) {
-        val skalOppdatere = skalForespørreArbeidsgiveropplysninger(hendelse)
+    private fun trengerArbeidsgiveropplysninger() {
+        val skalOppdatere = skalForespørreArbeidsgiveropplysninger()
 
         if (skalOppdatere) {
             val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
@@ -1594,13 +1594,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndterEndringAvSkjæringstidspunkter(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)
+            vedtaksperiode.trengerArbeidsgiveropplysninger()
             hendelse.info("Søknaden har flyttet skjæringstidspunkt hos en annen arbeidsgiver")
         }
         
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
-            vedtaksperiode.trengerArbeidsgiveropplysninger(søknad)
+            vedtaksperiode.trengerArbeidsgiveropplysninger()
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
@@ -1633,8 +1633,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-            vedtaksperiode.trengerArbeidsgiveropplysninger(inntektsmeldingReplayUtført)
-            if (vedtaksperiode.skalForespørreArbeidsgiveropplysninger(inntektsmeldingReplayUtført)) {
+            vedtaksperiode.trengerArbeidsgiveropplysninger()
+            if (vedtaksperiode.skalForespørreArbeidsgiveropplysninger()) {
                 // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
                     it.trengerIkkeArbeidsgiveropplysninger()
@@ -1646,7 +1646,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun loggPåminnetReplay(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
             val dagerSiden = DAYS.between(vedtaksperiode.oppdatert, LocalDateTime.now()).takeIf { it > 0 } ?: return // Vanlig replay
-            if (vedtaksperiode.skalForespørreArbeidsgiveropplysninger(inntektsmeldingReplayUtført)) return inntektsmeldingReplayUtført.info("Som følge av påminnet replay etterspurte perioden arbeidsgiveropplysninger $dagerSiden dager etter mottatt søknad")
+            if (vedtaksperiode.skalForespørreArbeidsgiveropplysninger()) return inntektsmeldingReplayUtført.info("Som følge av påminnet replay etterspurte perioden arbeidsgiveropplysninger $dagerSiden dager etter mottatt søknad")
             if (vedtaksperiode.tilstand != AvventerInntektsmelding) return inntektsmeldingReplayUtført.info("Som følge av påminnet replay gikk perioden videre til ${vedtaksperiode.tilstand::class.simpleName} $dagerSiden dager etter mottatt søknad")
         }
 
