@@ -410,7 +410,9 @@ internal class Vedtaksperiode private constructor(
         person
             .vedtaksperioder { !it.utbetalinger.hørerIkkeSammenMed(annullering) }
             .onEach {
-                person.vedtaksperiodeAnnullert(PersonObserver.VedtaksperiodeAnnullertEvent(it.periode.start, it.periode.endInclusive, it.id, it.organisasjonsnummer))
+                if (it.utbetalinger.erUtbetalt()) {
+                    person.vedtaksperiodeAnnullert(PersonObserver.VedtaksperiodeAnnullertEvent(it.periode.start, it.periode.endInclusive, it.id, it.organisasjonsnummer))
+                }
             }
 
         kontekst(hendelse)

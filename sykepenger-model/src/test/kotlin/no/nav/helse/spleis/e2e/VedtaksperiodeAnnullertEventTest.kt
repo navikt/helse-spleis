@@ -38,6 +38,18 @@ internal class VedtaksperiodeAnnullertEventTest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `vi sender ikke ut vedtaksperiode annullert-hendelse for vedtaksperioder som ikke er utbetalt`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        tilGodkjenning(5.mars, 31.mars, ORGNUMMER)
+        håndterAnnullerUtbetaling()
+
+        assertEquals(2, observatør.vedtaksperiodeAnnullertEventer.size)
+        assertEquals(1.januar til 31.januar, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
+        assertEquals(1.februar til 28.februar, observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom)
+    }
+
+    @Test
     fun `også langt gap`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
