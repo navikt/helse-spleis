@@ -406,10 +406,16 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(hendelse: AnnullerUtbetaling, annullering: Utbetaling) {
         if (utbetalinger.hørerIkkeSammenMed(annullering)) return
+
+        person
+            .vedtaksperioder { !it.utbetalinger.hørerIkkeSammenMed(annullering) }
+            .onEach {
+                person.vedtaksperiodeAnnullert(PersonObserver.VedtaksperiodeAnnullertEvent(it.periode.start, it.periode.endInclusive, it.id, it.organisasjonsnummer))
+            }
+
         kontekst(hendelse)
         hendelse.info("Forkaster denne, og senere perioder, som følge av annullering.")
         forkast(hendelse)
-        person.vedtaksperiodeAnnullert(PersonObserver.VedtaksperiodeAnnullertEvent(this.periode.start, this.periode.endInclusive, this.id))
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {

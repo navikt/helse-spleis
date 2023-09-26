@@ -655,7 +655,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class VedtaksperiodeAnnullertEvent (
         val fom: LocalDate,
         val tom: LocalDate,
-        val vedtaksperiodeId: UUID
+        val vedtaksperiodeId: UUID,
+        val organisasjonsnummer: String
     )
 
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {}
@@ -694,5 +695,5 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun behandlingUtført() {}
-    fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {}
+    fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
 }

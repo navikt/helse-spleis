@@ -167,7 +167,8 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("vedtaksperiode_annullert", mapOf(
             "fom" to event.fom,
             "tom" to event.tom,
-            "vedtaksperiodeId" to event.vedtaksperiodeId
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "organisasjonsnummer" to event.organisasjonsnummer,
         )))
     }
 
