@@ -6,6 +6,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -47,6 +49,22 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(testRapid.inspektør.indeksFor(vedtaksperiodeOpprettet) < testRapid.inspektør.indeksFor(vedtaksperiodeForkastet[1])) {
             "vedtaksperiode_opprettet må sendes på rapid før vedtaksperiode_forkastet"
         }
+    }
+
+    @Test
+    fun `vedtaksperiode annullert`() {
+        nyttVedtak()
+
+        sendAnnullering(testRapid.inspektør.etterspurteBehov(Aktivitet.Behov.Behovtype.Utbetaling).path(Aktivitet.Behov.Behovtype.Utbetaling.name).path("fagsystemId").asText())
+
+        val meldingOmAnnullertVedtaksperiode = testRapid.inspektør.meldinger("vedtaksperiode_annullert").first()
+
+        assertEquals(LocalDate.of(2018, 1, 1), meldingOmAnnullertVedtaksperiode["fom"].asLocalDate())
+        assertEquals(LocalDate.of(2018, 1, 31), meldingOmAnnullertVedtaksperiode["tom"].asLocalDate())
+        assertEquals(UNG_PERSON_FNR_2018, meldingOmAnnullertVedtaksperiode["fødselsnummer"].asText())
+        assertEquals(AKTØRID, meldingOmAnnullertVedtaksperiode["aktørId"].asText())
+        assertEquals(ORGNUMMER, meldingOmAnnullertVedtaksperiode["organisasjonsnummer"].asText())
+        assertEquals(testRapid.inspektør.vedtaksperiodeId(0), UUID.fromString(meldingOmAnnullertVedtaksperiode["vedtaksperiodeId"].asText()))
     }
 
     @Test

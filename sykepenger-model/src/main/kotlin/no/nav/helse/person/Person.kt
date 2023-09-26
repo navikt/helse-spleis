@@ -839,5 +839,9 @@ class Person private constructor(
         return true
         */
     }
+
+    internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
+        observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
+    }
 }
 

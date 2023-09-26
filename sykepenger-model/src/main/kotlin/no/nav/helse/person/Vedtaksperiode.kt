@@ -409,6 +409,7 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster denne, og senere perioder, som følge av annullering.")
         forkast(hendelse)
+        person.vedtaksperiodeAnnullert(PersonObserver.VedtaksperiodeAnnullertEvent(this.periode.start, this.periode.endInclusive, this.id))
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {

@@ -14,6 +14,7 @@ import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
@@ -548,6 +549,18 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected fun sendInfotrygdendring() {
         val (_, message) = meldingsfabrikk.lagInfotrygdendringer()
         testRapid.sendTestMessage(message)
+    }
+
+    protected fun nyttVedtak(fom: LocalDate = LocalDate.of(2018, 1, 1), tom: LocalDate = LocalDate.of(2018, 1, 31)) {
+        val soknadperiode = SoknadsperiodeDTO(fom, tom, sykmeldingsgrad = 100)
+        sendNySøknad(soknadperiode)
+        sendSøknad(perioder = listOf(soknadperiode))
+        sendInntektsmelding(arbeidsgiverperiode = listOf(Periode(fom, fom.plusDays(15))), fom)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
     }
 
     protected fun assertUtbetalingtype(utbetalingIndeks: Int, type: String) {

@@ -22,6 +22,7 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
@@ -651,6 +652,12 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val opprettet: LocalDateTime
     )
 
+    data class VedtaksperiodeAnnullertEvent (
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val vedtaksperiodeId: UUID
+    )
+
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {}
     fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
@@ -687,4 +694,5 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun behandlingUtført() {}
+    fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {}
 }
