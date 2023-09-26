@@ -74,10 +74,6 @@ class Revurderingseventyr private constructor(
         }
     }
 
-    internal fun kanIgangsetteOverstyringIAvventerInntektsmelding(hendelse: IAktivitetslogg) =
-        hvorfor.kanIgangsetteOverstyringIAvventerInntektsmelding().also {
-            if (!it) hendelse.info("Igangsetter ikke overstyring i AvventerInntektsmelding grunnet ${hvorfor::class.simpleName}") }
-
     private enum class TypeEndring {
         ENDRING,
         REVURDERING
@@ -86,8 +82,6 @@ class Revurderingseventyr private constructor(
     private sealed interface RevurderingÅrsak {
 
         fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {}
-
-        fun kanIgangsetteOverstyringIAvventerInntektsmelding() = true
 
         fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) {
             person.emitOverstyringIgangsattEvent(
@@ -161,8 +155,6 @@ class Revurderingseventyr private constructor(
 
         object NyPeriode : RevurderingÅrsak {
             override fun navn() = "NY_PERIODE"
-
-            override fun kanIgangsetteOverstyringIAvventerInntektsmelding() = false
         }
     }
 

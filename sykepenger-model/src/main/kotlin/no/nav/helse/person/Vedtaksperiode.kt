@@ -635,9 +635,7 @@ internal class Vedtaksperiode private constructor(
         søknad.valider(periode, jurist())
         søknad.valider(vilkårsgrunnlag)
         if (manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) søknad.funksjonellFeil(RV_SV_2)
-        if (søknad.harFunksjonelleFeilEllerVerre()) {
-            return forkast(søknad)
-        }
+        if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 
@@ -1286,6 +1284,7 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.arbeidsgiver.vurderOmSøknadKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
             vedtaksperiode.håndterSøknad(søknad) {
+                vedtaksperiode.person.igangsettOverstyring(søknad, Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
                     rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding) -> AvventerBlokkerendePeriode
@@ -1294,13 +1293,9 @@ internal class Vedtaksperiode private constructor(
             }
 
             søknad.info("Fullført behandling av søknad")
-            if (søknad.harFunksjonelleFeilEllerVerre()) return
-            vedtaksperiode.person.igangsettOverstyring(søknad, Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
-        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            throw IllegalStateException("Har startet revurdering før den nyopprettede perioden har håndtert søknaden")
-        }
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
     }
 
     internal object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
@@ -1609,7 +1604,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            if (!revurdering.kanIgangsetteOverstyringIAvventerInntektsmelding(hendelse)) return
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
