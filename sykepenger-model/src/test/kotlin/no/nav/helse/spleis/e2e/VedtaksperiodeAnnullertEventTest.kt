@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -83,5 +84,24 @@ internal class VedtaksperiodeAnnullertEventTest: AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
+    }
+
+    @Test
+    fun `revurdering uten endring som siden annulleres skal sende melding om annullert`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        håndterUtbetalt()
+
+        håndterAnnullerUtbetaling()
+
+        assertForventetFeil("Skal egentlig sende melding om annullerte perioder, selv etter en revurdering uten endring", nå = {
+            assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
+        }, ønsket = {
+            assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+        })
     }
 }
