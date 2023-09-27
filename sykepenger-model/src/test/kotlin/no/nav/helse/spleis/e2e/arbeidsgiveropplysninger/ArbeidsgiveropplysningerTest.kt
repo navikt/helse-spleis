@@ -606,6 +606,18 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Sender med egenmeldingsdager fra kort søknad`() {
+        håndterSykmelding(Sykmeldingsperiode(5.januar, 10.januar))
+        håndterSøknad(Sykdom(5.januar, 10.januar, 100.prosent), egenmeldinger = listOf(
+            Søknad.Søknadsperiode.Arbeidsgiverdag(4.januar, 4.januar)
+        ))
+        nyPeriode(11.januar til 31.januar)
+
+        val expectedEgenmeldinger = listOf(4.januar til 4.januar)
+        assertEquals(expectedEgenmeldinger, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().egenmeldingsperioder)
+    }
+
+    @Test
     fun `Skal ikke sende med skjønnsfastsatt sykpengegrunnlag som inntektForrigeSkjæringstidspunkt` () {
         val inntektsmeldingId = UUID.randomUUID()
         nyttVedtak(1.januar, 31.januar, inntektsmeldingId = inntektsmeldingId)

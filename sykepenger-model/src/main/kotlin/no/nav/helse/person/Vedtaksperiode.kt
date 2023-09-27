@@ -141,6 +141,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.TagBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
@@ -761,6 +762,9 @@ internal class Vedtaksperiode private constructor(
         val relevanteSykmeldingsperioder =
             arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykmeldingsperiode }
 
+        val sykdomstidslinjeKnyttetTilArbeidsgiverperiode =
+            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykdomstidslinje }.merge()
+
         val forespurteOpplysninger = listOfNotNull(
             forespurtInntekt(fastsattInntekt),
             forespurtFastsattInntekt(fastsattInntekt),
@@ -774,7 +778,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeId = id,
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykmeldingsperioder = relevanteSykmeldingsperioder,
-                egenmeldingsperioder = sykdomstidslinje.egenmeldingerFraSøknad(),
+                egenmeldingsperioder = sykdomstidslinjeKnyttetTilArbeidsgiverperiode.egenmeldingerFraSøknad(),
                 forespurteOpplysninger = forespurteOpplysninger
             )
         )
