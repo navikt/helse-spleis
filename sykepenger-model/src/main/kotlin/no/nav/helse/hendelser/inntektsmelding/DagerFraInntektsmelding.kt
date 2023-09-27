@@ -66,17 +66,19 @@ internal class DagerFraInntektsmelding(
 
     private fun periodeRettFør(periode: Periode) = gjenståendeDager.periodeRettFør(periode.start)
 
-    internal fun skalHåndteresAv(periode: Periode): Boolean {
+    private fun skalHåndtere(periode: Periode): Boolean {
         val overlapperMedVedtaksperiode = overlappendeDager(periode).isNotEmpty()
         val periodeRettFør = periodeRettFør(periode) != null
+        return overlapperMedVedtaksperiode || periodeRettFør
+    }
+
+    internal fun skalHåndteresAv(periode: Periode): Boolean {
         val vedtaksperiodeRettFør = gjenståendeDager.isNotEmpty() && periode.endInclusive.erRettFør(gjenståendeDager.first())
-        return overlapperMedVedtaksperiode || periodeRettFør || vedtaksperiodeRettFør
+        return skalHåndtere(periode) || vedtaksperiodeRettFør
     }
 
     internal fun skalHåndteresAvRevurdering(periode: Periode, sammenhengende: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
-        val overlapperMedVedtaksperiode = overlappendeDager(periode).isNotEmpty()
-        val periodeRettFør = periodeRettFør(periode) != null
-        if (overlapperMedVedtaksperiode || periodeRettFør) return true
+        if (skalHåndtere(periode)) return true
         // vedtaksperiodene før dagene skal bare håndtere dagene om de nye opplyste dagene er nærmere enn 10 dager fra forrige AGP-beregning
         if (opprinneligPeriode == null || arbeidsgiverperiode == null) return false
         val periodeMellomForrigeAgpOgNyAgp = arbeidsgiverperiode.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start) ?: return false

@@ -327,6 +327,27 @@ internal class Vedtaksperiode private constructor(
         dager.vurdertTilOgMed(periode.endInclusive)
     }
 
+    private fun skalHåndtereDagerRevurdering(dager: DagerFraInntektsmelding): Boolean {
+        return skalHåndtereDager(dager) { sammenhengende ->
+            dager.skalHåndteresAvRevurdering(periode, sammenhengende, finnArbeidsgiverperiode())
+        }
+    }
+
+    private fun skalHåndtereDagerAvventerInntektsmelding(dager: DagerFraInntektsmelding): Boolean {
+        return skalHåndtereDager(dager) { sammenhengende ->
+            dager.skalHåndteresAv(sammenhengende)
+        }
+    }
+
+    private fun skalHåndtereDager(dager: DagerFraInntektsmelding, strategi: DagerFraInntektsmelding.(Periode) -> Boolean): Boolean {
+        val sammenhengende = arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
+            .map { it.periode }
+            .periode() ?: return false
+        if (!strategi(dager, sammenhengende)) return false
+        dager.info("Vedtaksperioden $periode håndterer dager fordi den sammenhengende perioden $sammenhengende overlapper med inntektsmelding")
+        return true
+    }
+
     private fun håndterDager(dager: DagerFraInntektsmelding) {
         håndterDagerFør(dager)
         dager.håndter(periode, ::finnArbeidsgiverperiode) { arbeidsgiver.oppdaterSykdom(it) }?.let { oppdatertSykdomstidslinje ->
@@ -1137,28 +1158,8 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>)
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
-        fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            if (type in listOf(
-                    AVVENTER_REVURDERING,
-                    AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
-                    AVVENTER_VILKÅRSPRØVING_REVURDERING,
-                    AVVENTER_HISTORIKK_REVURDERING,
-                    AVVENTER_SIMULERING_REVURDERING,
-                    AVVENTER_GODKJENNING_REVURDERING,
-                    AVSLUTTET
-                )
-            ) {
-                val sammenhengende = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
-                    .map { it.periode }
-                    .periode() ?: return false
-                return dager.skalHåndteresAvRevurdering(
-                    vedtaksperiode.periode,
-                    sammenhengende,
-                    vedtaksperiode.finnArbeidsgiverperiode()
-                )
-            }
-            return dager.skalHåndteresAv(vedtaksperiode.periode)
-        }
+        fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            dager.skalHåndteresAv(vedtaksperiode.periode)
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             vedtaksperiode.håndterKorrigerendeInntektsmelding(dager)
         }
@@ -1419,6 +1420,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            vedtaksperiode.skalHåndtereDagerRevurdering(dager)
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
         }
@@ -1467,7 +1470,8 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
             vedtaksperiode.trengerYtelser(påminnelse)
         }
-
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            vedtaksperiode.skalHåndtereDagerRevurdering(dager)
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -1509,7 +1513,8 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             håndterRevurdering(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering, AvventerSkjønnsmessigFastsettelseRevurdering) }
         }
-
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            vedtaksperiode.skalHåndtereDagerRevurdering(dager)
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
@@ -1548,13 +1553,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {
-            if (super.skalHåndtereDager(vedtaksperiode, dager)) return true
-            val sammenhengende = vedtaksperiode.arbeidsgiver.finnSammenhengendeVedtaksperioder(vedtaksperiode)
-                .map { it.periode }
-                .periode() ?: return false
-            if (!dager.skalHåndteresAv(sammenhengende)) return false
-            dager.info("Vedtaksperioden ${vedtaksperiode.periode} håndterer dager fordi den sammenhengende perioden $sammenhengende overlapper med inntektsmelding")
-            return true
+            return vedtaksperiode.skalHåndtereDagerAvventerInntektsmelding(dager)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
@@ -1947,7 +1946,8 @@ internal class Vedtaksperiode private constructor(
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg) {
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
-
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            vedtaksperiode.skalHåndtereDagerRevurdering(dager)
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
 
         private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -2041,7 +2041,8 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.utbetalinger.simuler(påminnelse)
         }
-
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            vedtaksperiode.skalHåndtereDagerRevurdering(dager)
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             håndterRevurdering(simulering) {
                 vedtaksperiode.utbetalinger.valider(simulering)
@@ -2146,7 +2147,8 @@ internal class Vedtaksperiode private constructor(
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
         }
-
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            vedtaksperiode.skalHåndtereDagerRevurdering(dager)
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
             vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
         }
@@ -2384,6 +2386,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode)
             vedtaksperiode.låsOpp()
         }
+        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
+            vedtaksperiode.skalHåndtereDagerRevurdering(dager)
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)) return
