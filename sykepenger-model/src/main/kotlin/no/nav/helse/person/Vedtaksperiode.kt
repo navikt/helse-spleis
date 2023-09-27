@@ -509,15 +509,16 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
-        val trengerArbeidsgiveropplysninger = finnArbeidsgiverperiodeHensyntarForkastede()?.forventerOpplysninger(periode) ?: false
-        val sykmeldingsperioder = sykmeldingsperioderKnyttetTilArbeidsgiverperiode()
+        val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
+        val trengerArbeidsgiveropplysninger = arbeidsgiverperiodeHensyntarForkastede?.forventerOpplysninger(periode) ?: false
+        val sykmeldingsperioder = sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiodeHensyntarForkastede)
         val vedtaksperiodeForkastetEventBuilder = VedtaksperiodeForkastetEventBuilder(tilstand.type, trengerArbeidsgiveropplysninger, sykmeldingsperioder)
         tilstand(hendelse, TilInfotrygd)
         return vedtaksperiodeForkastetEventBuilder
     }
 
-    private fun sykmeldingsperioderKnyttetTilArbeidsgiverperiode(): List<Periode> {
-        val forkastedeVedtaksperioder = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(finnArbeidsgiverperiodeHensyntarForkastede())
+    private fun sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Periode> {
+        val forkastedeVedtaksperioder = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(arbeidsgiverperiode)
         return (forkastedeVedtaksperioder.map { it.sykmeldingsperiode } + listOf(sykmeldingsperiode)).distinct()
     }
 
@@ -731,35 +732,32 @@ internal class Vedtaksperiode private constructor(
         medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
-    private fun skalForespørreArbeidsgiveropplysninger() = finnArbeidsgiverperiode()?.forventerOpplysninger(periode) == true
+    private fun trengerArbeidsgiveropplysninger(): Boolean {
+        val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
+        if (!arbeidsgiverperiode.forventerOpplysninger(periode)) return false
 
-    private fun trengerArbeidsgiveropplysninger() {
-        val skalOppdatere = skalForespørreArbeidsgiveropplysninger()
+        val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
+        val relevanteSykmeldingsperioder =
+            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykmeldingsperiode }
 
-        if (skalOppdatere) {
-            val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
-            val arbeidsgiverperiode = finnArbeidsgiverperiode()
-            val relevanteSykmeldingsperioder =
-                arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykmeldingsperiode }
+        val forespurteOpplysninger = listOfNotNull(
+            forespurtInntekt(fastsattInntekt),
+            forespurtFastsattInntekt(fastsattInntekt),
+            forespurtRefusjon(fastsattInntekt),
+            forespurtArbeidsgiverperiode(arbeidsgiverperiode)
+        )
 
-            val forespurteOpplysninger = listOfNotNull(
-                forespurtInntekt(fastsattInntekt),
-                forespurtFastsattInntekt(fastsattInntekt),
-                forespurtRefusjon(fastsattInntekt),
-                forespurtArbeidsgiverperiode(arbeidsgiverperiode)
+        person.trengerArbeidsgiveropplysninger(
+            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = id,
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykmeldingsperioder = relevanteSykmeldingsperioder,
+                egenmeldingsperioder = sykdomstidslinje.egenmeldingerFraSøknad(),
+                forespurteOpplysninger = forespurteOpplysninger
             )
-
-            person.trengerArbeidsgiveropplysninger(
-                PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                    organisasjonsnummer = organisasjonsnummer,
-                    vedtaksperiodeId = id,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    sykmeldingsperioder = relevanteSykmeldingsperioder,
-                    egenmeldingsperioder = sykdomstidslinje.egenmeldingerFraSøknad(),
-                    forespurteOpplysninger = forespurteOpplysninger
-                )
-            )
-        }
+        )
+        return true
     }
 
     private fun trengerIkkeArbeidsgiveropplysninger() {
@@ -1618,21 +1616,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-            vedtaksperiode.trengerArbeidsgiveropplysninger()
-            if (vedtaksperiode.skalForespørreArbeidsgiveropplysninger()) {
+            if (vedtaksperiode.trengerArbeidsgiveropplysninger()) {
                 // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
                     it.trengerIkkeArbeidsgiveropplysninger()
                 }
             }
             vurderOmKanGåVidere(vedtaksperiode, inntektsmeldingReplayUtført)
-            loggPåminnetReplay(vedtaksperiode, inntektsmeldingReplayUtført)
-        }
-
-        private fun loggPåminnetReplay(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-            val dagerSiden = DAYS.between(vedtaksperiode.oppdatert, LocalDateTime.now()).takeIf { it > 0 } ?: return // Vanlig replay
-            if (vedtaksperiode.skalForespørreArbeidsgiveropplysninger()) return inntektsmeldingReplayUtført.info("Som følge av påminnet replay etterspurte perioden arbeidsgiveropplysninger $dagerSiden dager etter mottatt søknad")
-            if (vedtaksperiode.tilstand != AvventerInntektsmelding) return inntektsmeldingReplayUtført.info("Som følge av påminnet replay gikk perioden videre til ${vedtaksperiode.tilstand::class.simpleName} $dagerSiden dager etter mottatt søknad")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
