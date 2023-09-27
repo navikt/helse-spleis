@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class VedtaksperiodeAnnullertEventTest: AbstractEndToEndTest() {
+internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
 
     @Test
     fun `vi sender vedtaksperiode annullert-hendelse når saksbehandler annullerer en vedtaksperiode`() {
@@ -33,9 +32,18 @@ internal class VedtaksperiodeAnnullertEventTest: AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
 
         assertEquals(3, observatør.vedtaksperiodeAnnullertEventer.size)
-        assertEquals(1.januar til 31.januar, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
-        assertEquals(1.februar til 28.februar, observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom)
-        assertEquals(5.mars til 31.mars, observatør.vedtaksperiodeAnnullertEventer[2].fom til observatør.vedtaksperiodeAnnullertEventer[2].tom)
+        assertEquals(
+            1.januar til 31.januar,
+            observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
+        )
+        assertEquals(
+            1.februar til 28.februar,
+            observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom
+        )
+        assertEquals(
+            5.mars til 31.mars,
+            observatør.vedtaksperiodeAnnullertEventer[2].fom til observatør.vedtaksperiodeAnnullertEventer[2].tom
+        )
     }
 
     @Test
@@ -46,8 +54,14 @@ internal class VedtaksperiodeAnnullertEventTest: AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
 
         assertEquals(2, observatør.vedtaksperiodeAnnullertEventer.size)
-        assertEquals(1.januar til 31.januar, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
-        assertEquals(1.februar til 28.februar, observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom)
+        assertEquals(
+            1.januar til 31.januar,
+            observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
+        )
+        assertEquals(
+            1.februar til 28.februar,
+            observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom
+        )
     }
 
     @Test
@@ -58,7 +72,10 @@ internal class VedtaksperiodeAnnullertEventTest: AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
-        assertEquals(1.april til 30.april, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
+        assertEquals(
+            1.april til 30.april,
+            observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
+        )
     }
 
     @Test
@@ -77,7 +94,12 @@ internal class VedtaksperiodeAnnullertEventTest: AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((1.februar til 28.februar).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
+        håndterOverstyrTidslinje((1.februar til 28.februar).map {
+            ManuellOverskrivingDag(
+                it,
+                Dagtype.ArbeidIkkeGjenopptattDag
+            )
+        })
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -95,13 +117,18 @@ internal class VedtaksperiodeAnnullertEventTest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         håndterUtbetalt()
-
         håndterAnnullerUtbetaling()
 
-        assertForventetFeil("Skal egentlig sende melding om annullerte perioder, selv etter en revurdering uten endring", nå = {
-            assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
-        }, ønsket = {
-            assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
-        })
+        assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
     }
+
+    @Test
+    fun `Pågående revurdering uten endring som siden annulleres skal sende melding om annullert`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterAnnullerUtbetaling()
+
+        assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
+    }
+
 }
