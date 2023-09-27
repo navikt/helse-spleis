@@ -335,13 +335,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun håndterDagerKorrigering(dager: DagerFraInntektsmelding) {
-        håndterDagerFør(dager)
-        dager.håndter(periode, ::finnArbeidsgiverperiode) { arbeidsgiver.oppdaterSykdom(it) }?.let { oppdatertSykdomstidslinje ->
-            sykdomstidslinje = oppdatertSykdomstidslinje
-        }
-    }
-
     private fun håndterDagerFør(dager: DagerFraInntektsmelding) {
         val periodstartFør = periode.start
         dager.leggTilArbeidsdagerFør(periode.start)
@@ -665,15 +658,19 @@ internal class Vedtaksperiode private constructor(
         person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
     }
 
-    private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, gammelAgp: Arbeidsgiverperiode?, block: () -> Unit) {
+    private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, håndterLås: (() -> Unit) -> Unit = { it() }) {
         dager.valider(periode)
-        if (dager.harFunksjonelleFeilEllerVerre()) {
+        if (dager.harFunksjonelleFeilEllerVerre()) return
+        val opprinneligAgp = finnArbeidsgiverperiode()
+        if (dager.erKorrigeringForGammel(opprinneligAgp)) {
+            inntektsmeldingHåndtert(dager)
             return
         }
+
         val korrigertInntektsmeldingId =  hendelseIder.sisteInntektsmeldingId()
-        block()
+        håndterLås { håndterDager(dager) }
         val nyAgp = finnArbeidsgiverperiode()
-        if (gammelAgp != null && !gammelAgp.klinLik(nyAgp)) {
+        if (opprinneligAgp != null && !opprinneligAgp.klinLik(nyAgp)) {
             dager.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}")
             korrigertInntektsmeldingId?.let {
                 person.arbeidsgiveropplysningerKorrigert(
@@ -684,7 +681,6 @@ internal class Vedtaksperiode private constructor(
                     ))
             }
         }
-        inntektsmeldingHåndtert(dager)
         person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt = skjæringstidspunkt, periodeForEndring = periode))
         // setter kontekst tilbake siden igangsettelsen over kan endre på kontekstene
         kontekst(dager)
@@ -1166,10 +1162,7 @@ internal class Vedtaksperiode private constructor(
             return dager.skalHåndteresAv(vedtaksperiode.periode)
         }
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
-            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, gammelAgp) {
-                dager.håndterKorrigering(gammelAgp) { vedtaksperiode.håndterDagerKorrigering(dager) }
-            }
+            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager)
         }
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {}
@@ -2388,10 +2381,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            val gammelAgp = vedtaksperiode.finnArbeidsgiverperiode()
-            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager, gammelAgp) {
+            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager) {
                 vedtaksperiode.låsOpp()
-                dager.håndterKorrigering(gammelAgp) { vedtaksperiode.håndterDagerKorrigering(dager) }
+                it()
                 vedtaksperiode.lås()
             }
         }

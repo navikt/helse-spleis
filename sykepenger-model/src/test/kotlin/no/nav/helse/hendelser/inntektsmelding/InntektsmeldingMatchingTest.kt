@@ -154,8 +154,8 @@ internal class InntektsmeldingMatchingTest {
         assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode, arbeidsgiverperiode))
 
-        val håndtertDagerFraRevurdering = dager.håndterDagerFraRevurdering(arbeidsgiverperiode)
-        assertFalse(håndtertDagerFraRevurdering)
+        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(arbeidsgiverperiode)
+        assertTrue(håndtertDagerFraRevurdering)
     }
 
     @Test
@@ -169,8 +169,8 @@ internal class InntektsmeldingMatchingTest {
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode, arbeidsgiverperiode))
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode, arbeidsgiverperiode))
 
-        val håndtertDagerFraRevurdering = dager.håndterDagerFraRevurdering(arbeidsgiverperiode)
-        assertTrue(håndtertDagerFraRevurdering)
+        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(arbeidsgiverperiode)
+        assertFalse(håndtertDagerFraRevurdering)
     }
 
     @Test
@@ -185,8 +185,8 @@ internal class InntektsmeldingMatchingTest {
         assertFalse(dager.skalHåndteresAvRevurdering(vedtaksperiode1, sammenhengendePeriode1, arbeidsgiverperiode))
         assertTrue(dager.skalHåndteresAvRevurdering(vedtaksperiode2, sammenhengendePeriode2, arbeidsgiverperiode))
 
-        val håndtertDagerFraRevurdering = dager.håndterDagerFraRevurdering(arbeidsgiverperiode)
-        assertTrue(håndtertDagerFraRevurdering)
+        val håndtertDagerFraRevurdering = dager.erKorrigeringForGammel(arbeidsgiverperiode)
+        assertFalse(håndtertDagerFraRevurdering)
     }
 
     @Test
@@ -271,12 +271,6 @@ internal class InntektsmeldingMatchingTest {
         return håndterPeriodeRettFør(periode) {
             it.sykdomstidslinje()
         }.periode()
-    }
-
-    private fun DagerFraInntektsmelding.håndterDagerFraRevurdering(arbeidsgiverperiode: Arbeidsgiverperiode): Boolean {
-        var håndtert = false
-        håndterKorrigering(arbeidsgiverperiode) { håndtert = true }
-        return håndtert
     }
 
     private companion object {
