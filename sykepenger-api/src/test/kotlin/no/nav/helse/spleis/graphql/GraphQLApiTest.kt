@@ -263,12 +263,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                         alder {
                                             alderSisteSykedag,
                                             oppfylt
-                                        },
-                                        soknadsfrist {
-                                            sendtNav,
-                                            soknadFom,
-                                            soknadTom,
-                                            oppfylt
                                         }
                                     }
                                 }
@@ -980,7 +974,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "alderSisteSykedag": 25,
                       "oppfylt": true
                     },
-                    "soknadsfrist": null,
                     "sykepengedager": {
                       "forbrukteSykedager": 10,
                       "gjenstaendeSykedager": 238,

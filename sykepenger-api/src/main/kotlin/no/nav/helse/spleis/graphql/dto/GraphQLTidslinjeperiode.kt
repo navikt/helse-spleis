@@ -217,9 +217,7 @@ data class GraphQLUberegnetVilkarsprovdPeriode(
 
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,
-    val alder: Alder,
-    // deprecated: skal fjernes
-    val soknadsfrist: Soknadsfrist? = null
+    val alder: Alder
 ) {
     data class Sykepengedager(
         val skjaeringstidspunkt: LocalDate,
@@ -231,13 +229,6 @@ data class GraphQLPeriodevilkar(
 
     data class Alder(
         val alderSisteSykedag: Int,
-        val oppfylt: Boolean
-    )
-
-    data class Soknadsfrist(
-        val sendtNav: LocalDateTime,
-        val soknadFom: LocalDate,
-        val soknadTom: LocalDate,
         val oppfylt: Boolean
     )
 }
