@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
@@ -18,15 +17,7 @@ class ForespurtOpplysningTest {
     fun `serialiserer ForespurtOpplysning med Inntekt riktig`() {
 
         val forespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(PersonObserver.Inntektsforslag(
-                beregningsmåneder = listOf(
-                    januar(2018),
-                    februar(2018),
-                    mars(2018)
-                ),
-                PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
-            )
-            ),
+            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Arbeidsgiverperiode,
             PersonObserver.Refusjon(emptyList())
         )
@@ -72,11 +63,6 @@ class ForespurtOpplysningTest {
         mapOf(
             "opplysningstype" to "Inntekt",
             "forslag" to mapOf(
-                "beregningsmåneder" to listOf(
-                    januar(2018),
-                    februar(2018),
-                    mars(2018),
-                ),
                 "forrigeInntekt" to mapOf(
                         "skjæringstidspunkt" to 1.januar,
                         "kilde" to PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING.name,

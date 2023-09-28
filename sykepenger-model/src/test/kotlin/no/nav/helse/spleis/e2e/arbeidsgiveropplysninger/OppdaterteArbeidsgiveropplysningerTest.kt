@@ -1,14 +1,11 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.november
-import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -35,7 +32,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = listOf(1.januar til 1.januar),
             forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(PersonObserver.Inntektsforslag(beregningsmåneder = listOf(oktober(2017), november(2017), desember(2017)), forrigeInntekt = null)),
+                PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )
@@ -64,7 +61,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(5.januar til 31.januar),
             egenmeldingsperioder = listOf(1.januar til 2.januar),
             forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(PersonObserver.Inntektsforslag(beregningsmåneder = listOf(oktober(2017), november(2017), desember(2017)), forrigeInntekt = null)),
+                PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )
@@ -113,7 +110,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = emptyList(),
             forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(PersonObserver.Inntektsforslag(beregningsmåneder = listOf(oktober(2017), november(2017), desember(2017)), forrigeInntekt = null)),
+                PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )

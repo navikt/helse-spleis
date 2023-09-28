@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
@@ -22,7 +21,6 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 interface PersonObserver : SykefraværstilfelleeventyrObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
@@ -191,8 +189,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                     is Inntekt -> mapOf(
                         "opplysningstype" to "Inntekt",
                         "forslag" to mapOf(
-                            "beregningsmåneder" to forespurtOpplysning.forslag.beregningsmåneder,
-                            "forrigeInntekt" to forespurtOpplysning.forslag.forrigeInntekt?.let {
+                            "forrigeInntekt" to forespurtOpplysning.forslag?.let {
                                 mapOf(
                                     "skjæringstidspunkt" to it.skjæringstidspunkt,
                                     "kilde" to it.kilde.name,
@@ -222,13 +219,12 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         }
     }
 
-    data class Inntektsforslag(val beregningsmåneder: List<YearMonth>, val forrigeInntekt: Inntektsdata?)
     data class Inntektsdata(val skjæringstidspunkt: LocalDate, val kilde: Inntektsopplysningstype, val beløp: Double)
     enum class Inntektsopplysningstype{
         INNTEKTSMELDING,
         SAKSBEHANDLER
     }
-    data class Inntekt(val forslag: Inntektsforslag) : ForespurtOpplysning()
+    data class Inntekt(val forslag: Inntektsdata?) : ForespurtOpplysning()
     data class FastsattInntekt(val fastsattInntekt: no.nav.helse.økonomi.Inntekt) : ForespurtOpplysning()
     object Arbeidsgiverperiode : ForespurtOpplysning()
     data class Refusjon(val forslag: List<Refusjonsopplysning>) : ForespurtOpplysning()

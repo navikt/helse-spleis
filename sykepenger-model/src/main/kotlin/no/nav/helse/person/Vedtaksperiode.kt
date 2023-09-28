@@ -759,11 +759,9 @@ internal class Vedtaksperiode private constructor(
         if (!arbeidsgiverperiode.forventerOpplysninger(periode)) return false
 
         val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
-        val relevanteSykmeldingsperioder =
-            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykmeldingsperiode }
-
-        val sykdomstidslinjeKnyttetTilArbeidsgiverperiode =
-            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).map { it.sykdomstidslinje }.merge()
+        val vedtaksperioderKnyttetTilArbeidsgiverperiode = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
+        val relevanteSykmeldingsperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.sykmeldingsperiode }
+        val sykdomstidslinjeKnyttetTilArbeidsgiverperiode = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.sykdomstidslinje }.merge()
 
         val forespurteOpplysninger = listOfNotNull(
             forespurtInntekt(fastsattInntekt),
@@ -795,19 +793,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forespurtInntekt(fastsattInntekt: Inntekt?): PersonObserver.Inntekt? {
-        val beregningsmåneder = 3.downTo(1).map {
-            YearMonth.from(skjæringstidspunkt).minusMonths(it.toLong())
-        }
+        if (fastsattInntekt != null) return null
         val inntektForrigeSkjæringstidspunkt = person.skjæringstidspunkter()
             .filter { it != skjæringstidspunkt }
             .maxOrNull()
             ?.let { person.vilkårsgrunnlagFor(it)?.inntektsdata(it, organisasjonsnummer) }
 
-        if (fastsattInntekt == null) return PersonObserver.Inntekt(forslag = PersonObserver.Inntektsforslag(
-            beregningsmåneder,
-            forrigeInntekt = inntektForrigeSkjæringstidspunkt
-        ))
-        return null
+        return PersonObserver.Inntekt(forslag = inntektForrigeSkjæringstidspunkt)
     }
 
     private fun forespurtFastsattInntekt(fastsattInntekt: Inntekt?): PersonObserver.FastsattInntekt? =

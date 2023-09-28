@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -91,16 +90,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        november(2017),
-                        desember(2017),
-                        januar(2018)
-                    ),
-                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
-                )
-            ),
+            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT)))
         )
         val actualForespurteOpplysninger =
@@ -131,16 +121,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(17.februar til 17.mars)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        november(2017),
-                        desember(2017),
-                        januar(2018)
-                    ),
-                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
-                )
-            ),
+            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT))),
             PersonObserver.Arbeidsgiverperiode
         )
@@ -193,16 +174,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(16.januar til 21.januar)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        oktober(2017),
-                        november(2017),
-                        desember(2017)
-                    ),
-                    null
-                )
-            ),
+            PersonObserver.Inntekt(null),
             PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
@@ -268,16 +240,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        oktober(2017),
-                        november(2017),
-                        desember(2017)
-                    ),
-                    null
-                )
-            ),
+            PersonObserver.Inntekt(null),
             PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
@@ -355,16 +318,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        oktober(2017),
-                        november(2017),
-                        desember(2017)
-                    ),
-                    null
-                )
-            ),
+            PersonObserver.Inntekt(null),
             PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
@@ -381,16 +335,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val trengerArbeidsgiveropplysningerEvent = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        oktober(2017),
-                        november(2017),
-                        desember(2017)
-                    ),
-                    null
-                )
-            ),
+            PersonObserver.Inntekt(null),
             PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
@@ -632,16 +577,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        november(2017),
-                        desember(2017),
-                        januar(2018)
-                    ),
-                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
-                )
-            ),
+            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT))),
 
         )
@@ -666,16 +602,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        november(2017),
-                        desember(2017),
-                        januar(2018)
-                    ),
-                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER, 32000.0)
-                )
-            ),
+            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER, 32000.0)),
             PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(id, 1.januar, null, 32000.månedlig))),
         )
         val actualForespurteOpplysninger =
@@ -691,16 +618,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        desember(2017),
-                        januar(2018),
-                        februar(2018)
-                    ),
-                    null
-                )
-            ),
+            PersonObserver.Inntekt(null),
             PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
@@ -725,16 +643,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         nyPeriode(15.februar til 28.februar)
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        november(2017),
-                        desember(2017),
-                        januar(2018)
-                    ),
-                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
-                )
-            ),
+            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Refusjon(forslag = listOf(
                 Refusjonsopplysning(id, 30.januar, 19.februar, 28000.månedlig),
                 Refusjonsopplysning(id, 20.februar, 1.april, 27000.månedlig),
@@ -757,16 +666,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         nyPeriode(15.februar til 28.februar)
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        november(2017),
-                        desember(2017),
-                        januar(2018)
-                    ),
-                    PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)
-                )
-            ),
+            PersonObserver.Inntekt(PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
             PersonObserver.Refusjon(forslag = listOf(
                 Refusjonsopplysning(id, 11.februar, null, INGEN)
             ))
@@ -782,16 +682,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(15.februar til 28.februar)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(
-                        november(2017),
-                        desember(2017),
-                        januar(2018)
-                    ),
-                    null
-                )
-            ),
+            PersonObserver.Inntekt(null),
             PersonObserver.Refusjon(forslag = emptyList())
         )
         val actualForespurteOpplysninger =
@@ -853,12 +744,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(
-                PersonObserver.Inntektsforslag(
-                    listOf(oktober(2017), november(2017), desember(2017)),
-                    null
-                )
-            ),
+            PersonObserver.Inntekt(null),
             PersonObserver.Refusjon(forslag = emptyList()),
             PersonObserver.Arbeidsgiverperiode
         )
@@ -879,7 +765,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(2.januar til 17.januar),
             egenmeldingsperioder = listOf(1.januar til 1.januar),
             forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(PersonObserver.Inntektsforslag(beregningsmåneder = listOf(oktober(2017), november(2017), desember(2017)), forrigeInntekt = null)),
+                PersonObserver.Inntekt(null),
                 PersonObserver.Refusjon(forslag = emptyList()),
                 PersonObserver.Arbeidsgiverperiode
             )
