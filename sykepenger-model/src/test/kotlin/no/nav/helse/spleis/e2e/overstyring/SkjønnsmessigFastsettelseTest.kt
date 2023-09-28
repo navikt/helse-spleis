@@ -18,10 +18,12 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
@@ -136,12 +138,17 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `skjønnsmessig fastsettelse overstyres av en inntektmelding med samme beløp`() {
-        nyttVedtak(1.januar, 31.januar)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is SkjønnsmessigFastsatt)
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            val inntekt = INNTEKT
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntekt)))
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            nullstillTilstandsendringer()
+            håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        }
     }
 
     @Test

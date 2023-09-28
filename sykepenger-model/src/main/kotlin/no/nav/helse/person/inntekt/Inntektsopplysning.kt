@@ -49,12 +49,7 @@ abstract class Inntektsopplysning protected constructor(
         if (ny is Saksbehandler) return ny.fastsattÅrsinntekt() != this.beløp
         if (ny !is Inntektsmelding) return false
         val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
-        if (ny.dato !in måned) return false
-        // unngår å endre inntekt dersom beløpet er det samme da det ville
-        // trigget endel unødvendig null-revurderinger av skjæringstidspunktet (inntektsmeldinger kommer jo inn med
-        // inntekt og refusjon selv om det egentlig kun er endring i refusjonen)
-        return this.beløp != ny.beløp
-
+        return ny.dato in måned
     }
 
     internal open fun overstyrer(gammel: IkkeRapportert) = this
