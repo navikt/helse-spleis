@@ -22,13 +22,14 @@ internal class Sykefraværstilfelleeventyr(private val dato: LocalDate, private 
         )
 
     internal companion object {
-        fun List<Sykefraværstilfelleeventyr>.bliMed(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode): List<Sykefraværstilfelleeventyr> = with(sortedBy { it.dato }) {
-            val riktig = finnSisteSykefraværstilfelleFørSykdomsperioden(periode)
+        fun List<Sykefraværstilfelleeventyr>.bliMed(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode, sykdomsperiode: Periode?): List<Sykefraværstilfelleeventyr> = with(sortedBy { it.dato }) {
+            val riktig = finnSisteSykefraværstilfelleFørSykdomsperioden(sykdomsperiode)
             if (riktig == -1) return@with lagNyttSykefraværstilfelleForPeriode(vedtaksperiodeId, organisasjonsnummer, periode)
             return oppdaterSykefraværstilfelle(riktig, vedtaksperiodeId, organisasjonsnummer, periode)
         }
-        private fun List<Sykefraværstilfelleeventyr>.finnSisteSykefraværstilfelleFørSykdomsperioden(periode: Periode) =
-            this.indexOfLast { eventyr -> eventyr.dato <= periode.endInclusive }
+        private fun List<Sykefraværstilfelleeventyr>.finnSisteSykefraværstilfelleFørSykdomsperioden(sykdomsperiode: Periode?) =
+            if (sykdomsperiode == null) -1
+            else this.indexOfLast { eventyr -> eventyr.dato <= sykdomsperiode.endInclusive }
         private fun List<Sykefraværstilfelleeventyr>.oppdaterSykefraværstilfelle(indeks: Int, vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode): List<Sykefraværstilfelleeventyr> {
             val snute = this.take(indeks)
             val hale = this.drop(indeks + 1)

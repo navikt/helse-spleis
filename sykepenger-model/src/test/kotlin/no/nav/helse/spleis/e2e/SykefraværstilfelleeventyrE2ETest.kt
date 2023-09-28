@@ -45,6 +45,47 @@ internal class SykefraværstilfelleeventyrE2ETest : AbstractDslTest() {
     }
 
     @Test
+    fun `ett sykefraværstilfelle blir til to pga arbeid gjenopptatt`() {
+        a1 {
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 4.januar, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(11.januar, 15.januar, 100.prosent), Søknad.Søknadsperiode.Arbeid(11.januar, 15.januar))
+        }
+        a2 {
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.januar, 10.januar, 100.prosent))
+        }
+
+        assertEquals(3, observatør.sykefraværstilfelleeventyr.size)
+        val sisteEventyr = observatør.sykefraværstilfelleeventyr.last()
+        assertEquals(2, sisteEventyr.size)
+
+        val førsteSykefraværstilfelle = sisteEventyr[0]
+        assertEquals(3.januar, førsteSykefraværstilfelle.dato)
+        assertEquals(2, førsteSykefraværstilfelle.perioder.size)
+        førsteSykefraværstilfelle.perioder[0].also { tilfelle ->
+            assertEquals(a1 { 1.vedtaksperiode }, tilfelle.id)
+            assertEquals(a1, tilfelle.organisasjonsnummer)
+            assertEquals(3.januar, tilfelle.fom)
+            assertEquals(4.januar, tilfelle.tom)
+        }
+        førsteSykefraværstilfelle.perioder[1].also { tilfelle ->
+            assertEquals(a2 { 1.vedtaksperiode }, tilfelle.id)
+            assertEquals(a2, tilfelle.organisasjonsnummer)
+            assertEquals(5.januar, tilfelle.fom)
+            assertEquals(10.januar, tilfelle.tom)
+        }
+
+        val andreSykefraværstilfelle = sisteEventyr[1]
+        assertEquals(11.januar, andreSykefraværstilfelle.dato)
+        assertEquals(1, andreSykefraværstilfelle.perioder.size)
+        andreSykefraværstilfelle.perioder[0].also { tilfelle ->
+            assertEquals(a1 { 2.vedtaksperiode }, tilfelle.id)
+            assertEquals(a1, tilfelle.organisasjonsnummer)
+            assertEquals(11.januar, tilfelle.fom)
+            assertEquals(15.januar, tilfelle.tom)
+        }
+    }
+
+    @Test
     fun `ett sykefraværstilfelle fordelt på to ag`() {
         a1 {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 4.januar, 100.prosent))

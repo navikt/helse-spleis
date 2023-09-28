@@ -18,7 +18,7 @@ internal class SykefraværstilfelleeventyrTest {
         )
 
         val vedtaksperiode1 = UUID.randomUUID()
-        val result = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar).inspektør
+        val result = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 2.januar til 3.januar).inspektør
 
         assertEquals(2, result.event.size)
         result.event[0].also { sykefraværstilfelle ->
@@ -39,7 +39,7 @@ internal class SykefraværstilfelleeventyrTest {
         )
 
         val vedtaksperiode1 = UUID.randomUUID()
-        val result = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar).inspektør
+        val result = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 2.januar til 3.januar).inspektør
 
         assertEquals(2, result.event.size)
         result.event[0].also { sykefraværstilfelle ->
@@ -53,6 +53,28 @@ internal class SykefraværstilfelleeventyrTest {
     }
 
     @Test
+    fun `vedtaksperioder uten sykdomsperiode blir nytt skjæringstidspunkt`() {
+        val input = listOf(
+            Sykefraværstilfelleeventyr(1.januar)
+        )
+
+        val vedtaksperiode1 = UUID.randomUUID()
+        val vedtaksperiode2 = UUID.randomUUID()
+        val result1 = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 2.januar til 3.januar)
+        val result = result1.bliMed(vedtaksperiode2, "a1", 4.januar til 5.januar, null).inspektør
+
+        assertEquals(2, result.event.size)
+        result.event[0].also { sykefraværstilfelle ->
+            assertEquals(1.januar, sykefraværstilfelle.dato)
+            assertEquals(vedtaksperiode1, sykefraværstilfelle.perioder.single().id)
+        }
+        result.event[1].also { sykefraværstilfelle ->
+            assertEquals(4.januar, sykefraværstilfelle.dato)
+            assertEquals(vedtaksperiode2, sykefraværstilfelle.perioder.single().id)
+        }
+    }
+
+    @Test
     fun `vedtaksperioder blir med i sykefraværstilfelle`() {
         val input = listOf(
             Sykefraværstilfelleeventyr(1.februar),
@@ -62,9 +84,9 @@ internal class SykefraværstilfelleeventyrTest {
         val vedtaksperiode1 = UUID.randomUUID()
         val vedtaksperiode2 = UUID.randomUUID()
         val vedtaksperiode3 = UUID.randomUUID()
-        val result1 = input.bliMed(vedtaksperiode1, "a1", 2.januar til 5.januar)
-        val result2 = result1.bliMed(vedtaksperiode2, "a2", 2.januar til 5.januar)
-        val result3 = result2.bliMed(vedtaksperiode3, "a3", 1.februar til 15.februar)
+        val result1 = input.bliMed(vedtaksperiode1, "a1", 2.januar til 5.januar, 2.januar til 5.januar)
+        val result2 = result1.bliMed(vedtaksperiode2, "a2", 2.januar til 5.januar, 2.januar til 5.januar)
+        val result3 = result2.bliMed(vedtaksperiode3, "a3", 1.februar til 15.februar, 1.februar til 15.februar)
 
         val inspektør = result3.inspektør
 

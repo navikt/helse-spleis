@@ -1118,7 +1118,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun sykefraværsfortelling(list: List<Sykefraværstilfelleeventyr>) =
-        list.bliMed(this.id, this.organisasjonsnummer, this.periode)
+        list.bliMed(this.id, this.organisasjonsnummer, this.periode, this.sykdomstidslinje.sykdomsperiode())
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
@@ -1877,7 +1877,7 @@ internal class Vedtaksperiode private constructor(
             håndterFørstegangsbehandling(ytelser, vedtaksperiode) {
                 validation(ytelser) {
                     onValidationFailed { vedtaksperiode.forkast(ytelser) }
-                    onSuccess { vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode) }
+                    onSuccess { vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.skjæringstidspunkt }
                     valider { vedtaksperiode.kalkulerUtbetalinger(this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
                     onSuccess { vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning) }
                 }
@@ -2387,7 +2387,7 @@ internal class Vedtaksperiode private constructor(
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode)
+            vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.skjæringstidspunkt
             vedtaksperiode.låsOpp()
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
