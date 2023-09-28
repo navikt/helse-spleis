@@ -23,12 +23,19 @@ internal class Sykefraværstilfelleeventyr(private val dato: LocalDate, private 
 
     internal companion object {
         fun List<Sykefraværstilfelleeventyr>.bliMed(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode): List<Sykefraværstilfelleeventyr> = with(sortedBy { it.dato }) {
-            val riktig = this.indexOfLast { eventyr -> eventyr.dato <= periode.endInclusive }
-            if (riktig == -1) return@with listOf(Sykefraværstilfelleeventyr(periode.start, listOf(Triple(vedtaksperiodeId, organisasjonsnummer, periode)))) + this
-            val snute = this.take(riktig)
-            val hale = this.drop(riktig + 1)
-            return snute + this[riktig].bliMed(vedtaksperiodeId, organisasjonsnummer, periode) + hale
+            val riktig = finnSisteSykefraværstilfelleFørSykdomsperioden(periode)
+            if (riktig == -1) return@with lagNyttSykefraværstilfelleForPeriode(vedtaksperiodeId, organisasjonsnummer, periode)
+            return oppdaterSykefraværstilfelle(riktig, vedtaksperiodeId, organisasjonsnummer, periode)
         }
+        private fun List<Sykefraværstilfelleeventyr>.finnSisteSykefraværstilfelleFørSykdomsperioden(periode: Periode) =
+            this.indexOfLast { eventyr -> eventyr.dato <= periode.endInclusive }
+        private fun List<Sykefraværstilfelleeventyr>.oppdaterSykefraværstilfelle(indeks: Int, vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode): List<Sykefraværstilfelleeventyr> {
+            val snute = this.take(indeks)
+            val hale = this.drop(indeks + 1)
+            return snute + this[indeks].bliMed(vedtaksperiodeId, organisasjonsnummer, periode) + hale
+        }
+        private fun List<Sykefraværstilfelleeventyr>.lagNyttSykefraværstilfelleForPeriode(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode) =
+            listOf(Sykefraværstilfelleeventyr(periode.start, listOf(Triple(vedtaksperiodeId, organisasjonsnummer, periode)))) + this
 
         internal fun List<Sykefraværstilfelleeventyr>.varsleObservers(observers: List<SykefraværstilfelleeventyrObserver>) {
             val event = sortedBy { it.dato }.map { it.tilObserverEvent() }
