@@ -177,7 +177,6 @@ private fun SchemaBuilder.tidslinjeperiodeTypes() {
     type<GraphQLPeriodevilkar>()
     type<GraphQLPeriodevilkar.Sykepengedager>()
     type<GraphQLPeriodevilkar.Alder>()
-    type<GraphQLPeriodevilkar.Soknadsfrist>()
     type<GraphQLBeregnetPeriode>()
 }
 

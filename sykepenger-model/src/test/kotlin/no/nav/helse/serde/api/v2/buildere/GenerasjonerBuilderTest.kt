@@ -1100,20 +1100,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `får riktig søknadsfrist-vilkår per periode`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-
-        generasjoner {
-            0.generasjon {
-                assertEquals(2, perioder.size)
-                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
-            }
-        }
-    }
-
-    @Test
     fun `får riktig vilkår per periode ved revurdering av siste periode`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
@@ -1127,17 +1113,11 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(1).assertAldersvilkår(true, 25)
                 beregnetPeriode(0).assertSykepengedagerVilkår(29, 219, 1.januar(2019), 1.januar, true)
                 beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
-                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
             }
             1.generasjon {
                 assertEquals(2, perioder.size)
-                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
                 beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
                 beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
-                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
             }
         }
     }
@@ -1157,15 +1137,10 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
                 // gjenstående dager, forbrukte dager og maksdato. Kan muligens skrives om i modellen slik at disse tallene kan fiskes ut fra utbetalingen gitt en
                 // periode
                 beregnetPeriode(1).assertSykepengedagerVilkår(9, 239, 1.januar(2019), 1.januar, true)
-                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
             }
             1.generasjon {
-                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
                 beregnetPeriode(0).assertSykepengedagerVilkår(31, 217, 28.desember, 1.januar, true)
                 beregnetPeriode(1).assertSykepengedagerVilkår(11, 237, 28.desember, 1.januar, true)
-                beregnetPeriode(0).assertSøknadsfristVilkår(1.februar, 28.februar, 28.februar.atStartOfDay(), true)
-                beregnetPeriode(1).assertSøknadsfristVilkår(1.januar, 31.januar, 31.januar.atStartOfDay(), true)
             }
         }
     }
@@ -2349,18 +2324,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(expectedMaksdato, periodevilkår.sykepengedager.maksdato)
         assertEquals(expectedSkjæringstidspunkt, periodevilkår.sykepengedager.skjæringstidspunkt)
         assertEquals(expectedOppfylt, periodevilkår.sykepengedager.oppfylt)
-    }
-
-    private fun BeregnetPeriode.assertSøknadsfristVilkår(
-        expectedSøknadFom: LocalDate,
-        expectedSøknadTom: LocalDate,
-        expectedSendtNav: LocalDateTime,
-        expectedOppfylt: Boolean
-    ) {
-        assertEquals(expectedSøknadFom, periodevilkår.søknadsfrist?.søknadFom)
-        assertEquals(expectedSøknadTom, periodevilkår.søknadsfrist?.søknadTom)
-        assertEquals(expectedSendtNav, periodevilkår.søknadsfrist?.sendtNav)
-        assertEquals(expectedOppfylt, periodevilkår.søknadsfrist?.oppfylt)
     }
 
     private class Arbeidsgivergenerasjoner(

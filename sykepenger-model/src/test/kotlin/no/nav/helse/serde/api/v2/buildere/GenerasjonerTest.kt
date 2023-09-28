@@ -322,8 +322,7 @@ internal class GenerasjonerTest {
         hendelser = emptyList(),
         periodevilkår = BeregnetPeriode.Vilkår(
             BeregnetPeriode.Sykepengedager(periode.start, 28.desember, 0, 0, true),
-            BeregnetPeriode.Alder(30, true),
-            BeregnetPeriode.Søknadsfrist(LocalDateTime.now(), periode.start, periode.endInclusive, true)
+            BeregnetPeriode.Alder(30, true)
         ),
         vilkårsgrunnlagId = vilkårsgrunnlagId,
         forrigeGenerasjon = forrigeGenerasjon
@@ -336,8 +335,7 @@ internal class GenerasjonerTest {
         opprettet = LocalDateTime.now(),
         vilkår = BeregnetPeriode.Vilkår(
             BeregnetPeriode.Sykepengedager(periode.start, 28.desember, null, null, true),
-            BeregnetPeriode.Alder(30, true),
-            null
+            BeregnetPeriode.Alder(30, true)
         ),
         beregnet = LocalDateTime.now(),
         oppdatert = LocalDateTime.now(),

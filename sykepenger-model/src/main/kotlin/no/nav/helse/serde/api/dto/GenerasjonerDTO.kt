@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.serde.api.dto.HendelseDTO.Companion.søknadsfristOppfylt
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.TilSkjønnsfastsettelse
@@ -317,8 +316,7 @@ data class BeregnetPeriode(
             // feltet gir ikke mening for annullert periode:
             vilkår = Vilkår(
                 sykepengedager = Sykepengedager(fom, LocalDate.MAX, null, null, false),
-                alder = this.periodevilkår.alder,
-                søknadsfrist = null
+                alder = this.periodevilkår.alder
             ),
             beregnet = annulleringen.annulleringstidspunkt,
             oppdatert = oppdatert,
@@ -356,8 +354,7 @@ data class BeregnetPeriode(
 
     data class Vilkår(
         val sykepengedager: Sykepengedager,
-        val alder: Alder,
-        val søknadsfrist: Søknadsfrist?
+        val alder: Alder
     )
 
     data class Sykepengedager(
@@ -370,13 +367,6 @@ data class BeregnetPeriode(
 
     data class Alder(
         val alderSisteSykedag: Int,
-        val oppfylt: Boolean
-    )
-
-    data class Søknadsfrist(
-        val sendtNav: LocalDateTime,
-        val søknadFom: LocalDate,
-        val søknadTom: LocalDate,
         val oppfylt: Boolean
     )
 
@@ -493,8 +483,7 @@ data class BeregnetPeriode(
             val alderSisteSykepengedag = alder.let {
                 Alder(it.alderPåDato(sisteSykepengedag), it.innenfor70årsgrense(sisteSykepengedag))
             }
-            val søknadsfrist = hendelser.søknadsfristOppfylt()
-            return Vilkår(sykepengedager, alderSisteSykepengedag, søknadsfrist)
+            return Vilkår(sykepengedager, alderSisteSykepengedag)
         }
 
         internal fun medUtbetaling(

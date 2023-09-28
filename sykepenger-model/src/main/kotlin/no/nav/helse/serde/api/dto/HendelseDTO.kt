@@ -80,22 +80,5 @@ data class HendelseDTO(
             mottattDato = mottattDato,
             beregnetInntekt = beregnetInntekt
         )
-
-        internal fun List<HendelseDTO>.søknadsfristOppfylt(): BeregnetPeriode.Søknadsfrist? {
-            val søknad = firstOrNull { it.type == HendelsetypeDto.SENDT_SØKNAD_NAV } ?: return null
-            val sendtNav = søknad.sendtNav ?: return null
-            val fom = søknad.fom ?: return null
-            val tom = søknad.tom ?: return null
-            val søknadSendtMåned = sendtNav.toLocalDate()?.withDayOfMonth(1) ?: return null
-            val senesteMuligeSykedag = fom.plusMonths(3) ?: return null
-            val kravOppfylt = søknadSendtMåned < senesteMuligeSykedag.plusDays(1)
-
-            return BeregnetPeriode.Søknadsfrist(
-                sendtNav = sendtNav,
-                søknadFom = fom,
-                søknadTom = tom,
-                oppfylt = kravOppfylt
-            )
-        }
     }
 }

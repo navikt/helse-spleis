@@ -253,14 +253,6 @@ private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLPeriode
             alderSisteSykedag = it.alderSisteSykedag,
             oppfylt = it.oppfylt
         )
-    },
-    soknadsfrist = vilkår.søknadsfrist?.let {
-        GraphQLPeriodevilkar.Soknadsfrist(
-            sendtNav = it.sendtNav,
-            soknadFom = it.søknadFom,
-            soknadTom = it.søknadTom,
-            oppfylt = it.oppfylt
-        )
     }
 )
 
