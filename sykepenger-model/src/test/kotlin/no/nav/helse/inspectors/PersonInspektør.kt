@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
@@ -24,10 +23,10 @@ internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
 
 internal fun Person.søppelbøtte(hendelse: IAktivitetslogg, periode: Periode) =
-    søppelbøtte(Arbeidsgiver(this, "orgnummer", MaskinellJurist()), hendelse) { it.periode().start >= periode.start }
+    søppelbøtte(hendelse) { it.periode().start >= periode.start }
 
 internal fun Person.søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) =
-    søppelbøtte(Arbeidsgiver(this, "orgnummer", MaskinellJurist()), hendelse, filter)
+    søppelbøtte(hendelse, filter)
 
 internal class PersonInspektør(person: Person): PersonVisitor {
     internal val arbeidsgiverteller get() = arbeidsgivere.size

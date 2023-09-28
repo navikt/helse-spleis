@@ -58,9 +58,9 @@ class Revurderingseventyr private constructor(
         return true
     }
 
-    internal fun ikkeRelevant(skjæringstidspunkt: LocalDate): Boolean {
+    internal fun ikkeRelevant(skjæringstidspunkt: LocalDate, periode: Periode): Boolean {
         // om endringen gjelder et nyere skjæringstidspunkt så trenger vi ikke bryr oss
-        return this.skjæringstidspunkt > skjæringstidspunkt
+        return this.skjæringstidspunkt > skjæringstidspunkt || periodeForEndring.starterEtter(periode)
     }
 
     internal fun sendOverstyringIgangsattEvent(person: Person) {

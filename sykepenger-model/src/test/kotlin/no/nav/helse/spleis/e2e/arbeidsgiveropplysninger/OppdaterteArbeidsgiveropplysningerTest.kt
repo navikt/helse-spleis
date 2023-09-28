@@ -1,17 +1,30 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
+import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -131,7 +144,57 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Overlappende søknad med arbeid gjenopptatt slik at skjæringstidspunkt ikke flyttes hos annen arbeidsgiver skal ikke føre til oppdatert forespørsel`() {
+    fun `oppdaterte opplysninger for mars når ag2 tetter gapet`() {
+        nyPeriode(1.januar til 31.januar, a1)
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
+                a1 to INNTEKT,
+                a2 to INNTEKT
+            ), 1.januar),
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
+                a1 to INNTEKT,
+                a2 to INNTEKT
+            ), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        nyPeriode(1.mars til 31.mars, orgnummer = a1)
+        nyPeriode(1.februar til 28.februar, orgnummer = a2)
+        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
+        val arbeidsgiveropplysningerEventer = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter {
+            it.vedtaksperiodeId == 2.vedtaksperiode.id(a1)
+        }
+        assertEquals(2, arbeidsgiveropplysningerEventer.size)
+        arbeidsgiveropplysningerEventer.last().also { trengerArbeidsgiveropplysningerEvent ->
+            val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                organisasjonsnummer = a1,
+                vedtaksperiodeId = 2.vedtaksperiode.id(a1),
+                skjæringstidspunkt = 1.januar,
+                sykmeldingsperioder = listOf(1.mars til 31.mars),
+                egenmeldingsperioder = emptyList(),
+                forespurteOpplysninger = listOf(
+                    PersonObserver.FastsattInntekt(INNTEKT),
+                    PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT))),
+                    PersonObserver.Arbeidsgiverperiode
+                )
+            )
+            assertEquals(expectedForespørsel, trengerArbeidsgiveropplysningerEvent)
+        }
+    }
+
+    @Test
+    fun `Overlappende søknad fører til oppdatert forespørsel`() {
         nyPeriode(20.januar til 20.februar, orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Arbeid(18.januar, 31.januar), orgnummer = a2)
@@ -139,7 +202,6 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         assertEquals(20.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
-
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
     }
 }

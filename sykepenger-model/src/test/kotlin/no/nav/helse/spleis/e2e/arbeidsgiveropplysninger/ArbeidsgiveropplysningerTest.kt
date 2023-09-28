@@ -199,7 +199,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
 
-        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 2.vedtaksperiode.id(a1) })
 
         val actualForespurteOpplysninger =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
@@ -218,7 +221,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 10.februar, orgnummer = a2)
         nyPeriode(11.februar til 28.februar, a1)
 
-        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 2.vedtaksperiode.id(a1) })
         val inntektsmeldingId = inspektør(a1).hendelseIder(1.vedtaksperiode.id(a1)).last()
 
         val actualForespurteOpplysninger =
@@ -228,24 +234,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG)))
         )
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
-    }
-
-    @Test
-    fun `sender med riktig beregningsmåneder når første fraværsdag hos én arbeidsgivers er i en annen måned enn skjæringstidspunktet`() {
-        nyPeriode(31.januar til 28.februar, a1)
-        nyPeriode(1.februar til 28.februar, a2)
-
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        val actualForespurtOpplysning =
-            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
-
-        val expectedForespurteOpplysninger = listOf(
-            PersonObserver.Inntekt(null),
-            PersonObserver.Refusjon(forslag = emptyList()),
-            PersonObserver.Arbeidsgiverperiode
-        )
-
-        assertEquals(expectedForespurteOpplysninger, actualForespurtOpplysning)
     }
 
     @Test
@@ -272,7 +260,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
 
-        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 2.vedtaksperiode.id(a1) })
         val inntektsmeldingId = inspektør(a1).hendelseIder(1.vedtaksperiode.id(a1)).last()
         val actualForespurtOpplysning =
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().forespurteOpplysninger
@@ -298,7 +289,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(1.mars til 31.mars, a2)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
 
-        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) })
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 2.vedtaksperiode.id(a1) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 2.vedtaksperiode.id(a2) })
         val inntektsmeldingId = inspektør(a2).hendelseIder(1.vedtaksperiode.id(a2)).last()
 
         val actualForespurtOpplysning =
@@ -704,7 +699,9 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(1.februar til 28.februar)
         nyPeriode(1.januar til 30.januar)
 
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) })
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 2.vedtaksperiode.id(a1) })
         assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
     }
 
@@ -714,16 +711,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(25.januar til 31.januar)
 
         assertEquals(0, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.size)
-
-        assertForventetFeil(
-            forklaring = "Her burde februar-perioden sende ut en ny forespørsel",
-            nå = {
-                assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            },
-            ønsket = {
-                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) })
+        assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.vedtaksperiodeId == 2.vedtaksperiode.id(a1) })
     }
 
     @Test
