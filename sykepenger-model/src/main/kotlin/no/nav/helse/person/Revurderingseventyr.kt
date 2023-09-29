@@ -44,18 +44,15 @@ class Revurderingseventyr private constructor(
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
 
-    internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode): Boolean {
-        return inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING, periode)
-    }
+    internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode) =
+        inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING, periode)
 
     internal fun inngåSomEndring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode) =
         inngå(hendelse, vedtaksperiode, TypeEndring.ENDRING, periode)
 
-    private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring, periode: Periode) : Boolean {
-        if (periodeForEndring.starterEtter(periode)) return false
+    private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring, periode: Periode) {
         hvorfor.dersomInngått(hendelse, vedtaksperioder.isEmpty())
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
-        return true
     }
 
     internal fun ikkeRelevant(skjæringstidspunkt: LocalDate, periode: Periode): Boolean {
