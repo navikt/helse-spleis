@@ -80,7 +80,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal fun forventerOpplysninger(periode: Periode): Boolean {
         if (dekkesAvArbeidsgiver(periode)) return false // trenger ikke opplysninger om perioden er innenfor agp
         val utbetalingsperiode = utbetalingsperiodeForPeriode(periode) ?: return false
-        val utbetalingsperiodeFør = forrigeUtbetalingsperiode(periode) ?: return true
+        val utbetalingsperiodeFør = forrigeUtbetalingsperiode(utbetalingsperiode) ?: return true
         return erOppholdMellom(utbetalingsperiodeFør, utbetalingsperiode)
     }
 

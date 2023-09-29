@@ -6,12 +6,14 @@ import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
@@ -61,6 +63,8 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
+import no.nav.helse.til
+import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -79,6 +83,38 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `sender ut event TrengerArbeidsgiveropplysninger når vi ankommer AvventerInntektsmelding`() {
         nyPeriode(1.januar til 31.januar)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
+    fun `ber ikke om arbeidsgiveropplysninger på forlengelse med forskjøvet agp`() {
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 11.januar))
+        håndterSøknad(Sykdom(16.januar, 29.januar, 100.prosent), Ferie(16.januar, 16.januar))
+        håndterSøknad(Sykdom(30.januar, 8.februar, 100.prosent))
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
+    }
+
+    @Test
+    fun `auu håndterer dager før forlengelsen håndterer inntekt`() {
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 11.januar))
+        håndterSøknad(Sykdom(16.januar, 29.januar, 100.prosent), Ferie(16.januar, 16.januar))
+        håndterInntektsmelding(listOf(12.januar til 27.januar))
+        assertForventetFeil(
+            forklaring = "forlengelsen reagerer på 'overstyring igangsatt' og sender oppdatert forespørsel til HÆGG. " +
+                    "Dette vil ofte medføre at vi sørger for at vi håndterer evt. forskyvninger av skjæringstidspunkter, out-of-order, og tilfeller hvor " +
+                    "ting revurderes/overstyres på tidligere perioder som gir utslag på senere perioder." +
+                    "I akkurat dette tilfellet så vil vi ved håndtering av IM først sende ut oppdatert forespørsel, før vi kvitterer inntektsmelding rett etterpå." +
+                    "Rekkefølgen er forsåvidt riktig, men fordi meldingene sendes så tett opptil hverandre så skaper det foreløpig litt jobb for HÆGG." +
+                    "Utfallet av hvordan HÆGG kan løse problemet hos seg vil avgjøre litt hva forventetOppførsel skal være i testen også",
+            nå = {
+                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.distinctBy { it.vedtaksperiodeId }.single().vedtaksperiodeId)
+            },
+            ønsket = {
+                assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
+            }
+        )
     }
 
     @Test

@@ -128,6 +128,7 @@ internal class ArbeidsgiverperiodeTest {
             assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
             assertFalse(agp.forventerOpplysninger(22.januar til 23.januar))
             assertFalse(agp.forventerOpplysninger(lørdag den 20.januar til (mandag den 22.januar)))
+            assertFalse(agp.forventerOpplysninger(fredag den 19.januar til (mandag den 22.januar)))
         }
     }
 
