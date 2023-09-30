@@ -1,11 +1,11 @@
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 
 plugins {
-    id("com.bmuschko.docker-remote-api") version "9.3.1"
+    id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
-val micrometerRegistryPrometheusVersion = "1.10.4"
-val ktorVersion = "2.3.0"
+val micrometerRegistryPrometheusVersion = "1.11.4"
+val ktorVersion = "2.3.4"
 val wireMockVersion = "2.35.0"
 val awaitilityVersion = "4.2.0"
 val mockVersion = "1.13.4"
@@ -55,24 +55,26 @@ dependencies {
     testImplementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
 }
 
-tasks.named<Jar>("jar") {
-    archiveBaseName.set("app")
+tasks {
+    withType<Jar> {
+        archiveBaseName.set("app")
 
-    manifest {
-        attributes["Main-Class"] = mainClass
-        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-            it.name
+        manifest {
+            attributes["Main-Class"] = mainClass
+            /*attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
+                it.name
+            }*/
         }
-    }
 
-    doLast {
-        configurations.runtimeClasspath.get().forEach {
-            val file = File("$buildDir/libs/${it.name}")
-            if (!file.exists())
-                it.copyTo(file)
+        doLast {
+            configurations.runtimeClasspath.get().forEach {
+                val file = File("$buildDir/libs/${it.name}")
+                if (!file.exists())
+                    it.copyTo(file)
+            }
         }
+        finalizedBy(":sykepenger-api:remove_spleis_api_db_container")
     }
-    finalizedBy(":sykepenger-api:remove_spleis_api_db_container")
 }
 
 tasks.create("remove_spleis_api_db_container", DockerRemoveContainer::class) {

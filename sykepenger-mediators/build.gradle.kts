@@ -1,7 +1,7 @@
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 
 plugins {
-    id("com.bmuschko.docker-remote-api") version "9.3.1"
+    id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
 val mainClass = "no.nav.helse.AppKt"

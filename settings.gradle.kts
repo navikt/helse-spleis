@@ -4,16 +4,16 @@ include("jobs", "sykepenger-api", "sykepenger-model", "sykepenger-mediators", "s
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("testcontainers", "1.17.4")
-            version("rapids-and-rivers", "2023050308441683096263.f5a276d7bd28")
-            version("postgres", "42.5.0")
+            version("testcontainers", "1.19.0")
+            version("rapids-and-rivers", "2023093008351696055717.ffdec6aede3d")
+            version("postgres", "42.6.0")
             version("hikari", "5.0.1")
             version("kotliquery", "1.9.0")
             version("cloudsql", "1.7.2")
             version("flyway", "9.7.0")
-            version("logback", "1.4.7")
-            version("logstash", "7.3")
-            version("jackson", "2.15.0")
+            version("logback", "1.4.11")
+            version("logstash", "7.4")
+            version("jackson", "2.15.2")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
 
