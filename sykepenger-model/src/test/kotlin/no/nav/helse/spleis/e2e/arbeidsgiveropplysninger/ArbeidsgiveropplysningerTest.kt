@@ -99,22 +99,8 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 11.januar))
         håndterSøknad(Sykdom(16.januar, 29.januar, 100.prosent), Ferie(16.januar, 16.januar))
         håndterInntektsmelding(listOf(12.januar til 27.januar))
-        assertForventetFeil(
-            forklaring = "forlengelsen reagerer på 'overstyring igangsatt' og sender oppdatert forespørsel til HÆGG. " +
-                    "Dette vil ofte medføre at vi sørger for at vi håndterer evt. forskyvninger av skjæringstidspunkter, out-of-order, og tilfeller hvor " +
-                    "ting revurderes/overstyres på tidligere perioder som gir utslag på senere perioder." +
-                    "I akkurat dette tilfellet så vil vi ved håndtering av IM først sende ut oppdatert forespørsel, før vi kvitterer inntektsmelding rett etterpå." +
-                    "Rekkefølgen er forsåvidt riktig, men fordi meldingene sendes så tett opptil hverandre så skaper det foreløpig litt jobb for HÆGG." +
-                    "Utfallet av hvordan HÆGG kan løse problemet hos seg vil avgjøre litt hva forventetOppførsel skal være i testen også",
-            nå = {
-                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.distinctBy { it.vedtaksperiodeId }.single().vedtaksperiodeId)
-            },
-            ønsket = {
-                assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
-            }
-        )
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single().vedtaksperiodeId)
     }
 
     @Test

@@ -1568,7 +1568,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            vedtaksperiode.trengerArbeidsgiveropplysninger()
+            revurdering.hvisIkkeArbeidsgiverperiode { vedtaksperiode.trengerArbeidsgiveropplysninger() }
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
