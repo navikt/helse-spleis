@@ -61,9 +61,9 @@ tasks {
 
         manifest {
             attributes["Main-Class"] = mainClass
-            /*attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
+            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
                 it.name
-            }*/
+            }
         }
 
         doLast {
