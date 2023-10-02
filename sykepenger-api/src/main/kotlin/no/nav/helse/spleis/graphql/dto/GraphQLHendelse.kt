@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.graphql.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.LocalDateTime
