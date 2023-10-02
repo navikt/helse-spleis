@@ -115,17 +115,27 @@ class Refusjonsopplysning(
         }
 
         internal fun lagreTidsnær(førsteFraværsdag: LocalDate, refusjonshistorikk: Refusjonshistorikk) {
-            if (validerteRefusjonsopplysninger.isEmpty()) return
-            val første = validerteRefusjonsopplysninger.first()
-            val sisteRefusjonsdag = validerteRefusjonsopplysninger.last().tom
-            val endringerIRefusjon = validerteRefusjonsopplysninger.map { refusjonsopplysning ->
+            val relevanteRefusjonsopplysninger = validerteRefusjonsopplysninger.filter {
+                (it.tom ?: LocalDate.MAX) >= førsteFraværsdag
+            }
+            if (relevanteRefusjonsopplysninger.isEmpty()) return
+            val første = relevanteRefusjonsopplysninger.first()
+            val sisteRefusjonsdag = relevanteRefusjonsopplysninger.last().tom
+            val endringerIRefusjon = relevanteRefusjonsopplysninger.map { refusjonsopplysning ->
                 Refusjonshistorikk.Refusjon.EndringIRefusjon(
                     endringsdato = refusjonsopplysning.fom,
                     beløp = refusjonsopplysning.beløp
                 )
             }
 
-            val refusjon = Refusjonshistorikk.Refusjon(første.meldingsreferanseId, førsteFraværsdag, emptyList(), første.beløp, sisteRefusjonsdag, endringerIRefusjon)
+            val refusjon = Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = første.meldingsreferanseId,
+                førsteFraværsdag = førsteFraværsdag,
+                arbeidsgiverperioder = emptyList(),
+                beløp = første.beløp,
+                sisteRefusjonsdag = sisteRefusjonsdag,
+                endringerIRefusjon = endringerIRefusjon
+            )
             refusjonshistorikk.leggTilRefusjon(refusjon)
         }
 
