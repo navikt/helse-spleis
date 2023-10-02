@@ -262,3 +262,6 @@ spec:
         - team: tbd
           application: spoogle-opprydding-dev
           access: readwrite
+        - team: tbd
+          application: sparkel-dokumenter
+          access: readwrite

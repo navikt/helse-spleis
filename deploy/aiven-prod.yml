@@ -232,4 +232,7 @@ spec:
         - team: tbd
           application: spoogle
           access: readwrite
+        - team: tbd
+          application: sparkel-dokumenter
+          access: readwrite
 
