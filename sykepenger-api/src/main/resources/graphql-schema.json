@@ -725,30 +725,6 @@
           },
           "isDeprecated" : false,
           "deprecationReason" : null
-        }, {
-          "name" : "arbeidsgiver",
-          "description" : null,
-          "args" : [ {
-            "name" : "organisasjonsnummer",
-            "description" : null,
-            "type" : {
-              "kind" : "NON_NULL",
-              "name" : null,
-              "ofType" : {
-                "kind" : "SCALAR",
-                "name" : "String",
-                "ofType" : null
-              }
-            },
-            "defaultValue" : null
-          } ],
-          "type" : {
-            "kind" : "OBJECT",
-            "name" : "GraphQLArbeidsgiver",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
         } ],
         "inputFields" : null,
         "interfaces" : [ ],
@@ -834,82 +810,6 @@
           },
           "isDeprecated" : false,
           "deprecationReason" : null
-        }, {
-          "name" : "generasjonerSlice",
-          "description" : null,
-          "args" : [ {
-            "name" : "first",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Int",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "from",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Int",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          } ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "LIST",
-              "name" : null,
-              "ofType" : {
-                "kind" : "NON_NULL",
-                "name" : null,
-                "ofType" : {
-                  "kind" : "OBJECT",
-                  "name" : "GraphQLGenerasjon",
-                  "ofType" : null
-                }
-              }
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "generasjon",
-          "description" : null,
-          "args" : [ {
-            "name" : "index",
-            "description" : null,
-            "type" : {
-              "kind" : "NON_NULL",
-              "name" : null,
-              "ofType" : {
-                "kind" : "SCALAR",
-                "name" : "Int",
-                "ofType" : null
-              }
-            },
-            "defaultValue" : null
-          } ],
-          "type" : {
-            "kind" : "OBJECT",
-            "name" : "GraphQLGenerasjon",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "sisteGenerasjon",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "OBJECT",
-            "name" : "GraphQLGenerasjon",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
         } ],
         "inputFields" : null,
         "interfaces" : [ ],
@@ -954,82 +854,6 @@
                 }
               }
             }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "perioderSlice",
-          "description" : null,
-          "args" : [ {
-            "name" : "first",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Int",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          }, {
-            "name" : "from",
-            "description" : null,
-            "type" : {
-              "kind" : "SCALAR",
-              "name" : "Int",
-              "ofType" : null
-            },
-            "defaultValue" : null
-          } ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "LIST",
-              "name" : null,
-              "ofType" : {
-                "kind" : "NON_NULL",
-                "name" : null,
-                "ofType" : {
-                  "kind" : "INTERFACE",
-                  "name" : "GraphQLTidslinjeperiode",
-                  "ofType" : null
-                }
-              }
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "periode",
-          "description" : null,
-          "args" : [ {
-            "name" : "index",
-            "description" : null,
-            "type" : {
-              "kind" : "NON_NULL",
-              "name" : null,
-              "ofType" : {
-                "kind" : "SCALAR",
-                "name" : "Int",
-                "ofType" : null
-              }
-            },
-            "defaultValue" : null
-          } ],
-          "type" : {
-            "kind" : "INTERFACE",
-            "name" : "GraphQLTidslinjeperiode",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "sistePeriode",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "INTERFACE",
-            "name" : "GraphQLTidslinjeperiode",
-            "ofType" : null
           },
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -1086,7 +910,7 @@
                 "kind" : "NON_NULL",
                 "name" : null,
                 "ofType" : {
-                  "kind" : "OBJECT",
+                  "kind" : "INTERFACE",
                   "name" : "GraphQLHendelse",
                   "ofType" : null
                 }
@@ -1256,21 +1080,10 @@
           "ofType" : null
         } ]
       }, {
-        "kind" : "OBJECT",
+        "kind" : "INTERFACE",
         "name" : "GraphQLHendelse",
         "description" : "",
         "fields" : [ {
-          "name" : "beregnetInntekt",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "Float",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "eksternDokumentId",
           "description" : null,
           "args" : [ ],
@@ -1282,17 +1095,6 @@
               "name" : "String",
               "ofType" : null
             }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "fom",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "LocalDate",
-            "ofType" : null
           },
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -1312,61 +1114,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "mottattDato",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "LocalDateTime",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "rapportertDato",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "LocalDateTime",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "sendtArbeidsgiver",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "LocalDateTime",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "sendtNav",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "LocalDateTime",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "tom",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "LocalDate",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "type",
           "description" : null,
           "args" : [ ],
@@ -1381,26 +1128,11 @@
           },
           "isDeprecated" : false,
           "deprecationReason" : null
-        }, {
-          "name" : "typename",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "String",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
         } ],
         "inputFields" : null,
-        "interfaces" : [ ],
+        "interfaces" : null,
         "enumValues" : null,
-        "possibleTypes" : null
+        "possibleTypes" : [ ]
       }, {
         "kind" : "OBJECT",
         "name" : "GraphQLDag",
@@ -3068,7 +2800,7 @@
                 "kind" : "NON_NULL",
                 "name" : null,
                 "ofType" : {
-                  "kind" : "OBJECT",
+                  "kind" : "INTERFACE",
                   "name" : "GraphQLHendelse",
                   "ofType" : null
                 }
@@ -3277,7 +3009,7 @@
                 "kind" : "NON_NULL",
                 "name" : null,
                 "ofType" : {
-                  "kind" : "OBJECT",
+                  "kind" : "INTERFACE",
                   "name" : "GraphQLHendelse",
                   "ofType" : null
                 }
@@ -3692,7 +3424,7 @@
                 "kind" : "NON_NULL",
                 "name" : null,
                 "ofType" : {
-                  "kind" : "OBJECT",
+                  "kind" : "INTERFACE",
                   "name" : "GraphQLHendelse",
                   "ofType" : null
                 }

@@ -29,11 +29,10 @@ import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse
 import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLDag
-import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
-import no.nav.helse.spleis.graphql.dto.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
+import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.dto.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLOppdrag
@@ -46,11 +45,14 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsutbetaling
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadNav
 import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkildetype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykepengegrunnlagsgrense
+import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetVilkarsprovdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
@@ -219,24 +221,39 @@ private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
     }
 )
 
-private fun mapHendelse(hendelse: HendelseDTO) = GraphQLHendelse(
-    id = hendelse.id,
-    eksternDokumentId = hendelse.eksternDokumentId,
-    type = when (hendelse.type) {
-        HendelsetypeDto.NY_SØKNAD -> GraphQLHendelsetype.NySoknad
-        HendelsetypeDto.SENDT_SØKNAD_NAV -> GraphQLHendelsetype.SendtSoknadNav
-        HendelsetypeDto.SENDT_SØKNAD_ARBEIDSGIVER -> GraphQLHendelsetype.SendtSoknadArbeidsgiver
-        HendelsetypeDto.INNTEKTSMELDING -> GraphQLHendelsetype.Inntektsmelding
-        else -> GraphQLHendelsetype.Ukjent
-    },
-    mottattDato = hendelse.mottattDato,
-    beregnetInntekt = hendelse.beregnetInntekt,
-    fom = hendelse.fom,
-    tom = hendelse.tom,
-    rapportertDato = hendelse.rapportertdato,
-    sendtNav = hendelse.sendtNav,
-    sendtArbeidsgiver = hendelse.sendtArbeidsgiver
-)
+private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse.type) {
+    HendelsetypeDto.NY_SØKNAD -> GraphQLSykmelding(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!
+    )
+    HendelsetypeDto.SENDT_SØKNAD_NAV -> GraphQLSoknadNav(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!,
+        sendtNav = hendelse.sendtNav!!
+    )
+    HendelsetypeDto.SENDT_SØKNAD_ARBEIDSGIVER -> GraphQLSoknadArbeidsgiver(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!,
+        sendtArbeidsgiver = hendelse.sendtArbeidsgiver!!
+    )
+
+    HendelsetypeDto.INNTEKTSMELDING -> GraphQLInntektsmelding(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        mottattDato = hendelse.mottattDato!!,
+        beregnetInntekt = hendelse.beregnetInntekt!!
+    )
+    else -> null
+}
 
 private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) = GraphQLPeriodevilkar(
     sykepengedager = vilkår.sykepengedager.let {
@@ -285,7 +302,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             skjaeringstidspunkt = periode.skjæringstidspunkt,
             maksdato = periode.maksdato,
             utbetaling = mapUtbetaling(periode.utbetaling),
-            hendelser = periode.hendelser.map { mapHendelse(it) },
+            hendelser = periode.hendelser.mapNotNull { mapHendelse(it) },
             periodevilkar = mapPeriodevilkår(periode.periodevilkår),
             periodetilstand = mapTilstand(periode.periodetilstand),
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
@@ -301,7 +318,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             vedtaksperiodeId = periode.vedtaksperiodeId,
             periodetilstand = mapTilstand(periode.periodetilstand),
             skjaeringstidspunkt = periode.skjæringstidspunkt,
-            hendelser = periode.hendelser.map { mapHendelse(it) },
+            hendelser = periode.hendelser.mapNotNull { mapHendelse(it) },
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
         )
         else -> GraphQLUberegnetPeriode(
@@ -315,7 +332,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             vedtaksperiodeId = periode.vedtaksperiodeId,
             periodetilstand = mapTilstand(periode.periodetilstand),
             skjaeringstidspunkt = periode.skjæringstidspunkt,
-            hendelser = periode.hendelser.map { mapHendelse(it) }
+            hendelser = periode.hendelser.mapNotNull { mapHendelse(it) }
         )
     }
 

@@ -24,10 +24,3 @@ data class GraphQLArbeidsgiver(
     val generasjoner: List<GraphQLGenerasjon>,
     val ghostPerioder: List<GraphQLGhostPeriode>
 )
-
-internal fun <T> List<T>.safeSlice(first: Int?, from: Int?): List<T> {
-    if (from != null && from >= size || first == 0) return emptyList()
-    val start = (from ?: 0)
-    val end = ((start + (first ?: size) - 1)).coerceAtLeast(0).coerceAtMost(size - 1)
-    return slice(start..end)
-}

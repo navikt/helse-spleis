@@ -44,7 +44,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
-import no.nav.helse.spleis.graphql.dto.safeSlice
 
 internal fun SchemaBuilder.personSchema(personResolver: (fnr: String) -> GraphQLPerson?) {
     query("person") {
@@ -81,41 +80,8 @@ internal fun SchemaBuilder.personSchema(personResolver: (fnr: String) -> GraphQL
 }
 
 private fun SchemaBuilder.arbeidsgiverTypes() {
-    type<GraphQLGenerasjon> {
-        property<List<GraphQLTidslinjeperiode>>("perioderSlice") {
-            resolver { generasjon: GraphQLGenerasjon, first: Int?, from: Int? ->
-                generasjon.perioder.safeSlice(first, from)
-            }
-        }
-        property<GraphQLTidslinjeperiode?>("periode") {
-            resolver { generasjon: GraphQLGenerasjon, index: Int ->
-                generasjon.perioder.getOrNull(index)
-            }
-        }
-        property<GraphQLTidslinjeperiode?>("sistePeriode") {
-            resolver { generasjon: GraphQLGenerasjon ->
-                generasjon.perioder.firstOrNull()
-            }
-        }
-    }
-
-    type<GraphQLArbeidsgiver> {
-        property<List<GraphQLGenerasjon>>("generasjonerSlice") {
-            resolver { arbeidsgiver: GraphQLArbeidsgiver, first: Int?, from: Int? ->
-                arbeidsgiver.generasjoner.safeSlice(first, from)
-            }
-        }
-        property<GraphQLGenerasjon?>("generasjon") {
-            resolver { arbeidsgiver: GraphQLArbeidsgiver, index: Int ->
-                arbeidsgiver.generasjoner.getOrNull(index)
-            }
-        }
-        property<GraphQLGenerasjon?>("sisteGenerasjon") {
-            resolver { arbeidsgiver: GraphQLArbeidsgiver ->
-                arbeidsgiver.generasjoner.firstOrNull()
-            }
-        }
-    }
+    type<GraphQLGenerasjon>()
+    type<GraphQLArbeidsgiver>()
 }
 
 private fun SchemaBuilder.hendelseTypes() {
@@ -132,13 +98,7 @@ private fun SchemaBuilder.inntektsgrunnlagTypes() {
 }
 
 private fun SchemaBuilder.personTypes() {
-    type<GraphQLPerson> {
-        property<GraphQLArbeidsgiver?>("arbeidsgiver") {
-            resolver { person: GraphQLPerson, organisasjonsnummer: String ->
-                person.arbeidsgivere.find { it.organisasjonsnummer == organisasjonsnummer }
-            }
-        }
-    }
+    type<GraphQLPerson>()
 }
 
 private fun SchemaBuilder.simuleringTypes() {
