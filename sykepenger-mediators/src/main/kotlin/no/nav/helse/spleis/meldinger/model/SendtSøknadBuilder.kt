@@ -19,6 +19,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private val merkander = mutableListOf<Merknad>()
     private var opprinneligSendt: LocalDateTime? = null
     private var harAndreInntektskilder: Boolean = false
+    private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
     private var utenlandskSykmelding: Boolean = false
     private var sendTilGosys: Boolean = false
 
@@ -29,6 +30,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         orgnummer = organisasjonsnummer,
         perioder = perioder,
         andreInntektskilder = harAndreInntektskilder,
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
         sendtTilNAVEllerArbeidsgiver = innsendt!!,
         permittert = permittert,
         merknaderFraSykmelding = merkander,
@@ -43,6 +45,10 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {
         harAndreInntektskilder = andreInntektskilder
+    }
+
+    internal fun ikkeJobbetIDetSisteFraAnnetArbeidsforhold(ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean) = apply {
+        this.ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold
     }
 
     override fun utenlandskSykmelding(utenlandsk: Boolean) = apply {

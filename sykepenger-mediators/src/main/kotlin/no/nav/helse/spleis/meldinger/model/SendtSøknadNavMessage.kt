@@ -40,10 +40,10 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             packet["papirsykmeldinger"].forEach {
                 builder.papirsykmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
             }
-            when(val inntektskilder = packet["andreInntektskilder"]) {
-                is ArrayNode -> builder.inntektskilde(!inntektskilder.isEmpty)
-                else -> builder.inntektskilde(false)
-            }
+            val ikkeJobbetIDetSisteFraAnnetArbeidsforhold = harSvartNeiOmIkkeJobbetIDetSisteFraAnnetArbeidsforhold(packet["sporsmal"])
+            builder.ikkeJobbetIDetSisteFraAnnetArbeidsforhold(ikkeJobbetIDetSisteFraAnnetArbeidsforhold)
+            val inntektskilder = andreInntektskilder(packet["andreInntektskilder"], ikkeJobbetIDetSisteFraAnnetArbeidsforhold)
+            builder.inntektskilde(inntektskilder.isNotEmpty())
 
             packet["fravar"].forEach { fravær ->
                 val fraværstype = fravær["type"].asText()
@@ -57,6 +57,30 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             builder.arbeidsgjennopptatt(packet["arbeidGjenopptatt"].asOptionalLocalDate())
             builder.utenlandskSykmelding(packet["utenlandskSykmelding"].asBoolean(false))
             builder.sendTilGosys(packet["sendTilGosys"].asBoolean(false))
+        }
+
+        private fun andreInntektskilder(andreInntektskilder: JsonNode, ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean): List<String> {
+            if (andreInntektskilder !is ArrayNode) return emptyList()
+            // fjerner ANDRE_ARBEIDSFORHOLD dersom <ikkeJobbetIDetSisteFraAnnetArbeidsforhold> er satt til true
+            return andreInntektskilder
+                .map { it.path("type").asText() }
+                .filterNot { kilde -> kilde == "ANDRE_ARBEIDSFORHOLD" && ikkeJobbetIDetSisteFraAnnetArbeidsforhold }
+        }
+
+        private fun harSvartNeiOmIkkeJobbetIDetSisteFraAnnetArbeidsforhold(listeAvSpørsmål: JsonNode): Boolean {
+            val svarene = spørsmål(listeAvSpørsmål)
+            val svarPåOmJobbetIDetSiste = svarene
+                .firstOrNull { it.path("tag").asText() == "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD_JOBBET_I_DET_SISTE" }
+                ?.path("svar")
+                ?.singleOrNull()
+            return svarPåOmJobbetIDetSiste?.path("verdi")?.asText() == "NEI"
+        }
+
+        private fun spørsmål(listeAvSpørsmål: JsonNode): List<JsonNode> {
+            if (listeAvSpørsmål !is ArrayNode) return emptyList()
+            return listeAvSpørsmål.flatMap { spørsmål ->
+                listOf(spørsmål) + spørsmål(spørsmål.path("undersporsmal"))
+            }
         }
     }
 }

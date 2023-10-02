@@ -91,6 +91,7 @@ abstract class AbstractObservableTest {
         orgnummer = orgnummer,
         perioder = listOf(*perioder),
         andreInntektskilder = andreInntektskilder,
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false,
         sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),

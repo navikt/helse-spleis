@@ -43,6 +43,7 @@ class Søknad(
     orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
+    private val ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
     private val sendtTilNAVEllerArbeidsgiver: LocalDateTime,
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
@@ -132,6 +133,7 @@ class Søknad(
     }
 
     private fun validerInntektskilder(vilkårsgrunnlag: VilkårsgrunnlagElement?) {
+        if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) varsel(RV_SØ_44)
         if (!andreInntektskilder) return
         if (vilkårsgrunnlag == null) return this.funksjonellFeil(RV_SØ_10)
         this.varsel(RV_SØ_10)

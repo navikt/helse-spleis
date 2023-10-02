@@ -62,6 +62,8 @@ enum class Varselkode(
     RV_SØ_42("Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader"),
     RV_SØ_43("Arbeidsledigsøknad er lagt til grunn, undersøk refusjonsopplysningene før du utbetaler"),
 
+    RV_SØ_44("I søknaden er det oppgitt at den sykmeldte har et arbeidsforhold som ikke er registrert i AA-registeret."),
+
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
     RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning."),

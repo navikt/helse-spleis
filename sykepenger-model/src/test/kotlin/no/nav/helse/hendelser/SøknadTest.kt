@@ -20,7 +20,11 @@ import no.nav.helse.mai
 import no.nav.helse.november
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.AktivitetException
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spleis.e2e.assertIngenVarsler
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -280,6 +284,20 @@ internal class SøknadTest {
         assertFalse(søknad.harFunksjonelleFeilEllerVerre())
     }
 
+    @Test
+    fun `ikke jobbet siste 14 dager i annet arbeidsforhold`() {
+        søknad(Sykdom(1.januar, 20.januar, 100.prosent), ikkeJobbetIDetSisteFraAnnetArbeidsforhold = true)
+        søknad.valider(null)
+        aktivitetslogg.assertVarsel(RV_SØ_44)
+    }
+
+    @Test
+    fun `jobbet siste 14 dager i annet arbeidsforhold`() {
+        søknad(Sykdom(1.januar, 20.januar, 100.prosent), ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false)
+        søknad.valider(null)
+        aktivitetslogg.assertIngenVarsler()
+    }
+
     private fun søknad(
         vararg perioder: Søknadsperiode,
         andreInntektskilder: Boolean = false,
@@ -287,12 +305,14 @@ internal class SøknadTest {
         merknaderFraSykmelding: List<Merknad> = emptyList(),
         hendelsefabrikk: ArbeidsgiverHendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
-        egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag> = emptyList()
+        egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag> = emptyList(),
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
     ) {
         aktivitetslogg = Aktivitetslogg()
         søknad = hendelsefabrikk.lagSøknad(
             perioder = perioder,
             andreInntektskilder = andreInntektskilder,
+            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,

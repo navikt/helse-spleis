@@ -17,6 +17,8 @@ import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SporsmalDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -148,6 +150,7 @@ internal class TestMessageFactory(
         perioder: List<SoknadsperiodeDTO>,
         fravær: List<FravarDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null,
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         orgnummer: String = organisasjonsnummer,
         korrigerer: UUID? = null,
@@ -168,6 +171,7 @@ internal class TestMessageFactory(
             startSyketilfelle = LocalDate.now(),
             sendtNav = sendtNav,
             papirsykmeldinger = emptyList(),
+            sporsmal = lagSpørsmål(ikkeJobbetIDetSisteFraAnnetArbeidsforhold),
             egenmeldinger = emptyList(),
             fravar = fravær,
             korrigerer = korrigerer?.toString(),
@@ -184,6 +188,26 @@ internal class TestMessageFactory(
             egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
         )
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+    }
+
+    private fun lagSpørsmål(ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean): List<SporsmalDTO>? {
+        if (!ikkeJobbetIDetSisteFraAnnetArbeidsforhold) return null
+        return listOf(
+            SporsmalDTO(
+                undersporsmal = listOf(
+                    SporsmalDTO(
+                        undersporsmal = listOf(
+                            SporsmalDTO(
+                                tag = "INNTEKTSKILDE_ANDRE_ARBEIDSFORHOLD_JOBBET_I_DET_SISTE",
+                                svar = listOf(
+                                    SvarDTO(verdi = "NEI")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
     }
 
     fun lagSøknadFrilanser(
