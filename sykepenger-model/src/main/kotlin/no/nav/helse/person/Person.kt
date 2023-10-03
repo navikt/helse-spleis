@@ -371,7 +371,12 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse) {
         påminnelse.kontekst(aktivitetslogg, this)
         påminnelse.info("Håndterer påminnelse for person")
-        arbeidsgivere.forkastAUUSomErUtbetaltIInfotrygd(påminnelse, infotrygdhistorikk)
+
+        val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
+        arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
+            arbeidsgiver.sykefraværsfortelling(acc)
+        }.varsleObservers(observers)
+
         håndterGjenoppta(påminnelse)
     }
 

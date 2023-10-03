@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @DisableToggle(Toggle.STOPPE_TILSIG_AUU::class)
+@Disabled
 internal class PersonpåminnelseForkasterAuuTest: AbstractDslTest() {
 
     @Test
