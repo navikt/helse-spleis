@@ -97,7 +97,13 @@ internal class Inntektsmelding(
         block(hendelseId)
     }
 
-    internal fun kopierTidsnærOpplysning(nyDato: LocalDate, hendelse: IAktivitetslogg, oppholdsperiodeMellom: Periode?): Inntektsmelding {
+    internal fun kopierTidsnærOpplysning(
+        nyDato: LocalDate,
+        hendelse: IAktivitetslogg,
+        oppholdsperiodeMellom: Periode?,
+        inntektshistorikk: Inntektshistorikk
+    ) {
+        if (nyDato == this.dato) return
         val dagerMellom = ChronoUnit.DAYS.between(this.dato, nyDato)
         if (dagerMellom >= 60) {
             hendelse.info("Det er $dagerMellom dager mellom forrige inntektdato (${this.dato}) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
@@ -107,6 +113,6 @@ internal class Inntektsmelding(
                     "Forrige inntektdato var ${this.dato} og ny inntektdato er $nyDato")
             hendelse.varsel(RV_IV_7)
         }
-        return Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel)
+        inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel))
     }
 }

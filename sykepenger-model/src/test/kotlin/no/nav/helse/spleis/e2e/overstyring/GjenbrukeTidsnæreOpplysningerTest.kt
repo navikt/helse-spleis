@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -657,6 +658,16 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(30.januar, 31.januar))
+            assertIngenVarsel(RV_IV_7)
+        }
+    }
+
+    @Test
+    fun `ikke varsel når det er en korrigert søknad som ikke endrer noe ettersom inntektsdatoen er lik som før`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(1.juni, 30.juni)
+            håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(29.juni, 30.juni))
             assertIngenVarsel(RV_IV_7)
         }
     }
