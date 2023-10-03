@@ -18,7 +18,7 @@ internal class SykefraværstilfelleeventyrTest {
         )
 
         val vedtaksperiode1 = UUID.randomUUID()
-        val result = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 2.januar til 3.januar).inspektør
+        val result = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 2.januar).inspektør
 
         assertEquals(2, result.event.size)
         result.event[0].also { sykefraværstilfelle ->
@@ -39,7 +39,7 @@ internal class SykefraværstilfelleeventyrTest {
         )
 
         val vedtaksperiode1 = UUID.randomUUID()
-        val result = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 2.januar til 3.januar).inspektør
+        val result = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 1.januar).inspektør
 
         assertEquals(2, result.event.size)
         result.event[0].also { sykefraværstilfelle ->
@@ -60,8 +60,8 @@ internal class SykefraværstilfelleeventyrTest {
 
         val vedtaksperiode1 = UUID.randomUUID()
         val vedtaksperiode2 = UUID.randomUUID()
-        val result1 = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 2.januar til 3.januar)
-        val result = result1.bliMed(vedtaksperiode2, "a1", 4.januar til 5.januar, null).inspektør
+        val result1 = input.bliMed(vedtaksperiode1, "a1", 2.januar til 3.januar, 1.januar)
+        val result = result1.bliMed(vedtaksperiode2, "a1", 4.januar til 5.januar, 4.januar).inspektør
 
         assertEquals(2, result.event.size)
         result.event[0].also { sykefraværstilfelle ->
@@ -84,9 +84,9 @@ internal class SykefraværstilfelleeventyrTest {
         val vedtaksperiode1 = UUID.randomUUID()
         val vedtaksperiode2 = UUID.randomUUID()
         val vedtaksperiode3 = UUID.randomUUID()
-        val result1 = input.bliMed(vedtaksperiode1, "a1", 2.januar til 5.januar, 2.januar til 5.januar)
-        val result2 = result1.bliMed(vedtaksperiode2, "a2", 2.januar til 5.januar, 2.januar til 5.januar)
-        val result3 = result2.bliMed(vedtaksperiode3, "a3", 1.februar til 15.februar, 1.februar til 15.februar)
+        val result1 = input.bliMed(vedtaksperiode1, "a1", 2.januar til 5.januar, 1.januar)
+        val result2 = result1.bliMed(vedtaksperiode2, "a2", 2.januar til 5.januar, 1.januar)
+        val result3 = result2.bliMed(vedtaksperiode3, "a3", 1.februar til 15.februar, 1.februar)
 
         val inspektør = result3.inspektør
 

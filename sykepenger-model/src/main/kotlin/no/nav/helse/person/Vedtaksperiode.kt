@@ -37,6 +37,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -1103,7 +1104,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun sykefraværsfortelling(list: List<Sykefraværstilfelleeventyr>) =
-        list.bliMed(this.id, this.organisasjonsnummer, this.periode, this.sykdomstidslinje.sykdomsperiode())
+        list.bliMed(this.id, this.organisasjonsnummer, this.periode, this.skjæringstidspunkt)
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
