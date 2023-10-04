@@ -198,7 +198,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = INNTEKT)
         }
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
 
     }
 
@@ -214,7 +214,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVVENTER_GODKJENNING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
+                AVVENTER_HISTORIKK
             )
         }
     }
@@ -226,13 +226,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
             assertVarsel(RV_IV_2)
-            assertForkastetPeriodeTilstander(
-                1.vedtaksperiode,
-                AVVENTER_GODKJENNING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE,
-                TIL_INFOTRYGD
-            )
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
 
@@ -244,7 +238,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = INNTEKT)
             assertVarsel(RV_IV_2)
             assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
             assertEquals(100, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
 
             håndterOverstyrArbeidsgiveropplysninger(
@@ -273,7 +267,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertEquals(AvventerFastsettelseEtterSkjønn, inspektør.tilstandPåSykepengegrunnlag(1.januar))
             assertEquals(100, inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.avviksprosent)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
 
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(
                 orgnummer = a1,
@@ -310,7 +304,6 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -334,7 +327,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstander(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
 
     }

@@ -37,7 +37,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -703,7 +702,7 @@ internal class Vedtaksperiode private constructor(
         kontekst(dager)
     }
 
-    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, tilstandUtenAvvik: Vedtaksperiodetilstand, tilstandMedAvvik: Vedtaksperiodetilstand) {
+    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, tilstandUtenAvvik: Vedtaksperiodetilstand, håndterAvvik: () -> Unit) {
         val sykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist())
         sykepengegrunnlag.leggTil(hendelseIder, organisasjonsnummer) { inntektsmeldingId ->
             person.emitInntektsmeldingHåndtert(inntektsmeldingId, id, organisasjonsnummer)
@@ -714,7 +713,7 @@ internal class Vedtaksperiode private constructor(
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
-        if (sykepengegrunnlag.avventerFastsettelseEtterSkjønn()) return tilstand(vilkårsgrunnlag, tilstandMedAvvik)
+        if (Toggle.AltAvTjuefemprosentAvvikssaker.disabled && sykepengegrunnlag.avventerFastsettelseEtterSkjønn()) return håndterAvvik()
         tilstand(vilkårsgrunnlag, tilstandUtenAvvik)
     }
 
@@ -1425,9 +1424,6 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag ?: return tilstand(hendelse, AvventerVilkårsprøvingRevurdering) {
             hendelse.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
         }
-        if (trengerFastsettelseEtterSkjønn) return tilstand(hendelse, AvventerSkjønnsmessigFastsettelseRevurdering) {
-            hendelse.info("Trenger å skjønnsfastsette sykepengegrunnlaget før vi kan beregne utbetaling for revurderingen")
-        }
         tilstand(hendelse, AvventerHistorikkRevurdering)
     }
 
@@ -1499,7 +1495,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            håndterRevurdering(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering, AvventerSkjønnsmessigFastsettelseRevurdering) }
+            håndterRevurdering(vilkårsgrunnlag) {
+                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering) {
+                    vilkårsgrunnlag.varsel(RV_IV_2)
+                    vedtaksperiode.tilstand(vilkårsgrunnlag, AvventerHistorikkRevurdering)
+                }
+            }
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
@@ -1688,7 +1689,6 @@ internal class Vedtaksperiode private constructor(
             !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere
             arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> TrengerInntektsmelding
             vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
-            vedtaksperiode.trengerFastsettelseEtterSkjønn -> KlarForFastsettelseEtterSkjønn
             else -> KlarForBeregning
         }
 
@@ -1788,7 +1788,16 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             håndterFørstegangsbehandling(vilkårsgrunnlag, vedtaksperiode) {
-                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk, AvventerSkjønnsmessigFastsettelse)
+                val kanForkastesVedAvvik = vedtaksperiode.vilkårsgrunnlag == null && vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)
+                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk) {
+                    if (kanForkastesVedAvvik) {
+                        vilkårsgrunnlag.funksjonellFeil(RV_IV_2)
+                        vedtaksperiode.forkast(vilkårsgrunnlag)
+                    } else {
+                        vilkårsgrunnlag.varsel(RV_IV_2)
+                        vedtaksperiode.tilstand(vilkårsgrunnlag, AvventerHistorikk)
+                    }
+                }
             }
         }
 

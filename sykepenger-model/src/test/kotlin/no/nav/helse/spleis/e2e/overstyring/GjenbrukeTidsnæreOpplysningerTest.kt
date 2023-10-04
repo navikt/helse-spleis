@@ -753,7 +753,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             val andreOverstyring = UUID.randomUUID()
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))), meldingsreferanseId = andreOverstyring)
 
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsel(RV_IV_2)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))
 
@@ -775,7 +775,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
 
             håndterVilkårsgrunnlag(2.vedtaksperiode)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.februar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))
 
             håndterYtelser(2.vedtaksperiode)
@@ -799,10 +799,12 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntektIM)
+            nullstillTilstandsendringer()
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektSkatt)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+            assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+            nullstillTilstandsendringer()
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsmessigFastsattInntekt)))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
 
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -824,7 +826,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             håndterVilkårsgrunnlag(2.vedtaksperiode, inntektSkatt)
             assertVarsel(RV_IV_2, 2.vedtaksperiode.filter())
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.februar, listOf(OverstyrtArbeidsgiveropplysning(a1, beregnetInntektIM)))
 
             håndterYtelser(2.vedtaksperiode)

@@ -85,7 +85,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT + 500.daglig)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig)))
         håndterYtelser()
         håndterSimulering()

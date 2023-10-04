@@ -81,7 +81,6 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -153,7 +152,6 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVVENTER_GODKJENNING_REVURDERING,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )

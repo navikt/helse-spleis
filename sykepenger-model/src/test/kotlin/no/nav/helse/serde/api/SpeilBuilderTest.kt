@@ -22,6 +22,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
@@ -34,6 +35,7 @@ import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.Periodetilstand
+import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.TilSkjønnsfastsettelse
 import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
@@ -394,11 +396,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
         nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK)
 
         val speilDto = speilApi()
         val periode = speilDto.arbeidsgivere.single().generasjoner.single().perioder.single() as UberegnetVilkårsprøvdPeriode
-        assertEquals(TilSkjønnsfastsettelse, periode.periodetilstand)
+        assertEquals(ForberederGodkjenning, periode.periodetilstand)
         val vilkårsgrunnlagId = periode.vilkårsgrunnlagId
         assertEquals(setOf(vilkårsgrunnlagId), speilDto.vilkårsgrunnlag.keys)
     }
@@ -415,7 +417,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 45000.månedlig)))
         nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
         val speilDto = speilApi()
         val generasjoner = speilDto.arbeidsgivere.single().generasjoner
@@ -424,7 +426,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             assertEquals(1, generasjon.perioder.size)
             assertInstanceOf(UberegnetVilkårsprøvdPeriode::class.java, generasjon.perioder[0])
             val periode = generasjon.perioder[0] as UberegnetVilkårsprøvdPeriode
-            assertEquals(TilSkjønnsfastsettelse, periode.periodetilstand)
+            assertEquals(ForberederGodkjenning, periode.periodetilstand)
         }
         generasjoner[1].also { generasjon ->
             assertEquals(1, generasjon.perioder.size)
@@ -443,8 +445,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektIm.månedlig)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntektSkatt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
         håndterSkjønnsmessigFastsettelse(
             1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(
@@ -460,7 +464,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertTrue(inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ORGNUMMER) }.inspektør.inntektsopplysning is SkjønnsmessigFastsatt)
 

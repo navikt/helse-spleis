@@ -219,7 +219,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         }
 
         nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
         assertVarsel(RV_IV_2)
         assertIngenFunksjonelleFeil()
     }

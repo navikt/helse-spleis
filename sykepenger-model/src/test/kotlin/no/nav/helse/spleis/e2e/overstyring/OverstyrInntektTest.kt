@@ -146,7 +146,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         tilGodkjenning(fom, 31.januar(2021), 100.prosent, fom)
 
         håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
 
         assertVarsel(Varselkode.RV_IV_2, AktivitetsloggFilter.person())
 
@@ -160,7 +160,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
+            AVVENTER_HISTORIKK
         )
     }
 

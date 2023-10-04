@@ -496,7 +496,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(31000.månedlig, it.rapportertInntekt)
         }
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, orgnummer = a1)
         assertVarsel(RV_IV_2, 1.vedtaksperiode.filter(a1)) // takk dent. (fredet kommentar)
     }
 

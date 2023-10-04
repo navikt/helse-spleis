@@ -23,8 +23,10 @@ import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattIInfotrygd
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag.IngenNyArbeidsgiverperiode
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -186,7 +188,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         håndterSkjønnsmessigFastsettelse(1.januar(2020), listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

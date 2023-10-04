@@ -126,7 +126,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -158,7 +157,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertDiff(-3047)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
@@ -178,7 +177,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
@@ -205,7 +203,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_REVURDERING,
@@ -430,7 +427,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -451,7 +447,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -472,7 +467,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -499,7 +493,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_REVURDERING,
-            AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,

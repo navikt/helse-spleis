@@ -517,8 +517,7 @@ internal class Sykepengegrunnlag private constructor(
         }
 
         override fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-            if (Toggle.AltAvTjuefemprosentAvvikssaker.disabled) return sykepengegrunnlag.arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, sykepengegrunnlag.`6G`, sykepengegrunnlag.skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
-            return super.medUtbetalingsopplysninger(sykepengegrunnlag, organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
+            return sykepengegrunnlag.arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, sykepengegrunnlag.`6G`, sykepengegrunnlag.skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
         }
     }
     object FastsattEtterSkjønn : Tilstand {

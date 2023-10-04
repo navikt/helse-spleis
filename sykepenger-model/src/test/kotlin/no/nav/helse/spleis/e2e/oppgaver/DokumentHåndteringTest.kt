@@ -182,7 +182,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
         assertVarsel(RV_IV_2)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
         val skjønnsmessigFastsettelse = håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1), OverstyrtArbeidsgiveropplysning(a2, INNTEKT)))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

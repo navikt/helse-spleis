@@ -61,26 +61,6 @@ internal class SykepengegrunnlagTest {
     }
 
     @Test
-    fun `kan ikke hente ut utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse når toggle er på`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
-        val sykepengegrunnlag = 35000.månedlig.sykepengegrunnlag(UNG_PERSON_FØDSELSDATO.alder, "a1", 1.januar, skattInntekt = 50000.månedlig, refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 35000.månedlig).refusjonsopplysninger)
-        assertEquals(30, sykepengegrunnlag.inspektør.avviksprosent)
-        assertEquals(AvventerFastsettelseEtterSkjønn, sykepengegrunnlag.inspektør.tilstand)
-
-        assertEquals(
-            "forventet ikke å sette utbetalingsopplysninger i AvventerFastsettelseEtterSkjønn",
-            assertThrows<IllegalStateException> { sykepengegrunnlag.medUtbetalingsopplysninger("a1", 17.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver) }.message
-        )
-    }
-
-    @Test
-    fun `kan hente ut utbetalingsopplysninger fra et vilkårsgrunnlag i avventer skjønnsmessig fastsettelse når toggle er av`() = Toggle.AltAvTjuefemprosentAvvikssaker.disable {
-        val sykepengegrunnlag = 35000.månedlig.sykepengegrunnlag(UNG_PERSON_FØDSELSDATO.alder, "a1", 1.januar, skattInntekt = 50000.månedlig, refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 35000.månedlig).refusjonsopplysninger)
-        assertEquals(30, sykepengegrunnlag.inspektør.avviksprosent)
-        assertEquals(AvventerFastsettelseEtterSkjønn, sykepengegrunnlag.inspektør.tilstand)
-        assertDoesNotThrow { sykepengegrunnlag.medUtbetalingsopplysninger("a1", 17.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver) }
-    }
-
-    @Test
     fun equality() {
         val sykepengegrunnlag = INNTEKT.sykepengegrunnlag
         assertEquals(sykepengegrunnlag, sykepengegrunnlag)

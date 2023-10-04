@@ -104,7 +104,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
             (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
                 val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
                 val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
@@ -188,7 +188,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -306,7 +306,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -443,7 +442,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -551,7 +549,6 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_REVURDERING,
@@ -780,7 +777,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
-                AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -852,7 +849,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertPeriode(17.januar til 31.januar, 1080.daglig)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = true, "deaktiverer a2"))
             assertVarsel(RV_IV_2)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, inntekt)))
             assertTrue(inspektør.inntektsopplysning(1.vedtaksperiode, a1) is SkjønnsmessigFastsatt)
 
@@ -931,7 +928,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
 
         a1 {
             assertVarsel(RV_IV_2)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, inntekt),
                 OverstyrtArbeidsgiveropplysning(a2, inntekt)
