@@ -23,12 +23,10 @@ import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattIInfotrygd
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag.IngenNyArbeidsgiverperiode
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus

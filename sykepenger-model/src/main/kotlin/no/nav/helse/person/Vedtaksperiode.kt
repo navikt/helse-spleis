@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -67,8 +66,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
-import no.nav.helse.person.TilstandType.AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
@@ -83,7 +80,6 @@ import no.nav.helse.person.Venteårsak.Hva.BEREGNING
 import no.nav.helse.person.Venteårsak.Hva.GODKJENNING
 import no.nav.helse.person.Venteårsak.Hva.HJELP
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hva.SKJØNNSMESSIG_FASTSETTELSE
 import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.Venteårsak.Hvorfor.ALLEREDE_UTBETALT
@@ -1035,14 +1031,6 @@ internal class Vedtaksperiode private constructor(
             this.kontekst(kopi)
         }
 
-    private fun skalFastsettesVedSkjønn(hendelse: IAktivitetslogg): Boolean {
-        if (Toggle.AltAvTjuefemprosentAvvikssaker.enabled) return true
-        if (tilstand != AvventerSkjønnsmessigFastsettelse) return false
-        // når saksbehandler overstyrer slik at det blir over 25% avvik vil vi at saksbehandler får resulatet presentert istedenfor at det forkastes og blir "borte" i Speil
-        if (hendelse is OverstyrArbeidsforhold || hendelse is OverstyrArbeidsgiveropplysninger) return true
-        return person.kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag!!)
-    }
-
     private fun kalkulerUtbetalinger(aktivitetslogg: IAktivitetslogg, ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
         val vilkårsgrunnlag = requireNotNull(vilkårsgrunnlag)
         aktivitetslogg.kontekst(vilkårsgrunnlag)
@@ -1744,11 +1732,6 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        private object KlarForFastsettelseEtterSkjønn: Tilstand {
-            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-                vedtaksperiode.tilstand(hendelse, AvventerSkjønnsmessigFastsettelse)
-            }
-        }
         private object KlarForBeregning: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
                 vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
@@ -1880,72 +1863,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
             vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
-        }
-    }
-
-    internal object AvventerSkjønnsmessigFastsettelse : Vedtaksperiodetilstand {
-        override val type: TilstandType = AVVENTER_SKJØNNSMESSIG_FASTSETTELSE
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (vedtaksperiode.skalFastsettesVedSkjønn(hendelse)) {
-                return sikkerlogg.info(
-                    "Periode plukket ut som kandidat til skjønnsmessig fastsettelse {}, {}, {}",
-                    keyValue("aktørId", vedtaksperiode.aktørId),
-                    keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                    keyValue("hendelse", hendelse::class.simpleName)
-                )
-            }
-            hendelse.funksjonellFeil(RV_IV_2)
-            vedtaksperiode.forkast(hendelse)
-        }
-
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = SKJØNNSMESSIG_FASTSETTELSE.utenBegrunnelse
-        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) = vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
-
-        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)
-            vurderOmKanGåVidere(vedtaksperiode, hendelse)
-        }
-
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg)  {
-            vurderOmKanGåVidere(vedtaksperiode, hendelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!påminnelse.skalReberegnes()) return
-            vedtaksperiode.forkast(påminnelse)
-        }
-
-        private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (vedtaksperiode.trengerFastsettelseEtterSkjønn) return
-            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
-        }
-    }
-
-    internal object AvventerSkjønnsmessigFastsettelseRevurdering : Vedtaksperiodetilstand {
-        override val type: TilstandType = AVVENTER_SKJØNNSMESSIG_FASTSETTELSE_REVURDERING
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            hendelse.varsel(RV_IV_2)
-            vurderOmKanGåVidere(vedtaksperiode, hendelse)
-        }
-
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = SKJØNNSMESSIG_FASTSETTELSE fordi OVERSTYRING_IGANGSATT
-        override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) = vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
-
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg) {
-            vurderOmKanGåVidere(vedtaksperiode, hendelse)
-        }
-        override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
-            vedtaksperiode.skalHåndtereDagerRevurdering(dager)
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {}
-
-        private fun vurderOmKanGåVidere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.AltAvTjuefemprosentAvvikssaker.enabled && vedtaksperiode.trengerFastsettelseEtterSkjønn) return
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
     }
 
@@ -2485,8 +2402,7 @@ internal class Vedtaksperiode private constructor(
                 AvventerVilkårsprøvingRevurdering,
                 AvventerHistorikkRevurdering,
                 AvventerSimuleringRevurdering,
-                AvventerGodkjenningRevurdering,
-                AvventerSkjønnsmessigFastsettelseRevurdering
+                AvventerGodkjenningRevurdering
             )
         }
 

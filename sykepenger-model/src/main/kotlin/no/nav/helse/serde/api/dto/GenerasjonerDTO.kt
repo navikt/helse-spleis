@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
-import no.nav.helse.serde.api.dto.Periodetilstand.TilSkjønnsfastsettelse
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
@@ -36,7 +35,6 @@ enum class Periodetilstand {
     ManglerInformasjon,
     UtbetaltVenterPåAnnenPeriode,
     VenterPåAnnenPeriode,
-    TilSkjønnsfastsettelse,
     TilGodkjenning,
     IngenUtbetaling,
     TilInfotrygd;
@@ -227,9 +225,6 @@ data class UberegnetPeriode(
                     is Vedtaksperiode.AvventerHistorikk,
                     is Vedtaksperiode.AvventerHistorikkRevurdering,
                     is Vedtaksperiode.AvventerVilkårsprøving -> ForberederGodkjenning
-
-                    is Vedtaksperiode.AvventerSkjønnsmessigFastsettelse,
-                    is Vedtaksperiode.AvventerSkjønnsmessigFastsettelseRevurdering -> TilSkjønnsfastsettelse
 
                     else -> ManglerInformasjon
                 }
