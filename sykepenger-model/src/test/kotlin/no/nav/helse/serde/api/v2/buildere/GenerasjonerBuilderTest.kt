@@ -160,16 +160,22 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         // 21 & 22.August utbetalingsdager
 
         generasjoner {
-            assertForventetFeil(
-                forklaring= """
-                    Det blir ingen ny generasjon ved korrigert IM fordi det eneste som endrer seg
-                    er utbetalingsdagtypen for 21 og 22. august. Vi lager kun ny generajon om sykdomstidslinjetypen endres,
-                    men den er SYK både før og etter 🤔
-                    Vilkårsgrunnlaget endrer seg heller ikke, ettersom det er samme inntekt i den korrigerende inntektsmeldingen
-                """,
-                nå = { assertEquals(2, size) },
-                ønsket = { assertEquals(3, size) }
-            )
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) avType REVURDERING fra 21.august til 1.september medTilstand ForberederGodkjenning
+                uberegnetVilkårsprøvdPeriode(1) fra 24.juli til 20.august medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) avType REVURDERING fra 21.august til 1.september medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(1) fra 24.juli til 20.august medTilstand IngenUtbetaling
+            }
+            2.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(1) medTilstand IngenUtbetaling
+            }
         }
     }
 

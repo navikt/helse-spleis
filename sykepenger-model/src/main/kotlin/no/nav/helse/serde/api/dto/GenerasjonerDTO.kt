@@ -291,6 +291,7 @@ data class BeregnetPeriode(
      */
     internal fun ingenEndringerMellom(other: BeregnetPeriode): Boolean {
         checkNotNull(this.forrigeGenerasjon) { "forventet ikke at forrigeGenerasjon er null" }
+        if (other.vedtaksperiodeId == this.vedtaksperiodeId) return false
         // hvis vilkårsgrunnlaget har endret seg mellom forrige generasjon, så kan det likevel hende at 'other' (revurderingen før)
         // har allerede laget ny rad - og derfor trenger vi ikke lage enda en
         if (this.vilkårsgrunnlagId != this.forrigeGenerasjon.vilkårsgrunnlagId && this.vilkårsgrunnlagId != other.vilkårsgrunnlagId) return false
