@@ -120,8 +120,7 @@ class Refusjonsopplysning(
             }
             if (relevanteRefusjonsopplysninger.isEmpty()) return
             val første = relevanteRefusjonsopplysninger.first()
-            val sisteRefusjonsdag = relevanteRefusjonsopplysninger.last().tom
-            val endringerIRefusjon = relevanteRefusjonsopplysninger.map { refusjonsopplysning ->
+            val endringerIRefusjon = relevanteRefusjonsopplysninger.drop(1).map { refusjonsopplysning ->
                 Refusjonshistorikk.Refusjon.EndringIRefusjon(
                     endringsdato = refusjonsopplysning.fom,
                     beløp = refusjonsopplysning.beløp
@@ -133,7 +132,7 @@ class Refusjonsopplysning(
                 førsteFraværsdag = førsteFraværsdag,
                 arbeidsgiverperioder = emptyList(),
                 beløp = første.beløp,
-                sisteRefusjonsdag = sisteRefusjonsdag,
+                sisteRefusjonsdag = null,
                 endringerIRefusjon = endringerIRefusjon
             )
             refusjonshistorikk.leggTilRefusjon(refusjon)
