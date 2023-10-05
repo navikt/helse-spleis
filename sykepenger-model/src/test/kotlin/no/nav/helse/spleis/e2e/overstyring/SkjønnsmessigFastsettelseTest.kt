@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -37,15 +38,75 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSk
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterHovedregel
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterSkjønn
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.fail
 
 internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
+
+    @Test
+    fun `endring i refusjon skal ikke endre omregnet årsinntekt`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(a1, 19000.0.månedlig),
+            OverstyrtArbeidsgiveropplysning(a2, 21000.0.månedlig)
+        ))
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        (a1 og a2).forlengVedtak(1.februar til 28.februar)
+
+        a1 {
+            val im = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, refusjon = Refusjon(20000.månedlig, opphørsdato = 31.januar))
+
+            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
+
+            assertForventetFeil(
+                forklaring = "inntektsmelding overskriver skjønnsmessig fastsatt inntekt",
+                nå = {
+                    sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
+                        assertInstanceOf(Inntektsmelding::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
+                        assertEquals(im, arbeidsgiverInntektsopplysning.inntektsopplysning.inspektør.hendelseId)
+                    }
+                    sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also { arbeidsgiverInntektsopplysning ->
+                        assertInstanceOf(Inntektsmelding::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
+                    }
+                },
+                ønsket = {
+                    sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
+                        assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
+                        // TODO: det er avklaring på hvorvidt vi kan bytte ut inntektsopplysninger med (like beløp) og om det har noe påvirkning
+                        // på skjønnsfastsettingen
+                        assertNotEquals(im, arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt().inspektør.hendelseId)
+                    }
+                    sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also { arbeidsgiverInntektsopplysning ->
+                        assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
+                    }
+                }
+            )
+        }
+
+    }
 
     @Test
     fun `korrigere inntekten på noe som allerede har blitt skjønnsmessig fastsatt`() {
