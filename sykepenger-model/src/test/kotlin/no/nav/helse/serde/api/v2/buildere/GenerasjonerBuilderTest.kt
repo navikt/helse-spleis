@@ -1,11 +1,12 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -47,6 +48,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.september
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GenerasjonDTO
 import no.nav.helse.serde.api.dto.Inntekt
@@ -125,6 +127,51 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Manglende generasjon når det kommer IM som endrer AGP ved å endre dager i forkant av perioden`() {
+        håndterSøknad(Sykdom(7.august, 20.august, 100.prosent))
+        håndterSøknad(Sykdom(21.august, 1.september, 100.prosent))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(24.juli til 25.juli, 7.august til 20.august))
+        assertEquals("UUAARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        // 21 & 22.August utbetalingsdager
+
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(7.august til 22.august))
+        assertEquals("AAAARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        // 21 & 22.August agp -- denne blir ikke en generasjon
+
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(24.juli, Dagtype.Egenmeldingsdag),
+            ManuellOverskrivingDag(25.juli, Dagtype.Egenmeldingsdag)
+        ))
+
+        håndterYtelser(2.vedtaksperiode)
+        // 21 & 22.August utbetalingsdager
+
+        generasjoner {
+            assertForventetFeil(
+                forklaring= """
+                    Det blir ingen ny generasjon ved korrigert IM fordi det eneste som endrer seg
+                    er utbetalingsdagtypen for 21 og 22. august. Vi lager kun ny generajon om sykdomstidslinjetypen endres,
+                    men den er SYK både før og etter 🤔
+                    Vilkårsgrunnlaget endrer seg heller ikke, ettersom det er samme inntekt i den korrigerende inntektsmeldingen
+                """,
+                nå = { assertEquals(2, size) },
+                ønsket = { assertEquals(3, size) }
+            )
+        }
+    }
 
     @Test
     fun `avvik i inntekt slik at dager avslås pga minsteinntekt`() {
