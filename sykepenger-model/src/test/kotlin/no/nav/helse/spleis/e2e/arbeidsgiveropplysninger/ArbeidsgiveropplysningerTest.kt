@@ -5,6 +5,8 @@ import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -83,6 +85,45 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `sender ut event TrengerArbeidsgiveropplysninger når vi ankommer AvventerInntektsmelding`() {
         nyPeriode(1.januar til 31.januar)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
+    @Test
+    fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+            ), 1.januar),
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
+                a1 to INNTEKT,
+                a2 to INNTEKT
+            ), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            ), orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(11.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        assertEquals(2, observatør.inntektsmeldingHåndtert.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a2 })
+
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+
+        assertEquals(5, observatør.inntektsmeldingHåndtert.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a2 })
     }
 
     @Test

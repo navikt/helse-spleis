@@ -743,8 +743,9 @@ internal class Vedtaksperiode private constructor(
         medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
-    private fun trengerArbeidsgiveropplysninger(): Boolean {
+    private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg): Boolean {
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
+        if (harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return false
         if (!arbeidsgiverperiode.forventerOpplysninger(periode)) return false
 
         val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
@@ -1554,11 +1555,11 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
-            vedtaksperiode.trengerArbeidsgiveropplysninger()
+            vedtaksperiode.trengerArbeidsgiveropplysninger(søknad)
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-            revurdering.hvisIkkeArbeidsgiverperiode { vedtaksperiode.trengerArbeidsgiveropplysninger() }
+            revurdering.hvisIkkeArbeidsgiverperiode { vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse) }
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
@@ -1580,7 +1581,7 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
                 påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
             }
-            vedtaksperiode.trengerArbeidsgiveropplysninger()
+            vedtaksperiode.trengerArbeidsgiveropplysninger(påminnelse)
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg) {
@@ -1588,7 +1589,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-            if (vedtaksperiode.trengerArbeidsgiveropplysninger()) {
+            if (vedtaksperiode.trengerArbeidsgiveropplysninger(inntektsmeldingReplayUtført)) {
                 // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
                     it.trengerIkkeArbeidsgiveropplysninger()
