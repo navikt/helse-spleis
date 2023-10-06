@@ -19,6 +19,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -30,6 +31,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -42,6 +44,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -70,12 +73,61 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Ghost som sender IM hvor de opplyser om ikke fravær - men blir syk fra ghost etterpå allikevel`() {
+        val ghost = a2
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, orgnummer = a1)
+        håndterVilkårsgrunnlagGhost(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+
+        val ghostInntektFørIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
+        assertTrue(ghostInntektFørIm is SkattSykepengegrunnlag)
+
+        // Inntektsmelding fra Ghost vi egentlig ikke trenger, men de sender den allikevel og opplyser om IkkeFravaer...
+        // denne vinner over skatt i inntektsturnering
+        val ghostIM = håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            beregnetInntekt = 32000.månedlig,
+            orgnummer = ghost,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer"
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        val ghostInntektEtterIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
+        assertTrue(ghostInntektEtterIm is InntektsmeldingInntekt)
+
+        // Så kjem søknaden på ghosten læll
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = ghost)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = ghost)
+        håndterSimulering(1.vedtaksperiode, orgnummer = ghost)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = ghost)
+        håndterUtbetalt(orgnummer = ghost)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, ghost)
+
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
+        assertHarHendelseIder(1.vedtaksperiode, ghostIM, orgnummer = ghost)
+    }
 
     @Test
     fun `blir syk fra ghost lagrer ikke refusjonsopplysninger tilbake til skjæringstidspunktet`() {
@@ -1202,10 +1254,19 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1
         )
+        håndterVilkårsgrunnlagGhost(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        if (tilGodkjenning) return
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+    }
 
+    private fun håndterVilkårsgrunnlagGhost(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String) {
+        val skjæringstidspunkt = finnSkjæringstidspunkt(orgnummer, vedtaksperiodeIdInnhenter)
         val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3))
+            grunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(3)),
+            grunnlag(a2, skjæringstidspunkt, 32000.månedlig.repeat(3))
         )
 
         val arbeidsforhold = listOf(
@@ -1214,24 +1275,19 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
             inntektsvurdering = Inntektsvurdering(
                 listOf(
-                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
-                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(12))
+                    sammenligningsgrunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, skjæringstidspunkt, 32000.månedlig.repeat(12))
                 )
             ),
-            orgnummer = a1,
+            orgnummer = orgnummer,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntekter,
                 arbeidsforhold = emptyList()
             ),
             arbeidsforhold = arbeidsforhold
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        if (tilGodkjenning) return
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
     }
 }
