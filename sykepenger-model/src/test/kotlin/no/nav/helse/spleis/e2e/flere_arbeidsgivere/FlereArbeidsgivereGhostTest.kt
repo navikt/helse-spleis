@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -19,6 +20,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -44,7 +46,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -84,12 +85,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     @Test
     fun `Ghost som sender IM hvor de opplyser om ikke fravær - men blir syk fra ghost etterpå allikevel`() {
         val ghost = a2
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, orgnummer = a1)
-        håndterVilkårsgrunnlagGhost(1.vedtaksperiode, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        håndterVilkårsgrunnlagGhost(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
 
         val ghostInntektFørIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
         assertTrue(ghostInntektFørIm is SkattSykepengegrunnlag)
@@ -98,35 +102,51 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         // denne vinner over skatt i inntektsturnering
         val ghostIM = håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = 32000.månedlig,
+            beregnetInntekt = 33000.månedlig,
             orgnummer = ghost,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer"
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         val ghostInntektEtterIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
         assertTrue(ghostInntektEtterIm is InntektsmeldingInntekt)
 
         // Så kjem søknaden på ghosten læll
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = ghost)
+        val ghostSøknad = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = ghost)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = ghost)
         håndterSimulering(1.vedtaksperiode, orgnummer = ghost)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = ghost)
         håndterUtbetalt(orgnummer = ghost)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, a1)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, ghost)
 
-        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
-        assertHarHendelseIder(1.vedtaksperiode, ghostIM, orgnummer = ghost)
+
+        assertForventetFeil(
+            forklaring = """
+                Perioden på A1 som går i AvventerRevurdering kaller på gjennoppta behandling før periode på Ghost i AvventerIM får replayet
+                IM. Da ender vi opp med å gå videre uten å ha referanser til inntektsmelding som er brukt, og får ikke validert inneholdet i IM
+            """,
+            nå = {
+                assertIngenVarsler(1.vedtaksperiode.filter(ghost))
+                assertEquals(listOf(Dokumentsporing.søknad(ghostSøknad)), inspektør(ghost).hendelser(1.vedtaksperiode))
+            },
+            ønsket = {
+                assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
+                assertEquals(listOf(Dokumentsporing.søknad(ghostSøknad), Dokumentsporing.inntektsmeldingDager(ghostIM), Dokumentsporing.inntektsmeldingInntekt(ghostIM)), inspektør(ghost).hendelser(1.vedtaksperiode))
+            }
+        )
     }
 
     @Test
