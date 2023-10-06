@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
@@ -56,6 +57,7 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
@@ -223,6 +225,17 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             dagpenger = listOf(1.februar til 28.februar)
         )
         assertIngenVarsler()
+    }
+
+    @Test
+    fun `Var ikke permisjon i forlengelsen likevel`(){
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Permisjon(1.februar, 28.februar))
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
     }
 
     @Test

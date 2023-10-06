@@ -21,6 +21,8 @@ internal class BesteDagTest {
         private val ferieFraSaksbehandler = Dag.Feriedag(1.januar, TestEvent.saksbehandler)
         private val permisjonFraSøknad = Dag.Permisjonsdag(1.januar, TestEvent.søknad)
         private val sykedagFraSøknad = Dag.Sykedag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
+        private val sykHelgedagFraSøknad = Dag.SykHelgedag(6.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.søknad)
+        private val permisjonHelgedagFraSøknad = Dag.Permisjonsdag(6.januar, TestEvent.søknad)
         private val sykedagFraSaksbehandler = Dag.Sykedag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
         private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
         private val arbeidsdagFraSaksbehandler = Dag.Arbeidsdag(1.januar, TestEvent.saksbehandler)
@@ -109,6 +111,9 @@ internal class BesteDagTest {
     fun `permisjon vinner over sykdom`() {
         assertWinner(sykedagFraSøknad, permisjonFraSøknad, permisjonFraSøknad)
         assertWinner(permisjonFraSøknad, sykedagFraSøknad, sykedagFraSøknad)
+
+        assertWinner(permisjonHelgedagFraSøknad, sykHelgedagFraSøknad, sykHelgedagFraSøknad)
+        assertWinner(sykHelgedagFraSøknad, permisjonHelgedagFraSøknad, permisjonHelgedagFraSøknad)
     }
 
     @Test
