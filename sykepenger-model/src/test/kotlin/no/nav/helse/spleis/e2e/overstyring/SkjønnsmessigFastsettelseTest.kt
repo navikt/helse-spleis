@@ -1,12 +1,15 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -14,6 +17,8 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
@@ -53,6 +58,63 @@ import org.junit.jupiter.api.fail
 internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
+    fun `blir syk fra ghost etter skjønnsfastsettelse - skal ikke medføre ny skjønnsfastsettelse`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
+                a1 to INNTEKT,
+                a2 to INNTEKT
+            ), 1.januar),
+                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 1.januar),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT)
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+                OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.månedlig),
+                OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.månedlig)
+            ))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
+
+            sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
+                assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
+            }
+            sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also { arbeidsgiverInntektsopplysning ->
+                assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
+            }
+        }
+    }
+
+    @Test
     fun `endring i refusjon skal ikke endre omregnet årsinntekt`() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar)
 
@@ -81,31 +143,14 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
             val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
 
-            assertForventetFeil(
-                forklaring = "inntektsmelding overskriver skjønnsmessig fastsatt inntekt",
-                nå = {
-                    sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
-                        assertInstanceOf(Inntektsmelding::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
-                        assertEquals(im, arbeidsgiverInntektsopplysning.inntektsopplysning.inspektør.hendelseId)
-                    }
-                    sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also { arbeidsgiverInntektsopplysning ->
-                        assertInstanceOf(Inntektsmelding::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
-                    }
-                },
-                ønsket = {
-                    sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
-                        assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
-                        // TODO: det er avklaring på hvorvidt vi kan bytte ut inntektsopplysninger med (like beløp) og om det har noe påvirkning
-                        // på skjønnsfastsettingen
-                        assertNotEquals(im, arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt().inspektør.hendelseId)
-                    }
-                    sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also { arbeidsgiverInntektsopplysning ->
-                        assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
-                    }
-                }
-            )
+            sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
+                assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
+                assertEquals(im, arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt().inspektør.hendelseId)
+            }
+            sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also { arbeidsgiverInntektsopplysning ->
+                assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
+            }
         }
-
     }
 
     @Test
@@ -200,9 +245,11 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntekt)))
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             nullstillTilstandsendringer()
-            håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
-            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
+            val im = håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            val inntektsopplysning = inspektør.inntektsopplysningISykepengegrunnlaget(1.januar)
+            assertTrue(inntektsopplysning is SkjønnsmessigFastsatt)
+            assertNotEquals(im, inntektsopplysning.omregnetÅrsinntekt().inspektør.hendelseId)
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }

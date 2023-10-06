@@ -59,7 +59,9 @@ internal class Inntektsmelding(
 
     override fun overstyrer(gammel: Saksbehandler) = this
 
-    override fun overstyrer(gammel: SkjønnsmessigFastsatt) = this
+    override fun overstyrer(gammel: SkjønnsmessigFastsatt) =
+        if (erOmregnetÅrsinntektEndret(this, gammel)) this
+        else gammel.overstyrer(this)
 
     override fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): AvklarbarSykepengegrunnlag? {
         if (dato == skjæringstidspunkt) return this

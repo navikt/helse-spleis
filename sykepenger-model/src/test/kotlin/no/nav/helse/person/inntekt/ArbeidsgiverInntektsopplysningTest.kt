@@ -24,6 +24,7 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -55,6 +56,58 @@ internal class ArbeidsgiverInntektsopplysningTest {
         assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, new, NullObserver))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
         assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, forMange, NullObserver)) { "skal ikke kunne legge til inntekter som ikke finnes fra før" }
+    }
+
+    @Test
+    fun `ny inntektsmelding uten endring i beløp endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
+        val skjæringstidspunkt = 1.januar
+        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, NullObserver)
+        val inntektsmeldingA1 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now())
+        val inntektsmeldingA2 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig, LocalDateTime.now())
+        val inntektsmeldingA3 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig, LocalDateTime.now())
+
+        val inntektsmeldingA1Ny = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now())
+        val overstyrtA1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 900.månedlig, inntektsmeldingA1Ny, LocalDateTime.now()), Refusjonsopplysninger())
+
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 900.månedlig, inntektsmeldingA1, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 950.månedlig, inntektsmeldingA2, LocalDateTime.now()), Refusjonsopplysninger())
+        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 975.månedlig, inntektsmeldingA3, LocalDateTime.now()), Refusjonsopplysninger())
+
+        val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
+        val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
+        val new = listOf(overstyrtA1Opplysning)
+
+        val actual = original.overstyrInntekter(opptjening, new, NullObserver)
+        assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
+    }
+
+    @Test
+    fun `ny inntektsmelding uten endring i beløp i forhold Skatt endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
+        val skjæringstidspunkt = 1.januar
+        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, NullObserver)
+        val skattA1 = SkattSykepengegrunnlag(UUID.randomUUID(), skjæringstidspunkt, listOf(
+            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
+            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
+            Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(3).yearMonth, LØNNSINNTEKT, "", "")
+        ), emptyList(), LocalDateTime.now())
+        val inntektsmeldingA2 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig, LocalDateTime.now())
+        val inntektsmeldingA3 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig, LocalDateTime.now())
+
+        val inntektsmeldingA1Ny = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now())
+        val overstyrtA1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val forventetA1Opplysning = ArbeidsgiverInntektsopplysning("a1", SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 900.månedlig, inntektsmeldingA1Ny, LocalDateTime.now()), Refusjonsopplysninger())
+
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 900.månedlig, skattA1, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 950.månedlig, inntektsmeldingA2, LocalDateTime.now()), Refusjonsopplysninger())
+        val a3Opplysning = ArbeidsgiverInntektsopplysning("a3", SkjønnsmessigFastsatt(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 975.månedlig, inntektsmeldingA3, LocalDateTime.now()), Refusjonsopplysninger())
+
+        val original = listOf(a1Opplysning, a2Opplysning, a3Opplysning)
+        val expected = listOf(forventetA1Opplysning, a2Opplysning, a3Opplysning)
+        val new = listOf(overstyrtA1Opplysning)
+
+        val actual = original.overstyrInntekter(opptjening, new, NullObserver)
+        assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
     }
 
     @Test

@@ -113,6 +113,13 @@ abstract class Inntektsopplysning protected constructor(
     internal open fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, block: (inntektsmeldingId: UUID) -> Unit) {}
 
     internal companion object {
+        internal fun erOmregnetÅrsinntektEndret(før: Inntektsopplysning, etter: Inntektsopplysning) =
+            erOmregnetÅrsinntektEndret(listOf(før), listOf(etter))
+
+        internal fun erOmregnetÅrsinntektEndret(før: List<Inntektsopplysning>, etter: List<Inntektsopplysning>) =
+            omregnetÅrsinntekt(før) != omregnetÅrsinntekt(etter)
+
+        private fun omregnetÅrsinntekt(liste: List<Inntektsopplysning>): List<Inntekt> = liste.map { it.omregnetÅrsinntekt().beløp }
 
         internal fun List<Inntektsopplysning>.markerFlereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
             if (distinctBy { it.dato }.size <= 1 && none { it is SkattSykepengegrunnlag || it is IkkeRapportert }) return

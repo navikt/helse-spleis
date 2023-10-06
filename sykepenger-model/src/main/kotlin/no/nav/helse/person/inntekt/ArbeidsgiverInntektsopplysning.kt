@@ -45,14 +45,15 @@ class ArbeidsgiverInntektsopplysning(
     }
 
     private fun overstyr(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
-        val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer }
-            ?: return ArbeidsgiverInntektsopplysning(this.orgnummer, this.inntektsopplysning.omregnetÅrsinntekt(), refusjonsopplysninger)
+        val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer } ?: return this
         return overstyring.overstyrer(this)
     }
 
     private fun overstyrer(gammel: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
         return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning), refusjonsopplysninger = gammel.refusjonsopplysninger.merge(this.refusjonsopplysninger))
     }
+
+    private fun rullTilbake() = ArbeidsgiverInntektsopplysning(this.orgnummer, this.inntektsopplysning.omregnetÅrsinntekt(), refusjonsopplysninger)
 
     private fun subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening?) {
         inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, opptjening?.startdatoFor(orgnummer))
@@ -121,9 +122,15 @@ class ArbeidsgiverInntektsopplysning(
 
         // overskriver eksisterende verdier i *this* med verdier fra *other*,
         // og ignorerer ting i *other* som ikke finnes i *this*
-        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening?, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver) = this
-            .map { inntekt -> inntekt.overstyr(other) }
-            .also { it.subsummer(subsumsjonObserver, opptjening) }
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening?, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver): List<ArbeidsgiverInntektsopplysning> {
+            val omregnetÅrsinntekt = map { it.inntektsopplysning }
+            val endringen = this
+                .map { inntekt -> inntekt.overstyr(other) }
+                .also { it.subsummer(subsumsjonObserver, opptjening) }
+            val omregnetÅrsinntektEtterpå = endringen.map { it.inntektsopplysning }
+            if (Inntektsopplysning.erOmregnetÅrsinntektEndret(omregnetÅrsinntekt, omregnetÅrsinntektEtterpå)) return endringen.map { it.rullTilbake() }
+            return endringen
+        }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.sjekkForNyArbeidsgiver(aktivitetslogg: IAktivitetslogg, opptjening: Opptjening, orgnummer: String) {
             val arbeidsforholdAktivePåSkjæringstidspunktet = singleOrNull { opptjening.ansattVedSkjæringstidspunkt(it.orgnummer) } ?: return
