@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
@@ -19,8 +20,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UKJ
+import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
@@ -336,7 +339,7 @@ internal class UtbetalingTest {
         val utbetaling1 = opprettUtbetaling(tidslinje)
 
         val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 16.NAV, startDato = 1.januar).betale()
-        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 31.januar)
+        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, periode = 31.januar.somPeriode())
 
         val utbetaling1Inspektør = utbetaling1.inspektør
         val utbetaling2Inspektør = utbetaling2.inspektør
@@ -376,7 +379,7 @@ internal class UtbetalingTest {
         val utbetaling1 = opprettUtbetaling(tidslinje)
 
         val tidslinjeNy = tidslinjeOf(16.AP, 15.NAV, 18.ARB, 16.AP, 25.NAV, startDato = 1.januar).betale()
-        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 31.januar)
+        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, periode = 31.januar.somPeriode())
 
         val utbetaling1Inspektør = utbetaling1.inspektør
         val utbetaling2Inspektør = utbetaling2.inspektør
@@ -421,7 +424,7 @@ internal class UtbetalingTest {
         val utbetaling1 = opprettUtbetaling(tidslinje)
 
         val tidslinjeNy = tidslinjeOf(16.AP, 5.NAV, 4.NAV, 1.FRI, 2.NAV, 5.NAV, startDato = 1.januar).betale()
-        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, sisteDato = 28.januar)
+        val utbetaling2 = opprettUtbetaling(tidslinjeNy, utbetaling1, periode = 28.januar.somPeriode())
 
         val utbetaling1Inspektør = utbetaling1.inspektør
         val utbetaling2Inspektør = utbetaling2.inspektør
@@ -475,6 +478,42 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun `tom utbetaling slutter før tidligere`() {
+        // periode med 1 SykNav + 1 AGP dag
+        val tidslinje1 = tidslinjeOf(31.UTELATE, 1.NAP, 1.AP).betale()
+        val utbetaling1 = opprettUtbetaling(tidslinje1, periode = 1.februar til 2.februar)
+        // perioden strekkes tilbake med 31 Foreldrepengedager, og 2 AGP dager etter
+        val tidslinje2 = tidslinjeOf(31.FRI, 2.AP).betale()
+        val utbetaling2 = opprettUtbetaling(tidslinje2, tidligere = utbetaling1, periode = 1.januar til 2.februar)
+
+        val utbetaling1Inspektør = utbetaling1.inspektør
+        val utbetaling2Inspektør = utbetaling2.inspektør
+
+        assertEquals("?P", utbetaling1Inspektør.utbetalingstidslinje.toString())
+        assertEquals("FFFFFFF FFFFFFF FFFFFFF FFFFFFF FFFPP", utbetaling2Inspektør.utbetalingstidslinje.toString())
+        assertEquals(1.februar til 2.februar, utbetaling1Inspektør.utbetalingstidslinje.periode())
+        assertEquals(1.januar til 2.februar, utbetaling2Inspektør.utbetalingstidslinje.periode())
+        assertEquals(utbetaling2Inspektør.korrelasjonsId, utbetaling1Inspektør.korrelasjonsId)
+
+        assertEquals(1, utbetaling1Inspektør.arbeidsgiverOppdrag.size)
+        utbetaling1Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(1.februar til 1.februar, linje.fom til linje.tom)
+            assertEquals(NY, linje.endringskode)
+            assertEquals(1, linje.delytelseId)
+            assertNull(linje.refDelytelseId)
+        }
+        assertEquals(1, utbetaling2Inspektør.arbeidsgiverOppdrag.size)
+        utbetaling2Inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(1.februar til 1.februar, linje.fom til linje.tom)
+            assertEquals(ENDR, linje.endringskode)
+            assertEquals("OPPH", linje.statuskode)
+            assertEquals(1.februar, linje.datoStatusFom)
+            assertEquals(1, linje.delytelseId)
+            assertNull(linje.refDelytelseId)
+        }
+    }
+
+    @Test
     fun `utbetaling starter i Ny`() {
         val tidslinje = tidslinjeOf(16.AP, 17.NAV).betale()
 
@@ -520,9 +559,9 @@ internal class UtbetalingTest {
     @Test
     fun `periode for annullering`() {
         val tidslinje = tidslinjeOf(16.AP, 5.NAV, 1.FRI, 6.NAV, 1.FRI, 4.NAV).betale()
-        val første = opprettUtbetaling(tidslinje, sisteDato = 21.januar)
-        val andre = opprettUtbetaling(tidslinje, første, 28.januar)
-        val tredje = opprettUtbetaling(tidslinje, andre, 2.februar)
+        val første = opprettUtbetaling(tidslinje, periode = 21.januar.somPeriode())
+        val andre = opprettUtbetaling(tidslinje, første, 28.januar.somPeriode())
+        val tredje = opprettUtbetaling(tidslinje, andre, 2.februar.somPeriode())
         val annullering = annuller(tredje) ?: fail { "forventet utbetaling" }
         val utbetalingInspektør = annullering.inspektør
         assertEquals(første.inspektør.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
@@ -599,7 +638,7 @@ internal class UtbetalingTest {
     @Test
     fun nettoBeløp() {
         val tidslinje = tidslinjeOf(11.NAV).betale()
-        val første = opprettUtbetaling(tidslinje, sisteDato = 7.januar)
+        val første = opprettUtbetaling(tidslinje, periode = 7.januar.somPeriode())
         val andre = opprettUtbetaling(tidslinje, første)
 
         assertEquals(6000, første.inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp)
@@ -613,9 +652,9 @@ internal class UtbetalingTest {
             startDato = 1.januar(2020)
         ).betale()
 
-        val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
-        val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første)
-        val tredje = opprettUtbetaling(tidslinje.kutt(18.februar(2020)), tidligere = andre)
+        val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)), periode = 19.januar(2020).somPeriode())
+        val andre = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = første, periode = 24.januar(2020).somPeriode())
+        val tredje = opprettUtbetaling(tidslinje.kutt(18.februar(2020)), tidligere = andre, periode = 18.februar(2020).somPeriode())
         val andreAnnullert = annuller(andre) ?: fail { "forventet utbetaling" }
         godkjenn(andreAnnullert)
         assertEquals(listOf(andre, tredje), listOf(tredje, andre, første).aktive())
@@ -653,8 +692,8 @@ internal class UtbetalingTest {
             startDato = 1.januar(2020)
         ).betale()
 
-        val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
-        val andre = opprettUtbetaling(tidslinje, tidligere = første)
+        val første = opprettUtbetaling(tidslinje.kutt(19.januar(2020)), periode = 19.januar(2020).somPeriode())
+        val andre = opprettUtbetaling(tidslinje, tidligere = første, periode = tidslinje.periode().endInclusive.somPeriode())
 
         val inspektør1 = første.inspektør.arbeidsgiverOppdrag.inspektør
         val inspektør2 = andre.inspektør.arbeidsgiverOppdrag.inspektør
@@ -838,8 +877,8 @@ internal class UtbetalingTest {
         val tidslinje = beregnUtbetalinger(
             tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0), 5.UKJ, 23.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0))
         )
-        val første = opprettUtbetaling(tidslinje.kutt(31.januar))
-        val andre = opprettUtbetaling(tidslinje.kutt(20.februar), første)
+        val første = opprettUtbetaling(tidslinje.kutt(31.januar), periode = 31.januar.somPeriode())
+        val andre = opprettUtbetaling(tidslinje.kutt(20.februar), første, periode = 20.februar.somPeriode())
         val tredje = opprettUtbetaling(tidslinje, andre)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertEquals(andre.inspektør.personOppdrag.fagsystemId(), tredje.inspektør.personOppdrag.fagsystemId())
@@ -860,8 +899,8 @@ internal class UtbetalingTest {
     @Test
     fun `korrelasjonsId er lik på arbeidsgiveroppdrag fra Infotrygd`() {
         val tidslinje = beregnUtbetalinger(tidslinjeOf(16.AP, 15.NAV, 5.UKJ, 23.NAV))
-        val første = opprettUtbetaling(tidslinje.kutt(31.januar))
-        val andre = opprettUtbetaling(tidslinje.kutt(20.februar), første)
+        val første = opprettUtbetaling(tidslinje.kutt(31.januar), periode = 31.januar.somPeriode())
+        val andre = opprettUtbetaling(tidslinje.kutt(20.februar), første, periode = 20.februar.somPeriode())
         val tredje = opprettUtbetaling(tidslinje, andre)
         assertNotEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
         assertEquals(andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), tredje.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
@@ -1068,11 +1107,11 @@ internal class UtbetalingTest {
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje,
-        sisteDato: LocalDate = tidslinje.periode().endInclusive,
+        periode: Periode = tidslinje.periode(),
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = opprettUbetaltUtbetaling(tidslinje, null, sisteDato, fødselsnummer, orgnummer, aktivitetslogg)
+    ) = opprettUbetaltUtbetaling(tidslinje, null, periode, fødselsnummer, orgnummer, aktivitetslogg)
         .also { godkjenn(it) }
     private fun opprettGodkjentUtbetaling() =
         opprettGodkjentUtbetaling(beregnUtbetalinger(tidslinjeOf(16.AP, 5.NAV(3000))))
@@ -1080,7 +1119,7 @@ internal class UtbetalingTest {
     private fun opprettUbetaltUtbetaling(
         tidslinje: Utbetalingstidslinje,
         tidligere: Utbetaling? = null,
-        sisteDato: LocalDate = tidslinje.periode().endInclusive,
+        periode: Periode = tidslinje.periode(),
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
@@ -1090,7 +1129,7 @@ internal class UtbetalingTest {
         UUID.randomUUID(),
         orgnummer,
         tidslinje,
-        sisteDato.somPeriode(),
+        periode,
         aktivitetslogg,
         LocalDate.MAX,
         100,
@@ -1100,11 +1139,11 @@ internal class UtbetalingTest {
     private fun opprettUtbetaling(
         tidslinje: Utbetalingstidslinje,
         tidligere: Utbetaling? = null,
-        sisteDato: LocalDate = tidslinje.periode().endInclusive,
+        periode: Periode = tidslinje.periode(),
         fødselsnummer: String = UNG_PERSON_FNR_2018,
         orgnummer: String = ORGNUMMER,
         aktivitetslogg: Aktivitetslogg = this.aktivitetslogg
-    ) = opprettUbetaltUtbetaling(tidslinje, tidligere, sisteDato, fødselsnummer, orgnummer, aktivitetslogg).also { utbetaling ->
+    ) = opprettUbetaltUtbetaling(tidslinje, tidligere, periode, fødselsnummer, orgnummer, aktivitetslogg).also { utbetaling ->
         godkjenn(utbetaling)
         listOf(utbetaling.inspektør.arbeidsgiverOppdrag, utbetaling.inspektør.personOppdrag)
             .filter { it.harUtbetalinger() }

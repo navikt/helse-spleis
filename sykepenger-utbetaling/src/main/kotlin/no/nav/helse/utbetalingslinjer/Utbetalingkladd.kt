@@ -41,10 +41,10 @@ class Utbetalingkladd(
         )
     }
 
-    fun forrigeUtbetalte(utbetalinger: List<Utbetaling>): List<Utbetaling> {
+    fun forrigeUtbetalte(utbetalinger: List<Utbetaling>, vedtaksperiode: Periode): List<Utbetaling> {
         // fordi arbeidsgiverperioder kan slås sammen eller splittes opp så kan det hende vi finner
         // mer enn én utbetaling som dekker perioden vår
-        return utbetalinger.aktive(periode)
+        return utbetalinger.aktive(periode.oppdaterTom(vedtaksperiode))
     }
 
     fun opphørerHale(other: Periode) = this.periode.endInclusive < other.endInclusive

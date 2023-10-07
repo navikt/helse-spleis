@@ -306,7 +306,7 @@ class Utbetaling private constructor(
                 )
             }
 
-            val forrigeUtbetalte = kladden.forrigeUtbetalte(utbetalinger)
+            val forrigeUtbetalte = kladden.forrigeUtbetalte(utbetalinger, periode)
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull { it.harOppdragMedUtbetalinger() } ?: forrigeUtbetalte.firstOrNull()
 
             val nyUtbetaling = if (korrelerendeUtbetaling == null) {

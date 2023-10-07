@@ -2,6 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -23,11 +25,13 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.OVERFØRT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,6 +50,39 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling(ORGNUMMER)
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertEquals(Utbetalingstatus.ANNULLERT, inspektør.utbetaling(1).inspektør.tilstand)
+    }
+
+    @Test
+    fun `periode med syk nav strekkes tilbake med foreldrepenger - opphører tidligere utbetaling`() {
+        håndterSøknad(Sykdom(1.februar, 2.februar, 100.prosent))
+        håndterInntektsmelding(emptyList(), 1.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.januar til 31.januar))
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterOverstyrTidslinje(
+            (1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
+            listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
+        )
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.januar til 31.januar))
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        val utbetaling = inspektør.utbetaling(0).inspektør
+        val revurdering = inspektør.utbetaling(1).inspektør
+        assertEquals(utbetaling.korrelasjonsId, revurdering.korrelasjonsId)
+        assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
+        revurdering.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(1.februar til 1.februar, linje.fom til linje.tom)
+            assertEquals(Endringskode.ENDR, linje.endringskode)
+            assertEquals("OPPH", linje.statuskode)
+            assertEquals(1.februar, linje.datoStatusFom)
+            assertEquals(1, linje.delytelseId)
+            Assertions.assertNull(linje.refDelytelseId)
+        }
     }
 
     @Test
