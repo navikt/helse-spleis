@@ -148,6 +148,33 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         assertVarsel(RV_IM_3, 3.vedtaksperiode.filter())
     }
+    @Test
+    fun `uenighet i agp kan delvis bli utbetalt automatisk`() {
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent)) // En periode arbeidsgiver har glemt/ikke fått med seg
+        håndterSøknad(Sykdom(22.januar, 5.februar, 100.prosent))
+        håndterSøknad(Sykdom(6.februar, 6.februar, 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        håndterInntektsmelding(listOf(22.januar til 6.februar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        assertEquals(listOf(1.januar til 15.januar, 22.januar til 22.januar), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
+        assertEquals("PNNNNHH NNNNNHH N", inspektør.utbetalingstidslinjer(2.vedtaksperiode).toString())
+        assertVarsel(RV_IM_3, 3.vedtaksperiode.filter()) // Siste periode som håndterer dager fra IM får varsel (6.feb)
+
+        assertForventetFeil(
+            forklaring = """
+                Vedtaksperiode hvor vi er uenig om arbeidsgiverperioden kan bli automatisert ettersom varsel legges på perioden etter.
+                Slår heller ikke til å på sjekken hvor det er minst én ukedag mellom beregnet agp og vedtaksperioden ettersom det 
+                den her inneholder en agp-dag. Samme ville skjedd om det var kant-i-kant.
+            """,
+            nå = { assertIngenVarsler(2.vedtaksperiode.filter()) },
+            ønsket = { assertVarsel(RV_IM_3, 2.vedtaksperiode.filter()) }
+        )
+    }
 
     @Test
     fun `periode som begynner på siste dag i arbeidsgiverperioden`() {
