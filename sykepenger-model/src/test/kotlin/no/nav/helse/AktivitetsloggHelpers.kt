@@ -2,9 +2,9 @@ package no.nav.helse
 
 import java.util.UUID
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitet.Behov.Behovtype, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
     antallEtterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
