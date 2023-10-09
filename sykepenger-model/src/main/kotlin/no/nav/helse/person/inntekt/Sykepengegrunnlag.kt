@@ -47,6 +47,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.mark
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omregnedeÅrsinntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
@@ -420,6 +421,7 @@ internal class Sykepengegrunnlag private constructor(
         if (er6GBegrenset()) builder.tag6GBegrenset()
         builder.inntektskilde(inntektskilde())
         builder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
+        arbeidsgiverInntektsopplysninger.omregnedeÅrsinntekter(builder)
     }
 
     enum class Begrensning {

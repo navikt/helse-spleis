@@ -10,6 +10,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -276,5 +277,9 @@ class ArbeidsgiverInntektsopplysning(
             organisasjonsnummer: String,
             block: (inntektsmeldingId: UUID) -> Unit
         ) = single { it.gjelder(organisasjonsnummer) }.inntektsopplysning.leggTil(hendelseIder, block)
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(builder: GodkjenningsbehovBuilder) {
+            this.forEach{it.inntektsopplysning.omregnetÅrsinntekt(builder, it.orgnummer)}
+        }
     }
 }

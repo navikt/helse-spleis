@@ -231,9 +231,19 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(behov.path("utbetalingId").asText().isNotEmpty())
         assertDato(godkjenning.path("periodeFom").asText())
         assertDato(godkjenning.path("periodeTom").asText())
+        assertDato(godkjenning.path("skjæringstidspunkt").asText())
         assertTrue(godkjenning.path("periodetype").asText().isNotEmpty())
-        assertTrue(godkjenning.path("utbetalingtype").asText().isNotEmpty())
         assertTrue(godkjenning.path("førstegangsbehandling").isBoolean)
+        assertTrue(godkjenning.path("utbetalingtype").asText().isNotEmpty())
+        assertTrue(godkjenning.path("inntektskilde").asText().isNotEmpty())
+        assertTrue(godkjenning.path("orgnummereMedRelevanteArbeidsforhold").isArray)
+        assertFalse(godkjenning.path("orgnummereMedRelevanteArbeidsforhold").isEmpty)
+        assertTrue(godkjenning.path("tags").isArray)
+        assertTrue(godkjenning.path("kanAvvises").isBoolean)
+        assertTrue(godkjenning.path("omregnedeÅrsinntekter").isArray)
+        assertFalse(godkjenning.path("omregnedeÅrsinntekter").isEmpty)
+        assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("organisasjonsnummer").asText().isNotEmpty())
+        assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("beløp").isDouble)
     }
 
     private fun assertUtbetalingdetaljer(behov: JsonNode, erAnnullering: Boolean = false) {

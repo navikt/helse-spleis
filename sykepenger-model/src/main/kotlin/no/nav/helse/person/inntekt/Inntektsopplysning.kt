@@ -11,6 +11,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
@@ -111,6 +112,10 @@ abstract class Inntektsopplysning protected constructor(
     ) {}
 
     internal open fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, block: (inntektsmeldingId: UUID) -> Unit) {}
+
+    internal fun omregnetÅrsinntekt(builder: GodkjenningsbehovBuilder, orgnummer: String) {
+        builder.omregnedeÅrsinntekter(orgnummer, omregnetÅrsinntekt().beløp.reflection { årlig, _, _, _ -> årlig })
+    }
 
     internal companion object {
         internal fun erOmregnetÅrsinntektEndret(før: Inntektsopplysning, etter: Inntektsopplysning) =

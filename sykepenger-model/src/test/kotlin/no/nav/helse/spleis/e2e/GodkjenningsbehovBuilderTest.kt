@@ -22,7 +22,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `arbeidsgiverutbetaling`() {
         tilGodkjenning(1.januar, 31.januar, a1)
-        assertGodkjenningsbehov(tags = setOf("ARBEIDSGIVERUTBETALING"))
+        assertGodkjenningsbehov(tags = setOf("ARBEIDSGIVERUTBETALING"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)))
     }
 
     @Test
@@ -91,13 +91,21 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             a1,
             beregnetInntekt = 50000.månedlig
         )
-        assertGodkjenningsbehov(tags = setOf("ARBEIDSGIVERUTBETALING", "6G_BEGRENSET"))
+        assertGodkjenningsbehov(tags = setOf("ARBEIDSGIVERUTBETALING", "6G_BEGRENSET"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 600000.0)))
     }
 
     @Test
     fun `flere arbeidsgivere`() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
-        assertGodkjenningsbehov(tags = setOf("ARBEIDSGIVERUTBETALING", "FLERE_ARBEIDSGIVERE"), inntektskilde = "FLERE_ARBEIDSGIVERE", orgnummere = setOf(a1, a2))
+        assertGodkjenningsbehov(
+            tags = setOf("ARBEIDSGIVERUTBETALING", "FLERE_ARBEIDSGIVERE"),
+            inntektskilde = "FLERE_ARBEIDSGIVERE",
+            orgnummere = setOf(a1, a2),
+            omregnedeÅrsinntekter = listOf(
+                mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0),
+                mapOf("organisasjonsnummer" to a2, "beløp" to 240000.0)
+            )
+        )
     }
 
     private fun assertGodkjenningsbehov(
@@ -111,7 +119,8 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         periodeType: String = "FØRSTEGANGSBEHANDLING",
         førstegangsbehandling: Boolean = true,
         utbetalingstype: String = "UTBETALING",
-        inntektskilde: String = "EN_ARBEIDSGIVER"
+        inntektskilde: String = "EN_ARBEIDSGIVER",
+        omregnedeÅrsinntekter: List<Map<String, Any>> = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.reflection { årlig, _, _, _ ->  årlig }))
     ) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         val actualSkjæringstidspunkt = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "skjæringstidspunkt")!!
@@ -123,6 +132,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         val actualUtbetalingtype = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "utbetalingtype")!!
         val actualOrgnummereMedRelevanteArbeidsforhold = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "orgnummereMedRelevanteArbeidsforhold")!!
         val actualKanAvises = hentFelt<Boolean>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "kanAvvises")!!
+        val actualOmregnedeÅrsinntekter = hentFelt<List<Map<String, String>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "omregnedeÅrsinntekter")!!
 
 
         assertTrue(actualtags.containsAll(tags) )
@@ -135,6 +145,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         assertEquals(utbetalingstype, actualUtbetalingtype)
         assertEquals(orgnummere, actualOrgnummereMedRelevanteArbeidsforhold)
         assertEquals(kanAvvises, actualKanAvises)
+        assertEquals(omregnedeÅrsinntekter, actualOmregnedeÅrsinntekter)
     }
 
     private inline fun <reified T>hentFelt(vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1), feltNavn: String) = hendelselogg.etterspurtBehov<T>(

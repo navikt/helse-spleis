@@ -12,6 +12,7 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
     private lateinit var utbetalingtype: String
     private lateinit var inntektskilde: UtbetalingInntektskilde
     private lateinit var orgnummereMedRelevanteArbeidsforhold: Set<String>
+    private val omregnedeÅrsinntekter: MutableList<Map<String, Any>> = mutableListOf()
 
     fun tag6GBegrenset() = tags.add("6G_BEGRENSET")
     fun tagFlereArbeidsgivere(antall: Int) {
@@ -56,6 +57,9 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
         if (arbeidsgiverNettoBeløp == 0 && personNettoBeløp == 0) tags.add("INGEN_UTBETALING")
     }
 
+    fun omregnedeÅrsinntekter(orgnummer: String, omregnetÅrsinntekt: Double) = apply {
+        omregnedeÅrsinntekter.add(mapOf("organisasjonsnummer" to orgnummer, "beløp" to omregnetÅrsinntekt))
+    }
 
     fun build() = mapOf(
         "periodeFom" to periodeFom.toString(),
@@ -67,7 +71,8 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
         "inntektskilde" to inntektskilde.name,
         "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
         "tags" to tags,
-        "kanAvvises" to kanAvvises
+        "kanAvvises" to kanAvvises,
+        "omregnedeÅrsinntekter" to omregnedeÅrsinntekter
     )
 
 
