@@ -6,7 +6,6 @@ import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -56,8 +55,8 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
-import no.nav.helse.utbetalingslinjer.TagBuilder
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
+import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -417,9 +416,9 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
     }
 
-    internal fun tags(tagBuilder: TagBuilder) {
-        if (er6GBegrenset()) tagBuilder.tag6GBegrenset()
-        tagBuilder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
+    internal fun byggGodkjenningsbehov(builder: GodkjenningsbehovBuilder) {
+        if (er6GBegrenset()) builder.tag6GBegrenset()
+        builder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
     }
 
     enum class Begrensning {

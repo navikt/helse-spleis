@@ -116,12 +116,12 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val orgnummereMedRelevanteArbeidsforhold = hendelselogg.etterspurtBehov<List<String>>(
+        val orgnummereMedRelevanteArbeidsforhold = hendelselogg.etterspurtBehov<Set<String>>(
             vedtaksperiodeId = 1.vedtaksperiode.id(a1),
             behov = Aktivitet.Behov.Behovtype.Godkjenning,
             felt = "orgnummereMedRelevanteArbeidsforhold"
         )
-        assertEquals(listOf(a1, a2), orgnummereMedRelevanteArbeidsforhold)
+        assertEquals(setOf(a1, a2), orgnummereMedRelevanteArbeidsforhold)
     }
 
     @Test

@@ -24,7 +24,7 @@ import no.nav.helse.serde.api.dto.Utbetalingtype
 import no.nav.helse.serde.api.speil.Generasjoner
 import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.beregnet
 import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.uberegnet
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass

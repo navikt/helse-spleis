@@ -12,10 +12,9 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.TagBuilder
+import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
-import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagElement, Utbetaling, Sykdomstidslinje>>) {
@@ -92,27 +91,8 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
 
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
 
-    internal fun godkjenning(
-        hendelse: IAktivitetslogg,
-        periode: Periode,
-        skjæringstidspunkt: LocalDate,
-        periodetype: UtbetalingPeriodetype,
-        førstegangsbehandling: Boolean,
-        orgnummereMedRelevanteArbeidsforhold: List<String>,
-        tagBuilder: TagBuilder,
-        kanAvvises: Boolean
-    ) {
-        siste!!.godkjenning(
-            hendelse = hendelse,
-            periode = periode,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype,
-            førstegangsbehandling = førstegangsbehandling,
-            inntektskilde = sisteVilkårsgrunnlag!!.inntektskilde(),
-            orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-            tagBuilder = tagBuilder,
-            kanAvvises = kanAvvises
-        )
+    internal fun godkjenning(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+        siste!!.godkjenning(hendelse, builder)
     }
 
     internal fun nyUtbetaling(

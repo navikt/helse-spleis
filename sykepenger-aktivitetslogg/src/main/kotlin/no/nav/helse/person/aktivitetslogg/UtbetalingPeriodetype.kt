@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingslinjer
+package no.nav.helse.person.aktivitetslogg
 
 enum class UtbetalingPeriodetype {
     /** Perioden er første periode i et sykdomstilfelle */

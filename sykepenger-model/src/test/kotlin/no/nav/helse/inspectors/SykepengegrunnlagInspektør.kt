@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
-import no.nav.helse.utbetalingslinjer.UtbetalingInntektskilde
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Avviksprosent
 import kotlin.math.roundToInt

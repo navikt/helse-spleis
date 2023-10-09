@@ -239,33 +239,8 @@ sealed class Aktivitet(
                 )
             }
 
-            fun godkjenning(
-                aktivitetslogg: IAktivitetslogg,
-                periodeFom: LocalDate,
-                periodeTom: LocalDate,
-                skjæringstidspunkt: LocalDate,
-                periodetype: String,
-                førstegangsbehandling: Boolean,
-                utbetalingtype: String,
-                inntektskilde: String,
-                orgnummereMedRelevanteArbeidsforhold: List<String>,
-                tags: Set<String>,
-                kanAvvises: Boolean
-            ) {
-                aktivitetslogg.behov(
-                    Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", mapOf(
-                        "periodeFom" to periodeFom.toString(),
-                        "periodeTom" to periodeTom.toString(),
-                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-                        "periodetype" to periodetype,
-                        "førstegangsbehandling" to førstegangsbehandling,
-                        "utbetalingtype" to utbetalingtype,
-                        "inntektskilde" to inntektskilde,
-                        "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
-                        "tags" to tags,
-                        "kanAvvises" to kanAvvises
-                    )
-                )
+            fun godkjenning(aktivitetslogg: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+                aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", builder.build())
             }
         }
 

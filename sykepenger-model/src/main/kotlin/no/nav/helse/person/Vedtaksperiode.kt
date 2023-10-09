@@ -138,9 +138,8 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.utbetalingslinjer.TagBuilder
+import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.UtbetalingPeriodetype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.IKKE_UTBETALT
@@ -942,28 +941,15 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
         val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt))
-        val tagBuilder = TagBuilder()
-        vilkårsgrunnlag.tags(tagBuilder)
         val erForlengelse = erForlengelse()
-        utbetalinger.godkjenning(
-            hendelse = hendelse,
-            periode = periode,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = when (erForlengelse) {
-                true -> when (vilkårsgrunnlag) {
-                    is InfotrygdVilkårsgrunnlag -> UtbetalingPeriodetype.INFOTRYGDFORLENGELSE
-                    else -> UtbetalingPeriodetype.FORLENGELSE
-                }
-                false -> when (vilkårsgrunnlag) {
-                    is InfotrygdVilkårsgrunnlag -> UtbetalingPeriodetype.OVERGANG_FRA_IT
-                    else -> UtbetalingPeriodetype.FØRSTEGANGSBEHANDLING
-                }
-            },
-            førstegangsbehandling = !erForlengelse,
-            tagBuilder = tagBuilder,
-            orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt),
-            kanAvvises = arbeidsgiver.kanForkastes(this)
-        )
+        val builder = GodkjenningsbehovBuilder(erForlengelse, arbeidsgiver.kanForkastes(this))
+        builder.periode(periode.start, periode.endInclusive)
+        builder.skjæringstidspunkt(skjæringstidspunkt)
+        builder.erInfotrygd(vilkårsgrunnlag is InfotrygdVilkårsgrunnlag)
+        builder.inntektskilde(vilkårsgrunnlag.inntektskilde())
+        builder.orgnummereMedRelevanteArbeidsforhold(person.relevanteArbeidsgivere(skjæringstidspunkt).toSet())
+        vilkårsgrunnlag.byggGodkjenningsbehov(builder)
+        utbetalinger.godkjenning(hendelse, builder)
     }
 
     internal fun gjenopptaBehandling(hendelse: IAktivitetslogg, arbeidsgivere: Iterable<Arbeidsgiver>) {

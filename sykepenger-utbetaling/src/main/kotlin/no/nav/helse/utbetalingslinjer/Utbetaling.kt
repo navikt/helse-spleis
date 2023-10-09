@@ -10,8 +10,9 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
@@ -161,30 +162,9 @@ class Utbetaling private constructor(
         tilstand.simuler(this, hendelse)
     }
 
-    fun godkjenning(
-        hendelse: IAktivitetslogg,
-        periode: Periode,
-        skjæringstidspunkt: LocalDate,
-        periodetype: UtbetalingPeriodetype,
-        førstegangsbehandling: Boolean,
-        inntektskilde: UtbetalingInntektskilde,
-        orgnummereMedRelevanteArbeidsforhold: List<String>,
-        tagBuilder: TagBuilder,
-        kanAvvises: Boolean
-    ) {
+    fun godkjenning(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
         hendelse.kontekst(this)
-        tilstand.godkjenning(
-            this,
-            periode,
-            skjæringstidspunkt,
-            periodetype,
-            førstegangsbehandling,
-            inntektskilde,
-            orgnummereMedRelevanteArbeidsforhold,
-            hendelse,
-            tagBuilder,
-            kanAvvises
-        )
+        tilstand.godkjenning(this, hendelse, builder)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -564,15 +544,8 @@ class Utbetaling private constructor(
 
         fun godkjenning(
             utbetaling: Utbetaling,
-            periode: Periode,
-            skjæringstidspunkt: LocalDate,
-            periodetype: UtbetalingPeriodetype,
-            førstegangsbehandling: Boolean,
-            inntektskilde: UtbetalingInntektskilde,
-            orgnummereMedRelevanteArbeidsforhold: List<String>,
             hendelse: IAktivitetslogg,
-            tagBuilder: TagBuilder,
-            kanAvvises: Boolean
+            builder: GodkjenningsbehovBuilder
         ) {
             hendelse.info("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_13)
@@ -612,38 +585,21 @@ class Utbetaling private constructor(
             utbetaling.personOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
         }
 
-        override fun godkjenning(
-            utbetaling: Utbetaling,
-            periode: Periode,
-            skjæringstidspunkt: LocalDate,
-            periodetype: UtbetalingPeriodetype,
-            førstegangsbehandling: Boolean,
-            inntektskilde: UtbetalingInntektskilde,
-            orgnummereMedRelevanteArbeidsforhold: List<String>,
-            hendelse: IAktivitetslogg,
-            tagBuilder: TagBuilder,
-            kanAvvises: Boolean
-        ) {
-            godkjenning(
+        override fun godkjenning(utbetaling: Utbetaling, hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+            builder.utbetalingtype(utbetaling.type.name)
+            tags(builder, utbetaling)
+
+            Aktivitet.Behov.godkjenning(
                 aktivitetslogg = hendelse,
-                periodeFom = periode.start,
-                periodeTom = periode.endInclusive,
-                skjæringstidspunkt = skjæringstidspunkt,
-                periodetype = periodetype.name,
-                førstegangsbehandling = førstegangsbehandling,
-                utbetalingtype = utbetaling.type.name,
-                inntektskilde = inntektskilde.name,
-                orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-                tags = tags(tagBuilder, utbetaling).build(),
-                kanAvvises = kanAvvises
+                builder = builder
             )
         }
 
-        private fun tags(tagBuilder: TagBuilder, utbetaling: Utbetaling): TagBuilder {
+        private fun tags(builder: GodkjenningsbehovBuilder, utbetaling: Utbetaling): GodkjenningsbehovBuilder {
             val arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag.nettoBeløp()
             val personNettoBeløp = utbetaling.personOppdrag.nettoBeløp()
-            tagBuilder.tagUtbetaling(arbeidsgiverNettoBeløp, personNettoBeløp)
-            return tagBuilder
+            builder.tagUtbetaling(arbeidsgiverNettoBeløp, personNettoBeløp)
+            return builder
         }
     }
 
@@ -872,8 +828,6 @@ enum class Utbetalingstatus {
 
 enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
 enum class Endringskode { NY, UEND, ENDR }
-/* en enum-port/adapter-greie. Alternativet er en modul som inneholder ... kodeverk */
-enum class UtbetalingInntektskilde { EN_ARBEIDSGIVER, FLERE_ARBEIDSGIVERE }
 
 enum class Klassekode(val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
