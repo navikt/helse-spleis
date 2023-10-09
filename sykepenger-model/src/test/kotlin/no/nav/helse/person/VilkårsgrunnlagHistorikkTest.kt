@@ -25,6 +25,7 @@ import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsfor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.serde.migration.Sykefraværstilfeller
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
@@ -48,6 +49,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
@@ -108,12 +110,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
 
-        val sykdomstidslinje = resetSeed(nyttSkjæringstidspunkt) { 31.S }
-        val skjæringstidspunkter = sykdomstidslinje.skjæringstidspunkter()
-        assertEquals(listOf(nyttSkjæringstidspunkt), skjæringstidspunkter)
-
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
-        historikk.oppdaterHistorikk(Aktivitetslogg(), sykdomstidslinje.skjæringstidspunkter())
+        historikk.oppdaterHistorikk(Aktivitetslogg(), sykefraværstilfeller(nyttSkjæringstidspunkt))
 
         assertEquals(2, historikk.inspektør.vilkårsgrunnlagTeller.size)
         assertEquals(0, historikk.inspektør.vilkårsgrunnlagTeller[0]) { "det siste innslaget skal være tomt" }
@@ -593,4 +591,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             )
         )
     }
+
+    private fun sykefraværstilfeller(vararg dato: LocalDate) =
+        dato.map {
+            Sykefraværstilfelleeventyr(it, listOf(
+                Triple(UUID.randomUUID(), "orgnr", 1.januar til 31.januar)
+            ))
+        }
 }

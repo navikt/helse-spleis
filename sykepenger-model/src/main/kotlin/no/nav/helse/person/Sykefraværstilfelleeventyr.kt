@@ -22,6 +22,8 @@ internal class Sykefraværstilfelleeventyr(private val dato: LocalDate, private 
         )
 
     internal companion object {
+        fun List<Sykefraværstilfelleeventyr>.erAktivtSkjæringstidspunkt(dato: LocalDate) =
+            any { sykefraværstilfelle -> sykefraværstilfelle.dato == dato && sykefraværstilfelle.perioder.isNotEmpty() }
         fun List<Sykefraværstilfelleeventyr>.bliMed(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode, skjæringstidspunkt: LocalDate): List<Sykefraværstilfelleeventyr> = with(sortedBy { it.dato }) {
             val riktig = finnSisteSykefraværstilfelleFørSykdomsperioden(skjæringstidspunkt)
             if (riktig == -1) return@with lagNyttSykefraværstilfelleForPeriode(vedtaksperiodeId, organisasjonsnummer, periode)
@@ -37,9 +39,10 @@ internal class Sykefraværstilfelleeventyr(private val dato: LocalDate, private 
         private fun List<Sykefraværstilfelleeventyr>.lagNyttSykefraværstilfelleForPeriode(vedtaksperiodeId: UUID, organisasjonsnummer: String, periode: Periode) =
             listOf(Sykefraværstilfelleeventyr(periode.start, listOf(Triple(vedtaksperiodeId, organisasjonsnummer, periode)))) + this
 
-        internal fun List<Sykefraværstilfelleeventyr>.varsleObservers(observers: List<SykefraværstilfelleeventyrObserver>) {
+        internal fun List<Sykefraværstilfelleeventyr>.varsleObservers(observers: List<SykefraværstilfelleeventyrObserver>): List<Sykefraværstilfelleeventyr> {
             val event = sortedBy { it.dato }.map { it.tilObserverEvent() }
             observers.forEach { it.sykefraværstilfelle(event) }
+            return this
         }
     }
 }

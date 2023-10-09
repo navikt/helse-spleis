@@ -43,7 +43,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
-import no.nav.helse.person.Arbeidsgiver.Companion.forkastAUUSomErUtbetaltIInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -658,11 +657,10 @@ class Person private constructor(
     }
 
     internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
-        val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
-        arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
+        val sykefraværstilfeller = arbeidsgivere.fold(skjæringstidspunkter().map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
             arbeidsgiver.sykefraværsfortelling(acc)
         }.varsleObservers(observers)
-        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkterEtterEndring)
+        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller)
     }
 
     internal fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {

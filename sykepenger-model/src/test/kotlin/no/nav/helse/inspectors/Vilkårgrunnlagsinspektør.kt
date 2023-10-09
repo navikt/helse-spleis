@@ -110,6 +110,8 @@ internal class VilkårgrunnlagInnslagInspektør(innslag: VilkårsgrunnlagHistori
 internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() = GrunnlagsdataInspektør(this)
 
 internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) : VilkårsgrunnlagHistorikkVisitor {
+    internal lateinit var skjæringstidspunkt: LocalDate
+        private set
     internal lateinit var sykepengegrunnlag: Sykepengegrunnlag
         private set
     internal lateinit var sammenligningsgrunnlag: Sammenligningsgrunnlag
@@ -143,6 +145,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         vilkårsgrunnlagId: UUID,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
+        this.skjæringstidspunkt = skjæringstidspunkt
         this.sykepengegrunnlag = sykepengegrunnlag
         this.opptjening = opptjening
         this.meldingsreferanseId = meldingsreferanseId
@@ -160,6 +163,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID
     ) {
+        this.skjæringstidspunkt = skjæringstidspunkt
         this.sykepengegrunnlag = sykepengegrunnlag
         this.vilkårsgrunnlagId = vilkårsgrunnlagId
         this.type = "Infotrygd"

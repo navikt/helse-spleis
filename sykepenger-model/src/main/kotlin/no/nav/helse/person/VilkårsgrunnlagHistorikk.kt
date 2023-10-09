@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.erAktivtSkjæringstidspunkt
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -65,8 +66,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagFor(skjæringstidspunkt)?.build(builder)
     }
 
-    internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, skjæringstidspunkter: List<LocalDate>) {
-        val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter) ?: return
+    internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: List<Sykefraværstilfelleeventyr>) {
+        val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller) ?: return
         if (nyttInnslag == sisteInnlag()) return
         historikk.add(0, nyttInnslag)
     }
@@ -172,11 +173,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return this.vilkårsgrunnlag == other.vilkårsgrunnlag
         }
 
-        internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, skjæringstidspunkter: List<LocalDate>): Innslag {
-            val gyldigeVilkårsgrunnlag = vilkårsgrunnlag.filter { (key, _)-> key in skjæringstidspunkter }
+        internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: List<Sykefraværstilfelleeventyr>): Innslag {
+            val gyldigeVilkårsgrunnlag = beholdAktiveSkjæringstidspunkter(sykefraværstilfeller)
             val diff = this.vilkårsgrunnlag.size - gyldigeVilkårsgrunnlag.size
             if (diff > 0) aktivitetslogg.info("Fjernet $diff vilkårsgrunnlagselementer")
             return Innslag(gyldigeVilkårsgrunnlag)
+        }
+
+        private fun beholdAktiveSkjæringstidspunkter(sykefraværstilfeller: List<Sykefraværstilfelleeventyr>): Map<LocalDate, VilkårsgrunnlagElement> {
+            return vilkårsgrunnlag.filter { (dato, _) -> sykefraværstilfeller.erAktivtSkjæringstidspunkt(dato) }
         }
 
         internal fun gjennoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?)  = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) }

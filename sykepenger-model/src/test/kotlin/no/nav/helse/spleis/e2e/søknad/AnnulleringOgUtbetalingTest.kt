@@ -233,7 +233,6 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         nullstillTilstandsendringer()
 
         håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent), Ferie(3.mars, 26.mars))
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
