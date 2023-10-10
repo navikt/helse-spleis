@@ -1,7 +1,6 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.ForlengelseFraInfotrygd
 
 internal class V11LeggeTilForlengelseFraInfotrygd : JsonMigration(version = 11) {
 
@@ -10,7 +9,7 @@ internal class V11LeggeTilForlengelseFraInfotrygd : JsonMigration(version = 11) 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
-                (periode as ObjectNode).put("forlengelseFraInfotrygd", ForlengelseFraInfotrygd.IKKE_ETTERSPURT.name)
+                (periode as ObjectNode).put("forlengelseFraInfotrygd", "IKKE_ETTERSPURT")
             }
         }
     }

@@ -16,7 +16,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toJsonList
 import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
@@ -234,7 +233,6 @@ internal class JsonBuilder : AbstractBuilder() {
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
-            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
@@ -1410,7 +1408,6 @@ internal class JsonBuilder : AbstractBuilder() {
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
-            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>
         ) {
             pushState(VedtaksperiodeState(
@@ -1602,7 +1599,6 @@ internal class JsonBuilder : AbstractBuilder() {
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
-            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>
         ) {
             vedtaksperiodeMap.putAll(mutableMapOf(
@@ -1621,7 +1617,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 "utbetalinger" to this.utbetalinger,
                 "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
                 "skjæringstidspunkt" to skjæringstidspunkt(),
-                "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
                 "opprettet" to opprettet,
                 "oppdatert" to oppdatert
             ))

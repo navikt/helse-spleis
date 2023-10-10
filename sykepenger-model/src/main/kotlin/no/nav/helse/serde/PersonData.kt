@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
@@ -871,7 +870,6 @@ internal data class PersonData(
             private val tilstand: TilstandType,
             private val utbetalinger: List<VedtaksperiodeUtbetalingData>,
             private val utbetalingstidslinje: UtbetalingstidslinjeData,
-            private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
@@ -939,7 +937,6 @@ internal data class PersonData(
                         utbetalinger = this.utbetalinger.tilModellobjekt(grunnlagoppslag, utbetalinger)
                     ),
                     utbetalingstidslinje = this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
-                    forlengelseFraInfotrygd = forlengelseFraInfotrygd,
                     opprettet = opprettet,
                     oppdatert = oppdatert,
                     medVedtaksperiode = jurist

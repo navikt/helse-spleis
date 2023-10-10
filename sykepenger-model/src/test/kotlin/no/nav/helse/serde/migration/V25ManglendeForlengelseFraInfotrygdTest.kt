@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.januar
@@ -21,16 +20,16 @@ internal class V25ManglendeForlengelseFraInfotrygdTest {
     @Test
     fun `ferdigbygd json blir migrert riktig`() {
         val original = objectMapper.readTree(testperson(
-            Pair(Periode(1.januar, 31.januar), ForlengelseFraInfotrygd.JA),
-            Pair(Periode(1.februar, 10.februar), ForlengelseFraInfotrygd.IKKE_ETTERSPURT),
-            Pair(Periode(11.februar, 25.februar), ForlengelseFraInfotrygd.IKKE_ETTERSPURT),
+            Pair(Periode(1.januar, 31.januar), "JA"),
+            Pair(Periode(1.februar, 10.februar), "IKKE_ETTERSPURT"),
+            Pair(Periode(11.februar, 25.februar), "IKKE_ETTERSPURT"),
             skjemaversjon = 24
         ))
 
         val expected = objectMapper.readTree(testperson(
-            Pair(Periode(1.januar, 31.januar), ForlengelseFraInfotrygd.JA),
-            Pair(Periode(1.februar, 10.februar), ForlengelseFraInfotrygd.JA),
-            Pair(Periode(11.februar, 25.februar), ForlengelseFraInfotrygd.JA),
+            Pair(Periode(1.januar, 31.januar), "JA"),
+            Pair(Periode(1.februar, 10.februar), "JA"),
+            Pair(Periode(11.februar, 25.februar), "JA"),
             skjemaversjon = 25
         ))
 
@@ -40,18 +39,18 @@ internal class V25ManglendeForlengelseFraInfotrygdTest {
     @Test
     fun `forlengelseFraInfotrygd overføres kun til forlengelser`() {
         val original = objectMapper.readTree(testperson(
-            Pair(Periode(1.januar, 31.januar), ForlengelseFraInfotrygd.JA),
-            Pair(Periode(1.februar, 10.februar), ForlengelseFraInfotrygd.IKKE_ETTERSPURT),
-            Pair(Periode(11.februar, 25.februar), ForlengelseFraInfotrygd.IKKE_ETTERSPURT),
-            Pair(Periode(1.april, 20.april), ForlengelseFraInfotrygd.NEI),
+            Pair(Periode(1.januar, 31.januar), "JA"),
+            Pair(Periode(1.februar, 10.februar), "IKKE_ETTERSPURT"),
+            Pair(Periode(11.februar, 25.februar), "IKKE_ETTERSPURT"),
+            Pair(Periode(1.april, 20.april), "NEI"),
             skjemaversjon = 24
         ))
 
         val expected = objectMapper.readTree(testperson(
-            Pair(Periode(1.januar, 31.januar), ForlengelseFraInfotrygd.JA),
-            Pair(Periode(1.februar, 10.februar), ForlengelseFraInfotrygd.JA),
-            Pair(Periode(11.februar, 25.februar), ForlengelseFraInfotrygd.JA),
-            Pair(Periode(1.april, 20.april), ForlengelseFraInfotrygd.NEI),
+            Pair(Periode(1.januar, 31.januar), "JA"),
+            Pair(Periode(1.februar, 10.februar), "JA"),
+            Pair(Periode(11.februar, 25.februar), "JA"),
+            Pair(Periode(1.april, 20.april), "NEI"),
             skjemaversjon = 25
         ))
 
@@ -61,7 +60,7 @@ internal class V25ManglendeForlengelseFraInfotrygdTest {
 }
 
 @Language("JSON")
-private fun testperson(vararg perioder: Pair<Periode, ForlengelseFraInfotrygd>, skjemaversjon: Int) =
+private fun testperson(vararg perioder: Pair<Periode, String>, skjemaversjon: Int) =
     """
     {
       "arbeidsgivere": [
@@ -72,7 +71,7 @@ private fun testperson(vararg perioder: Pair<Periode, ForlengelseFraInfotrygd>, 
                 {
                     "fom": "${periode.start}",
                     "tom": "${periode.endInclusive}",
-                    "forlengelseFraInfotrygd": "${forlengelseFraInfotrygd.name}"
+                    "forlengelseFraInfotrygd": "$forlengelseFraInfotrygd"
                 }
                 """.trimIndent()
             }}

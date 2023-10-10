@@ -43,6 +43,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -50,9 +51,7 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -61,12 +60,9 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -119,7 +115,7 @@ class JsonBuilderTest {
     @Test
     fun `med annullering`() {
         val person = person().apply {
-            håndter(annullering(fangeArbeidsgiverFagsystemId()))
+            håndter(annullering(TestArbeidsgiverInspektør(this, orgnummer).utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()))
         }
         testSerialiseringAvPerson(person)
     }
@@ -148,7 +144,6 @@ class JsonBuilderTest {
                     sendtSøknad = tom
                 )
             )
-            fangeSykdomstidslinje()
             fangeVedtaksperiode()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, dødsdato = 1.januar))
@@ -254,8 +249,6 @@ class JsonBuilderTest {
 
     private lateinit var vedtaksperiodeId: String
     private lateinit var tilstand: TilstandType
-    private lateinit var sykdomstidslinje: Sykdomstidslinje
-    private val utbetalingsliste: MutableMap<String, List<Utbetaling>> = mutableMapOf()
 
     private fun person(
         fom: LocalDate = 1.januar,
@@ -273,7 +266,6 @@ class JsonBuilderTest {
                     sendtSøknad = sendtSøknad
                 )
             )
-            fangeSykdomstidslinje()
             fangeVedtaksperiode()
             håndter(utbetalingshistorikk())
             håndter(inntektsmelding(fom = fom))
@@ -282,7 +274,6 @@ class JsonBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
-            fangeUtbetalinger()
             håndter(utbetalt())
             fangeVedtaksperiode()
         }
@@ -305,7 +296,6 @@ class JsonBuilderTest {
             )
             fangeVedtaksperiode()
             håndter(utbetalingshistorikk())
-            fangeSykdomstidslinje()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(
@@ -320,7 +310,6 @@ class JsonBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
-            fangeUtbetalinger()
             håndter(utbetalt())
             fangeVedtaksperiode()
         }
@@ -394,7 +383,6 @@ class JsonBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
-            fangeUtbetalinger()
             håndter(utbetalt())
         }
 
@@ -430,7 +418,6 @@ class JsonBuilderTest {
                     sendtSøknad = sendtSøknad
                 )
             )
-            fangeSykdomstidslinje()
             fangeVedtaksperiode()
             håndter(utbetalingshistorikk())
             håndter(inntektsmelding(fom = fom))
@@ -439,7 +426,6 @@ class JsonBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
-            fangeUtbetalinger()
             håndter(utbetalt())
             fangeVedtaksperiode()
             håndter(
@@ -504,7 +490,6 @@ class JsonBuilderTest {
                     sendtSøknad = sendtSøknad
                 )
             )
-            fangeSykdomstidslinje()
             fangeVedtaksperiode()
             håndter(utbetalingshistorikk())
             håndter(inntektsmelding(fom = fom))
@@ -533,52 +518,15 @@ class JsonBuilderTest {
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))
             håndter(utbetalingsgodkjenning(vedtaksperiodeId = vedtaksperiodeId))
-            fangeUtbetalinger()
             håndter(utbetalt())
             fangeVedtaksperiode()
         }
-
-
-    private fun Person.fangeUtbetalinger() {
-        utbetalingsliste.clear()
-        accept(object : PersonVisitor {
-            private lateinit var orgnr: String
-            override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-                orgnr = organisasjonsnummer
-            }
-
-            override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-                utbetalingsliste[orgnr] = utbetalinger
-            }
-        })
-    }
 
     private fun Person.fangeVedtaksperiode() {
         inspektør.sisteVedtaksperiodeTilstander().entries.single().also { (id, tilstandtype) ->
             vedtaksperiodeId = id.toString()
             tilstand = tilstandtype
         }
-    }
-
-    private fun Person.fangeArbeidsgiverFagsystemId(): String {
-        var result: String? = null
-        accept(object : PersonVisitor {
-            override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-                result = oppdrag.fagsystemId()
-            }
-        })
-        return requireNotNull(result)
-    }
-
-    private fun Person.fangeSykdomstidslinje() {
-        accept(object : PersonVisitor {
-            override fun preVisitSykdomstidslinje(
-                tidslinje: Sykdomstidslinje,
-                låstePerioder: List<Periode>
-            ) {
-                sykdomstidslinje = tidslinje
-            }
-        })
     }
 
     private fun sykmelding(
@@ -769,7 +717,7 @@ class JsonBuilderTest {
         aktørId = aktørId,
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
-        fagsystemId = utbetalingsliste.getValue(orgnummer).last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
+        fagsystemId = TestArbeidsgiverInspektør(this, orgnummer).utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(),
         utbetalingId = personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
         status = Oppdragstatus.AKSEPTERT,
         melding = "hei",

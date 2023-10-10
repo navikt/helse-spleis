@@ -10,7 +10,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
@@ -88,7 +87,6 @@ internal class TestArbeidsgiverInspektør(
     private var inVedtaksperiode = false
     private var inUtbetaling = false
     private var inFeriepengeutbetaling = false
-    private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, Set<Dokumentsporing>>()
     private val sykmeldingsperioder = mutableListOf<Periode>()
 
@@ -166,7 +164,6 @@ internal class TestArbeidsgiverInspektør(
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>
     ) {
         inVedtaksperiode = true
@@ -178,7 +175,6 @@ internal class TestArbeidsgiverInspektør(
         perioder[vedtaksperiodeindeks] = periode
         tilstander[vedtaksperiodeindeks] = tilstand.type
         skjæringstidspunkter[vedtaksperiodeindeks] = skjæringstidspunkt
-        forlengelserFraInfotrygd[vedtaksperiodeindeks] = forlengelseFraInfotrygd
         vedtaksperiode.accept(VedtaksperiodeSykdomstidslinjeinnhenter())
     }
 
@@ -197,7 +193,6 @@ internal class TestArbeidsgiverInspektør(
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>
     ) {
         vedtaksperiodeindeks += 1
@@ -402,7 +397,6 @@ internal class TestArbeidsgiverInspektør(
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
-            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>
         ) {
             vedtaksperiodeId = id
@@ -464,8 +458,6 @@ internal class TestArbeidsgiverInspektør(
     internal fun utbetalingId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeutbetalingider[vedtaksperiodeIdInnhenter.id(orgnummer).indeks]?.last() ?: fail {
         "Vedtaksperiode ${vedtaksperiodeIdInnhenter.id(orgnummer)} har ingen utbetalinger"
     }
-
-    internal fun forlengelseFraInfotrygd(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(forlengelserFraInfotrygd)
 
     internal fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeIdInnhenter))
     internal fun vilkårsgrunnlag(vedtaksperiodeId: UUID) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeId))

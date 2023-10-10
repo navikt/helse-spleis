@@ -50,7 +50,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
-import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
@@ -165,7 +164,6 @@ internal class Vedtaksperiode private constructor(
     private val sykmeldingsperiode: Periode,
     private val utbetalinger: VedtaksperiodeUtbetalinger,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
-    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
     jurist: MaskinellJurist
@@ -220,7 +218,6 @@ internal class Vedtaksperiode private constructor(
             sykmeldingsperiode,
             skjæringstidspunktMemoized,
             skjæringstidspunktFraInfotrygd,
-            forlengelseFraInfotrygd,
             hendelseIder
         )
         sykdomstidslinje.accept(visitor)
@@ -236,7 +233,6 @@ internal class Vedtaksperiode private constructor(
             sykmeldingsperiode,
             skjæringstidspunktMemoized,
             skjæringstidspunktFraInfotrygd,
-            forlengelseFraInfotrygd,
             hendelseIder
         )
     }
@@ -2650,7 +2646,6 @@ internal class Vedtaksperiode private constructor(
             sykmeldingsperiode: Periode,
             utbetalinger: VedtaksperiodeUtbetalinger,
             utbetalingstidslinje: Utbetalingstidslinje,
-            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             medVedtaksperiode: MaskinellJurist
@@ -2669,7 +2664,6 @@ internal class Vedtaksperiode private constructor(
             sykmeldingsperiode = sykmeldingsperiode,
             utbetalinger = utbetalinger,
             utbetalingstidslinje = utbetalingstidslinje,
-            forlengelseFraInfotrygd = forlengelseFraInfotrygd,
             opprettet = opprettet,
             oppdatert = oppdatert,
             jurist = medVedtaksperiode
@@ -2712,12 +2706,6 @@ internal class Vedtaksperiode private constructor(
                 ).maxOf { it.periode.endInclusive }
 
     }
-}
-
-enum class ForlengelseFraInfotrygd {
-    IKKE_ETTERSPURT,
-    JA,
-    NEI
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

@@ -538,7 +538,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>
     ) {
         delegatee.preVisitVedtaksperiode(
@@ -551,7 +550,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             opprinneligPeriode,
             skjæringstidspunkt,
             skjæringstidspunktFraInfotrygd,
-            forlengelseFraInfotrygd,
             hendelseIder
         )
     }
@@ -699,7 +697,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>
     ) {
         delegatee.postVisitVedtaksperiode(
@@ -712,7 +709,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             opprinneligPeriode,
             skjæringstidspunkt,
             skjæringstidspunktFraInfotrygd,
-            forlengelseFraInfotrygd,
             hendelseIder
         )
     }

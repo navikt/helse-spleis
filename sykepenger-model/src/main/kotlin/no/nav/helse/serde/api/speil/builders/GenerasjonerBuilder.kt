@@ -12,7 +12,6 @@ import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -102,7 +101,6 @@ internal class GenerasjonerBuilder(
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>
     ) {
         val hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) }
@@ -157,7 +155,6 @@ internal class GenerasjonerBuilder(
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>
     ) {
         this.tilstand.forlatVedtaksperiode(this)
