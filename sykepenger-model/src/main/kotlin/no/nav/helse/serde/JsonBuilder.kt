@@ -1583,12 +1583,6 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(VedtaksperiodeUtbetalingerState(this.utbetalinger))
         }
 
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
-            val utbetalingstidslinjeMap = mutableMapOf<String, Any>()
-            vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinjeMap
-            pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
-        }
-
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,

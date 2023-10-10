@@ -869,7 +869,6 @@ internal data class PersonData(
             private val sykmeldingTom: LocalDate,
             private val tilstand: TilstandType,
             private val utbetalinger: List<VedtaksperiodeUtbetalingData>,
-            private val utbetalingstidslinje: UtbetalingstidslinjeData,
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
@@ -936,7 +935,6 @@ internal data class PersonData(
                     utbetalinger = VedtaksperiodeUtbetalinger(
                         utbetalinger = this.utbetalinger.tilModellobjekt(grunnlagoppslag, utbetalinger)
                     ),
-                    utbetalingstidslinje = this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                     opprettet = opprettet,
                     oppdatert = oppdatert,
                     medVedtaksperiode = jurist

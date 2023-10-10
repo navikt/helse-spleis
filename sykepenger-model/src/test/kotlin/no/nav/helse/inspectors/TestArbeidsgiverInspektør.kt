@@ -179,8 +179,10 @@ internal class TestArbeidsgiverInspektør(
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
-        if (inVedtaksperiode && !inUtbetaling) utbetalingstidslinjer[vedtaksperiodeindeks] = tidslinje
-        else if (!inVedtaksperiode && inUtbetaling) utbetalingutbetalingstidslinjer.add(tidslinje)
+        // utbetalingstidslinje besøkes i vedtaksperiodeutbetalinger, utbetalingstidslinjeberegninger og utbetalinger på arbeidsgivernivå
+        if (inVedtaksperiode) return
+        if (!inUtbetaling) return
+        utbetalingutbetalingstidslinjer.add(tidslinje)
     }
 
     override fun postVisitVedtaksperiode(
@@ -470,8 +472,8 @@ internal class TestArbeidsgiverInspektør(
     internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(skjæringstidspunkter)()
     internal fun skjæringstidspunkt(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(skjæringstidspunkter)()
 
-    internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(utbetalingstidslinjer)
-    internal fun utbetalingstidslinjer(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(utbetalingstidslinjer)
+    internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalingstidslinjer(vedtaksperiodeIdInnhenter.id(orgnummer))
+    internal fun utbetalingstidslinjer(vedtaksperiodeId: UUID) = utbetalinger(vedtaksperiodeId).last().inspektør.utbetalingstidslinje.subset(periode(vedtaksperiodeId))
 
     internal fun vedtaksperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(vedtaksperioder)
     internal fun vedtaksperioder(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(vedtaksperioder)

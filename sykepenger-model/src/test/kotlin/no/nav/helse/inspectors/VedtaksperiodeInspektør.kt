@@ -27,7 +27,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
     internal lateinit var oppdatert: LocalDateTime
         private set
     internal lateinit var skjæringstidspunkt: LocalDate
-    internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID?>
+    internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID>
     internal lateinit var utbetalingstidslinje: Utbetalingstidslinje
 
     override fun preVisitVedtaksperiode(
@@ -53,7 +53,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje
     ) {
-        val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId
+        val vilkårsgrunnlagId = grunnlagsdata.inspektør.vilkårsgrunnlagId
         val utbetalingId = utbetaling.inspektør.utbetalingId
         utbetalingIdTilVilkårsgrunnlagId = utbetalingId to vilkårsgrunnlagId
     }

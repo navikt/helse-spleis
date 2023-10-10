@@ -163,7 +163,6 @@ internal class Vedtaksperiode private constructor(
     private var periode: Periode,
     private val sykmeldingsperiode: Periode,
     private val utbetalinger: VedtaksperiodeUtbetalinger,
-    private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
     jurist: MaskinellJurist
@@ -198,7 +197,6 @@ internal class Vedtaksperiode private constructor(
         periode = periode,
         sykmeldingsperiode = periode,
         utbetalinger = VedtaksperiodeUtbetalinger(),
-        utbetalingstidslinje = Utbetalingstidslinje(),
         opprettet = LocalDateTime.now(),
         jurist = jurist
     ) {
@@ -221,7 +219,6 @@ internal class Vedtaksperiode private constructor(
             hendelseIder
         )
         sykdomstidslinje.accept(visitor)
-        utbetalingstidslinje.accept(visitor)
         utbetalinger.accept(visitor)
         visitor.postVisitVedtaksperiode(
             this,
@@ -1021,7 +1018,7 @@ internal class Vedtaksperiode private constructor(
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
-        this.utbetalingstidslinje = utbetalinger.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, arbeidsgiverSomBeregner, this.sykdomstidslinje, this.periode, hendelse, grunnlagsdata, maksimumSykepenger, utbetalingstidslinje)
+        utbetalinger.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, arbeidsgiverSomBeregner, this.sykdomstidslinje, this.periode, hendelse, grunnlagsdata, maksimumSykepenger, utbetalingstidslinje)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, hendelse)
     }
 
@@ -2645,7 +2642,6 @@ internal class Vedtaksperiode private constructor(
             periode: Periode,
             sykmeldingsperiode: Periode,
             utbetalinger: VedtaksperiodeUtbetalinger,
-            utbetalingstidslinje: Utbetalingstidslinje,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             medVedtaksperiode: MaskinellJurist
@@ -2663,7 +2659,6 @@ internal class Vedtaksperiode private constructor(
             periode = periode,
             sykmeldingsperiode = sykmeldingsperiode,
             utbetalinger = utbetalinger,
-            utbetalingstidslinje = utbetalingstidslinje,
             opprettet = opprettet,
             oppdatert = oppdatert,
             jurist = medVedtaksperiode
