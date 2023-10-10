@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -216,8 +215,6 @@ class Inntektsmelding(
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
         refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
     }
-
-    internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>): Boolean {
         håndtertInntekt = true

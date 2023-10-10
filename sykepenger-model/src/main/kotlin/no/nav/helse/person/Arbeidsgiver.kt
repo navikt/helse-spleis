@@ -100,7 +100,6 @@ internal class Arbeidsgiver private constructor(
     private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonshistorikk: Refusjonshistorikk,
-    private val inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
     private val jurist: MaskinellJurist
 ) : Aktivitetskontekst, UtbetalingObserver {
     internal constructor(person: Person, organisasjonsnummer: String, jurist: MaskinellJurist) : this(
@@ -116,7 +115,6 @@ internal class Arbeidsgiver private constructor(
         beregnetUtbetalingstidslinjer = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
         refusjonshistorikk = Refusjonshistorikk(),
-        inntektsmeldingInfo = InntektsmeldingInfoHistorikk(),
         jurist.medOrganisasjonsnummer(organisasjonsnummer)
     )
 
@@ -351,7 +349,6 @@ internal class Arbeidsgiver private constructor(
         feriepengeutbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
         refusjonshistorikk.accept(visitor)
-        inntektsmeldingInfo.accept(visitor)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
 
@@ -1015,7 +1012,6 @@ internal class Arbeidsgiver private constructor(
                 beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
                 feriepengeutbetalinger: List<Feriepengeutbetaling>,
                 refusjonshistorikk: Refusjonshistorikk,
-                inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
                 jurist: MaskinellJurist
             ) = Arbeidsgiver(
                 person,
@@ -1030,7 +1026,6 @@ internal class Arbeidsgiver private constructor(
                 beregnetUtbetalingstidslinjer.toMutableList(),
                 feriepengeutbetalinger.toMutableList(),
                 refusjonshistorikk,
-                inntektsmeldingInfo,
                 jurist
             )
         }

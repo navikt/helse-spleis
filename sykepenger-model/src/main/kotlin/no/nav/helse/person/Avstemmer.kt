@@ -158,8 +158,7 @@ internal class Avstemmer(person: Person) {
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?
+            hendelseIder: Set<Dokumentsporing>
         ) {
             push(HarVedtaksperiodeUtbetalinger(utbetalinger, id))
         }
@@ -175,8 +174,7 @@ internal class Avstemmer(person: Person) {
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?
+            hendelseIder: Set<Dokumentsporing>
         ) {
             perioder.add(
                 mapOf(

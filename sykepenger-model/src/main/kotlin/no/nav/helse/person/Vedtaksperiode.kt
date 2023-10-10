@@ -161,7 +161,6 @@ internal class Vedtaksperiode private constructor(
     private var skjæringstidspunktFraInfotrygd: LocalDate?,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableSet<Dokumentsporing>,
-    private var inntektsmeldingInfo: InntektsmeldingInfo?,
     private var periode: Periode,
     private val sykmeldingsperiode: Periode,
     private val utbetalinger: VedtaksperiodeUtbetalinger,
@@ -198,7 +197,6 @@ internal class Vedtaksperiode private constructor(
         skjæringstidspunktFraInfotrygd = null,
         sykdomstidslinje = sykdomstidslinje,
         hendelseIder = mutableSetOf(dokumentsporing),
-        inntektsmeldingInfo = null,
         periode = periode,
         sykmeldingsperiode = periode,
         utbetalinger = VedtaksperiodeUtbetalinger(),
@@ -223,10 +221,8 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktMemoized,
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
-            hendelseIder,
-            inntektsmeldingInfo
+            hendelseIder
         )
-        inntektsmeldingInfo?.accept(visitor)
         sykdomstidslinje.accept(visitor)
         utbetalingstidslinje.accept(visitor)
         utbetalinger.accept(visitor)
@@ -241,8 +237,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktMemoized,
             skjæringstidspunktFraInfotrygd,
             forlengelseFraInfotrygd,
-            hendelseIder,
-            inntektsmeldingInfo
+            hendelseIder
         )
     }
 
@@ -2651,7 +2646,6 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktFraInfotrygd: LocalDate?,
             sykdomstidslinje: Sykdomstidslinje,
             dokumentsporing: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?,
             periode: Periode,
             sykmeldingsperiode: Periode,
             utbetalinger: VedtaksperiodeUtbetalinger,
@@ -2671,7 +2665,6 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunktFraInfotrygd = skjæringstidspunktFraInfotrygd,
             sykdomstidslinje = sykdomstidslinje,
             hendelseIder = dokumentsporing.map { it }.toMutableSet(),
-            inntektsmeldingInfo = inntektsmeldingInfo,
             periode = periode,
             sykmeldingsperiode = sykmeldingsperiode,
             utbetalinger = utbetalinger,

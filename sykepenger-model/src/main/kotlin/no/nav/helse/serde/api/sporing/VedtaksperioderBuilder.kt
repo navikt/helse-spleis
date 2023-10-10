@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.BuilderState
 
@@ -27,8 +26,7 @@ internal class VedtaksperioderBuilder(private val byggerForkastedePerioder: Bool
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?
+        hendelseIder: Set<Dokumentsporing>
     ) {
         perioder.add(VedtaksperiodeDTO(
             id = id,

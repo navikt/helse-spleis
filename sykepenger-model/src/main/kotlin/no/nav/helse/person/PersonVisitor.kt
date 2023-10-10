@@ -228,20 +228,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Sykepen
     ) {}
 }
 
-internal interface InntektsmeldingInfoVisitor {
-    fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {}
-}
-
-internal interface InntektsmeldingInfoHistorikkVisitor : InntektsmeldingInfoVisitor {
-    fun preVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {}
-    fun preVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {}
-    fun postVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {}
-    fun postVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {}
-}
-
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor,
-    UtbetalingVisitor, UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor,
-    InntektsmeldingInfoHistorikkVisitor, SykmeldingsperioderVisitor {
+    UtbetalingVisitor, UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -368,8 +356,7 @@ internal interface VedtaksperiodeUtbetalingVisitor : UtbetalingVisitor, Vilkårs
     fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {}
 }
 
-internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor,
-    UtbetalingsdagVisitor, InntektsmeldingInfoVisitor {
+internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, UtbetalingsdagVisitor {
     fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -381,8 +368,7 @@ internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?
+        hendelseIder: Set<Dokumentsporing>
     ) {}
 
     fun postVisitVedtaksperiode(
@@ -396,8 +382,7 @@ internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor,
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?
+        hendelseIder: Set<Dokumentsporing>
     ) {
     }
 }

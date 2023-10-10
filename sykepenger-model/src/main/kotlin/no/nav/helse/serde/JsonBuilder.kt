@@ -17,8 +17,6 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toJsonList
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.InntektsmeldingInfoHistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
@@ -237,8 +235,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?
+            hendelseIder: Set<Dokumentsporing>
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperiodeListe.add(vedtaksperiodeMap)
@@ -259,12 +256,6 @@ internal class JsonBuilder : AbstractBuilder() {
             val historikk = mutableListOf<Map<String, Any?>>()
             arbeidsgiverMap["refusjonshistorikk"] = historikk
             pushState(RefusjonshistorikkState(historikk))
-        }
-
-        override fun preVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {
-            val historikk = mutableListOf<Map<String, Any>>()
-            arbeidsgiverMap["inntektsmeldingInfo"] = historikk
-            pushState(InntektsmeldingInfoHistorikkState(historikk))
         }
 
         override fun postVisitArbeidsgiver(
@@ -417,38 +408,6 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
             popState()
-        }
-    }
-
-    private class InntektsmeldingInfoHistorikkState(private val historikk: MutableList<Map<String, Any>>) : BuilderState() {
-
-        override fun preVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {
-            val element = mutableMapOf<String, Any>()
-            historikk.add(element)
-            pushState(InntektsmeldingInfoHistorikkElementState(dato, element))
-        }
-
-        override fun postVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {
-            popState()
-        }
-
-        private class InntektsmeldingInfoHistorikkElementState(dato: LocalDate, element: MutableMap<String, Any>) : BuilderState() {
-            private val elementer = mutableListOf<Map<String, Any>>()
-
-            init {
-                element["dato"] = dato
-                element["inntektsmeldinger"] = elementer
-            }
-
-            override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
-                elementer.add(mutableMapOf<String, Any>("id" to id).apply {
-                    compute("arbeidsforholdId") { _, _ -> arbeidsforholdId }
-                })
-            }
-
-            override fun postVisitInntektsmeldinginfoElement(dato: LocalDate, elementer: List<InntektsmeldingInfo>) {
-                popState()
-            }
         }
     }
 
@@ -1452,8 +1411,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?
+            hendelseIder: Set<Dokumentsporing>
         ) {
             pushState(VedtaksperiodeState(
                 vedtaksperiodeMap = vedtaksperiodeMap
@@ -1634,10 +1592,6 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
         }
 
-        override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
-            vedtaksperiodeMap["inntektsmeldingInfo"] = mapOf("id" to id, "arbeidsforholdId" to arbeidsforholdId)
-        }
-
         override fun postVisitVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             id: UUID,
@@ -1649,8 +1603,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?
+            hendelseIder: Set<Dokumentsporing>
         ) {
             vedtaksperiodeMap.putAll(mutableMapOf(
                 "id" to id,

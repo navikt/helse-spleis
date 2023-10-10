@@ -12,7 +12,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
@@ -168,8 +167,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?
+        hendelseIder: Set<Dokumentsporing>
     ) {
         inVedtaksperiode = true
         vedtaksperiodeTeller += 1
@@ -200,8 +198,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Dokumentsporing>,
-        inntektsmeldingInfo: InntektsmeldingInfo?
+        hendelseIder: Set<Dokumentsporing>
     ) {
         vedtaksperiodeindeks += 1
         inVedtaksperiode = false
@@ -406,8 +403,7 @@ internal class TestArbeidsgiverInspektør(
             skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Dokumentsporing>,
-            inntektsmeldingInfo: InntektsmeldingInfo?
+            hendelseIder: Set<Dokumentsporing>
         ) {
             vedtaksperiodeId = id
         }
