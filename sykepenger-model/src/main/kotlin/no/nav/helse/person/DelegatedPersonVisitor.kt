@@ -1077,19 +1077,23 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun preVisitGenerasjon(
+        id: UUID,
+        tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje
     ) {
-        delegatee.preVisitGenerasjon(grunnlagsdata, utbetaling, sykdomstidslinje)
+        delegatee.preVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje)
     }
 
     override fun postVisitGenerasjon(
+        id: UUID,
+        tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje
     ) {
-        delegatee.postVisitGenerasjon(grunnlagsdata, utbetaling, sykdomstidslinje)
+        delegatee.postVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje)
     }
 
     override fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {

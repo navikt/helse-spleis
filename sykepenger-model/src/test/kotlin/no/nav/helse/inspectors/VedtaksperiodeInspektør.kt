@@ -48,6 +48,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
     }
 
     override fun preVisitGenerasjon(
+        id: UUID,
+        tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje

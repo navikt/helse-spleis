@@ -1618,6 +1618,8 @@ internal class JsonBuilder : AbstractBuilder() {
 
     private class GenerasjonerState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
         override fun preVisitGenerasjon(
+            id: UUID,
+            tidsstempel: LocalDateTime,
             grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
             utbetaling: Utbetaling,
             sykdomstidslinje: Sykdomstidslinje
@@ -1690,11 +1692,15 @@ internal class JsonBuilder : AbstractBuilder() {
             }
 
             override fun postVisitGenerasjon(
+                id: UUID,
+                tidsstempel: LocalDateTime,
                 grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
                 utbetaling: Utbetaling,
                 sykdomstidslinje: Sykdomstidslinje
             ) {
                 this.utbetalinger.add(mapOf(
+                    "id" to id,
+                    "tidsstempel" to tidsstempel,
                     "skjæringstidspunkt" to this.skjæringstidspunkt, // bare for å hjelpe debug i spanner
                     "utbetalingId" to this.utbetalingId.toString(),
                     "utbetalingstatus" to this.utbetalingstatus, // bare for å hjelpe debug i spanner

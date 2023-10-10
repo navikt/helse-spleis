@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.hendelser.Periode
@@ -109,16 +110,20 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     }
 
     internal class Generasjon(
+        private val id: UUID,
+        private val tidsstempel: LocalDateTime,
         private val grunnlagsdata: VilkårsgrunnlagElement,
         val utbetaling: Utbetaling,
         private val sykdomstidslinje: Sykdomstidslinje
     ) {
+        constructor(grunnlagsdata: VilkårsgrunnlagElement, utbetaling: Utbetaling, sykdomstidslinje: Sykdomstidslinje) : this(UUID.randomUUID(), LocalDateTime.now(), grunnlagsdata, utbetaling, sykdomstidslinje)
+
         fun accept(visitor: GenerasjonerVisistor) {
-            visitor.preVisitGenerasjon(grunnlagsdata, utbetaling, sykdomstidslinje)
+            visitor.preVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje)
             grunnlagsdata.accept(visitor)
             utbetaling.accept(visitor)
             sykdomstidslinje.accept(visitor)
-            visitor.postVisitGenerasjon(grunnlagsdata, utbetaling, sykdomstidslinje)
+            visitor.postVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje)
         }
 
         fun lagreTidsnæreInntekter(

@@ -1,6 +1,9 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.node.TextNode
 import no.nav.helse.readResource
 import no.nav.helse.serde.serdeObjectMapper
 import org.skyscreamer.jsonassert.JSONAssert
@@ -29,11 +32,41 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
         originalJson: String,
         jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT
     ): JsonNode {
-        val expected = toNode(expectedJson)
         val migrert = migrer(originalJson)
+        val expected = erstattPlaceholders(toNode(expectedJson), migrert)
         println(migrert.toString())
         assertJson(migrert.toString(), expected.toString(), jsonCompareMode)
         return migrert
+    }
+
+    // bytter ut <$.......$> på felter med verdi fra actual. På den måten kan man asserte at feltet finnes, men verdien er ukjent.
+    // Eksempelvis om migreringen innfører en Random UUID på et felt i en migrering, så kan man i expected-json skrive:
+    // { "id": "<! en random UUID legges på her !>" }
+    private fun erstattPlaceholders(expected: JsonNode, actual: JsonNode): JsonNode {
+        when (expected) {
+            is ArrayNode -> {
+                if (actual is ArrayNode) {
+                    expected.forEachIndexed { index, value -> erstattPlaceholders(value, actual[index]) }
+                }
+            }
+            is ObjectNode -> {
+                if (actual is ObjectNode) {
+                    expected.fields().forEach { (key, value) ->
+                        when (value) {
+                            is TextNode -> {
+                                if (value.asText().matches(placeholderRegex)) {
+                                    val valueNode = actual.path(key)
+                                    expected.put(key, valueNode.asText())
+                                }
+                            }
+
+                            is ArrayNode, is ObjectNode -> erstattPlaceholders(value, actual.path(key))
+                        }
+                    }
+                }
+            }
+        }
+        return expected
     }
 
     protected fun assertJson(
@@ -47,5 +80,9 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
             actual,
             jsonCompareMode
         )
+    }
+
+    private companion object {
+        private val placeholderRegex = "<!.*!>".toRegex()
     }
 }

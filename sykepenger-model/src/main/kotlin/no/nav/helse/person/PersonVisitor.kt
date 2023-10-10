@@ -349,11 +349,15 @@ internal interface GenerasjonerVisistor : GenerasjonVisistor {
 
 internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor, SykdomstidslinjeVisitor {
     fun preVisitGenerasjon(
+        id: UUID,
+        tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje
     ) {}
     fun postVisitGenerasjon(
+        id: UUID,
+        tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje

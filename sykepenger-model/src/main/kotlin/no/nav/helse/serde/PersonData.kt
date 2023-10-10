@@ -895,14 +895,22 @@ internal data class PersonData(
             }
 
             data class GenerasjonData(
+                private val id: UUID,
+                private val tidsstempel: LocalDateTime,
                 private val vilkårsgrunnlagId: UUID,
                 private val utbetalingId: UUID,
                 private val sykdomstidslinje: SykdomstidslinjeData
             ) {
                 companion object {
                     fun List<GenerasjonData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
-                        this.map { (grunnlagId, utbetalingId, sykdomstidslinjedata) ->
-                            Generasjoner.Generasjon(grunnlagoppslag(grunnlagId), utbetalinger.getValue(utbetalingId), sykdomstidslinjedata.createSykdomstidslinje())
+                        this.map {
+                            Generasjoner.Generasjon(
+                                id = it.id,
+                                tidsstempel = it.tidsstempel,
+                                grunnlagsdata = grunnlagoppslag(it.vilkårsgrunnlagId),
+                                utbetaling = utbetalinger.getValue(it.utbetalingId),
+                                sykdomstidslinje = it.sykdomstidslinje.createSykdomstidslinje()
+                            )
                         }
                 }
             }
