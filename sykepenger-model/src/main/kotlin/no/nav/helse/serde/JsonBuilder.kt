@@ -232,7 +232,6 @@ internal class JsonBuilder : AbstractBuilder() {
             periode: Periode,
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
-            skjæringstidspunktFraInfotrygd: LocalDate?,
             hendelseIder: Set<Dokumentsporing>
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
@@ -1407,7 +1406,6 @@ internal class JsonBuilder : AbstractBuilder() {
             periode: Periode,
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
-            skjæringstidspunktFraInfotrygd: LocalDate?,
             hendelseIder: Set<Dokumentsporing>
         ) {
             pushState(VedtaksperiodeState(
@@ -1592,7 +1590,6 @@ internal class JsonBuilder : AbstractBuilder() {
             periode: Periode,
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
-            skjæringstidspunktFraInfotrygd: LocalDate?,
             hendelseIder: Set<Dokumentsporing>
         ) {
             vedtaksperiodeMap.putAll(mutableMapOf(
@@ -1609,7 +1606,6 @@ internal class JsonBuilder : AbstractBuilder() {
                 },
                 "tilstand" to tilstand.type.name,
                 "utbetalinger" to this.utbetalinger,
-                "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
                 "skjæringstidspunkt" to skjæringstidspunkt(),
                 "opprettet" to opprettet,
                 "oppdatert" to oppdatert

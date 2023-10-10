@@ -163,7 +163,6 @@ internal class TestArbeidsgiverInspektør(
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
-        skjæringstidspunktFraInfotrygd: LocalDate?,
         hendelseIder: Set<Dokumentsporing>
     ) {
         inVedtaksperiode = true
@@ -194,7 +193,6 @@ internal class TestArbeidsgiverInspektør(
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
-        skjæringstidspunktFraInfotrygd: LocalDate?,
         hendelseIder: Set<Dokumentsporing>
     ) {
         vedtaksperiodeindeks += 1
@@ -398,7 +396,6 @@ internal class TestArbeidsgiverInspektør(
             periode: Periode,
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
-            skjæringstidspunktFraInfotrygd: LocalDate?,
             hendelseIder: Set<Dokumentsporing>
         ) {
             vedtaksperiodeId = id

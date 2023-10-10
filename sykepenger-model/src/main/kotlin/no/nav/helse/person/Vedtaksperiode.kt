@@ -157,7 +157,6 @@ internal class Vedtaksperiode private constructor(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private var tilstand: Vedtaksperiodetilstand,
-    private var skjæringstidspunktFraInfotrygd: LocalDate?,
     private var sykdomstidslinje: Sykdomstidslinje,
     private val hendelseIder: MutableSet<Dokumentsporing>,
     private var periode: Periode,
@@ -191,7 +190,6 @@ internal class Vedtaksperiode private constructor(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         tilstand = Start,
-        skjæringstidspunktFraInfotrygd = null,
         sykdomstidslinje = sykdomstidslinje,
         hendelseIder = mutableSetOf(dokumentsporing),
         periode = periode,
@@ -215,7 +213,6 @@ internal class Vedtaksperiode private constructor(
             periode,
             sykmeldingsperiode,
             skjæringstidspunktMemoized,
-            skjæringstidspunktFraInfotrygd,
             hendelseIder
         )
         sykdomstidslinje.accept(visitor)
@@ -229,7 +226,6 @@ internal class Vedtaksperiode private constructor(
             periode,
             sykmeldingsperiode,
             skjæringstidspunktMemoized,
-            skjæringstidspunktFraInfotrygd,
             hendelseIder
         )
     }
@@ -1821,7 +1817,6 @@ internal class Vedtaksperiode private constructor(
             håndterFørstegangsbehandling(ytelser, vedtaksperiode) {
                 validation(ytelser) {
                     onValidationFailed { vedtaksperiode.forkast(ytelser) }
-                    onSuccess { vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.skjæringstidspunkt }
                     valider { vedtaksperiode.kalkulerUtbetalinger(this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
                     onSuccess { vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning) }
                 }
@@ -2265,7 +2260,6 @@ internal class Vedtaksperiode private constructor(
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.skjæringstidspunkt
             vedtaksperiode.låsOpp()
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
@@ -2636,7 +2630,6 @@ internal class Vedtaksperiode private constructor(
             fødselsnummer: String,
             organisasjonsnummer: String,
             tilstand: Vedtaksperiodetilstand,
-            skjæringstidspunktFraInfotrygd: LocalDate?,
             sykdomstidslinje: Sykdomstidslinje,
             dokumentsporing: Set<Dokumentsporing>,
             periode: Periode,
@@ -2653,7 +2646,6 @@ internal class Vedtaksperiode private constructor(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             tilstand = tilstand,
-            skjæringstidspunktFraInfotrygd = skjæringstidspunktFraInfotrygd,
             sykdomstidslinje = sykdomstidslinje,
             hendelseIder = dokumentsporing.map { it }.toMutableSet(),
             periode = periode,
@@ -2666,15 +2658,12 @@ internal class Vedtaksperiode private constructor(
 
         private fun List<Vedtaksperiode>.manglendeUtbetalingsopplysninger(dag: LocalDate, melding: String) {
             val vedtaksperiode = firstOrNull { dag in it.periode } ?: return
-            val potensieltNyttSkjæringstidspunkt =
-                vedtaksperiode.skjæringstidspunktFraInfotrygd != null && vedtaksperiode.skjæringstidspunkt != vedtaksperiode.skjæringstidspunktFraInfotrygd
 
-            sikkerlogg.warn("Manglende utbetalingsopplysninger: $melding for $dag med skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt}. {}, {}, {}, {}, {}",
+            sikkerlogg.warn("Manglende utbetalingsopplysninger: $melding for $dag med skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt}. {}, {}, {}, {}",
                 keyValue("aktørId", vedtaksperiode.aktørId),
                 keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
                 keyValue("tilstand", vedtaksperiode.tilstand.type.name),
-                keyValue("vedtaksperiodeId", "${vedtaksperiode.id}"),
-                keyValue("potensieltNyttSkjæringstidspunkt", "$potensieltNyttSkjæringstidspunkt")
+                keyValue("vedtaksperiodeId", "${vedtaksperiode.id}")
             )
         }
 

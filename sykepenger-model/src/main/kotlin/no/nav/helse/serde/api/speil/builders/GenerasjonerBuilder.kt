@@ -100,7 +100,6 @@ internal class GenerasjonerBuilder(
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
-        skjæringstidspunktFraInfotrygd: LocalDate?,
         hendelseIder: Set<Dokumentsporing>
     ) {
         val hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) }
@@ -154,7 +153,6 @@ internal class GenerasjonerBuilder(
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
-        skjæringstidspunktFraInfotrygd: LocalDate?,
         hendelseIder: Set<Dokumentsporing>
     ) {
         this.tilstand.forlatVedtaksperiode(this)

@@ -23,7 +23,6 @@ internal class VedtaksperioderBuilder(private val byggerForkastedePerioder: Bool
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
-        skjæringstidspunktFraInfotrygd: LocalDate?,
         hendelseIder: Set<Dokumentsporing>
     ) {
         perioder.add(VedtaksperiodeDTO(

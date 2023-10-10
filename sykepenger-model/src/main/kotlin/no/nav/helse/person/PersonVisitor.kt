@@ -366,7 +366,6 @@ internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, Utbe
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
-        skjæringstidspunktFraInfotrygd: LocalDate?,
         hendelseIder: Set<Dokumentsporing>
     ) {}
 
@@ -379,7 +378,6 @@ internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, Utbe
         periode: Periode,
         opprinneligPeriode: Periode,
         skjæringstidspunkt: () -> LocalDate,
-        skjæringstidspunktFraInfotrygd: LocalDate?,
         hendelseIder: Set<Dokumentsporing>
     ) {
     }

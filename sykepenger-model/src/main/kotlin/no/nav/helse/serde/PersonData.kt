@@ -859,7 +859,6 @@ internal data class PersonData(
 
         data class VedtaksperiodeData(
             private val id: UUID,
-            private val skjæringstidspunktFraInfotrygd: LocalDate?,
             private val skjæringstidspunkt: LocalDate?,
             private val sykdomstidslinje: SykdomstidslinjeData,
             private val hendelseIder: List<DokumentsporingData>,
@@ -927,7 +926,6 @@ internal data class PersonData(
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,
                     tilstand = parseTilstand(this.tilstand),
-                    skjæringstidspunktFraInfotrygd = skjæringstidspunktFraInfotrygd,
                     sykdomstidslinje = sykdomstidslinje.createSykdomstidslinje(),
                     dokumentsporing = sporingIder.toMutableSet(),
                     periode = Periode(fom, tom),

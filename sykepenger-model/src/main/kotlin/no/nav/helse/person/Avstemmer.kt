@@ -156,7 +156,6 @@ internal class Avstemmer(person: Person) {
             periode: Periode,
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
-            skjæringstidspunktFraInfotrygd: LocalDate?,
             hendelseIder: Set<Dokumentsporing>
         ) {
             push(HarVedtaksperiodeUtbetalinger(utbetalinger, id))
@@ -171,7 +170,6 @@ internal class Avstemmer(person: Person) {
             periode: Periode,
             opprinneligPeriode: Periode,
             skjæringstidspunkt: () -> LocalDate,
-            skjæringstidspunktFraInfotrygd: LocalDate?,
             hendelseIder: Set<Dokumentsporing>
         ) {
             perioder.add(
