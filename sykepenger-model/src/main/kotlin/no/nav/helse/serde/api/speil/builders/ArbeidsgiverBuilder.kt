@@ -17,7 +17,7 @@ internal class ArbeidsgiverBuilder(
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
             id = id,
-            generasjoner = GenerasjonerBuilder(organisasjonsnummer, hendelser, alder, arbeidsgiver, vilkårsgrunnlagHistorikk).build()
+            generasjoner = SpeilGenerasjonerBuilder(organisasjonsnummer, hendelser, alder, arbeidsgiver, vilkårsgrunnlagHistorikk).build()
         )
     }
 

@@ -8,7 +8,7 @@ import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
-    val generasjoner: List<GenerasjonDTO>,
+    val generasjoner: List<SpeilGenerasjonDTO>,
     val ghostPerioder: List<GhostPeriodeDTO> = emptyList()
 ) {
     private companion object {

@@ -24,7 +24,7 @@ import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlagtype
-import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder
+import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder
 import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
@@ -57,7 +57,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     private fun vilkårsgrunnlag(organisasjonsnummer: String = AG1): Map<UUID, Vilkårsgrunnlag> {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
 
-        GenerasjonerBuilder(
+        SpeilGenerasjonerBuilder(
             organisasjonsnummer,
             søknadDTOer,
             UNG_PERSON_FØDSELSDATO.alder,

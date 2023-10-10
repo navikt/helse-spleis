@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -50,7 +49,7 @@ import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.GenerasjonDTO
+import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.Periodetilstand
@@ -67,7 +66,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType.FORELDET_SYKEDAG
-import no.nav.helse.serde.api.dto.Tidslinjeperiode
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FORLENGELSE
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING
@@ -83,7 +82,7 @@ import no.nav.helse.serde.api.dto.Utbetalingtype.ANNULLERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.UTBETALING
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
-import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder
+import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder
 import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -126,7 +125,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
+internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Manglende generasjon når det kommer IM som endrer AGP ved å endre dager i forkant av perioden`() {
@@ -1999,61 +1998,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("går igjennom denne med Maxi og Simen")
-    fun `inntektsmelding for to korte perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(24.januar, 30.januar))
-        håndterSøknad(Sykdom(24.januar, 30.januar, 100.prosent))
-
-        nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 24.januar)
-        assertEquals("UUUUGG UUUUSHH SSSSSH? ??SSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertEquals(2.januar til 17.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertEquals(2.januar til 17.januar, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        val arbeidsgiverperioden = inspektør.arbeidsgiverperioden(2.vedtaksperiode)!!
-        assertFalse(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(17.januar.somPeriode()))
-        assertTrue(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(18.januar.somPeriode()))
-
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        generasjoner {
-            assertEquals(1, size)
-            0.generasjon {
-                assertEquals(2, perioder.size)
-                beregnetPeriode(0) avType UTBETALING medTilstand TilGodkjenning
-                uberegnetPeriode(1) medTilstand IngenUtbetaling
-            }
-        }
-
-        håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.januar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        nullstillTilstandsendringer()
-        håndterUtbetalt()
-
-        håndterYtelser(2.vedtaksperiode)
-
-        generasjoner {
-            assertEquals(1, size)
-            0.generasjon {
-                assertEquals(2, perioder.size)
-                beregnetPeriode(0) avType UTBETALING medTilstand ForberederGodkjenning
-                beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
-            }
-        }
-
-        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-    }
-
-    @Test
     fun `avvist revurdering uten tidligere utbetaling kan forkastes`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -2382,38 +2326,38 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     private class Arbeidsgivergenerasjoner(
         private val orgnummer: String,
         private val vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>,
-        private val generasjoner: List<GenerasjonDTO>
+        private val generasjoner: List<SpeilGenerasjonDTO>
     ) {
         val size = generasjoner.size
 
-        fun Int.generasjon(assertBlock: GenerasjonDTO.() -> Unit) {
+        fun Int.generasjon(assertBlock: SpeilGenerasjonDTO.() -> Unit) {
             require(this >= 0) { "Kan ikke være et negativt tall!" }
             generasjoner[this].run(assertBlock)
         }
 
-        fun GenerasjonDTO.beregnetPeriode(index: Int): BeregnetPeriode {
+        fun SpeilGenerasjonDTO.beregnetPeriode(index: Int): BeregnetPeriode {
             val periode = this.perioder[index]
             require(periode is BeregnetPeriode) { "Perioden ${periode::class.simpleName} er ikke en beregnet periode!" }
             return periode
         }
 
-        fun GenerasjonDTO.uberegnetPeriode(index: Int): UberegnetPeriode {
+        fun SpeilGenerasjonDTO.uberegnetPeriode(index: Int): UberegnetPeriode {
             val periode = this.perioder[index]
             require(periode is UberegnetPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet periode!" }
             return periode
         }
 
-        fun GenerasjonDTO.uberegnetVilkårsprøvdPeriode(index: Int): UberegnetVilkårsprøvdPeriode {
+        fun SpeilGenerasjonDTO.uberegnetVilkårsprøvdPeriode(index: Int): UberegnetVilkårsprøvdPeriode {
             val periode = this.perioder[index]
             require(periode is UberegnetVilkårsprøvdPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet vilkårsprøvd periode!" }
             return periode
         }
 
-        infix fun <T : Tidslinjeperiode> T.medAntallDager(antall: Int): T {
+        infix fun <T : SpeilTidslinjeperiode> T.medAntallDager(antall: Int): T {
             assertEquals(antall, sammenslåttTidslinje.size)
             return this
         }
-        infix fun <T : Tidslinjeperiode> T.harTidslinje(dager: Pair<Periode, SykdomstidslinjedagType>): T {
+        infix fun <T : SpeilTidslinjeperiode> T.harTidslinje(dager: Pair<Periode, SykdomstidslinjedagType>): T {
             val (periode, dagtype) = dager
             val periodeUtenHelg = periode.filterNot { it.erHelg() }
             val tidslinjedager = this.sammenslåttTidslinje.filter { it.dagen in periodeUtenHelg }
@@ -2426,7 +2370,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             return requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) { "Forventet å finne vilkårsgrunnlag for periode" }
         }
 
-        infix fun <T : Tidslinjeperiode> T.forkastet(forkastet: Boolean): T {
+        infix fun <T : SpeilTidslinjeperiode> T.forkastet(forkastet: Boolean): T {
             assertEquals(forkastet, this.erForkastet)
             return this
         }
@@ -2441,26 +2385,26 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             return this
         }
 
-        infix fun <T : Tidslinjeperiode> T.medTilstand(tilstand: Periodetilstand): T {
+        infix fun <T : SpeilTidslinjeperiode> T.medTilstand(tilstand: Periodetilstand): T {
             assertEquals(tilstand, this.periodetilstand)
             return this
         }
 
-        infix fun <T : Tidslinjeperiode> T.medPeriodetype(tidslinjeperiodetype: Tidslinjeperiodetype): T {
+        infix fun <T : SpeilTidslinjeperiode> T.medPeriodetype(tidslinjeperiodetype: Tidslinjeperiodetype): T {
             assertEquals(tidslinjeperiodetype, this.periodetype)
             return this
         }
 
-        infix fun <T : Tidslinjeperiode> T.fra(periode: Periode): T {
+        infix fun <T : SpeilTidslinjeperiode> T.fra(periode: Periode): T {
             assertEquals(periode.start, this.fom)
             assertEquals(periode.endInclusive, this.tom)
             return this
         }
-        infix fun <T : Tidslinjeperiode> T.fra(fom: LocalDate): T {
+        infix fun <T : SpeilTidslinjeperiode> T.fra(fom: LocalDate): T {
             assertEquals(fom, this.fom)
             return this
         }
-        infix fun <T : Tidslinjeperiode> T.til(tom: LocalDate): T {
+        infix fun <T : SpeilTidslinjeperiode> T.til(tom: LocalDate): T {
             assertEquals(tom, this.tom)
             return this
         }
@@ -2468,7 +2412,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private fun generasjoner(organisasjonsnummer: String = ORGNUMMER, block: Arbeidsgivergenerasjoner.() -> Unit = {}) {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
-        val generasjonerBuilder = GenerasjonerBuilder(
+        val generasjonerBuilder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
             søknadDTOer,
             UNG_PERSON_FØDSELSDATO.alder,

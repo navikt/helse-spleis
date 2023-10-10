@@ -19,17 +19,17 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.AnnullertUtbetaling
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
-import no.nav.helse.serde.api.dto.GenerasjonDTO
+import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.SpeilOppdrag
-import no.nav.helse.serde.api.dto.Tidslinjeperiode
-import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.sorterEtterHendelse
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.sorterEtterHendelse
 import no.nav.helse.serde.api.dto.UberegnetPeriode
-import no.nav.helse.serde.api.speil.Generasjoner
-import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.AktivePerioder
-import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.ForkastedePerioder
-import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.Initiell
-import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder.Byggetilstand.Utbetalinger
+import no.nav.helse.serde.api.speil.SpeilGenerasjoner
+import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.AktivePerioder
+import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.ForkastedePerioder
+import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.Initiell
+import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.Utbetalinger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
@@ -44,7 +44,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 // Besøker hele arbeidsgiver-treet
-internal class GenerasjonerBuilder(
+internal class SpeilGenerasjonerBuilder(
     private val organisasjonsnummer: String,
     private val hendelser: List<HendelseDTO>,
     private val alder: Alder,
@@ -53,7 +53,7 @@ internal class GenerasjonerBuilder(
 ) : ArbeidsgiverVisitor {
     private var tilstand: Byggetilstand = Initiell
 
-    private val aktivePerioder = mutableListOf<Tidslinjeperiode>()
+    private val aktivePerioder = mutableListOf<SpeilTidslinjeperiode>()
     private val forkastedePerioder = mutableListOf<List<BeregnetPeriode>>()
     private val annulleringer = mutableListOf<AnnullertUtbetaling>()
 
@@ -61,13 +61,13 @@ internal class GenerasjonerBuilder(
         arbeidsgiver.accept(this)
     }
 
-    internal fun build(): List<GenerasjonDTO> {
+    internal fun build(): List<SpeilGenerasjonDTO> {
         val perioder = aktivePerioder + forkastedePerioder.flatMap { tidligere ->
             val siste = tidligere.last()
             val annullering = siste.somAnnullering(annulleringer)
             annullering?.let { tidligere + it } ?: emptyList()
         }
-        return Generasjoner().apply {
+        return SpeilGenerasjoner().apply {
             perioder
                 .sorterEtterHendelse()
                 .map { it.registrerBruk(vilkårsgrunnlaghistorikk, organisasjonsnummer) }
@@ -266,7 +266,7 @@ internal class GenerasjonerBuilder(
 
     private interface Byggetilstand {
         fun besøkUtbetaling(
-            builder: GenerasjonerBuilder,
+            builder: SpeilGenerasjonerBuilder,
             id: UUID,
             korrelasjonsId: UUID,
             type: Utbetalingtype,
@@ -276,18 +276,18 @@ internal class GenerasjonerBuilder(
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?
         ) {}
-        fun besøkUtbetalingvurdering(builder: GenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {
+        fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun besøkOppdrag(builder: GenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {}
-        fun forlatArbeidsgiveroppdrag(builder: GenerasjonerBuilder) {
+        fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {}
+        fun forlatArbeidsgiveroppdrag(builder: SpeilGenerasjonerBuilder) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun forlatPersonoppdrag(builder: GenerasjonerBuilder) {
+        fun forlatPersonoppdrag(builder: SpeilGenerasjonerBuilder) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
         fun besøkOppdragslinje(
-            builder: GenerasjonerBuilder,
+            builder: SpeilGenerasjonerBuilder,
             fom: LocalDate,
             tom: LocalDate,
             beløp: Int,
@@ -297,7 +297,7 @@ internal class GenerasjonerBuilder(
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
         fun besøkVedtaksperiode(
-            builder: GenerasjonerBuilder,
+            builder: SpeilGenerasjonerBuilder,
             vedtaksperiode: Vedtaksperiode,
             vedtaksperiodeId: UUID,
             skjæringstidspunkt: LocalDate,
@@ -309,31 +309,31 @@ internal class GenerasjonerBuilder(
         ) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun besøkBeregnetPeriode(builder: GenerasjonerBuilder) {
+        fun besøkBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun forlatBeregnetPeriode(builder: GenerasjonerBuilder) {
+        fun forlatBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun besøkVilkårsgrunnlagelement(builder: GenerasjonerBuilder, vilkårsgrunnlagId: UUID, skjæringstidspunkt: LocalDate) {
+        fun besøkVilkårsgrunnlagelement(builder: SpeilGenerasjonerBuilder, vilkårsgrunnlagId: UUID, skjæringstidspunkt: LocalDate) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun besøkUtbetalingstidslinje(builder: GenerasjonerBuilder, utbetalingstidslinje: Utbetalingstidslinje) {}
-        fun besøkSykdomstidslinje(builder: GenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {}
-        fun forlatVedtaksperiode(builder: GenerasjonerBuilder) {
+        fun besøkUtbetalingstidslinje(builder: SpeilGenerasjonerBuilder, utbetalingstidslinje: Utbetalingstidslinje) {}
+        fun besøkSykdomstidslinje(builder: SpeilGenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {}
+        fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
 
         object Initiell : Byggetilstand
         object Utbetalinger : Byggetilstand {
-            override fun besøkUtbetalingvurdering(builder: GenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {}
-            override fun forlatArbeidsgiveroppdrag(builder: GenerasjonerBuilder) {}
-            override fun forlatPersonoppdrag(builder: GenerasjonerBuilder) {}
-            override fun besøkOppdrag(builder: GenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {}
-            override fun besøkOppdragslinje(builder: GenerasjonerBuilder, fom: LocalDate, tom: LocalDate, beløp: Int, grad: Int, endringskode: Endringskode) {}
+            override fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {}
+            override fun forlatArbeidsgiveroppdrag(builder: SpeilGenerasjonerBuilder) {}
+            override fun forlatPersonoppdrag(builder: SpeilGenerasjonerBuilder) {}
+            override fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {}
+            override fun besøkOppdragslinje(builder: SpeilGenerasjonerBuilder, fom: LocalDate, tom: LocalDate, beløp: Int, grad: Int, endringskode: Endringskode) {}
 
             override fun besøkUtbetaling(
-                builder: GenerasjonerBuilder,
+                builder: SpeilGenerasjonerBuilder,
                 id: UUID,
                 korrelasjonsId: UUID,
                 type: Utbetalingtype,
@@ -358,10 +358,10 @@ internal class GenerasjonerBuilder(
             private var beregnetPeriodeBuilder: BeregnetPeriode.Builder? = null
             private var oppdragbuilder: SpeilOppdrag.Builder? = null
 
-            protected abstract fun nyBeregnetPeriode(builder: GenerasjonerBuilder, beregnetPeriode: BeregnetPeriode)
+            protected abstract fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode)
 
             override fun besøkVedtaksperiode(
-                builder: GenerasjonerBuilder,
+                builder: SpeilGenerasjonerBuilder,
                 vedtaksperiode: Vedtaksperiode,
                 vedtaksperiodeId: UUID,
                 skjæringstidspunkt: LocalDate,
@@ -374,13 +374,13 @@ internal class GenerasjonerBuilder(
                 vedtaksperiodebuilder = TidslinjeperioderBuilder(vedtaksperiode, vedtaksperiodeId, skjæringstidspunkt, tilstand, opprettet, oppdatert, periode, hendelser)
             }
 
-            override fun besøkBeregnetPeriode(builder: GenerasjonerBuilder) {
+            override fun besøkBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
                 vedtaksperiodebuilder?.nyBeregnetPeriode()?.also {
                     this.beregnetPeriodeBuilder = it
                 }
             }
 
-            override fun forlatBeregnetPeriode(builder: GenerasjonerBuilder) {
+            override fun forlatBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
                 beregnetPeriodeBuilder?.build(builder.alder)?.also {
                     vedtaksperiodebuilder?.nyBeregnetPeriode(it)
                     nyBeregnetPeriode(builder, it)
@@ -389,7 +389,7 @@ internal class GenerasjonerBuilder(
             }
 
             final override fun besøkUtbetaling(
-                builder: GenerasjonerBuilder,
+                builder: SpeilGenerasjonerBuilder,
                 id: UUID,
                 korrelasjonsId: UUID,
                 type: Utbetalingtype,
@@ -410,35 +410,35 @@ internal class GenerasjonerBuilder(
                 }
             }
 
-            override fun besøkUtbetalingvurdering(builder: GenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {
+            override fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {
                 beregnetPeriodeBuilder?.medVurdering(godkjent, tidsstempel, automatisk, ident)
             }
 
-            override fun besøkUtbetalingstidslinje(builder: GenerasjonerBuilder, utbetalingstidslinje: Utbetalingstidslinje) {
+            override fun besøkUtbetalingstidslinje(builder: SpeilGenerasjonerBuilder, utbetalingstidslinje: Utbetalingstidslinje) {
                 beregnetPeriodeBuilder?.medUtbetalingstidslinje(UtbetalingstidslinjeBuilder(utbetalingstidslinje).build())
             }
 
-            override fun besøkOppdrag(builder: GenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {
+            override fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {
                 oppdragbuilder = SpeilOppdrag.Builder(fagsystemId, tidsstempel, nettobeløp, simulering)
             }
 
-            override fun besøkOppdragslinje(builder: GenerasjonerBuilder, fom: LocalDate, tom: LocalDate, beløp: Int, grad: Int, endringskode: Endringskode) {
+            override fun besøkOppdragslinje(builder: SpeilGenerasjonerBuilder, fom: LocalDate, tom: LocalDate, beløp: Int, grad: Int, endringskode: Endringskode) {
                 oppdragbuilder?.medOppdragslinje(fom, tom, beløp, grad, endringskode.dto())
             }
 
-            override fun forlatArbeidsgiveroppdrag(builder: GenerasjonerBuilder) {
+            override fun forlatArbeidsgiveroppdrag(builder: SpeilGenerasjonerBuilder) {
                 beregnetPeriodeBuilder?.medArbeidsgiveroppdrag(checkNotNull(oppdragbuilder).build())
             }
 
-            override fun forlatPersonoppdrag(builder: GenerasjonerBuilder) {
+            override fun forlatPersonoppdrag(builder: SpeilGenerasjonerBuilder) {
                 beregnetPeriodeBuilder?.medPersonoppdrag(checkNotNull(oppdragbuilder).build())
             }
 
-            override fun besøkVilkårsgrunnlagelement(builder: GenerasjonerBuilder, vilkårsgrunnlagId: UUID, skjæringstidspunkt: LocalDate) {
+            override fun besøkVilkårsgrunnlagelement(builder: SpeilGenerasjonerBuilder, vilkårsgrunnlagId: UUID, skjæringstidspunkt: LocalDate) {
                 this.beregnetPeriodeBuilder?.medVilkårsgrunnlag(vilkårsgrunnlagId, skjæringstidspunkt)
             }
 
-            override fun besøkSykdomstidslinje(builder: GenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {
+            override fun besøkSykdomstidslinje(builder: SpeilGenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {
                 val sykdomstidslinjeDto = SykdomstidslinjeBuilder(sykdomstidslinje).build()
                 this.beregnetPeriodeBuilder?.medSykdomstidslinje(sykdomstidslinjeDto)
             }
@@ -446,13 +446,13 @@ internal class GenerasjonerBuilder(
 
         class AktivePerioder : Periodebygger() {
             private var uberegnetPeriodeBuilder: UberegnetPeriode.Builder? = null
-            override fun nyBeregnetPeriode(builder: GenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
+            override fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
                 uberegnetPeriodeBuilder?.medForrigeBeregnetPeriode(beregnetPeriode)
                 builder.aktivePerioder.add(beregnetPeriode)
             }
 
             override fun besøkVedtaksperiode(
-                builder: GenerasjonerBuilder,
+                builder: SpeilGenerasjonerBuilder,
                 vedtaksperiode: Vedtaksperiode,
                 vedtaksperiodeId: UUID,
                 skjæringstidspunkt: LocalDate,
@@ -468,13 +468,13 @@ internal class GenerasjonerBuilder(
                 }
             }
 
-            override fun forlatVedtaksperiode(builder: GenerasjonerBuilder) {
+            override fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {
                 uberegnetPeriodeBuilder?.build()?.also {
                     builder.aktivePerioder.add(it)
                 }
                 uberegnetPeriodeBuilder = null
             }
-            override fun besøkSykdomstidslinje(builder: GenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {
+            override fun besøkSykdomstidslinje(builder: SpeilGenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {
                 super.besøkSykdomstidslinje(builder, sykdomstidslinje)
                 val sykdomstidslinjeDto = SykdomstidslinjeBuilder(sykdomstidslinje).build()
                 this.uberegnetPeriodeBuilder?.medSykdomstidslinje(sykdomstidslinjeDto)
@@ -484,11 +484,11 @@ internal class GenerasjonerBuilder(
         class ForkastedePerioder : Periodebygger() {
             private val beregnedePerioder = mutableListOf<BeregnetPeriode>()
 
-            override fun nyBeregnetPeriode(builder: GenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
+            override fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
                 beregnedePerioder.add(beregnetPeriode)
             }
 
-            override fun forlatVedtaksperiode(builder: GenerasjonerBuilder) {
+            override fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {
                 if (beregnedePerioder.isEmpty()) return
                 // skal bare ta vare på dem dersom de har blitt annullert!
                 builder.forkastedePerioder.add(beregnedePerioder.toList())

@@ -16,7 +16,7 @@ import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
-import no.nav.helse.serde.api.dto.Tidslinjeperiode
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Utbetaling
@@ -285,7 +285,7 @@ private fun mapInntektstype(kilde: UtbetalingInntektskilde) = when (kilde) {
     UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE -> GraphQLInntektstype.FlereArbeidsgivere
 }
 
-internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
+internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode) =
     when (periode) {
         is BeregnetPeriode -> GraphQLBeregnetPeriode(
             fom = periode.fom,

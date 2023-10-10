@@ -12,25 +12,25 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.GenerasjonDTO
+import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.Periodetilstand
-import no.nav.helse.serde.api.dto.Tidslinjeperiode
-import no.nav.helse.serde.api.dto.Tidslinjeperiode.Companion.sorterEtterHendelse
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.sorterEtterHendelse
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.Utbetalingtype
-import no.nav.helse.serde.api.speil.Generasjoner
-import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.beregnet
-import no.nav.helse.serde.api.v2.buildere.GenerasjonerTest.Hva.uberegnet
+import no.nav.helse.serde.api.speil.SpeilGenerasjoner
+import no.nav.helse.serde.api.v2.buildere.SpeilGenerasjonerTest.Hva.beregnet
+import no.nav.helse.serde.api.v2.buildere.SpeilGenerasjonerTest.Hva.uberegnet
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
 
 
-internal class GenerasjonerTest {
+internal class SpeilGenerasjonerTest {
     @Test
     fun `bare førstegangsbehandlinger`() {
         val generasjoner = byggGenerasjoner(
@@ -246,31 +246,31 @@ internal class GenerasjonerTest {
         }
     }
 
-    private fun byggGenerasjoner(vararg perioder: Tidslinjeperiode) = perioder.toList().generasjoner
-    private val List<Tidslinjeperiode>.generasjoner get() = Generasjoner().apply {
+    private fun byggGenerasjoner(vararg perioder: SpeilTidslinjeperiode) = perioder.toList().generasjoner
+    private val List<SpeilTidslinjeperiode>.generasjoner get() = SpeilGenerasjoner().apply {
         sorterEtterHendelse().forEach { it.tilGenerasjon(this) }
     }.build()
 
-    private operator fun List<GenerasjonDTO>.invoke(forventetAntall: Int, assertBlock: List<GenerasjonDTO>.() -> Unit) {
+    private operator fun List<SpeilGenerasjonDTO>.invoke(forventetAntall: Int, assertBlock: List<SpeilGenerasjonDTO>.() -> Unit) {
         assertEquals(forventetAntall, this.size)
         assertBlock(this)
     }
-    private fun List<GenerasjonDTO>.generasjon(index: Int, forventetAntall: Int, assertBlock: GenerasjonDTO.() -> Unit) {
+    private fun List<SpeilGenerasjonDTO>.generasjon(index: Int, forventetAntall: Int, assertBlock: SpeilGenerasjonDTO.() -> Unit) {
         assertEquals(forventetAntall, this[index].perioder.size)
         assertBlock(this[index])
     }
-    private fun GenerasjonDTO.periode(index: Int, assertBlock: Tidslinjeperiode.() -> Unit = { }): Tidslinjeperiode {
+    private fun SpeilGenerasjonDTO.periode(index: Int, assertBlock: SpeilTidslinjeperiode.() -> Unit = { }): SpeilTidslinjeperiode {
         assertBlock(this.perioder[index])
         return this.perioder[index]
     }
-    private enum class Hva(val kClass: KClass<out Tidslinjeperiode>) { beregnet(BeregnetPeriode::class), uberegnet(UberegnetPeriode::class) }
-    private infix fun Tidslinjeperiode.er(hva: Hva) = apply {
+    private enum class Hva(val kClass: KClass<out SpeilTidslinjeperiode>) { beregnet(BeregnetPeriode::class), uberegnet(UberegnetPeriode::class) }
+    private infix fun SpeilTidslinjeperiode.er(hva: Hva) = apply {
         assertEquals(hva.kClass, this::class)
     }
-    private infix fun Tidslinjeperiode.fra(fom: LocalDate) = apply {
+    private infix fun SpeilTidslinjeperiode.fra(fom: LocalDate) = apply {
         assertEquals(fom, this.fom)
     }
-    private infix fun Tidslinjeperiode.til(tom: LocalDate) = apply {
+    private infix fun SpeilTidslinjeperiode.til(tom: LocalDate) = apply {
         assertEquals(tom, this.tom)
     }
 
