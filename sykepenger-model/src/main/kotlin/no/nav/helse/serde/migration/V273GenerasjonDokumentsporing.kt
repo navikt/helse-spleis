@@ -3,6 +3,8 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
 import org.slf4j.LoggerFactory
@@ -50,6 +52,13 @@ internal class V273GenerasjonDokumentsporing: JsonMigration(273) {
                     val tidspunkt = LocalDateTime.parse(element.path("tidsstempel").asText())
                     oppdaterTidspunkt(hendelseId, tidspunkt)
                 }
+                element.path("beregnetSykdomstidslinje").also { tidslinje ->
+                    tidslinje.path("dager").forEach { dag ->
+                        val id = UUID.fromString(dag.path("kilde").path("id").asText())
+                        val tidsstempel = LocalDateTime.parse(dag.path("kilde").path("tidsstempel").asText())
+                        oppdaterTidspunkt(id, tidsstempel)
+                    }
+                }
             }
             arbeidsgiver.path("refusjonshistorikk").forEach { element ->
                 val hendelseId = UUID.fromString(element.path("meldingsreferanseId").asText())
@@ -82,8 +91,8 @@ internal class V273GenerasjonDokumentsporing: JsonMigration(273) {
         return vedtaksperiodeDokumentsporing.filter { sporing ->
             val dokumentId = UUID.fromString(sporing.path("dokumentId").asText())
             val dokumenttype = sporing.path("dokumenttype").asText()
-            val tidligsteTidspunkt = checkNotNull(tidligsteTidspunktForHendelse(dokumentId)) {
-                "Finner ikke tidligste tidspunkt for hendelse $dokumenttype $dokumentId"
+            val tidligsteTidspunkt = tidligsteTidspunktForHendelse(dokumentId) ?: EPOCH.atStartOfDay().also {
+                sikkerlogg.info("V273: Finner ikke tidligste tidspunkt for hendelse $dokumenttype $dokumentId")
             }
             tidligsteTidspunkt < generasjonTidspunkt
         }
