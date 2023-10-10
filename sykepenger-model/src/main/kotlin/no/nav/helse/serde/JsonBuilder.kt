@@ -1639,8 +1639,10 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         private class VedtaksperiodeUtbetalingState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
+            private lateinit var skjæringstidspunkt: LocalDate
             private lateinit var grunnlagId: UUID
             private lateinit var utbetalingId: UUID
+            private lateinit var utbetalingstatus: String
             private val sykdomstidslinjedetaljer = mutableMapOf<String, Any?>()
 
             override fun preVisitGrunnlagsdata(
@@ -1653,6 +1655,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 vilkårsgrunnlagId: UUID,
                 medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
             ) {
+                this.skjæringstidspunkt = skjæringstidspunkt
                 this.grunnlagId = vilkårsgrunnlagId
             }
 
@@ -1662,6 +1665,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 sykepengegrunnlag: Sykepengegrunnlag,
                 vilkårsgrunnlagId: UUID
             ) {
+                this.skjæringstidspunkt = skjæringstidspunkt
                 this.grunnlagId = vilkårsgrunnlagId
             }
 
@@ -1687,6 +1691,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 annulleringer: Set<UUID>
             ) {
                 utbetalingId = id
+                this.utbetalingstatus = utbetalingstatus.name
             }
 
             override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
@@ -1699,7 +1704,9 @@ internal class JsonBuilder : AbstractBuilder() {
                 sykdomstidslinje: Sykdomstidslinje
             ) {
                 this.utbetalinger.add(mapOf(
+                    "skjæringstidspunkt" to this.skjæringstidspunkt, // bare for å hjelpe debug i spanner
                     "utbetalingId" to this.utbetalingId.toString(),
+                    "utbetalingstatus" to this.utbetalingstatus, // bare for å hjelpe debug i spanner
                     "vilkårsgrunnlagId" to this.grunnlagId.toString(),
                     "sykdomstidslinje" to sykdomstidslinjedetaljer
                 ))
