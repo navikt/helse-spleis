@@ -1569,7 +1569,7 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class VedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : BuilderState() {
-        private val utbetalinger = mutableListOf<Map<String, Any?>>()
+        private val generasjoner = mutableListOf<Map<String, Any?>>()
 
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
             val sykdomstidslinje = mutableMapOf<String, Any?>()
@@ -1579,7 +1579,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun preVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
-            pushState(VedtaksperiodeUtbetalingerState(this.utbetalinger))
+            pushState(GenerasjonerState(this.generasjoner))
         }
 
         override fun postVisitVedtaksperiode(
@@ -1606,7 +1606,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     )
                 },
                 "tilstand" to tilstand.type.name,
-                "utbetalinger" to this.utbetalinger,
+                "generasjoner" to this.generasjoner,
                 "skjæringstidspunkt" to skjæringstidspunkt(),
                 "opprettet" to opprettet,
                 "oppdatert" to oppdatert
@@ -1616,20 +1616,20 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    private class VedtaksperiodeUtbetalingerState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
+    private class GenerasjonerState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
         override fun preVisitGenerasjon(
             grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
             utbetaling: Utbetaling,
             sykdomstidslinje: Sykdomstidslinje
         ) {
-            pushState(VedtaksperiodeUtbetalingState(utbetalinger))
+            pushState(GenerasjonState(utbetalinger))
         }
 
         override fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
             popState()
         }
 
-        private class VedtaksperiodeUtbetalingState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
+        private class GenerasjonState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
             private lateinit var skjæringstidspunkt: LocalDate
             private lateinit var grunnlagId: UUID
             private lateinit var utbetalingId: UUID

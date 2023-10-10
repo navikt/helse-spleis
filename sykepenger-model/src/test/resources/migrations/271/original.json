@@ -1,0 +1,19 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "utbetalinger": []
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "utbetalinger": []
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 270
+}

@@ -867,7 +867,7 @@ internal data class PersonData(
             private val sykmeldingFom: LocalDate,
             private val sykmeldingTom: LocalDate,
             private val tilstand: TilstandType,
-            private val utbetalinger: List<GenerasjonData>,
+            private val generasjoner: List<GenerasjonData>,
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
@@ -931,7 +931,7 @@ internal data class PersonData(
                     periode = Periode(fom, tom),
                     sykmeldingsperiode = sykmeldingsperiode,
                     utbetalinger = Generasjoner(
-                        generasjoner = this.utbetalinger.tilModellobjekt(grunnlagoppslag, utbetalinger)
+                        generasjoner = this.generasjoner.tilModellobjekt(grunnlagoppslag, utbetalinger)
                     ),
                     opprettet = opprettet,
                     oppdatert = oppdatert,

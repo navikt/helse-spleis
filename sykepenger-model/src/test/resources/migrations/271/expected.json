@@ -1,0 +1,19 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "generasjoner": []
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "generasjoner": []
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 271
+}

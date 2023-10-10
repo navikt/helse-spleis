@@ -195,6 +195,7 @@ import no.nav.helse.serde.migration.V268ForkasteVilkårsgrunnlagUtenInntekter
 import no.nav.helse.serde.migration.V269SpissetMigreringForÅForkasteUtbetaling
 import no.nav.helse.serde.migration.V26SykdomshistorikkMerge
 import no.nav.helse.serde.migration.V270ForkasteHerreløseUtbetalinger
+import no.nav.helse.serde.migration.V271RenamerUtbetalingerTilGenerasjon
 import no.nav.helse.serde.migration.V27CachetSykdomstidslinjePåVedtaksperiode
 import no.nav.helse.serde.migration.V28HendelsesIderPåVedtaksperiode
 import no.nav.helse.serde.migration.V29LeggerTilInntektsKildeType
@@ -549,7 +550,8 @@ class SerialisertPerson(val json: String) {
             V267SpissetMigreringForÅForkasteUtbetaling(),
             V268ForkasteVilkårsgrunnlagUtenInntekter(),
             V269SpissetMigreringForÅForkasteUtbetaling(),
-            V270ForkasteHerreløseUtbetalinger()
+            V270ForkasteHerreløseUtbetalinger(),
+            V271RenamerUtbetalingerTilGenerasjon()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
