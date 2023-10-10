@@ -39,7 +39,7 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
         return migrert
     }
 
-    // bytter ut <$.......$> på felter med verdi fra actual. På den måten kan man asserte at feltet finnes, men verdien er ukjent.
+    // bytter ut <!.......!> på felter med verdi fra actual. På den måten kan man asserte at feltet finnes, men verdien er ukjent.
     // Eksempelvis om migreringen innfører en Random UUID på et felt i en migrering, så kan man i expected-json skrive:
     // { "id": "<! en random UUID legges på her !>" }
     private fun erstattPlaceholders(expected: JsonNode, actual: JsonNode): JsonNode {
