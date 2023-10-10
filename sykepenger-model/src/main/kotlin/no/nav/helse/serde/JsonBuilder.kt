@@ -1622,7 +1622,8 @@ internal class JsonBuilder : AbstractBuilder() {
             tidsstempel: LocalDateTime,
             grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
             utbetaling: Utbetaling,
-            sykdomstidslinje: Sykdomstidslinje
+            sykdomstidslinje: Sykdomstidslinje,
+            dokumentsporing: Set<Dokumentsporing>
         ) {
             pushState(GenerasjonState(utbetalinger))
         }
@@ -1696,7 +1697,8 @@ internal class JsonBuilder : AbstractBuilder() {
                 tidsstempel: LocalDateTime,
                 grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
                 utbetaling: Utbetaling,
-                sykdomstidslinje: Sykdomstidslinje
+                sykdomstidslinje: Sykdomstidslinje,
+                dokumentsporing: Set<Dokumentsporing>
             ) {
                 this.utbetalinger.add(mapOf(
                     "id" to id,
@@ -1705,7 +1707,13 @@ internal class JsonBuilder : AbstractBuilder() {
                     "utbetalingId" to this.utbetalingId.toString(),
                     "utbetalingstatus" to this.utbetalingstatus, // bare for å hjelpe debug i spanner
                     "vilkårsgrunnlagId" to this.grunnlagId.toString(),
-                    "sykdomstidslinje" to sykdomstidslinjedetaljer
+                    "sykdomstidslinje" to sykdomstidslinjedetaljer,
+                    "dokumentsporing" to dokumentsporing.toJsonList().map { (id, type) ->
+                        mapOf(
+                            "dokumentId" to id,
+                            "dokumenttype" to type.name
+                        )
+                    }
                 ))
                 popState()
             }

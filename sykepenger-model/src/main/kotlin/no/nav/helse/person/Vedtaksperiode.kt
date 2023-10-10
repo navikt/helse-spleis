@@ -1014,7 +1014,8 @@ internal class Vedtaksperiode private constructor(
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
-        generasjoner.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, arbeidsgiverSomBeregner, this.sykdomstidslinje, this.periode, hendelse, grunnlagsdata, maksimumSykepenger, utbetalingstidslinje)
+        val generasjonkladd = Generasjoner.Generasjon.Generasjonkladd(grunnlagsdata, sykdomstidslinje, hendelseIder.toSet())
+        generasjoner.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, arbeidsgiverSomBeregner, generasjonkladd, periode, hendelse, maksimumSykepenger, utbetalingstidslinje)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, hendelse)
     }
 

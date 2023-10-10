@@ -111,7 +111,8 @@ internal class SpeilGenerasjonerBuilder(
         tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        dokumentsporing: Set<Dokumentsporing>
     ) {
         this.tilstand.besøkBeregnetPeriode(this)
     }
@@ -121,7 +122,8 @@ internal class SpeilGenerasjonerBuilder(
         tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        dokumentsporing: Set<Dokumentsporing>
     ) {
         this.tilstand.forlatBeregnetPeriode(this)
     }

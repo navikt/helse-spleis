@@ -353,14 +353,16 @@ internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHisto
         tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        dokumentsporing: Set<Dokumentsporing>
     ) {}
     fun postVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        dokumentsporing: Set<Dokumentsporing>
     ) {}
 }
 

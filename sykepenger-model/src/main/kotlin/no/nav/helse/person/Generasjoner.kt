@@ -9,11 +9,11 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -95,17 +95,16 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         fødselsnummer: String,
         arbeidsgiver: Arbeidsgiver,
         arbeidsgiverSomBeregner: Arbeidsgiver,
-        sykdomstidslinje: Sykdomstidslinje,
+        generasjonkladd: Generasjon.Generasjonkladd,
         periode: Periode,
         hendelse: IAktivitetslogg,
-        grunnlagsdata: VilkårsgrunnlagElement,
         maksimumSykepenger: Alder.MaksimumSykepenger,
         utbetalingstidslinje: Utbetalingstidslinje
     ): Utbetalingstidslinje {
         val strategi = if (this.harAvsluttede()) Arbeidsgiver::lagRevurdering else Arbeidsgiver::lagUtbetaling
         val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, arbeidsgiverSomBeregner, utbetalingstidslinje, maksimumSykepenger.sisteDag(), maksimumSykepenger.forbrukteDager(), maksimumSykepenger.gjenståendeDager(), periode)
         denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
-        generasjoner.add(Generasjon(grunnlagsdata, denNyeUtbetalingen, sykdomstidslinje))
+        generasjoner.add(generasjonkladd.somGenerasjon(denNyeUtbetalingen))
         return utbetalingstidslinje.subset(periode)
     }
 
@@ -114,16 +113,17 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         private val tidsstempel: LocalDateTime,
         private val grunnlagsdata: VilkårsgrunnlagElement,
         val utbetaling: Utbetaling,
-        private val sykdomstidslinje: Sykdomstidslinje
+        private val sykdomstidslinje: Sykdomstidslinje,
+        private val dokumentsporing: Set<Dokumentsporing>
     ) {
-        constructor(grunnlagsdata: VilkårsgrunnlagElement, utbetaling: Utbetaling, sykdomstidslinje: Sykdomstidslinje) : this(UUID.randomUUID(), LocalDateTime.now(), grunnlagsdata, utbetaling, sykdomstidslinje)
+        constructor(grunnlagsdata: VilkårsgrunnlagElement, utbetaling: Utbetaling, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Set<Dokumentsporing>) : this(UUID.randomUUID(), LocalDateTime.now(), grunnlagsdata, utbetaling, sykdomstidslinje, dokumentsporing)
 
         fun accept(visitor: GenerasjonerVisistor) {
-            visitor.preVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje)
+            visitor.preVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje, dokumentsporing)
             grunnlagsdata.accept(visitor)
             utbetaling.accept(visitor)
             sykdomstidslinje.accept(visitor)
-            visitor.postVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje)
+            visitor.postVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje, dokumentsporing)
         }
 
         fun lagreTidsnæreInntekter(
@@ -133,6 +133,14 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             oppholdsperiodeMellom: Periode?
         ) {
             grunnlagsdata.lagreTidsnæreInntekter(nyttSkjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
+        }
+
+        internal class Generasjonkladd(
+            private val grunnlagsdata: VilkårsgrunnlagElement,
+            private val sykdomstidslinje: Sykdomstidslinje,
+            private val dokumentsporing: Set<Dokumentsporing>
+        ) {
+            fun somGenerasjon(utbetaling: Utbetaling) = Generasjon(grunnlagsdata, utbetaling, sykdomstidslinje, dokumentsporing)
         }
     }
 }

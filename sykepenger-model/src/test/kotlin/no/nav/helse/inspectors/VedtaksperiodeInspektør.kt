@@ -52,7 +52,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         tidsstempel: LocalDateTime,
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        dokumentsporing: Set<Dokumentsporing>
     ) {
         val vilkårsgrunnlagId = grunnlagsdata.inspektør.vilkårsgrunnlagId
         val utbetalingId = utbetaling.inspektør.utbetalingId

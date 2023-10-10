@@ -899,7 +899,8 @@ internal data class PersonData(
                 private val tidsstempel: LocalDateTime,
                 private val vilkårsgrunnlagId: UUID,
                 private val utbetalingId: UUID,
-                private val sykdomstidslinje: SykdomstidslinjeData
+                private val sykdomstidslinje: SykdomstidslinjeData,
+                private val dokumentsporing: List<DokumentsporingData>
             ) {
                 companion object {
                     fun List<GenerasjonData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
@@ -909,7 +910,8 @@ internal data class PersonData(
                                 tidsstempel = it.tidsstempel,
                                 grunnlagsdata = grunnlagoppslag(it.vilkårsgrunnlagId),
                                 utbetaling = utbetalinger.getValue(it.utbetalingId),
-                                sykdomstidslinje = it.sykdomstidslinje.createSykdomstidslinje()
+                                sykdomstidslinje = it.sykdomstidslinje.createSykdomstidslinje(),
+                                dokumentsporing = it.dokumentsporing.tilSporing()
                             )
                         }
                 }
