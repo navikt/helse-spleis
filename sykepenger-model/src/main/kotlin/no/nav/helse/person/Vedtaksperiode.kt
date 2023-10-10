@@ -146,6 +146,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalin
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.UTBETALT
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
+import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 
@@ -731,7 +732,9 @@ internal class Vedtaksperiode private constructor(
         if (harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return false
         if (!arbeidsgiverperiode.forventerOpplysninger(periode)) return false
 
-        val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
+        val harSkattSykepengegrunnlagISammeMåned = person.harSkattSykepengegrunnlagFor(organisasjonsnummer, skjæringstidspunkt)
+                && skjæringstidspunkt.yearMonth == periode().start.yearMonth
+        val fastsattInntekt = if (!harSkattSykepengegrunnlagISammeMåned) person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer()) else null
         val vedtaksperioderKnyttetTilArbeidsgiverperiode = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
         val relevanteSykmeldingsperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.sykmeldingsperiode }
         val sykdomstidslinjeKnyttetTilArbeidsgiverperiode = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.sykdomstidslinje }.merge()

@@ -8,7 +8,6 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -65,8 +64,6 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.til
-import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -858,6 +855,72 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        assertEquals(expectedForespørsel, actualForespørsel)
+    }
+
+    @Test
+    fun `Flere arbeidsgivere med ulik fom i samme måned - skal be om inntekt selvom vi har inntekt fra skatt`() {
+        nyPeriode(1.januar til 31.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        nyPeriode(2.januar til 31.januar, orgnummer = a2)
+        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            organisasjonsnummer = a2,
+            vedtaksperiodeId = 1.vedtaksperiode.id(a2),
+            skjæringstidspunkt = 1.januar,
+            sykmeldingsperioder = listOf(2.januar til 31.januar),
+            egenmeldingsperioder = emptyList(),
+            forespurteOpplysninger = listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Arbeidsgiverperiode
+            )
+        )
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        assertEquals(expectedForespørsel, actualForespørsel)
+    }
+
+    @Test
+    fun `Flere arbeidsgivere med ulik fom i ulik måned - skal ikke be om inntekt selv om vi har innntekt fra skatt`() {
+        nyPeriode(31.desember(2017) til 31.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(31.desember(2017) til 15.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 31.desember(2017)),
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 31.desember(2017)),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        nyPeriode(1.januar til 31.januar, orgnummer = a2)
+        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            organisasjonsnummer = a2,
+            vedtaksperiodeId = 1.vedtaksperiode.id(a2),
+            skjæringstidspunkt = 31.desember(2017),
+            sykmeldingsperioder = listOf(1.januar til 31.januar),
+            egenmeldingsperioder = emptyList(),
+            forespurteOpplysninger = listOf(
+                PersonObserver.FastsattInntekt(fastsattInntekt = INNTEKT),
+                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Arbeidsgiverperiode
+            )
+        )
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
         assertEquals(expectedForespørsel, actualForespørsel)
     }

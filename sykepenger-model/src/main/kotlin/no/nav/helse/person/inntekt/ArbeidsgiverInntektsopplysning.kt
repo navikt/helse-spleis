@@ -281,5 +281,8 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(builder: GodkjenningsbehovBuilder) {
             this.forEach{it.inntektsopplysning.omregnetÅrsinntekt(builder, it.orgnummer)}
         }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.harSkattSykepengegrunnlagFor(organisasjonsnummer: String) =
+            firstOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.erSkattSykepengegrunnlag() ?: false
     }
 }

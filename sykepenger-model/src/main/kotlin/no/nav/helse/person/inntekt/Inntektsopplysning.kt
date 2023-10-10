@@ -117,6 +117,8 @@ abstract class Inntektsopplysning protected constructor(
         builder.omregnedeÅrsinntekter(orgnummer, omregnetÅrsinntekt().beløp.reflection { årlig, _, _, _ -> årlig })
     }
 
+    internal fun erSkattSykepengegrunnlag(): Boolean = this is SkattSykepengegrunnlag
+
     internal companion object {
         internal fun erOmregnetÅrsinntektEndret(før: Inntektsopplysning, etter: Inntektsopplysning) =
             erOmregnetÅrsinntektEndret(listOf(før), listOf(etter))

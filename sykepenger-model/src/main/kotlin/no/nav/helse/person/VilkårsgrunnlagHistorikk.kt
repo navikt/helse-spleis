@@ -340,6 +340,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun kandidatForSkjønnsmessigFastsettelse() = sykepengegrunnlag.kandidatForSkjønnsmessigFastsettelse()
         internal fun trengerFastsettelseEtterSkjønn() = sykepengegrunnlag.avventerFastsettelseEtterSkjønn()
+        internal fun harSkattSykepengegrunnlagFor(organisasjonsnummer: String): Boolean = sykepengegrunnlag.harSkattSykepengegrunnlagFor(organisasjonsnummer)
 
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
