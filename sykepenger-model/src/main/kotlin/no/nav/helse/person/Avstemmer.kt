@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -224,7 +223,7 @@ internal class Avstemmer(person: Person) {
             if (utbetalingstatus != Utbetalingstatus.FORKASTET) utbetalinger.getOrPut(vedtaksperiodeId) { mutableListOf() }.add(id)
         }
 
-        override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {
+        override fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
             pop()
         }
     }

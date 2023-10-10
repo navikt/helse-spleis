@@ -1072,28 +1072,28 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitVurdering(vurdering, ident, epost, tidspunkt, automatiskBehandling, godkjent)
     }
 
-    override fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {
-        delegatee.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
+    override fun preVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
+        delegatee.preVisitGenerasjoner(generasjoner)
     }
 
-    override fun preVisitVedtaksperiodeUtbetaling(
+    override fun preVisitGenerasjon(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje
     ) {
-        delegatee.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje)
+        delegatee.preVisitGenerasjon(grunnlagsdata, utbetaling, sykdomstidslinje)
     }
 
-    override fun postVisitVedtaksperiodeUtbetaling(
+    override fun postVisitGenerasjon(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje
     ) {
-        delegatee.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje)
+        delegatee.postVisitGenerasjon(grunnlagsdata, utbetaling, sykdomstidslinje)
     }
 
-    override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {
-        delegatee.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
+    override fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
+        delegatee.postVisitGenerasjoner(generasjoner)
     }
 
     override fun postVisitUtbetaling(

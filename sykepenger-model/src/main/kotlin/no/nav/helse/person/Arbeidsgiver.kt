@@ -961,8 +961,8 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun kanForkastes(vedtaksperiodeUtbetalinger: VedtaksperiodeUtbetalinger) =
-        vedtaksperiodeUtbetalinger.kanForkastes(utbetalinger)
+    internal fun kanForkastes(generasjoner: Generasjoner) =
+        generasjoner.kanForkastes(utbetalinger)
 
     internal fun kanForkastes(vedtaksperiode: Vedtaksperiode) =
         vedtaksperiode.kanForkastes(utbetalinger)

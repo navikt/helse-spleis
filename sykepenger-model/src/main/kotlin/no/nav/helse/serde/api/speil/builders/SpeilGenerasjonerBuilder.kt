@@ -106,11 +106,11 @@ internal class SpeilGenerasjonerBuilder(
         this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, skjæringstidspunkt(), tilstand, opprettet, oppdatert, periode, hendelser)
     }
 
-    override fun preVisitVedtaksperiodeUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: Utbetaling, sykdomstidslinje: Sykdomstidslinje) {
+    override fun preVisitGenerasjon(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: Utbetaling, sykdomstidslinje: Sykdomstidslinje) {
         this.tilstand.besøkBeregnetPeriode(this)
     }
 
-    override fun postVisitVedtaksperiodeUtbetaling(
+    override fun postVisitGenerasjon(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje

@@ -17,24 +17,19 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagElement, Utbetaling, Sykdomstidslinje>>) {
+internal class Generasjoner(generasjoner: List<Generasjon>) {
     internal constructor() : this(mutableListOf())
 
-    private val utbetalingene get() = utbetalinger.map(Triple<*, Utbetaling, *>::second)
-    private val utbetalinger = utbetalinger.toMutableList()
-    private val sisteVilkårsgrunnlag get() = utbetalinger.lastOrNull()?.first
-    private val siste get() = utbetalinger.lastOrNull()?.second
+    private val utbetalingene get() = generasjoner.map(Generasjon::utbetaling)
+    private val generasjoner = generasjoner.toMutableList()
+    private val siste get() = generasjoner.lastOrNull()?.utbetaling
 
-    internal fun accept(visitor: VedtaksperiodeUtbetalingVisitor) {
-        visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
-        utbetalinger.forEach { (grunnlagsdata, utbetaling, sykdomstidslinje) ->
-            visitor.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje)
-            grunnlagsdata.accept(visitor)
-            utbetaling.accept(visitor)
-            sykdomstidslinje.accept(visitor)
-            visitor.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling, sykdomstidslinje)
+    internal fun accept(visitor: GenerasjonerVisistor) {
+        visitor.preVisitGenerasjoner(generasjoner)
+        generasjoner.forEach { generasjon ->
+            generasjon.accept(visitor)
         }
-        visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
+        visitor.postVisitGenerasjoner(generasjoner)
     }
 
     internal fun harUtbetaling() = siste != null && siste!!.gyldig()
@@ -48,10 +43,10 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>) =
         Utbetaling.kanForkastes(utbetalingene, arbeidsgiverUtbetalinger)
-    internal fun harAvsluttede() = utbetalinger.any { (_, utbetaling) -> utbetaling.erAvsluttet() }
+    internal fun harAvsluttede() = generasjoner.any { generasjon -> generasjon.utbetaling.erAvsluttet() }
     internal fun harId(utbetalingId: UUID) = utbetalingene.harId(utbetalingId)
-    internal fun hørerIkkeSammenMed(other: Utbetaling) = utbetalinger.lastOrNull { (_, utbetaling) -> utbetaling.gyldig() }?.second?.hørerSammen(other) == false
-    internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = other.siste != null && hørerIkkeSammenMed(other.siste!!)
+    internal fun hørerIkkeSammenMed(other: Utbetaling) = generasjoner.lastOrNull { generasjon  -> generasjon.utbetaling.gyldig() }?.utbetaling?.hørerSammen(other) == false
+    internal fun hørerIkkeSammenMed(other: Generasjoner) = other.siste != null && hørerIkkeSammenMed(other.siste!!)
     internal fun gjelderIkkeFor(hendelse: UtbetalingHendelse) = siste?.gjelderFor(hendelse) != true
 
     internal fun lagreTidsnæreInntekter(
@@ -60,8 +55,7 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
         hendelse: IAktivitetslogg,
         oppholdsperiodeMellom: Periode?
     ) {
-        val forrige = sisteVilkårsgrunnlag ?: return
-        forrige.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
+        generasjoner.lastOrNull()?.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
     }
 
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
@@ -78,7 +72,7 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
         siste?.build(builder)
     }
 
-    internal fun overlapperMed(other: VedtaksperiodeUtbetalinger): Boolean {
+    internal fun overlapperMed(other: Generasjoner): Boolean {
         if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
         return this.siste!!.overlapperMed(other.siste!!)
     }
@@ -110,7 +104,30 @@ internal class VedtaksperiodeUtbetalinger(utbetalinger: List<Triple<Vilkårsgrun
         val strategi = if (this.harAvsluttede()) Arbeidsgiver::lagRevurdering else Arbeidsgiver::lagUtbetaling
         val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, arbeidsgiverSomBeregner, utbetalingstidslinje, maksimumSykepenger.sisteDag(), maksimumSykepenger.forbrukteDager(), maksimumSykepenger.gjenståendeDager(), periode)
         denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
-        utbetalinger.add(Triple(grunnlagsdata, denNyeUtbetalingen, sykdomstidslinje))
+        generasjoner.add(Generasjon(grunnlagsdata, denNyeUtbetalingen, sykdomstidslinje))
         return utbetalingstidslinje.subset(periode)
+    }
+
+    internal class Generasjon(
+        private val grunnlagsdata: VilkårsgrunnlagElement,
+        val utbetaling: Utbetaling,
+        private val sykdomstidslinje: Sykdomstidslinje
+    ) {
+        fun accept(visitor: GenerasjonerVisistor) {
+            visitor.preVisitGenerasjon(grunnlagsdata, utbetaling, sykdomstidslinje)
+            grunnlagsdata.accept(visitor)
+            utbetaling.accept(visitor)
+            sykdomstidslinje.accept(visitor)
+            visitor.postVisitGenerasjon(grunnlagsdata, utbetaling, sykdomstidslinje)
+        }
+
+        fun lagreTidsnæreInntekter(
+            nyttSkjæringstidspunkt: LocalDate,
+            arbeidsgiver: Arbeidsgiver,
+            hendelse: IAktivitetslogg,
+            oppholdsperiodeMellom: Periode?
+        ) {
+            grunnlagsdata.lagreTidsnæreInntekter(nyttSkjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
+        }
     }
 }

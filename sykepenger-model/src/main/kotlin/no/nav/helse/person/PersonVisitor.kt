@@ -341,22 +341,26 @@ internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingstidslinjeVi
     }
 }
 
-internal interface VedtaksperiodeUtbetalingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor, SykdomstidslinjeVisitor {
-    fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {}
-    fun preVisitVedtaksperiodeUtbetaling(
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje
-    ) {}
-    fun postVisitVedtaksperiodeUtbetaling(
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje
-    ) {}
-    fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {}
+internal interface GenerasjonerVisistor : GenerasjonVisistor {
+
+    fun preVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {}
+    fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {}
 }
 
-internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, UtbetalingsdagVisitor {
+internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor, SykdomstidslinjeVisitor {
+    fun preVisitGenerasjon(
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        utbetaling: Utbetaling,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {}
+    fun postVisitGenerasjon(
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        utbetaling: Utbetaling,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {}
+}
+
+internal interface VedtaksperiodeVisitor : GenerasjonerVisistor, UtbetalingsdagVisitor {
     fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,

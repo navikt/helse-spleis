@@ -47,7 +47,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         this.skjæringstidspunkt = skjæringstidspunkt()
     }
 
-    override fun preVisitVedtaksperiodeUtbetaling(
+    override fun preVisitGenerasjon(
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         sykdomstidslinje: Sykdomstidslinje

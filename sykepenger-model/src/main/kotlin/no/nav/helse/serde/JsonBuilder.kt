@@ -16,6 +16,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toJsonList
 import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
@@ -1577,7 +1578,7 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(SykdomstidslinjeState(sykdomstidslinje))
         }
 
-        override fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {
+        override fun preVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
             pushState(VedtaksperiodeUtbetalingerState(this.utbetalinger))
         }
 
@@ -1616,7 +1617,7 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class VedtaksperiodeUtbetalingerState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
-        override fun preVisitVedtaksperiodeUtbetaling(
+        override fun preVisitGenerasjon(
             grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
             utbetaling: Utbetaling,
             sykdomstidslinje: Sykdomstidslinje
@@ -1624,7 +1625,7 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(VedtaksperiodeUtbetalingState(utbetalinger))
         }
 
-        override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Triple<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling, Sykdomstidslinje?>>) {
+        override fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
             popState()
         }
 
@@ -1688,7 +1689,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 pushState(SykdomstidslinjeState(sykdomstidslinjedetaljer))
             }
 
-            override fun postVisitVedtaksperiodeUtbetaling(
+            override fun postVisitGenerasjon(
                 grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
                 utbetaling: Utbetaling,
                 sykdomstidslinje: Sykdomstidslinje

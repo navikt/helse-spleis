@@ -22,7 +22,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeUtbetalinger
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -49,7 +49,7 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData.Companion.tilSporing
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeUtbetalingData.Companion.tilModellobjekt
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.Companion.tilModellobjekt
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.Companion.parseArbeidsgiverInntektsopplysninger
@@ -867,7 +867,7 @@ internal data class PersonData(
             private val sykmeldingFom: LocalDate,
             private val sykmeldingTom: LocalDate,
             private val tilstand: TilstandType,
-            private val utbetalinger: List<VedtaksperiodeUtbetalingData>,
+            private val utbetalinger: List<GenerasjonData>,
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
@@ -894,15 +894,15 @@ internal data class PersonData(
                 fun tilModelltype(dokumentId: UUID) = modelltype(dokumentId)
             }
 
-            data class VedtaksperiodeUtbetalingData(
+            data class GenerasjonData(
                 private val vilkårsgrunnlagId: UUID,
                 private val utbetalingId: UUID,
                 private val sykdomstidslinje: SykdomstidslinjeData
             ) {
                 companion object {
-                    fun List<VedtaksperiodeUtbetalingData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
+                    fun List<GenerasjonData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
                         this.map { (grunnlagId, utbetalingId, sykdomstidslinjedata) ->
-                            Triple(grunnlagoppslag(grunnlagId), utbetalinger.getValue(utbetalingId), sykdomstidslinjedata.createSykdomstidslinje())
+                            Generasjoner.Generasjon(grunnlagoppslag(grunnlagId), utbetalinger.getValue(utbetalingId), sykdomstidslinjedata.createSykdomstidslinje())
                         }
                 }
             }
@@ -930,8 +930,8 @@ internal data class PersonData(
                     dokumentsporing = sporingIder.toMutableSet(),
                     periode = Periode(fom, tom),
                     sykmeldingsperiode = sykmeldingsperiode,
-                    utbetalinger = VedtaksperiodeUtbetalinger(
-                        utbetalinger = this.utbetalinger.tilModellobjekt(grunnlagoppslag, utbetalinger)
+                    utbetalinger = Generasjoner(
+                        generasjoner = this.utbetalinger.tilModellobjekt(grunnlagoppslag, utbetalinger)
                     ),
                     opprettet = opprettet,
                     oppdatert = oppdatert,

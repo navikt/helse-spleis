@@ -16,7 +16,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeUtbetalinger
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -34,7 +34,7 @@ private class ArbeidsgiverMixin
 private class VedtaksperiodeMixin
 
 @JsonIgnoreProperties("arbeidsgiver")
-private class VedtaksperiodeUtbetalingerMixin
+private class GenerasjonerMixin
 
 @JsonIgnoreProperties("observers", "forrigeHendelse")
 private class UtbetalingMixin
@@ -73,7 +73,7 @@ private val objectMapper = jacksonObjectMapper()
             Person::class.java to PersonMixin::class.java,
             Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
             Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
-            VedtaksperiodeUtbetalinger::class.java to VedtaksperiodeUtbetalingerMixin::class.java,
+            Generasjoner::class.java to GenerasjonerMixin::class.java,
             Utbetaling::class.java to UtbetalingMixin::class.java,
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
