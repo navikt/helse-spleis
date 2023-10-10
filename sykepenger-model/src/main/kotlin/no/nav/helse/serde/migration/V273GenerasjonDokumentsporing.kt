@@ -44,9 +44,12 @@ internal class V273GenerasjonDokumentsporing: JsonMigration(273) {
 
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("sykdomshistorikk").forEach { element ->
-                val hendelseId = UUID.fromString(element.path("hendelseId").asText())
-                val tidspunkt = LocalDateTime.parse(element.path("tidsstempel").asText())
-                oppdaterTidspunkt(hendelseId, tidspunkt)
+                val node = element.path("hendelseId")
+                if (node.isTextual) {
+                    val hendelseId = UUID.fromString(node.asText())
+                    val tidspunkt = LocalDateTime.parse(element.path("tidsstempel").asText())
+                    oppdaterTidspunkt(hendelseId, tidspunkt)
+                }
             }
             arbeidsgiver.path("refusjonshistorikk").forEach { element ->
                 val hendelseId = UUID.fromString(element.path("meldingsreferanseId").asText())
