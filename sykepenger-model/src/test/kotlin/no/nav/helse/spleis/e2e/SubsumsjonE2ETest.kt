@@ -2911,7 +2911,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             paragraf = Paragraf.PARAGRAF_35,
             ledd = LEDD_1,
             versjon = 1.juni(2021),
-            input = emptyMap(),
+            input = mapOf(
+                "stadfesting" to true
+            ),
             output = emptyMap(),
             vedtaksperiodeId = 1.vedtaksperiode
         )

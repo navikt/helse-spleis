@@ -875,7 +875,9 @@ class MaskinellJurist private constructor(
             versjon = LocalDate.of(2021, 6, 1),
             paragraf = Paragraf.PARAGRAF_35,
             ledd = LEDD_1,
-            input = emptyMap(),
+            input = mapOf(
+                "stadfesting" to true
+            ),
             output = emptyMap(),
             kontekster = kontekster()
         ))
