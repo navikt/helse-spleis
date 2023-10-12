@@ -287,20 +287,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(dager: DagerFraInntektsmelding) {
-        val skalHåndtereDager = tilstand.skalHåndtereDager(this, dager)
-        if (!skalHåndtereDager || dager.alleredeHåndtert(hendelseIder)) {
-            dager.vurdertTilOgMed(periode.endInclusive)
-
-            // om vedtaksperioden ikke skal håndtere dagene kan dette være fordi inntektsmeldingen har oppgitt
-            // første fraværsdag slik at arbeidsgiverperioden ikke håndteres. Vi vil likevel kunne trenge varsel,
-            // så for å produsere evt. varsel håndteres det av perioden(e) som overlaper med oppgitt agp eller første fraværsdag
-            if (!skalHåndtereDager && dager.skalValideresAv(periode)) {
-                kontekst(dager)
-                dager.valider(this.periode, finnArbeidsgiverperiode())
-                if (dager.harFunksjonelleFeilEllerVerre()) forkast(dager)
-            }
-            return
-        }
+        if (!tilstand.skalHåndtereDager(this, dager) || dager.alleredeHåndtert(hendelseIder))
+            return dager.vurdertTilOgMed(periode.endInclusive)
         kontekst(dager)
         tilstand.håndter(this, dager)
         dager.vurdertTilOgMed(periode.endInclusive)
@@ -328,11 +316,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
-        val hendelse = dager.sykdomstidslinje(periode) ?: return
-        periode = periode.oppdaterFom(hendelse.sykdomstidslinje().periode() ?: periode)
-        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        val hendelse = dager.sykdomstidslinje(periode)
+        if (hendelse != null) {
+            periode = periode.oppdaterFom(hendelse.sykdomstidslinje().periode() ?: periode)
+            sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+            inntektsmeldingHåndtert(dager)
+        }
         dager.validerArbeidsgiverperiode(periode, finnArbeidsgiverperiode())
-        inntektsmeldingHåndtert(dager)
     }
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {

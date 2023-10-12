@@ -552,13 +552,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `strekker ikke periode tilbake før første fraværsdag`() {
+    fun `strekker periode tilbake før første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 8.januar))
         håndterSøknad(Sykdom(1.januar, 8.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 8.januar, 10.januar til 17.januar), 1.februar)
-        assertEquals(1.februar til 20.februar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(9.januar til 20.februar, inspektør.periode(2.vedtaksperiode))
     }
 
     @Test
@@ -609,7 +609,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             avsendersystem = Inntektsmelding.Avsendersystem.ALTINN
         )
         assertIngenFunksjonelleFeil()
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
+        assertEquals(1.januar til 28.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertIngenVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -2054,10 +2056,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 6.februar,
             avsendersystem = Inntektsmelding.Avsendersystem.ALTINN
         )
-        assertEquals(6.februar til 28.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(20.januar til 28.februar, inspektør.periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
-        assertEquals("SSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+        assertIngenVarsel(RV_IM_3, 1.vedtaksperiode.filter())
+        assertEquals("GG UUUUUGG UUUUUGG ?SSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals(1, inspektør.inntektInspektør.size)
         assertIngenInfo("Inntektsmelding ikke håndtert")
     }

@@ -7,8 +7,10 @@ import no.nav.helse.erRettFør
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.perioder
@@ -421,7 +423,7 @@ internal class SkjæringstidspunktTest {
         arbeidsgiverperioder = arbeidsgiverperioder,
         arbeidsforholdId = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    )
+    ).dager().sykdomstidslinje(arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
 
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"

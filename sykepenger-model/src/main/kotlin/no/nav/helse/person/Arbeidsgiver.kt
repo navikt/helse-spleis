@@ -524,7 +524,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding.")
-        val dager = DagerFraInntektsmelding(inntektsmelding)
+        val dager = inntektsmelding.dager()
         håndter(inntektsmelding) { håndter(dager) }
 
         addInntektsmelding(inntektsmelding)

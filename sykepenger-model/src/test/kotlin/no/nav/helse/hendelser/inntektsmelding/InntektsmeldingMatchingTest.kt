@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -269,21 +270,6 @@ internal class InntektsmeldingMatchingTest {
             harFlereInntektsmeldinger = false,
             avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
             mottatt = LocalDateTime.now(),
-        ).let { inntektsmelding ->
-            DagerFraInntektsmelding(inntektsmelding)
-        }
-
-        private val DagerFraInntektsmelding.inspektør get() = DagerFraInntektsmeldingInspektør(this)
-        private class DagerFraInntektsmeldingInspektør(dager: DagerFraInntektsmelding): DagerFraInntektsmeldingVisitor {
-            lateinit var gjenståendeDager: Set<LocalDate>
-
-            init {
-                dager.accept(this)
-            }
-
-            override fun visitGjenståendeDager(dager: Set<LocalDate>) {
-                gjenståendeDager = dager
-            }
-        }
+        ).dager()
     }
 }

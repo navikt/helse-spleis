@@ -4,33 +4,121 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.forrigeDag
+import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class DagerFraInntektsmelding(
-    private val inntektsmelding: Inntektsmelding
+    private val inntektsmelding: Inntektsmelding,
+    private val arbeidsgiverperioder: List<Periode>,
+    private val førsteFraværsdag: LocalDate?,
+    begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+    private val avsendersystem: Inntektsmelding.Avsendersystem?,
+    private val harFlereInntektsmeldinger: Boolean,
+    private val harOpphørAvNaturalytelser: Boolean
 ): IAktivitetslogg by inntektsmelding {
-    private val opprinneligPeriode = inntektsmelding.sykdomstidslinje().periode()
+    private companion object {
+        private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
+            "BetvilerArbeidsufoerhet",
+            "FiskerMedHyre",
+            "StreikEllerLockout",
+            "FravaerUtenGyldigGrunn",
+            "BeskjedGittForSent",
+            "IkkeLoenn"
+        )
+
+        private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
+        private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
+    }
+
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
     private val arbeidsdager = mutableSetOf<LocalDate>()
-    private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
     private var dagerHåndtert = false
+    private val arbeidsgiverperiode = arbeidsgiverperioder.periode()
+    private val overlappsperiode = when {
+        // første fraværsdag er oppgitt etter arbeidsgiverperioden
+        arbeidsgiverperiode == null || førsteFraværsdag != null && førsteFraværsdag > arbeidsgiverperiode.endInclusive.nesteDag -> førsteFraværsdag?.somPeriode()
+        // kant-i-kant
+        førsteFraværsdag?.forrigeDag == arbeidsgiverperiode.endInclusive -> arbeidsgiverperiode.oppdaterTom(arbeidsgiverperiode.endInclusive.nesteDag)
+        else -> arbeidsgiverperiode
+    }
     private val alleDager get() = (opprinneligPeriode?: emptySet()) + arbeidsdager
     private val håndterteDager get() = alleDager - gjenståendeDager
-    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
 
-    private companion object {
-        private const val MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER = 10
+    private val sykdomstidslinje = lagSykdomstidslinje()
+    private val opprinneligPeriode = sykdomstidslinje.periode()
+    private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
+
+    private val ignorerDager: Boolean get() {
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return false
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return true
+        if (hulleteArbeidsgiverperiode()) return true
+        return false
     }
+
+    private fun lagSykdomstidslinje(): Sykdomstidslinje {
+        return tidslinjeForArbeidsgiverperioden() ?: tidslinjeForFørsteFraværsdag()
+    }
+
+    private fun tidslinjeForFørsteFraværsdag(): Sykdomstidslinje {
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt == null || førsteFraværsdag == null) return Sykdomstidslinje()
+        return Sykdomstidslinje.sykedagerNav(førsteFraværsdag, førsteFraværsdag, 100.prosent, inntektsmelding.kilde)
+    }
+
+    private fun tidslinjeForArbeidsgiverperioden(): Sykdomstidslinje? {
+        if (ignorerDager) return Sykdomstidslinje()
+        if (arbeidsgiverperiodenKanIkkeTolkes()) return null
+
+        val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, inntektsmelding.kilde) } ?: Sykdomstidslinje()
+        val friskHelg = friskHelgMellomFørsteFraværsdagOgArbeidsgiverperioden()
+        return arbeidsdager.merge(lagArbeidsgivertidslinje(), Dag.replace).merge(friskHelg)
+    }
+
+    private fun arbeidsgiverperiodenKanIkkeTolkes(): Boolean {
+        if (førsteFraværsdag == null) return false
+        val periodeMellom = arbeidsgiverperiode?.periodeMellom(førsteFraværsdag)
+        return periodeMellom != null && periodeMellom.count() >= MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER
+    }
+
+    private fun friskHelgMellomFørsteFraværsdagOgArbeidsgiverperioden(): Sykdomstidslinje {
+        if (førsteFraværsdag == null) return Sykdomstidslinje()
+        if (arbeidsgiverperiode?.erRettFør(førsteFraværsdag) != true) return Sykdomstidslinje()
+        val helgen = arbeidsgiverperiode.periodeMellom(førsteFraværsdag) ?: return Sykdomstidslinje()
+        return Sykdomstidslinje.arbeidsdager(helgen, inntektsmelding.kilde)
+    }
+
+    private fun lagArbeidsgivertidslinje(): Sykdomstidslinje {
+        val agp = arbeidsgiverperioder.map(::arbeidsgiverdager).merge()
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return agp
+        return agp.merge(arbeidsgiverperiodeNavSkalUtbetale().map(::sykedagerNav).merge(), Dag.replace)
+    }
+
+    private fun arbeidsgiverperiodeNavSkalUtbetale(): List<Periode> {
+        if (arbeidsgiverperiode != null && (førsteFraværsdag == null || førsteFraværsdag in arbeidsgiverperiode)) return arbeidsgiverperioder
+        return listOfNotNull(førsteFraværsdag?.førsteArbeidsdag()?.somPeriode())
+    }
+
+    private fun arbeidsgiverdager(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, inntektsmelding.kilde)
+    private fun sykedagerNav(periode: Periode) = Sykdomstidslinje.sykedagerNav(periode.start, periode.endInclusive, 100.prosent, inntektsmelding.kilde)
 
     internal fun accept(visitor: DagerFraInntektsmeldingVisitor) {
         visitor.visitGjenståendeDager(gjenståendeDager)
@@ -44,16 +132,14 @@ internal class DagerFraInntektsmelding(
     internal fun alleredeHåndtert(hendelseIder: Set<Dokumentsporing>) = dokumentsporing in hendelseIder
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
-        inntektsmelding.trimLeft(dato)
         gjenståendeDager.removeAll {gjenstående -> gjenstående <= dato}
     }
 
     internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
-        checkNotNull(opprinneligPeriode) { "Forventer ikke å utvide en tom sykdomstidslinje" }
-        inntektsmelding.padLeft(dato)
-        val oppdatertPeriode = inntektsmelding.sykdomstidslinje().periode() ?: return
-        if (opprinneligPeriode == oppdatertPeriode) return
-        val arbeidsdagerFør = oppdatertPeriode - opprinneligPeriode
+        if (arbeidsgiverperioder.isEmpty()) return
+        if (opprinneligPeriode == null) return
+        val oppdatertPeriode = opprinneligPeriode.oppdaterFom(dato)
+        val arbeidsdagerFør = oppdatertPeriode.trim(opprinneligPeriode).flatten()
         if (!arbeidsdager.addAll(arbeidsdagerFør)) return
         gjenståendeDager.addAll(arbeidsdagerFør)
     }
@@ -70,8 +156,17 @@ internal class DagerFraInntektsmelding(
 
     internal fun skalHåndteresAv(periode: Periode): Boolean {
         val vedtaksperiodeRettFør = gjenståendeDager.isNotEmpty() && periode.endInclusive.erRettFør(gjenståendeDager.first())
-        return skalHåndtere(periode) || vedtaksperiodeRettFør
+        return skalHåndtere(periode) || vedtaksperiodeRettFør || tomSykdomstidslinjeMenSkalValidere(periode) || egenmeldingerIForkantAvPerioden(periode)
     }
+
+    private fun tomSykdomstidslinjeMenSkalValidere(periode: Periode) =
+        (opprinneligPeriode == null && skalValideresAv(periode))
+
+    // om vedtaksperioden ikke direkte overlapper med gjenståendeDager, men gjenståendeDager er ikke tom, og vedtaksperioden overlapper
+    // med første fraværsdag, betyr det at inntektsmeldingen informerer om egenmeldinger vi ikke har søknad for.
+    // Om vi hadde en vedtaksperiode, ville dagene bli 'spist opp' via vurdertTilOgMed()
+    private fun egenmeldingerIForkantAvPerioden(periode: Periode) =
+        (overlappsperiode != null && overlappsperiode.overlapperMed(periode) && gjenståendeDager.isNotEmpty())
 
     internal fun skalHåndteresAvRevurdering(periode: Periode, sammenhengende: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
         if (skalHåndtere(periode)) return true
@@ -86,15 +181,16 @@ internal class DagerFraInntektsmelding(
     internal fun sykdomstidslinje(vedtaksperiode: Periode): SykdomstidslinjeHendelse? {
         val periode = håndterDagerFør(vedtaksperiode) ?: return null
         if (periode.start != vedtaksperiode.start) info("Perioden ble strukket tilbake fra ${vedtaksperiode.start} til ${periode.start} (${ChronoUnit.DAYS.between(periode.start, vedtaksperiode.start)} dager)")
+        val sykdomstidslinje = samletSykdomstidslinje(periode)
         gjenståendeDager.removeAll(periode)
         dagerHåndtert = true
-        return BitAvInntektsmelding(inntektsmelding, periode)
+        return BitAvInntektsmelding(inntektsmelding, sykdomstidslinje)
     }
 
-    internal fun validerArbeidsgiverperiode(periode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
-        if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
-        else inntektsmelding.validerFeilaktigNyArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
-    }
+    private fun samletSykdomstidslinje(periode: Periode) =
+        (arbeidsdagertidslinje() + sykdomstidslinje).subset(periode)
+    private fun arbeidsdagertidslinje() =
+        arbeidsdager.map { Sykdomstidslinje.arbeidsdager(it, it, inntektsmelding.kilde) }.merge()
 
     private fun håndterDagerFør(vedtaksperiode: Periode): Periode? {
         leggTilArbeidsdagerFør(vedtaksperiode.start)
@@ -104,22 +200,59 @@ internal class DagerFraInntektsmelding(
         return periode
     }
 
-    internal fun skalValideresAv(periode: Periode) = inntektsmelding.skalValideresAv(periode)
-
-    internal fun valider(periode: Periode) {
-        inntektsmelding.valider(periode, NullObserver)
+    private fun skalValideresAv(periode: Periode) = overlappsperiode?.overlapperMed(periode) == true || ikkeUtbetaltAGPOgAGPOverlapper(periode)
+    private fun ikkeUtbetaltAGPOgAGPOverlapper(periode: Periode): Boolean {
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return false
+        if (arbeidsgiverperiode == null) return false
+        if (førsteFraværsdag != null && førsteFraværsdag > arbeidsgiverperiode.endInclusive.nesteDag) return false
+        return arbeidsgiverperiode.overlapperMed(periode)
     }
 
-    internal fun valider(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?) {
-        valider(periode)
-        inntektsmelding.validerArbeidsgiverperiode(periode, arbeidsgiverperiode)
+    internal fun valider(periode: Periode) {
+        if (!skalValideresAv(periode)) return
+        if (harOpphørAvNaturalytelser) funksjonellFeil(Varselkode.RV_IM_7)
+        if (harFlereInntektsmeldinger) varsel(Varselkode.RV_IM_22)
+        validerBegrunnelseForReduksjonEllerIkkeUtbetalt()
+    }
+
+    private fun validerBegrunnelseForReduksjonEllerIkkeUtbetalt() {
+        if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return
+        info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(begrunnelseForReduksjonEllerIkkeUtbetalt))
+        if (hulleteArbeidsgiverperiode()) funksjonellFeil(RV_IM_23)
+        when (begrunnelseForReduksjonEllerIkkeUtbetalt) {
+            in ikkeStøttedeBegrunnelserForReduksjon -> funksjonellFeil(RV_IM_8)
+            "FerieEllerAvspasering" -> varsel(Varselkode.RV_IM_25)
+            else -> varsel(RV_IM_8)
+        }
+    }
+
+    private fun hulleteArbeidsgiverperiode(): Boolean {
+        return arbeidsgiverperioder.size > 1 && (førsteFraværsdag == null || førsteFraværsdag in arbeidsgiverperiode!!)
+    }
+
+    internal fun validerArbeidsgiverperiode(periode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
+        if (!skalValideresAv(periode)) return
+        if (gjenståendeDager.isNotEmpty()) return validerFeilaktigNyArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
+        if (beregnetArbeidsgiverperiode != null) validerArbeidsgiverperiode(beregnetArbeidsgiverperiode)
+        if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
+    }
+
+    private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
+        if (arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
+        if (avsendersystem == Inntektsmelding.Avsendersystem.NAV_NO && arbeidsgiverperioder.isEmpty()) return
+        varsel(Varselkode.RV_IM_3)
+    }
+
+    private fun validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
+        if (avsendersystem == Inntektsmelding.Avsendersystem.NAV_NO && arbeidsgiverperioder.isEmpty()) return
+        beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode, this)
     }
 
     internal fun noenDagerHåndtert() = dagerHåndtert
 
-    internal fun påvirker(sykdomstidslinje: Sykdomstidslinje): Boolean {
-        val periode = sykdomstidslinje.periode() ?: return false
-        return sykdomstidslinje.påvirkesAv(BitAvInntektsmelding(inntektsmelding, periode).sykdomstidslinje())
+    fun overlappendeSykmeldingsperioder(sykmeldingsperioder: List<Periode>): List<Periode> {
+        if (overlappsperiode == null) return emptyList()
+        return sykmeldingsperioder.mapNotNull { it.overlappendePeriode(overlappsperiode) }
     }
 
     internal fun erKorrigeringForGammel(gammelAgp: Arbeidsgiverperiode?): Boolean {
@@ -136,9 +269,9 @@ internal class DagerFraInntektsmelding(
 
     private class BitAvInntektsmelding(
         private val inntektsmelding: Inntektsmelding,
-        private val periode: Periode
+        private val sykdomstidslinje: Sykdomstidslinje
     ): SykdomstidslinjeHendelse(inntektsmelding.meldingsreferanseId(), inntektsmelding) {
-        override fun sykdomstidslinje() = inntektsmelding.sykdomstidslinje().subset(periode)
+        override fun sykdomstidslinje() = sykdomstidslinje
         override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = throw IllegalStateException("Ikke i bruk")
         override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = throw IllegalStateException("Ikke i bruk")
     }

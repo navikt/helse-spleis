@@ -188,9 +188,9 @@ internal class SykmeldingsperioderTest {
         sykmeldingsperioder.lagre(1.januar til 15.januar)
         sykmeldingsperioder.lagre(1.mars til 28.mars)
 
-        assertEquals(listOf(1.januar til 15.januar), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), 1.januar)))
-        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.februar til 16.februar), 1.februar)))
-        assertEquals(listOf(1.mars til 16.mars), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.mars til 16.mars), 1.mars)))
+        assertEquals(listOf(1.januar til 15.januar), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), 1.januar).dager()))
+        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.februar til 16.februar), 1.februar).dager()))
+        assertEquals(listOf(1.mars til 16.mars), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.mars til 16.mars), 1.mars).dager()))
     }
 
     @Test
@@ -198,7 +198,7 @@ internal class SykmeldingsperioderTest {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 31.januar)
 
-        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar)))
+        assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar).dager()))
     }
 
     @Test
@@ -213,7 +213,7 @@ internal class SykmeldingsperioderTest {
                 inntektsmelding(
                     listOf(1.januar til 16.januar),
                     førsteFraværsdag = 10.februar
-                )
+                ).dager()
             )
         )
     }
@@ -231,7 +231,7 @@ internal class SykmeldingsperioderTest {
             harOpphørAvNaturalytelser = false
         )
 
-    class Inspektør() : SykmeldingsperioderVisitor {
+    class Inspektør : SykmeldingsperioderVisitor {
 
         val perioder = mutableListOf<Periode>()
 

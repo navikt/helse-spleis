@@ -1,9 +1,9 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 
 internal class Sykmeldingsperioder(
     private var perioder: List<Periode> = listOf()
@@ -27,8 +27,8 @@ internal class Sykmeldingsperioder(
         perioder = perioder.flatMap { it.trim(søknad.oppdaterFom(LocalDate.MIN)) }
     }
 
-    internal fun overlappendePerioder(inntektsmelding: Inntektsmelding) =
-        inntektsmelding.overlappendeSykmeldingsperioder(perioder)
+    internal fun overlappendePerioder(dager: DagerFraInntektsmelding) =
+        dager.overlappendeSykmeldingsperioder(perioder)
 }
 
 internal interface SykmeldingsperioderVisitor {

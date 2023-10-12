@@ -102,6 +102,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
 
+        nullstillTilstandsendringer()
         val innteksmeldingId = håndterInntektsmelding(
             listOf(14.april til 14.april, 18.april til 2.mai),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse"
@@ -205,6 +206,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             førsteFraværsdag = 6.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "foo"
         ) // 6.januar lørdag
+        assertEquals("HH NSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
