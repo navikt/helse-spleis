@@ -17,12 +17,12 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -59,10 +59,8 @@ import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
@@ -876,8 +874,9 @@ internal data class PersonData(
                 private val dokumentId: UUID,
                 private val dokumenttype: DokumentTypeData
             ) {
+                fun tilModellobjekt() = dokumenttype.tilModelltype(dokumentId)
                 companion object {
-                    internal fun List<DokumentsporingData>.tilSporing() = map { it.dokumenttype.tilModelltype(it.dokumentId) }.toSet()
+                    internal fun List<DokumentsporingData>.tilSporing() = map { it.tilModellobjekt() }.toSet()
                 }
             }
             enum class DokumentTypeData(private val modelltype: (UUID) -> Dokumentsporing) {
@@ -897,24 +896,68 @@ internal data class PersonData(
 
             data class GenerasjonData(
                 private val id: UUID,
-                private val tidsstempel: LocalDateTime,
-                private val vilkårsgrunnlagId: UUID,
-                private val utbetalingId: UUID,
-                private val sykdomstidslinje: SykdomstidslinjeData,
-                private val dokumentsporing: List<DokumentsporingData>
+                private val tilstand: TilstandData,
+                private val vedtakFattet: LocalDateTime?,
+                private val avsluttet: LocalDateTime?,
+                private val endringer: List<EndringData>
             ) {
+                internal enum class TilstandData {
+                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING, VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, AVSLUTTET_UTEN_VEDTAK_REVURDERING, TIL_INFOTRYGD;
+                    fun tilModellobjekt() = mapping.getValue(this)
+
+                    companion object {
+                        private val mapping = mapOf(
+                            UBEREGNET to Generasjoner.Generasjon.Tilstand.Uberegnet,
+                            UBEREGNET_OMGJØRING to Generasjoner.Generasjon.Tilstand.UberegnetOmgjøring,
+                            UBEREGNET_REVURDERING to Generasjoner.Generasjon.Tilstand.UberegnetRevurdering,
+                            BEREGNET to Generasjoner.Generasjon.Tilstand.Beregnet,
+                            BEREGNET_OMGJØRING to Generasjoner.Generasjon.Tilstand.BeregnetOmgjøring,
+                            BEREGNET_REVURDERING to Generasjoner.Generasjon.Tilstand.BeregnetRevurdering,
+                            VEDTAK_FATTET to Generasjoner.Generasjon.Tilstand.VedtakFattet,
+                            VEDTAK_IVERKSATT to Generasjoner.Generasjon.Tilstand.VedtakIverksatt,
+                            REVURDERT_VEDTAK_AVVIST to Generasjoner.Generasjon.Tilstand.RevurdertVedtakAvvist,
+                            AVSLUTTET_UTEN_VEDTAK to Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtak,
+                            AVSLUTTET_UTEN_VEDTAK_REVURDERING to Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtakRevurdering,
+                            TIL_INFOTRYGD to Generasjoner.Generasjon.Tilstand.TilInfotrygd
+                        )
+                        fun tilEnum(tilstand: Generasjoner.Generasjon.Tilstand) = mapping.entries.single { (_, obj) -> obj == tilstand }.key
+                    }
+                }
+                internal fun tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner.Generasjon(
+                    id = id,
+                    tilstand = tilstand.tilModellobjekt(),
+                    endringer = endringer.map { it.tilModellobjekt(grunnlagoppslag, utbetalinger) },
+                    vedtakFattet = vedtakFattet,
+                    avsluttet = avsluttet
+                )
                 companion object {
                     fun List<GenerasjonData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
-                        this.map {
-                            Generasjoner.Generasjon(
-                                id = it.id,
-                                tidsstempel = it.tidsstempel,
-                                grunnlagsdata = grunnlagoppslag(it.vilkårsgrunnlagId),
-                                utbetaling = utbetalinger.getValue(it.utbetalingId),
-                                sykdomstidslinje = it.sykdomstidslinje.createSykdomstidslinje(),
-                                dokumentsporing = it.dokumentsporing.tilSporing()
-                            )
-                        }
+                        this.map { it.tilModellobjekt(grunnlagoppslag, utbetalinger) }
+                }
+
+                data class EndringData(
+                    private val id: UUID,
+                    private val tidsstempel: LocalDateTime,
+                    private val sykmeldingsperiodeFom: LocalDate,
+                    private val sykmeldingsperiodeTom: LocalDate,
+                    private val fom: LocalDate,
+                    private val tom: LocalDate,
+                    private val utbetalingId: UUID?,
+                    private val vilkårsgrunnlagId: UUID?,
+                    private val sykdomstidslinje: SykdomstidslinjeData,
+                    private val dokumentsporing: DokumentsporingData
+                ) {
+                    fun tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
+                        Generasjoner.Generasjon.Endring(
+                            id = id,
+                            tidsstempel = tidsstempel,
+                            sykmeldingsperiode = sykmeldingsperiodeFom til sykmeldingsperiodeTom,
+                            periode = fom til tom,
+                            grunnlagsdata = vilkårsgrunnlagId?.let(grunnlagoppslag),
+                            utbetaling = utbetalingId?.let(utbetalinger::getValue),
+                            dokumentsporing = dokumentsporing.tilModellobjekt(),
+                            sykdomstidslinje = sykdomstidslinje.createSykdomstidslinje()
+                        )
                 }
             }
             internal fun createVedtaksperiode(
@@ -941,12 +984,12 @@ internal data class PersonData(
                     dokumentsporing = sporingIder.toMutableSet(),
                     periode = Periode(fom, tom),
                     sykmeldingsperiode = sykmeldingsperiode,
-                    utbetalinger = Generasjoner(
+                    generasjoner = Generasjoner(
                         generasjoner = this.generasjoner.tilModellobjekt(grunnlagoppslag, utbetalinger)
                     ),
                     opprettet = opprettet,
                     oppdatert = oppdatert,
-                    medVedtaksperiode = jurist
+                    medOrganisasjonsnummer = jurist
                 )
             }
 

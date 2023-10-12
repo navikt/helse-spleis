@@ -2,12 +2,16 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomshistorikkHendelse>
 
 internal interface SykdomshistorikkHendelse : IAktivitetslogg {
+    fun dokumentsporing(): Dokumentsporing
+    fun oppdaterFom(other: Periode): Periode
     fun element(): Sykdomshistorikk.Element
 
     class Hendelseskilde(

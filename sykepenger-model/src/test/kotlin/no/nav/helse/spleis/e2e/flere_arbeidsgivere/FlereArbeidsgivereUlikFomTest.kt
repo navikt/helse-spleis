@@ -107,12 +107,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
+        håndterYtelser(orgnummer = a2)
         assertEquals(1, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
         val ag2Utbetalinger = inspektør(a2).utbetalinger(1.vedtaksperiode)
-        assertEquals(1, ag2Utbetalinger.size)
-        assertEquals(Utbetalingstatus.FORKASTET, ag2Utbetalinger.single().inspektør.tilstand)
+        assertEquals(2, ag2Utbetalinger.size)
+        assertEquals(Utbetalingstatus.FORKASTET, ag2Utbetalinger[0].inspektør.tilstand)
+        assertEquals(Utbetalingstatus.IKKE_UTBETALT, ag2Utbetalinger[1].inspektør.tilstand)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
     }
 
     @Test

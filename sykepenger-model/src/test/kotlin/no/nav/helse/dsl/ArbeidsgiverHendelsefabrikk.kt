@@ -297,7 +297,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         vedtaksperiodeId: UUID,
         utbetalingGodkjent: Boolean,
         automatiskBehandling: Boolean,
-        utbetalingId: UUID
+        utbetalingId: UUID,
+        godkjenttidspunkt: LocalDateTime = LocalDateTime.now()
     ) = Utbetalingsgodkjenning(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
@@ -308,7 +309,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola.nordmann@nav.no",
         utbetalingGodkjent = utbetalingGodkjent,
-        godkjenttidspunkt = LocalDateTime.now(),
+        godkjenttidspunkt = godkjenttidspunkt,
         automatiskBehandling = automatiskBehandling,
     )
 

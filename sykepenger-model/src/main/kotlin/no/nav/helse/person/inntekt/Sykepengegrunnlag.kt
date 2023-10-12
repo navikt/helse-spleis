@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfakta
@@ -449,7 +450,7 @@ internal class Sykepengegrunnlag private constructor(
         return false
     }
 
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, organisasjonsnummer: String, block: (inntektsmeldingId: UUID) -> Unit) =
+    internal fun leggTil(hendelseIder: Generasjoner, organisasjonsnummer: String, block: (inntektsmeldingId: UUID) -> Unit) =
         arbeidsgiverInntektsopplysninger.leggTil(hendelseIder, organisasjonsnummer, block)
 
     private fun tilstand(nyTilstand: Tilstand): Tilstand {

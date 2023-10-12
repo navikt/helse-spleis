@@ -30,7 +30,7 @@ private class PersonMixin
 @JsonIgnoreProperties("person", "jurist")
 private class ArbeidsgiverMixin
 
-@JsonIgnoreProperties("person", "arbeidsgiver", "jurist")
+@JsonIgnoreProperties("person", "arbeidsgiver", "arbeidsgiverjurist")
 private class VedtaksperiodeMixin
 
 @JsonIgnoreProperties("arbeidsgiver")

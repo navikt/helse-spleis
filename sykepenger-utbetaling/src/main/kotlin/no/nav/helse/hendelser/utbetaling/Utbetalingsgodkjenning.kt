@@ -34,6 +34,9 @@ class Utbetalingsgodkjenning(
         automatiskBehandling
     )
 
+    fun vedtakFattetTidspunkt() = godkjenttidspunkt
+    fun vedtakGodkjent() = utbetalingGodkjent
+
     fun valider(trengerFastsettelseEtterSkjønn: Boolean): IAktivitetslogg {
         if (trengerFastsettelseEtterSkjønn && utbetalingGodkjent) {
             // i dette tilfellet må det enten skjønnsfastsettes først eller så må utbetalingen annulleres

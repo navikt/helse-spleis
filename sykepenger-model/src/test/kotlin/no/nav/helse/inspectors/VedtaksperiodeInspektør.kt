@@ -5,9 +5,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.serde.PersonData
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -16,12 +18,9 @@ internal val Vedtaksperiode.inspektør get() = VedtaksperiodeInspektør(this)
 
 internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : VedtaksperiodeVisitor {
 
-    init {
-        vedtaksperiode.accept(this)
-    }
-
     internal lateinit var id: UUID
         private set
+
     internal lateinit var periode: Periode
         private set
     internal lateinit var oppdatert: LocalDateTime
@@ -29,6 +28,26 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
     internal lateinit var skjæringstidspunkt: LocalDate
     internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID>
     internal lateinit var utbetalingstidslinje: Utbetalingstidslinje
+    internal val generasjoner = mutableListOf<Generasjon>()
+    init {
+        vedtaksperiode.accept(this)
+    }
+
+    data class Generasjon(
+        val id: UUID,
+        val endringer: List<Generasjonendring>,
+        val periode: Periode,
+        val tilstand: PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData,
+        val vedtakFattet: LocalDateTime?,
+        val avsluttet: LocalDateTime?
+    ) {
+        data class Generasjonendring(
+            val grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+            val utbetaling: Utbetaling?,
+            val periode: Periode,
+            val dokumentsporing: Dokumentsporing
+        )
+    }
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
@@ -50,13 +69,37 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
     override fun preVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje,
-        dokumentsporing: Set<Dokumentsporing>
+        tilstand: Generasjoner.Generasjon.Tilstand,
+        periode: Periode,
+        vedtakFattet: LocalDateTime?,
+        avsluttet: LocalDateTime?
     ) {
-        val vilkårsgrunnlagId = grunnlagsdata.inspektør.vilkårsgrunnlagId
-        val utbetalingId = utbetaling.inspektør.utbetalingId
+        this.generasjoner.add(Generasjon(
+            id = id,
+            endringer = emptyList(),
+            periode = periode,
+            tilstand = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
+            vedtakFattet = vedtakFattet,
+            avsluttet = avsluttet
+        ))
+    }
+
+    override fun preVisitGenerasjonendring(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykmeldingsperiode: Periode,
+        periode: Periode,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        utbetaling: Utbetaling?,
+        dokumentsporing: Dokumentsporing,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {
+        val sisteGenerasjon = this.generasjoner.last()
+        this.generasjoner[this.generasjoner.lastIndex] = sisteGenerasjon.copy(
+            endringer = sisteGenerasjon.endringer.plus(Generasjon.Generasjonendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing))
+        )
+        val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId ?: return
+        val utbetalingId = utbetaling!!.inspektør.utbetalingId
         utbetalingIdTilVilkårsgrunnlagId = utbetalingId to vilkårsgrunnlagId
     }
 

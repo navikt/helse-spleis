@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
@@ -273,10 +273,10 @@ class ArbeidsgiverInntektsopplysning(
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.leggTil(
-            hendelseIder: MutableSet<Dokumentsporing>,
+            generasjoner: Generasjoner,
             organisasjonsnummer: String,
             block: (inntektsmeldingId: UUID) -> Unit
-        ) = single { it.gjelder(organisasjonsnummer) }.inntektsopplysning.leggTil(hendelseIder, block)
+        ) = single { it.gjelder(organisasjonsnummer) }.inntektsopplysning.leggTil(generasjoner, block)
 
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(builder: GodkjenningsbehovBuilder) {
             this.forEach{it.inntektsopplysning.omregnetÅrsinntekt(builder, it.orgnummer)}

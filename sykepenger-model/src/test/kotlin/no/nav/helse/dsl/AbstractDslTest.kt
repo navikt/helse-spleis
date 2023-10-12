@@ -21,10 +21,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.VedtaksperiodeInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.serde.migration.Json
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -78,6 +81,7 @@ internal abstract class AbstractDslTest {
 
     protected fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
     protected fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
+    protected fun inspektør(vedtaksperiodeId: UUID) = inspiser(personInspektør).vedtaksperiode(vedtaksperiodeId).inspektør
 
     protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
         testperson.arbeidsgiver(this, testblokk)

@@ -33,10 +33,8 @@ import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
@@ -1081,23 +1079,64 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun preVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje,
-        dokumentsporing: Set<Dokumentsporing>
+        tilstand: Generasjoner.Generasjon.Tilstand,
+        periode: Periode,
+        vedtakFattet: LocalDateTime?,
+        avsluttet: LocalDateTime?
     ) {
-        delegatee.preVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje, dokumentsporing)
+        delegatee.preVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet)
     }
-
+    override fun preVisitGenerasjonendring(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykmeldingsperiode: Periode,
+        periode: Periode,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        utbetaling: Utbetaling?,
+        dokumentsporing: Dokumentsporing,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {
+        delegatee.preVisitGenerasjonendring(
+            id,
+            tidsstempel,
+            sykmeldingsperiode,
+            periode,
+            grunnlagsdata,
+            utbetaling,
+            dokumentsporing,
+            sykdomstidslinje
+        )
+    }
+    override fun postVisitGenerasjonendring(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykmeldingsperiode: Periode,
+        periode: Periode,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        utbetaling: Utbetaling?,
+        dokumentsporing: Dokumentsporing,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {
+        delegatee.postVisitGenerasjonendring(
+            id,
+            tidsstempel,
+            sykmeldingsperiode,
+            periode,
+            grunnlagsdata,
+            utbetaling,
+            dokumentsporing,
+            sykdomstidslinje
+        )
+    }
     override fun postVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje,
-        dokumentsporing: Set<Dokumentsporing>
+        tilstand: Generasjoner.Generasjon.Tilstand,
+        periode: Periode,
+        vedtakFattet: LocalDateTime?,
+        avsluttet: LocalDateTime?
     ) {
-        delegatee.postVisitGenerasjon(id, tidsstempel, grunnlagsdata, utbetaling, sykdomstidslinje, dokumentsporing)
+        delegatee.postVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet)
     }
 
     override fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {

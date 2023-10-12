@@ -20,9 +20,7 @@ class OverstyrArbeidsforhold(
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
-        hendelseIder.add(Dokumentsporing.overstyrArbeidsforhold(meldingsreferanseId()))
-    }
+    override fun dokumentsporing() = Dokumentsporing.overstyrArbeidsforhold(meldingsreferanseId())
 
     override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: MaskinellJurist) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, this.skjæringstidspunkt, jurist)

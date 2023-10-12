@@ -354,7 +354,7 @@ internal class LagUtbetalingForRevurderingTest {
             organisasjonsnummer = organisasjonsnummer,
             sykdomstidslinje = Sykdomstidslinje(sykdomstidslinje),
             dokumentsporing = Dokumentsporing.søknad(SØKNAD),
-            periode = periode,
+            sykmeldingsperiode = periode,
             jurist = maskinellJurist
         )
     }

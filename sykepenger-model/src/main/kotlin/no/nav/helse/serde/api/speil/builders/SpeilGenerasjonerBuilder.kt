@@ -12,6 +12,7 @@ import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -109,21 +110,28 @@ internal class SpeilGenerasjonerBuilder(
     override fun preVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje,
-        dokumentsporing: Set<Dokumentsporing>
+        tilstand: Generasjoner.Generasjon.Tilstand,
+        periode: Periode,
+        vedtakFattet: LocalDateTime?,
+        avsluttet: LocalDateTime?
     ) {
+        val generasjonerUtenUtbetaling = setOf(
+            Generasjoner.Generasjon.Tilstand.Uberegnet,
+            Generasjoner.Generasjon.Tilstand.UberegnetOmgjøring,
+            Generasjoner.Generasjon.Tilstand.UberegnetRevurdering,
+            Generasjoner.Generasjon.Tilstand.TilInfotrygd
+        )
+        if (tilstand in generasjonerUtenUtbetaling) return
         this.tilstand.besøkBeregnetPeriode(this)
     }
 
     override fun postVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje,
-        dokumentsporing: Set<Dokumentsporing>
+        tilstand: Generasjoner.Generasjon.Tilstand,
+        periode: Periode,
+        vedtakFattet: LocalDateTime?,
+        avsluttet: LocalDateTime?
     ) {
         this.tilstand.forlatBeregnetPeriode(this)
     }

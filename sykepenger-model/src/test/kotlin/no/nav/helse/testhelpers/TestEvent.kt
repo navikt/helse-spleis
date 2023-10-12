@@ -30,6 +30,14 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
     class Søknad(opprettet: LocalDateTime) : TestEvent(opprettet)
     class TestHendelse(opprettet: LocalDateTime) : TestEvent(opprettet)
 
+    override fun dokumentsporing(): Dokumentsporing {
+        error("ikke i bruk")
+    }
+
+    override fun oppdaterFom(other: Periode): Periode {
+        error("ikke i bruk")
+    }
+
     override fun element(): Sykdomshistorikk.Element {
         error("ikke i bruk")
     }

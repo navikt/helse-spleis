@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -134,11 +135,11 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun meldingsreferanseId() = meldingsreferanseId
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) : Boolean {
+    internal fun leggTil(generasjoner: Generasjoner) : Boolean {
         dagerHåndtert = true
-        return hendelseIder.add(dokumentsporing)
+        return generasjoner.oppdaterDokumentsporing(dokumentsporing)
     }
-    internal fun alleredeHåndtert(hendelseIder: Set<Dokumentsporing>) = dokumentsporing in hendelseIder
+    internal fun alleredeHåndtert(generasjoner: Generasjoner) = generasjoner.dokumentHåndtert(dokumentsporing)
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
         gjenståendeDager.removeAll {gjenstående -> gjenstående <= dato}
@@ -281,6 +282,9 @@ internal class DagerFraInntektsmelding(
         private val sykdomstidslinje: Sykdomstidslinje,
         aktivitetslogg: Aktivitetslogg
     ): SykdomshistorikkHendelse, IAktivitetslogg by (aktivitetslogg) {
+        override fun oppdaterFom(other: Periode) =
+            other.oppdaterFom(sykdomstidslinje().periode() ?: other)
+        override fun dokumentsporing() = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
         internal fun sykdomstidslinje() = sykdomstidslinje
         override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
     }

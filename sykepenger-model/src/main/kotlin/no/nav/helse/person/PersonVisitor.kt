@@ -351,18 +351,38 @@ internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHisto
     fun preVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje,
-        dokumentsporing: Set<Dokumentsporing>
+        tilstand: Generasjoner.Generasjon.Tilstand,
+        periode: Periode,
+        vedtakFattet: LocalDateTime?,
+        avsluttet: LocalDateTime?
+    ) {}
+    fun preVisitGenerasjonendring(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykmeldingsperiode: Periode,
+        periode: Periode,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        utbetaling: Utbetaling?,
+        dokumentsporing: Dokumentsporing,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {}
+    fun postVisitGenerasjonendring(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykmeldingsperiode: Periode,
+        periode: Periode,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        utbetaling: Utbetaling?,
+        dokumentsporing: Dokumentsporing,
+        sykdomstidslinje: Sykdomstidslinje
     ) {}
     fun postVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-        utbetaling: Utbetaling,
-        sykdomstidslinje: Sykdomstidslinje,
-        dokumentsporing: Set<Dokumentsporing>
+        tilstand: Generasjoner.Generasjon.Tilstand,
+        periode: Periode,
+        vedtakFattet: LocalDateTime?,
+        avsluttet: LocalDateTime?
     ) {}
 }
 

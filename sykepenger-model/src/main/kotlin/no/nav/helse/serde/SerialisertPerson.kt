@@ -560,7 +560,8 @@ class SerialisertPerson(val json: String) {
             V272GenerasjonIdOgTidsstempel(),
             V273GenerasjonDokumentsporing(),
             V274None(),
-            V275None()
+            V275None(),
+            V276GenerasjonMedEndringer()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

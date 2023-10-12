@@ -17,6 +17,7 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
         internal fun overstyrArbeidsgiveropplysninger(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsgiveropplysninger)
         internal fun overstyrArbeidsforhold(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsforhold)
         internal fun skjønnsmessigFastsettelse(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse)
+        internal fun grunnbeløpendring(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse) // TODO: bytte DokumentType
 
         internal fun Iterable<Dokumentsporing>.toJsonList() = map { it.id to it.dokumentType }
         internal fun Iterable<Dokumentsporing>.ider() = map { it.id }.toSet()

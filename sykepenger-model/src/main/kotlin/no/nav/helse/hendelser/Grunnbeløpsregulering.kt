@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
@@ -17,7 +18,7 @@ class Grunnbeløpsregulering(
     override fun erRelevant(skjæringstidspunkt: LocalDate) =
         this.skjæringstidspunkt == skjæringstidspunkt
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}
+    override fun dokumentsporing() = Dokumentsporing.grunnbeløpendring(meldingsreferanseId())
 
     override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: MaskinellJurist) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, skjæringstidspunkt, jurist)

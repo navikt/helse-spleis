@@ -61,6 +61,7 @@ class Søknad(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
     private val sykdomsperiode: Periode
+    private val opprinneligSykdomstidslinje: Sykdomstidslinje
     private var sykdomstidslinje: Sykdomstidslinje
 
     internal companion object {
@@ -83,7 +84,8 @@ class Søknad(
             .merge(Dagturnering.SØKNAD::beste)
             .subset(sykdomsperiode)
 
-        sykdomstidslinje = egenmeldingstidslinje.merge(søknadstidslinje, replace)
+        opprinneligSykdomstidslinje = egenmeldingstidslinje.merge(søknadstidslinje, replace)
+        sykdomstidslinje = opprinneligSykdomstidslinje
     }
 
     override fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
@@ -97,7 +99,8 @@ class Søknad(
         sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
     }
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = hendelseIder.add(Dokumentsporing.søknad(meldingsreferanseId()))
+    override fun dokumentsporing() =
+        Dokumentsporing.søknad(meldingsreferanseId())
 
     override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 
@@ -162,9 +165,9 @@ class Søknad(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            sykdomstidslinje = sykdomstidslinje,
+            sykdomstidslinje = if (harFunksjonelleFeilEllerVerre()) opprinneligSykdomstidslinje else sykdomstidslinje,
             dokumentsporing = Dokumentsporing.søknad(meldingsreferanseId()),
-            periode = sykdomsperiode,
+            sykmeldingsperiode = sykdomsperiode,
             jurist = jurist
         )
     }

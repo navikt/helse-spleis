@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
@@ -94,8 +95,8 @@ internal class Inntektsmelding(
         saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, hendelseId)
     }
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, block: (inntektsmeldingId: UUID) -> Unit) {
-        if (!hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(hendelseId))) return
+    override fun leggTil(generasjoner: Generasjoner, block: (inntektsmeldingId: UUID) -> Unit) {
+        if (!generasjoner.oppdaterDokumentsporing(Dokumentsporing.inntektsmeldingInntekt(hendelseId))) return
         block(hendelseId)
     }
 

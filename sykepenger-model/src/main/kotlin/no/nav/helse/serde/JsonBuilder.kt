@@ -1638,106 +1638,149 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    private class GenerasjonerState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
+    private class GenerasjonerState(private val generasjoner: MutableList<Map<String, Any?>>) : BuilderState() {
         override fun preVisitGenerasjon(
             id: UUID,
             tidsstempel: LocalDateTime,
-            grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-            utbetaling: Utbetaling,
-            sykdomstidslinje: Sykdomstidslinje,
-            dokumentsporing: Set<Dokumentsporing>
+            tilstand: Generasjoner.Generasjon.Tilstand,
+            periode: Periode,
+            vedtakFattet: LocalDateTime?,
+            avsluttet: LocalDateTime?
         ) {
-            pushState(GenerasjonState(utbetalinger))
+            pushState(GenerasjonState(generasjoner))
         }
 
         override fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
             popState()
         }
 
-        private class GenerasjonState(private val utbetalinger: MutableList<Map<String, Any?>>) : BuilderState() {
-            private lateinit var skjæringstidspunkt: LocalDate
-            private lateinit var grunnlagId: UUID
-            private lateinit var utbetalingId: UUID
-            private lateinit var utbetalingstatus: String
-            private val sykdomstidslinjedetaljer = mutableMapOf<String, Any?>()
-
-            override fun preVisitGrunnlagsdata(
-                skjæringstidspunkt: LocalDate,
-                grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-                sykepengegrunnlag: Sykepengegrunnlag,
-                opptjening: Opptjening,
-                vurdertOk: Boolean,
-                meldingsreferanseId: UUID?,
-                vilkårsgrunnlagId: UUID,
-                medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
-            ) {
-                this.skjæringstidspunkt = skjæringstidspunkt
-                this.grunnlagId = vilkårsgrunnlagId
-            }
-
-            override fun preVisitInfotrygdVilkårsgrunnlag(
-                infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
-                skjæringstidspunkt: LocalDate,
-                sykepengegrunnlag: Sykepengegrunnlag,
-                vilkårsgrunnlagId: UUID
-            ) {
-                this.skjæringstidspunkt = skjæringstidspunkt
-                this.grunnlagId = vilkårsgrunnlagId
-            }
-
-            override fun preVisitUtbetaling(
-                utbetaling: Utbetaling,
+        private class GenerasjonState(private val generasjoner: MutableList<Map<String, Any?>>) : BuilderState() {
+            private val endringer = mutableListOf<Map<String, Any?>>()
+            override fun preVisitGenerasjonendring(
                 id: UUID,
-                korrelasjonsId: UUID,
-                type: Utbetalingtype,
-                utbetalingstatus: Utbetalingstatus,
-                periode: Periode,
                 tidsstempel: LocalDateTime,
-                oppdatert: LocalDateTime,
-                arbeidsgiverNettoBeløp: Int,
-                personNettoBeløp: Int,
-                maksdato: LocalDate,
-                forbrukteSykedager: Int?,
-                gjenståendeSykedager: Int?,
-                stønadsdager: Int,
-                beregningId: UUID,
-                overføringstidspunkt: LocalDateTime?,
-                avsluttet: LocalDateTime?,
-                avstemmingsnøkkel: Long?,
-                annulleringer: Set<UUID>
+                sykmeldingsperiode: Periode,
+                periode: Periode,
+                grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+                utbetaling: Utbetaling?,
+                dokumentsporing: Dokumentsporing,
+                sykdomstidslinje: Sykdomstidslinje
             ) {
-                utbetalingId = id
-                this.utbetalingstatus = utbetalingstatus.name
-            }
-
-            override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
-                pushState(SykdomstidslinjeState(sykdomstidslinjedetaljer))
+                pushState(GenerasjonendringState(endringer))
             }
 
             override fun postVisitGenerasjon(
                 id: UUID,
                 tidsstempel: LocalDateTime,
-                grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-                utbetaling: Utbetaling,
-                sykdomstidslinje: Sykdomstidslinje,
-                dokumentsporing: Set<Dokumentsporing>
+                tilstand: Generasjoner.Generasjon.Tilstand,
+                periode: Periode,
+                vedtakFattet: LocalDateTime?,
+                avsluttet: LocalDateTime?
             ) {
-                this.utbetalinger.add(mapOf(
+                generasjoner.add(mapOf(
                     "id" to id,
                     "tidsstempel" to tidsstempel,
-                    "skjæringstidspunkt" to this.skjæringstidspunkt, // bare for å hjelpe debug i spanner
-                    "utbetalingId" to this.utbetalingId.toString(),
-                    "utbetalingstatus" to this.utbetalingstatus, // bare for å hjelpe debug i spanner
-                    "vilkårsgrunnlagId" to this.grunnlagId.toString(),
-                    "sykdomstidslinje" to sykdomstidslinjedetaljer,
-                    "dokumentsporing" to dokumentsporing.toJsonList().map { (id, type) ->
-                        mapOf(
-                            "dokumentId" to id,
-                            "dokumenttype" to type.name
-                        )
-                    }
+                    "tilstand" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
+                    "fom" to periode.start,
+                    "tom" to periode.endInclusive,
+                    "vedtakFattet" to vedtakFattet,
+                    "avsluttet" to avsluttet,
+                    "endringer" to endringer
                 ))
                 popState()
+            }
+
+            private class GenerasjonendringState(private val endringer: MutableList<Map<String, Any?>>) : BuilderState() {
+                private var skjæringstidspunkt: LocalDate? = null
+                private var grunnlagId: UUID? = null
+                private var utbetalingId: UUID? = null
+                private var utbetalingstatus: String? = null
+                private val sykdomstidslinjedetaljer = mutableMapOf<String, Any?>()
+
+                override fun preVisitGrunnlagsdata(
+                    skjæringstidspunkt: LocalDate,
+                    grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+                    sykepengegrunnlag: Sykepengegrunnlag,
+                    opptjening: Opptjening,
+                    vurdertOk: Boolean,
+                    meldingsreferanseId: UUID?,
+                    vilkårsgrunnlagId: UUID,
+                    medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+                ) {
+                    this.skjæringstidspunkt = skjæringstidspunkt
+                    this.grunnlagId = vilkårsgrunnlagId
+                }
+
+                override fun preVisitInfotrygdVilkårsgrunnlag(
+                    infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+                    skjæringstidspunkt: LocalDate,
+                    sykepengegrunnlag: Sykepengegrunnlag,
+                    vilkårsgrunnlagId: UUID
+                ) {
+                    this.skjæringstidspunkt = skjæringstidspunkt
+                    this.grunnlagId = vilkårsgrunnlagId
+                }
+
+                override fun preVisitUtbetaling(
+                    utbetaling: Utbetaling,
+                    id: UUID,
+                    korrelasjonsId: UUID,
+                    type: Utbetalingtype,
+                    utbetalingstatus: Utbetalingstatus,
+                    periode: Periode,
+                    tidsstempel: LocalDateTime,
+                    oppdatert: LocalDateTime,
+                    arbeidsgiverNettoBeløp: Int,
+                    personNettoBeløp: Int,
+                    maksdato: LocalDate,
+                    forbrukteSykedager: Int?,
+                    gjenståendeSykedager: Int?,
+                    stønadsdager: Int,
+                    beregningId: UUID,
+                    overføringstidspunkt: LocalDateTime?,
+                    avsluttet: LocalDateTime?,
+                    avstemmingsnøkkel: Long?,
+                    annulleringer: Set<UUID>
+                ) {
+                    utbetalingId = id
+                    this.utbetalingstatus = utbetalingstatus.name
+                }
+
+                override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+                    pushState(SykdomstidslinjeState(sykdomstidslinjedetaljer))
+                }
+
+                override fun postVisitGenerasjonendring(
+                    id: UUID,
+                    tidsstempel: LocalDateTime,
+                    sykmeldingsperiode: Periode,
+                    periode: Periode,
+                    grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+                    utbetaling: Utbetaling?,
+                    dokumentsporing: Dokumentsporing,
+                    sykdomstidslinje: Sykdomstidslinje
+                ) {
+                    endringer.add(mapOf(
+                        "id" to id,
+                        "tidsstempel" to tidsstempel,
+                        "sykmeldingsperiodeFom" to sykmeldingsperiode.start,
+                        "sykmeldingsperiodeTom" to sykmeldingsperiode.endInclusive,
+                        "fom" to periode.start,
+                        "tom" to periode.endInclusive,
+                        "skjæringstidspunkt" to this.skjæringstidspunkt, // bare for å hjelpe debug i spanner
+                        "utbetalingId" to this.utbetalingId,
+                        "utbetalingstatus" to this.utbetalingstatus, // bare for å hjelpe debug i spanner
+                        "vilkårsgrunnlagId" to this.grunnlagId,
+                        "sykdomstidslinje" to sykdomstidslinjedetaljer,
+                        "dokumentsporing" to setOf(dokumentsporing).toJsonList().single().let { (id, type) ->
+                            mapOf(
+                                "dokumentId" to id,
+                                "dokumenttype" to type.name
+                            )
+                        }
+                    ))
+                    popState()
+                }
             }
         }
     }

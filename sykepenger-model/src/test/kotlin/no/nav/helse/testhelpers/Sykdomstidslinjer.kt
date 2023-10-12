@@ -4,7 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Collectors
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
@@ -196,5 +198,7 @@ internal val Int.PROBLEM
 
 
 internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), private val meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
+    override fun dokumentsporing() = error("ikke i bruk")
+    override fun oppdaterFom(other: Periode) = other
     override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, tidslinje)
 }

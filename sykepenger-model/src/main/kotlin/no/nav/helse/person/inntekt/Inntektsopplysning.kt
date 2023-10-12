@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
@@ -111,7 +112,7 @@ abstract class Inntektsopplysning protected constructor(
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {}
 
-    internal open fun leggTil(hendelseIder: MutableSet<Dokumentsporing>, block: (inntektsmeldingId: UUID) -> Unit) {}
+    internal open fun leggTil(generasjoner: Generasjoner, block: (inntektsmeldingId: UUID) -> Unit) {}
 
     internal fun omregnetÅrsinntekt(builder: GodkjenningsbehovBuilder, orgnummer: String) {
         builder.omregnedeÅrsinntekter(orgnummer, omregnetÅrsinntekt().beløp.reflection { årlig, _, _, _ -> årlig })

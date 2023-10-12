@@ -147,6 +147,5 @@ class OverstyrTidslinje(
         sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
     }
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
-        hendelseIder.add(Dokumentsporing.overstyrTidslinje(meldingsreferanseId()))
+    override fun dokumentsporing() = Dokumentsporing.overstyrTidslinje(meldingsreferanseId())
 }

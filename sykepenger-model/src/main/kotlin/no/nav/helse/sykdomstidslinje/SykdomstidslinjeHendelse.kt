@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 
@@ -25,7 +26,7 @@ abstract class SykdomstidslinjeHendelse internal constructor(
     private var nesteFraOgMed: LocalDate = LocalDate.MIN
     internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId(), opprettet)
 
-    internal fun oppdaterFom(other: Periode): Periode {
+    override fun oppdaterFom(other: Periode): Periode {
         // strekker vedtaksperioden tilbake til å måte første dag
         val førsteDag = sykdomstidslinje().førsteDag()
         return other.oppdaterFom(førsteDag)
@@ -52,11 +53,11 @@ abstract class SykdomstidslinjeHendelse internal constructor(
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
         && this.meldingsreferanseId() == other.meldingsreferanseId()
 
-    internal fun leggTil(vedtaksperiodeId: UUID, hendelseIder: MutableSet<Dokumentsporing>): Boolean {
+    internal fun leggTil(vedtaksperiodeId: UUID, generasjoner: Generasjoner): Boolean {
         håndtertAv.add(vedtaksperiodeId)
-        return leggTil(hendelseIder)
+        // return generasjoner.oppdaterDokumentsporing(dokumentsporing())
+        return true
     }
-    protected abstract fun leggTil(hendelseIder: MutableSet<Dokumentsporing>): Boolean
 
     override fun hashCode(): Int {
         return meldingsreferanseId().hashCode()
