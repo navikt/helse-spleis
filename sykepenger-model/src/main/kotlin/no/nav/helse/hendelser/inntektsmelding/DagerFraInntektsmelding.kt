@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -46,7 +47,7 @@ internal class DagerFraInntektsmelding(
         inntektsmelding.trimLeft(dato)
         gjenståendeDager.removeAll {gjenstående -> gjenstående <= dato}
     }
-    internal fun oppdatertFom(periode: Periode) = inntektsmelding.oppdaterFom(periode)
+
     internal fun leggTilArbeidsdagerFør(dato: LocalDate) {
         checkNotNull(opprinneligPeriode) { "Forventer ikke å utvide en tom sykdomstidslinje" }
         inntektsmelding.padLeft(dato)
@@ -55,11 +56,6 @@ internal class DagerFraInntektsmelding(
         val arbeidsdagerFør = oppdatertPeriode - opprinneligPeriode
         if (!arbeidsdager.addAll(arbeidsdagerFør)) return
         gjenståendeDager.addAll(arbeidsdagerFør)
-    }
-
-    internal fun håndterPeriodeRettFør(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje {
-        val periodeRettFør = periodeRettFør(periode) ?: return Sykdomstidslinje()
-        return håndter(periodeRettFør, oppdaterSykdom)
     }
 
     private fun overlappendeDager(periode: Periode) =  periode.intersect(gjenståendeDager)
@@ -87,21 +83,25 @@ internal class DagerFraInntektsmelding(
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
-    private fun håndter(periode: Periode, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje {
-        val arbeidsgiverSykdomstidslinje = oppdaterSykdom(BitAvInntektsmelding(inntektsmelding, periode))
+    internal fun sykdomstidslinje(vedtaksperiode: Periode): SykdomstidslinjeHendelse? {
+        val periode = håndterDagerFør(vedtaksperiode) ?: return null
+        if (periode.start != vedtaksperiode.start) info("Perioden ble strukket tilbake fra ${vedtaksperiode.start} til ${periode.start} (${ChronoUnit.DAYS.between(periode.start, vedtaksperiode.start)} dager)")
         gjenståendeDager.removeAll(periode)
         dagerHåndtert = true
-        return arbeidsgiverSykdomstidslinje
+        return BitAvInntektsmelding(inntektsmelding, periode)
     }
 
-    internal fun håndter(periode: Periode, arbeidsgiverperiode: () -> Arbeidsgiverperiode?, oppdaterSykdom: (sykdomstidslinje: SykdomstidslinjeHendelse) -> Sykdomstidslinje): Sykdomstidslinje? {
-        val overlappendeDager = overlappendeDager(periode).takeUnless { it.isEmpty() } ?: return null
-        val arbeidsgiverSykdomstidslinje = håndter(overlappendeDager.omsluttendePeriode!!, oppdaterSykdom)
-        arbeidsgiverperiode().let { beregnetArbeidsgiverperiode ->
-            if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
-            else inntektsmelding.validerFeilaktigNyArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
-        }
-        return arbeidsgiverSykdomstidslinje.subset(periode)
+    internal fun validerArbeidsgiverperiode(periode: Periode, beregnetArbeidsgiverperiode: Arbeidsgiverperiode?) {
+        if (gjenståendeDager.isEmpty()) inntektsmelding.validerArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
+        else inntektsmelding.validerFeilaktigNyArbeidsgiverperiode(periode, beregnetArbeidsgiverperiode)
+    }
+
+    private fun håndterDagerFør(vedtaksperiode: Periode): Periode? {
+        leggTilArbeidsdagerFør(vedtaksperiode.start)
+        val gjenståendePeriode = gjenståendeDager.omsluttendePeriode ?: return null
+        val periode = vedtaksperiode.oppdaterFom(gjenståendePeriode)
+        if (!periode.overlapperMed(gjenståendePeriode)) return null
+        return periode
     }
 
     internal fun skalValideresAv(periode: Periode) = inntektsmelding.skalValideresAv(periode)

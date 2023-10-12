@@ -8,10 +8,13 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingMatchingTest
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -24,6 +27,9 @@ internal class SykefraværstilfelleeventyrE2ETest : AbstractDslTest() {
         håndterSøknad(Sykdom(15.januar, 22.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
 
+        assertEquals(1.januar til 4.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(5.januar til 10.januar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(11.januar til 22.januar, inspektør.periode(3.vedtaksperiode))
         assertEquals(6, observatør.sykefraværstilfelleeventyr.size)
         val sisteEventyr = observatør.sykefraværstilfelleeventyr.last()
         assertEquals(1, sisteEventyr.size)

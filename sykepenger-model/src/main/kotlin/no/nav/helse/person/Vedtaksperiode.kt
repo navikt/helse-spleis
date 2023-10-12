@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit.DAYS
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -329,20 +328,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
-        håndterDagerFør(dager)
-        dager.håndter(periode, ::finnArbeidsgiverperiode) { arbeidsgiver.oppdaterSykdom(it) }?.let { oppdatertSykdomstidslinje ->
-            sykdomstidslinje = oppdatertSykdomstidslinje
-            inntektsmeldingHåndtert(dager)
-        }
-    }
-
-    private fun håndterDagerFør(dager: DagerFraInntektsmelding) {
-        val periodstartFør = periode.start
-        dager.leggTilArbeidsdagerFør(periode.start)
-        periode = dager.oppdatertFom(periode)
-        dager.håndterPeriodeRettFør(periode) { arbeidsgiver.oppdaterSykdom(it) }
-        if (periode.start == periodstartFør) return
-        dager.info("Perioden ble strukket tilbake fra $periodstartFør til ${periode.start} (${DAYS.between(periode.start, periodstartFør)} dager)")
+        val hendelse = dager.sykdomstidslinje(periode) ?: return
+        periode = periode.oppdaterFom(hendelse.sykdomstidslinje().periode() ?: periode)
+        sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
+        dager.validerArbeidsgiverperiode(periode, finnArbeidsgiverperiode())
+        inntektsmeldingHåndtert(dager)
     }
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
