@@ -20,8 +20,6 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsmelding(
@@ -31,6 +29,7 @@ class Inntektsmelding(
     fødselsnummer: String,
     aktørId: String,
     private val førsteFraværsdag: LocalDate?,
+    private val inntektsdato: LocalDate?,
     private val beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
     private val arbeidsforholdId: String?,
@@ -57,7 +56,8 @@ class Inntektsmelding(
             return false
         }
 
-        private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): LocalDate {
+        private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, inntektsdato: LocalDate?): LocalDate {
+            if (inntektsdato != null) return inntektsdato
             if (førsteFraværsdag != null && (arbeidsgiverperioder.isEmpty() || førsteFraværsdag > arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
             return arbeidsgiverperioder.maxOf { it.start }
         }
@@ -81,12 +81,12 @@ class Inntektsmelding(
         harOpphørAvNaturalytelser
     )
     private var håndtertInntekt = false
-    private val inntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder)
+    private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)
 
     internal fun aktuellForReplay(sammenhengendePeriode: Periode) = Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
-        if (alternativInntektsdato == this.inntektsdato) return
+        if (alternativInntektsdato == this.beregnetInntektsdato) return
         if (!inntektshistorikk.leggTil(Inntektsmelding(alternativInntektsdato, meldingsreferanseId(), beregnetInntekt))) return
         info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
@@ -94,7 +94,7 @@ class Inntektsmelding(
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonObserver: SubsumsjonObserver): Pair<LocalDate, Boolean> {
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
-        return inntektsdato to inntektshistorikk.leggTil(Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt))
+        return beregnetInntektsdato to inntektshistorikk.leggTil(Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt))
     }
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
@@ -112,11 +112,11 @@ class Inntektsmelding(
         refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
         // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
         // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
-        val startskudd = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) skjæringstidspunkt else inntektsdato
+        val startskudd = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) skjæringstidspunkt else beregnetInntektsdato
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,
-                Inntektsmelding(inntektsdato, meldingsreferanseId(), beregnetInntekt),
+                Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt),
                 refusjonshistorikk.refusjonsopplysninger(startskudd, this)
             )
         )

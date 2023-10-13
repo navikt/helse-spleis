@@ -137,6 +137,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 fødselsnummer = personidentifikator.toString(),
                 aktørId = aktørId,
                 førsteFraværsdag = førsteFraværsdag,
+                inntektsdato = null,
                 beregnetInntekt = beregnetInntekt,
                 arbeidsgiverperioder = arbeidsgiverperioder,
                 arbeidsforholdId = arbeidsforholdId,

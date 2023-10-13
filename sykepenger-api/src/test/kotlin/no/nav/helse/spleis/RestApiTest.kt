@@ -128,6 +128,7 @@ internal class RestApiTest {
             fødselsnummer = UNG_PERSON_FNR,
             aktørId = "aktørId",
             førsteFraværsdag = LocalDate.of(2018, 1, 1),
+            inntektsdato = null,
             beregnetInntekt = 12000.månedlig,
             arbeidsgiverperioder = listOf(Periode(LocalDate.of(2018, 9, 10), LocalDate.of(2018, 9, 10).plusDays(16))),
             arbeidsforholdId = null,

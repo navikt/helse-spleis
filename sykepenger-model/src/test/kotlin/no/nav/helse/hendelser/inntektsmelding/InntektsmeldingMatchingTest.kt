@@ -263,6 +263,7 @@ internal class InntektsmeldingMatchingTest {
             fødselsnummer = "12345678910",
             aktørId = "1",
             førsteFraværsdag = førsteFraværsdag,
+            inntektsdato = null,
             beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = arbeidsgiverperiode.toList(),
             arbeidsforholdId = null,

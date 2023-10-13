@@ -59,6 +59,7 @@ internal abstract class AbstractPersonTest {
                     fødselsnummer = "",
                     aktørId = "",
                     førsteFraværsdag = null,
+                    inntektsdato = null,
                     beregnetInntekt = TestPerson.INNTEKT,
                     arbeidsgiverperioder = listOf(1.januar til 16.januar),
                     arbeidsforholdId = null,

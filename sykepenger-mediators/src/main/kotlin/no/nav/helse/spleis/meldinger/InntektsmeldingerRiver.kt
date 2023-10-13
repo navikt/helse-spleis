@@ -46,7 +46,8 @@ internal open class InntektsmeldingerRiver(
             "opphoerAvNaturalytelser",
             "harFlereInntektsmeldinger",
             "historiskeFolkeregisteridenter",
-            "avsenderSystem"
+            "avsenderSystem",
+            "inntektsdato"
         )
     }
 

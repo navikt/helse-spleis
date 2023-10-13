@@ -43,6 +43,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     private val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
     private val personopplysninger = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato, dødsdato)
     private val avsendersystem = packet["avsenderSystem"].tilAvsendersystem()
+    private val inntektsdato = packet["inntektsdato"].asOptionalLocalDate()
 
     protected val inntektsmelding
         get() = Inntektsmelding(
@@ -52,6 +53,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             førsteFraværsdag = førsteFraværsdag,
+            inntektsdato = inntektsdato,
             beregnetInntekt = beregnetInntekt.månedlig,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = arbeidsforholdId,
