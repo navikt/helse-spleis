@@ -40,12 +40,11 @@ class Inntektsmelding(
     avsendersystem: Avsendersystem?,
     mottatt: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : SykdomstidslinjeHendelse(
+) : ArbeidstakerHendelse(
     meldingsreferanseId = meldingsreferanseId,
     fødselsnummer = fødselsnummer,
     aktørId = aktørId,
     organisasjonsnummer = orgnummer,
-    opprettet = mottatt,
     aktivitetslogg = aktivitetslogg
 ) {
     companion object {
@@ -86,14 +85,6 @@ class Inntektsmelding(
 
     internal fun aktuellForReplay(sammenhengendePeriode: Periode) = Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
 
-    override fun sykdomstidslinje(): Sykdomstidslinje {
-        error("ikke i bruk")
-    }
-
-    override fun overlappsperiode(): Periode {
-        error("ikke i bruk")
-    }
-
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
         if (alternativInntektsdato == this.inntektsdato) return
         if (!inntektshistorikk.leggTil(Inntektsmelding(alternativInntektsdato, meldingsreferanseId(), beregnetInntekt))) return
@@ -110,7 +101,7 @@ class Inntektsmelding(
         refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
     }
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>): Boolean {
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>): Boolean {
         håndtertInntekt = true
         return hendelseIder.add(Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId()))
     }
@@ -176,7 +167,7 @@ class Inntektsmelding(
         info("Inntektsmelding ikke håndtert")
         val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager)
         if (overlappendeSykmeldingsperioder.isNotEmpty()) {
-            person.emitInntektsmeldingFørSøknadEvent(this, overlappendeSykmeldingsperioder, organisasjonsnummer)
+            person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId(), overlappendeSykmeldingsperioder, organisasjonsnummer)
             return info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
         }
         person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer)

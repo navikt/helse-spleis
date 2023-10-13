@@ -63,7 +63,7 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.Melding
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -452,7 +452,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         val agp = (1.januar til 16.januar).filterNot { it.erHelg() }
         agp.forEach {
-            assertSykdomstidslinjedag(it, Dag.SykedagNav::class, no.nav.helse.hendelser.Inntektsmelding::class)
+            assertSykdomstidslinjedag(it, Dag.SykedagNav::class, "Inntektsmelding")
         }
         val førsteUtbetalingsdag = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag[0].fom
         assertEquals(1.januar, førsteUtbetalingsdag)
@@ -522,7 +522,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(forventetRevurdering, observatør.utbetalingMedUtbetalingEventer.last().dager)
     }
 
-    private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
+    private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: Melding) {
+        assertSykdomstidslinjedag(dato, dagtype, kommerFra.simpleName!!)
+    }
+
+    private fun assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: String) {
         val dagen = inspektør.sykdomstidslinje[dato]
         assertEquals(dagtype, dagen::class)
         assertTrue(dagen.kommerFra(kommerFra))

@@ -304,7 +304,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         val dagerEtter = inspektør.sykdomstidslinje.inspektør.dager
         (1.januar til 16.januar).forEach {
-            if (!it.erHelg()) assertTrue(dagerFør.getValue(it).kommerFra(Inntektsmelding::class)) { "$it kommer ikke fra Inntektsmelding" }
+            if (!it.erHelg()) assertTrue(dagerFør.getValue(it).kommerFra("Inntektsmelding")) { "$it kommer ikke fra Inntektsmelding" }
             assertTrue(dagerEtter.getValue(it).kommerFra(OverstyrTidslinje::class)) { "$it kommer ikke fra OverstyrTidslinje" }
         }
 
@@ -379,7 +379,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening"
         )
         assertEquals(SykedagNav::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
-        assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra(Inntektsmelding::class))
+        assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra("Inntektsmelding"))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -401,7 +401,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         assertEquals(SykedagNav::class, inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar]::class)
-        assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra(Inntektsmelding::class))
+        assertTrue(inspektør.sykdomshistorikk.sykdomstidslinje()[1.januar].kommerFra("Inntektsmelding"))
     }
 
     @Test

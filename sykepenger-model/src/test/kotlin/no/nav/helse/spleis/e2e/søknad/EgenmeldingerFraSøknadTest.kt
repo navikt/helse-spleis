@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.søknad
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -111,7 +110,7 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
         assertTrue(inspektør.sykdomstidslinje[7.januar] is Dag.SykHelgedag)
 
         (1..6).forEach {
-            assertTrue(inspektør.sykdomstidslinje[it.januar].kommerFra(Inntektsmelding::class) )
+            assertTrue(inspektør.sykdomstidslinje[it.januar].kommerFra("Inntektsmelding") )
         }
         (7..31).forEach {
             assertTrue(inspektør.sykdomstidslinje[it.januar].kommerFra(Søknad::class) )
@@ -127,7 +126,7 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(2.januar til 17.januar))
 
         assertTrue(inspektør.sykdomstidslinje[1.januar] is Dag.Arbeidsdag)
-        assertTrue(inspektør.sykdomstidslinje[1.januar].kommerFra(Inntektsmelding::class) )
+        assertTrue(inspektør.sykdomstidslinje[1.januar].kommerFra("Inntektsmelding") )
 
         (2..31).forEach {
             assertTrue(inspektør.sykdomstidslinje[it.januar].kommerFra(Søknad::class) )

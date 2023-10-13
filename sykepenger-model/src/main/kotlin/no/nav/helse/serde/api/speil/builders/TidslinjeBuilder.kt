@@ -129,7 +129,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
     }
 
     private fun Hendelseskilde.toKildetypeDTO() = when {
-        erAvType(Inntektsmelding::class) -> SykdomstidslinjedagKildetype.Inntektsmelding
+        erAvType("Inntektsmelding") -> SykdomstidslinjedagKildetype.Inntektsmelding
         erAvType(Søknad::class) -> SykdomstidslinjedagKildetype.Søknad
         erAvType(OverstyrTidslinje::class) -> SykdomstidslinjedagKildetype.Saksbehandler
         else -> SykdomstidslinjedagKildetype.Ukjent

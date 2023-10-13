@@ -2010,7 +2010,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val beregnetSykdomstidslinje = inspektør.sykdomshistorikk.sykdomstidslinje()
         val beregnetSykdomstidslinjeDager = beregnetSykdomstidslinje.inspektør.dager
         assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in 28.januar til førsteDagIArbeidsgiverperioden.minusDays(1) }.values.all {
-            (it is Dag.Arbeidsdag || it is Dag.FriskHelgedag) && it.kommerFra(Inntektsmelding::class)
+            (it is Dag.Arbeidsdag || it is Dag.FriskHelgedag) && it.kommerFra("Inntektsmelding")
         }) { beregnetSykdomstidslinje.toShortString() }
         assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in førsteDagIArbeidsgiverperioden til 31.mars }.values.all {
             (it is Dag.Sykedag || it is Dag.SykHelgedag) && it.kommerFra(Søknad::class)

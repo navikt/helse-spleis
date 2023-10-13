@@ -671,18 +671,12 @@ class Person private constructor(
     }
 
     internal fun emitInntektsmeldingFørSøknadEvent(
-        hendelse: Inntektsmelding,
+        meldingsreferanseId: UUID,
         overlappendeSykmeldingsperioder: List<Periode>,
         organisasjonsnummer: String
     ) {
         observers.forEach {
-            it.inntektsmeldingFørSøknad(
-                PersonObserver.InntektsmeldingFørSøknadEvent(
-                    hendelse.kilde.meldingsreferanseId(),
-                    overlappendeSykmeldingsperioder,
-                    organisasjonsnummer
-                )
-            )
+            it.inntektsmeldingFørSøknad(PersonObserver.InntektsmeldingFørSøknadEvent(meldingsreferanseId, overlappendeSykmeldingsperioder, organisasjonsnummer))
         }
     }
 

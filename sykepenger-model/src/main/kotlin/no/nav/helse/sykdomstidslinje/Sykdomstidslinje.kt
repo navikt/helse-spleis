@@ -204,14 +204,6 @@ internal class Sykdomstidslinje private constructor(
 
     private fun sammeDagtyper(other: Sykdomstidslinje) = dager.mapValues { it.value::class } == other.dager.mapValues { it.value::class }
 
-    internal fun påvirkesAv(other: Sykdomstidslinje): Boolean {
-        if (other.dager.isEmpty()) return false
-        val utenLåser = Sykdomstidslinje(dager, periode).subset(other.periode!!)
-        if (utenLåser.dager.isEmpty()) return false
-        val merget = utenLåser.merge(other, Dagturnering.TURNERING::beste)
-        return !utenLåser.sammeDagtyper(merget)
-    }
-
     override fun hashCode() = Objects.hash(dager, periode, låstePerioder)
 
     override fun toString() = toShortString()

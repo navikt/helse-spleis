@@ -57,6 +57,7 @@ internal sealed class Dag(
     }
 
     internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)
+    internal fun kommerFra(hendelse: String) = kilde.erAvType(hendelse)
 
     internal fun erHelg() = dato.erHelg()
 

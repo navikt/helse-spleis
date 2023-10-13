@@ -36,6 +36,8 @@ internal interface SykdomshistorikkHendelse : IAktivitetslogg {
         override fun toString() = type
         internal fun meldingsreferanseId() = meldingsreferanseId
         internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
+        // todo: midlertidig fordi "Inntektsmelding" ikke er en SykdomshistorikkHendelse. Alle dager med kilde "Inntektsmelding" må migreres til "BitFraInntektsmelding"
+        internal fun erAvType(meldingstype: String) = this.type == meldingstype
         internal fun toJson() = mapOf("type" to type, "id" to meldingsreferanseId, "tidsstempel" to tidsstempel)
     }
 }

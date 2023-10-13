@@ -4,23 +4,19 @@ import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.AIG
+import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestEvent
-import no.nav.helse.testhelpers.U
 import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
@@ -247,39 +243,6 @@ internal class SykdomstidslinjeTest {
     fun `feriedager uten sykmelding`() {
         val tidslinje = 7.AIG
         assertEquals("JJJJJJJ", tidslinje.toShortString())
-    }
-
-    @Test
-    fun `en sykdomstidslinje påvirkes ikke av en tom sykdomstidslinje`() {
-        assertFalse(31.S.påvirkesAv(Sykdomstidslinje()))
-        assertFalse(Sykdomstidslinje().påvirkesAv(Sykdomstidslinje()))
-    }
-
-    @Test
-    fun `en sykdomstidslinje påvirkes ikke av en sykdomstidslinje med samme informasjon i en del av perioden`() {
-        val søknad1 = 31.S(Søknad::class)
-        resetSeed(5.januar)
-        val søknad2 = 20.S(Søknad::class)
-        assertFalse(søknad1.påvirkesAv(søknad2))
-        assertTrue(søknad2.påvirkesAv(søknad1))
-    }
-
-    @Test
-    fun `en sykdomstidslinje påvirkes ikke av en tidligere eller senere sykdomstidslinje`() {
-        val januar = 31.S
-        val februar = 28.S
-        val mars = 31.S
-        assertFalse(februar.påvirkesAv(januar))
-        assertFalse(februar.påvirkesAv(mars))
-    }
-
-    @Test
-    fun `sykdomstidslinjen til en søknad påvirkes av overlappende arbeidsdager fra inntektsmelding`() {
-        val søknad = 31.S(Søknad::class)
-        resetSeed()
-        val inntektsmelding = 15.A(Inntektsmelding::class) + 16.U(Inntektsmelding::class)
-        assertTrue(søknad.påvirkesAv(inntektsmelding))
-        assertTrue(inntektsmelding.påvirkesAv(søknad))
     }
 
     private val konfliktsky = { venstre: Dag, høyre: Dag ->

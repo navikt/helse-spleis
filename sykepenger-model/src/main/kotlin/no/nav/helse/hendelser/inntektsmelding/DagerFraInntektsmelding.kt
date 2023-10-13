@@ -55,6 +55,8 @@ internal class DagerFraInntektsmelding(
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
     }
 
+    // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
+    // krever nok at vi json-migrerer alle "Inntektsmelding" til "BitAvInntektsmelding" først
     internal val kilde = Hendelseskilde("Inntektsmelding", meldingsreferanseId, mottatt)
     private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
