@@ -122,14 +122,6 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
-    fun `tidslinje med problemdag er utenfor omfang`() {
-        val tidslinje = Sykdomstidslinje.problemdager(1.mandag, 1.mandag, TestEvent.testkilde, "Dette er en problemdag")
-        val aktivitetslogg = Aktivitetslogg()
-        assertFalse(tidslinje.valider(aktivitetslogg))
-        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
     fun `kutter frem til og med`() {
         val tidslinje = Sykdomstidslinje.sykedager(1.februar, 1.mars, 100.prosent, TestEvent.testkilde)
         assertEquals(14.februar, tidslinje.fremTilOgMed(14.februar).sisteDag())

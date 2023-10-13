@@ -6,12 +6,12 @@ import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -151,7 +151,7 @@ internal class CreateØkonomiTest {
                 dag: Dag.Sykedag,
                 dato: LocalDate,
                 økonomi: Økonomi,
-                kilde: SykdomstidslinjeHendelse.Hendelseskilde
+                kilde: SykdomshistorikkHendelse.Hendelseskilde
             ) {
                 fangetØkonomi = økonomi
             }

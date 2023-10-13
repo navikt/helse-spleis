@@ -66,6 +66,7 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
@@ -762,7 +763,7 @@ internal class Arbeidsgiver private constructor(
         return énHarHåndtert(overstyrSykepengegrunnlag) { håndter(it, alleVedtaksperioder) }
     }
 
-    internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+    internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {
         val sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
         person.sykdomshistorikkEndret(hendelse)
         return sykdomstidslinje

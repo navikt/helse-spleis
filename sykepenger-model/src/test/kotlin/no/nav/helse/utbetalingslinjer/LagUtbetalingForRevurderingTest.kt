@@ -23,8 +23,8 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -342,7 +342,7 @@ internal class LagUtbetalingForRevurderingTest {
             Dag.Sykedag(
                 it,
                 økonomi = Økonomi.sykdomsgrad(100.prosent),
-                kilde = SykdomstidslinjeHendelse.Hendelseskilde("Søknad", SØKNAD, LocalDateTime.now())
+                kilde = Hendelseskilde("Søknad", SØKNAD, LocalDateTime.now())
             )
         }
         return Vedtaksperiode(

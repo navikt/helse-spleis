@@ -59,6 +59,8 @@ import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -785,8 +787,7 @@ internal data class PersonData(
                 private val id: UUID,
                 private val tidsstempel: LocalDateTime
             ) {
-                internal fun parseKilde() =
-                    SykdomstidslinjeHendelse.Hendelseskilde(type, id, tidsstempel)
+                internal fun parseKilde() = Hendelseskilde(type, id, tidsstempel)
             }
         }
 

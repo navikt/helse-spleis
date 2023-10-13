@@ -6,8 +6,8 @@ import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
@@ -268,7 +268,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         override fun arbeidsgiverperiodedag(
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) {
             arbeidsgiverperiodedager += 1
         }
@@ -276,12 +276,12 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         override fun arbeidsgiverperiodedagNav(
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) {
             arbeidsgiverperiodedagerNavAnsvar += 1
         }
 
-        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
             utbetalingsdager += 1
         }
 

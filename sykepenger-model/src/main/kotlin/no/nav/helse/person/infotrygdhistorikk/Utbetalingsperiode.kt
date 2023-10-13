@@ -9,8 +9,8 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -28,7 +28,7 @@ abstract class Utbetalingsperiode(
         // inntektbeløpet i Infotrygd-utbetalingene er gradert; justerer derfor "opp igjen"
         fun inntekt(inntekt: Inntekt, grad: Prosentdel) = Inntekt.fraGradert(inntekt, grad)
     }
-    override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
+    override fun sykdomstidslinje(kilde: SykdomshistorikkHendelse.Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, grad, kilde)
     }
 

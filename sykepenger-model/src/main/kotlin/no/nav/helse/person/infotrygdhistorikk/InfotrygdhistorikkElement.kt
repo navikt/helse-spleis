@@ -13,6 +13,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBeta
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -32,7 +33,7 @@ class InfotrygdhistorikkElement private constructor(
 ) {
     private val inntekter = Inntektsopplysning.sorter(inntekter)
     private val perioder = Infotrygdperiode.sorter(perioder)
-    private val kilde = SykdomstidslinjeHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
+    private val kilde = SykdomshistorikkHendelse.Hendelseskilde("Infotrygdhistorikk", id, tidsstempel)
 
     init {
         if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }

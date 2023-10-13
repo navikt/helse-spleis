@@ -33,6 +33,8 @@ import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -801,39 +803,39 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitSykdomstidslinje(tidslinje, låstePerioder)
     }
 
-    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, kilde)
     }
 
-    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, kilde)
     }
 
-    override fun visitDag(dag: Dag.Arbeidsgiverdag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.Arbeidsgiverdag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, økonomi, kilde)
     }
 
-    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, kilde)
     }
 
-    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, kilde)
     }
 
-    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, kilde)
     }
 
-    override fun visitDag(dag: Dag.ArbeidsgiverHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.ArbeidsgiverHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, økonomi, kilde)
     }
 
-    override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, økonomi, kilde)
     }
 
-    override fun visitDag(dag: Dag.ForeldetSykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.ForeldetSykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, økonomi, kilde)
     }
 
@@ -841,24 +843,24 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         dag: Dag.SykedagNav,
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) {
         delegatee.visitDag(dag, dato, økonomi, kilde)
     }
 
-    override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, økonomi, kilde)
     }
 
-    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {
         delegatee.visitDag(dag, dato, kilde)
     }
 
     override fun visitDag(
         dag: Dag.ProblemDag,
         dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
-        other: SykdomstidslinjeHendelse.Hendelseskilde?,
+        kilde: Hendelseskilde,
+        other: Hendelseskilde?,
         melding: String
     ) {
         delegatee.visitDag(dag, dato, kilde, other, melding)
@@ -867,7 +869,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     override fun visitDag(
         dag: Dag.AndreYtelser,
         dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        kilde: Hendelseskilde,
         ytelse: Dag.AndreYtelser.AnnenYtelse
     ) {
         delegatee.visitDag(dag, dato, kilde, ytelse)

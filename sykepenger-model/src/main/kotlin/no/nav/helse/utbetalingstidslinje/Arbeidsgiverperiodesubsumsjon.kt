@@ -3,8 +3,8 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserAap
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserDagpenger
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserForeldrepenger
@@ -65,7 +65,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
     override fun arbeidsgiverperiodedag(
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) {
         tilstand.arbeidsgiverperiodedag(this, dato, økonomi)
         subsumsjonObserver?.also { it.`§ 8-17 ledd 1 bokstav a`(false, dagen = dato, sykdomstidslinjesubsumsjon) }
@@ -76,13 +76,13 @@ internal class Arbeidsgiverperiodesubsumsjon(
     override fun arbeidsgiverperiodedagNav(
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) {
         subsumsjonObserver?.also { it.`§ 8-17 ledd 1`(dato) }
         other.arbeidsgiverperiodedagNav(dato, økonomi, kilde)
     }
 
-    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         // på første navdag etter fullført agp
         if (dato.erHelg()) subsumsjonObserver?.also { it.`§ 8-11 ledd 1`(dato) }
         else tilstand.utbetalingsdag(this, dato, økonomi)

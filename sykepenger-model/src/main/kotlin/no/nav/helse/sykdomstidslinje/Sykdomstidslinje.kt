@@ -17,17 +17,15 @@ import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_ST_1
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
-import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -37,8 +35,8 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
@@ -77,33 +75,6 @@ internal class Sykdomstidslinje private constructor(
             this.periode?.plus(other.periode) ?: other.periode,
             this.låstePerioder.toMutableList()
         )
-    }
-
-    private class ProblemDagVisitor(val problemmeldinger: MutableList<String>) : SykdomstidslinjeVisitor {
-        override fun visitDag(
-            dag: ProblemDag,
-            dato: LocalDate,
-            kilde: Hendelseskilde,
-            other: Hendelseskilde?,
-            melding: String
-        ) {
-            problemmeldinger.add(melding)
-        }
-    }
-
-    internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
-        val problemmeldinger = mutableListOf<String>()
-        val visitor = ProblemDagVisitor(problemmeldinger)
-        dager.values.filter { it::class == ProblemDag::class }
-            .forEach { it.accept(visitor) }
-
-        return problemmeldinger
-            .distinct()
-            .onEach {
-                aktivitetslogg.info("Sykdomstidslinjen inneholder ustøttet dag. Problem oppstått fordi: %s", it)
-                aktivitetslogg.funksjonellFeil(RV_ST_1)
-            }
-            .isEmpty()
     }
 
     internal operator fun plus(other: Sykdomstidslinje) = this.merge(other)

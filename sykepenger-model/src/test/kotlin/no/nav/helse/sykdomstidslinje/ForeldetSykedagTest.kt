@@ -22,6 +22,7 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -109,45 +110,45 @@ internal class ForeldetSykedagTest {
             }
         }
 
-        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag::class)
-        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag::class)
+        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag::class)
+        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag::class)
         override fun visitDag(
             dag: Arbeidsgiverdag,
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag::class)
-        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag::class)
-        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) = inkrementer(dag::class)
+        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag::class)
+        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag::class)
         override fun visitDag(
             dag: ArbeidsgiverHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
             dag: Sykedag,
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
             dag: ForeldetSykedag,
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
             dag: SykHelgedag,
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) = inkrementer(dag::class)
         override fun visitDag(
             dag: ProblemDag,
             dato: LocalDate,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde,
-            other: SykdomstidslinjeHendelse.Hendelseskilde?,
+            kilde: Hendelseskilde,
+            other: Hendelseskilde?,
             melding: String
         ) = inkrementer(dag::class)
 

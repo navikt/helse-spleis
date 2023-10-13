@@ -249,7 +249,7 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
-        return sykdomstidslinje(periode)?.sykdomstidslinje()?.periode()
+        return bitAvInntektsmelding(periode)?.sykdomstidslinje()?.periode()
     }
 
     private companion object {

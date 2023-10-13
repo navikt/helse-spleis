@@ -3,8 +3,8 @@ package no.nav.helse.etterlevelse
 import java.time.LocalDate
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Økonomi
 
 internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
@@ -16,23 +16,23 @@ internal class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : Syk
 
     fun dager() = navdager.toList()
 
-    override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomshistorikkHendelse.Hendelseskilde) {
         visit(dato, "SYKEDAG", økonomi)
     }
 
-    override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomshistorikkHendelse.Hendelseskilde) {
         visit(dato, "SYKEDAG", økonomi)
     }
 
-    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomshistorikkHendelse.Hendelseskilde) {
         visit(dato, "FERIEDAG", null)
     }
 
-    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomshistorikkHendelse.Hendelseskilde) {
         visit(dato, "PERMISJONSDAG", null)
     }
 
-    override fun visitDag(dag: Dag.AndreYtelser, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, ytelse: Dag.AndreYtelser.AnnenYtelse) {
+    override fun visitDag(dag: Dag.AndreYtelser, dato: LocalDate, kilde: SykdomshistorikkHendelse.Hendelseskilde, ytelse: Dag.AndreYtelser.AnnenYtelse) {
         visit(dato, when(ytelse) {
             Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> "FORELDREPENGER"
             Dag.AndreYtelser.AnnenYtelse.AAP -> "ARBEIDSAVKLARINGSPENGER"

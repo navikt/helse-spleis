@@ -7,11 +7,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.serde.serdeObjectMapper
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 
 internal class V167ProblemDagKilde: JsonMigration(167) {
     private companion object {
-        private val ingenKilde = SykdomstidslinjeHendelse.Hendelseskilde(SykdomstidslinjeHendelse::class, UUID.randomUUID(), LocalDateTime.now()).let {
+        private val ingenKilde = SykdomshistorikkHendelse.Hendelseskilde(SykdomshistorikkHendelse::class, UUID.randomUUID(), LocalDateTime.now()).let {
             serdeObjectMapper.convertValue<ObjectNode>(it.toJson())
         }
         private val sammeKilde = { dag: JsonNode -> (dag.path("kilde") as ObjectNode) }

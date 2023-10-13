@@ -27,6 +27,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke f�
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
@@ -104,6 +106,8 @@ class Søknad(
             sykdomstidslinje
         }
     }
+
+    override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 

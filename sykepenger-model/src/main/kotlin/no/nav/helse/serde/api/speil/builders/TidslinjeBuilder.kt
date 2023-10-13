@@ -15,8 +15,8 @@ import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagUtenGrad
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -30,73 +30,73 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
 
     fun build() = tidslinje.toList()
 
-    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
 
-    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
 
     override fun visitDag(
         dag: Dag.Arbeidsgiverdag,
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) = leggTilDag(dag, dato, økonomi, kilde)
 
-    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
 
     override fun visitDag(
         dag: Dag.ArbeidIkkeGjenopptattDag,
         dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) = leggTilDag(dag, dato, null, kilde)
 
-    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
 
     override fun visitDag(
         dag: Dag.ArbeidsgiverHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) = leggTilDag(dag, dato, økonomi, kilde)
 
     override fun visitDag(
         dag: Dag.Sykedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) = leggTilDag(dag, dato, økonomi, kilde)
 
     override fun visitDag(
         dag: Dag.SykedagNav,
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) = leggTilDag(dag, dato, økonomi, kilde)
 
     override fun visitDag(
         dag: Dag.ForeldetSykedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) = leggTilDag(dag, dato, økonomi, kilde)
 
     override fun visitDag(
         dag: Dag.SykHelgedag,
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) = leggTilDag(dag, dato, økonomi, kilde)
 
-    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
+    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
 
     override fun visitDag(
         dag: Dag.AndreYtelser,
         dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        kilde: Hendelseskilde,
         ytelse: Dag.AndreYtelser.AnnenYtelse
     ) = leggTilDag(dag, dato, null, kilde, when (ytelse) {
         Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> SykdomstidslinjedagType.ANDRE_YTELSER_FORELDREPENGER
@@ -111,13 +111,13 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
     override fun visitDag(
         dag: Dag.ProblemDag,
         dato: LocalDate,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
-        other: SykdomstidslinjeHendelse.Hendelseskilde?,
+        kilde: Hendelseskilde,
+        other: Hendelseskilde?,
         melding: String
     ) =
         leggTilDag(dag, dato, null, kilde)
 
-    private fun leggTilDag(dag: Dag, dato: LocalDate, økonomi: Økonomi?, kilde: SykdomstidslinjeHendelse.Hendelseskilde, dagtype: SykdomstidslinjedagType = dag.toDagtypeDTO()) {
+    private fun leggTilDag(dag: Dag, dato: LocalDate, økonomi: Økonomi?, kilde: Hendelseskilde, dagtype: SykdomstidslinjedagType = dag.toDagtypeDTO()) {
         val dagDto = Sykdomstidslinjedag(
             dato,
             dagtype,
@@ -128,7 +128,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         tidslinje.add(dagDto)
     }
 
-    private fun SykdomstidslinjeHendelse.Hendelseskilde.toKildetypeDTO() = when {
+    private fun Hendelseskilde.toKildetypeDTO() = when {
         erAvType(Inntektsmelding::class) -> SykdomstidslinjedagKildetype.Inntektsmelding
         erAvType(Søknad::class) -> SykdomstidslinjedagKildetype.Søknad
         erAvType(OverstyrTidslinje::class) -> SykdomstidslinjedagKildetype.Saksbehandler

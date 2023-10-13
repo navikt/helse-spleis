@@ -22,9 +22,10 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -184,13 +185,13 @@ internal class DagerFraInntektsmelding(
 
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
-    internal fun sykdomstidslinje(vedtaksperiode: Periode): SykdomstidslinjeHendelse? {
+    internal fun bitAvInntektsmelding(vedtaksperiode: Periode): BitAvInntektsmelding? {
         val periode = håndterDagerFør(vedtaksperiode) ?: return null
         if (periode.start != vedtaksperiode.start) info("Perioden ble strukket tilbake fra ${vedtaksperiode.start} til ${periode.start} (${ChronoUnit.DAYS.between(periode.start, vedtaksperiode.start)} dager)")
         val sykdomstidslinje = samletSykdomstidslinje(periode)
         gjenståendeDager.removeAll(periode)
         dagerHåndtert = true
-        return BitAvInntektsmelding(meldingsreferanseId, sykdomstidslinje, mottatt, aktivitetslogg)
+        return BitAvInntektsmelding(meldingsreferanseId, sykdomstidslinje, aktivitetslogg)
     }
 
     private fun samletSykdomstidslinje(periode: Periode) =
@@ -273,14 +274,13 @@ internal class DagerFraInntektsmelding(
         return false
     }
 
-    private class BitAvInntektsmelding(
-        meldingsreferanseId: UUID,
+    internal class BitAvInntektsmelding(
+        private val meldingsreferanseId: UUID,
         private val sykdomstidslinje: Sykdomstidslinje,
-        opprettet: LocalDateTime,
         aktivitetslogg: Aktivitetslogg
-    ): SykdomstidslinjeHendelse(meldingsreferanseId, "IKKE_NØDVENDIG", "IKKE_NØDVENDIG", "IKKE_NØDVENDIG", opprettet, Inntektsmelding::class, aktivitetslogg) {
-        override fun sykdomstidslinje() = sykdomstidslinje
-        override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = throw IllegalStateException("Ikke i bruk")
+    ): SykdomshistorikkHendelse, IAktivitetslogg by (aktivitetslogg) {
+        internal fun sykdomstidslinje() = sykdomstidslinje
+        override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
     }
 }
 

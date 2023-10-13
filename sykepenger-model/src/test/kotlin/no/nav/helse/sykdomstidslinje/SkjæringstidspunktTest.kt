@@ -27,7 +27,6 @@ import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.YF
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -388,11 +387,12 @@ internal class SkjæringstidspunktTest {
 
     private fun assertSkjæringstidspunkt(
         forventetSkjæringstidspunkt: LocalDate,
-        vararg hendelse: SykdomstidslinjeHendelse
+        vararg hendelse: SykdomshistorikkHendelse
     ) {
-        val tidslinje = hendelse
-            .map { it.sykdomstidslinje() }
-            .merge(Dagturnering.TURNERING::beste)
+        val a = Sykdomshistorikk()
+        hendelse.forEach { a.håndter(it) }
+
+        val tidslinje = a.sykdomstidslinje()
 
         val skjæringstidspunkt = tidslinje.sisteSkjæringstidspunkt()
         assertEquals(forventetSkjæringstidspunkt, skjæringstidspunkt) {
@@ -423,7 +423,7 @@ internal class SkjæringstidspunktTest {
         arbeidsgiverperioder = arbeidsgiverperioder,
         arbeidsforholdId = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt = null
-    ).dager().sykdomstidslinje(arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
+    ).dager().bitAvInntektsmelding(arbeidsgiverperioder.plusElement(førsteFraværsdag.somPeriode()).periode()!!)!!
 
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"

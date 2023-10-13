@@ -316,7 +316,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
-        val hendelse = dager.sykdomstidslinje(periode)
+        val hendelse = dager.bitAvInntektsmelding(periode)
         if (hendelse != null) {
             periode = periode.oppdaterFom(hendelse.sykdomstidslinje().periode() ?: periode)
             sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)

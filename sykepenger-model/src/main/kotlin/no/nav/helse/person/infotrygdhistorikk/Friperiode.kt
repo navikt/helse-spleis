@@ -2,13 +2,13 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import no.nav.helse.person.InfotrygdperiodeVisitor
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 
 class Friperiode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {
-    override fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
+    override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje {
         return Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
     }
 

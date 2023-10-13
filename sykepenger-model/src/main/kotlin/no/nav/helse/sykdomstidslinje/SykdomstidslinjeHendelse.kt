@@ -9,11 +9,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import kotlin.reflect.KClass
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 
-internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
-
-abstract class SykdomstidslinjeHendelse(
+abstract class SykdomstidslinjeHendelse internal constructor(
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String,
@@ -21,7 +19,7 @@ abstract class SykdomstidslinjeHendelse(
     private val opprettet: LocalDateTime,
     melding: Melding? = null,
     private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg), SykdomshistorikkHendelse {
     private companion object {
         private val aldri = LocalDate.MIN til LocalDate.MIN
     }
@@ -31,36 +29,8 @@ abstract class SykdomstidslinjeHendelse(
     private var forrigeTom: LocalDate = LocalDate.MIN
     internal val kilde: Hendelseskilde = Hendelseskilde(melding ?: this::class, meldingsreferanseId(), opprettet)
 
-    internal class Hendelseskilde(
-        private val type: String,
-        private val meldingsreferanseId: UUID,
-        private val tidsstempel: LocalDateTime
-    ) {
-        internal constructor(
-            hendelse: Melding,
-            meldingsreferanseId: UUID,
-            tidsstempel: LocalDateTime
-        ) : this(kildenavn(hendelse), meldingsreferanseId, tidsstempel)
-
-        companion object {
-            internal val INGEN = Hendelseskilde(SykdomstidslinjeHendelse::class, UUID.randomUUID(), LocalDateTime.now())
-
-            private fun kildenavn(hendelse: Melding): String =
-                hendelse.simpleName ?: "Ukjent"
-
-            internal fun tidligsteTidspunktFor(kilder: List<Hendelseskilde>, type: Melding): LocalDateTime {
-                check(kilder.all { it.erAvType(type) })
-                return kilder.first().tidsstempel
-            }
-        }
-
-        override fun toString() = type
-        internal fun meldingsreferanseId() = meldingsreferanseId
-        internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
-        internal fun toJson() = mapOf("type" to type, "id" to meldingsreferanseId, "tidsstempel" to tidsstempel)
-    }
-
     internal abstract fun sykdomstidslinje(): Sykdomstidslinje
+    override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 
     internal fun oppdaterFom(other: Periode): Periode {
         if (trimmetForbi()) return other

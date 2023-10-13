@@ -13,11 +13,11 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.AIG
+import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.K
 import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
@@ -633,7 +633,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun arbeidsgiverperiodedag(
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) {
             mediators.forEach { it.arbeidsgiverperiodedag(dato, økonomi, kilde) }
         }
@@ -641,12 +641,12 @@ internal class UtbetalingstidslinjeBuilderTest {
         override fun arbeidsgiverperiodedagNav(
             dato: LocalDate,
             økonomi: Økonomi,
-            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+            kilde: Hendelseskilde
         ) {
             mediators.forEach { it.arbeidsgiverperiodedagNav(dato, økonomi, kilde) }
         }
 
-        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
             mediators.forEach { it.utbetalingsdag(dato, økonomi, kilde) }
         }
 

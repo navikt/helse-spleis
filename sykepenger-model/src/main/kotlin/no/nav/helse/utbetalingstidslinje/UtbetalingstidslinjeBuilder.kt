@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Økonomi
 
 internal sealed class UtbetalingstidslinjeBuilderException(message: String) : RuntimeException(message) {
@@ -49,7 +49,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     override fun arbeidsgiverperiodedag(
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) {
         builder.addArbeidsgiverperiodedag(dato, inntekter.medInntekt(dato, økonomi.ikkeBetalt()))
     }
@@ -57,7 +57,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     override fun arbeidsgiverperiodedagNav(
         dato: LocalDate,
         økonomi: Økonomi,
-        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        kilde: Hendelseskilde
     ) {
         val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
             true -> inntekter.medUtbetalingsopplysninger(dato, økonomi)
@@ -70,7 +70,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         builder.addUkjentDag(dato)
     }
 
-    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         if (dato.erHelg()) return builder.addHelg(dato, inntekter.utenInntekt(dato, økonomi))
         val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
             true -> inntekter.medUtbetalingsopplysninger(dato, økonomi)
