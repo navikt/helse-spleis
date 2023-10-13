@@ -61,11 +61,7 @@ class Søknad(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
     private val sykdomsperiode: Periode
-    private val sykdomstidslinje: Sykdomstidslinje
-    private val egenmeldingsperiode: Periode?
-    private val egenmeldingstidslinje: Sykdomstidslinje
-    private var egenmeldingsstart: LocalDate?
-    private var egenmeldingsslutt: LocalDate?
+    private var sykdomstidslinje: Sykdomstidslinje
 
     internal companion object {
         internal const val tidslinjegrense = 40L
@@ -76,36 +72,32 @@ class Søknad(
         if (perioder.isEmpty()) logiskFeil("Søknad må inneholde perioder")
         sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: logiskFeil("Søknad inneholder ikke sykdomsperioder")
         if (perioder.inneholderDagerEtter(sykdomsperiode.endInclusive)) logiskFeil("Søknad inneholder dager etter siste sykdomsdag")
-        sykdomstidslinje = perioder
+        val egenmeldingstidslinje = egenmeldinger
+            .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
+            .merge(Dagturnering.SØKNAD::beste)
+            .fremTilOgMed(sykdomsperiode.endInclusive)
+
+        val søknadstidslinje = perioder
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
             .merge(Dagturnering.SØKNAD::beste)
             .subset(sykdomsperiode)
 
-        egenmeldingsperiode = Søknadsperiode.egenmeldingsperiode(egenmeldinger)
-        egenmeldingsstart = egenmeldingsperiode?.start
-        egenmeldingsslutt = egenmeldingsperiode?.endInclusive
-        egenmeldingstidslinje = egenmeldingsperiode?.let {
-            egenmeldinger
-                .map { it.sykdomstidslinje(egenmeldingsperiode, avskjæringsdato(), kilde) }
-                .merge(Dagturnering.SØKNAD::beste)
-                .subset(egenmeldingsperiode)
-        } ?: Sykdomstidslinje()
-
+        sykdomstidslinje = egenmeldingstidslinje.merge(søknadstidslinje, replace)
     }
 
-    internal fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
+    override fun erRelevant(other: Periode) = other.overlapperMed(sykdomsperiode)
 
     override fun sykdomstidslinje(): Sykdomstidslinje {
-        val egenmeldingCutoffStart = egenmeldingsstart
-        val egenmeldingCutoffEnd = egenmeldingsslutt
-        return if (egenmeldingCutoffStart != null && egenmeldingCutoffEnd != null) {
-            egenmeldingstidslinje.subset(egenmeldingCutoffStart til egenmeldingCutoffEnd)
-                .merge(sykdomstidslinje, replace)
-        } else {
-            sykdomstidslinje
-        }
+        return sykdomstidslinje
     }
+
+    override fun trimSykdomstidslinje(fom: LocalDate) {
+        if (fom > sykdomsperiode.endInclusive) return
+        sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
+    }
+
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = hendelseIder.add(Dokumentsporing.søknad(meldingsreferanseId()))
 
     override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 
@@ -160,12 +152,9 @@ class Søknad(
     private fun avskjæringsdato(): LocalDate =
         (opprinneligSendt ?: sendtTilNAVEllerArbeidsgiver).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
-        hendelseIder.add(Dokumentsporing.søknad(meldingsreferanseId()))
-
 
     internal fun lagVedtaksperiode(person: Person, arbeidsgiver: Arbeidsgiver, jurist: MaskinellJurist): Vedtaksperiode {
-        val periode = requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
+        requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
         return Vedtaksperiode(
             søknad = this,
             person = person,
@@ -175,36 +164,13 @@ class Søknad(
             organisasjonsnummer = organisasjonsnummer,
             sykdomstidslinje = sykdomstidslinje,
             dokumentsporing = Dokumentsporing.søknad(meldingsreferanseId()),
-            periode = periode,
+            periode = sykdomsperiode,
             jurist = jurist
         )
     }
 
     internal fun slettSykmeldingsperioderSomDekkes(arbeidsgiveren: Sykmeldingsperioder) {
         arbeidsgiveren.fjern(sykdomsperiode)
-    }
-
-    internal fun trimEgenmeldingsdager(trimFør: LocalDate?, trimEtter: LocalDate) {
-        if (trimFør != null) trimEgenmeldingsdagerFør(trimFør)
-        trimEgenmeldingsdagerEtter(trimEtter)
-    }
-
-    private fun trimEgenmeldingsdagerFør(dato: LocalDate) {
-        if (egenmeldingsperiode != null && egenmeldingsperiode.endInclusive <= dato) {
-            egenmeldingsstart = null
-            egenmeldingsslutt = null
-        } else if (egenmeldingsperiode != null && egenmeldingsperiode.start <= dato) {
-            egenmeldingsstart = egenmeldingstidslinje.førsteArbeidsgiverdagEtter(dato)
-        }
-    }
-
-    private fun trimEgenmeldingsdagerEtter(dato: LocalDate) {
-        if(egenmeldingsperiode != null && egenmeldingsperiode.start >= dato) {
-            egenmeldingsstart = null
-            egenmeldingsslutt = null
-        } else if (egenmeldingsperiode != null && egenmeldingsperiode.endInclusive >= dato) {
-            egenmeldingsslutt = dato.minusDays(1)
-        }
     }
 
     class Merknad(private val type: String) {
@@ -300,7 +266,7 @@ class Søknad(
 
         class Arbeidsgiverdag(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "arbeidsgiverdag") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde).subset(sykdomsperiode.oppdaterTom(periode))
+                Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
         }
 
         class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "papirsykmelding") {

@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
@@ -49,7 +48,7 @@ class OverstyrTidslinje(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, opprettet) {
 
     private val periode: Periode
-    private val sykdomstidslinje: Sykdomstidslinje
+    private var sykdomstidslinje: Sykdomstidslinje
 
     init {
         sykdomstidslinje = dager.map {
@@ -141,11 +140,12 @@ class OverstyrTidslinje(
         }
     }
 
-    internal fun erRelevant(other: Periode) = other.oppdaterFom(other.start.forrigeDag).overlapperMed(periode())
-
-    override fun overlappsperiode() = periode
+    override fun erRelevant(other: Periode) = other.oppdaterFom(other.start.forrigeDag).overlapperMed(periode())
 
     override fun sykdomstidslinje() = sykdomstidslinje
+    override fun trimSykdomstidslinje(fom: LocalDate) {
+        sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
+    }
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
         hendelseIder.add(Dokumentsporing.overstyrTidslinje(meldingsreferanseId()))

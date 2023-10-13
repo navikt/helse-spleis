@@ -6,13 +6,13 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
-private const val UNG_PERSON_FNR_2018 = "12029240045"
-private const val AKTØRID = "42"
-private const val ORGNUMMER = "987654321"
-internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHendelse(UUID.randomUUID(), UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, opprettet) {
+internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
     companion object {
         val søknad = Søknad(LocalDateTime.now()).kilde
         val inntektsmelding = Inntektsmelding(LocalDateTime.now()).kilde
@@ -21,6 +21,8 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHend
         val testkilde = TestHendelse(LocalDateTime.now()).kilde
     }
 
+    val kilde = SykdomshistorikkHendelse.Hendelseskilde(this::class.simpleName ?: "Ukjent", UUID.randomUUID(), opprettet)
+
     // Objects impersonating real-life sources of sickness timeline days
     class Inntektsmelding(opprettet: LocalDateTime) : TestEvent(opprettet)
     class Sykmelding(opprettet: LocalDateTime) : TestEvent(opprettet)
@@ -28,6 +30,7 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHend
     class Søknad(opprettet: LocalDateTime) : TestEvent(opprettet)
     class TestHendelse(opprettet: LocalDateTime) : TestEvent(opprettet)
 
-    override fun sykdomstidslinje() = Sykdomstidslinje()
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = true
+    override fun element(): Sykdomshistorikk.Element {
+        error("ikke i bruk")
+    }
 }

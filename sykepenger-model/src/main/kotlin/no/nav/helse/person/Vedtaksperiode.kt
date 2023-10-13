@@ -241,14 +241,37 @@ internal class Vedtaksperiode private constructor(
         sykmelding.trimLeft(periode.endInclusive)
     }
 
+    private fun <Hendelse: SykdomstidslinjeHendelse> håndterSykdomstidslinjeHendelse(hendelse: Hendelse, håndtering: (Hendelse) -> Unit) {
+        if (!hendelse.erRelevant(this.periode)) return hendelse.vurdertTilOgMed(periode.endInclusive)
+        kontekst(hendelse)
+        hendelse.leggTil(id, hendelseIder)
+        håndtering(hendelse)
+        hendelse.vurdertTilOgMed(periode.endInclusive)
+    }
+
     internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
-        if (!søknad.erRelevant(this.periode)) return
-        kontekst(søknad)
-        val sisteTomFør = arbeidsgiver.finnTidligereVedtaksperioder(periode().start).maxOfOrNull { it.periode().endInclusive }
-        søknad.trimEgenmeldingsdager(sisteTomFør, sykmeldingsperiode.start)
-        søknadHåndtert(søknad)
-        tilstand.håndter(this, søknad, arbeidsgivere)
-        søknad.trimLeft(periode.endInclusive)
+        håndterSykdomstidslinjeHendelse(søknad) {
+            søknadHåndtert(søknad)
+            tilstand.håndter(this, søknad, arbeidsgivere)
+        }
+    }
+
+    internal fun håndter(hendelse: OverstyrTidslinje) {
+        håndterSykdomstidslinjeHendelse(hendelse) {
+            val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
+            tilstand.håndter(this, hendelse)
+            val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
+            if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
+                hendelseIder.sisteInntektsmeldingId()?.let {
+                    person.arbeidsgiveropplysningerKorrigert(
+                        PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
+                            korrigerendeInntektsopplysningId = hendelse.meldingsreferanseId(),
+                            korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
+                            korrigertInntektsmeldingId = it
+                        ))
+                }
+            }
+        }
     }
 
     private fun inntektsmeldingHåndtert(inntektsmelding: Inntektsmelding): Boolean {
@@ -264,7 +287,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun søknadHåndtert(søknad: Søknad) {
-        søknad.leggTil(hendelseIder)
         person.emitSøknadHåndtert(søknad.meldingsreferanseId(), id, organisasjonsnummer)
     }
 
@@ -399,26 +421,6 @@ internal class Vedtaksperiode private constructor(
         kontekst(påminnelse)
         tilstand.påminnelse(this, påminnelse)
         return true
-    }
-
-    internal fun håndter(hendelse: OverstyrTidslinje) {
-        if (!hendelse.erRelevant(periode)) return
-        kontekst(hendelse)
-        hendelse.leggTil(hendelseIder)
-        val arbeidsgiverperiodeFørOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
-        tilstand.håndter(this, hendelse)
-        val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
-        if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
-            hendelseIder.sisteInntektsmeldingId()?.let {
-                person.arbeidsgiveropplysningerKorrigert(
-                    PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
-                    korrigerendeInntektsopplysningId = hendelse.meldingsreferanseId(),
-                    korrigerendeInntektektsopplysningstype = SAKSBEHANDLER,
-                    korrigertInntektsmeldingId = it
-                ))
-            }
-        }
-        hendelse.trimLeft(periode.endInclusive)
     }
 
     internal fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag, alleVedtaksperioder: Iterable<Vedtaksperiode>): Boolean {

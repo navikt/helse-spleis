@@ -37,7 +37,6 @@ import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
@@ -96,7 +95,7 @@ internal class Sykdomstidslinje private constructor(
         ?.findLast { erEnSykedag(this[it]) }
         ?.let { this.subset(Periode(dager.firstKey(), it)) } ?: Sykdomstidslinje()
 
-    private fun fraOgMed(dato: LocalDate) =
+    internal fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
 
     internal fun trim(perioder: List<Periode>): Sykdomstidslinje {

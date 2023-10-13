@@ -5,7 +5,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Collectors
 import no.nav.helse.januar
-import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
@@ -13,10 +14,11 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Melding
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
@@ -192,11 +194,7 @@ internal val Int.PROBLEM
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, INGEN, "Problemdag") }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-private const val UNG_PERSON_FNR_2018 = "12029240045"
-private const val AKTØRID = "42"
-private const val ORGNUMMER = "987654321"
 
-internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomstidslinjeHendelse(meldingsreferanseId, UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, LocalDateTime.now()) {
-    override fun sykdomstidslinje() = tidslinje
-    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = true
+internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), private val meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
+    override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, tidslinje)
 }
