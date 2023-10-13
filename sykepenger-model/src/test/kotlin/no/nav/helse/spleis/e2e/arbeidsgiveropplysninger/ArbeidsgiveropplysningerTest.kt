@@ -8,7 +8,6 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -65,8 +64,6 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.til
-import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -808,36 +805,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
     }
 
-    @Test
-    fun `Sender oppdatert forespørsel når vi vi får inn ny forrigeInntekt`() {
-        nyPeriode(1.januar til 31.januar)
-        nyPeriode(10.februar til 10.mars)
-
-        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertForventetFeil(
-            forklaring = "ønsker å sende ut en oppdatert forespørsel for andre vedtaksperiode med oppdatert forrige inntekt",
-            nå = {
-                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            },
-            ønsket = {
-                assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-
-                val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                    organisasjonsnummer = ORGNUMMER,
-                    vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
-                    skjæringstidspunkt = 10.februar,
-                    sykmeldingsperioder = listOf(1.januar til 31.januar, 10.februar til 10.mars),
-                    egenmeldingsperioder = emptyList(),
-                    forespurteOpplysninger = listOf(
-                        PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
-                        PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT))),
-                        PersonObserver.Arbeidsgiverperiode
-                    )
-                )
-                assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())
-            }
-        )
-    }
 
     @Test
     fun `Kort periode som blir lang pga korrigerende søknad med egenmeldingsdager skal sende ut forespørsel`() {

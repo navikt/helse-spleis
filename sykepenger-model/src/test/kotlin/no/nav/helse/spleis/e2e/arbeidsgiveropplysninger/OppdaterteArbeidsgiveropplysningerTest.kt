@@ -204,4 +204,35 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a2) }.size)
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.size)
     }
+
+    @Test
+    fun `Sender oppdatert forespørsel når vi vi får inn ny forrigeInntekt`() {
+        nyPeriode(1.januar til 31.januar)
+        nyPeriode(10.februar til 10.mars)
+
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertForventetFeil(
+            forklaring = "ønsker å sende ut en oppdatert forespørsel for andre vedtaksperiode med oppdatert forrige inntekt",
+            nå = {
+                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+            },
+            ønsket = {
+                assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
+                val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                    organisasjonsnummer = ORGNUMMER,
+                    vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                    skjæringstidspunkt = 10.februar,
+                    sykmeldingsperioder = listOf(1.januar til 31.januar, 10.februar til 10.mars),
+                    egenmeldingsperioder = emptyList(),
+                    forespurteOpplysninger = listOf(
+                        PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
+                        PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT))),
+                        PersonObserver.Arbeidsgiverperiode
+                    )
+                )
+                assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())
+            }
+        )
+    }
 }
