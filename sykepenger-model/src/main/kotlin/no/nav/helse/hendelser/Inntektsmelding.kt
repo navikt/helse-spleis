@@ -50,19 +50,7 @@ class Inntektsmelding(
     organisasjonsnummer = orgnummer,
     opprettet = mottatt, aktivitetslogg = aktivitetslogg
 ) {
-    private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
-    private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
-
-    init {
-        if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
-    }
-    private val dager = DagerFraInntektsmelding(this, this.arbeidsgiverperioder, førsteFraværsdag, begrunnelseForReduksjonEllerIkkeUtbetalt, avsendersystem, harFlereInntektsmeldinger, harOpphørAvNaturalytelser)
-
-    private var håndtertInntekt = false
-    private val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) førsteFraværsdag else this.arbeidsgiverperioder.maxOf { it.start }
-
     companion object {
-
         fun aktuellForReplay(sammenhengendePeriode: Periode, førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode?, redusertUtbetaling: Boolean) : Boolean {
             if (arbeidsgiverperiode == null) return redusertUtbetaling && førsteFraværsdag in sammenhengendePeriode // dersom IM har oppgitt reduksjon, og AGP er tom, da benyttes første fraværsdag som en nødløsning (TM)
             if (arbeidsgiverperiode.overlapperMed(sammenhengendePeriode)) return true
@@ -71,7 +59,22 @@ class Inntektsmelding(
             if (førsteFraværsdag in sammenhengendePeriode) return true
             return false
         }
+
+        private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): LocalDate {
+            if (førsteFraværsdag != null && (arbeidsgiverperioder.isEmpty() || førsteFraværsdag > arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
+            return arbeidsgiverperioder.maxOf { it.start }
+        }
     }
+
+    init {
+        if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
+    }
+
+    private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
+    private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
+    private val dager = DagerFraInntektsmelding(this, this.arbeidsgiverperioder, førsteFraværsdag, begrunnelseForReduksjonEllerIkkeUtbetalt, avsendersystem, harFlereInntektsmeldinger, harOpphørAvNaturalytelser)
+    private var håndtertInntekt = false
+    private val inntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder)
 
     internal fun aktuellForReplay(sammenhengendePeriode: Periode) = Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
 
@@ -85,15 +88,6 @@ class Inntektsmelding(
 
     override fun overlappsperiode(): Periode {
         error("ikke i bruk")
-    }
-
-    @OptIn(ExperimentalContracts::class)
-    private fun førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag: LocalDate?): Boolean {
-        contract {
-            returns(true) implies (førsteFraværsdag != null)
-        }
-        if (førsteFraværsdag == null) return false
-        return arbeidsgiverperiode == null || førsteFraværsdag > arbeidsgiverperiode.endInclusive.nesteDag
     }
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
