@@ -1,7 +1,9 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
@@ -14,6 +16,7 @@ import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
@@ -22,19 +25,22 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class DagerFraInntektsmelding(
-    private val inntektsmelding: Inntektsmelding,
+    private val meldingsreferanseId: UUID,
+    private val aktivitetslogg: Aktivitetslogg,
     private val arbeidsgiverperioder: List<Periode>,
     private val førsteFraværsdag: LocalDate?,
+    private val mottatt: LocalDateTime,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val avsendersystem: Inntektsmelding.Avsendersystem?,
     private val harFlereInntektsmeldinger: Boolean,
     private val harOpphørAvNaturalytelser: Boolean
-): IAktivitetslogg by inntektsmelding {
+): IAktivitetslogg by aktivitetslogg {
     private companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
             "BetvilerArbeidsufoerhet",
@@ -49,7 +55,8 @@ internal class DagerFraInntektsmelding(
         private const val MAKS_ANTALL_DAGER_MELLOM_FØRSTE_FRAVÆRSDAG_OG_AGP_FOR_HÅNDTERING_AV_DAGER = 20
     }
 
-    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
+    internal val kilde = Hendelseskilde("Inntektsmelding", meldingsreferanseId, mottatt)
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
     private val arbeidsdager = mutableSetOf<LocalDate>()
     private var dagerHåndtert = false
@@ -81,14 +88,14 @@ internal class DagerFraInntektsmelding(
 
     private fun tidslinjeForFørsteFraværsdag(): Sykdomstidslinje {
         if (begrunnelseForReduksjonEllerIkkeUtbetalt == null || førsteFraværsdag == null) return Sykdomstidslinje()
-        return Sykdomstidslinje.sykedagerNav(førsteFraværsdag, førsteFraværsdag, 100.prosent, inntektsmelding.kilde)
+        return Sykdomstidslinje.sykedagerNav(førsteFraværsdag, førsteFraværsdag, 100.prosent, kilde)
     }
 
     private fun tidslinjeForArbeidsgiverperioden(): Sykdomstidslinje? {
         if (ignorerDager) return Sykdomstidslinje()
         if (arbeidsgiverperiodenKanIkkeTolkes()) return null
 
-        val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, inntektsmelding.kilde) } ?: Sykdomstidslinje()
+        val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, kilde) } ?: Sykdomstidslinje()
         val friskHelg = friskHelgMellomFørsteFraværsdagOgArbeidsgiverperioden()
         return arbeidsdager.merge(lagArbeidsgivertidslinje(), Dag.replace).merge(friskHelg)
     }
@@ -103,7 +110,7 @@ internal class DagerFraInntektsmelding(
         if (førsteFraværsdag == null) return Sykdomstidslinje()
         if (arbeidsgiverperiode?.erRettFør(førsteFraværsdag) != true) return Sykdomstidslinje()
         val helgen = arbeidsgiverperiode.periodeMellom(førsteFraværsdag) ?: return Sykdomstidslinje()
-        return Sykdomstidslinje.arbeidsdager(helgen, inntektsmelding.kilde)
+        return Sykdomstidslinje.arbeidsdager(helgen, kilde)
     }
 
     private fun lagArbeidsgivertidslinje(): Sykdomstidslinje {
@@ -117,14 +124,14 @@ internal class DagerFraInntektsmelding(
         return listOfNotNull(førsteFraværsdag?.førsteArbeidsdag()?.somPeriode())
     }
 
-    private fun arbeidsgiverdager(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, inntektsmelding.kilde)
-    private fun sykedagerNav(periode: Periode) = Sykdomstidslinje.sykedagerNav(periode.start, periode.endInclusive, 100.prosent, inntektsmelding.kilde)
+    private fun arbeidsgiverdager(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
+    private fun sykedagerNav(periode: Periode) = Sykdomstidslinje.sykedagerNav(periode.start, periode.endInclusive, 100.prosent, kilde)
 
     internal fun accept(visitor: DagerFraInntektsmeldingVisitor) {
         visitor.visitGjenståendeDager(gjenståendeDager)
     }
 
-    internal fun meldingsreferanseId() = inntektsmelding.meldingsreferanseId()
+    internal fun meldingsreferanseId() = meldingsreferanseId
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) : Boolean {
         dagerHåndtert = true
         return hendelseIder.add(dokumentsporing)
@@ -184,13 +191,13 @@ internal class DagerFraInntektsmelding(
         val sykdomstidslinje = samletSykdomstidslinje(periode)
         gjenståendeDager.removeAll(periode)
         dagerHåndtert = true
-        return BitAvInntektsmelding(inntektsmelding, sykdomstidslinje)
+        return BitAvInntektsmelding(meldingsreferanseId, sykdomstidslinje, mottatt, aktivitetslogg)
     }
 
     private fun samletSykdomstidslinje(periode: Periode) =
         (arbeidsdagertidslinje() + sykdomstidslinje).subset(periode)
     private fun arbeidsdagertidslinje() =
-        arbeidsdager.map { Sykdomstidslinje.arbeidsdager(it, it, inntektsmelding.kilde) }.merge()
+        arbeidsdager.map { Sykdomstidslinje.arbeidsdager(it, it, kilde) }.merge()
 
     private fun håndterDagerFør(vedtaksperiode: Periode): Periode? {
         leggTilArbeidsdagerFør(vedtaksperiode.start)
@@ -268,9 +275,11 @@ internal class DagerFraInntektsmelding(
     }
 
     private class BitAvInntektsmelding(
-        private val inntektsmelding: Inntektsmelding,
-        private val sykdomstidslinje: Sykdomstidslinje
-    ): SykdomstidslinjeHendelse(inntektsmelding.meldingsreferanseId(), inntektsmelding) {
+        meldingsreferanseId: UUID,
+        private val sykdomstidslinje: Sykdomstidslinje,
+        opprettet: LocalDateTime,
+        aktivitetslogg: Aktivitetslogg
+    ): SykdomstidslinjeHendelse(meldingsreferanseId, "IKKE_NØDVENDIG", "IKKE_NØDVENDIG", "IKKE_NØDVENDIG", opprettet, Inntektsmelding::class, aktivitetslogg) {
         override fun sykdomstidslinje() = sykdomstidslinje
         override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = throw IllegalStateException("Ikke i bruk")
         override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = throw IllegalStateException("Ikke i bruk")

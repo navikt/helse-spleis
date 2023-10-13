@@ -24,8 +24,6 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.ArbeidsgiverInntektsopplysn
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Inntekt
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -48,7 +46,8 @@ class Inntektsmelding(
     fødselsnummer = fødselsnummer,
     aktørId = aktørId,
     organisasjonsnummer = orgnummer,
-    opprettet = mottatt, aktivitetslogg = aktivitetslogg
+    opprettet = mottatt,
+    aktivitetslogg = aktivitetslogg
 ) {
     companion object {
         fun aktuellForReplay(sammenhengendePeriode: Periode, førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode?, redusertUtbetaling: Boolean) : Boolean {
@@ -72,7 +71,17 @@ class Inntektsmelding(
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
-    private val dager = DagerFraInntektsmelding(this, this.arbeidsgiverperioder, førsteFraværsdag, begrunnelseForReduksjonEllerIkkeUtbetalt, avsendersystem, harFlereInntektsmeldinger, harOpphørAvNaturalytelser)
+    private val dager = DagerFraInntektsmelding(
+        meldingsreferanseId,
+        aktivitetslogg,
+        this.arbeidsgiverperioder,
+        førsteFraværsdag,
+        mottatt,
+        begrunnelseForReduksjonEllerIkkeUtbetalt,
+        avsendersystem,
+        harFlereInntektsmeldinger,
+        harOpphørAvNaturalytelser
+    )
     private var håndtertInntekt = false
     private val inntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder)
 
