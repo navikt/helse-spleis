@@ -829,6 +829,23 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(expectedForespørsel, actualForespørsel)
     }
 
+    @Test
+    fun `Sender ikke med sykmeldingsperioder som er etter skjæringstidspunktet`() {
+        nyPeriode(5.februar til 28.februar)
+        nyPeriode(1.januar til 31.januar)
+
+        val actualJanuarForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder[2]
+        assertForventetFeil(
+            forklaring = "skal ikke sende med sykmeldingsperioder knyttet til AGP som er etter vedtaksperioden forespørselen sendes ut for",
+            nå = {
+                assertEquals(listOf(1.januar til 31.januar, 5.februar til 28.februar), actualJanuarForespørsel.sykmeldingsperioder)
+            },
+            ønsket = {
+                assertEquals(listOf(1.januar til 31.januar), actualJanuarForespørsel.sykmeldingsperioder)
+            }
+        )
+    }
+
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(1.januar til 31.januar, a1)
         nyPeriode(1.januar til 31.januar, a2)
