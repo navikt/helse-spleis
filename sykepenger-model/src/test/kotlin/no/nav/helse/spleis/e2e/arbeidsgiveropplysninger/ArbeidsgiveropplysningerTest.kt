@@ -49,6 +49,7 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
+import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -831,19 +832,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ikke med sykmeldingsperioder som er etter skjæringstidspunktet`() {
-        nyPeriode(5.februar til 28.februar)
         nyPeriode(1.januar til 31.januar)
+        nyPeriode(1.februar til 28.februar)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        val actualJanuarForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder[2]
-        assertForventetFeil(
-            forklaring = "skal ikke sende med sykmeldingsperioder knyttet til AGP som er etter vedtaksperioden forespørselen sendes ut for",
-            nå = {
-                assertEquals(listOf(1.januar til 31.januar, 5.februar til 28.februar), actualJanuarForespørsel.sykmeldingsperioder)
-            },
-            ønsket = {
-                assertEquals(listOf(1.januar til 31.januar), actualJanuarForespørsel.sykmeldingsperioder)
-            }
-        )
+        val actualJanuarForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder[1]
+        assertEquals(listOf(1.januar til 31.januar), actualJanuarForespørsel.sykmeldingsperioder)
     }
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {

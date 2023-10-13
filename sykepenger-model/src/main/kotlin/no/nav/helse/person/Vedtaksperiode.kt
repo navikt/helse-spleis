@@ -711,7 +711,9 @@ internal class Vedtaksperiode private constructor(
 
         val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
         val vedtaksperioderKnyttetTilArbeidsgiverperiode = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
-        val relevanteSykmeldingsperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.sykmeldingsperiode }
+        val relevanteSykmeldingsperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode
+            .filter { it.sykmeldingsperiode.start < periode().endInclusive }
+            .map { it.sykmeldingsperiode }
         val sykdomstidslinjeKnyttetTilArbeidsgiverperiode = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.sykdomstidslinje }.merge()
 
         val forespurteOpplysninger = listOfNotNull(
