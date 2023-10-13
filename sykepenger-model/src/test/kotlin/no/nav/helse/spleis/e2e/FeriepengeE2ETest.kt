@@ -288,7 +288,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Beregner feriepenger korrekt for enkel spleisperiode uten infotrygdhistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -325,7 +325,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Beregner feriepenger korrekt for enkel spleisperiode med en utbetaling i infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -378,7 +378,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -425,7 +425,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Beregner ikke feriepenger for personer markert for manuell beregning av feriepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -451,7 +451,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Sender ikke to utbetalingsbehov om feriepengereberegningen er lik den forrige`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -503,7 +503,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val ORGNUMMER2 = "978654321"
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.august(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -554,7 +554,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.august(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -577,7 +577,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Validerer at beregnet feriepengebeløp for IT finnes i lista over utbetalte feriepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -617,7 +617,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Validering feiler hvis beregnet feriepengebeløp for IT ikke finnes i lista over utbetalte feriepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -657,7 +657,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Validerer ikke utbetalte feriepenger hvis beregnet feriepengebeløp for IT er 0`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -688,7 +688,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Utbetaling av feriepenger sender behov til oppdrag`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -719,7 +719,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Sender ut events etter mottak av kvittering fra oppdrag`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -754,7 +754,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Sender ut events kun for oppdrag med relevant utbetalingId etter mottak av kvittering`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -816,7 +816,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         Toggle.SendFeriepengeOppdrag.enable {
             håndterSykmelding(Sykmeldingsperiode(6.juni(2020), 7.juni(2020)))
             håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(6.juni(2020), 7.juni(2020), 100.prosent))
-            håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)))
+            håndterInntektsmelding(listOf(6.juni(2020) til 7.juni(2020)),)
 
             håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020)
@@ -830,7 +830,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         Toggle.SendFeriepengeOppdrag.enable {
             håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
             håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-            håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+            håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.juni(2019) til 1.mai(2020) inntekter {
@@ -859,7 +859,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `reberegning av feriepenger med endringer`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -896,7 +896,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `reberegning av feriepenger med endringer hvor totalt utbetalte dager går over 48`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -942,7 +942,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `reberegning av feriepenger med endringer hvor første ikke blir sendt`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -993,7 +993,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Kobler ny utbetaling til det forrige sendte oppdraget`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -1047,7 +1047,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         Toggle.SendFeriepengeOppdrag.enable {
             håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
             håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-            håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+            håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.juni(2019) til 1.mai(2020) inntekter {
@@ -1091,7 +1091,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Reberegning som ender med 0 i totalsum sender opphør`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -1127,7 +1127,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Rekjøring etter annullert oppdrag skal ikke sende feriepenger ved beløp 0`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -1171,7 +1171,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Rekjøring etter annullert oppdrag skal sende feriepenger med ny fagsystemId`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -1196,7 +1196,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.oktober(2020), 14.desember(2020)))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.oktober(2020), 14.desember(2020), 100.prosent)) // 41 dager
-        håndterInntektsmelding(listOf(1.oktober(2020) til 16.oktober(2020)))
+        håndterInntektsmelding(listOf(1.oktober(2020) til 16.oktober(2020)),)
         håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.oktober(2019) til 1.september(2020) inntekter {
@@ -1236,7 +1236,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Feriepengeutbetaling til person`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -1272,7 +1272,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Personutbetaling 48 dager i IT, spleis skal ikke betale noe`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -1303,7 +1303,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Feriepengeutbetaling til orgnummer 0`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {
@@ -1339,7 +1339,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     fun `Test av sanity-logging`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020)))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
-        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.juni(2019) til 1.mai(2020) inntekter {

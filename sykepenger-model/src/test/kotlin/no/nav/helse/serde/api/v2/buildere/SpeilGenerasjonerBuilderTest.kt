@@ -21,7 +21,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -49,7 +48,6 @@ import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.Periodetilstand
@@ -64,9 +62,10 @@ import no.nav.helse.serde.api.dto.Periodetilstand.TilUtbetaling
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
+import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType.FORELDET_SYKEDAG
-import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FORLENGELSE
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING
@@ -120,9 +119,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
@@ -131,7 +128,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `Manglende generasjon når det kommer IM som endrer AGP ved å endre dager i forkant av perioden`() {
         håndterSøknad(Sykdom(7.august, 20.august, 100.prosent))
         håndterSøknad(Sykdom(21.august, 1.september, 100.prosent))
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(24.juli til 25.juli, 7.august til 20.august))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(24.juli til 25.juli, 7.august til 20.august),)
         assertEquals("UUAARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -142,7 +139,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         // 21 & 22.August utbetalingsdager
 
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(7.august til 22.august))
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(7.august til 22.august),)
         assertEquals("AAAARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -183,7 +180,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         val beregnetInntekt = halvG.beløp(1.januar)
         nyttVedtak(1.januar, 31.januar, beregnetInntekt = beregnetInntekt)
         forlengVedtak(1.februar,  28.februar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt - 1.daglig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt - 1.daglig,)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning()
@@ -334,7 +331,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `person med foreldet dager`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juni)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -401,7 +398,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 opphørsdato = null,
                 endringerIRefusjon = emptyList()
             ),
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         håndterVilkårsgrunnlag(
@@ -448,7 +445,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
@@ -928,7 +925,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -949,7 +946,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -1113,7 +1110,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `periode uten utbetaling - kun ferie`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         generasjoner {
             assertEquals(1, size)
             0.generasjon {
@@ -1204,7 +1201,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            refusjon = Inntektsmelding.Refusjon(0.månedlig, null)
+            refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
@@ -1273,7 +1270,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             }
         }
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
@@ -1966,7 +1963,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        håndterInntektsmelding(listOf(10.januar til 25.januar))
+        håndterInntektsmelding(listOf(10.januar til 25.januar),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -2005,7 +2002,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar))
         håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
 
-        håndterInntektsmelding(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+        håndterInntektsmelding(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT,)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -2025,7 +2022,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `avvist utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -2109,7 +2106,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `omgjøre kort periode til at nav utbetaler`() {
         nyPeriode(4.januar til 20.januar)
-        håndterInntektsmelding(listOf(4.januar til 19.januar))
+        håndterInntektsmelding(listOf(4.januar til 19.januar),)
 
         håndterOverstyrTidslinje(4.januar.til(19.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -2146,7 +2143,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((1.januar til 4.januar).map {
             ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
         }, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -2192,7 +2189,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
 
         nyPeriode(16.januar til 31.januar, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(3.vedtaksperiode, orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
@@ -2268,7 +2265,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `tidligere periode med arbeid får samme arbeidsgiverperiode som nyere periode`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

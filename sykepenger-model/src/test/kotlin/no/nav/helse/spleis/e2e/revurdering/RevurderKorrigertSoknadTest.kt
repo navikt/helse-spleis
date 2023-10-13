@@ -380,7 +380,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar))
         håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
 
-        håndterInntektsmelding(listOf(31.januar til 15.februar))
+        håndterInntektsmelding(listOf(31.januar til 15.februar),)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 

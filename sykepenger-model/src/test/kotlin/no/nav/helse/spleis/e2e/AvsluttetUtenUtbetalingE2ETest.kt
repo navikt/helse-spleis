@@ -41,7 +41,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.mars, 18.mars)))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.mars, 18.mars)),)
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(3.mars, 26.mars, 100.prosent))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -91,7 +91,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars))
-        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
+        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)),)
 
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
 
@@ -139,7 +139,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
                 // 6. og 7. januar er helg
                 8.januar til 12.januar,// 5
                 13.januar til 18.januar // 6
-            ), 8.januar
+            ),
+            8.januar,
         )
         assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)

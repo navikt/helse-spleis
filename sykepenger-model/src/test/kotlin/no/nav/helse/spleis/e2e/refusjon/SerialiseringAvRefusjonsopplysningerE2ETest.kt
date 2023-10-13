@@ -34,7 +34,7 @@ internal class SerialiseringAvRefusjonsopplysningerE2ETest : AbstractEndToEndTes
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(15000.månedlig, opphørsdato = null),
-            orgnummer = a2
+            orgnummer = a2,
         )
         inspektør(a1).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, 20000.månedlig)
         inspektør(a2).refusjonsopplysningerFraVilkårsgrunnlag(1.januar).assertRefusjonsbeløp(1.januar til 31.januar, 15000.månedlig)

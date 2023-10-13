@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -53,7 +52,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `når utbetaling er ikke godkjent skal påfølgende perioder også kastes ut`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -87,7 +86,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
             håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         } førerTil AVVENTER_INNTEKTSMELDING somEtterfulgtAv {
-            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
         } førerTil AVVENTER_VILKÅRSPRØVING somEtterfulgtAv {
             håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         } førerTil AVVENTER_HISTORIKK somEtterfulgtAv {
@@ -109,7 +108,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -157,7 +156,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(
             listOf(Periode(3.januar, 18.januar)),
-            refusjon = Refusjon(INNTEKT, 20.januar, emptyList())
+            refusjon = Refusjon(INNTEKT, 20.januar, emptyList()),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -179,7 +178,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
-            refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar)))
+            refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar))),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -199,7 +198,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke i til utbetaling ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -227,7 +226,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster i avventer godkjenning ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

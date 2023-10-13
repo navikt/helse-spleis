@@ -374,7 +374,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
+        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer,)
         håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
@@ -399,7 +399,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
             orgnummer = orgnummer
         )
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer)
+        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = orgnummer,)
         håndterVilkårsgrunnlag(observatør.sisteVedtaksperiode(), inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {
@@ -423,8 +423,8 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil), orgnummer = a2)
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a1)
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2)
+        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1,)
+        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 arbeidsgiverperiode.start.minusYears(1) til arbeidsgiverperiode.start.withDayOfMonth(1).minusMonths(1) inntekter {

@@ -24,7 +24,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -816,7 +815,7 @@ internal class Arbeidsgiver private constructor(
         val (inntektsdato, lagtTilNå) = inntektsmelding.addInntekt(inntektshistorikk, inntektsmelding.jurist(jurist))
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
-        if (sykdomstidslinjeperiode != null && inntektsdato !in sykdomstidslinjeperiode)
+        if (inntektsmelding.skalIkkeLagreInntekt(sykdomstidslinjeperiode))
             return inntektsmelding.info("Lagrer ikke inntekt på skjæringstidspunkt fordi inntektdato er oppgitt til å være utenfor den perioden arbeidsgiver har sykdom for")
         val skjæringstidspunkt = person.skjæringstidspunkt(inntektsdato.somPeriode())
         finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {

@@ -46,12 +46,12 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
             førsteFraværsdag = 1.januar(2021),
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar(2021) til 16.januar(2021)),
             førsteFraværsdag = 1.januar(2021),
-            orgnummer = a2
+            orgnummer = a2,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -123,7 +123,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 30000.månedlig,
             refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList()),
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         val inntekter = listOf(
@@ -162,7 +162,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.februar,
             beregnetInntekt = 30000.månedlig,
             refusjon = Inntektsmelding.Refusjon(30000.månedlig, null, emptyList()),
-            orgnummer = a2
+            orgnummer = a2,
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -188,7 +188,7 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 12.januar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 12.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 12.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)
 
         håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar), orgnummer = a2)

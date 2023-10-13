@@ -130,7 +130,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = 50000.årlig
+            beregnetInntekt = 50000.årlig,
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,

@@ -47,7 +47,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
     fun `kan sende inn søknad før periode er gått ut`() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom))
         håndterSøknad(Sykdom(fom, tom, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(fom, sisteArbeidsgiverdag)), førsteFraværsdag = fom)
+        håndterInntektsmelding(listOf(Periode(fom, sisteArbeidsgiverdag)), førsteFraværsdag = fom,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 fom.minusYears(1) til fom.minusMonths(1) inntekter {

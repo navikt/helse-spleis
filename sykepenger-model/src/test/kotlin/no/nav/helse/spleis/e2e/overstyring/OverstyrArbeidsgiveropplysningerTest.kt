@@ -99,7 +99,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = nyIMInntekt)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = nyIMInntekt,)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Inntektsmelding)
@@ -686,7 +686,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is Saksbehandler)
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is Saksbehandler)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1,)
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a1) is Inntektsmelding)
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar, a2) is Saksbehandler)
     }
@@ -696,7 +696,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
 
         nyPeriode(5.februar til 28.februar)
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar,)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(RV_RE_1, 2.vedtaksperiode.filter())

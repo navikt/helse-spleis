@@ -103,7 +103,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     fun `utbetaling feilet med ett oppdrag status avvist og ett som er ok`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList()))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -135,7 +139,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     fun `utbetaling feilet med ett oppdrag status ok og ett som er avvist`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList()))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

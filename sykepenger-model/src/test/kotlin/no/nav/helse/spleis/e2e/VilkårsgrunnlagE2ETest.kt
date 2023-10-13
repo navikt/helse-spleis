@@ -52,7 +52,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar), orgnummer = a2)
         håndterSøknad(Sykdom(6.februar, 28.februar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2)
+        håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2,)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a2,
             inntektsvurdering = Inntektsvurdering(
@@ -90,7 +90,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `negativt omregnet årsinntekt for ghost-arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -119,7 +119,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -136,7 +136,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `ingen sammenligningsgrunlag fører til error om 25% avvik`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
 
@@ -153,7 +153,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         val arbeidsgiverperioder = listOf(
             1.januar til 16.januar
         )
-        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 1.januar)
+        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 1.januar,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -195,7 +195,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             arbeidsgiverperioder = arbeidsgiverperioder,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 1000.månedlig,
-            refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList())
+            refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList()),
         )
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
@@ -230,7 +230,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `25 % avvik i inntekt lager error`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -249,7 +249,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -271,7 +271,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() {
         nyPeriode(1.januar til 16.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         nyPeriode(17.januar til 31.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)

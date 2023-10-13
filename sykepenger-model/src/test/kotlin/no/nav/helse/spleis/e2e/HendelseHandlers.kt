@@ -41,7 +41,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
@@ -110,7 +109,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
             beregnetInntekt = beregnetInntekt,
-            orgnummer = it
+            orgnummer = it,
         )
     }
 
@@ -180,7 +179,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
             beregnetInntekt = 20000.månedlig,
-            orgnummer = it
+            orgnummer = it,
         )
     }
 
@@ -317,7 +316,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
         refusjon = refusjon,
         orgnummer = orgnummer,
         id = inntektsmeldingId,
-        fnr = fnr
+        fnr = fnr,
     )
     val id = observatør.sisteVedtaksperiode()
     håndterVilkårsgrunnlag(
@@ -475,6 +474,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     arbeidsgiverperioder: List<Periode>,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
+    inntektsdato: LocalDate? = null,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     harOpphørAvNaturalytelser: Boolean = false,
@@ -486,6 +486,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
     return håndterInntektsmelding(
         arbeidsgiverperioder,
         førsteFraværsdag,
+        inntektsdato = inntektsdato,
         beregnetInntekt = beregnetInntekt,
         refusjon,
         orgnummer = orgnummer,
@@ -498,6 +499,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
     arbeidsgiverperioder: List<Periode>,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
+    inntektsdato: LocalDate? = null,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
@@ -514,6 +516,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     arbeidsgiverperioder,
     beregnetInntekt = beregnetInntekt,
     førsteFraværsdag = førsteFraværsdag,
+    inntektsdato = inntektsdato,
     refusjon = refusjon,
     orgnummer = orgnummer,
     harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,

@@ -74,7 +74,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     fun `har en generasjon med vilkårsgrunnlag for periode til godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntekt)
         håndterYtelser()
         håndterSimulering()
@@ -133,11 +133,12 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     fun `revurdering av inntekt`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
-            listOf(1.januar til 16.januar), beregnetInntekt = 35000.månedlig, refusjon = Refusjon(
+            listOf(1.januar til 16.januar), beregnetInntekt = 35000.månedlig,
+            refusjon = Refusjon(
                 35000.månedlig,
                 null,
                 emptyList()
-            )
+            ),
         )
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser()
@@ -252,7 +253,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterInntektsmelding(listOf(1.mars til 16.mars))
+        håndterInntektsmelding(listOf(1.mars til 16.mars),)
         håndterVilkårsgrunnlag(2.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -297,7 +298,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
             refusjon = Refusjon(31000.månedlig, null, emptyList()),
-            orgnummer = AG1
+            orgnummer = AG1,
         )
 
         val inntekter = listOf(

@@ -17,6 +17,7 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -36,7 +37,6 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -52,7 +52,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
-            orgnummer = a1
+            orgnummer = a1,
         )
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
@@ -87,7 +87,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
-            orgnummer = a1
+            orgnummer = a1,
         )
         val inntekter1 = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3))
@@ -130,7 +130,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.juli(2021) til 16.juli(2021)),
             førsteFraværsdag = 1.juli(2021),
             beregnetInntekt = 30000.månedlig,
-            orgnummer = a1
+            orgnummer = a1,
         )
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3))
@@ -164,7 +164,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
     fun `arbeidsgivere med sammenligningsgrunnlag, men uten inntekt, skal ikke anses som ekstra arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1,)
 
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT))
         val inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)))
@@ -214,7 +214,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.mars(2017) til 16.mars(2017)),
             førsteFraværsdag = 1.mars(2017),
             beregnetInntekt = 30000.månedlig,
-            orgnummer = a1
+            orgnummer = a1,
         )
         val inntekterA1 = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
@@ -251,7 +251,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
             beregnetInntekt = 30000.månedlig,
-            orgnummer = a2
+            orgnummer = a2,
         )
         val inntekterA2 = listOf(
             grunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), 35000.månedlig.repeat(3))
@@ -299,7 +299,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
             beregnetInntekt = 10000.månedlig,
-            orgnummer = a1
+            orgnummer = a1,
         )
         val inntekter1 = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)))
         val arbeidsforhold1 = listOf(
@@ -331,7 +331,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = 11400.månedlig,
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         val arbeidsforhold1 = listOf(
@@ -368,7 +368,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(2.februar til 17.februar),
             førsteFraværsdag = 2.februar,
             beregnetInntekt = 45000.månedlig,
-            orgnummer = a2
+            orgnummer = a2,
         )
 
         val inntekter3 = listOf(
@@ -407,7 +407,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.mars til 16.mars),
             førsteFraværsdag = 1.mars,
             beregnetInntekt = 11400.månedlig,
-            orgnummer = a1
+            orgnummer = a1,
         )
         val inntekter2 = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 2.vedtaksperiode), 11400.månedlig.repeat(2)),
@@ -521,7 +521,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT,
-            orgnummer = a1
+            orgnummer = a1,
         )
 
         håndterVilkårsgrunnlag(

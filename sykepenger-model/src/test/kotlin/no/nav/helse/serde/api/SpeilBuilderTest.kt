@@ -117,7 +117,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
         nyPeriode(1.januar til 16.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ja")
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ja",)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -143,7 +143,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `lager ikke hvit pølse i helg`() {
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -156,7 +156,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `Negativt nettobeløp på simulering skal gi warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringsresultat = standardSimuleringsresultat(ORGNUMMER, totalbeløp = -1))
@@ -167,7 +167,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `Viser inntektsgrunnlag for arbeidsforhold som startet innen 3 måneder før skjæringstidspunktet, selvom vi ikke har inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             inntektsvurdering = Inntektsvurdering(
@@ -291,8 +291,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(
-            listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
-                Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar)))
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
+                Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar))),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -323,7 +324,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(20000.månedlig, null)
+            refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
         )
 
         val speil = speilApi()
@@ -352,7 +353,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             1.februar,
-            refusjon = Inntektsmelding.Refusjon(INGEN, null)
+            refusjon = Inntektsmelding.Refusjon(INGEN, null),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -390,7 +391,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `periode til skjønnsfastsettelse`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
         nullstillTilstandsendringer()
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -405,7 +406,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `periode til skjønnsfastsettelse - revurdering`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 30000.månedlig)))
         håndterYtelser(1.vedtaksperiode)
@@ -440,7 +441,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val inntektSkatt = 31000.0 * 2
         val inntektSkjønnsfastsatt = 31000 * 1.5
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektIm.månedlig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektIm.månedlig,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntektSkatt.månedlig)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

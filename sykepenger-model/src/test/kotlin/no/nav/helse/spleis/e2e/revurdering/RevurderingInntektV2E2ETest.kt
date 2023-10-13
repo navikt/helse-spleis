@@ -261,7 +261,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            beregnetInntekt = 50000.årlig
+            beregnetInntekt = 50000.årlig,
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
@@ -557,7 +557,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar))
+            listOf(Periode(1.januar, 16.januar)),
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -590,7 +590,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - periode uten utbetaling først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -647,11 +647,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     fun `revurdere inntekt slik at det blir brukerutbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(
+            listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(
                 INGEN,
                 null,
                 emptyList()
-            )
+            ),
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -670,11 +671,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     fun `revurdere inntekt slik at det blir delvis refusjon`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(
+            listOf(Periode(1.januar, 16.januar)),
+            refusjon = Refusjon(
                 25000.månedlig,
                 null,
                 emptyList()
-            )
+            ),
         )
         håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)

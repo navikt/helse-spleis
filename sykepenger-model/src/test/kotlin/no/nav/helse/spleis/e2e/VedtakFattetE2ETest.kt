@@ -79,7 +79,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     fun `sender vedtak fattet for perioder utenfor arbeidsgiverperioden med bare ferie`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 20.januar, 100.prosent), Ferie(17.januar, 20.januar))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar),)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(0, inspektør.utbetalinger.size)
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
@@ -123,8 +123,8 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a2,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2019) til 1.desember(2019) inntekter {
@@ -171,12 +171,12 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = 45000.månedlig,
-            orgnummer = a1
+            orgnummer = a1,
         )
         håndterInntektsmelding(
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = 44000.månedlig,
-            orgnummer = a2
+            orgnummer = a2,
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -234,7 +234,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, null, emptyList()),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "noe"
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "noe",
         )
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -269,7 +269,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.juni til 16.juni),
             førsteFraværsdag = 1.august,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
         )
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -293,7 +293,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert"
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

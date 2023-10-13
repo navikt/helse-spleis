@@ -45,7 +45,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             Sykdom(1.april(2021), 23.april(2021), 100.prosent),
             Ferie(23.april(2021), 23.april(2021))
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
@@ -82,7 +86,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 100.prosent)
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
@@ -117,7 +125,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             Sykdom(1.april(2021), 23.april(2021), 100.prosent),
             Ferie(23.april(2021), 23.april(2021))
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
@@ -159,7 +171,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             Sykdom(1.april(2021), 23.april(2021), 60.prosent),
             Sykdom(24.april(2021), 30.april(2021), 40.prosent)
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
@@ -195,7 +211,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
@@ -231,7 +251,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
@@ -268,7 +292,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
@@ -310,7 +338,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
@@ -353,7 +385,11 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             Sykdom(1.april(2021), 23.april(2021), 60.prosent)
         )
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.april(2021), 16.april(2021))), førsteFraværsdag = 1.april(2021))
+        håndterInntektsmeldingMedValidering(
+            1.vedtaksperiode,
+            listOf(Periode(1.april(2021), 16.april(2021))),
+            førsteFraværsdag = 1.april(2021),
+        )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {

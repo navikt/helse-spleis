@@ -29,7 +29,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -46,7 +46,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     fun `grad rundes av`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 80.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -59,7 +59,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     fun `første periode er kun arbeidsgiverperiode og ferie`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(20.januar, 22.januar))
-        håndterInntektsmelding(listOf(4.januar til 19.januar))
+        håndterInntektsmelding(listOf(4.januar til 19.januar),)
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
 

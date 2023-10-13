@@ -47,7 +47,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
     fun `Opplæringspenger starter mindre enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
-        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterInntektsmelding(listOf(3.mars til 18.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(3.februar til 20.februar))
         assertVarsel(Varselkode.RV_AY_8)
@@ -58,7 +58,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
     fun `Opplæringspenger starter mer enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
-        håndterInntektsmelding(listOf(3.mars til 18.mars))
+        håndterInntektsmelding(listOf(3.mars til 18.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(3.januar til 20.januar))
         assertIngenFunksjonelleFeil()
@@ -69,7 +69,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
     fun `Periode for person der det ikke foreligger opplæringspengerytelse blir behandlet og sendt til godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
@@ -101,7 +101,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
     fun `Periode som overlapper med opplæringspengerytelse får varsel`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.januar til 31.januar))
         assertVarsel(Varselkode.RV_AY_8)
@@ -112,7 +112,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
     fun `Periode som overlapper med opplæringspengerytelse i starten av perioden får varsel`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.desember(2017) til 1.januar))
         assertVarsel(Varselkode.RV_AY_8)
@@ -123,7 +123,7 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
     fun `Periode som overlapper med opplæringspengerytelse i slutten av perioden får varsel`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(31.januar til 14.februar))
         assertVarsel(Varselkode.RV_AY_8)

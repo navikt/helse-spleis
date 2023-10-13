@@ -175,4 +175,6 @@ class Inntektsmelding(
     private fun håndtertNå(dager: DagerFraInntektsmelding) = håndtertInntekt || dager.noenDagerHåndtert()
     private fun håndtertTidligere(vedtaksperioder: List<Vedtaksperiode>) = vedtaksperioder.any { meldingsreferanseId() in it.hendelseIder() }
     internal fun jurist(jurist: MaskinellJurist) = jurist.medInntektsmelding(this.meldingsreferanseId())
+    internal fun skalIkkeLagreInntekt(sykdomstidslinjeperiode: Periode?) =
+        sykdomstidslinjeperiode != null && beregnetInntektsdato !in sykdomstidslinjeperiode && inntektsdato == null
 }

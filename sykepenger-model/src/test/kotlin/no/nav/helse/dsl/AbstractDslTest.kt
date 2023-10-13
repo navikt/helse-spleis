@@ -210,13 +210,14 @@ internal abstract class AbstractDslTest {
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        inntektsdato: LocalDate? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID()
     ) =
-        this { håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id) }
+        this { håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, inntektsdato, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id) }
     protected fun String.håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
@@ -277,6 +278,7 @@ internal abstract class AbstractDslTest {
         tom: LocalDate,
         grad: Prosentdel = 100.prosent,
         førsteFraværsdag: LocalDate = fom,
+        inntektsdato: LocalDate? = null,
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
@@ -284,13 +286,14 @@ internal abstract class AbstractDslTest {
         sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag),
         sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag) }
+        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag) }
 
     protected fun String.tilGodkjenning(
         fom: LocalDate,
         tom: LocalDate,
         grad: Prosentdel = 100.prosent,
         førsteFraværsdag: LocalDate = fom,
+        inntektsdato: LocalDate? = null,
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
@@ -298,7 +301,7 @@ internal abstract class AbstractDslTest {
         sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag),
         sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag) }
+        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag) }
 
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
@@ -329,6 +332,7 @@ internal abstract class AbstractDslTest {
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        inntektsdato: LocalDate? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
@@ -336,7 +340,7 @@ internal abstract class AbstractDslTest {
         id: UUID = UUID.randomUUID(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+        bareÈnArbeidsgiver(a1).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, inntektsdato, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
 
     internal fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
@@ -419,6 +423,7 @@ internal abstract class AbstractDslTest {
         tom: LocalDate,
         grad: Prosentdel = 100.prosent,
         førsteFraværsdag: LocalDate = fom,
+        inntektsdato: LocalDate? = null,
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
@@ -426,7 +431,7 @@ internal abstract class AbstractDslTest {
         sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, beregnetInntekt, førsteFraværsdag),
         sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(a1, beregnetInntekt, førsteFraværsdag)
     ) =
-        bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag)
+        bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag)
 
     protected fun serializeForSpeil() = testperson.serializeForSpeil()
 

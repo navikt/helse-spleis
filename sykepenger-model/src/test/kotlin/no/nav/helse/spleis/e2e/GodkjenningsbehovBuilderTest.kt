@@ -30,7 +30,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null)
+            refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -43,7 +43,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT/2, opphørsdato = null)
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT/2, opphørsdato = null),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -64,7 +64,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null)
+            refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -76,7 +76,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INGEN, null))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null)
+            refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

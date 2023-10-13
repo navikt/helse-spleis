@@ -146,7 +146,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     @Test
     fun `oppdaterte opplysninger for mars når ag2 tetter gapet`() {
         nyPeriode(1.januar til 31.januar, a1)
-        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
                 a1 to INNTEKT,
@@ -210,7 +210,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar)
         nyPeriode(10.februar til 10.mars)
 
-        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar),)
         assertForventetFeil(
             forklaring = "ønsker å sende ut en oppdatert forespørsel for andre vedtaksperiode med oppdatert forrige inntekt",
             nå = {
