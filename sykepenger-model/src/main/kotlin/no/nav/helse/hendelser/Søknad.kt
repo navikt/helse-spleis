@@ -107,7 +107,14 @@ class Søknad(
 
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
-    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+    internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagElement?, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+        valider(subsumsjonObserver)
+        validerInntektskilder(vilkårsgrunnlag)
+        søknadstype.valider(this, vilkårsgrunnlag, organisasjonsnummer)
+        return this
+    }
+
+    private fun valider(subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
@@ -123,12 +130,6 @@ class Søknad(
         if (utenlandskSykmelding) funksjonellFeil(RV_SØ_29)
         if (sendTilGosys) funksjonellFeil(RV_SØ_30)
         if (yrkesskade) varsel(RV_YS_1)
-        return this
-    }
-
-    internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagElement?): IAktivitetslogg {
-        validerInntektskilder(vilkårsgrunnlag)
-        søknadstype.valider(this, vilkårsgrunnlag, organisasjonsnummer)
         return this
     }
 

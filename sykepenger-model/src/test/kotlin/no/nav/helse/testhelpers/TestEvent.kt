@@ -29,6 +29,5 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHend
     class TestHendelse(opprettet: LocalDateTime) : TestEvent(opprettet)
 
     override fun sykdomstidslinje() = Sykdomstidslinje()
-    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = Aktivitetslogg()
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = true
 }

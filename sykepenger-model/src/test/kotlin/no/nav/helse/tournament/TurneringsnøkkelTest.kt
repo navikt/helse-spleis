@@ -80,7 +80,6 @@ internal class TurneringsnøkkelTest {
         object Aareg : TestHendelse() // Dette er ren spekulasjon omkring AAreg som kilde
 
         override fun sykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
-        override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
         override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = true
     }
 }

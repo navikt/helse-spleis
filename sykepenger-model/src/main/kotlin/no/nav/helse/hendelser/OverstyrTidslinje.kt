@@ -147,8 +147,6 @@ class OverstyrTidslinje(
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
-    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = this
-
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) =
         hendelseIder.add(Dokumentsporing.overstyrTidslinje(meldingsreferanseId()))
 }

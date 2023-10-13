@@ -4,13 +4,11 @@ import java.time.LocalDate
 import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
@@ -83,10 +81,6 @@ abstract class SykdomstidslinjeHendelse(
         val periode = overlappsperiode() ?: aldri
         return periode.beholdDagerEtter(forrigeTom) ?: aldri
     }
-
-    internal abstract fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg
-
-    internal open fun padLeft(dato: LocalDate) {}
 
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
         && this.meldingsreferanseId() == other.meldingsreferanseId()

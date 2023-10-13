@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.erRettFør
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -281,7 +280,6 @@ internal class DagerFraInntektsmelding(
         aktivitetslogg: Aktivitetslogg
     ): SykdomstidslinjeHendelse(meldingsreferanseId, "IKKE_NØDVENDIG", "IKKE_NØDVENDIG", "IKKE_NØDVENDIG", opprettet, Inntektsmelding::class, aktivitetslogg) {
         override fun sykdomstidslinje() = sykdomstidslinje
-        override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = throw IllegalStateException("Ikke i bruk")
         override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) = throw IllegalStateException("Ikke i bruk")
     }
 }

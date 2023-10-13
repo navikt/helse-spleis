@@ -14,7 +14,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -91,15 +90,7 @@ class Inntektsmelding(
         error("ikke i bruk")
     }
 
-    override fun padLeft(dato: LocalDate) {
-        error("ikke i bruk")
-    }
-
     override fun overlappsperiode(): Periode {
-        error("ikke i bruk")
-    }
-
-    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         error("ikke i bruk")
     }
 
