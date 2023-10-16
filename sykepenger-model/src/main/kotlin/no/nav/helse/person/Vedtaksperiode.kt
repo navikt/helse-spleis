@@ -352,7 +352,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
-        if (!utbetalingshistorikk.erRelevant(id)) return
+        if (tilstand != AvsluttetUtenUtbetaling && !utbetalingshistorikk.erRelevant(id)) return
         kontekst(utbetalingshistorikk)
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
     }
@@ -2166,9 +2166,10 @@ internal class Vedtaksperiode private constructor(
         ) {
             super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
             if (!vedtaksperiode.forventerInntekt()) return
+            if (Toggle.STOPPE_TILSIG_AUU.enabled) return vårTing()
             // for å hindre at eldre AUUer som vi har tenkt å omgjøre forkaster seg før vi har fått sjanse til å ta stilling til dem
             val tilfeldigValgtDato = 1.januar(2023) // (litt tilfeldig valgt dato, men for å stoppe -NYE- ting)
-            if (Toggle.STOPPE_TILSIG_AUU.disabled && vedtaksperiode.periode.endInclusive < tilfeldigValgtDato) return
+            if (vedtaksperiode.periode.endInclusive < tilfeldigValgtDato) return
             // stoppe tilsig av vedtaksperioder i AUU som ender opp med å ville utbetale seg selv
             validation(hendelse) {
                 onValidationFailed { vedtaksperiode.forkast(hendelse) }
@@ -2176,6 +2177,21 @@ internal class Vedtaksperiode private constructor(
                 valider(RV_IT_36) { erUpåvirketAvInfotrygdendringer(vedtaksperiode) }
             }
         }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            if (Toggle.STOPPE_TILSIG_AUU.enabled) return vårTing()
+        }
+
+        private fun vårTing() {
+
+        }
+
 
         private fun erUpåvirketAvInfotrygdendringer(vedtaksperiode: Vedtaksperiode): Boolean {
             if (!vedtaksperiode.forventerInntekt()) return true
