@@ -44,10 +44,11 @@ internal class GenerasjonerReferanseTest : AbstractDslTest() {
         if (!path.isDirectory()) path.createDirectory()
         tester.forEach { (testnummer, test) ->
             val (navn, innhold) = test
-            val filnavn = navn.replace(" ", "_")
-            val file = path.resolve("actual/${testnummer.toString().padStart(2, '0')}__$filnavn.json")
-            file.createParentDirectories().writeText(innhold)
-            println("Skriver $navn til $file")
+            val vennlig_filnavn = navn.replace(" ", "_")
+            val filnavn = "${testnummer.toString().padStart(2, '0')}__$vennlig_filnavn.json"
+            val actual = path.resolve("actual/$filnavn").createParentDirectories().writeText(innhold)
+            val expected = path.resolve("expected/$filnavn").createParentDirectories().writeText(innhold)
+            println("Skriver $navn til $actual")
         }
     }
 
