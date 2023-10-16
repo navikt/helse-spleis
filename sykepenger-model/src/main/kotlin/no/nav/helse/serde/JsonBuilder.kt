@@ -101,10 +101,10 @@ import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.ØkonomiBuilder
 import kotlin.collections.set
 
-fun Person.serialize(): SerialisertPerson {
+fun Person.serialize(pretty: Boolean = false): SerialisertPerson {
     val jsonBuilder = JsonBuilder()
     this.accept(jsonBuilder)
-    return SerialisertPerson(jsonBuilder.toJson())
+    return SerialisertPerson(if (pretty) jsonBuilder.toPretty() else jsonBuilder.toJson())
 }
 
 internal class JsonBuilder : AbstractBuilder() {

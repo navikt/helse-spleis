@@ -50,8 +50,10 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -148,6 +150,9 @@ internal class TestPerson(
     fun serializeForSpeil(): PersonDTO {
         return serializePersonForSpeil(person)
     }
+    fun serialize(pretty: Boolean = false): SerialisertPerson {
+        return person.serialize(pretty)
+    }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {
         private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(aktørId, personidentifikator, orgnummer)
@@ -164,6 +169,7 @@ internal class TestPerson(
 
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,
+            egenmeldinger: List<Søknad.Søknadsperiode.Arbeidsgiverdag> = emptyList(),
             andreInntektskilder: Boolean = false,
             arbeidUtenforNorge: Boolean = false,
             yrkesskade: Boolean = false,
@@ -179,6 +185,7 @@ internal class TestPerson(
                 vedtaksperiodesamler.fangVedtaksperiode {
                     arbeidsgiverHendelsefabrikk.lagSøknad(
                         *perioder,
+                        egenmeldinger = egenmeldinger,
                         andreInntektskilder = andreInntektskilder,
                         arbeidUtenforNorge = arbeidUtenforNorge,
                         sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
