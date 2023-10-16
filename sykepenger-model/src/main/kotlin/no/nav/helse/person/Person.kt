@@ -818,16 +818,6 @@ class Person private constructor(
         return infotrygdhistorikk.harUtbetaltI(vedtaksperiode)
     }
 
-    internal fun kandidatForSkjønnsmessigFastsettelse(vilkårsgrunnlag: VilkårsgrunnlagElement): Boolean {
-        // slått av midlertidig
-        return false
-        /*
-        if (!vilkårsgrunnlag.kandidatForSkjønnsmessigFastsettelse()) return false
-        if (!alder.kandidatForSkjønnsmessigFastsettelse()) return false
-        return true
-        */
-    }
-
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }

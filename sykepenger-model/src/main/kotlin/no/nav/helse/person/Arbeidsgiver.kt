@@ -35,9 +35,7 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomsti
 import no.nav.helse.person.Person.Companion.Frilans
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
-import no.nav.helse.person.Vedtaksperiode.Companion.AUU_UTBETALT_I_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
-import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.gruppérAuuer
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_AVVENTENDE_GODKJENNING
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
@@ -127,20 +125,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.tidligsteDato(): LocalDate {
             return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
-        }
-
-        internal fun List<Arbeidsgiver>.forkastAUUSomErUtbetaltIInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
-            val alleVedtaksperioder = flatMap { it.vedtaksperioder }
-
-            alleVedtaksperioder.gruppérAuuer(infotrygdhistorikk, AUU_UTBETALT_I_INFOTRYGD(infotrygdhistorikk)).forEach {
-                it.forkast(hendelse, alleVedtaksperioder, "overlappende utbetaling i Infotrygd", sjekkAgp = false, sjekkSkjæringstidspunkt = false)
-            }
-            alleVedtaksperioder.gruppérAuuer(infotrygdhistorikk, AUU_SOM_VIL_UTBETALES).forEach {
-                it.forkast(hendelse, alleVedtaksperioder, "Perioder som står i AUU og VIL_UTBETALES, i tillegg til å ha gått inn i AUU før 2023")
-            }
-            alleVedtaksperioder.gruppérAuuer(infotrygdhistorikk, AUU_SOM_VIL_UTBETALES).forEach {
-                it.forkast(hendelse, alleVedtaksperioder)
-            }
         }
 
         internal fun List<Arbeidsgiver>.forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk) {
