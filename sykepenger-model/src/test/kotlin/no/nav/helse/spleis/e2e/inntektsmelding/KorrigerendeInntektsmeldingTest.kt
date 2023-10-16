@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -9,18 +10,25 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -44,6 +52,40 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
+
+    @Test
+    fun `Feil periode får melding om avvik, og burde kastes ut fremfor å bli varsel`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
+
+        assertForventetFeil(
+            forklaring = "Feil periode får varsel, og ikke bare det, den burde jo vært error og alt blitt forkastet 😪",
+            nå = {
+                assertVarsel(RV_IV_2, 3.vedtaksperiode.filter())
+                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+                assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            },
+            ønsket = {
+                assertFunksjonellFeil(RV_IV_2, 2.vedtaksperiode.filter())
+                assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+                assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+                assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            }
+        )
+    }
 
     @Test
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved helt lik korrigerende inntektsmelding`() {
