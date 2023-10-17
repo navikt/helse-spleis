@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -178,6 +179,32 @@ internal class GenerasjonerReferanseTest : AbstractDslTest() {
             nyttVedtak(1.januar, 31.januar)
             nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
             håndterAnnullering(inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        }
+    }
+    @Test
+    fun `test 16 - annullering etter uberegnet revurdering`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 90.prosent))
+            håndterAnnullering(inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        }
+    }
+    @Test
+    fun `test 17 - annullering etter beregnet revurdering`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 90.prosent))
+            håndterYtelser(1.vedtaksperiode)
+            håndterAnnullering(inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        }
+    }
+    @Test
+    fun `test 18 - forkastet auu`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
         }
     }
 }
