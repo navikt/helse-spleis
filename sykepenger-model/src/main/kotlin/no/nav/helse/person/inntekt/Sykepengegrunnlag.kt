@@ -127,7 +127,7 @@ internal class Sykepengegrunnlag private constructor(
                     minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
         }
 
-        avviksprosent.validerAvvik(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
+        avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
     }
 
     internal fun kandidatForSkjønnsmessigFastsettelse() = arbeidsgiverInntektsopplysninger.size == 1
@@ -211,10 +211,6 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger.markerFlereArbeidsgivere(aktivitetslogg)
     }
 
-    internal fun validerAvvik(aktivitetslogg: IAktivitetslogg) {
-        avviksprosent.validerAvvik(aktivitetslogg)
-    }
-
     internal fun aktiver(orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
         deaktiverteArbeidsforhold.aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonObserver)
             .let { (deaktiverte, aktiverte) ->
@@ -235,7 +231,7 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         return hendelse.overstyr(this, subsumsjonObserver).apply {
-            avviksprosent.validerAvvik(hendelse, omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
+            avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
         }
     }
 
@@ -244,7 +240,7 @@ internal class Sykepengegrunnlag private constructor(
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
         arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
-        return kopierSykepengegrunnlagOgValiderAvvik(hendelse, resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
+        return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
 
     internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
@@ -275,17 +271,16 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger
             .finn(inntektsmelding.organisasjonsnummer())
             ?.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
-        return kopierSykepengegrunnlagOgValiderAvvik(inntektsmelding, resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
+        return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
 
     private fun kopierSykepengegrunnlagOgValiderAvvik(
-        hendelse: IAktivitetslogg,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
-            avviksprosent.validerAvvik(hendelse, omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
+            avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
         }
     }
 
@@ -468,6 +463,8 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.inntektsdata(skjæringstidspunkt, organisasjonsnummer,)
+
+    internal fun loggInntektsvurdering(hendelse: IAktivitetslogg) = avviksprosent.loggInntektsvurdering(hendelse)
 
     internal sealed interface Tilstand {
         fun entering(sykepengegrunnlag: Sykepengegrunnlag) {}

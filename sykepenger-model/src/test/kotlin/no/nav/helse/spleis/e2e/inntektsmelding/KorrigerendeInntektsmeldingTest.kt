@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -28,7 +27,6 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -58,17 +56,8 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
-        assertForventetFeil(
-            forklaring = "Kastes ikke ut",
-            nå = {
-                assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            },
-            ønsket = {
-                assertFunksjonellFeil(RV_IV_2, 1.vedtaksperiode.filter())
-                assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
-            }
-        )
+        assertFunksjonellFeil(RV_IV_2, 1.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
     }
 
     @Test
@@ -88,21 +77,10 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
 
-        assertForventetFeil(
-            forklaring = "Feil periode får varsel, og ikke bare det, den burde jo vært error og alt blitt forkastet 😪",
-            nå = {
-                assertVarsel(RV_IV_2, 3.vedtaksperiode.filter())
-                assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-                assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            },
-            ønsket = {
-                assertFunksjonellFeil(RV_IV_2, 2.vedtaksperiode.filter())
-                assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-                assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-                assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
-            }
-        )
+        assertFunksjonellFeil(RV_IV_2, 2.vedtaksperiode.filter())
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
     }
 
     @Test

@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -38,7 +37,6 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -51,7 +49,6 @@ import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -686,13 +683,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere mens en forlengelse er til utbetaling`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `revurdere mens en forlengelse er til utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(INNTEKT / 2, skjæringstidspunkt = 1.januar)
-        assertVarsel(RV_IV_2)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
+        håndterOverstyrInntekt(INNTEKT * 1.05, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
@@ -700,12 +695,10 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere mens en førstegangsbehandlingen er til utbetaling`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `revurdere mens en førstegangsbehandlingen er til utbetaling`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
-        assertVarsel(RV_IV_2)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)))
+        håndterOverstyrInntekt(INNTEKT * 1.05, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertNotNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])

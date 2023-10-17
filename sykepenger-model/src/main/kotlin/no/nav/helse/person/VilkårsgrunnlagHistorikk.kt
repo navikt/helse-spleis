@@ -340,6 +340,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun kandidatForSkjønnsmessigFastsettelse() = sykepengegrunnlag.kandidatForSkjønnsmessigFastsettelse()
         internal fun trengerFastsettelseEtterSkjønn() = sykepengegrunnlag.avventerFastsettelseEtterSkjønn()
+        internal fun loggInntektsvurdering(hendelse: IAktivitetslogg) = sykepengegrunnlag.loggInntektsvurdering(hendelse)
 
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
@@ -418,7 +419,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening) {
         internal fun validerFørstegangsvurdering(aktivitetslogg: IAktivitetslogg) {
-            sykepengegrunnlag.validerAvvik(aktivitetslogg)
             sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
             sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
         }

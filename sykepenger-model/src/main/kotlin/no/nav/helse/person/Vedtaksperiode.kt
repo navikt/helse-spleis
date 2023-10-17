@@ -661,7 +661,7 @@ internal class Vedtaksperiode private constructor(
         kontekst(dager)
     }
 
-    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, tilstandUtenAvvik: Vedtaksperiodetilstand, håndterAvvik: () -> Unit) {
+    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         val sykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist())
         sykepengegrunnlag.leggTil(hendelseIder, organisasjonsnummer) { inntektsmeldingId ->
             person.emitInntektsmeldingHåndtert(inntektsmeldingId, id, organisasjonsnummer)
@@ -672,8 +672,7 @@ internal class Vedtaksperiode private constructor(
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
-        if (Toggle.AltAvTjuefemprosentAvvikssaker.disabled && sykepengegrunnlag.avventerFastsettelseEtterSkjønn()) return håndterAvvik()
-        tilstand(vilkårsgrunnlag, tilstandUtenAvvik)
+        tilstand(vilkårsgrunnlag, nesteTilstand)
     }
 
     private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
@@ -1379,6 +1378,8 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne revurdering" }
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
+            if (vedtaksperiode.trengerFastsettelseEtterSkjønn) hendelse.varsel(RV_IV_2)
+            vedtaksperiode.vilkårsgrunnlag?.loggInntektsvurdering(hendelse)
             vedtaksperiode.trengerYtelser(hendelse)
         }
 
@@ -1435,10 +1436,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             håndterRevurdering(vilkårsgrunnlag) {
-                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering) {
-                    vilkårsgrunnlag.varsel(RV_IV_2)
-                    vedtaksperiode.tilstand(vilkårsgrunnlag, AvventerHistorikkRevurdering)
-                }
+                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering)
             }
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
@@ -1722,16 +1720,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             håndterFørstegangsbehandling(vilkårsgrunnlag, vedtaksperiode) {
-                val kanForkastesVedAvvik = vedtaksperiode.vilkårsgrunnlag == null && vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)
-                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk) {
-                    if (kanForkastesVedAvvik) {
-                        vilkårsgrunnlag.funksjonellFeil(RV_IV_2)
-                        vedtaksperiode.forkast(vilkårsgrunnlag)
-                    } else {
-                        vilkårsgrunnlag.varsel(RV_IV_2)
-                        vedtaksperiode.tilstand(vilkårsgrunnlag, AvventerHistorikk)
-                    }
-                }
+                vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk)
             }
         }
 
@@ -1753,9 +1742,22 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne utbetaling" }
-            vedtaksperiode.loggInnenforArbeidsgiverperiode()
-            vedtaksperiode.trengerYtelser(hendelse)
-            hendelse.info("Forespør sykdoms- og inntektshistorikk")
+            håndterAvvik(vedtaksperiode, hendelse) {
+                vedtaksperiode.vilkårsgrunnlag?.loggInntektsvurdering(hendelse)
+                vedtaksperiode.loggInnenforArbeidsgiverperiode()
+                vedtaksperiode.trengerYtelser(hendelse)
+                hendelse.info("Forespør sykdoms- og inntektshistorikk")
+            }
+        }
+
+        private fun håndterAvvik(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, block: () -> Unit) {
+            if (!vedtaksperiode.trengerFastsettelseEtterSkjønn) return block()
+            if (Toggle.AltAvTjuefemprosentAvvikssaker.enabled || hendelse is OverstyrSykepengegrunnlag || !vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) {
+                hendelse.varsel(RV_IV_2)
+                return block()
+            }
+            hendelse.funksjonellFeil(RV_IV_2)
+            vedtaksperiode.forkast(hendelse)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =

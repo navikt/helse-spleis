@@ -33,16 +33,17 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.person
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.EN_ARBEIDSGIVER
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
@@ -559,7 +560,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurderer tidligere skjæringstidspunkt`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `revurderer tidligere skjæringstidspunkt`() = Toggle.AltAvTjuefemprosentAvvikssaker.disable {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -581,19 +582,21 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            nullstillTilstandsendringer()
-            håndterOverstyrArbeidsforhold(1.mars, ArbeidsforholdOverstyrt(a2, true, "test"))
-            assertVarsel(RV_IV_2)
-            håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT)))
-            assertEquals(50, inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.avviksprosent)
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            håndterYtelser(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            håndterOverstyrArbeidsforhold(1.mars, ArbeidsforholdOverstyrt(a2, true, "test"))
+            nullstillTilstandsendringer()
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsel(RV_IV_2, 2.vedtaksperiode.filter())
+            håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT)))
+            assertEquals(50, inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.avviksprosent)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -650,14 +653,11 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             }
             assertTilstander(
                 1.vedtaksperiode,
-                AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING,
-                TIL_UTBETALING,
                 AVSLUTTET
             )
             assertTilstander(
                 2.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,

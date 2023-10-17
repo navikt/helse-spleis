@@ -24,16 +24,11 @@ import no.nav.helse.juni
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.serde.migration.Sykefraværstilfeller
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -49,7 +44,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
@@ -216,10 +210,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(grunnlagsdata)
         val økonomi: Økonomi = historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
-
-        val aktivitetslogg = Aktivitetslogg()
-        grunnlagsdata.validerFørstegangsvurdering(aktivitetslogg)
-        aktivitetslogg.assertVarsel(Varselkode.RV_IV_2)
     }
 
     @Test

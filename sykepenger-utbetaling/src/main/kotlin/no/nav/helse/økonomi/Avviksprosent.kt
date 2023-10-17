@@ -2,7 +2,6 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -31,17 +30,12 @@ class Avviksprosent private constructor(private val desimal: Double) : Comparabl
         if (this.equals(other)) 0
         else this.desimal.compareTo(other.desimal)
 
-    fun validerAvvik(aktivitetslogg: IAktivitetslogg) {
-        if (!harAkseptabeltAvvik()) return aktivitetslogg.varsel(Varselkode.RV_IV_2)
+    fun loggInntektsvurdering(aktivitetslogg: IAktivitetslogg) {
+        if (!harAkseptabeltAvvik()) return aktivitetslogg.info("Har mer enn %d.0 %% avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.toInt(), this.prosent())
         aktivitetslogg.info("Har %d.0 %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.toInt(), this.prosent())
     }
 
-    fun validerAvvik(aktivitetslogg: IAktivitetslogg, omregnetÅrsinntekt: Inntekt, sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) {
-        validerAvvik(aktivitetslogg)
-        validerAvvik(omregnetÅrsinntekt, sammenligningsgrunnlag, subsumsjonObserver)
-    }
-
-    fun validerAvvik(omregnetÅrsinntekt: Inntekt, sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) {
+    fun subsummér(omregnetÅrsinntekt: Inntekt, sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) {
         subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(
             maksimaltTillattAvvikPåÅrsinntekt = MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.toInt(),
             grunnlagForSykepengegrunnlagÅrlig = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },

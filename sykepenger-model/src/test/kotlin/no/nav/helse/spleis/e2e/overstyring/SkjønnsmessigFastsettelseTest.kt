@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -24,7 +23,6 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -36,6 +34,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -45,8 +44,6 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSk
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterHovedregel
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterSkjønn
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.person
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -331,8 +328,8 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             tilGodkjenning(1.januar, 31.januar)
             nullstillTilstandsendringer()
             håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT * 2)
-            assertVarsel(RV_IV_2)
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertFunksjonellFeil(RV_IV_2, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
         }
     }
 
