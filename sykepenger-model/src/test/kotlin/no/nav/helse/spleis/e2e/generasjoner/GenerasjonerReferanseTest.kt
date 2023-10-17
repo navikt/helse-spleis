@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -223,18 +222,44 @@ internal class GenerasjonerReferanseTest : AbstractDslTest() {
         }
     }
     @Test
-    fun `test 21 - periode forsøkt revurdert flere ganger før eldre periode tok over`() {
+    fun `test 21 - periode forsøkt revurdert flere ganger før eldre uberegnet periode tok over`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             nyttVedtak(1.mars, 31.mars)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.mars, Dagtype.Feriedag)))
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.mars, Dagtype.Sykedag)))
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.mars, Dagtype.Sykedag, 90)))
             håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        }
+    }
+    @Test
+    fun `test 22 - periode forsøkt revurdert flere ganger før eldre beregnet periode tok over`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(1.mars, 31.mars)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.mars, Dagtype.Feriedag)))
             håndterYtelser(2.vedtaksperiode)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.mars, Dagtype.Sykedag, 90)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+            håndterYtelser(1.vedtaksperiode)
+        }
+    }
+    @Test
+    fun `test 23 - korrigert søknad på uberegnet forlengelse`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(Sykdom(1.mars, 31.mars, 90.prosent)) // mars-perioden skal ha to endringer her; begge søknadene må være reflektert
+        }
+    }
+    @Test
+    fun `test 24 - korrigert søknad på tidligere beregnet forlengelse`() {
+        a1 {
+            tilGodkjenning(1.mars, 31.mars)
+            tilGodkjenning(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.mars, 31.mars, 90.prosent)) // mars-perioden skal ha to endringer her; begge søknadene må være reflektert
         }
     }
 }
