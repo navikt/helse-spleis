@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
@@ -196,7 +197,7 @@ internal class GenerasjonerReferanseTest : AbstractDslTest() {
             nyttVedtak(1.januar, 31.januar)
             nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 90.prosent))
-            håndterYtelser(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode) // burde kanskje utvidet testen med flere runder innom håndterYtelser for å ha flere forkastede utbetalinger
             håndterAnnullering(inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         }
     }
@@ -205,6 +206,35 @@ internal class GenerasjonerReferanseTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterAnmodningOmForkasting(1.vedtaksperiode)
+        }
+    }
+    @Test
+    fun `test 19 - forkastet uberegnet periode`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+        }
+    }
+    @Test
+    fun `test 20 - forkastet beregnet periode`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+        }
+    }
+    @Test
+    fun `test 21 - periode forsøkt revurdert flere ganger før eldre periode tok over`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(1.mars, 31.mars)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.mars, Dagtype.Feriedag)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.mars, Dagtype.Sykedag)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+            håndterYtelser(2.vedtaksperiode)
         }
     }
 }
