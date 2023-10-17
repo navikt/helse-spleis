@@ -7,6 +7,7 @@ import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -147,19 +148,34 @@ internal class GenerasjonerReferanseTest : AbstractDslTest() {
         }
     }
     @Test
-    fun `test 12 - omgjøring før utbetaling`() {
+    fun `test 12 - endring etter til utbetaling`() {
         a1 {
-            håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            tilGodkjenning(1.januar, 31.januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
         }
     }
     @Test
-    fun `test 13 - omgjøring etter utbetaling`() {
+    fun `test 13 - beregnet revurdering`() {
         a1 {
-            håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            nyttVedtak(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
             håndterYtelser(1.vedtaksperiode)
+        }
+    }
+    @Test
+    fun `test 14 - auu etter beregnet utbetaling`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 31.januar))
+        }
+    }
+    @Test
+    fun `test 15 - annullering etter utbetalt`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+            håndterAnnullering(inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         }
     }
 }
