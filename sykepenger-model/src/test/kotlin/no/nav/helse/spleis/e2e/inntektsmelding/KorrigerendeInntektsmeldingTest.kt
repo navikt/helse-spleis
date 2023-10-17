@@ -54,6 +54,24 @@ import org.junit.jupiter.api.Test
 internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
     @Test
+    fun `Kaster ut periode til godkjenning som får korrigerende IM med avvik`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
+        assertForventetFeil(
+            forklaring = "Kastes ikke ut",
+            nå = {
+                assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            },
+            ønsket = {
+                assertFunksjonellFeil(RV_IV_2, 1.vedtaksperiode.filter())
+                assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+            }
+        )
+    }
+
+    @Test
     fun `Feil periode får melding om avvik, og burde kastes ut fremfor å bli varsel`() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
