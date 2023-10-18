@@ -311,4 +311,14 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         assertEquals(listOf(1.januar til 15.januar, 1.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
         assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
     }
+
+    @Test
+    fun `Sender ikke med senere sykmeldingsperioder enn vedtaksperioden som forkastes` () {
+        nyPeriode(1.januar til 31.januar)
+        nyPeriode(1.februar til 28.februar)
+        person.søppelbøtte(hendelselogg) { true }
+        assertEquals(listOf(1.januar til 31.januar), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
+        assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+        assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
+    }
 }

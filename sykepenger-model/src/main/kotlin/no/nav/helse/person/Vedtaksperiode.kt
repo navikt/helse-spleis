@@ -495,7 +495,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Periode> {
         val forkastedeVedtaksperioder = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(arbeidsgiverperiode)
-        return (forkastedeVedtaksperioder.map { it.sykmeldingsperiode } + listOf(sykmeldingsperiode)).distinct()
+        return (forkastedeVedtaksperioder.map { it.sykmeldingsperiode }.filter { it.start < sykmeldingsperiode.endInclusive } + listOf(sykmeldingsperiode)).distinct()
     }
 
     internal inner class VedtaksperiodeForkastetEventBuilder(private val gjeldendeTilstand: TilstandType, private val trengerArbeidsgiveropplysninger: Boolean, private val sykmeldingsperioder: List<Periode>) {
