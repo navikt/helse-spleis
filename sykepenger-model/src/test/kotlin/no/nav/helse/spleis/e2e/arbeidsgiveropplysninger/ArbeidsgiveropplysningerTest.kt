@@ -849,6 +849,31 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(listOf(20.januar til 31.januar), actualForespørsel.sykmeldingsperioder)
     }
 
+    @Test
+    fun `Skal ikke sende med egenmeldingsperioder når vi ikke ber om AGP`() {
+        nyttVedtak(1.januar, 17.januar)
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
+        håndterSøknad(
+            Sykdom(20.januar, 31.januar, 100.prosent),
+            egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(19.januar, 19.januar))
+        )
+        håndterInntektsmelding(emptyList(), avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO, førsteFraværsdag = 20.januar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder[1]
+        assertForventetFeil(
+            forklaring = "Trenger ikke sende med egenmeldingsperioder når vi ikke ber om AGP, burde være sikker på at egenmeldinger ikke kommer fra søknad på perioden uten ny AGP",
+            nå = {
+                assertEquals(listOf(19.januar til 19.januar), actualForespørsel.egenmeldingsperioder)
+            },
+            ønsket = {
+                assertEquals(emptyList<Periode>(), actualForespørsel.egenmeldingsperioder)
+            }
+        )
+    }
+
+
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(1.januar til 31.januar, a1)
         nyPeriode(1.januar til 31.januar, a2)
