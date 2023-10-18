@@ -35,13 +35,11 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.januar
 import no.nav.helse.memoized
-import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
@@ -2197,24 +2195,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return
             if (!påminnelse.skalReberegnes()) return
-
-            val problemer = mutableListOf<String>()
-            if (vedtaksperiode.vilkårsgrunnlag == null) {
-                problemer.add("vilkårsgrunnlag mangler")
-            }
-            if (vedtaksperiode.person.erBetaltInfotrygd(vedtaksperiode.periode.start.minusDays(18) til vedtaksperiode.periode.start.forrigeDag)) {
-                problemer.add("eldre utbetaling i Infotrygd nærmere enn 18 dager")
-            }
-            if (vedtaksperiode.person.erBetaltInfotrygd(vedtaksperiode.periode)) {
-                problemer.add("overlappende utbetaling i Infotrygd")
-            }
-            if (vedtaksperiode.person.erBetaltInfotrygd(vedtaksperiode.periode.endInclusive.nesteDag til LocalDate.MAX)) {
-                problemer.add("nyere utbetaling i Infotrygd")
-            }
-
-            val situasjon = vedtaksperiode.arbeidsgiver.utbetalingssituasjon(vedtaksperiode.finnArbeidsgiverperiode()!!, listOf(vedtaksperiode.periode))
-            if (problemer.isNotEmpty()) return sikkerlogg.info("{} {} $situasjon ville fått varsler som følge av omgjøring: ${problemer.joinToString()}", kv("aktørId", vedtaksperiode.aktørId), kv("vedtaksperiodeId", vedtaksperiode.id))
-
             vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
