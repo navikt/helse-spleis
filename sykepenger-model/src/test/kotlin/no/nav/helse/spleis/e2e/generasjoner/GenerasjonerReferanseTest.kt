@@ -7,6 +7,7 @@ import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -260,6 +261,34 @@ internal class GenerasjonerReferanseTest : AbstractDslTest() {
             tilGodkjenning(1.mars, 31.mars)
             tilGodkjenning(1.januar, 31.januar)
             håndterSøknad(Sykdom(1.mars, 31.mars, 90.prosent)) // mars-perioden skal ha to endringer her; begge søknadene må være reflektert
+        }
+    }
+    @Test
+    fun `test 25 - flere arbeidsgivere med forlengelse`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        }
+        a1 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        }
+        a1 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
         }
     }
 }
