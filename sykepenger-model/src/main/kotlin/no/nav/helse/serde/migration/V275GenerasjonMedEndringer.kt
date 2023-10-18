@@ -259,7 +259,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
         val dokumenterHåndtertAvTidligereGenerasjoner = mutableListOf<Dokumentsporing>()
         val nyeGenerasjoner = generasjoner
             .mapNotNull { node ->
-                migrerGenerasjon(node, forkastedeUtbetalinger, dokumentsporing, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, opprettettidspunkt, tidspunktForUtbetalingOpprettelse, tidspunktForUtbetalingVurdert, tidspunktForUtbetalingAvsluttet, utbetalingstatus, sykdomstidslinjesubsetting, utbetalingtype, dokumenterHåndtertAvTidligereGenerasjoner).also {
+                migrerGenerasjon(periode, node, forkastedeUtbetalinger, dokumentsporing, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, opprettettidspunkt, tidspunktForUtbetalingOpprettelse, tidspunktForUtbetalingVurdert, tidspunktForUtbetalingAvsluttet, utbetalingstatus, sykdomstidslinjesubsetting, utbetalingtype, dokumenterHåndtertAvTidligereGenerasjoner).also {
                     if (it != null) {
                         forkastedeUtbetalinger.clear()
                         dokumenterHåndtertAvTidligereGenerasjoner.addAll(it.path("endringer").map { endring -> endring.path("dokumentsporing").dokumentsporing })
@@ -276,7 +276,25 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
         val endeligResultat = if (nyeGenerasjoner.isEmpty()) {
             listOf(migrerInitiellGenerasjon(fom, tom, sykmeldingsperiodeFom, sykmeldingsperiodeTom, opprettettidspunkt, periode, tidligsteTidspunktForHendelse, endringerFraForkastedeUtbetalinger, sykdomstidslinjesubsetting))
         } else {
-            nyeGenerasjoner + if (endringerFraForkastedeUtbetalinger.isNotEmpty()) {
+            val førsteGenerasjon = nyeGenerasjoner.first()
+            val auuGenerasjon = if (førsteGenerasjon.path("tilstand").asText() == "BEREGNET_OMGJØRING") {
+                val auuTidspunkt = LocalDateTime.parse(periode.path("opprettet").asText())
+                val førsteHendelse = dokumentsporing.dokumenter.first()
+                (førsteGenerasjon.path("endringer") as ArrayNode).also {
+                    check(it.size() > 1) {
+                        "Forventer at den beregnede omgjøringen har flere hendelser enn 1"
+                    }
+                    it.removeAll { dokument ->
+                        dokument.path("dokumentsporing").dokumentsporing == førsteHendelse
+                    }
+                }
+                listOf(
+                    lagGenerasjon("AVSLUTTET_UTEN_VEDTAK", auuTidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, listOf(
+                        oversettDokumentsporingTilEndring(førsteHendelse, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, { id -> checkNotNull(sykdomstidslinjesubsetting(id, sykmeldingsperiodeFom, sykmeldingsperiodeTom)) { "Finner ikke sykdomstidslinje for $id for vedtaksperiode ${periode.path("id").asText()}" } }, null, null, null)
+                    ), null, auuTidspunkt)
+                )
+            } else emptyList<ObjectNode>()
+            auuGenerasjon + nyeGenerasjoner + if (endringerFraForkastedeUtbetalinger.isNotEmpty()) {
                 // forutsetter at alle de forkastede utbetalingene er revurderinger
                 check(dokumenterUtenEndring.isEmpty()) {
                     "har ikke tatt høyde for at det kan finnes dokumenter som ikke inngår i noen utbetalinger: $dokumenterUtenEndring"
@@ -347,6 +365,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
 
         var forrigeDokumentId: UUID? = null
         val egneEndringer = dokumenter
+            .endringerSomIkkeInngårIForkastedeUtbetalinger(forkastedeUtbetalingerSomEndring)
             .endringerSomIkkeInngårIForkastedeUtbetalinger(forkastedeUtbetalingerSomEndring)
             .map { dokument ->
                 val tidspunktForHendelsen = tidligsteTidspunktForHendelse(dokument.id)
@@ -438,6 +457,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
     }
 
     private fun migrerGenerasjon(
+        periode: JsonNode,
         generasjon: JsonNode,
         forkastedeUtbetalinger: MutableList<ObjectNode>,
         dokumentsporing: ArrayNode,
@@ -494,11 +514,18 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
         val generasjontype = utbetalingtype(utbetalingId)
         val generasjonAvsluttet = utbetalingAvsluttet ?: utbetalingVurdert?.takeIf { utbetalingstatusForGenerasjonen == "IKKE_GODKJENT" && generasjontype == "UTBETALING" }
 
+        check(endringer.isNotEmpty()) {
+            "Vedtaksperioden $fom - $tom (${periode.path("id").asText()}) har ingen hendelser for generasjon med utbetaling $utbetalingId"
+        }
+
         val tilstand = when {
             utbetalingAvsluttet != null -> "VEDTAK_IVERKSATT"
             utbetalingVurdert != null -> when (utbetalingstatusForGenerasjonen) {
                 "IKKE_GODKJENT" -> when (generasjontype) {
-                    "UTBETALING" -> "TIL_INFOTRYGD"
+                    "UTBETALING" -> when (periode.path("tilstand").asText()) {
+                        "TIL_INFOTRYGD" -> "TIL_INFOTRYGD"
+                        else -> "BEREGNET_OMGJØRING"
+                    }
                     "REVURDERING" -> "REVURDERT_VEDTAK_AVVIST"
                     else -> error("forventer ikke utbetalingtypen: $generasjontype")
                 }
@@ -512,7 +539,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
             put("utbetalingId", "$utbetalingId")
             put("vilkårsgrunnlagId", "$vilkårsgrunnlagId")
         }
-        return lagGenerasjon(tilstand, LocalDateTime.parse(endringer.first().path("tidsstempel").asText()), fom, tom, endringer.plusElement(endringMedUtbetaling), vedtakFattet, generasjonAvsluttet)
+        return lagGenerasjon(tilstand, LocalDateTime.parse(endringer.first().path("tidsstempel").asText()), fom, tom, endringer.plusElement(endringMedUtbetaling), vedtakFattet, generasjonAvsluttet.takeUnless { tilstand == "BEREGNET_OMGJØRING" })
     }
 
     private fun endringer(a: List<ObjectNode>, b: List<ObjectNode>) = (a + b).sortedBy {
