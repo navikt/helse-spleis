@@ -180,7 +180,6 @@ class InfotrygdhistorikkElement private constructor(
         person.emitOverlappendeInfotrygdperiodeEtterInfotrygdendring(
             vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, overlappendePerioder, hendelseId
         )
-
     }
 
     internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }

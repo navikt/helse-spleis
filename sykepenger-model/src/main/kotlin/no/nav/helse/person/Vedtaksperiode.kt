@@ -38,7 +38,6 @@ import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.januar
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
@@ -109,6 +108,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
@@ -350,7 +350,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
-        if (!utbetalingshistorikk.erRelevant(id)) return
+        if (tilstand != AvsluttetUtenUtbetaling && !utbetalingshistorikk.erRelevant(id)) return
         kontekst(utbetalingshistorikk)
         tilstand.håndter(person, arbeidsgiver, this, utbetalingshistorikk, infotrygdhistorikk)
     }
@@ -1054,8 +1054,11 @@ internal class Vedtaksperiode private constructor(
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
-        fun håndterRevurdering(hendelse: PersonHendelse, block: () -> Unit) { FunksjonelleFeilTilVarsler.wrap(hendelse, block) }
-        fun håndterFørstegangsbehandling(hendelse: PersonHendelse, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
+        fun håndterRevurdering(hendelse: IAktivitetslogg, block: () -> Unit) {
+            if (hendelse !is PersonHendelse) return block()
+            FunksjonelleFeilTilVarsler.wrap(hendelse, block)
+        }
+        fun håndterFørstegangsbehandling(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
             if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return block()
             // Om førstegangsbehandling ikke kan forkastes (typisk Out of Order/ omgjøring av AUU) så håndteres det som om det er en revurdering
             håndterRevurdering(hendelse, block)
@@ -2174,16 +2177,49 @@ internal class Vedtaksperiode private constructor(
         ) {
             super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
             if (!vedtaksperiode.forventerInntekt()) return
-            // for å hindre at eldre AUUer som vi har tenkt å omgjøre forkaster seg før vi har fått sjanse til å ta stilling til dem
-            val tilfeldigValgtDato = 1.januar(2023) // (litt tilfeldig valgt dato, men for å stoppe -NYE- ting)
-            if (Toggle.STOPPE_TILSIG_AUU.disabled && vedtaksperiode.periode.endInclusive < tilfeldigValgtDato) return
-            // stoppe tilsig av vedtaksperioder i AUU som ender opp med å ville utbetale seg selv
+            if (håndterInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) return
             validation(hendelse) {
                 onValidationFailed { vedtaksperiode.forkast(hendelse) }
                 valider { infotrygdhistorikk.valider(this, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer) }
                 valider(RV_IT_36) { erUpåvirketAvInfotrygdendringer(vedtaksperiode) }
             }
         }
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            if (!vedtaksperiode.forventerInntekt()) return
+            håndterInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)
+        }
+
+        private fun håndterInfotrygdendring(
+            hendelse: IAktivitetslogg,
+            vedtaksperiode: Vedtaksperiode,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ): Boolean {
+            if (Toggle.OmgjøringVedInfotrygdendring.disabled) return false
+
+            håndterRevurdering(hendelse) {
+                infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
+            }
+
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) {
+                hendelse.info("AUU vil omgjøres, men avventer å starte omgjøring ettersom vi vil ende opp med å spørre om inntektsmelding")
+                return true // Toggle er på, så vil ikke kjøre den "gamle" koden selv om vi ikke starter omgjøring nå
+            }
+
+            hendelse.varsel(RV_IT_38)
+            vedtaksperiode.person.igangsettOverstyring(
+                hendelse,
+                Revurderingseventyr.infotrygdendring(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+            )
+            return true
+        }
+
 
         private fun erUpåvirketAvInfotrygdendringer(vedtaksperiode: Vedtaksperiode): Boolean {
             if (!vedtaksperiode.forventerInntekt()) return true
