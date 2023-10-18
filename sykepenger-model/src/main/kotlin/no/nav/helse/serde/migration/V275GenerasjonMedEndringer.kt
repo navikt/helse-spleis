@@ -6,17 +6,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.serde.migration.V275GenerasjonMedEndringer.Dokumentsporing.Companion.dokumenter
+import no.nav.helse.serde.migration.V275GenerasjonMedEndringer.Dokumentsporing.Companion.dokumentsporing
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V274GenerasjonMedEndringer: JsonMigration(274) {
+internal class V275GenerasjonMedEndringer: JsonMigration(275) {
     override val description = "dry run av migrering for å legge til <endringer> på generasjoner"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         try {
             migrer(jsonNode.deepCopy())
         } catch (err: Exception) {
-            sikkerlogg.info("[V274 Ville ha trynet med feil: $err", err)
+            sikkerlogg.info("[V275] Ville ha trynet med feil: $err", err)
         }
     }
 
@@ -35,17 +37,17 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
                 val elementOpprettet = LocalDateTime.parse(element.path("opprettet").asText())
                 element.path("vilkårsgrunnlag").forEach { grunnlag ->
                     grunnlag.path("meldingsreferanseId").takeIf(JsonNode::isTextual)?.also { hendelseId ->
-                        oppdaterTidspunkt(UUID.fromString(hendelseId.asText()), elementOpprettet)
+                        oppdaterTidspunkt(hendelseId.asText().uuid, elementOpprettet)
                     }
 
                     grunnlag.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").forEach { opplysning ->
                         opplysning.path("inntektsopplysning").also { inntektopplysning ->
-                            val id = UUID.fromString(inntektopplysning.path("hendelseId").asText())
+                            val id = inntektopplysning.path("hendelseId").asText().uuid
                             val tidspunkt = LocalDateTime.parse(inntektopplysning.path("tidsstempel").asText())
                             oppdaterTidspunkt(id, tidspunkt)
                         }
                         opplysning.path("refusjonsopplysninger").forEach { refusjonsopplysning ->
-                            val id = UUID.fromString(refusjonsopplysning.path("meldingsreferanseId").asText())
+                            val id = refusjonsopplysning.path("meldingsreferanseId").asText().uuid
                             oppdaterTidspunkt(id, elementOpprettet)
                         }
                     }
@@ -58,7 +60,7 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
                     .path("sykdomshistorikk")
                     .firstOrNull { element ->
                         val node = element.path("hendelseId")
-                        node.isTextual && UUID.fromString(node.asText()) == hendelseId
+                        node.isTextual && node.asText().uuid == hendelseId
                     }
                     ?.path("beregnetSykdomstidslinje")
                     ?.let { beregnetTidslinje ->
@@ -92,13 +94,13 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
             arbeidsgiver.path("sykdomshistorikk").reversed().forEach { element ->
                 val node = element.path("hendelseId")
                 if (node.isTextual) {
-                    val hendelseId = UUID.fromString(node.asText())
+                    val hendelseId = node.asText().uuid
                     val tidspunkt = LocalDateTime.parse(element.path("tidsstempel").asText())
                     oppdaterTidspunkt(hendelseId, tidspunkt)
                 }
                 element.path("beregnetSykdomstidslinje").also { tidslinje ->
                     tidslinje.path("dager").forEach { dag ->
-                        val id = UUID.fromString(dag.path("kilde").path("id").asText())
+                        val id = dag.path("kilde").path("id").asText().uuid
                         val tidsstempel = LocalDateTime.parse(dag.path("kilde").path("tidsstempel").asText())
                         // oppdaterer tidspunkt for hendelsen bare dersom vi ikke har hørt om den før;
                         // søknader har et tidspunkt satt til midnatt som er pga det er verdien av 'sykmeldingSkrevet'.
@@ -108,43 +110,43 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
                 }
             }
             arbeidsgiver.path("refusjonshistorikk").forEach { element ->
-                val hendelseId = UUID.fromString(element.path("meldingsreferanseId").asText())
+                val hendelseId = element.path("meldingsreferanseId").asText().uuid
                 val tidspunkt = LocalDateTime.parse(element.path("tidsstempel").asText())
                 oppdaterTidspunkt(hendelseId, tidspunkt)
             }
             arbeidsgiver.path("inntektshistorikk").forEach { element ->
-                val hendelseId = UUID.fromString(element.path("hendelseId").asText())
+                val hendelseId = element.path("hendelseId").asText().uuid
                 val tidspunkt = LocalDateTime.parse(element.path("tidsstempel").asText())
                 oppdaterTidspunkt(hendelseId, tidspunkt)
             }
 
             val tidspunktForUtbetalingOpprettelse = arbeidsgiver.path("utbetalinger").associate { utbetaling ->
-                UUID.fromString(utbetaling.path("id").asText()) to LocalDateTime.parse(utbetaling.path("tidsstempel").asText())
+                utbetaling.path("id").asText().uuid to LocalDateTime.parse(utbetaling.path("tidsstempel").asText())
             }
             val tidspunktForUtbetalingOppdatering = arbeidsgiver.path("utbetalinger").associate { utbetaling ->
-                UUID.fromString(utbetaling.path("id").asText()) to LocalDateTime.parse(utbetaling.path("oppdatert").asText())
+                utbetaling.path("id").asText().uuid to LocalDateTime.parse(utbetaling.path("oppdatert").asText())
             }
             val tidspunktForUtbetalingVurdert = arbeidsgiver.path("utbetalinger")
                 .filter { utbetaling ->
                     utbetaling.path("vurdering").hasNonNull("tidspunkt")
                 }
                 .associate { utbetaling ->
-                    UUID.fromString(utbetaling.path("id").asText()) to LocalDateTime.parse(utbetaling.path("vurdering").path("tidspunkt").asText())
+                    utbetaling.path("id").asText().uuid to LocalDateTime.parse(utbetaling.path("vurdering").path("tidspunkt").asText())
                 }
             val tidspunktForUtbetalingAvsluttet = arbeidsgiver.path("utbetalinger")
                 .filter { utbetaling ->
                     utbetaling.hasNonNull("avsluttet")
                 }
                 .associate { utbetaling ->
-                    UUID.fromString(utbetaling.path("id").asText()) to LocalDateTime.parse(utbetaling.path("avsluttet").asText())
+                    utbetaling.path("id").asText().uuid to LocalDateTime.parse(utbetaling.path("avsluttet").asText())
                 }
             val utbetalingtype = arbeidsgiver.path("utbetalinger")
                 .associate { utbetaling ->
-                    UUID.fromString(utbetaling.path("id").asText()) to utbetaling.path("type").asText()
+                    utbetaling.path("id").asText().uuid to utbetaling.path("type").asText()
                 }
             val utbetalingstatus = arbeidsgiver.path("utbetalinger")
                 .associate { utbetaling ->
-                    UUID.fromString(utbetaling.path("id").asText()) to utbetaling.path("status").asText()
+                    utbetaling.path("id").asText().uuid to utbetaling.path("status").asText()
                 }
 
             arbeidsgiver.path("vedtaksperioder")
@@ -171,9 +173,7 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
         bekreftPeriode(periode)
     }
     private fun bekreftPeriode(periode: JsonNode) {
-        val dokumentsporing = periode.path("hendelseIder").map {
-            it.path("dokumentId").asText() to it.path("dokumenttype").asText()
-        }
+        val dokumentsporing = periode.path("hendelseIder").map { it.dokumentsporing }
         check(!periode.path("generasjoner").isEmpty) {
             "En vedtaksperiode har 0 generasjoner (vedtaksperiode ${periode.path("id").asText()})"
         }
@@ -183,19 +183,23 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
             "En vedtaksperiode har en generasjon med 0 endringer (vedtaksperiode ${periode.path("id").asText()})"
         }
         val dokumenterUtenEndring = dokumentsporing.filterNot { dokument ->
-            periode.path("generasjoner").any { generasjon ->
-                generasjon.path("endringer").any { endring ->
-                    val dokumentsporingForEndring = endring.path("dokumentsporing").let {
-                        it.path("dokumentId").asText() to it.path("dokumenttype").asText()
-                    }
-                    dokument == dokumentsporingForEndring
-                }
-            }
+            periode.path("generasjoner").generasjonHarHåndtert(dokument)
         }
         check(dokumenterUtenEndring.isEmpty()) {
             "Et/flere dokument(er) har ikke en tilhørende endring, og ville forsvunnet: $dokumenterUtenEndring (vedtaksperiode ${periode.path("id").asText()})"
         }
     }
+
+    private fun Iterable<JsonNode>.generasjonHarHåndtert(dokument: Dokumentsporing) =
+        any { generasjon ->
+            generasjon.path("endringer").any { endring ->
+                dokument == endring.path("dokumentsporing").dokumentsporing
+            }
+        }
+    private fun Iterable<JsonNode>.utbetalingHarHåndtert(dokument: Dokumentsporing) =
+        any { utbetaling ->
+            dokument == utbetaling.path("dokumentsporing").dokumentsporing
+        }
 
     private val JsonNode.periode: ClosedRange<LocalDate> get() {
         return if (this.hasNonNull("fom")) {
@@ -221,15 +225,14 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
         if (siste.path("tilstand").asText() == "TIL_INFOTRYGD") return
 
         val forkastingTidspunkt = LocalDateTime.parse(periode.path("oppdatert").asText())
-        val fom = LocalDate.parse(periode.path("fom").asText())
-        val tom = LocalDate.parse(periode.path("tom").asText())
+        val fom = periode.path("fom").asText().dato
+        val tom = periode.path("tom").asText().dato
         val sisteEndring = siste.path("endringer").last()
         val sykmeldingsperiodeFom = sisteEndring.path("sykmeldingsperiodeFom").asText().dato
         val sykmeldingsperiodeTom = sisteEndring.path("sykmeldingsperiodeTom").asText().dato
-        val dokumentId = UUID.fromString(sisteEndring.path("dokumentsporing").path("dokumentId").asText())
-        val dokumenttype = sisteEndring.path("dokumentsporing").path("dokumenttype").asText()
+        val dokument = sisteEndring.path("dokumentsporing").dokumentsporing
         val sykdomstidslinje = sisteEndring.path("sykdomstidslinje").deepCopy<ObjectNode>()
-        val endring = lagEndring(dokumentId, dokumenttype, forkastingTidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinje, null, null)
+        val endring = lagEndring(dokument.id, dokument.type, forkastingTidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinje, null, null)
         val infotrygdgenerasjon = lagGenerasjon("TIL_INFOTRYGD", forkastingTidspunkt, fom, tom, listOf(endring), avsluttet = forkastingTidspunkt)
         (periode.path("generasjoner") as ArrayNode).add(infotrygdgenerasjon)
     }
@@ -247,43 +250,28 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
     ): List<ObjectNode> {
         val forkastedeUtbetalinger: MutableList<ObjectNode> = mutableListOf()
         val dokumentsporing = periode.path("hendelseIder").deepCopy<ArrayNode>()
-        val fom = LocalDate.parse(periode.path("fom").asText())
-        val tom = LocalDate.parse(periode.path("tom").asText())
-        val sykmeldingsperiodeFom = LocalDate.parse(periode.path("sykmeldingFom").asText())
-        val sykmeldingsperiodeTom = LocalDate.parse(periode.path("sykmeldingTom").asText())
+        val fom = periode.path("fom").asText().dato
+        val tom = periode.path("tom").asText().dato
+        val sykmeldingsperiodeFom = periode.path("sykmeldingFom").asText().dato
+        val sykmeldingsperiodeTom = periode.path("sykmeldingTom").asText().dato
         val opprettettidspunkt = LocalDateTime.parse(periode.path("opprettet").asText())
         val generasjoner = periode.path("generasjoner") as ArrayNode
-        val dokumenterHåndtertAvTidligereGenerasjoner = mutableListOf<UUID>()
+        val dokumenterHåndtertAvTidligereGenerasjoner = mutableListOf<Dokumentsporing>()
         val nyeGenerasjoner = generasjoner
             .mapNotNull { node ->
                 migrerGenerasjon(node, forkastedeUtbetalinger, dokumentsporing, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, opprettettidspunkt, tidspunktForUtbetalingOpprettelse, tidspunktForUtbetalingVurdert, tidspunktForUtbetalingAvsluttet, utbetalingstatus, sykdomstidslinjesubsetting, utbetalingtype, dokumenterHåndtertAvTidligereGenerasjoner).also {
                     if (it != null) {
                         forkastedeUtbetalinger.clear()
-                        dokumenterHåndtertAvTidligereGenerasjoner.addAll(it.path("endringer").map { endring -> UUID.fromString(endring.path("dokumentsporing").path("dokumentId").asText()) })
+                        dokumenterHåndtertAvTidligereGenerasjoner.addAll(it.path("endringer").map { endring -> endring.path("dokumentsporing").dokumentsporing })
                     }
                 }
             }
 
         val endringerFraForkastedeUtbetalinger = endringerFraForkastetUtbetaling(forkastedeUtbetalinger, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
         val dokumenterUtenEndring = dokumentsporing
-            .filterNot { dokument ->
-                val dokumentpar = dokument.path("dokumentId").asText() to dokument.path("dokumenttype").asText()
-                val ingenGenerasjonHåndtert = nyeGenerasjoner.any { generasjon ->
-                    generasjon.path("endringer").any { endring ->
-                        val dokumentsporingForEndring = endring.path("dokumentsporing").let {
-                            it.path("dokumentId").asText() to it.path("dokumenttype").asText()
-                        }
-                        dokumentpar == dokumentsporingForEndring
-                    }
-                }
-                val ingenForkastetUtbetalingHåndtert = endringerFraForkastedeUtbetalinger.any { utbetaling ->
-                    val dokumentsporingForEndring = utbetaling.path("dokumentsporing").let {
-                        it.path("dokumentId").asText() to it.path("dokumenttype").asText()
-                    }
-                    dokumentpar == dokumentsporingForEndring
-                }
-                ingenGenerasjonHåndtert || ingenForkastetUtbetalingHåndtert
-            }
+            .dokumenter
+            .filterNot { dokument -> nyeGenerasjoner.generasjonHarHåndtert(dokument) }
+            .filterNot { dokument -> endringerFraForkastedeUtbetalinger.utbetalingHarHåndtert(dokument) }
 
         val endeligResultat = if (nyeGenerasjoner.isEmpty()) {
             listOf(migrerInitiellGenerasjon(fom, tom, sykmeldingsperiodeFom, sykmeldingsperiodeTom, opprettettidspunkt, periode, tidligsteTidspunktForHendelse, endringerFraForkastedeUtbetalinger, sykdomstidslinjesubsetting))
@@ -300,7 +288,7 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
                 val antarAtPeriodenErUberegnetRevurdering = periode.path("tilstand").asText() in setOf("AVVENTER_REVURDERING", "AVVENTER_HISTORIKK_REVURDERING")
                 val tilstand = if (antarAtPeriodenErUberegnetRevurdering) "UBEREGNET_REVURDERING" else "BEREGNET_REVURDERING"
                 val endringUtenUtbetaling = if (antarAtPeriodenErUberegnetRevurdering) endringerFraForkastedeUtbetalinger.last().deepCopy().let {
-                    val forkastetUtbetalingId = UUID.fromString(it.path("utbetalingId").asText())
+                    val forkastetUtbetalingId = it.path("utbetalingId").asText().uuid
                     check("FORKASTET" == utbetalingstatus(forkastetUtbetalingId)) {
                         "Forventer at utbetalingen $forkastetUtbetalingId skal være forkastet for vedtaksperiode ${periode.path("id").asText()}"
                     }
@@ -314,14 +302,11 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
                 val sisteEndringISisteGenerasjon = sisteGenerasjon.path("endringer").last()
 
                 dokumenterUtenEndring.mapNotNull { dokumentUtenEndring ->
-                    val sisteDokumentId = UUID.fromString(dokumentUtenEndring.path("dokumentId").asText())
-                    val sisteDokumenttype = dokumentUtenEndring.path("dokumenttype").asText()
-
                     val vedtaksperiodeOppdatert = LocalDateTime.parse(periode.path("oppdatert").asText())
                     // et best guess basert på tidspunktet den siste hendelsen ble håndtert i spleis, eller oppdatert-tidspunktet til vedtaksperioden
-                    val tidspunktForNårPeriodenGikkTilAvventerRevurdering = tidligsteTidspunktForHendelse(sisteDokumentId) ?: vedtaksperiodeOppdatert
-                    val sykdomstidslinjeForUberegnetRevurdering = sykdomstidslinjesubsetting(sisteDokumentId, fom, tom) ?: sisteEndringISisteGenerasjon.path("sykdomstidslinje").deepCopy()
-                    val endring = lagEndring(sisteDokumentId, sisteDokumenttype, tidspunktForNårPeriodenGikkTilAvventerRevurdering, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinjeForUberegnetRevurdering, null, null)
+                    val tidspunktForNårPeriodenGikkTilAvventerRevurdering = tidligsteTidspunktForHendelse(dokumentUtenEndring.id) ?: vedtaksperiodeOppdatert
+                    val sykdomstidslinjeForUberegnetRevurdering = sykdomstidslinjesubsetting(dokumentUtenEndring.id, fom, tom) ?: sisteEndringISisteGenerasjon.path("sykdomstidslinje").deepCopy()
+                    val endring = lagEndring(dokumentUtenEndring.id, dokumentUtenEndring.type, tidspunktForNårPeriodenGikkTilAvventerRevurdering, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinjeForUberegnetRevurdering, null, null)
 
                     if (sisteGenerasjon.hasNonNull("vedtakFattet")) lagGenerasjon("UBEREGNET_REVURDERING", tidspunktForNårPeriodenGikkTilAvventerRevurdering, fom, tom, listOf(endring))
                     else null
@@ -348,26 +333,30 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
         sykdomstidslinjesubsetting: (UUID, LocalDate, LocalDate) -> ObjectNode?
     ): ObjectNode {
         val sykdomstidslinje = periode.path("sykdomstidslinje").deepCopy<ObjectNode>()
+        val dokumenter = periode.path("hendelseIder").dokumenter.takeUnless { it.isEmpty() }
+            ?: sykdomstidslinje
+                .path("dager")
+                .map { dag ->
+                    val type = when (val kildetype = dag.path("kilde").path("type").asText()) {
+                        "Inntektsmelding" -> "InntektsmeldingDager"
+                        else -> kildetype
+                    }
+                    Dokumentsporing(dag.path("kilde").path("id").asText().uuid, type)
+                }
+                .distinct()
 
         var forrigeDokumentId: UUID? = null
-        val egneEndringer = periode.path("hendelseIder")
-            .filterNot { dokument ->
-                val hendelseId = UUID.fromString(dokument.path("dokumentId").asText())
-                hendelseId in forkastedeUtbetalingerSomEndring.map {
-                    UUID.fromString(it.path("dokumentsporing").path("dokumentId").asText())
-                }
+        val egneEndringer = dokumenter
+            .endringerSomIkkeInngårIForkastedeUtbetalinger(forkastedeUtbetalingerSomEndring)
+            .map { dokument ->
+                val tidspunktForHendelsen = tidligsteTidspunktForHendelse(dokument.id)
+                val sykdomstidslinjeForHendelsen = sykdomstidslinjesubsetting(dokument.id, fom, tom) ?: forrigeDokumentId?.let { sykdomstidslinjesubsetting(it, fom, tom) } ?: sykdomstidslinje
+                forrigeDokumentId = dokument.id
+                lagEndring(dokument.id, dokument.type, tidspunktForHendelsen ?: opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinjeForHendelsen, null, null)
             }
-            .map { hendelse ->
-                val dokumentId: UUID = UUID.fromString(hendelse.path("dokumentId").asText())
-                val dokumenttype: String = hendelse.path("dokumenttype").asText()
-
-                val tidspunktForHendelsen = tidligsteTidspunktForHendelse(dokumentId)
-                val sykdomstidslinjeForHendelsen = sykdomstidslinjesubsetting(dokumentId, fom, tom) ?: forrigeDokumentId?.let { sykdomstidslinjesubsetting(it, fom, tom) } ?: sykdomstidslinje
-                forrigeDokumentId = dokumentId
-                lagEndring(dokumentId, dokumenttype, tidspunktForHendelsen ?: opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinjeForHendelsen, null, null)
-            }
-        val endringer = (forkastedeUtbetalingerSomEndring + egneEndringer).sortedBy {
-            LocalDateTime.parse(it.path("tidsstempel").asText())
+        val endringer = endringer(forkastedeUtbetalingerSomEndring, egneEndringer)
+        check(endringer.isNotEmpty()) {
+            "Vedtaksperioden $fom - $tom (${periode.path("id").asText()}) har ingen hendelser"
         }
         endringer.first().put("tidsstempel", "$opprettettidspunkt")
         val vedtaksperiodeOppdatert = LocalDateTime.parse(periode.path("oppdatert").asText())
@@ -462,14 +451,14 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
         utbetalingstatus: (UUID) -> String,
         sykdomstidslinjesubsetting: (UUID, LocalDate, LocalDate) -> ObjectNode?,
         utbetalingtype: (UUID) -> String,
-        dokumenterHåndtertAvTidligereGenerasjoner: MutableList<UUID>
+        dokumenterHåndtertAvTidligereGenerasjoner: MutableList<Dokumentsporing>
     ): ObjectNode? {
         generasjon as ObjectNode
 
         check(generasjon.hasNonNull("utbetalingId")) {
             "generasjonen har ikke utbetalingId"
         }
-        val utbetalingId = UUID.fromString(generasjon.path("utbetalingId").asText())
+        val utbetalingId = generasjon.path("utbetalingId").asText().uuid
 
         val utbetalingstatusForGenerasjonen = utbetalingstatus(utbetalingId)
         if (utbetalingstatusForGenerasjonen == "FORKASTET") {
@@ -477,30 +466,28 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
             return null
         }
 
-        val sykdomstidslinje = generasjon.path("sykdomstidslinje").deepCopy<ObjectNode>()
-        val fom = LocalDate.parse(sykdomstidslinje.path("periode").path("fom").asText())
-        val tom = LocalDate.parse(sykdomstidslinje.path("periode").path("tom").asText())
-        val vilkårsgrunnlagId = UUID.fromString(generasjon.path("vilkårsgrunnlagId").asText())
+        val sykdomstidslinje = generasjon.path("sykdomstidslinje").deepCopy<ObjectNode>().takeIf { sykdomstidslinje ->
+            sykdomstidslinje.path("periode").hasNonNull("fom")
+        } ?: dokumentsporing.dokumenter.firstNotNullOfOrNull { dokument ->
+            sykdomstidslinjesubsetting(dokument.id, sykmeldingsperiodeFom, sykmeldingsperiodeFom)
+        }
+        checkNotNull(sykdomstidslinje) {
+            "sykdomstidslinjen er tom for vedtaksperiode"
+        }
+        val fom = sykdomstidslinje.path("periode").path("fom").asText().dato
+        val tom = sykdomstidslinje.path("periode").path("tom").asText().dato
+        val vilkårsgrunnlagId = generasjon.path("vilkårsgrunnlagId").asText().uuid
         val forkastedeUtbetalingerSomEndring = endringerFraForkastetUtbetaling(forkastedeUtbetalinger, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
         val utbetalingOpprettet = checkNotNull(tidspunktForUtbetalingOpprettelse(utbetalingId)) {
             "forventer å finne tidspunkt for når utbetaling er opprettet"
         }
         var forrigeSykdomstidslinje: ObjectNode = sykdomstidslinje
         fun sykdomstidslinjeSubsetForPeriode(hendelseId: UUID) = sykdomstidslinjesubsetting(hendelseId, fom, tom)?.also { forrigeSykdomstidslinje = it } ?: forrigeSykdomstidslinje
-        val egneEndringer = generasjon.path("dokumentsporing")
-            .filterNot { dokument ->
-                val hendelseId = UUID.fromString(dokument.path("dokumentId").asText())
-                hendelseId in dokumenterHåndtertAvTidligereGenerasjoner || hendelseId in forkastedeUtbetalingerSomEndring.map {
-                    UUID.fromString(it.path("dokumentsporing").path("dokumentId").asText())
-                }
-            }
-            .map {
-                oversettDokumentsporingTilEndring(it, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, ::sykdomstidslinjeSubsetForPeriode, null, null, null)
-            }
-        check(egneEndringer.isNotEmpty()) {
-            "Egne endringer er en tom liste"
-        }
-        val endringer = (egneEndringer + forkastedeUtbetalingerSomEndring).sortedBy { LocalDateTime.parse(it.path("tidsstempel").asText()) }
+        val egneEndringer = generasjon.path("dokumentsporing").dokumenter
+            .endringerSomIkkeInngårIForkastedeUtbetalinger(forkastedeUtbetalingerSomEndring)
+            .endringerSomIkkeInngårITidligereGenerasjoner(dokumenterHåndtertAvTidligereGenerasjoner)
+            .map { oversettDokumentsporingTilEndring(it, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, ::sykdomstidslinjeSubsetForPeriode, null, null, null) }
+        val endringer = endringer(egneEndringer, forkastedeUtbetalingerSomEndring)
         val utbetalingVurdert = tidspunktForUtbetalingVurdert(utbetalingId)
         val utbetalingAvsluttet = tidspunktForUtbetalingAvsluttet(utbetalingId)
         val vedtakFattet = utbetalingVurdert?.takeUnless { utbetalingstatusForGenerasjonen == "IKKE_GODKJENT" }
@@ -528,12 +515,24 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
         return lagGenerasjon(tilstand, LocalDateTime.parse(endringer.first().path("tidsstempel").asText()), fom, tom, endringer.plusElement(endringMedUtbetaling), vedtakFattet, generasjonAvsluttet)
     }
 
+    private fun endringer(a: List<ObjectNode>, b: List<ObjectNode>) = (a + b).sortedBy {
+        LocalDateTime.parse(it.path("tidsstempel").asText())
+    }
+    private fun List<Dokumentsporing>.endringerSomIkkeInngårIForkastedeUtbetalinger(forkastedeUtbetalingerSomEndring: List<ObjectNode>) =
+        filterNot { dokument ->
+            dokument in forkastedeUtbetalingerSomEndring.map { it.path("dokumentsporing").dokumentsporing }
+        }
+    private fun List<Dokumentsporing>.endringerSomIkkeInngårITidligereGenerasjoner(dokumenterHåndtertAvTidligereGenerasjoner: List<Dokumentsporing>) =
+        filterNot { dokument ->
+            dokument in dokumenterHåndtertAvTidligereGenerasjoner
+        }
+
     private fun endringerFraForkastetUtbetaling(forkastedeUtbetalinger: List<ObjectNode>, opprettettidspunkt: LocalDateTime, sykmeldingsperiodeFom: LocalDate, sykmeldingsperiodeTom: LocalDate, tidligsteTidspunktForHendelse: (UUID) -> LocalDateTime?, tidspunktForUtbetalingOpprettelse: (UUID) -> LocalDateTime?): List<ObjectNode> {
         return forkastedeUtbetalinger.flatMap { forkastet ->
-            val sisteHendelse = forkastet.path("dokumentsporing").last()
+            val sisteHendelse = forkastet.path("dokumentsporing").last().dokumentsporing
             val forkastetSykdomstidslinje = forkastet.path("sykdomstidslinje").deepCopy<ObjectNode>()
-            val forkastetUtbetalingId = UUID.fromString(forkastet.path("utbetalingId").asText())
-            val forkastetVilkårsgrunnlagId = UUID.fromString(forkastet.path("vilkårsgrunnlagId").asText())
+            val forkastetUtbetalingId = forkastet.path("utbetalingId").asText().uuid
+            val forkastetVilkårsgrunnlagId = forkastet.path("vilkårsgrunnlagId").asText().uuid
             val forkastetUtbetalingOpprettet = checkNotNull(tidspunktForUtbetalingOpprettelse(forkastetUtbetalingId)) {
                 "forventer at en forkastet utbetaling kan mappes til et opprettelsestidspunkt"
             }
@@ -545,7 +544,7 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
     }
 
     private fun oversettDokumentsporingTilEndring(
-        dokumentsporing: JsonNode,
+        dokument: Dokumentsporing,
         opprettettidspunkt: LocalDateTime,
         tidligsteTidspunktForHendelse: (UUID) -> LocalDateTime?,
         sykmeldingsperiodeFom: LocalDate,
@@ -555,11 +554,22 @@ internal class V274GenerasjonMedEndringer: JsonMigration(274) {
         forkastetVilkårsgrunnlagId: UUID? = null,
         forkastetUtbetalingOpprettet: LocalDateTime? = null
     ): ObjectNode {
-        val dokumentId: UUID = UUID.fromString(dokumentsporing.path("dokumentId").asText())
-        val dokumenttype: String = dokumentsporing.path("dokumenttype").asText()
-        val tidspunktForEndring = forkastetUtbetalingOpprettet ?: tidligsteTidspunktForHendelse(dokumentId)?.coerceAtLeast(opprettettidspunkt) ?: opprettettidspunkt
-        val sykdomstidslinjeForEndring = sykdomstidslinjesubsetting(dokumentId)
-        return lagEndring(dokumentId, dokumenttype, tidspunktForEndring, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinjeForEndring, forkastetUtbetalingId, forkastetVilkårsgrunnlagId)
+        val tidspunktForEndring = forkastetUtbetalingOpprettet ?: tidligsteTidspunktForHendelse(dokument.id)?.coerceAtLeast(opprettettidspunkt) ?: opprettettidspunkt
+        val sykdomstidslinjeForEndring = sykdomstidslinjesubsetting(dokument.id)
+        return lagEndring(dokument.id, dokument.type, tidspunktForEndring, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinjeForEndring, forkastetUtbetalingId, forkastetVilkårsgrunnlagId)
+    }
+
+    private data class Dokumentsporing(
+        val id: UUID,
+        val type: String
+    ) {
+        companion object {
+            val JsonNode.dokumentsporing get() = Dokumentsporing(
+                id = this.path("dokumentId").asText().uuid,
+                type = this.path("dokumenttype").asText()
+            )
+            val JsonNode.dokumenter get() = map { it.dokumentsporing }
+        }
     }
 
     private companion object {
