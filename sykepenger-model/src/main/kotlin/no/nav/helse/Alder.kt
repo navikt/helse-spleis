@@ -125,8 +125,6 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
         return Utbetalingstidslinje.avvis(tidslinjer, listOf(dødsdato.nesteDag til LocalDate.MAX), listOf(Begrunnelse.EtterDødsdato))
     }
 
-    internal fun kandidatForSkjønnsmessigFastsettelse() = fødselsdato.dayOfMonth >= 27
-
     internal class MaksimumSykepenger private constructor(
         beregningFom: LocalDate,
         private val forbrukteDager: Int,

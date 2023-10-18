@@ -130,8 +130,6 @@ internal class Sykepengegrunnlag private constructor(
         avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
     }
 
-    internal fun kandidatForSkjønnsmessigFastsettelse() = arbeidsgiverInntektsopplysninger.size == 1
-
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         fun opprett(

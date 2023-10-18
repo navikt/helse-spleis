@@ -2419,10 +2419,6 @@ internal class Vedtaksperiode private constructor(
             it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt(NullObserver)
         }
 
-        internal val AUU_UTBETALT_I_INFOTRYGD = { infotrygdhistorikk: Infotrygdhistorikk ->
-            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.tilstand == AvsluttetUtenUtbetaling && infotrygdhistorikk.harUtbetaltI(vedtaksperiode.periode) }
-        }
-
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
 
@@ -2491,21 +2487,6 @@ internal class Vedtaksperiode private constructor(
             }
 
             internal companion object {
-                internal fun List<Vedtaksperiode>.gruppérAuuer(infotrygdhistorikk: Infotrygdhistorikk, filter: (vedtaksperiode: Vedtaksperiode) -> Boolean) =
-                    this
-                        .groupBy { it.organisasjonsnummer }
-                        .flatMap { (organisasjonsnummer, vedtaksperioder) ->
-                            vedtaksperioder
-                                .filter { it.tilstand == AvsluttetUtenUtbetaling }
-                                .groupBy { it.finnArbeidsgiverperiode() }
-                                .flatMap { (arbeidsgiverperiode, vedtaksperioder) ->
-                                    if (arbeidsgiverperiode == null) vedtaksperioder.map { AuuUtenAGP(organisasjonsnummer, it) }
-                                    else listOf(AuuerMedSammeAGP(infotrygdhistorikk, organisasjonsnummer, vedtaksperioder, arbeidsgiverperiode))
-                                }
-
-                        }
-                        .filter { auuer -> auuer.auuer.any(filter) }
-                        .sortedByDescending { it.sisteAuu }
                 internal fun List<Vedtaksperiode>.auuGruppering(vedtaksperiode: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk): AuuGruppering? {
                     if (vedtaksperiode.tilstand != AvsluttetUtenUtbetaling) return null
                     val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return AuuUtenAGP(vedtaksperiode.organisasjonsnummer, vedtaksperiode)

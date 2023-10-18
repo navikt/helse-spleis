@@ -338,7 +338,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return kopierMed(hendelse, this.sykepengegrunnlag, this.opptjening, NullObserver, nyttSkjæringstidspunkt)
         }
 
-        internal fun kandidatForSkjønnsmessigFastsettelse() = sykepengegrunnlag.kandidatForSkjønnsmessigFastsettelse()
         internal fun trengerFastsettelseEtterSkjønn() = sykepengegrunnlag.avventerFastsettelseEtterSkjønn()
         internal fun loggInntektsvurdering(hendelse: IAktivitetslogg) = sykepengegrunnlag.loggInntektsvurdering(hendelse)
 
