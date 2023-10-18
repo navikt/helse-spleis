@@ -446,10 +446,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "skjæringstidspunkt": "2018-02-10",
           "sykmeldingsperioder": [
             {
-              "fom": "2018-01-01",
-              "tom": "2018-01-31"
-            }, 
-            {
               "fom": "2018-02-10",
               "tom": "2018-03-10"
             }

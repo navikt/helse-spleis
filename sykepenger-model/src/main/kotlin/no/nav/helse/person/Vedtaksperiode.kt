@@ -712,10 +712,9 @@ internal class Vedtaksperiode private constructor(
 
         val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
         val vedtaksperioderKnyttetTilArbeidsgiverperiode = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
-        val relevanteSykmeldingsperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode
-            .filter { it.sykmeldingsperiode.start < periode().endInclusive }
-            .map { it.sykmeldingsperiode }
-        val sykdomstidslinjeKnyttetTilArbeidsgiverperiode = vedtaksperioderKnyttetTilArbeidsgiverperiode.map { it.sykdomstidslinje }.merge()
+        val sykdomstidslinjeKnyttetTilArbeidsgiverperiode = vedtaksperioderKnyttetTilArbeidsgiverperiode
+            .map { it.sykdomstidslinje }
+            .merge()
 
         val forespurteOpplysninger = listOfNotNull(
             forespurtInntekt(fastsattInntekt),
@@ -729,7 +728,7 @@ internal class Vedtaksperiode private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = id,
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykmeldingsperioder = relevanteSykmeldingsperioder,
+                sykmeldingsperioder = relevanteSykmeldingsperioder(arbeidsgiverperiode, vedtaksperioderKnyttetTilArbeidsgiverperiode),
                 egenmeldingsperioder = sykdomstidslinjeKnyttetTilArbeidsgiverperiode.egenmeldingerFraSøknad(),
                 forespurteOpplysninger = forespurteOpplysninger
             )
@@ -782,13 +781,22 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forespurtArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): PersonObserver.Arbeidsgiverperiode? {
+        if (trengerArbeidsgiverperiode(arbeidsgiverperiode)) return PersonObserver.Arbeidsgiverperiode
+        return null
+    }
+
+    private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
         val arbeidsgiverperiodeperioder = arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder().orEmpty()
-        val trengerArbeidsgiverperiode = arbeidsgiver.tidligerePeriodeHarIkkeForespurtPeriode(periode().start, arbeidsgiverperiode)
+        return arbeidsgiver.tidligerePeriodeHarIkkeForespurtPeriode(periode().start, arbeidsgiverperiode)
                 || arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
                 ?: false
+    }
 
-        if (trengerArbeidsgiverperiode) return PersonObserver.Arbeidsgiverperiode
-        return null
+    private fun relevanteSykmeldingsperioder(arbeidsgiverperiode: Arbeidsgiverperiode?, vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
+        if (trengerArbeidsgiverperiode(arbeidsgiverperiode)) return vedtaksperioder
+            .filter { it.sykmeldingsperiode.start < periode().endInclusive }
+            .map { it.sykmeldingsperiode }
+        return listOf(sykmeldingsperiode)
     }
 
     private fun trengerInntektsmelding() {
