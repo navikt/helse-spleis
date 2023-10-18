@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.generasjoner
 
 import java.nio.file.Paths
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
@@ -15,6 +16,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -289,6 +292,29 @@ internal class GenerasjonerReferanseTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
+        }
+    }
+
+    @Test
+    fun `test 26 - omgjøring forsøkt avvist`() {
+        a1 {
+            håndterSøknad(Sykdom(3.januar, 17.januar, 100.prosent))
+            håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(3.januar til 18.januar))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
+                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 17.januar, 100.prosent, INNTEKT)
+            ))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false) // forsøkt avvist av saksbehandler
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
         }
     }
 }
