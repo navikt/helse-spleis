@@ -2195,6 +2195,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return
             if (!påminnelse.skalReberegnes()) return
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(påminnelse)) return påminnelse.info("Avventer omgjøring av AUU fra ${vedtaksperiode.skjæringstidspunkt.year} ettersom den ville spurt om inntektsmelding")
             vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
