@@ -284,9 +284,11 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
                     check(it.size() > 1) {
                         "Forventer at den beregnede omgjøringen har flere hendelser enn 1"
                     }
+                    val siste = it.last().deepCopy<ObjectNode>()
                     it.removeAll { dokument ->
                         dokument.path("dokumentsporing").dokumentsporing == førsteHendelse
                     }
+                    if (it.isEmpty) it.add(siste)
                 }
                 listOf(
                     lagGenerasjon("AVSLUTTET_UTEN_VEDTAK", auuTidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, listOf(
@@ -317,6 +319,9 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
                 listOf(lagGenerasjon(tilstand, LocalDateTime.parse(endringerFraForkastedeUtbetalinger.first().path("tidsstempel").asText()), fom, tom, endringerFraForkastedeUtbetalinger + listOfNotNull(endringUtenUtbetaling)))
             } else {
                 val sisteGenerasjon = nyeGenerasjoner.last()
+                if (sisteGenerasjon.path("endringer").isEmpty) {
+                    val a =1
+                }
                 val sisteEndringISisteGenerasjon = sisteGenerasjon.path("endringer").last()
 
                 dokumenterUtenEndring.mapNotNull { dokumentUtenEndring ->
