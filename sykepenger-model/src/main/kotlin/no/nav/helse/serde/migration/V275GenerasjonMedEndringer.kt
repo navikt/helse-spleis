@@ -503,9 +503,13 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
         }
         var forrigeSykdomstidslinje: ObjectNode = sykdomstidslinje
         fun sykdomstidslinjeSubsetForPeriode(hendelseId: UUID) = sykdomstidslinjesubsetting(hendelseId, fom, tom)?.also { forrigeSykdomstidslinje = it } ?: forrigeSykdomstidslinje
-        val egneEndringer = generasjon.path("dokumentsporing").dokumenter
+        val endringerSomIkkeInngårITidligereGenerasjoner = generasjon.path("dokumentsporing")
+            .dokumenter
             .endringerSomIkkeInngårIForkastedeUtbetalinger(forkastedeUtbetalingerSomEndring)
             .endringerSomIkkeInngårITidligereGenerasjoner(dokumenterHåndtertAvTidligereGenerasjoner)
+            .takeUnless { it.isEmpty() }
+            ?: dokumenterHåndtertAvTidligereGenerasjoner.takeLast(1)
+        val egneEndringer = endringerSomIkkeInngårITidligereGenerasjoner
             .map { oversettDokumentsporingTilEndring(it, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, ::sykdomstidslinjeSubsetForPeriode, null, null, null) }
         val endringer = endringer(egneEndringer, forkastedeUtbetalingerSomEndring)
         val utbetalingVurdert = tidspunktForUtbetalingVurdert(utbetalingId)
