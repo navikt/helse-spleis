@@ -267,7 +267,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
                 }
             }
 
-        val endringerFraForkastedeUtbetalinger = endringerFraForkastetUtbetaling(forkastedeUtbetalinger, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
+        val endringerFraForkastedeUtbetalinger = endringerFraForkastetUtbetaling(forkastedeUtbetalinger, dokumenterHåndtertAvTidligereGenerasjoner, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
         val dokumenterUtenEndring = dokumentsporing
             .dokumenter
             .filterNot { dokument -> nyeGenerasjoner.generasjonHarHåndtert(dokument) }
@@ -497,7 +497,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
         val fom = sykdomstidslinje.path("periode").path("fom").asText().dato
         val tom = sykdomstidslinje.path("periode").path("tom").asText().dato
         val vilkårsgrunnlagId = generasjon.path("vilkårsgrunnlagId").asText().uuid
-        val forkastedeUtbetalingerSomEndring = endringerFraForkastetUtbetaling(forkastedeUtbetalinger, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
+        val forkastedeUtbetalingerSomEndring = endringerFraForkastetUtbetaling(forkastedeUtbetalinger, dokumenterHåndtertAvTidligereGenerasjoner, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
         val utbetalingOpprettet = checkNotNull(tidspunktForUtbetalingOpprettelse(utbetalingId)) {
             "forventer å finne tidspunkt for når utbetaling er opprettet"
         }
@@ -507,7 +507,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
             .dokumenter
             .endringerSomIkkeInngårIForkastedeUtbetalinger(forkastedeUtbetalingerSomEndring)
             .endringerSomIkkeInngårITidligereGenerasjoner(dokumenterHåndtertAvTidligereGenerasjoner)
-            .takeUnless { it.isEmpty() }
+            .takeUnless { it.isEmpty() && forkastedeUtbetalingerSomEndring.isEmpty() }
             ?: dokumenterHåndtertAvTidligereGenerasjoner.takeLast(1)
         val egneEndringer = endringerSomIkkeInngårITidligereGenerasjoner
             .map { oversettDokumentsporingTilEndring(it, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, ::sykdomstidslinjeSubsetForPeriode, null, null, null) }
@@ -558,19 +558,26 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
             dokument in dokumenterHåndtertAvTidligereGenerasjoner
         }
 
-    private fun endringerFraForkastetUtbetaling(forkastedeUtbetalinger: List<ObjectNode>, opprettettidspunkt: LocalDateTime, sykmeldingsperiodeFom: LocalDate, sykmeldingsperiodeTom: LocalDate, tidligsteTidspunktForHendelse: (UUID) -> LocalDateTime?, tidspunktForUtbetalingOpprettelse: (UUID) -> LocalDateTime?): List<ObjectNode> {
+    private fun endringerFraForkastetUtbetaling(forkastedeUtbetalinger: List<ObjectNode>, dokumenterHåndtertAvTidligereGenerasjoner: MutableList<Dokumentsporing>, opprettettidspunkt: LocalDateTime, sykmeldingsperiodeFom: LocalDate, sykmeldingsperiodeTom: LocalDate, tidligsteTidspunktForHendelse: (UUID) -> LocalDateTime?, tidspunktForUtbetalingOpprettelse: (UUID) -> LocalDateTime?): List<ObjectNode> {
         return forkastedeUtbetalinger.flatMap { forkastet ->
-            val sisteHendelse = forkastet.path("dokumentsporing").last().dokumentsporing
+            val dokumenter = forkastet.path("dokumentsporing").dokumenter
+            val sisteHendelse = dokumenter.last()
             val forkastetSykdomstidslinje = forkastet.path("sykdomstidslinje").deepCopy<ObjectNode>()
             val forkastetUtbetalingId = forkastet.path("utbetalingId").asText().uuid
             val forkastetVilkårsgrunnlagId = forkastet.path("vilkårsgrunnlagId").asText().uuid
             val forkastetUtbetalingOpprettet = checkNotNull(tidspunktForUtbetalingOpprettelse(forkastetUtbetalingId)) {
                 "forventer at en forkastet utbetaling kan mappes til et opprettelsestidspunkt"
             }
-            listOf(
-                oversettDokumentsporingTilEndring(sisteHendelse, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, { forkastetSykdomstidslinje }, null, null, null),
-                oversettDokumentsporingTilEndring(sisteHendelse, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, { forkastetSykdomstidslinje }, forkastetUtbetalingId, forkastetVilkårsgrunnlagId, forkastetUtbetalingOpprettet)
-            )
+            val nyeDokumenter = dokumenter
+                .filterNot { it in dokumenterHåndtertAvTidligereGenerasjoner }
+                .takeUnless { it.isEmpty() }
+                ?: dokumenter.takeLast(1)
+
+            val endringerFraDokumenter = nyeDokumenter
+                .onEach { dokumenterHåndtertAvTidligereGenerasjoner.add(it) }
+                .map { oversettDokumentsporingTilEndring(it, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, { forkastetSykdomstidslinje }, null, null, null) }
+            val endringFraUtbetaling = listOf(oversettDokumentsporingTilEndring(sisteHendelse, opprettettidspunkt, tidligsteTidspunktForHendelse, sykmeldingsperiodeFom, sykmeldingsperiodeTom, { forkastetSykdomstidslinje }, forkastetUtbetalingId, forkastetVilkårsgrunnlagId, forkastetUtbetalingOpprettet))
+            endringerFraDokumenter + endringFraUtbetaling
         }
     }
 
