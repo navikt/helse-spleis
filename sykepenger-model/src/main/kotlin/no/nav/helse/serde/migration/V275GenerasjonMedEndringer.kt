@@ -297,10 +297,6 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
                 )
             } else emptyList<ObjectNode>()
             auuGenerasjon + nyeGenerasjoner + if (endringerFraForkastedeUtbetalinger.isNotEmpty()) {
-                // forutsetter at alle de forkastede utbetalingene er revurderinger
-                check(dokumenterUtenEndring.isEmpty()) {
-                    "har ikke tatt høyde for at det kan finnes dokumenter som ikke inngår i noen utbetalinger: $dokumenterUtenEndring"
-                }
                 /*
                     hvis vedtaksperioden er forkastet så antar vi at vedtaksperioden har blitt annullert etter å ha beregnet revurdering.
                     hvis vedtaksperioden fremdeles er aktiv antar vi at revurderingen har blitt forkastet fordi en eldre periode har "tatt over"
@@ -316,12 +312,19 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
                     it.putNull("utbetalingId")
                     it.putNull("vilkårsgrunnlagId")
                 } else null
-                listOf(lagGenerasjon(tilstand, LocalDateTime.parse(endringerFraForkastedeUtbetalinger.first().path("tidsstempel").asText()), fom, tom, endringerFraForkastedeUtbetalinger + listOfNotNull(endringUtenUtbetaling)))
+                val endringerFraDokumenter = dokumenterUtenEndring.map { dokumentUtenEndring ->
+                    (endringUtenUtbetaling ?: endringerFraForkastedeUtbetalinger.last()).deepCopy().apply {
+                        put("id", "${UUID.randomUUID()}")
+                        put("tidsstempel", tidligsteTidspunktForHendelse(dokumentUtenEndring.id).toString())
+                        (path("dokumentsporing") as ObjectNode).apply {
+                            put("dokumentId", "${dokumentUtenEndring.id}")
+                            put("dokumenttype", dokumentUtenEndring.type)
+                        }
+                    }
+                }
+                listOf(lagGenerasjon(tilstand, LocalDateTime.parse(endringerFraForkastedeUtbetalinger.first().path("tidsstempel").asText()), fom, tom, endringerFraForkastedeUtbetalinger + endringerFraDokumenter + listOfNotNull(endringUtenUtbetaling)))
             } else {
                 val sisteGenerasjon = nyeGenerasjoner.last()
-                if (sisteGenerasjon.path("endringer").isEmpty) {
-                    val a =1
-                }
                 val sisteEndringISisteGenerasjon = sisteGenerasjon.path("endringer").last()
 
                 dokumenterUtenEndring.mapNotNull { dokumentUtenEndring ->
