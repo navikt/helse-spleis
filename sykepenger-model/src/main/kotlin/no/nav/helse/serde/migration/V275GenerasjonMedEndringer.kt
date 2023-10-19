@@ -327,7 +327,18 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
                     val endring = lagEndring(dokumentUtenEndring.id, dokumentUtenEndring.type, tidspunktForNårPeriodenGikkTilAvventerRevurdering, sykmeldingsperiodeFom, sykmeldingsperiodeTom, sykdomstidslinjeForUberegnetRevurdering, null, null)
 
                     if (sisteGenerasjon.hasNonNull("vedtakFattet")) lagGenerasjon("UBEREGNET_REVURDERING", tidspunktForNårPeriodenGikkTilAvventerRevurdering, fom, tom, listOf(endring))
-                    else null
+                    else {
+                        sisteGenerasjon.path("endringer").last().deepCopy<ObjectNode>().also {
+                            (sisteGenerasjon.path("endringer") as ArrayNode).add(it)
+                            it.put("id", "${UUID.randomUUID()}")
+                            it.put("tidsstempel", tidligsteTidspunktForHendelse(dokumentUtenEndring.id).toString())
+                            (it.path("dokumentsporing") as ObjectNode).apply {
+                                put("dokumentId", "${dokumentUtenEndring.id}")
+                                put("dokumenttype", dokumentUtenEndring.type)
+                            }
+                        }
+                        null
+                    }
                 }
             }
         }
