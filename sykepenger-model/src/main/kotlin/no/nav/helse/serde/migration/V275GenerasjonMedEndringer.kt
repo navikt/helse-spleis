@@ -15,10 +15,11 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
     override val description = "dry run av migrering for å legge til <endringer> på generasjoner"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+        val aktør = jsonNode.path("aktørId").asText()
         try {
             migrer(jsonNode.deepCopy())
         } catch (err: Exception) {
-            sikkerlogg.info("[V275] Ville ha trynet med feil: $err", err)
+            sikkerlogg.info("[V275] $aktør Ville ha trynet med feil: $err", err)
         }
     }
 
@@ -161,12 +162,12 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
     private fun bekreftAktivVedtaksperiode(periode: JsonNode) {
         bekreftPeriode(periode)
         check(periode.path("tilstand").asText() != "TIL_INFOTRYGD") {
-            "En aktiv vedtaksperiode står i TIL_INFOTRYGD etter migrering"
+            "En aktiv vedtaksperiode (${periode.path("id").asText()}) står i TIL_INFOTRYGD etter migrering"
         }
         check(periode.path("generasjoner").none { generasjon ->
             generasjon.path("tilstand").asText() == "TIL_INFOTRYGD"
         }) {
-            "En aktiv generasjon står i TIL_INFOTRYGD etter migrering"
+            "En aktiv generasjon står i TIL_INFOTRYGD etter migrering (vedtaksperiode ${periode.path("id").asText()})"
         }
     }
     private fun bekreftForkastetPeriode(periode: JsonNode) {
