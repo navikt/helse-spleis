@@ -189,6 +189,14 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
         check(dokumenterUtenEndring.isEmpty()) {
             "Et/flere dokument(er) har ikke en tilhørende endring, og ville forsvunnet: $dokumenterUtenEndring (vedtaksperiode ${periode.path("id").asText()})"
         }
+
+        periode.path("generasjoner").forEach { generasjon ->
+            generasjon.path("endringer").forEach { endring ->
+                setOf("id", "tidsstempel", "sykmeldingsperiodeFom", "sykmeldingsperiodeTom", "fom", "tom").forEach { påkrevd ->
+                    check(endring.path(påkrevd).asText().isNotEmpty()) { "endring i vedtaksperiode ${periode.path("id").asText()} mangler <$påkrevd>"}
+                }
+            }
+        }
     }
 
     private fun Iterable<JsonNode>.generasjonHarHåndtert(dokument: Dokumentsporing) =
@@ -268,7 +276,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
                 }
             }
 
-        val endringerFraForkastedeUtbetalinger = endringerFraForkastetUtbetaling(forkastedeUtbetalinger, dokumenterHåndtertAvTidligereGenerasjoner, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
+        val endringerFraForkastedeUtbetalinger = endringerFraForkastetUtbetaling(periode, forkastedeUtbetalinger, dokumenterHåndtertAvTidligereGenerasjoner, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
         val dokumenterUtenEndring = dokumentsporing
             .dokumenter
             .filterNot { dokument -> nyeGenerasjoner.generasjonHarHåndtert(dokument) }
@@ -510,6 +518,8 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
             sykdomstidslinje.path("periode").hasNonNull("fom")
         } ?: dokumentsporing.dokumenter.firstNotNullOfOrNull { dokument ->
             sykdomstidslinjesubsetting(dokument.id, sykmeldingsperiodeFom, sykmeldingsperiodeFom)
+        } ?: periode.path("sykdomstidslinje").deepCopy<ObjectNode>().takeIf { sykdomstidslinje ->
+            sykdomstidslinje.path("periode").hasNonNull("fom")
         }
         checkNotNull(sykdomstidslinje) {
             "sykdomstidslinjen er tom for vedtaksperiode"
@@ -517,7 +527,7 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
         val fom = sykdomstidslinje.path("periode").path("fom").asText().dato
         val tom = sykdomstidslinje.path("periode").path("tom").asText().dato
         val vilkårsgrunnlagId = generasjon.path("vilkårsgrunnlagId").asText().uuid
-        val forkastedeUtbetalingerSomEndring = endringerFraForkastetUtbetaling(forkastedeUtbetalinger, dokumenterHåndtertAvTidligereGenerasjoner, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
+        val forkastedeUtbetalingerSomEndring = endringerFraForkastetUtbetaling(periode, forkastedeUtbetalinger, dokumenterHåndtertAvTidligereGenerasjoner, opprettettidspunkt, sykmeldingsperiodeFom, sykmeldingsperiodeTom, tidligsteTidspunktForHendelse, tidspunktForUtbetalingOpprettelse)
         val utbetalingOpprettet = checkNotNull(tidspunktForUtbetalingOpprettelse(utbetalingId)) {
             "forventer å finne tidspunkt for når utbetaling er opprettet"
         }
@@ -578,11 +588,13 @@ internal class V275GenerasjonMedEndringer: JsonMigration(275) {
             dokument in dokumenterHåndtertAvTidligereGenerasjoner
         }
 
-    private fun endringerFraForkastetUtbetaling(forkastedeUtbetalinger: List<ObjectNode>, dokumenterHåndtertAvTidligereGenerasjoner: MutableList<Dokumentsporing>, opprettettidspunkt: LocalDateTime, sykmeldingsperiodeFom: LocalDate, sykmeldingsperiodeTom: LocalDate, tidligsteTidspunktForHendelse: (UUID) -> LocalDateTime?, tidspunktForUtbetalingOpprettelse: (UUID) -> LocalDateTime?): List<ObjectNode> {
+    private fun endringerFraForkastetUtbetaling(periode: JsonNode, forkastedeUtbetalinger: List<ObjectNode>, dokumenterHåndtertAvTidligereGenerasjoner: MutableList<Dokumentsporing>, opprettettidspunkt: LocalDateTime, sykmeldingsperiodeFom: LocalDate, sykmeldingsperiodeTom: LocalDate, tidligsteTidspunktForHendelse: (UUID) -> LocalDateTime?, tidspunktForUtbetalingOpprettelse: (UUID) -> LocalDateTime?): List<ObjectNode> {
         return forkastedeUtbetalinger.flatMap { forkastet ->
             val dokumenter = forkastet.path("dokumentsporing").dokumenter
             val sisteHendelse = dokumenter.last()
-            val forkastetSykdomstidslinje = forkastet.path("sykdomstidslinje").deepCopy<ObjectNode>()
+            val forkastetSykdomstidslinje = forkastet.path("sykdomstidslinje").deepCopy<ObjectNode>().takeIf { sykdomstidslinje ->
+                sykdomstidslinje.path("periode").hasNonNull("fom")
+            } ?: periode.path("sykdomstidslinje").deepCopy()
             val forkastetUtbetalingId = forkastet.path("utbetalingId").asText().uuid
             val forkastetVilkårsgrunnlagId = forkastet.path("vilkårsgrunnlagId").asText().uuid
             val forkastetUtbetalingOpprettet = checkNotNull(tidspunktForUtbetalingOpprettelse(forkastetUtbetalingId)) {
