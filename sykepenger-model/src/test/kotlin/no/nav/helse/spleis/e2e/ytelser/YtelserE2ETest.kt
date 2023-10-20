@@ -29,6 +29,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertInfo
@@ -133,7 +136,33 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertIngenFunksjonelleFeil()
     }
 
+    @Test
+    fun `forlengelse trenger ikke sjekke mot 4-ukers vindu`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
 
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode,
+            foreldrepenger = listOf(20.januar til 31.januar),
+            omsorgspenger = listOf(20.januar til 31.januar),
+            opplæringspenger = listOf(20.januar til 31.januar),
+            pleiepenger = listOf(20.januar til 31.januar)
+        )
+        assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
+        assertVarsel(RV_AY_6, 1.vedtaksperiode.filter())
+        assertVarsel(RV_AY_7, 1.vedtaksperiode.filter())
+        assertVarsel(RV_AY_8, 1.vedtaksperiode.filter())
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode,
+            foreldrepenger = listOf(20.januar til 31.januar),
+            omsorgspenger = listOf(20.januar til 31.januar),
+            opplæringspenger = listOf(20.januar til 31.januar),
+            pleiepenger = listOf(20.januar til 31.januar)
+        )
+        assertIngenVarsler(2.vedtaksperiode.filter())
+    }
     @Test
     fun `Omsorgspenger starter mer enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))

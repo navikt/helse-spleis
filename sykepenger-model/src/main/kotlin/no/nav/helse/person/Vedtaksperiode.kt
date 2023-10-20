@@ -993,7 +993,7 @@ internal class Vedtaksperiode private constructor(
         person.valider(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt)
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, organisasjonsnummer)
         val maksimumSykepenger = beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger) ?: return false
-        ytelser.valider(periode, skjæringstidspunkt, maksimumSykepenger.sisteDag())
+        ytelser.valider(periode, skjæringstidspunkt, maksimumSykepenger.sisteDag(), erForlengelse())
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 

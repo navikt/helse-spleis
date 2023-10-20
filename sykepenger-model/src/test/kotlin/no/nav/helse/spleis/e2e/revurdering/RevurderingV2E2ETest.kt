@@ -987,7 +987,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
         assertIngenVarsler(1.vedtaksperiode.filter())
-        assertVarsel(RV_AY_5, 2.vedtaksperiode.filter())
         assertVarsel(RV_UT_23, 2.vedtaksperiode.filter())
     }
 

@@ -8,13 +8,14 @@ class Foreldrepermisjon(
     private val svangerskapsytelse: List<Periode>
 ) {
 
-    internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode): Boolean {
+    internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
         if (foreldrepengeytelse.isEmpty() && svangerskapsytelse.isEmpty()) {
             aktivitetslogg.info("Bruker har ingen foreldrepenge- eller svangerskapsytelser")
             return false
         }
+        val overlappsperiode = if (erForlengelse) sykdomsperiode else sykdomsperiode.familieYtelserPeriode
         return (foreldrepengeytelse + svangerskapsytelse)
-                .any { ytelse -> ytelse.overlapperMed(sykdomsperiode.familieYtelserPeriode) }
+                .any { ytelse -> ytelse.overlapperMed(overlappsperiode) }
     }
 
 }
