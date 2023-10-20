@@ -5,6 +5,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -31,6 +32,8 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.OmgjøringVedInfotrygdendring::class)
@@ -44,6 +47,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertVarsel(RV_IT_14, 1.vedtaksperiode.filter())
         assertInfo("AUU vil omgjøres, men avventer å starte omgjøring ettersom vi vil ende opp med å spørre om inntektsmelding", 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertIngenOverlappendeInfotrygdutbetaling()
     }
 
     @Test
@@ -56,6 +60,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+        assertIngenOverlappendeInfotrygdutbetaling()
     }
 
     @Test
@@ -64,6 +69,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, varselkode = RV_IT_3)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
     }
 
     @Test
@@ -73,6 +79,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 15.januar, 100.prosent, INNTEKT))
         assertInfo("AUU vil omgjøres, men avventer å starte omgjøring ettersom vi vil ende opp med å spørre om inntektsmelding", 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
     }
 
     @Test
@@ -83,6 +90,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 15.januar, 100.prosent, INNTEKT))
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
     }
 
     @Test
@@ -94,6 +102,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
     }
 
     @Test
@@ -104,6 +113,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, varselkode = RV_IT_3)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
     }
 
     @Test
@@ -116,6 +126,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, varselkode = RV_IT_3) // Kan forkastes slik forkastingslogikken er nå, ettersom IT-utbetaling "dekker" for arbeidsgiverperioden
         assertTilstander(2.vedtaksperiode, AVSLUTTET)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
     }
 
     @Test
@@ -128,5 +139,16 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertIngenOverlappendeInfotrygdutbetaling()
+    }
+
+    private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiode: IdInnhenter) {
+        val overlapp = observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.single()
+        assertEquals(vedtaksperiode.id(ORGNUMMER), overlapp.vedtaksperiodeId)
+        assertEquals("AVSLUTTET_UTEN_UTBETALING", overlapp.vedtaksperiodetilstand)
+    }
+
+    private fun assertIngenOverlappendeInfotrygdutbetaling() {
+        assertTrue(observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.isEmpty())
     }
 }
