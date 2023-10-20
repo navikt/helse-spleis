@@ -1,0 +1,113 @@
+{
+  "aktørId" : "42",
+  "fødselsnummer" : "12029240045",
+  "opprettet" : "2023-10-16T12:40:20.938744",
+  "fødselsdato" : "1992-02-12",
+  "dødsdato" : null,
+  "arbeidsgivere" : [ {
+    "inntektshistorikk" : [ ],
+    "sykdomshistorikk" : [ {
+      "id" : "fed29cbf-06cf-45f2-ac2e-d6da890fcf02",
+      "hendelseId" : "e6db468c-502f-4fa8-84a3-36f75bd7f4f5",
+      "tidsstempel" : "2023-10-16T12:40:20.939356",
+      "hendelseSykdomstidslinje" : {
+        "låstePerioder" : [ {
+          "fom" : "2018-01-03",
+          "tom" : "2018-01-17"
+        } ],
+        "periode" : {
+          "fom" : "2018-01-03",
+          "tom" : "2018-01-17"
+        },
+        "dager" : [ {
+          "fom" : "2018-01-03",
+          "tom" : "2018-01-17",
+          "type" : "SYKEDAG",
+          "kilde" : {
+            "type" : "Søknad",
+            "id" : "e6db468c-502f-4fa8-84a3-36f75bd7f4f5",
+            "tidsstempel" : "2018-01-03T00:00:00"
+          },
+          "grad" : 100.0
+        } ]
+      },
+      "beregnetSykdomstidslinje" : {
+        "låstePerioder" : [ {
+          "fom" : "2018-01-03",
+          "tom" : "2018-01-17"
+        } ],
+        "periode" : {
+          "fom" : "2018-01-03",
+          "tom" : "2018-01-17"
+        },
+        "dager" : [ {
+          "fom" : "2018-01-03",
+          "tom" : "2018-01-17",
+          "type" : "SYKEDAG",
+          "kilde" : {
+            "type" : "Søknad",
+            "id" : "e6db468c-502f-4fa8-84a3-36f75bd7f4f5",
+            "tidsstempel" : "2018-01-03T00:00:00"
+          },
+          "grad" : 100.0
+        } ]
+      }
+    } ],
+    "sykmeldingsperioder" : [ ],
+    "utbetalinger" : [ ],
+    "vedtaksperioder" : [ {
+      "sykdomstidslinje" : {
+        "låstePerioder" : [ ],
+        "periode" : {
+          "fom" : "2018-01-03",
+          "tom" : "2018-01-17"
+        },
+        "dager" : [ {
+          "fom" : "2018-01-03",
+          "tom" : "2018-01-17",
+          "type" : "SYKEDAG",
+          "kilde" : {
+            "type" : "Søknad",
+            "id" : "e6db468c-502f-4fa8-84a3-36f75bd7f4f5",
+            "tidsstempel" : "2018-01-03T00:00:00"
+          },
+          "grad" : 100.0
+        } ]
+      },
+      "id" : "88ccd072-898d-4480-a175-9b7e37026956",
+      "fom" : "2018-01-03",
+      "tom" : "2018-01-17",
+      "sykmeldingFom" : "2018-01-03",
+      "sykmeldingTom" : "2018-01-17",
+      "hendelseIder" : [ {
+        "dokumentId" : "e6db468c-502f-4fa8-84a3-36f75bd7f4f5",
+        "dokumenttype" : "Søknad"
+      } ],
+      "tilstand" : "AVSLUTTET_UTEN_UTBETALING",
+      "generasjoner" : [ ],
+      "skjæringstidspunkt" : "2018-01-03",
+      "opprettet" : "2023-10-16T12:40:20.939277",
+      "oppdatert" : "2023-10-16T12:40:20.94042"
+    } ],
+    "forkastede" : [ ],
+    "refusjonshistorikk" : [ ],
+    "id" : "22a68af6-f26c-494f-b9e9-259c3183aa67",
+    "organisasjonsnummer" : "a1",
+    "beregnetUtbetalingstidslinjer" : [ ],
+    "refusjonOpphører" : [ ],
+    "feriepengeutbetalinger" : [ ]
+  } ],
+  "infotrygdhistorikk" : [ {
+    "id" : "a542cf2b-a0ca-40f7-a60f-16f544832593",
+    "tidsstempel" : "2023-10-16T12:40:20.939613",
+    "hendelseId" : "fb9b6b11-560e-40a4-9a7a-b193fd7823d4",
+    "ferieperioder" : [ ],
+    "arbeidsgiverutbetalingsperioder" : [ ],
+    "personutbetalingsperioder" : [ ],
+    "inntekter" : [ ],
+    "arbeidskategorikoder" : { },
+    "oppdatert" : "2023-10-16T12:40:20.939605"
+  } ],
+  "vilkårsgrunnlagHistorikk" : [ ],
+  "skjemaVersjon" : 273
+}

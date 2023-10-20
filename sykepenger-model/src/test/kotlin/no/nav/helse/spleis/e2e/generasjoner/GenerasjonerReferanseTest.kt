@@ -36,7 +36,7 @@ import kotlin.io.path.writeText
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GenerasjonerReferanseTest : AbstractDslTest() {
     private companion object {
-        private const val testversjon = 274
+        private const val testversjon = 276
     }
     private val tester = mutableMapOf<Int, Pair<String, String>>()
     @AfterAll

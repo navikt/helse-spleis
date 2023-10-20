@@ -6,21 +6,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.serde.migration.V275GenerasjonMedEndringer.Dokumentsporing.Companion.dokumenter
-import no.nav.helse.serde.migration.V275GenerasjonMedEndringer.Dokumentsporing.Companion.dokumentsporing
+import no.nav.helse.serde.migration.V276GenerasjonMedEndringer.Dokumentsporing.Companion.dokumenter
+import no.nav.helse.serde.migration.V276GenerasjonMedEndringer.Dokumentsporing.Companion.dokumentsporing
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V275GenerasjonMedEndringer: JsonMigration(275) {
-    override val description = "dry run av migrering for å legge til <endringer> på generasjoner"
+internal class V276GenerasjonMedEndringer: JsonMigration(276) {
+    override val description = "legger til <endringer> på generasjoner"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
-        val aktør = jsonNode.path("aktørId").asText()
-        try {
-            migrer(jsonNode.deepCopy())
-        } catch (err: Exception) {
-            sikkerlogg.info("[V275] $aktør Ville ha trynet med feil: $err", err)
-        }
+        migrer(jsonNode)
     }
 
     private fun migrer(jsonNode: ObjectNode) {
