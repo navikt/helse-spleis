@@ -2217,11 +2217,6 @@ internal class Vedtaksperiode private constructor(
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             }
 
-            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) {
-                hendelse.info("AUU vil omgjøres, men avventer å starte omgjøring ettersom vi vil ende opp med å spørre om inntektsmelding")
-                return true // Toggle er på, så vil ikke kjøre den "gamle" koden selv om vi ikke starter omgjøring nå
-            }
-
             hendelse.varsel(RV_IT_38)
             vedtaksperiode.person.igangsettOverstyring(
                 hendelse,
