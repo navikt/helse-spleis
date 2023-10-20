@@ -1,0 +1,70 @@
+name: Generasjoner dev
+
+on:
+  push:
+    branches:
+      - generasjoner
+
+env:
+  ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  set_version:
+    name: set image name
+    runs-on: ubuntu-latest
+    steps:
+      - name: create docker tag
+        run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+    outputs:
+      image_spleis: ghcr.io/${{ github.repository }}/spleis:generasjoner-${{ env.TAG }}
+      image_spleis_api: ghcr.io/${{ github.repository }}/spleis-api:generasjoner-${{ env.TAG }}
+
+  build:
+    name: build docker image
+    runs-on: ubuntu-latest-16-cores
+    needs: set_version
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17.x'
+          cache: 'gradle'
+      - name: test and build
+        run: ./gradlew clean test build
+      - name: build spleis
+        run: docker build -f Dockerfile sykepenger-mediators --pull -t ${{ needs.set_version.outputs.image_spleis }}
+      - name: build spleis-api
+        run: docker build -f Dockerfile sykepenger-api --pull -t ${{ needs.set_version.outputs.image_spleis_api }}
+      - name: push docker images
+        run: |
+          docker login ghcr.io --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }}
+          docker push ${{ needs.set_version.outputs.image_spleis }}
+          docker push ${{ needs.set_version.outputs.image_spleis_api }}
+
+  deploy-spleis:
+    name: deploy spleis to dev
+    needs: [set_version, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/dev.yml,deploy/db-dev.yml
+          IMAGE: ${{ needs.set_version.outputs.image_spleis }}
+  deploy-spleis-api:
+    name: deploy spleis-api to dev
+    needs: [set_version, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/dev-api.yml
+          IMAGE: ${{ needs.set_version.outputs.image_spleis_api }}
