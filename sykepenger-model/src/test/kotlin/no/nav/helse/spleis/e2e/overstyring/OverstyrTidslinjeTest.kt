@@ -119,9 +119,10 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         nyttVedtak(11.februar, 28.februar, arbeidsgiverperiode = listOf(1.februar til 4.februar, 7.februar til 18.februar))
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[5.februar]::class)
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[6.februar]::class)
+        nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(16.januar til 31.januar),)
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
 
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(5.februar, Dagtype.Sykedag, 100),

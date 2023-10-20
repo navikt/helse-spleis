@@ -178,7 +178,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     }
 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
-        generasjoner.last().dokumentHåndtert(dokumentsporing)
+        generasjoner.any { it.dokumentHåndtert(dokumentsporing) }
 
     fun håndterEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
         val generasjon = generasjoner.last().håndterEndring(arbeidsgiver, hendelse) ?: return
@@ -737,6 +737,8 @@ enum class Periodetilstand {
                 override fun tillaterNyGenerasjon(generasjon: Generasjon, other: Generasjon): Boolean {
                     return true
                 }
+
+                override fun avslutt(generasjon: Generasjon) {}
 
                 override fun sikreNyGenerasjon(generasjon: Generasjon): Generasjon {
                     return generasjon.sikreNyGenerasjon(UberegnetOmgjøring)
