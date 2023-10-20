@@ -108,7 +108,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_36
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
@@ -2178,12 +2177,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
             if (!vedtaksperiode.forventerInntekt()) return
-            if (håndterInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) return
-            validation(hendelse) {
-                onValidationFailed { vedtaksperiode.forkast(hendelse) }
-                valider { infotrygdhistorikk.valider(this, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer) }
-                valider(RV_IT_36) { erUpåvirketAvInfotrygdendringer(vedtaksperiode) }
-            }
+            håndterInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)
         }
 
         override fun håndter(
@@ -2204,13 +2198,12 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,
             infotrygdhistorikk: Infotrygdhistorikk
-        ): Boolean {
-            if (Toggle.OmgjøringVedInfotrygdendring.disabled) return false
+        ){
 
             if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode) && utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk)) {
                 hendelse.funksjonellFeil(RV_IT_3)
                 vedtaksperiode.person.forkastAuu(hendelse, vedtaksperiode)
-                return true
+                return
             }
 
             håndterRevurdering(hendelse) {
@@ -2222,15 +2215,6 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 Revurderingseventyr.infotrygdendring(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
-            return true
-        }
-
-
-        private fun erUpåvirketAvInfotrygdendringer(vedtaksperiode: Vedtaksperiode): Boolean {
-            if (!vedtaksperiode.forventerInntekt()) return true
-            val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return true
-            val situasjon = vedtaksperiode.arbeidsgiver.utbetalingssituasjon(arbeidsgiverperiode, listOf(vedtaksperiode.periode))
-            return situasjon != IKKE_UTBETALT
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {

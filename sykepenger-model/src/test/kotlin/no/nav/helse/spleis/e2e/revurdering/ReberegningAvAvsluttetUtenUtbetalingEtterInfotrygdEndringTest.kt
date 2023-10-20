@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -35,7 +33,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.OmgjøringVedInfotrygdendring::class)
 internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : AbstractEndToEndTest() {
 
     @Test

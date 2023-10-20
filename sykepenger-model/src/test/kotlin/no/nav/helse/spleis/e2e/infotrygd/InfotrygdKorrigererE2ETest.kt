@@ -108,7 +108,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterYtelser(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
         håndterYtelser(3.vedtaksperiode)
 
         assertEquals(5, inspektør.utbetalinger.size)

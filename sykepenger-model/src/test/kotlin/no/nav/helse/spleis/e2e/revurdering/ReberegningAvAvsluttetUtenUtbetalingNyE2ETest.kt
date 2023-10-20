@@ -952,20 +952,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `utbetalinger i infotrygd etterpå`() {
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar))
-        håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(21.februar, 11.mars))
-        håndterSøknad(Sykdom(21.februar, 11.mars, 100.prosent))
-
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.februar, 11.mars, 100.prosent, INNTEKT))
-
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
         val forMyeInntekt = INNTEKT * 1.2
         val riktigInntekt = INNTEKT
@@ -1253,33 +1239,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 17.januar, 100.prosent, INNTEKT))
         assertFunksjonellFeil(RV_IT_3, 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `allerede utbetalt i Infotrygd med utbetaling etterpå`() {
-        nyPeriode(2.januar til 17.januar)
-        nyPeriode(18.januar til 31.januar)
-
-        håndterInntektsmelding(listOf(2.januar til 17.januar),)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertEquals(2.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertEquals(2.januar til 17.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-
-        nullstillTilstandsendringer()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 17.januar, 100.prosent, INNTEKT))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        assertEquals(17.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertEquals(null, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
