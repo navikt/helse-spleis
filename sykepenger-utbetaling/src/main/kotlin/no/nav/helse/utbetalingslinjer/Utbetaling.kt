@@ -405,6 +405,10 @@ class Utbetaling private constructor(
                 annulleringer.any { annullering -> annullering.hørerSammen(utbetaling) }
             }
         }
+        fun kanForkastes(vedtaksperiodeUtbetalingen: Utbetaling, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
+            val annulleringer = arbeidsgiverUtbetalinger.filter { it.erAnnullering() && it.tilstand != Forkastet }
+            return annulleringer.any { annullering -> annullering.hørerSammen(vedtaksperiodeUtbetalingen) }
+        }
     }
 
     fun accept(visitor: UtbetalingVisitor) {
