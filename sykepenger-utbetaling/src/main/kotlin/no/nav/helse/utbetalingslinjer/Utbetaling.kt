@@ -35,7 +35,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class Utbetaling private constructor(
-    private val id: UUID,
+    val id: UUID,
     private val korrelasjonsId: UUID,
     private val beregningId: UUID,
     private val periode: Periode,
@@ -186,11 +186,6 @@ class Utbetaling private constructor(
     fun valider(simulering: Simulering) {
         arbeidsgiverOppdrag.valider(simulering)
         personOppdrag.valider(simulering)
-    }
-
-    fun build(builder: UtbetalingVedtakFattetBuilder) {
-        builder.utbetalingId(id)
-        vurdering?.build(builder)
     }
 
     fun håndter(hendelse: AnnullerUtbetaling) {
@@ -797,10 +792,6 @@ class Utbetaling private constructor(
                 utbetaling.type == ANNULLERING -> Annullert
                 else -> GodkjentUtenUtbetaling
             }
-
-        fun build(builder: UtbetalingVedtakFattetBuilder) {
-            builder.utbetalingVurdert(tidspunkt)
-        }
     }
 
 }

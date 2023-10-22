@@ -33,8 +33,11 @@ private class ArbeidsgiverMixin
 @JsonIgnoreProperties("person", "arbeidsgiver", "arbeidsgiverjurist")
 private class VedtaksperiodeMixin
 
-@JsonIgnoreProperties("arbeidsgiver")
+@JsonIgnoreProperties("observatører")
 private class GenerasjonerMixin
+
+@JsonIgnoreProperties("observatører")
+private class GenerasjonMixin
 
 @JsonIgnoreProperties("observers", "forrigeHendelse")
 private class UtbetalingMixin
@@ -74,6 +77,7 @@ private val objectMapper = jacksonObjectMapper()
             Arbeidsgiver::class.java to ArbeidsgiverMixin::class.java,
             Vedtaksperiode::class.java to VedtaksperiodeMixin::class.java,
             Generasjoner::class.java to GenerasjonerMixin::class.java,
+            Generasjoner.Generasjon::class.java to GenerasjonMixin::class.java,
             Utbetaling::class.java to UtbetalingMixin::class.java,
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,

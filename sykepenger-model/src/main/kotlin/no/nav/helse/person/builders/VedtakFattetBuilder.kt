@@ -13,7 +13,6 @@ import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfa
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
-import no.nav.helse.utbetalingslinjer.UtbetalingVedtakFattetBuilder
 import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
 
@@ -26,7 +25,7 @@ internal class VedtakFattetBuilder(
     private val hendelseIder: Set<UUID>,
     private val skjæringstidspunkt: LocalDate,
     private val tags: MutableSet<Tag> = mutableSetOf()
-): UtbetalingVedtakFattetBuilder {
+) {
     private var sykepengegrunnlag =  Inntekt.INGEN
     private var beregningsgrunnlag = Inntekt.INGEN
     private var begrensning: Begrensning? = null
@@ -34,8 +33,8 @@ internal class VedtakFattetBuilder(
     private var vedtakFattetTidspunkt = LocalDateTime.now()
     private var utbetalingId: UUID? = null
 
-    override fun utbetalingId(id: UUID) = apply { this.utbetalingId = id }
-    override fun utbetalingVurdert(tidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = tidspunkt }
+    internal fun utbetalingId(id: UUID) = apply { this.utbetalingId = id }
+    internal fun utbetalingVurdert(tidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = tidspunkt }
     internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
     internal fun beregningsgrunnlag(beregningsgrunnlag: Inntekt) = apply { this.beregningsgrunnlag = beregningsgrunnlag }
     internal fun begrensning(begrensning: Begrensning) = apply { this.begrensning = begrensning }

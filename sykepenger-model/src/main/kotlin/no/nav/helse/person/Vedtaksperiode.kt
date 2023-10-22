@@ -6,6 +6,7 @@ import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
+import net.logstash.logback.argument.StructuredArguments.v
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
@@ -83,6 +84,7 @@ import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_AVSLUTTES
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_UTBETALES
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -95,6 +97,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -155,7 +158,7 @@ internal class Vedtaksperiode private constructor(
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
     private val arbeidsgiverjurist: MaskinellJurist
-) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
+) : Aktivitetskontekst, Comparable<Vedtaksperiode>, GenerasjonObserver {
 
     private val sykmeldingsperiode = generasjoner.sykmeldingsperiode()
     private val periode get() = generasjoner.periode()
@@ -189,6 +192,10 @@ internal class Vedtaksperiode private constructor(
     ) {
         kontekst(søknad)
         person.vedtaksperiodeOpprettet(id, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
+    }
+
+    init {
+        generasjoner.addObserver(this)
     }
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
@@ -668,15 +675,9 @@ internal class Vedtaksperiode private constructor(
         tilstand(vilkårsgrunnlag, nesteTilstand)
     }
 
-    private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse, onUtbetalt: () -> Unit) {
-        if (hendelse.harFunksjonelleFeilEllerVerre()) return hendelse.funksjonellFeil(RV_UT_5)
-        if (!generasjoner.erAvsluttet(hendelse)) return
-        onUtbetalt()
-    }
-
-    private fun ferdigstillVedtak(hendelse: IAktivitetslogg) {
-        sendVedtakFattet()
-        person.gjenopptaBehandling(hendelse)
+    private fun håndterUtbetalingHendelse(hendelse: UtbetalingHendelse) {
+        if (!hendelse.harFunksjonelleFeilEllerVerre()) return
+        hendelse.funksjonellFeil(RV_UT_5)
     }
 
     private fun trengerYtelser(hendelse: IAktivitetslogg) {
@@ -851,23 +852,51 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(event)
     }
 
-    private fun sendVedtakFattet() {
+    override fun avsluttetUtenVedtak(
+        generasjonId: UUID,
+        tidsstempel: LocalDateTime,
+        periode: Periode,
+        dokumentsporing: Set<UUID>
+    ) {
+        sendVedtakFattet(periode, dokumentsporing)
+    }
+
+    override fun vedtakIverksatt(
+        generasjonId: UUID,
+        tidsstempel: LocalDateTime,
+        periode: Periode,
+        dokumentsporing: Set<UUID>,
+        utbetalingId: UUID,
+        vedtakFattetTidspunkt: LocalDateTime
+    ) {
+        sendVedtakFattet(periode, dokumentsporing, utbetalingId, vedtakFattetTidspunkt)
+    }
+
+    private fun sendVedtakFattet(
+        periode: Periode,
+        dokumentsporing: Set<UUID>,
+        utbetalingId: UUID? = null,
+        vedtakFattetTidspunkt: LocalDateTime? = null
+    ) {
         val builder = VedtakFattetBuilder(
             fødselsnummer,
             aktørId,
             organisasjonsnummer,
             id,
             periode,
-            hendelseIder(),
+            dokumentsporing,
             skjæringstidspunkt
         )
 
         val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
-        this.finnArbeidsgiverperiode()?.tags(periode, builder, harPeriodeRettFør)
+        this.finnArbeidsgiverperiode()?.tags(this.periode, builder, harPeriodeRettFør)
 
-        generasjoner.build(builder)
+        if (utbetalingId != null) builder.utbetalingId(utbetalingId)
+        if (vedtakFattetTidspunkt != null) builder.utbetalingVurdert(vedtakFattetTidspunkt)
+
         person.build(skjæringstidspunkt, builder)
         person.vedtakFattet(builder.result())
+        person.gjenopptaBehandling(Aktivitetslogg())
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {
@@ -1337,9 +1366,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
-            vedtaksperiode.håndterUtbetalingHendelse(hendelse) {
-                vedtaksperiode.ferdigstillVedtak(hendelse)
-            }
+            vedtaksperiode.håndterUtbetalingHendelse(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -2082,10 +2109,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
-            vedtaksperiode.håndterUtbetalingHendelse(hendelse) {
-                vedtaksperiode.tilstand(hendelse, Avsluttet) {
-                    hendelse.info("OK fra Oppdragssystemet")
-                }
+            vedtaksperiode.håndterUtbetalingHendelse(hendelse)
+            if (!vedtaksperiode.generasjoner.erAvsluttet()) return
+            vedtaksperiode.tilstand(hendelse, Avsluttet) {
+                hendelse.info("OK fra Oppdragssystemet")
             }
         }
 
@@ -2106,7 +2133,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.lås()
             vedtaksperiode.generasjoner.avslutt()
             check(!vedtaksperiode.generasjoner.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
-            vedtaksperiode.ferdigstillVedtak(hendelse)
+            vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -2241,7 +2268,7 @@ internal class Vedtaksperiode private constructor(
             check(vedtaksperiode.generasjoner.erFattetVedtak()) {
                 "forventer at generasjonen skal ha fattet vedtak"
             }
-            vedtaksperiode.ferdigstillVedtak(hendelse)
+            vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
