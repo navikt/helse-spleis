@@ -30,7 +30,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.Person.Companion.Frilans
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
@@ -634,7 +633,7 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
                 personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(),
-                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id), // TODO: trengs dette lengre dersom én utbetaling === én vedtaksperiode?
+                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id), // TODO: denne kan slettes når spesialsaker ikke trengs automatiseres mer (eneste avhengighet er sporbar)
                 ident = ident
             )
         )
@@ -676,7 +675,7 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
                 personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(),
-                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id) + forkastede.iderMedUtbetaling(id), // TODO: trengs dette lengre dersom én utbetaling === én vedtaksperiode?
+                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id), // TODO: denne kan slettes når spesialsaker ikke trengs automatiseres mer (eneste avhengighet er sporbar)
                 ident = ident,
                 korrelasjonsId = korrelasjonsId
             )

@@ -42,7 +42,5 @@ internal class ForkastetVedtaksperiode(
                 .sorted()
                 .filter { arbeidsgiverperiode.hørerTil(it.periode()) }
 
-        internal fun List<ForkastetVedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
-            map { it.vedtaksperiode }.iderMedUtbetaling(utbetalingId)
     }
 }
