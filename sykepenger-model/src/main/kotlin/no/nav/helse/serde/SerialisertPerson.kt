@@ -201,6 +201,7 @@ import no.nav.helse.serde.migration.V273GenerasjonDokumentsporing
 import no.nav.helse.serde.migration.V274None
 import no.nav.helse.serde.migration.V275None
 import no.nav.helse.serde.migration.V276GenerasjonMedEndringer
+import no.nav.helse.serde.migration.V277UberegnetRevurdering
 import no.nav.helse.serde.migration.V27CachetSykdomstidslinjePåVedtaksperiode
 import no.nav.helse.serde.migration.V28HendelsesIderPåVedtaksperiode
 import no.nav.helse.serde.migration.V29LeggerTilInntektsKildeType
@@ -561,7 +562,8 @@ class SerialisertPerson(val json: String) {
             V273GenerasjonDokumentsporing(),
             V274None(),
             V275None(),
-            V276GenerasjonMedEndringer()
+            V276GenerasjonMedEndringer(),
+            V277UberegnetRevurdering()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
