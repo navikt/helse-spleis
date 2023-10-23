@@ -480,21 +480,39 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkaster gamle utbetalinger for flere AG`() {
+    fun `forkaster gamle utbetalinger for flere AG når der skjer endringer siden forrige`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(17.januar, Feriedag),
+            ManuellOverskrivingDag(18.januar, Feriedag)
+        ), a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Feriedag)), a1)
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(18.januar, Sykedag, 100)
+        ), a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+
+        inspektør(a1).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
+            assertEquals(3, utbetalinger.size)
+        }
+        inspektør(a1).utbetalinger(2.vedtaksperiode).also { utbetalinger ->
+            assertEquals(1, utbetalinger.size)
+        }
         inspektør(a2).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
-            assertEquals(4, utbetalinger.size)
+            assertEquals(3, utbetalinger.size)
+            assertEquals(100, utbetalinger.last().inspektør.utbetalingstidslinje[18.januar].økonomi.inspektør.totalGrad)
         }
         inspektør(a2).utbetalinger(2.vedtaksperiode).also { utbetalinger ->
-            assertEquals(2, utbetalinger.size)
+            assertEquals(1, utbetalinger.size)
         }
     }
 

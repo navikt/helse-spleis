@@ -1039,14 +1039,6 @@ internal class Vedtaksperiode private constructor(
         val skjæringstidspunktet = this.skjæringstidspunkt
         // lag utbetaling for seg selv + andre overlappende perioder hos andre arbeidsgivere (som ikke er utbetalt/avsluttet allerede)
         return person.nåværendeVedtaksperioder {
-            it === this || (
-                    it.arbeidsgiver !== this.arbeidsgiver
-                            && it.tilstand in setOf(AvventerBlokkerendePeriode, AvventerRevurdering)
-                            && this.periode.overlapperMed(it.periode)
-                            && skjæringstidspunktet == it.skjæringstidspunkt
-                    )
-        }
-        return person.nåværendeVedtaksperioder {
             it.generasjoner.klarForUtbetaling() && (
                 it === this || (
                         it.arbeidsgiver !== this.arbeidsgiver
@@ -1332,6 +1324,15 @@ internal class Vedtaksperiode private constructor(
             if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode))
                 return INNTEKTSMELDING fordi MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
             return null
+        }
+
+        override fun igangsettOverstyring(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            revurdering: Revurderingseventyr
+        ) {
+            super.igangsettOverstyring(vedtaksperiode, hendelse, revurdering)
+            vedtaksperiode.generasjoner.forkastUtbetaling(hendelse)
         }
 
         private fun loggDersomStuckRevurdering(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) {
@@ -1654,11 +1655,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
         }
 
-        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {}
-
-        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            // vedtaksperiode.generasjoner.forkastUtbetaling(aktivitetslogg)
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
+            vedtaksperiode.generasjoner.forkastUtbetaling(hendelse)
         }
+
         private fun tilstand(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>

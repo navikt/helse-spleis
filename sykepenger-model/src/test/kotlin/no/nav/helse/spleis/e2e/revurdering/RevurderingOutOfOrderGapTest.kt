@@ -512,9 +512,11 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
+        assertEquals(1, inspektør(a1).utbetalinger.size)
+        assertEquals(2, inspektør(a2).utbetalinger.size)
         val a1Utbetaling = inspektør(a1).utbetaling(0).inspektør
         val a2FørsteUtbetaling = inspektør(a2).utbetaling(0).inspektør
-        val a2AndreUtbetaling = inspektør(a2).utbetaling(2).inspektør
+        val a2AndreUtbetaling = inspektør(a2).utbetaling(1).inspektør
 
         assertEquals(a1Utbetaling.tilstand, Utbetalingstatus.UTBETALT)
         assertEquals(a2FørsteUtbetaling.tilstand, Utbetalingstatus.UTBETALT)

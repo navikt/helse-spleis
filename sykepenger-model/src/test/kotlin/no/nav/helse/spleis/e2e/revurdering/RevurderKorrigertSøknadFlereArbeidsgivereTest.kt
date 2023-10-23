@@ -264,10 +264,10 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a1 {
-            assertEquals(6, inspektør.utbetalinger.size)
+            assertEquals(4, inspektør.utbetalinger.size)
 
             inspektør.utbetaling(0).inspektør.also { januarutbetaling ->
-                val revurdering = inspektør.utbetaling(3).inspektør
+                val revurdering = inspektør.utbetaling(2).inspektør
                 assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(1.januar til 31.januar, januarutbetaling.periode)
                 assertEquals(1.januar til 31.januar, revurdering.periode)
@@ -284,8 +284,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 }
             }
 
-            inspektør.utbetaling(2).inspektør.also { marsutbetaling ->
-                val revurdering = inspektør.utbetaling(5).inspektør
+            inspektør.utbetaling(1).inspektør.also { marsutbetaling ->
+                val revurdering = inspektør.utbetaling(3).inspektør
                 assertEquals(marsutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(24.februar til 24.mars, marsutbetaling.periode)
                 assertEquals(24.februar til 24.mars, revurdering.periode)
@@ -295,9 +295,9 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             }
         }
         a2 {
-            assertEquals(4, inspektør.utbetalinger.size)
-            inspektør.utbetaling(1).inspektør.also { februarutbetaling ->
-                val revurdering = inspektør.utbetaling(3).inspektør
+            assertEquals(2, inspektør.utbetalinger.size)
+            inspektør.utbetaling(0).inspektør.also { februarutbetaling ->
+                val revurdering = inspektør.utbetaling(1).inspektør
                 assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(25.januar til 25.februar, februarutbetaling.periode)
                 assertEquals(25.januar til 25.februar, revurdering.periode)
@@ -572,10 +572,10 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a1 {
-            assertEquals(6, inspektør.utbetalinger.size)
+            assertEquals(4, inspektør.utbetalinger.size)
 
             inspektør.utbetaling(0).inspektør.also { januarutbetaling ->
-                val revurdering = inspektør.utbetaling(3).inspektør
+                val revurdering = inspektør.utbetaling(2).inspektør
                 assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(1.januar til 31.januar, januarutbetaling.periode)
                 assertEquals(1.januar til 31.januar, revurdering.periode)
@@ -584,8 +584,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
             }
 
-            inspektør.utbetaling(2).inspektør.also { marsutbetaling ->
-                val revurdering = inspektør.utbetaling(5).inspektør
+            inspektør.utbetaling(1).inspektør.also { marsutbetaling ->
+                val revurdering = inspektør.utbetaling(3).inspektør
                 assertEquals(marsutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(24.februar til 24.mars, marsutbetaling.periode)
                 assertEquals(24.februar til 24.mars, revurdering.periode)
@@ -596,10 +596,10 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a2 {
-            assertEquals(4, inspektør.utbetalinger.size)
+            assertEquals(2, inspektør.utbetalinger.size)
 
-            inspektør.utbetaling(1).inspektør.also { februarutbetaling ->
-                val revurdering = inspektør.utbetaling(3).inspektør
+            inspektør.utbetaling(0).inspektør.also { februarutbetaling ->
+                val revurdering = inspektør.utbetaling(1).inspektør
                 assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
                 assertEquals(25.januar til 25.februar, februarutbetaling.periode)
                 assertEquals(25.januar til 25.februar, revurdering.periode)

@@ -6,9 +6,11 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -53,6 +55,7 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -97,7 +100,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ag2 forkaster utbetaling tildelt av ag1`() {
+    fun `ag2 forkaster ikke utbetaling tildelt av ag1`() {
         nyPeriode(1.januar til 20.januar, a1)
         nyPeriode(1.januar til 20.januar, a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT/2, orgnummer = a1,)
@@ -109,6 +112,29 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
         håndterYtelser(orgnummer = a2)
         assertEquals(1, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
+        val ag2Utbetalinger = inspektør(a2).utbetalinger(1.vedtaksperiode)
+        assertEquals(1, ag2Utbetalinger.size)
+        assertEquals(Utbetalingstatus.IKKE_UTBETALT, ag2Utbetalinger[0].inspektør.tilstand)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2)
+    }
+
+    @Test
+    fun `ag2 forkaster utbetaling tildelt av ag1 om det har skjedd endringer i mellomtiden`() {
+        nyPeriode(1.januar til 20.januar, a1)
+        nyPeriode(1.januar til 20.januar, a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT/2, orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT/2, orgnummer = a2,)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Feriedag)), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        håndterYtelser(orgnummer = a2)
+        assertEquals(2, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
         val ag2Utbetalinger = inspektør(a2).utbetalinger(1.vedtaksperiode)
         assertEquals(2, ag2Utbetalinger.size)
         assertEquals(Utbetalingstatus.FORKASTET, ag2Utbetalinger[0].inspektør.tilstand)

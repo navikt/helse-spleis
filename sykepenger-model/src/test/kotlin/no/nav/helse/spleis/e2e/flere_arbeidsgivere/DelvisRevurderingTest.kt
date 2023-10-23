@@ -263,6 +263,6 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
             )
         }
         assertEquals(2, inspektør(a1).utbetalinger.size)
-        assertEquals(2, inspektør(a2).utbetalinger.size)
+        assertEquals(1, inspektør(a2).utbetalinger.size)
     }
 }

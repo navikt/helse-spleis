@@ -659,6 +659,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
+        assertEquals(1, inspektør(a2).utbetalinger.size)
         inspektør(a1).utbetaling(0).also { utbetaling ->
             assertEquals(2, utbetaling.inspektør.arbeidsgiverOppdrag.size)
             utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
@@ -671,7 +672,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             }
             assertTrue(utbetaling.inspektør.personOppdrag.isEmpty())
         }
-        inspektør(a2).utbetaling(1).also { utbetaling ->
+        assertEquals(1, inspektør(a2).utbetalinger.size)
+        inspektør(a2).utbetaling(0).also { utbetaling ->
             assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
             utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(1080, linje.beløp)
@@ -774,13 +776,15 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
+        assertEquals(1, inspektør(a1).utbetalinger.size)
         inspektør(a1).utbetaling(0).also { utbetaling ->
             val linje = utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør
             assertEquals(1431, linje.beløp)
             assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
             assertTrue(utbetaling.inspektør.personOppdrag.isEmpty())
         }
-        inspektør(a2).utbetaling(1).also { utbetaling ->
+        assertEquals(1, inspektør(a2).utbetalinger.size)
+        inspektør(a2).utbetaling(0).also { utbetaling ->
             val linje = utbetaling.inspektør.personOppdrag[0].inspektør
             assertEquals(730, linje.beløp)
             assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
