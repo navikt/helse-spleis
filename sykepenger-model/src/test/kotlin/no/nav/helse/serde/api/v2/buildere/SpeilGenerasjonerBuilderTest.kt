@@ -1,12 +1,15 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -2297,6 +2300,40 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.mars til 31.mars) medTilstand Utbetalt
                 beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+            }
+        }
+    }
+
+    @Test
+    fun `bygge generasjon mens periode er i Avventer historikk og forrige arbeidsgiver er utbetalt`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent) , orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent) , orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        generasjoner(a1) {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt medTilstand Utbetalt
+            }
+        }
+        generasjoner(a2) {
+            assertEquals(1, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Ubetalt medTilstand ForberederGodkjenning
             }
         }
     }
