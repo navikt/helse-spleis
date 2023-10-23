@@ -299,7 +299,7 @@ internal class SpeilGenerasjonerTest {
         oppdatert = LocalDateTime.now(),
         periodetilstand = Periodetilstand.IngenUtbetaling,
         skjæringstidspunkt = periode.start,
-        hendelser = emptyList()
+        hendelser = emptySet()
     )
     private fun beregnetPeriode(periode: Periode, utbetaling: Utbetaling, vedtaksperiodeId: UUID = UUID.randomUUID(), vilkårsgrunnlagId: UUID = UUID.randomUUID(), forrigeGenerasjon: BeregnetPeriode? = null) = BeregnetPeriode(
         vedtaksperiodeId = vedtaksperiodeId,
@@ -319,7 +319,7 @@ internal class SpeilGenerasjonerTest {
         forbrukteSykedager = 0,
         maksdato = 28.desember,
         utbetaling = utbetaling,
-        hendelser = emptyList(),
+        hendelser = emptySet(),
         periodevilkår = BeregnetPeriode.Vilkår(
             BeregnetPeriode.Sykepengedager(periode.start, 28.desember, 0, 0, true),
             BeregnetPeriode.Alder(30, true)
@@ -340,7 +340,7 @@ internal class SpeilGenerasjonerTest {
         beregnet = LocalDateTime.now(),
         oppdatert = LocalDateTime.now(),
         periodetilstand = Periodetilstand.Annullert,
-        hendelser = emptyList(),
+        hendelser = emptySet(),
         beregningId = UUID.randomUUID(),
         utbetaling = utbetaling
     )

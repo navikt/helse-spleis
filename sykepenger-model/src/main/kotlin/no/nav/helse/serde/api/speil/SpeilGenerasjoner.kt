@@ -86,7 +86,7 @@ class SpeilGenerasjoner {
         class AktivGenerasjon(private val forrigeBeregnet: BeregnetPeriode) : Byggetilstand {
             override fun utbetaltPeriode(generasjoner: SpeilGenerasjoner, periode: BeregnetPeriode) {
                 // en tidligere utbetalt periode vil bety at en tidligere uberegnet periode er omgjort/eller er out of order
-                if (periode < forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, EndringITidligerePeriodeGenerasjon(periode))
+                if (periode < forrigeBeregnet) return generasjoner.leggTilNyRadOgPeriode(periode, RevurdertGenerasjon(periode))
                 generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
             }
 

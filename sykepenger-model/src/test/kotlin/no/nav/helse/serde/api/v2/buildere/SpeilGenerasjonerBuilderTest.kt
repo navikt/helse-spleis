@@ -924,9 +924,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `kort periode med forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)

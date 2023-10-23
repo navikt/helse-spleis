@@ -160,5 +160,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[1].tilstand)
             }
         }
+        val rr = serializeForSpeil()
+        val a = 1
     }
 }

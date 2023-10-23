@@ -67,7 +67,7 @@ abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val oppdatert: LocalDateTime
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
-    abstract val hendelser: List<HendelseDTO>
+    abstract val hendelser: Set<HendelseDTO>
     abstract val sorteringstidspunkt: LocalDateTime
 
     internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): SpeilTidslinjeperiode {
@@ -116,7 +116,7 @@ data class UberegnetVilkårsprøvdPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: List<HendelseDTO>,
+    override val hendelser: Set<HendelseDTO>,
     val vilkårsgrunnlagId: UUID
 ) : SpeilTidslinjeperiode() {
 
@@ -160,7 +160,7 @@ data class UberegnetPeriode(
     override val sorteringstidspunkt: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: List<HendelseDTO>
+    override val hendelser: Set<HendelseDTO>
 ) : SpeilTidslinjeperiode() {
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
@@ -183,27 +183,26 @@ data class UberegnetPeriode(
         return this.copy(periodetype = periodetype)
     }
 
+    fun medOpplysningerFra(other: UberegnetPeriode): SpeilTidslinjeperiode {
+        return this.copy(
+            hendelser = this.hendelser + other.hendelser,
+            sammenslåttTidslinje = other.sammenslåttTidslinje
+        )
+    }
+
     internal class Builder(
         private val vedtaksperiodeId: UUID,
         private val skjæringstidspunkt: LocalDate,
         private val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        private val generasjonOpprettet: LocalDateTime,
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
-        private val hendelser: List<HendelseDTO>
+        private val hendelser: Set<HendelseDTO>
     ) {
-        private var forrigeBeregnetPeriode: BeregnetPeriode? = null
         private lateinit var sykdomstidslinje: List<Sykdomstidslinjedag>
 
-        fun medForrigeBeregnetPeriode(beregnetPeriode: BeregnetPeriode) {
-            forrigeBeregnetPeriode = beregnetPeriode
-        }
-
-        internal fun build(): UberegnetPeriode? {
-            // det er ikke vits å lage en Uberegnet periode dersom vedtaksperioden er helt avsluttet
-            if (tilstand in setOf(Vedtaksperiode.Avsluttet)) return null
-            // det er ikke vits å lage en Uberegnet periode dersom forrige beregnet periode faktisk ikke er avsluttet
-            if (forrigeBeregnetPeriode?.utbetaling?.status in setOf(Utbetalingstatus.Overført, Utbetalingstatus.Godkjent, Utbetalingstatus.Ubetalt, Utbetalingstatus.IkkeGodkjent)) return null
+        internal fun build(): UberegnetPeriode {
             return UberegnetPeriode(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fom = periode.start,
@@ -212,14 +211,14 @@ data class UberegnetPeriode(
                 periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
                 inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
                 erForkastet = false,
-                sorteringstidspunkt = if (forrigeBeregnetPeriode == null) opprettet else oppdatert,
+                sorteringstidspunkt = generasjonOpprettet,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 periodetilstand = when (tilstand) {
                     is Vedtaksperiode.AvsluttetUtenUtbetaling -> Periodetilstand.IngenUtbetaling
-                    is Vedtaksperiode.AvventerRevurdering -> if (forrigeBeregnetPeriode == null) VenterPåAnnenPeriode else UtbetaltVenterPåAnnenPeriode
+                    is Vedtaksperiode.AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode
                     is Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
 
                     is Vedtaksperiode.AvventerHistorikk,
@@ -258,7 +257,7 @@ data class BeregnetPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: List<HendelseDTO>,
+    override val hendelser: Set<HendelseDTO>,
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
     val beregningId: UUID,
@@ -373,13 +372,13 @@ data class BeregnetPeriode(
         private val vedtaksperiode: Vedtaksperiode,
         private val vedtaksperiodeId: UUID,
         private val periodetilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        private val generasjonOpprettet: LocalDateTime,
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
-        private val hendelser: List<HendelseDTO>,
+        private val hendelser: Set<HendelseDTO>,
         private val forrigeBeregnetPeriode: BeregnetPeriode?
     ) {
-        private lateinit var beregnet: LocalDateTime
         private lateinit var skjæringstidspunkt: LocalDate
         private lateinit var utbetalingId: UUID
         private lateinit var korrelasjonsId: UUID
@@ -428,7 +427,7 @@ data class BeregnetPeriode(
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 maksdato = maksdato,
-                beregnet = beregnet,
+                beregnet = generasjonOpprettet,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
                 periodevilkår = periodevilkår(alder, skjæringstidspunkt, avgrensetUtbetalingstidslinje, hendelser),
@@ -473,7 +472,7 @@ data class BeregnetPeriode(
             alder: no.nav.helse.Alder,
             skjæringstidspunkt: LocalDate,
             avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>,
-            hendelser: List<HendelseDTO>
+            hendelser: Set<HendelseDTO>
         ): Vilkår {
             val sisteSykepengedag = avgrensetUtbetalingstidslinje.sisteNavDag()?.dato ?: periode.endInclusive
             val sykepengedager = Sykepengedager(skjæringstidspunkt, maksdato, forbrukteSykedager, gjenståendeSykedager, maksdato > sisteSykepengedag)
@@ -492,7 +491,7 @@ data class BeregnetPeriode(
             forbrukteSykedager: Int,
             gjenståendeDager: Int
         ) = apply {
-            medUtbetaling(Utbetalingtype.UTBETALING, id, korrelasjonsId, status, opprettet, maksdato, forbrukteSykedager, gjenståendeDager)
+            medUtbetaling(Utbetalingtype.UTBETALING, id, korrelasjonsId, status, maksdato, forbrukteSykedager, gjenståendeDager)
         }
         internal fun medRevurdering(
             id: UUID,
@@ -503,7 +502,7 @@ data class BeregnetPeriode(
             forbrukteSykedager: Int,
             gjenståendeDager: Int
         ) = apply {
-            medUtbetaling(Utbetalingtype.REVURDERING, id, korrelasjonsId, status, opprettet, maksdato, forbrukteSykedager, gjenståendeDager)
+            medUtbetaling(Utbetalingtype.REVURDERING, id, korrelasjonsId, status, maksdato, forbrukteSykedager, gjenståendeDager)
         }
 
         private fun medUtbetaling(
@@ -511,7 +510,6 @@ data class BeregnetPeriode(
             id: UUID,
             korrelasjonsId: UUID,
             status: String,
-            opprettet: LocalDateTime,
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeDager: Int
@@ -520,7 +518,6 @@ data class BeregnetPeriode(
             this.korrelasjonsId = korrelasjonsId
             this.utbetalingstatus = utledStatus(type, status)
             this.utbetalingId = id
-            this.beregnet = opprettet
             this.maksdato = maksdato
             this.forbrukteSykedager = forbrukteSykedager
             this.gjenståendeSykedager = gjenståendeDager
@@ -582,7 +579,7 @@ data class AnnullertPeriode(
     val beregnet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
-    override val hendelser: List<HendelseDTO>,
+    override val hendelser: Set<HendelseDTO>,
 
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
