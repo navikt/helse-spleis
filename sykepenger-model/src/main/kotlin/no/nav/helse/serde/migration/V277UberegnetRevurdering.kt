@@ -37,7 +37,7 @@ internal class V277UberegnetRevurdering: JsonMigration(277) {
         val endring = lagEndring(sisteDokumentsporing.id, sisteDokumentsporing.type, vedtaksperiodeOppdatert, sisteEndring.path("sykmeldingsperiodeFom").asText().dato, sisteEndring.path("sykmeldingsperiodeTom").asText().dato, sisteEndring.path("sykdomstidslinje").deepCopy(), null, null)
         val nyGenerasjon = lagGenerasjon("UBEREGNET_REVURDERING", vedtaksperiodeOppdatert, sisteGenerasjon.path("fom").asText().dato, sisteGenerasjon.path("tom").asText().dato, listOf(endring), null, null)
 
-        sikkerlogg.info("[V277] Lager ny UBEREGNET_REVURDERING for ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon")
+        sikkerlogg.info("[V277] $aktørId Lager ny UBEREGNET_REVURDERING for ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon")
         generasjoner.add(nyGenerasjon)
     }
 
