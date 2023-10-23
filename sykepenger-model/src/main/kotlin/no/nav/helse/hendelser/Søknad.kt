@@ -177,10 +177,16 @@ class Søknad(
     }
 
     class Merknad(private val type: String) {
+        private companion object {
+            private val tilbakedateringer = setOf(
+                "UGYLDIG_TILBAKEDATERING",
+                "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER",
+                "UNDER_BEHANDLING"
+            )
+        }
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
-            if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
-                aktivitetslogg.varsel(RV_SØ_3)
-            }
+            if (type !in tilbakedateringer) return
+            aktivitetslogg.varsel(RV_SØ_3)
         }
     }
 
