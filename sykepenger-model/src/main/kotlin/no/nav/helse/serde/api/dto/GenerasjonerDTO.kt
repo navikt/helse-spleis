@@ -16,6 +16,7 @@ import no.nav.helse.serde.api.speil.SpeilGenerasjoner
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.merge
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
 
 data class SpeilGenerasjonDTO(
     val id: UUID, // Runtime
@@ -67,7 +68,7 @@ abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val oppdatert: LocalDateTime
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
-    abstract val hendelser: List<HendelseDTO>
+    abstract val hendelser: Set<HendelseDTO>
     abstract val sorteringstidspunkt: LocalDateTime
 
     internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): SpeilTidslinjeperiode {
@@ -80,6 +81,7 @@ abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
 
     internal abstract fun tilGenerasjon(generasjoner: SpeilGenerasjoner)
     override fun compareTo(other: SpeilTidslinjeperiode) = tom.compareTo(other.tom)
+    internal open fun medOpplysningerFra(other: UberegnetPeriode): UberegnetPeriode? = null
 
     internal companion object {
         fun List<SpeilTidslinjeperiode>.sorterEtterHendelse() = this
@@ -116,7 +118,7 @@ data class UberegnetVilkårsprøvdPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: List<HendelseDTO>,
+    override val hendelser: Set<HendelseDTO>,
     val vilkårsgrunnlagId: UUID
 ) : SpeilTidslinjeperiode() {
 
@@ -160,7 +162,7 @@ data class UberegnetPeriode(
     override val sorteringstidspunkt: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: List<HendelseDTO>
+    override val hendelser: Set<HendelseDTO>
 ) : SpeilTidslinjeperiode() {
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
@@ -183,27 +185,29 @@ data class UberegnetPeriode(
         return this.copy(periodetype = periodetype)
     }
 
+    override fun medOpplysningerFra(other: UberegnetPeriode): UberegnetPeriode? {
+        // kopierer bare -like- generasjoner; om en periode er strukket tilbake så bevarer vi generasjonen
+        if (this.fom != other.fom) return null
+        return this.copy(
+            hendelser = this.hendelser + other.hendelser,
+            sammenslåttTidslinje = other.sammenslåttTidslinje
+        )
+    }
+
     internal class Builder(
         private val vedtaksperiodeId: UUID,
         private val skjæringstidspunkt: LocalDate,
         private val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+        private val generasjonOpprettet: LocalDateTime,
+        private val generasjonAvsluttet: LocalDateTime?,
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
-        private val hendelser: List<HendelseDTO>
+        private val hendelser: Set<HendelseDTO>
     ) {
-        private var forrigeBeregnetPeriode: BeregnetPeriode? = null
         private lateinit var sykdomstidslinje: List<Sykdomstidslinjedag>
 
-        fun medForrigeBeregnetPeriode(beregnetPeriode: BeregnetPeriode) {
-            forrigeBeregnetPeriode = beregnetPeriode
-        }
-
-        internal fun build(): UberegnetPeriode? {
-            // det er ikke vits å lage en Uberegnet periode dersom vedtaksperioden er helt avsluttet
-            if (tilstand in setOf(Vedtaksperiode.Avsluttet)) return null
-            // det er ikke vits å lage en Uberegnet periode dersom forrige beregnet periode faktisk ikke er avsluttet
-            if (forrigeBeregnetPeriode?.utbetaling?.status in setOf(Utbetalingstatus.Overført, Utbetalingstatus.Godkjent, Utbetalingstatus.Ubetalt, Utbetalingstatus.IkkeGodkjent)) return null
+        internal fun build(): UberegnetPeriode {
             return UberegnetPeriode(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fom = periode.start,
@@ -212,33 +216,27 @@ data class UberegnetPeriode(
                 periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
                 inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
                 erForkastet = false,
-                sorteringstidspunkt = if (forrigeBeregnetPeriode == null) opprettet else oppdatert,
+                sorteringstidspunkt = generasjonOpprettet,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
-                periodetilstand = when (tilstand) {
-                    is Vedtaksperiode.AvsluttetUtenUtbetaling -> Periodetilstand.IngenUtbetaling
-                    is Vedtaksperiode.AvventerRevurdering -> if (forrigeBeregnetPeriode == null) VenterPåAnnenPeriode else UtbetaltVenterPåAnnenPeriode
+                periodetilstand = generasjonAvsluttet?.let { IngenUtbetaling } ?: when (tilstand) {
+                    is Vedtaksperiode.AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode
                     is Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
 
                     is Vedtaksperiode.AvventerHistorikk,
                     is Vedtaksperiode.AvventerHistorikkRevurdering,
                     is Vedtaksperiode.AvventerVilkårsprøving -> ForberederGodkjenning
 
-                    else -> ManglerInformasjon
+                    is Vedtaksperiode.AvventerInntektsmelding -> ManglerInformasjon
+                    else -> error("Forventer ikke mappingregel for $tilstand")
                 }
 
             )
         }
 
         internal fun medSykdomstidslinje(sykdomstidslinje: List<Sykdomstidslinjedag>) = apply {
-            if (this::sykdomstidslinje.isInitialized && sykdomstidslinje != this.sykdomstidslinje) {
-                // Hvis sykdomstidslinjen allerede er initialisert for en uberegnet periode,
-                // skyldes det at vi besøker sykdomstidslinjen fra vedtaksperiodeutbetalinger.
-                // Vi lar ikke disse sykdomstidslinjene overskrive sykdomstidslinjen allerede satt fra vedtaksperioden
-                return this
-            }
             this.sykdomstidslinje = sykdomstidslinje
         }
     }
@@ -258,7 +256,7 @@ data class BeregnetPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: List<HendelseDTO>,
+    override val hendelser: Set<HendelseDTO>,
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
     val beregningId: UUID,
@@ -370,13 +368,12 @@ data class BeregnetPeriode(
      * Bygger en periode som har minst én utbetaling
      */
     internal class Builder(
-        private val vedtaksperiode: Vedtaksperiode,
         private val vedtaksperiodeId: UUID,
         private val periodetilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
-        private val hendelser: List<HendelseDTO>,
+        private val hendelser: Set<HendelseDTO>,
         private val forrigeBeregnetPeriode: BeregnetPeriode?
     ) {
         private lateinit var beregnet: LocalDateTime
@@ -431,7 +428,7 @@ data class BeregnetPeriode(
                 beregnet = beregnet,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
-                periodevilkår = periodevilkår(alder, skjæringstidspunkt, avgrensetUtbetalingstidslinje, hendelser),
+                periodevilkår = periodevilkår(alder, skjæringstidspunkt, avgrensetUtbetalingstidslinje),
                 sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
                 gjenståendeSykedager = gjenståendeSykedager,
                 forbrukteSykedager = forbrukteSykedager,
@@ -472,8 +469,7 @@ data class BeregnetPeriode(
         private fun periodevilkår(
             alder: no.nav.helse.Alder,
             skjæringstidspunkt: LocalDate,
-            avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>,
-            hendelser: List<HendelseDTO>
+            avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>
         ): Vilkår {
             val sisteSykepengedag = avgrensetUtbetalingstidslinje.sisteNavDag()?.dato ?: periode.endInclusive
             val sykepengedager = Sykepengedager(skjæringstidspunkt, maksdato, forbrukteSykedager, gjenståendeSykedager, maksdato > sisteSykepengedag)
@@ -582,7 +578,7 @@ data class AnnullertPeriode(
     val beregnet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
-    override val hendelser: List<HendelseDTO>,
+    override val hendelser: Set<HendelseDTO>,
 
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.

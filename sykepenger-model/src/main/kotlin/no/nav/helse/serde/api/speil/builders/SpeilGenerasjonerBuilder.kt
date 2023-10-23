@@ -103,10 +103,18 @@ internal class SpeilGenerasjonerBuilder(
         skjæringstidspunkt: () -> LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {
-        val hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) }
+        val hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) }.toSet()
         this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, skjæringstidspunkt(), tilstand, opprettet, oppdatert, periode, hendelser)
     }
 
+    private val Generasjoner.Generasjon.Tilstand.uberegnet get() = this in setOf(
+        Generasjoner.Generasjon.Tilstand.Uberegnet,
+        Generasjoner.Generasjon.Tilstand.UberegnetOmgjøring,
+        Generasjoner.Generasjon.Tilstand.UberegnetRevurdering,
+        Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtak,
+        Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtakRevurdering,
+        Generasjoner.Generasjon.Tilstand.TilInfotrygd
+    )
     override fun preVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
@@ -115,14 +123,8 @@ internal class SpeilGenerasjonerBuilder(
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?
     ) {
-        val generasjonerUtenUtbetaling = setOf(
-            Generasjoner.Generasjon.Tilstand.Uberegnet,
-            Generasjoner.Generasjon.Tilstand.UberegnetOmgjøring,
-            Generasjoner.Generasjon.Tilstand.UberegnetRevurdering,
-            Generasjoner.Generasjon.Tilstand.TilInfotrygd
-        )
-        if (tilstand in generasjonerUtenUtbetaling) return
-        this.tilstand.besøkBeregnetPeriode(this)
+        if (tilstand.uberegnet) return this.tilstand.besøkUberegnetPeriode(this, periode, tidsstempel, avsluttet)
+        this.tilstand.besøkBeregnetPeriode(this, periode, tidsstempel, vedtakFattet, avsluttet)
     }
 
     override fun postVisitGenerasjon(
@@ -133,6 +135,7 @@ internal class SpeilGenerasjonerBuilder(
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?
     ) {
+        if (tilstand.uberegnet) return this.tilstand.forlatUberegnetPeriode(this)
         this.tilstand.forlatBeregnetPeriode(this)
     }
 
@@ -323,11 +326,28 @@ internal class SpeilGenerasjonerBuilder(
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             periode: Periode,
-            hendelser: List<HendelseDTO>
+            hendelser: Set<HendelseDTO>
         ) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun besøkBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
+        fun besøkUberegnetPeriode(
+            builder: SpeilGenerasjonerBuilder,
+            periode: Periode,
+            generasjonOpprettet: LocalDateTime,
+            avsluttet: LocalDateTime?
+        ) {
+            throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
+        }
+        fun forlatUberegnetPeriode(builder: SpeilGenerasjonerBuilder) {
+            throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
+        }
+        fun besøkBeregnetPeriode(
+            builder: SpeilGenerasjonerBuilder,
+            periode: Periode,
+            generasjonOpprettet: LocalDateTime,
+            vedtakFattet: LocalDateTime?,
+            avsluttet: LocalDateTime?
+        ) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
         fun forlatBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
@@ -374,9 +394,11 @@ internal class SpeilGenerasjonerBuilder(
         abstract class Periodebygger : Byggetilstand {
             protected var vedtaksperiodebuilder: TidslinjeperioderBuilder? = null
             private var beregnetPeriodeBuilder: BeregnetPeriode.Builder? = null
+            private var uberegnetPeriodeBuilder: UberegnetPeriode.Builder? = null
             private var oppdragbuilder: SpeilOppdrag.Builder? = null
 
             protected abstract fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode)
+            protected abstract fun nyUberegnetPeriode(builder: SpeilGenerasjonerBuilder, uberegnetPeriode: UberegnetPeriode)
 
             override fun besøkVedtaksperiode(
                 builder: SpeilGenerasjonerBuilder,
@@ -387,13 +409,37 @@ internal class SpeilGenerasjonerBuilder(
                 opprettet: LocalDateTime,
                 oppdatert: LocalDateTime,
                 periode: Periode,
-                hendelser: List<HendelseDTO>
+                hendelser: Set<HendelseDTO>
             ) {
                 vedtaksperiodebuilder = TidslinjeperioderBuilder(vedtaksperiode, vedtaksperiodeId, skjæringstidspunkt, tilstand, opprettet, oppdatert, periode, hendelser)
             }
 
-            override fun besøkBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
-                vedtaksperiodebuilder?.nyBeregnetPeriode()?.also {
+            override fun besøkUberegnetPeriode(
+                builder: SpeilGenerasjonerBuilder,
+                periode: Periode,
+                generasjonOpprettet: LocalDateTime,
+                avsluttet: LocalDateTime?
+            ) {
+                vedtaksperiodebuilder?.nyUberegnetPeriode(periode, generasjonOpprettet, avsluttet)?.also {
+                    this.uberegnetPeriodeBuilder = it
+                }
+            }
+
+            override fun forlatUberegnetPeriode(builder: SpeilGenerasjonerBuilder) {
+                uberegnetPeriodeBuilder?.build()?.also {
+                    nyUberegnetPeriode(builder, it)
+                }
+                uberegnetPeriodeBuilder = null
+            }
+
+            override fun besøkBeregnetPeriode(
+                builder: SpeilGenerasjonerBuilder,
+                periode: Periode,
+                generasjonOpprettet: LocalDateTime,
+                vedtakFattet: LocalDateTime?,
+                avsluttet: LocalDateTime?
+            ) {
+                vedtaksperiodebuilder?.nyBeregnetPeriode(periode, generasjonOpprettet)?.also {
                     this.beregnetPeriodeBuilder = it
                 }
             }
@@ -459,44 +505,25 @@ internal class SpeilGenerasjonerBuilder(
             override fun besøkSykdomstidslinje(builder: SpeilGenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {
                 val sykdomstidslinjeDto = SykdomstidslinjeBuilder(sykdomstidslinje).build()
                 this.beregnetPeriodeBuilder?.medSykdomstidslinje(sykdomstidslinjeDto)
+                this.uberegnetPeriodeBuilder?.medSykdomstidslinje(sykdomstidslinjeDto)
             }
         }
 
         class AktivePerioder : Periodebygger() {
-            private var uberegnetPeriodeBuilder: UberegnetPeriode.Builder? = null
             override fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
-                uberegnetPeriodeBuilder?.medForrigeBeregnetPeriode(beregnetPeriode)
                 builder.aktivePerioder.add(beregnetPeriode)
             }
 
-            override fun besøkVedtaksperiode(
-                builder: SpeilGenerasjonerBuilder,
-                vedtaksperiode: Vedtaksperiode,
-                vedtaksperiodeId: UUID,
-                skjæringstidspunkt: LocalDate,
-                tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
-                opprettet: LocalDateTime,
-                oppdatert: LocalDateTime,
-                periode: Periode,
-                hendelser: List<HendelseDTO>
-            ) {
-                super.besøkVedtaksperiode(builder, vedtaksperiode, vedtaksperiodeId, skjæringstidspunkt, tilstand, opprettet, oppdatert, periode, hendelser)
-                vedtaksperiodebuilder?.nyUberegnetPeriode()?.also {
-                    this.uberegnetPeriodeBuilder = it
-                }
+            override fun nyUberegnetPeriode(builder: SpeilGenerasjonerBuilder, uberegnetPeriode: UberegnetPeriode) {
+                val indeks = builder.aktivePerioder.indexOfLast { it.erSammeVedtaksperiode(uberegnetPeriode) }
+                val forrigeUberegnet = builder.aktivePerioder.getOrNull(indeks)
+                val oppdatertEksisterende = forrigeUberegnet?.medOpplysningerFra(uberegnetPeriode)
+                // alle like AUU-generasjoner slås sammen til én pølse
+                if (oppdatertEksisterende == null) builder.aktivePerioder.add(uberegnetPeriode)
+                else builder.aktivePerioder[indeks] = oppdatertEksisterende
             }
 
-            override fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {
-                uberegnetPeriodeBuilder?.build()?.also {
-                    builder.aktivePerioder.add(it)
-                }
-                uberegnetPeriodeBuilder = null
-            }
-            override fun besøkSykdomstidslinje(builder: SpeilGenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {
-                super.besøkSykdomstidslinje(builder, sykdomstidslinje)
-                val sykdomstidslinjeDto = SykdomstidslinjeBuilder(sykdomstidslinje).build()
-                this.uberegnetPeriodeBuilder?.medSykdomstidslinje(sykdomstidslinjeDto)
-            }
+            override fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {}
         }
 
         class ForkastedePerioder : Periodebygger() {
@@ -505,6 +532,8 @@ internal class SpeilGenerasjonerBuilder(
             override fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
                 beregnedePerioder.add(beregnetPeriode)
             }
+
+            override fun nyUberegnetPeriode(builder: SpeilGenerasjonerBuilder, uberegnetPeriode: UberegnetPeriode) {}
 
             override fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {
                 if (beregnedePerioder.isEmpty()) return
@@ -522,13 +551,21 @@ internal class SpeilGenerasjonerBuilder(
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime,
             private val periode: Periode,
-            private val hendelser: List<HendelseDTO>
+            private val hendelser: Set<HendelseDTO>
         ) {
             private var forrigeBeregnetPeriode: BeregnetPeriode? = null
 
             internal fun nyBeregnetPeriode(ny: BeregnetPeriode) { forrigeBeregnetPeriode = ny }
-            internal fun nyBeregnetPeriode() = BeregnetPeriode.Builder(vedtaksperiode, vedtaksperiodeId, tilstand, opprettet, oppdatert, periode, hendelser, forrigeBeregnetPeriode)
-            internal fun nyUberegnetPeriode() = UberegnetPeriode.Builder(vedtaksperiodeId, skjæringstidspunkt, tilstand, opprettet, oppdatert, periode, hendelser)
+            internal fun nyBeregnetPeriode(periode: Periode, generasjonOpprettet: LocalDateTime) = BeregnetPeriode.Builder(
+                vedtaksperiodeId,
+                tilstand,
+                opprettet,
+                oppdatert,
+                periode,
+                hendelser,
+                forrigeBeregnetPeriode
+            )
+            internal fun nyUberegnetPeriode(periode: Periode, generasjonOpprettet: LocalDateTime, avsluttet: LocalDateTime?) = UberegnetPeriode.Builder(vedtaksperiodeId, skjæringstidspunkt, tilstand, generasjonOpprettet, avsluttet, opprettet, oppdatert, periode, hendelser)
         }
     }
 }

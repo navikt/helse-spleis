@@ -926,7 +926,7 @@ internal data class PersonData(
                 internal fun tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner.Generasjon(
                     id = id,
                     tilstand = tilstand.tilModellobjekt(),
-                    endringer = endringer.map { it.tilModellobjekt(grunnlagoppslag, utbetalinger) },
+                    endringer = endringer.map { it.tilModellobjekt(grunnlagoppslag, utbetalinger) }.toMutableList(),
                     vedtakFattet = vedtakFattet,
                     avsluttet = avsluttet
                 )

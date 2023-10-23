@@ -86,28 +86,20 @@ class SpeilGenerasjoner {
         class AktivGenerasjon(private val forrigeBeregnet: BeregnetPeriode) : Byggetilstand {
             override fun utbetaltPeriode(generasjoner: SpeilGenerasjoner, periode: BeregnetPeriode) {
                 // en tidligere utbetalt periode vil bety at en tidligere uberegnet periode er omgjort/eller er out of order
-                if (periode < forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, EndringITidligerePeriodeGenerasjon(periode))
+                if (periode < forrigeBeregnet) return generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
                 generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
             }
 
             override fun uberegnetVilkårsprøvdPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetVilkårsprøvdPeriode) {
                 if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(forrigeBeregnet))
-                generasjoner.leggTilNyRadOgPeriode(periode, UberegnetVilkårsprøvdPeriodeGenerasjon())
+                generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
             }
         }
 
-        class UberegnetVilkårsprøvdPeriodeGenerasjon() : Byggetilstand {
+        // dersom det kommer en endring på en tidligere periode så er det garantert å komme revurderinger etterpå;
+        // derfor lages det ikke en ny rad ved første revurdering
+        class EndringITidligerePeriodeGenerasjon() : Byggetilstand {
             override fun revurdertPeriode(generasjoner: SpeilGenerasjoner, periode: BeregnetPeriode) {
-                generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(periode))
-            }
-        }
-
-        class EndringITidligerePeriodeGenerasjon(private val outOfOrderPeriode: BeregnetPeriode) : Byggetilstand {
-            override fun revurdertPeriode(generasjoner: SpeilGenerasjoner, periode: BeregnetPeriode) {
-                val perioder = generasjoner.nåværendeGenerasjon.filter { it >= outOfOrderPeriode && it < periode }
-                generasjoner.nåværendeGenerasjon.removeAll(perioder)
-                generasjoner.leggTilNyRad()
-                perioder.forEach { generasjoner.leggTilNyPeriode(it) }
                 generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(periode))
             }
         }
@@ -125,7 +117,7 @@ class SpeilGenerasjoner {
             }
             override fun uberegnetVilkårsprøvdPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetVilkårsprøvdPeriode) {
                 if (periode > revurderingen) return generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(revurderingen))
-                generasjoner.leggTilNyRadOgPeriode(periode, UberegnetVilkårsprøvdPeriodeGenerasjon())
+                generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
             }
         }
     }

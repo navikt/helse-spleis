@@ -924,9 +924,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `kort periode med forlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar))
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar))
         håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -2107,6 +2105,43 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `omgjøre periode etter en revurdering`() {
+        nyPeriode(4.januar til 20.januar)
+        nyttVedtak(1.mars, 31.mars)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(30.mars, 31.mars))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) fra (1.mars til 31.mars) medTilstand ForberederGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 20.januar) medTilstand Utbetalt
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(1) fra (4.januar til 20.januar) medTilstand IngenUtbetaling
+            }
+            2.generasjon {
+                assertEquals(2, perioder.size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(1) fra (4.januar til 20.januar) medTilstand IngenUtbetaling
+            }
+        }
+    }
+
+    @Test
     fun `omgjøre kort periode til at nav utbetaler`() {
         nyPeriode(4.januar til 20.januar)
         håndterInntektsmelding(listOf(4.januar til 19.januar),)
@@ -2163,8 +2198,9 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 19.januar) medTilstand Utbetalt
             }
             1.generasjon {
-                assertEquals(1, perioder.size)
+                assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(1) fra (5.januar til 19.januar) medTilstand IngenUtbetaling
             }
         }
     }
@@ -2297,9 +2333,10 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(2) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
             }
             1.generasjon {
-                assertEquals(2, perioder.size)
+                assertEquals(3, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.mars til 31.mars) medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+                uberegnetVilkårsprøvdPeriode(1) fra (1.februar til 28.februar) medTilstand IngenUtbetaling
+                beregnetPeriode(2) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
             }
         }
     }

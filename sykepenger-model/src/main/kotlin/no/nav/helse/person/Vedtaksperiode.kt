@@ -585,7 +585,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse) {
-        generasjoner.håndterEndring(arbeidsgiver, hendelse)
+        generasjoner.håndterEndring(person, arbeidsgiver, hendelse)
     }
 
     private fun lagreTidsnæreopplysninger(hendelse: IAktivitetslogg) {

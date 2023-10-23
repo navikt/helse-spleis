@@ -746,9 +746,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {
-        val sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
-        person.sykdomshistorikkEndret(hendelse)
-        return sykdomstidslinje
+        return sykdomshistorikk.håndter(hendelse)
     }
 
     private fun sykdomstidslinje(): Sykdomstidslinje {

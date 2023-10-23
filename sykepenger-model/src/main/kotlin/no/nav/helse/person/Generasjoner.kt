@@ -175,9 +175,11 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         generasjoner.any { it.dokumentHåndtert(dokumentsporing) }
 
-    fun håndterEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
-        val generasjon = generasjoner.last().håndterEndring(arbeidsgiver, hendelse) ?: return
-        leggTilNyGenerasjon(generasjon)
+    fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
+        generasjoner.last().håndterEndring(arbeidsgiver, hendelse)?.also {
+            leggTilNyGenerasjon(it)
+        }
+        person.sykdomshistorikkEndret(hendelse)
     }
 
     fun erFattetVedtak(): Boolean {
@@ -188,20 +190,20 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         return this.generasjoner.erUtbetaltPåForskjelligeUtbetalinger(other.generasjoner)
     }
 
-    internal class Generasjon private constructor(
+    internal class Generasjon constructor(
         private val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
         private var vedtakFattet: LocalDateTime?,
-        private var avsluttet: LocalDateTime?,
-        private var periode: Periode = endringer.last().periode
+        private var avsluttet: LocalDateTime?
     ) {
         private val gjeldende get() = endringer.last()
+        private val periode: Periode get() = gjeldende.periode
         private val tidsstempel = endringer.first().tidsstempel
         private val dokumentsporing get() = endringer.dokumentsporing
         private val observatører = mutableListOf<GenerasjonObserver>()
 
-        constructor(id: UUID, tilstand: Tilstand, endringer: List<Endring>, vedtakFattet: LocalDateTime?, avsluttet: LocalDateTime?) : this(id, tilstand, endringer.toMutableList(), vedtakFattet, avsluttet)
+        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet)
 
         init {
             check(endringer.isNotEmpty()) {
@@ -402,14 +404,10 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             return tilstand.håndterEndring(this, arbeidsgiver, hendelse)
         }
 
-
         private fun håndtereEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Endring {
-            // TODO: denne må være her ene og alene fordi 'arbeidsgiver.oppdaterSykdom()' ender opp med å sende ut sykefraværsfortellingen,
-            // og da må vedtaksperiodens periode reflektere den nye perioden ellers blir det litt teit
-            // derfor må <this.periode> være en 'var', men man trenger aldri deserialisere den
-            this.periode = hendelse.oppdaterFom(endringer.last().periode)
-            val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
-            return endringer.last().kopierMedEndring(this.periode, hendelse.dokumentsporing(), sykdomstidslinje)
+            val oppdatertPeriode = hendelse.oppdaterFom(endringer.last().periode)
+            val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(oppdatertPeriode)
+            return endringer.last().kopierMedEndring(oppdatertPeriode, hendelse.dokumentsporing(), sykdomstidslinje)
         }
         // oppdaterer seg selv med endringen
         private fun oppdaterMedEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
@@ -420,28 +418,22 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
 
         private fun nyGenerasjonMedEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, starttilstand: Tilstand = Tilstand.Uberegnet): Generasjon {
             return Generasjon(
-                id = UUID.randomUUID(),
                 tilstand = starttilstand,
                 endringer = listOf(håndtereEndring(arbeidsgiver, hendelse)),
-                vedtakFattet = null,
                 avsluttet = null
             )
         }
         private fun sikreNyGenerasjon(starttilstand: Tilstand): Generasjon {
             return Generasjon(
-                id = UUID.randomUUID(),
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling()),
-                vedtakFattet = null,
                 avsluttet = null
             )
         }
 
         private fun nyGenerasjonTilInfotrygd() = Generasjon(
-            id = UUID.randomUUID(),
             tilstand = Tilstand.TilInfotrygd,
             endringer = listOf(this.gjeldende.kopierUtenUtbetaling()),
-            vedtakFattet = null,
             avsluttet = LocalDateTime.now()
         )
 
@@ -499,7 +491,6 @@ enum class Periodetilstand {
 
             fun nyGenerasjon(sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode) =
                 Generasjon(
-                    id = UUID.randomUUID(),
                     tilstand = Tilstand.Uberegnet,
                     endringer = listOf(
                         Endring(
@@ -511,7 +502,6 @@ enum class Periodetilstand {
                             periode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette generasjon på tom sykdomstidslinje" }
                         )
                     ),
-                    vedtakFattet = null,
                     avsluttet = null
                 )
 
