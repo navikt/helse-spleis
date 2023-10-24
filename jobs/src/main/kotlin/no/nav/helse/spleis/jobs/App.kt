@@ -113,8 +113,10 @@ private fun hentArbeid(session: Session, arbeidId: String): Long? {
     """
     @Language("PostgreSQL")
     val oppdater = "update arbeidstabell set arbeid_startet=now() where arbeid_id=? and fnr=?"
-    return session.run(queryOf(query, arbeidId).map { it.long("fnr") }.asSingle)?.also { fnr ->
-        session.run(queryOf(oppdater, arbeidId, fnr).asUpdate)
+    return session.transaction { txSession ->
+        txSession.run(queryOf(query, arbeidId).map { it.long("fnr") }.asSingle)?.also { fnr ->
+            txSession.run(queryOf(oppdater, arbeidId, fnr).asUpdate)
+        }
     }
 }
 private fun arbeidFullført(session: Session, arbeidId: String, fnr: Long) {
@@ -130,28 +132,26 @@ private fun aktørId(session: Session, fnr: Long): List<Long> {
 
 private fun testSpeilJsonTask(arbeidId: String) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
-        sessionOf(ds).use {
-            fyllArbeidstabell(it, arbeidId)
-            it.transaction { session ->
-                var fnr: Long?
-                do {
-                    log.info("Forsøker å hente arbeid")
-                    fnr = hentArbeid(session, arbeidId)?.also { fnr ->
-                        try {
-                            hentPerson(session, fnr)?.let { data ->
-                                try {
-                                    serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
-                                } catch (err: Exception) {
-                                    log.info("${aktørId(session, fnr)} lar seg ikke serialisere: ${err.message}")
-                                }
+        sessionOf(ds).use { session ->
+            fyllArbeidstabell(session, arbeidId)
+            var fnr: Long?
+            do {
+                log.info("Forsøker å hente arbeid")
+                fnr = hentArbeid(session, arbeidId)?.also { fnr ->
+                    try {
+                        hentPerson(session, fnr)?.let { data ->
+                            try {
+                                serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
+                            } catch (err: Exception) {
+                                log.info("${aktørId(session, fnr)} lar seg ikke serialisere: ${err.message}")
                             }
-                        } finally {
-                            arbeidFullført(session, arbeidId, fnr)
                         }
+                    } finally {
+                        arbeidFullført(session, arbeidId, fnr)
                     }
-                } while (fnr != null)
-                log.info("Fant ikke noe arbeid, avslutter")
-            }
+                }
+            } while (fnr != null)
+            log.info("Fant ikke noe arbeid, avslutter")
         }
     }
 }
