@@ -1,0 +1,142 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVVENTER_GODKJENNING_REVURDERING",
+          "generasjoner": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "id": "784e1e9a-62a8-4e28-81a6-d61abcf1c843",
+              "endringer": [
+                {
+                  "id": "en id",
+                  "tidsstempel": "et tidsstempel",
+                  "utbetalingId": "fooooo",
+                  "vilkårsgrunnlagId": "shooooo",
+                  "dokumentsporing": {
+                    "dokumentId": "en id",
+                    "dokumenttype": "en type"
+                  }
+                }
+              ]
+            },
+            {
+              "tilstand": "UBEREGNET_REVURDERING",
+              "id": "febefadb-ed1e-467b-aca2-e74cb8904960",
+              "tidsstempel": "2023-10-24T08:12:13.123456",
+              "endringer": [
+                {
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingDager"
+                  }
+                }
+              ]
+            },
+            {
+              "tilstand": "UBEREGNET_REVURDERING",
+              "id": "cfae818d-a261-4412-b69b-4e153e857c17",
+              "tidsstempel": "2023-10-24T08:12:13.123456",
+              "endringer": [
+                {
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingInntekt"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tilstand": "AVVENTER_REVURDERING",
+          "generasjoner": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "id": "6c9f6176-5a52-4083-98d2-173130a6a8cc",
+              "endringer": [
+                {
+                  "id": "en id",
+                  "tidsstempel": "et tidsstempel",
+                  "utbetalingId": "fooooo",
+                  "vilkårsgrunnlagId": "shooooo",
+                  "dokumentsporing": {
+                    "dokumentId": "en id",
+                    "dokumenttype": "en type"
+                  }
+                }
+              ]
+            },
+            {
+              "tilstand": "UBEREGNET_REVURDERING",
+              "id": "58d7de82-399e-40cb-ba8a-f082cd815af5",
+              "tidsstempel": "2023-10-24T08:12:13.123456",
+              "endringer": [
+                {
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingDager"
+                  }
+                }
+              ]
+            },
+            {
+              "tilstand": "BEREGNET_REVURDERING",
+              "id": "c8f12908-c716-4e43-b786-8c53d6626f11",
+              "tidsstempel": "2023-10-24T08:12:13.123456",
+              "endringer": [
+                {
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingInntekt"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tilstand": "AVVENTER_REVURDERING",
+          "generasjoner": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "id": "0248140a-6249-4e75-8570-07acc59c3a1e",
+              "tidsstempel": "et tidsstempel",
+              "endringer": [
+                {
+                  "id": "en id",
+                  "tidsstempel": "et tidsstempel",
+                  "utbetalingId": "fooooo",
+                  "vilkårsgrunnlagId": "shooooo",
+                  "dokumentsporing": {
+                    "dokumentId": "en id",
+                    "dokumenttype": "en type"
+                  }
+                }
+              ]
+            },
+            {
+              "tilstand": "UBEREGNET_REVURDERING",
+              "id": "f5a5c387-2180-4640-8b11-2b9182e8c19d",
+              "tidsstempel": "2023-10-24T08:12:13.123456",
+              "endringer": [
+                {
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingDager"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
