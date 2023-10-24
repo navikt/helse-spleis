@@ -533,6 +533,15 @@ internal class SpeilGenerasjonerBuilder(
                 beregnedePerioder.add(beregnetPeriode)
             }
 
+            override fun besøkUberegnetPeriode(
+                builder: SpeilGenerasjonerBuilder,
+                periode: Periode,
+                generasjonOpprettet: LocalDateTime,
+                avsluttet: LocalDateTime?
+            ) {}
+
+            override fun forlatUberegnetPeriode(builder: SpeilGenerasjonerBuilder) {}
+
             override fun nyUberegnetPeriode(builder: SpeilGenerasjonerBuilder, uberegnetPeriode: UberegnetPeriode) {}
 
             override fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {
