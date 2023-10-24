@@ -6,6 +6,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
@@ -43,7 +44,7 @@ fun main(args: Array<String>) {
         "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
         "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
         "migrate_v2" -> migrateV2Task(args[1].trim().toInt())
-        "test_speiljson" -> testSpeilJsonTask()
+        "test_speiljson" -> testSpeilJsonTask(args[1].trim())
         else -> log.error("Unknown task $task")
     }
 }
@@ -95,23 +96,61 @@ private fun migrateV2Task(targetVersjon: Int) {
     }
 }
 
-// tester hvorvidt personer lar seg serialisere til speil uten exceptions
-// bør bare kjøres med parallellism=1 fordi arbeidet kan ikke fordeles på flere podder
-private fun testSpeilJsonTask() {
+
+private fun fyllArbeidstabell(session: Session, arbeidId: String) {
+    @Language("PostgreSQL")
+    val query = """
+        INSERT INTO arbeidstabell (arbeid_id,fnr,arbeid_startet,arbeid_ferdig)
+        SELECT ?, fnr, null, null from person
+        ON CONFLICT (arbeid_id,fnr) DO NOTHING; 
+    """
+    session.run(queryOf(query, arbeidId).asExecute)
+}
+private fun hentArbeid(session: Session, arbeidId: String): Long? {
+    @Language("PostgreSQL")
+    val query = """
+    select fnr from arbeidstabell where arbeid_startet IS NULL and arbeid_id = ? limit 1 for update skip locked; 
+    """
+    @Language("PostgreSQL")
+    val oppdater = "update arbeidstabell set arbeid_startet=now() where arbeid_id=? and fnr=?"
+    return session.run(queryOf(query, arbeidId).map { it.long("fnr") }.asSingle)?.also { fnr ->
+        session.run(queryOf(oppdater, arbeidId, fnr).asUpdate)
+    }
+}
+private fun arbeidFullført(session: Session, arbeidId: String, fnr: Long) {
+    @Language("PostgreSQL")
+    val query = "update arbeidstabell set arbeid_ferdig=now() where arbeid_id=? and fnr=?"
+    session.run(queryOf(query, arbeidId, fnr).asUpdate)
+}
+private fun aktørId(session: Session, fnr: Long): List<Long> {
+    @Language("PostgreSQL")
+    val query = "select aktor_id from unike_person where fnr=?"
+    return session.run(queryOf(query, fnr).map { it.long("aktor_id") }.asList)
+}
+
+private fun testSpeilJsonTask(arbeidId: String) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
-        sessionOf(ds).use { session ->
-            session.run(queryOf("SELECT fnr,aktor_id FROM unike_person").map {
-                it.long("fnr") to it.string("aktor_id")
-            }.asList)
-                .forEach {  (fnr, aktørId) ->
-                    hentPerson(session, fnr)?.let { data ->
+        sessionOf(ds).use {
+            it.transaction { session ->
+                fyllArbeidstabell(session, arbeidId)
+
+                var fnr: Long?
+                do {
+                    fnr = hentArbeid(session, arbeidId)?.also { fnr ->
                         try {
-                            serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
-                        } catch (err: Exception) {
-                            log.info("$aktørId lar seg ikke serialisere: ${err.message}")
+                            hentPerson(session, fnr)?.let { data ->
+                                try {
+                                    serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
+                                } catch (err: Exception) {
+                                    log.info("${aktørId(session, fnr)} lar seg ikke serialisere: ${err.message}")
+                                }
+                            }
+                        } finally {
+                            arbeidFullført(session, arbeidId, fnr)
                         }
                     }
-                }
+                } while (fnr != null)
+            }
         }
     }
 }
