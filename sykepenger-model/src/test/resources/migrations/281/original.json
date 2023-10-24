@@ -1,0 +1,48 @@
+{
+  "arbeidsgivere": [
+    {
+      "forkastede": [],
+      "vedtaksperioder": [
+        {
+          "id": "d0f51fcb-e67c-471f-a5c4-e66131062181",
+          "tilstand": "AVSLUTTET",
+          "oppdatert": "for lenge siden",
+          "generasjoner": [
+            {
+              "tilstand": "UBEREGNET",
+              "id": "21a902c5-71a3-4412-9f02-7ddfea1bf6ba",
+              "endringer": [
+                {
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingDager"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "becef2ca-ab0b-4941-bbec-70ddac846906",
+          "tilstand": "AVSLUTTET",
+          "generasjoner": [
+            {
+              "tilstand": "BEREGNET",
+              "id": "21a902c5-71a3-4412-9f02-7ddfea1bf6ba",
+              "endringer": [
+                {
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingDager"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
