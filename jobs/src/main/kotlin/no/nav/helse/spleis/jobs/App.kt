@@ -7,6 +7,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
@@ -129,11 +131,22 @@ private fun aktørId(session: Session, fnr: Long): List<Long> {
     val query = "select aktor_id from unike_person where fnr=?"
     return session.run(queryOf(query, fnr).map { it.long("aktor_id") }.asList)
 }
-
+private fun arbeidFinnes(session: Session, arbeidId: String): Boolean {
+    @Language("PostgreSQL")
+    val query = "SELECT COUNT(1) as antall FROM arbeidstabell where arbeid_id=?"
+    val antall = session.run(queryOf(query, arbeidId).map { it.long("antall") }.asSingle) ?: 0
+    return antall > 0
+}
 private fun testSpeilJsonTask(arbeidId: String) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         sessionOf(ds).use { session ->
             fyllArbeidstabell(session, arbeidId)
+
+            log.info("Venter på at arbeid skal bli tilgjengelig")
+            while (!arbeidFinnes(session, arbeidId)) {
+                log.info("Arbeid finnes ikke ennå, venter litt")
+                runBlocking { delay(250) }
+            }
             var fnr: Long?
             do {
                 log.info("Forsøker å hente arbeid")
