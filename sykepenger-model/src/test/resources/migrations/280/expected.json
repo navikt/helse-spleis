@@ -1,0 +1,50 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVSLUTTET",
+          "generasjoner": [
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "id": "98b2e49e-7fce-45ae-a3a0-05bfdd9ad953",
+              "endringer": [
+                {
+                  "id": "en id",
+                  "tidsstempel": "et tidsstempel",
+                  "utbetalingId": "fooooo",
+                  "vilkårsgrunnlagId": "shooooo",
+                  "dokumentsporing": {
+                    "dokumentId": "en id",
+                    "dokumenttype": "en type"
+                  }
+                },
+                {
+                  "id": "<! en random uuid !>",
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "utbetalingId": "fooooo",
+                  "vilkårsgrunnlagId": "shooooo",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingDager"
+                  }
+                },
+                {
+                  "id": "<! en random uuid !>",
+                  "tidsstempel": "2023-10-24T08:12:13.123456",
+                  "utbetalingId": "fooooo",
+                  "vilkårsgrunnlagId": "shooooo",
+                  "dokumentsporing": {
+                    "dokumentId": "0674d505-31e0-49d3-8b49-db5a45405b6d",
+                    "dokumenttype": "InntektsmeldingInntekt"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 280
+}
