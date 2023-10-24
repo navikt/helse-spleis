@@ -230,7 +230,8 @@ data class UberegnetPeriode(
                     is Vedtaksperiode.AvventerVilkårsprøving,
                     is Vedtaksperiode.AvventerVilkårsprøvingRevurdering -> ForberederGodkjenning
 
-                    is Vedtaksperiode.AvventerInntektsmelding -> ManglerInformasjon
+                    is Vedtaksperiode.AvventerInntektsmelding,
+                    is Vedtaksperiode.AvventerInfotrygdHistorikk -> ManglerInformasjon
                     else -> error("Forventer ikke mappingregel for $tilstand")
                 }
 
