@@ -131,11 +131,11 @@ private fun aktørId(session: Session, fnr: Long): List<Long> {
 private fun testSpeilJsonTask(arbeidId: String) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         sessionOf(ds).use {
+            fyllArbeidstabell(it, arbeidId)
             it.transaction { session ->
-                fyllArbeidstabell(session, arbeidId)
-
                 var fnr: Long?
                 do {
+                    log.info("Forsøker å hente arbeid")
                     fnr = hentArbeid(session, arbeidId)?.also { fnr ->
                         try {
                             hentPerson(session, fnr)?.let { data ->
@@ -150,6 +150,7 @@ private fun testSpeilJsonTask(arbeidId: String) {
                         }
                     }
                 } while (fnr != null)
+                log.info("Fant ikke noe arbeid, avslutter")
             }
         }
     }
