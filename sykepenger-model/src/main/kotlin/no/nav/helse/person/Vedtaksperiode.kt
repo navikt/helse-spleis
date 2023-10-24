@@ -2390,15 +2390,6 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal val PÅGÅENDE_REVURDERING: VedtaksperiodeFilter = {
-            it.tilstand in setOf(
-                AvventerVilkårsprøvingRevurdering,
-                AvventerHistorikkRevurdering,
-                AvventerSimuleringRevurdering,
-                AvventerGodkjenningRevurdering
-            )
-        }
-
         internal val HAR_PÅGÅENDE_UTBETALINGER: VedtaksperiodeFilter = { it.generasjoner.utbetales() }
 
         internal val HAR_AVVENTENDE_GODKJENNING: VedtaksperiodeFilter = {

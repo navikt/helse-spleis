@@ -40,7 +40,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
-import no.nav.helse.person.Vedtaksperiode.Companion.PÅGÅENDE_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
@@ -237,7 +236,8 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
-        private fun Iterable<Arbeidsgiver>.periodeSomSkalGjenopptas() = pågåendeRevurderingsperiode() ?: førsteIkkeFerdigBehandletPeriode().minOrNull()
+        private fun Iterable<Arbeidsgiver>.periodeSomSkalGjenopptas() = førsteIkkeFerdigBehandletPeriode().minOrNull()
+
         private fun Iterable<Arbeidsgiver>.sistePeriodeSomHarPågåendeUtbetaling() = vedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).maxOrNull()
         private fun Iterable<Arbeidsgiver>.førsteAuuSomVilUtbetales() = nåværendeVedtaksperioder(AUU_SOM_VIL_UTBETALES).minOrNull()
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
@@ -248,9 +248,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.nestemann() = sistePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas() ?: førsteAuuSomVilUtbetales()
 
-        private fun Iterable<Arbeidsgiver>.pågåendeRevurderingsperiode(): Vedtaksperiode? {
-            return nåværendeVedtaksperioder(PÅGÅENDE_REVURDERING).firstOrNull()
-        }
         private fun Iterable<Arbeidsgiver>.førsteIkkeFerdigBehandletPeriode() = nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
 
         internal fun søppelbøtte(
