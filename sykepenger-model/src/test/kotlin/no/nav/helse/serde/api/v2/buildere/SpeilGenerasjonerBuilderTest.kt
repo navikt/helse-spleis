@@ -45,6 +45,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.arbeidsgiver
@@ -2221,9 +2222,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
             1.generasjon {
-                assertEquals(2, perioder.size)
+                assertEquals(1, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-                uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
         }
 
@@ -2371,6 +2371,24 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(1, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Ubetalt medTilstand ForberederGodkjenning
+            }
+        }
+    }
+
+    @Test
+    fun `uberegnet periode i avventer vilkårsprøving revurdering`() {
+        nyttVedtak(2.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 100)))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(1, perioder.size)
+                uberegnetPeriode(0) fra 1.januar til 31.januar medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(1, perioder.size)
+                beregnetPeriode(0) fra 2.januar til 31.januar er Utbetalingstatus.Utbetalt medTilstand Utbetalt
             }
         }
     }

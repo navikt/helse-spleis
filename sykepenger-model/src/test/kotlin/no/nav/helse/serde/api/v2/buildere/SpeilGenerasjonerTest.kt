@@ -39,12 +39,17 @@ internal class SpeilGenerasjonerTest {
             beregnetPeriode(10.april til 28.april, utbetaling(Utbetalingtype.UTBETALING)),
             uberegnetPeriode(1.januar til 10.januar)
         )
-        generasjoner(1) {
+        generasjoner(2) {
             generasjon(0, 4) {
                 periode(0) fra 10.april til 28.april er beregnet
                 periode(1) fra 11.mars til 31.mars er beregnet
                 periode(2) fra 1.mars til 10.mars er uberegnet
                 periode(3) fra 1.januar til 10.januar er uberegnet
+            }
+            generasjon(1, 3) {
+                periode(0) fra 10.april til 28.april er beregnet
+                periode(1) fra 11.mars til 31.mars er beregnet
+                periode(2) fra 1.mars til 10.mars er uberegnet
             }
         }
     }

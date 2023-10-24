@@ -90,8 +90,13 @@ class SpeilGenerasjoner {
                 generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
             }
 
+            override fun uberegnetPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetPeriode) {
+                if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode)
+                generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
+            }
+
             override fun uberegnetVilkårsprøvdPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetVilkårsprøvdPeriode) {
-                if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(forrigeBeregnet))
+                if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode)
                 generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
             }
         }
