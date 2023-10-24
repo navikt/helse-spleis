@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -69,6 +70,7 @@ import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
+import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -94,6 +96,24 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `arbeidsgiver opplyser om egenmeldinger og bruker opplyser om ferie`() {
+        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
+        håndterInntektsmelding(listOf(10.januar til 25.januar))
+        håndterSøknad(Sykdom(10.januar, 28.januar, 100.prosent), Ferie(10.januar, 28.januar))
+        assertForventetFeil(
+            forklaring = "Selv om søknaden i out of order opplyser om ferie hele perioden, har arbeidsgiver opplyst om egenmeldingsdager. Det gjør at perioden i februar vil utbetales",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            }
+        )
+    }
 
     @Test
     fun `omgjøre kort periode får referanse til inntektsmeldingen som inneholder inntekten som er lagt til grunn`() {
