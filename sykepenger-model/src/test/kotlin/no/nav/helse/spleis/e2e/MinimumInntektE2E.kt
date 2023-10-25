@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -86,8 +87,16 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 assertEquals((7.februar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
                 assertTrue(utbetalingstidslinjeInspektør.avvistedatoer.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
             }
-            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertTag(1.vedtaksperiode, PersonObserver.VedtakFattetEvent.Tag.SykepengegrunnlagUnder2G)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         }
+    }
+
+    @Test
+    fun `tagger ikke normal inntekt`() {
+        nyttVedtak(1.januar, 31.januar)
+        assertIkkeTag(1.vedtaksperiode, PersonObserver.VedtakFattetEvent.Tag.SykepengegrunnlagUnder2G)
     }
 
     @Test
