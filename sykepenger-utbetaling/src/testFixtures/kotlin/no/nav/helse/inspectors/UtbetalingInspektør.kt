@@ -66,7 +66,6 @@ class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor {
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,

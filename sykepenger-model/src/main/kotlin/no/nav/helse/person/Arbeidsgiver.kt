@@ -81,7 +81,6 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
@@ -93,7 +92,6 @@ internal class Arbeidsgiver private constructor(
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>,
-    private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonshistorikk: Refusjonshistorikk,
     private val jurist: MaskinellJurist
@@ -108,7 +106,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder = mutableListOf(),
         forkastede = mutableListOf(),
         utbetalinger = mutableListOf(),
-        beregnetUtbetalingstidslinjer = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
         refusjonshistorikk = Refusjonshistorikk(),
         jurist.medOrganisasjonsnummer(organisasjonsnummer)
@@ -322,9 +319,6 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitForkastedePerioder(forkastede)
         forkastede.forEach { it.accept(visitor) }
         visitor.postVisitForkastedePerioder(forkastede)
-        visitor.preVisitUtbetalingstidslinjeberegninger(beregnetUtbetalingstidslinjer)
-        beregnetUtbetalingstidslinjer.forEach { it.accept(visitor) }
-        visitor.postVisitUtbetalingstidslinjeberegninger(beregnetUtbetalingstidslinjer)
         visitor.preVisitFeriepengeutbetalinger(feriepengeutbetalinger)
         feriepengeutbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitFeriepengeutbetalinger(feriepengeutbetalinger)
@@ -339,41 +333,28 @@ internal class Arbeidsgiver private constructor(
     internal fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
-        orgnummerTilDenSomBeregner: Arbeidsgiver,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode
-    ) = lagNyUtbetaling(aktivitetslogg, fødselsnummer, orgnummerTilDenSomBeregner, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
+    ) = lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
 
     internal fun lagRevurdering(
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
-        orgnummerTilDenSomBeregner: Arbeidsgiver,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode
     ): Utbetaling {
-        return lagNyUtbetaling(
-            aktivitetslogg,
-            fødselsnummer,
-            orgnummerTilDenSomBeregner,
-            utbetalingstidslinje,
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager,
-            periode,
-            Utbetalingtype.REVURDERING
-        )
+        return lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.REVURDERING)
     }
 
     private fun lagNyUtbetaling(
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
-        orgnummerTilDenSomBeregner: Arbeidsgiver,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
@@ -381,20 +362,17 @@ internal class Arbeidsgiver private constructor(
         periode: Periode,
         type: Utbetalingtype
     ): Utbetaling {
-        val sykdomshistorikkId = sykdomshistorikk.nyesteId()
-        val vilkårsgrunnlagHistorikkId = person.nyesteIdForVilkårsgrunnlagHistorikk()
-        lagreUtbetalingstidslinjeberegning(orgnummerTilDenSomBeregner.organisasjonsnummer, utbetalingstidslinje, sykdomshistorikkId, vilkårsgrunnlagHistorikkId)
-        val (utbetalingen, annulleringer) = Utbetalingstidslinjeberegning.lagUtbetaling(
-            beregnetUtbetalingstidslinjer,
-            utbetalinger,
-            fødselsnummer,
-            periode,
-            aktivitetslogg,
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager,
-            type,
-            organisasjonsnummer
+        val (utbetalingen, annulleringer) = Utbetaling.lagUtbetaling(
+            utbetalinger = utbetalinger,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            utbetalingstidslinje = utbetalingstidslinje,
+            periode = periode,
+            aktivitetslogg = aktivitetslogg,
+            maksdato = maksdato,
+            forbrukteSykedager = forbrukteSykedager,
+            gjenståendeSykedager = gjenståendeSykedager,
+            type = type
         )
         nyUtbetaling(aktivitetslogg, utbetalingen, annulleringer)
         return utbetalingen
@@ -431,22 +409,6 @@ internal class Arbeidsgiver private constructor(
             feriepengeutbetalinger.add(feriepengeutbetaling)
             feriepengeutbetaling.overfør(utbetalingshistorikkForFeriepenger)
         }
-    }
-
-    private fun lagreUtbetalingstidslinjeberegning(
-        organisasjonsnummer: String,
-        utbetalingstidslinje: Utbetalingstidslinje,
-        sykdomshistorikkId: UUID,
-        vilkårsgrunnlagHistorikkId: UUID
-    ) {
-        beregnetUtbetalingstidslinjer.add(
-            Utbetalingstidslinjeberegning(
-                sykdomshistorikkId,
-                vilkårsgrunnlagHistorikkId,
-                organisasjonsnummer,
-                utbetalingstidslinje
-            )
-        )
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
@@ -971,8 +933,7 @@ internal class Arbeidsgiver private constructor(
         }
 
     internal fun utbetalingssituasjon(arbeidsgiverperiode: Arbeidsgiverperiode, perioder: List<Periode>): Utbetalingssituasjon {
-        val utbetalingstidslinje = beregnetUtbetalingstidslinjer.lastOrNull()?.utbetalingstidslinje()
-        return arbeidsgiverperiode.utbetalingssituasjon(perioder, utbetalingstidslinje)
+        return arbeidsgiverperiode.utbetalingssituasjon(perioder, utbetalinger.lastOrNull())
     }
 
     internal class JsonRestorer private constructor() {
@@ -987,7 +948,6 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: MutableList<ForkastetVedtaksperiode>,
                 utbetalinger: List<Utbetaling>,
-                beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
                 feriepengeutbetalinger: List<Feriepengeutbetaling>,
                 refusjonshistorikk: Refusjonshistorikk,
                 jurist: MaskinellJurist
@@ -1001,7 +961,6 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder,
                 forkastede,
                 utbetalinger.toMutableList(),
-                beregnetUtbetalingstidslinjer.toMutableList(),
                 feriepengeutbetalinger.toMutableList(),
                 refusjonshistorikk,
                 jurist

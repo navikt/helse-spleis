@@ -264,7 +264,6 @@ internal class LagUtbetalingForRevurderingTest {
         return Utbetaling.lagUtbetaling(
             tidligere?.let { listOf(tidligere) } ?: emptyList(),
             fødselsnummer,
-            UUID.randomUUID(),
             orgnummer,
             betaltTidslinje,
             sisteDato.somPeriode(),

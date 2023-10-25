@@ -29,11 +29,11 @@ internal class UtbetalingkladderBuilderTest {
         val result = builder.build()
         assertEquals(2, result.size)
         result[0].also { kladd ->
-            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, UUID.randomUUID(), tidslinje, LocalDate.MAX, 0, 0)
+            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, tidslinje, LocalDate.MAX, 0, 0)
             assertEquals(1.januar til 16.februar, utbetaling.inspektør.periode)
         }
         result[1].also { kladd ->
-            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, UUID.randomUUID(), tidslinje, LocalDate.MAX, 0, 0)
+            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, tidslinje, LocalDate.MAX, 0, 0)
             assertEquals(17.februar til 3.april, utbetaling.inspektør.periode)
         }
     }
@@ -45,14 +45,14 @@ internal class UtbetalingkladderBuilderTest {
         val result = builder.build()
         assertEquals(2, result.size)
         result[0].also { kladd ->
-            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, UUID.randomUUID(), tidslinje, LocalDate.MAX, 0, 0)
+            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, tidslinje, LocalDate.MAX, 0, 0)
             assertEquals(1.januar til 16.februar, utbetaling.inspektør.periode)
             val arbeidsgiverOppdrag = utbetaling.inspektør.arbeidsgiverOppdrag
             assertEquals(1, arbeidsgiverOppdrag.size)
             assertEquals(1.januar til 31.januar, arbeidsgiverOppdrag.single().periode)
         }
         result[1].also { kladd ->
-            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, UUID.randomUUID(), tidslinje, LocalDate.MAX, 0, 0)
+            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, tidslinje, LocalDate.MAX, 0, 0)
             assertEquals(17.februar til 3.april, utbetaling.inspektør.periode)
             val arbeidsgiverOppdrag = utbetaling.inspektør.arbeidsgiverOppdrag
             assertEquals(1, arbeidsgiverOppdrag.size)
@@ -67,7 +67,7 @@ internal class UtbetalingkladderBuilderTest {
         val result = builder.build()
         assertEquals(1, result.size)
         result.single().also { kladd ->
-            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, UUID.randomUUID(), tidslinje, LocalDate.MAX, 0, 0)
+            val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, tidslinje, LocalDate.MAX, 0, 0)
             assertEquals(1.januar til 25.januar, utbetaling.inspektør.periode)
             val arbeidsgiverOppdrag = utbetaling.inspektør.arbeidsgiverOppdrag
             assertEquals(2, arbeidsgiverOppdrag.size)

@@ -49,7 +49,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Prosentdel
@@ -68,14 +67,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
         delegatee.visitVarsel(id, kontekster, aktivitet, kode, melding, tidsstempel)
-    }
-
-    override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
-        delegatee.preVisitUtbetalingstidslinjeberegninger(beregninger)
-    }
-
-    override fun postVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
-        delegatee.postVisitUtbetalingstidslinjeberegninger(beregninger)
     }
 
     override fun postVisitGrunnlagsdata(
@@ -264,38 +255,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
         delegatee.postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger)
-    }
-
-    override fun preVisitUtbetalingstidslinjeberegning(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        organisasjonsnummer: String,
-        sykdomshistorikkElementId: UUID,
-        vilkårsgrunnlagHistorikkInnslagId: UUID
-    ) {
-        delegatee.preVisitUtbetalingstidslinjeberegning(
-            id,
-            tidsstempel,
-            organisasjonsnummer,
-            sykdomshistorikkElementId,
-            vilkårsgrunnlagHistorikkInnslagId
-        )
-    }
-
-    override fun postVisitUtbetalingstidslinjeberegning(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        organisasjonsnummer: String,
-        sykdomshistorikkElementId: UUID,
-        vilkårsgrunnlagHistorikkInnslagId: UUID
-    ) {
-        delegatee.postVisitUtbetalingstidslinjeberegning(
-            id,
-            tidsstempel,
-            organisasjonsnummer,
-            sykdomshistorikkElementId,
-            vilkårsgrunnlagHistorikkInnslagId
-        )
     }
 
     override fun visitBehov(
@@ -1008,7 +967,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,
@@ -1029,7 +987,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             forbrukteSykedager,
             gjenståendeSykedager,
             stønadsdager,
-            beregningId,
             overføringstidspunkt,
             avsluttet,
             avstemmingsnøkkel,
@@ -1158,7 +1115,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,
@@ -1179,7 +1135,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             forbrukteSykedager,
             gjenståendeSykedager,
             stønadsdager,
-            beregningId,
             overføringstidspunkt,
             avsluttet,
             avstemmingsnøkkel,

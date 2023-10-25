@@ -32,8 +32,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Prosentdel
@@ -229,7 +227,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Sykepen
 }
 
 internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor,
-    UtbetalingVisitor, UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
+    UtbetalingVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -237,8 +235,6 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Sykdomshistori
     ) {
     }
 
-    fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {}
-    fun postVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {}
     fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {}
     fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {}
@@ -319,26 +315,6 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
     }
 
     fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
-}
-
-internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingstidslinjeVisitor {
-    fun preVisitUtbetalingstidslinjeberegning(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        organisasjonsnummer: String,
-        sykdomshistorikkElementId: UUID,
-        vilkårsgrunnlagHistorikkInnslagId: UUID
-    ) {
-    }
-
-    fun postVisitUtbetalingstidslinjeberegning(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        organisasjonsnummer: String,
-        sykdomshistorikkElementId: UUID,
-        vilkårsgrunnlagHistorikkInnslagId: UUID
-    ) {
-    }
 }
 
 internal interface GenerasjonerVisistor : GenerasjonVisistor {

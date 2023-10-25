@@ -66,7 +66,6 @@ internal class UtbetalingTest {
     @Test
     fun `forkaster annulleringer som utbetalingen peker på`() {
         val annullering1 = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -78,7 +77,6 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 248
         ).also { it.opprett(Aktivitetslogg()) }
         val annullering2 = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 3.mars til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -91,7 +89,6 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val utbetalingen = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -117,7 +114,6 @@ internal class UtbetalingTest {
     @Test
     fun `ny utbetaling erstatter flere uten utbetalinger`() {
         val annullering1 = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -129,7 +125,6 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 248
         ).also { it.opprett(Aktivitetslogg()) }
         val annullering2 = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 3.mars til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -142,7 +137,6 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val utbetalingen = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -168,7 +162,6 @@ internal class UtbetalingTest {
     @Test
     fun `ny utbetaling erstatter flere med utbetalinger`() {
         val annullering1 = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -182,7 +175,6 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 248
         ).also { it.opprett(Aktivitetslogg()) }
         val annullering2 = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 3.mars til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -195,7 +187,6 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val utbetalingen = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -245,7 +236,6 @@ internal class UtbetalingTest {
     @Test
     fun `ny utbetaling erstatter flere med utbetalinger - med egne utbetalinger`() {
         val annullering1 = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 1.februar til 15.februar,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -259,7 +249,6 @@ internal class UtbetalingTest {
             gjenståendeSykedager = 248
         ).also { it.opprett(Aktivitetslogg()) }
         val annullering2 = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 3.mars til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -272,7 +261,6 @@ internal class UtbetalingTest {
         ).also { it.opprett(Aktivitetslogg()) }
 
         val utbetalingen = Utbetaling(
-            beregningId = UUID.randomUUID(),
             korrelerendeUtbetaling = null,
             periode = 1.januar til 31.mars,
             utbetalingstidslinje = Utbetalingstidslinje(),
@@ -521,7 +509,6 @@ internal class UtbetalingTest {
         val utbetaling = Utbetaling.lagUtbetaling(
             emptyList(),
             UNG_PERSON_FNR_2018,
-            UUID.randomUUID(),
             ORGNUMMER,
             tidslinje,
             sisteDato.somPeriode(),
@@ -543,7 +530,6 @@ internal class UtbetalingTest {
         val utbetaling = Utbetaling.lagUtbetaling(
             emptyList(),
             UNG_PERSON_FNR_2018,
-            UUID.randomUUID(),
             ORGNUMMER,
             tidslinje,
             sisteDato.somPeriode(),
@@ -1126,7 +1112,6 @@ internal class UtbetalingTest {
     ) = Utbetaling.lagUtbetaling(
         tidligere?.let { listOf(tidligere) } ?: emptyList(),
         fødselsnummer,
-        UUID.randomUUID(),
         orgnummer,
         tidslinje,
         periode,

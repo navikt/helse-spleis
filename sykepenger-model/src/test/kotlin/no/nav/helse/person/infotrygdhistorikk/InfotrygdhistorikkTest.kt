@@ -414,7 +414,6 @@ internal class InfotrygdhistorikkTest {
     private fun utbetaling() = Utbetaling.lagUtbetaling(
         utbetalinger = emptyList(),
         fødselsnummer = "",
-        beregningId = UUID.randomUUID(),
         organisasjonsnummer = "",
         utbetalingstidslinje = tidslinjeOf(),
         periode = 1.januar.somPeriode(),

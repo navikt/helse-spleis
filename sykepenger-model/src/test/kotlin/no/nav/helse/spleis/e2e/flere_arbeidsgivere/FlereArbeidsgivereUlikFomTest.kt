@@ -1810,9 +1810,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         val utbetalinger = inspektør.utbetalinger(3.vedtaksperiode)
         assertEquals(1, utbetalinger.size)
         assertEquals(1.januar til 31.mars, utbetalinger.single().inspektør.periode)
-
-        val utbetalingstidslinje = inspektør.utbetalingstidslinjeBeregninger.last()
-        assertEquals(1.januar til 30.april, utbetalingstidslinje.utbetalingstidslinje().periode())
     }
 
     @Test

@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
-import net.logstash.logback.argument.StructuredArguments.v
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
@@ -84,7 +83,6 @@ import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_AVSLUTTES
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_UTBETALES
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -1025,7 +1023,7 @@ internal class Vedtaksperiode private constructor(
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
-        generasjoner.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, arbeidsgiverSomBeregner, grunnlagsdata, periode, hendelse, maksimumSykepenger, utbetalingstidslinje)
+        generasjoner.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, grunnlagsdata, periode, hendelse, maksimumSykepenger, utbetalingstidslinje)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, hendelse)
     }
 
@@ -2632,10 +2630,6 @@ internal class Vedtaksperiode private constructor(
             fødselsnummer: String,
             organisasjonsnummer: String,
             tilstand: Vedtaksperiodetilstand,
-            sykdomstidslinje: Sykdomstidslinje,
-            dokumentsporing: Set<Dokumentsporing>,
-            periode: Periode,
-            sykmeldingsperiode: Periode,
             generasjoner: Generasjoner,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,

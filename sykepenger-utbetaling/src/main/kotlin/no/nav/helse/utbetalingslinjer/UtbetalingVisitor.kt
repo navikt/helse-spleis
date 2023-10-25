@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 
@@ -24,7 +23,6 @@ interface UtbetalingVisitor : UtbetalingstidslinjeVisitor, OppdragVisitor, Utbet
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,
@@ -54,7 +52,6 @@ interface UtbetalingVisitor : UtbetalingstidslinjeVisitor, OppdragVisitor, Utbet
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,

@@ -133,7 +133,6 @@ internal class UtbetalingkladdTest {
     private fun Utbetalingkladd.utbetaling(utbetalingstidslinje: Utbetalingstidslinje) = lagUtbetaling(
         type = UTBETALING,
         korrelerendeUtbetaling = null,
-        beregningId = UUID.randomUUID(),
         utbetalingstidslinje = utbetalingstidslinje,
         maksdato = LocalDate.MAX,
         forbrukteSykedager = 0,

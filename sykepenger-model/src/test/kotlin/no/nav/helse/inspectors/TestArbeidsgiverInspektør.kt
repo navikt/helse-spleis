@@ -33,7 +33,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import org.junit.jupiter.api.fail
 
 internal class TestArbeidsgiverInspektør(
@@ -80,8 +79,6 @@ internal class TestArbeidsgiverInspektør(
     internal val arbeidsgiverOppdrag = mutableListOf<Oppdrag>()
     internal val totalBeløp = mutableListOf<Int>()
     internal val nettoBeløp = mutableListOf<Int>()
-    internal lateinit var utbetalingstidslinjeBeregninger: List<Utbetalingstidslinjeberegning>
-    private val utbetalingstidslinjer = mutableMapOf<Int, Utbetalingstidslinje>()
     private val vedtaksperioder = mutableMapOf<Int, Vedtaksperiode>()
     private var forkastetPeriode = false
     private var inVedtaksperiode = false
@@ -117,10 +114,6 @@ internal class TestArbeidsgiverInspektør(
         }
     }
 
-    override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
-        utbetalingstidslinjeBeregninger = beregninger
-    }
-
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
@@ -135,23 +128,6 @@ internal class TestArbeidsgiverInspektør(
 
     override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
         forkastetPeriode = false
-    }
-
-    override fun preVisitUtbetalingstidslinjeberegning(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        organisasjonsnummer: String,
-        sykdomshistorikkElementId: UUID,
-        vilkårsgrunnlagHistorikkInnslagId: UUID
-    ) {
-        utbetalingstidslinjeberegningData.add(
-            UtbetalingstidslinjeberegningData(
-            id = id,
-            tidsstempel = tidsstempel,
-            sykdomshistorikkElementId = sykdomshistorikkElementId,
-            vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId
-        )
-        )
     }
 
     override fun preVisitVedtaksperiode(
@@ -295,7 +271,6 @@ internal class TestArbeidsgiverInspektør(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,
@@ -330,7 +305,6 @@ internal class TestArbeidsgiverInspektør(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,

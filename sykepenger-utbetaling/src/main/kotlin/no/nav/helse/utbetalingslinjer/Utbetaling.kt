@@ -30,6 +30,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory
 class Utbetaling private constructor(
     val id: UUID,
     private val korrelasjonsId: UUID,
-    private val beregningId: UUID,
     private val periode: Periode,
     private val utbetalingstidslinje: Utbetalingstidslinje,
     private val arbeidsgiverOppdrag: Oppdrag,
@@ -56,7 +56,6 @@ class Utbetaling private constructor(
     private var oppdatert: LocalDateTime = tidsstempel
 ) : Aktivitetskontekst {
     constructor(
-        beregningId: UUID,
         korrelerendeUtbetaling: Utbetaling?,
         periode: Periode,
         utbetalingstidslinje: Utbetalingstidslinje,
@@ -70,7 +69,6 @@ class Utbetaling private constructor(
     ) : this(
         UUID.randomUUID(),
         korrelerendeUtbetaling?.takeIf { arbeidsgiverOppdrag.tilhører(it.arbeidsgiverOppdrag) || personOppdrag.tilhører(it.personOppdrag) }?.korrelasjonsId ?: UUID.randomUUID(),
-        beregningId,
         periode,
         utbetalingstidslinje,
         arbeidsgiverOppdrag,
@@ -127,6 +125,11 @@ class Utbetaling private constructor(
     fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
 
     fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
+
+    fun erAlleDagerBetalte(dagene: List<LocalDate>) = dagene.all { utbetalingstidslinje.navDagMedBeløp(it) }
+    private fun Utbetalingstidslinje.navDagMedBeløp(dag: LocalDate) = get(dag).let {
+        it is Utbetalingsdag.NavDag && it.økonomi.harBeløp()
+    }
 
     fun opprett(hendelse: IAktivitetslogg) {
         tilstand.opprett(this, hendelse)
@@ -255,7 +258,6 @@ class Utbetaling private constructor(
         fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
             fødselsnummer: String,
-            beregningId: UUID,
             organisasjonsnummer: String,
             utbetalingstidslinje: Utbetalingstidslinje,
             periode: Periode,
@@ -296,7 +298,7 @@ class Utbetaling private constructor(
 
             val annulleringer = forrigeUtbetalte.filterNot { it === korrelerendeUtbetaling }.mapNotNull { it.opphør(aktivitetslogg) }
             if (annulleringer.isNotEmpty()) aktivitetslogg.varsel(RV_UT_21)
-            val utbetalingen = nyUtbetaling.lagUtbetaling(type, korrelerendeUtbetaling, beregningId, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, annulleringer)
+            val utbetalingen = nyUtbetaling.lagUtbetaling(type, korrelerendeUtbetaling, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, annulleringer)
             listOf(utbetalingen.arbeidsgiverOppdrag, utbetalingen.personOppdrag).valider(aktivitetslogg)
             return utbetalingen to annulleringer
         }
@@ -346,7 +348,6 @@ class Utbetaling private constructor(
         fun ferdigUtbetaling(
             id: UUID,
             korrelasjonsId: UUID,
-            beregningId: UUID,
             annulleringer: List<Utbetaling>,
             opprinneligPeriode: Periode,
             utbetalingstidslinje: Utbetalingstidslinje,
@@ -366,7 +367,6 @@ class Utbetaling private constructor(
         ): Utbetaling = Utbetaling(
             id = id,
             korrelasjonsId = korrelasjonsId,
-            beregningId = beregningId,
             periode = opprinneligPeriode,
             utbetalingstidslinje = utbetalingstidslinje,
             arbeidsgiverOppdrag = arbeidsgiverOppdrag,
@@ -422,7 +422,6 @@ class Utbetaling private constructor(
             forbrukteSykedager,
             gjenståendeSykedager,
             stønadsdager,
-            beregningId,
             overføringstidspunkt,
             avsluttet,
             avstemmingsnøkkel,
@@ -451,7 +450,6 @@ class Utbetaling private constructor(
             forbrukteSykedager,
             gjenståendeSykedager,
             stønadsdager,
-            beregningId,
             overføringstidspunkt,
             avsluttet,
             avstemmingsnøkkel,
@@ -635,7 +633,6 @@ class Utbetaling private constructor(
         }
 
         override fun annuller(utbetaling: Utbetaling, hendelse: IAktivitetslogg) = Utbetaling(
-            utbetaling.beregningId,
             utbetaling,
             utbetaling.periode,
             utbetaling.utbetalingstidslinje,
@@ -683,7 +680,6 @@ class Utbetaling private constructor(
 
         override fun annuller(utbetaling: Utbetaling, hendelse: IAktivitetslogg) =
             Utbetaling(
-                utbetaling.beregningId,
                 utbetaling,
                 utbetaling.periode,
                 utbetaling.utbetalingstidslinje,

@@ -93,7 +93,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
@@ -264,10 +263,6 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
-            pushState(UtbetalingstidslinjeberegningerState(beregningerList))
-        }
-
         override fun preVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {
             pushState(FeriepengeutbetalingerState(feriepengeutbetalingListe))
         }
@@ -288,35 +283,6 @@ internal class JsonBuilder : AbstractBuilder() {
             arbeidsgiverMap["beregnetUtbetalingstidslinjer"] = beregningerList
             arbeidsgiverMap["refusjonOpphører"] = refusjonOpphører
             arbeidsgiverMap["feriepengeutbetalinger"] = feriepengeutbetalingListe.toList()
-            popState()
-        }
-    }
-
-    private class UtbetalingstidslinjeberegningerState(private val beregninger: MutableList<Map<String, Any?>>) : BuilderState() {
-        private val utbetalingstidslinjeMap = mutableMapOf<String, Any>()
-
-        override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
-            pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
-        }
-
-        override fun postVisitUtbetalingstidslinjeberegning(
-            id: UUID,
-            tidsstempel: LocalDateTime,
-            organisasjonsnummer: String,
-            sykdomshistorikkElementId: UUID,
-            vilkårsgrunnlagHistorikkInnslagId: UUID
-        ) {
-            beregninger.add(mapOf(
-                "id" to id,
-                "sykdomshistorikkElementId" to sykdomshistorikkElementId,
-                "vilkårsgrunnlagHistorikkInnslagId" to vilkårsgrunnlagHistorikkInnslagId,
-                "tidsstempel" to tidsstempel,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "utbetalingstidslinje" to utbetalingstidslinjeMap
-            ))
-        }
-
-        override fun postVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
             popState()
         }
     }
@@ -1468,7 +1434,6 @@ internal class JsonBuilder : AbstractBuilder() {
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
             stønadsdager: Int,
-            beregningId: UUID,
             overføringstidspunkt: LocalDateTime?,
             avsluttet: LocalDateTime?,
             avstemmingsnøkkel: Long?,
@@ -1534,7 +1499,6 @@ internal class JsonBuilder : AbstractBuilder() {
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?,
             stønadsdager: Int,
-            beregningId: UUID,
             overføringstidspunkt: LocalDateTime?,
             avsluttet: LocalDateTime?,
             avstemmingsnøkkel: Long?,
@@ -1542,7 +1506,6 @@ internal class JsonBuilder : AbstractBuilder() {
         ) {
             utbetalingMap["id"] = id
             utbetalingMap["korrelasjonsId"] = korrelasjonsId
-            utbetalingMap["beregningId"] = beregningId
             utbetalingMap["annulleringer"] = annulleringer
             utbetalingMap["utbetalingstidslinje"] = utbetalingstidslinjeMap
             utbetalingMap["arbeidsgiverOppdrag"] = arbeidsgiverOppdragMap
@@ -1593,13 +1556,6 @@ internal class JsonBuilder : AbstractBuilder() {
     private class VedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : BuilderState() {
         private val generasjoner = mutableListOf<Map<String, Any?>>()
 
-        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
-            val sykdomstidslinje = mutableMapOf<String, Any?>()
-
-            vedtaksperiodeMap["sykdomstidslinje"] = sykdomstidslinje
-            pushState(SykdomstidslinjeState(sykdomstidslinje))
-        }
-
         override fun preVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {
             pushState(GenerasjonerState(this.generasjoner))
         }
@@ -1617,11 +1573,11 @@ internal class JsonBuilder : AbstractBuilder() {
         ) {
             vedtaksperiodeMap.putAll(mutableMapOf(
                 "id" to id,
-                "fom" to periode.start,
-                "tom" to periode.endInclusive,
-                "sykmeldingFom" to opprinneligPeriode.start,
-                "sykmeldingTom" to opprinneligPeriode.endInclusive,
-                "hendelseIder" to hendelseIder.toJsonList().map { (id, type) ->
+                "fom" to periode.start, // serialiseres kun for spanner sin del
+                "tom" to periode.endInclusive, // serialiseres kun for spanner sin del
+                "sykmeldingFom" to opprinneligPeriode.start, // serialiseres kun for spanner sin del
+                "sykmeldingTom" to opprinneligPeriode.endInclusive, // serialiseres kun for spanner sin del
+                "hendelseIder" to hendelseIder.toJsonList().map { (id, type) -> // serialiseres kun for spanner sin del
                     mapOf(
                         "dokumentId" to id,
                         "dokumenttype" to type.name
@@ -1629,7 +1585,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 },
                 "tilstand" to tilstand.type.name,
                 "generasjoner" to this.generasjoner,
-                "skjæringstidspunkt" to skjæringstidspunkt(),
+                "skjæringstidspunkt" to skjæringstidspunkt(), // serialiseres kun for spanner sin del
                 "opprettet" to opprettet,
                 "oppdatert" to oppdatert
             ))
@@ -1736,7 +1692,6 @@ internal class JsonBuilder : AbstractBuilder() {
                     forbrukteSykedager: Int?,
                     gjenståendeSykedager: Int?,
                     stønadsdager: Int,
-                    beregningId: UUID,
                     overføringstidspunkt: LocalDateTime?,
                     avsluttet: LocalDateTime?,
                     avstemmingsnøkkel: Long?,

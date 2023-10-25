@@ -103,7 +103,6 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         vedtaksperiodeSomLagerUtbetaling: UUID,
         fødselsnummer: String,
         arbeidsgiver: Arbeidsgiver,
-        arbeidsgiverSomBeregner: Arbeidsgiver,
         grunnlagsdata: VilkårsgrunnlagElement,
         periode: Periode,
         hendelse: IAktivitetslogg,
@@ -111,7 +110,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         utbetalingstidslinje: Utbetalingstidslinje
     ): Utbetalingstidslinje {
         val strategi = if (this.harAvsluttede()) Arbeidsgiver::lagRevurdering else Arbeidsgiver::lagUtbetaling
-        val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, arbeidsgiverSomBeregner, utbetalingstidslinje, maksimumSykepenger.sisteDag(), maksimumSykepenger.forbrukteDager(), maksimumSykepenger.gjenståendeDager(), periode)
+        val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksimumSykepenger.sisteDag(), maksimumSykepenger.forbrukteDager(), maksimumSykepenger.gjenståendeDager(), periode)
         denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
         generasjoner.last().utbetaling(denNyeUtbetalingen, grunnlagsdata, hendelse)
         return utbetalingstidslinje.subset(periode)

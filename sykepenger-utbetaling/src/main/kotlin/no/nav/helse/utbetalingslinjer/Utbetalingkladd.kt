@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
@@ -19,7 +18,6 @@ class Utbetalingkladd(
     fun lagUtbetaling(
         type: Utbetalingtype,
         korrelerendeUtbetaling: Utbetaling?,
-        beregningId: UUID,
         utbetalingstidslinje: Utbetalingstidslinje,
         maksdato: LocalDate,
         forbrukteSykedager: Int,
@@ -27,7 +25,6 @@ class Utbetalingkladd(
         annulleringer: List<Utbetaling> = emptyList()
     ): Utbetaling {
         return Utbetaling(
-            beregningId = beregningId,
             korrelerendeUtbetaling = korrelerendeUtbetaling,
             periode = periode,
             utbetalingstidslinje = utbetalingstidslinje.kutt(periode.endInclusive),

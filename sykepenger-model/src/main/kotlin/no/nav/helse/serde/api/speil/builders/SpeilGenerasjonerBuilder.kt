@@ -202,7 +202,6 @@ internal class SpeilGenerasjonerBuilder(
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
         stønadsdager: Int,
-        beregningId: UUID,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,

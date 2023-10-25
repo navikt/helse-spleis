@@ -48,7 +48,6 @@ import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData.Companion.tilSporing
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.Companion.tilModellobjekt
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
@@ -78,7 +77,6 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.SpleisAr
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.SpleisPerson
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -577,7 +575,6 @@ internal data class PersonData(
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>,
-        private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
         private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
         private val refusjonshistorikk: List<RefusjonData>
     ) {
@@ -608,7 +605,6 @@ internal data class PersonData(
                 vedtaksperiodeliste,
                 forkastedeliste,
                 modelUtbetalinger,
-                beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
                 feriepengeutbetalinger.map { it.createFeriepengeutbetaling(alder) },
                 refusjonshistorikk.parseRefusjon(),
                 arbeidsgiverJurist
@@ -660,25 +656,6 @@ internal data class PersonData(
                 beløp = beløp.månedlig,
                 tidsstempel = tidsstempel
             )
-        }
-
-        data class BeregnetUtbetalingstidslinjeData(
-            private val id: UUID,
-            private val tidsstempel: LocalDateTime,
-            private val sykdomshistorikkElementId: UUID,
-            private val vilkårsgrunnlagHistorikkInnslagId: UUID,
-            private val organisasjonsnummer: String,
-            private val utbetalingstidslinje: UtbetalingstidslinjeData
-        ) {
-            internal fun tilBeregnetUtbetalingstidslinje() =
-                Utbetalingstidslinjeberegning.restore(
-                    id = id,
-                    tidsstempel = tidsstempel,
-                    sykdomshistorikkElementId = sykdomshistorikkElementId,
-                    vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
-                    organisasjonsnummer = organisasjonsnummer,
-                    utbetalingstidslinje = utbetalingstidslinje.konverterTilUtbetalingstidslinje()
-                )
         }
 
         data class RefusjonsopplysningData(
@@ -858,13 +835,6 @@ internal data class PersonData(
 
         data class VedtaksperiodeData(
             private val id: UUID,
-            private val skjæringstidspunkt: LocalDate?,
-            private val sykdomstidslinje: SykdomstidslinjeData,
-            private val hendelseIder: List<DokumentsporingData>,
-            private val fom: LocalDate,
-            private val tom: LocalDate,
-            private val sykmeldingFom: LocalDate,
-            private val sykmeldingTom: LocalDate,
             private val tilstand: TilstandType,
             private val generasjoner: List<GenerasjonData>,
             private val opprettet: LocalDateTime,
@@ -875,9 +845,6 @@ internal data class PersonData(
                 private val dokumenttype: DokumentTypeData
             ) {
                 fun tilModellobjekt() = dokumenttype.tilModelltype(dokumentId)
-                companion object {
-                    internal fun List<DokumentsporingData>.tilSporing() = map { it.tilModellobjekt() }.toSet()
-                }
             }
             enum class DokumentTypeData(private val modelltype: (UUID) -> Dokumentsporing) {
                 Sykmelding(Dokumentsporing::sykmelding),
@@ -970,8 +937,6 @@ internal data class PersonData(
                 utbetalinger: Map<UUID, Utbetaling>,
                 jurist: MaskinellJurist
             ): Vedtaksperiode {
-                val sporingIder = hendelseIder.tilSporing()
-                val sykmeldingsperiode = Periode(sykmeldingFom, sykmeldingTom)
                 return Vedtaksperiode.ferdigVedtaksperiode(
                     person = person,
                     arbeidsgiver = arbeidsgiver,
@@ -980,10 +945,6 @@ internal data class PersonData(
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,
                     tilstand = parseTilstand(this.tilstand),
-                    sykdomstidslinje = sykdomstidslinje.createSykdomstidslinje(),
-                    dokumentsporing = sporingIder.toMutableSet(),
-                    periode = Periode(fom, tom),
-                    sykmeldingsperiode = sykmeldingsperiode,
                     generasjoner = Generasjoner(
                         generasjoner = this.generasjoner.tilModellobjekt(grunnlagoppslag, utbetalinger)
                     ),
@@ -1178,7 +1139,6 @@ internal data class PersonData(
     data class UtbetalingData(
         val id: UUID,
         private val korrelasjonsId: UUID,
-        private val beregningId: UUID,
         private val fom: LocalDate,
         private val tom: LocalDate,
         private val annulleringer: List<UUID>?,
@@ -1201,7 +1161,6 @@ internal data class PersonData(
         internal fun konverterTilUtbetaling(andreUtbetalinger: List<Pair<UUID, Utbetaling>>) = Utbetaling.ferdigUtbetaling(
             id = id,
             korrelasjonsId = korrelasjonsId,
-            beregningId = beregningId,
             annulleringer = annulleringer?.map { annulleringen -> andreUtbetalinger.single { it.first == annulleringen }.second } ?: emptyList(),
             opprinneligPeriode = fom til tom,
             utbetalingstidslinje = utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
