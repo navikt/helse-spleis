@@ -34,5 +34,6 @@ spec:
     #- name: RUNTIME_OPTS
     #  value: "migrate"    # gjør migrering ved å pushe events på kafka, og lar spleis gjøre jobben (lager nedetid)
     - name: RUNTIME_OPTS
-      value: "migrate_v2 262"   # gjør migrering direkte mot databasen ved at alle personer løftes opp til versjon angitt som argument nr 2
-                                 # NB! NB! Da er det lurt å sette opp 'parallelism' til endel høyere, kanskje 30?
+      value: "migrate_v2 [en_unik_arbeid_id]"   # gjør migrering direkte mot databasen ved at alle personer løftes opp til siste versjon.
+                                                # [en_unik_arbeid_id] er en tekst du bestemmer selv, den må bare ikke finnes i <arbeidstabellen> fra før
+                                                # Etter at migreringen er ferdig kan det være greit å slette fra arbeidstabellen etterpå

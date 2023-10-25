@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
         "vacuum" -> vacuumTask()
         "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
         "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
-        "migrate_v2" -> migrateV2Task(args[1].trim().toInt())
+        "migrate_v2" -> migrateV2Task(args[1].trim())
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
         else -> log.error("Unknown task $task")
     }
@@ -66,34 +66,29 @@ private fun vacuumTask() {
     )
 }
 
-private fun migrateV2Task(targetVersjon: Int) {
-    DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
-        sessionOf(ds).use { session ->
-            val finnArbeid = { txSession: TransactionalSession, utførArbeid: (Long, String) -> Unit ->
-                txSession.run(queryOf("SELECT fnr,data FROM person WHERE skjema_versjon < $targetVersjon LIMIT 1 FOR UPDATE SKIP LOCKED;").map {
-                    it.long("fnr") to it.string("data")
-                }.asSingle)?.also { (ident, arbeid) -> utførArbeid(ident, arbeid) } != null
-
-            }
-            var arbeidUtført: Boolean
-            var migreringCounter = 0
-            do {
-                arbeidUtført = session.transaction { txSession ->
-                    finnArbeid(txSession) { ident, data ->
-                        migreringCounter += 1
-                        log.info("[$migreringCounter] Utfører migrering")
-                        val time = measureTimeMillis {
-                            val resultat = SerialisertPerson(data).deserialize(MaskinellJurist()).serialize()
-                            check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
-                                "skjemaversjon" to resultat.skjemaVersjon,
-                                "data" to resultat.json,
-                                "ident" to ident
-                            )).asUpdate))
-                        }
-                        log.info("[$migreringCounter] Utført på $time ms")
-                    }
+private fun migrateV2Task(arbeidId: String) {
+    @Language("PostgreSQL")
+    val query = """
+        SELECT data FROM person WHERE fnr = ? LIMIT 1 FOR UPDATE SKIP LOCKED;
+    """
+    var migreringCounter = 0
+    opprettOgUtførArbeid(arbeidId) { session, fnr ->
+        session.transaction { txSession ->
+            // låser ned person-raden slik at spleis ikke tar inn meldinger og overskriver mens denne podden holder på
+            val data = txSession.run(queryOf(query, fnr).map { it.string("data") }.asSingle)
+            if (data != null) {
+                migreringCounter += 1
+                log.info("[$migreringCounter] Utfører migrering")
+                val time = measureTimeMillis {
+                    val resultat = SerialisertPerson(data).deserialize(MaskinellJurist()).serialize()
+                    check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
+                        "skjemaversjon" to resultat.skjemaVersjon,
+                        "data" to resultat.json,
+                        "ident" to fnr
+                    )).asUpdate))
                 }
-            } while (arbeidUtført)
+                log.info("[$migreringCounter] Utført på $time ms")
+            }
         }
     }
 }
@@ -137,7 +132,8 @@ private fun arbeidFinnes(session: Session, arbeidId: String): Boolean {
     val antall = session.run(queryOf(query, arbeidId).map { it.long("antall") }.asSingle) ?: 0
     return antall > 0
 }
-private fun testSpeilJsonTask(arbeidId: String) {
+
+private fun opprettOgUtførArbeid(arbeidId: String, arbeider: (session: Session, fnr: Long) -> Unit) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         sessionOf(ds).use { session ->
             fyllArbeidstabell(session, arbeidId)
@@ -152,19 +148,25 @@ private fun testSpeilJsonTask(arbeidId: String) {
                 log.info("Forsøker å hente arbeid")
                 fnr = hentArbeid(session, arbeidId)?.also { fnr ->
                     try {
-                        hentPerson(session, fnr)?.let { data ->
-                            try {
-                                serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
-                            } catch (err: Exception) {
-                                log.info("${aktørId(session, fnr)} lar seg ikke serialisere: ${err.message}")
-                            }
-                        }
+                        arbeider(session, fnr)
                     } finally {
                         arbeidFullført(session, arbeidId, fnr)
                     }
                 }
             } while (fnr != null)
             log.info("Fant ikke noe arbeid, avslutter")
+        }
+    }
+}
+
+private fun testSpeilJsonTask(arbeidId: String) {
+    opprettOgUtførArbeid(arbeidId) { session, fnr ->
+        hentPerson(session, fnr)?.let { data ->
+            try {
+                serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
+            } catch (err: Exception) {
+                log.info("${aktørId(session, fnr)} lar seg ikke serialisere: ${err.message}")
+            }
         }
     }
 }
