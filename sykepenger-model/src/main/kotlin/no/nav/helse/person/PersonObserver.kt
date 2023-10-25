@@ -593,7 +593,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
 
         enum class Tag {
             `6GBegrenset`,
-            IngenNyArbeidsgiverperiode
+            IngenNyArbeidsgiverperiode,
+            SykepengegrunnlagUnder2G
         }
 
         sealed class Sykepengegrunnlagsfakta {

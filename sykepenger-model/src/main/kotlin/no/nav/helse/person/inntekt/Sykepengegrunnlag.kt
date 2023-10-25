@@ -376,6 +376,9 @@ internal class Sykepengegrunnlag private constructor(
             .beregningsgrunnlag(this.beregningsgrunnlag)
             .begrensning(this.begrensning)
             .sykepengegrunnlagsfakta(tilstand.sykpengegrunnlagsfakta(this))
+        if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) {
+            builder.sykepengergrunnlagErUnder2G()
+        }
         arbeidsgiverInntektsopplysninger.build(builder)
     }
     override fun equals(other: Any?): Boolean {

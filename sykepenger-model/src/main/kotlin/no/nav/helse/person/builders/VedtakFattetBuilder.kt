@@ -40,6 +40,7 @@ internal class VedtakFattetBuilder(
     internal fun begrensning(begrensning: Begrensning) = apply { this.begrensning = begrensning }
     internal fun omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiverÅrlig: Map<String, Double>) = apply { this.omregnetÅrsinntektPerArbeidsgiverÅrlig = omregnetÅrsinntektPerArbeidsgiverÅrlig }
     internal fun ingenNyArbeidsgiverperiode() = apply { tags.add(Tag.IngenNyArbeidsgiverperiode) }
+    internal fun sykepengergrunnlagErUnder2G() = apply { tags.add(Tag.SykepengegrunnlagUnder2G) }
 
     private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }
