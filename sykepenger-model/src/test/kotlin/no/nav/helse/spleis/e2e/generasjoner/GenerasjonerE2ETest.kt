@@ -1,25 +1,29 @@
 package no.nav.helse.spleis.e2e.generasjoner
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Generasjoner
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_IVERKSATT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -103,7 +107,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                     assertEquals(Dokumentsporing.inntektsmeldingDager(im), generasjon.endringer[1].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), generasjon.endringer[2].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), generasjon.endringer[3].dokumentsporing)
-                    assertEquals(PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET, generasjon.tilstand)
+                    assertEquals(VEDTAK_FATTET, generasjon.tilstand)
                     assertEquals(vedtakFattetTidspunkt, generasjon.vedtakFattet)
                     assertNull(generasjon.avsluttet)
                 }
@@ -138,7 +142,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 assertEquals(2, generasjoner.size)
                 generasjoner[0].also { generasjon ->
                     assertEquals(3, generasjon.endringer.size)
-                    assertEquals(PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET, generasjon.tilstand)
+                    assertEquals(VEDTAK_FATTET, generasjon.tilstand)
                 }
                 generasjoner[1].also { generasjon ->
                     assertEquals(1, generasjon.endringer.size)
@@ -159,6 +163,52 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[0].tilstand)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[1].tilstand)
             }
+        }
+    }
+
+    @Test
+    fun `periode hos ag2 blir innenfor agp mens ag1 har laget utbetaling`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
+        }
+        a2 {
+            håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
+        }
+        a2 {
+            håndterInntektsmelding(emptyList(), førsteFraværsdag = 2.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeOpptjening")
+        }
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode,
+                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+                arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH, type = ORDINÆRT), Arbeidsforhold(a2, LocalDate.EPOCH, type = ORDINÆRT))
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+        }
+        a2 {
+            håndterInntektsmelding(listOf(2.januar til 17.januar))
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 {
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(1, generasjoner.size)
+                assertEquals(VEDTAK_IVERKSATT, generasjoner.single().tilstand)
+            }
+        }
+        a2 {
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[0].tilstand)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[1].tilstand)
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 }

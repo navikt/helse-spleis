@@ -1036,15 +1036,14 @@ internal class Vedtaksperiode private constructor(
     private fun utbetalingsperioder(): List<Vedtaksperiode> {
         val skjæringstidspunktet = this.skjæringstidspunkt
         // lag utbetaling for seg selv + andre overlappende perioder hos andre arbeidsgivere (som ikke er utbetalt/avsluttet allerede)
-        return person.nåværendeVedtaksperioder {
-            it.generasjoner.klarForUtbetaling() && (
-                it === this || (
-                        it.arbeidsgiver !== this.arbeidsgiver
-                                && this.periode.overlapperMed(it.periode)
-                                && skjæringstidspunktet == it.skjæringstidspunkt
-                        )
-            )
-        }
+        return person.nåværendeVedtaksperioder { it.klarForUtbetaling(this, skjæringstidspunktet) }
+    }
+
+    private fun klarForUtbetaling(periodeSomBeregner: Vedtaksperiode, skjæringstidspunktet: LocalDate): Boolean {
+        if (!generasjoner.klarForUtbetaling()) return false
+        if (this === periodeSomBeregner) return true
+        if (!forventerInntekt(NullObserver)) return false
+        return this.arbeidsgiver !== periodeSomBeregner.arbeidsgiver && this.periode.overlapperMed(periodeSomBeregner.periode) && skjæringstidspunktet == this.skjæringstidspunkt
     }
 
     private fun beregnUtbetalinger(hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Alder.MaksimumSykepenger? {
