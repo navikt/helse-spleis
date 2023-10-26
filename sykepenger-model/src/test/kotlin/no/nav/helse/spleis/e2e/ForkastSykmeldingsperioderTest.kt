@@ -7,8 +7,9 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -47,7 +48,7 @@ internal class ForkastSykmeldingsperioderTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Forkaster sykmeldingsperioder slik at den andre arbeidsgiveren forkastes pga utbetalt i Infotrygd`(){
+    fun `Forkaster sykmeldingsperioder slik at den andre arbeidsgiveren gjenopptar behandling`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         }
@@ -76,7 +77,8 @@ internal class ForkastSykmeldingsperioderTest: AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertVarsel(RV_IT_3)
         }
     }
 }

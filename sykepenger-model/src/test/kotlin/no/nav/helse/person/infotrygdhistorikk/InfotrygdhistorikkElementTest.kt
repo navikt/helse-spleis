@@ -16,6 +16,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsler
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
@@ -426,8 +427,8 @@ internal class InfotrygdhistorikkElementTest {
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 1234.daglig)
         )
         val element = nyttHistorikkelement(utbetalinger)
-        assertFalse(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), "ag1"))
-        aktivitetslogg.assertFunksjonellFeil(Varselkode.RV_IT_3)
+        assertTrue(element.valider(aktivitetslogg, Periode(1.januar, 1.januar), "ag1"))
+        aktivitetslogg.assertVarsel(Varselkode.RV_IT_3)
     }
 
     @Test

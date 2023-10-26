@@ -12,10 +12,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertTilstand
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.nyPeriode
@@ -45,8 +47,8 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         val meldingsreferanseId = håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT))
         val infotrygdHistorikk = person.inspektør.utbetaltIInfotrygd
         assertEquals(17.januar til 31.januar, infotrygdHistorikk.single())
-        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil(Varselkode.RV_IT_3)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertVarsel(RV_IT_3)
 
         val event = observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.single()
         val forventet =
