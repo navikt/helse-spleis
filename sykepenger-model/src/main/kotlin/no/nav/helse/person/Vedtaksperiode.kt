@@ -104,7 +104,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad 
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
@@ -2218,13 +2217,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             infotrygdhistorikk: Infotrygdhistorikk
         ){
-
-            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode) && utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk)) {
-                hendelse.funksjonellFeil(RV_IT_3)
-                vedtaksperiode.person.forkastAuu(hendelse, vedtaksperiode)
-                return
-            }
-
             håndterRevurdering(hendelse) {
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             }

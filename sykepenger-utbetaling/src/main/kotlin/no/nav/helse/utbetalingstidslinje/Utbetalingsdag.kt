@@ -106,12 +106,13 @@ sealed class Utbetalingsdag(
     companion object {
         fun dagerUnderGrensen(tidslinjer: List<Utbetalingstidslinje>): List<Periode> {
             return periode(tidslinjer)
-                .filter { dato -> tidslinjer.map { it[dato].økonomi }.erUnderGrensen() }
-                .grupperSammenhengendePerioder()
+                ?.filter { dato -> tidslinjer.map { it[dato].økonomi }.erUnderGrensen() }
+                ?.grupperSammenhengendePerioder()
+                ?: emptyList()
         }
 
         fun betale(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return periode(tidslinjer).fold(tidslinjer) { resultat, dato ->
+            return periode(tidslinjer)?.fold(tidslinjer) { resultat, dato ->
                 try {
                     tidslinjer
                         .map { it[dato].økonomi }
@@ -124,18 +125,18 @@ sealed class Utbetalingsdag(
                 } catch (err: Exception) {
                     throw IllegalArgumentException("Klarte ikke å utbetale for dag=$dato, fordi: ${err.message}", err)
                 }
-            }
+            } ?: tidslinjer
         }
 
         fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return periode(tidslinjer).fold(tidslinjer) { tidslinjer1, dagen ->
+            return periode(tidslinjer)?.fold(tidslinjer) { tidslinjer1, dagen ->
                 // regner ut totalgrad for alle økonomi på samme dag
                 val dager = Økonomi.totalSykdomsgrad(tidslinjer1.map { it[dagen].økonomi })
                 // oppdaterer tidslinjen til hver ag med nytt økonomiobjekt
                 tidslinjer1.zip(dager) { tidslinjen, økonomi ->
                     Utbetalingstidslinje(tidslinjen.map { if (it.dato == dagen) it.kopierMed(økonomi) else it })
                 }
-            }
+            } ?: tidslinjer
         }
     }
 }

@@ -10,6 +10,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 
 internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
@@ -28,7 +29,7 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
     }
 
     private fun assert6GBegrensetUtbetaling(ag1: Pair<Utbetalingstidslinje, Double>, ag2: Pair<Utbetalingstidslinje, Double>) {
-        val periode = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first))
+        val periode = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first)) ?: fail { "forventer en periode" }
         val dato = periode.start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
 

@@ -63,7 +63,7 @@ abstract class Utbetalingsperiode(
     private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (!this.periode.overlapperMed(periode)) return
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
-        aktivitetslogg.funksjonellFeil(RV_IT_3)
+        aktivitetslogg.varsel(RV_IT_3)
     }
 
     private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {

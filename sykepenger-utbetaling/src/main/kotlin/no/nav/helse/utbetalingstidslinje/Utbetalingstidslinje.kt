@@ -38,7 +38,8 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
         fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
             .filter { it.utbetalingsdager.isNotEmpty() }
             .map { it.periode() }
-            .reduce(Periode::plus)
+            .takeUnless { it.isEmpty() }
+            ?.reduce(Periode::plus)
 
         fun avvis(
             tidslinjer: List<Utbetalingstidslinje>,

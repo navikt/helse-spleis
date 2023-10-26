@@ -24,7 +24,6 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     private lateinit var maksimumSykepenger: Alder.MaksimumSykepenger
-    private lateinit var sisteDag: LocalDate
     private lateinit var state: State
     private lateinit var teller: UtbetalingTeller
     private var opphold = 0
@@ -84,13 +83,14 @@ internal class MaksimumSykepengedagerfilter(
         val sisteDato = periode.endInclusive
         this.subsumsjonObserver = subsumsjonObserver
         beregnetTidslinje = tidslinjer
-            .reduce(Utbetalingstidslinje::plus)
+            .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
             .plus(infotrygdtidslinje).kutt(sisteDato)
         tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje)
         teller = UtbetalingTeller(alder, arbeidsgiverRegler)
         state = State.Initiell
         beregnetTidslinje.accept(this)
 
+        val sisteDag = if (beregnetTidslinje.isNotEmpty()) beregnetTidslinje.periode().endInclusive else periode.endInclusive
         maksimumSykepenger = teller.maksimumSykepenger(sisteDag).also {
             it.sisteDag(karantenesporing(periode, subsumsjonObserver))
         }
@@ -118,14 +118,6 @@ internal class MaksimumSykepengedagerfilter(
         state.leaving(this)
         state = nyState
         state.entering(this)
-    }
-
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
-        sisteDag = gjeldendePeriode!!.endInclusive
-    }
-
-    override fun postVisitUtbetalingstidslinje() {
-
     }
 
     override fun visit(
