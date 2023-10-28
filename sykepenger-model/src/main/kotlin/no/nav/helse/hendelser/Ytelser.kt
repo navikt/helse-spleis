@@ -12,7 +12,8 @@ class Ytelser(
     fødselsnummer: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
-    private val foreldrepermisjon: Foreldrepermisjon,
+    private val foreldrepenger: Foreldrepenger,
+    private val svangerskapspenger: Svangerskapspenger,
     private val pleiepenger: Pleiepenger,
     private val omsorgspenger: Omsorgspenger,
     private val opplæringspenger: Opplæringspenger,
@@ -34,7 +35,8 @@ class Ytelser(
         val periodeForOverlappsjekk = periode.start til minOf(periode.endInclusive, maksdato)
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt, periodeForOverlappsjekk)
         dagpenger.valider(this, skjæringstidspunkt, periodeForOverlappsjekk)
-        if (foreldrepermisjon.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med foreldrepenger eller svangerskapspenger`)
+        if (foreldrepenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med foreldrepenger`)
+        if (svangerskapspenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med svangerskapspenger`)
         if (pleiepenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med pleiepenger`)
         if (omsorgspenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med omsorgspenger`)
         if (opplæringspenger.overlapper(this, periodeForOverlappsjekk, erForlengelse)) varsel(Varselkode.`Overlapper med opplæringspenger`)

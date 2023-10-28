@@ -3,19 +3,18 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
-class Foreldrepermisjon(
-    private val foreldrepengeytelse: List<Periode>,
+class Svangerskapspenger(
     private val svangerskapsytelse: List<Periode>
 ) {
 
     internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
-        if (foreldrepengeytelse.isEmpty() && svangerskapsytelse.isEmpty()) {
-            aktivitetslogg.info("Bruker har ingen foreldrepenge- eller svangerskapsytelser")
+        if (svangerskapsytelse.isEmpty()) {
+            aktivitetslogg.info("Bruker har ingen svangerskapsytelser")
             return false
         }
         val overlappsperiode = if (erForlengelse) sykdomsperiode else sykdomsperiode.familieYtelserPeriode
-        return (foreldrepengeytelse + svangerskapsytelse)
-                .any { ytelse -> ytelse.overlapperMed(overlappsperiode) }
+        return svangerskapsytelse.any {
+            ytelse -> ytelse.overlapperMed(overlappsperiode) }
     }
 
 }

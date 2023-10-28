@@ -191,6 +191,7 @@ enum class Varselkode(
     RV_AY_8("Det er utbetalt opplæringspenger i samme periode."),
     RV_AY_9("Det er institusjonsopphold i perioden. Vurder retten til sykepenger."),
     RV_AY_10("Behandling av Ytelser feilet, årsak ukjent", avviklet = true),
+    RV_AY_11("Det er utbetalt svangerskapspenger i samme periode."),
 
     // SI: Simulering
     RV_SI_1("Feil under simulering", avviklet = true),
@@ -281,11 +282,12 @@ enum class Varselkode(
         val `Overlapper med arbeidsavklaringspenger` = RV_AY_3
         val `Overlapper med dagpenger` = RV_AY_4
 
-        val `Overlapper med foreldrepenger eller svangerskapspenger` = RV_AY_5
+        val `Overlapper med foreldrepenger` = RV_AY_5
         val `Overlapper med pleiepenger` = RV_AY_6
         val `Overlapper med omsorgspenger` = RV_AY_7
         val `Overlapper med opplæringspenger` = RV_AY_8
         val `Overlapper med institusjonsopphold` = RV_AY_9
+        val `Overlapper med svangerskapspenger` = RV_AY_11
 
 
         val `Støtter ikke søknadstypen` = RV_SØ_39

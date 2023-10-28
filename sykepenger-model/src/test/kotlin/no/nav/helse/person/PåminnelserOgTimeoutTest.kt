@@ -8,7 +8,7 @@ import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -309,8 +310,10 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-            foreldrepermisjon = Foreldrepermisjon(
-                foreldrepengeytelse = emptyList(),
+            foreldrepenger = Foreldrepenger(
+                foreldrepengeytelse = emptyList()
+            ),
+            svangerskapspenger = Svangerskapspenger(
                 svangerskapsytelse = emptyList()
             ),
             pleiepenger = Pleiepenger(

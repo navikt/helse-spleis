@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -201,10 +202,8 @@ abstract class AbstractObservableTest {
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
-            foreldrepermisjon = Foreldrepermisjon(
-                foreldrepengeytelse = foreldrepenger,
-                svangerskapsytelse = svangerskapspenger
-            ),
+            foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepenger),
+            svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapspenger),
             pleiepenger = Pleiepenger(
                 perioder = pleiepenger
             ),

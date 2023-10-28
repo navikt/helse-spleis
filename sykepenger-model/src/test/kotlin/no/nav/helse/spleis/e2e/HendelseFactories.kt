@@ -12,7 +12,7 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -370,9 +371,11 @@ internal fun AbstractEndToEndTest.ytelser(
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-        foreldrepermisjon = Foreldrepermisjon(
-            foreldrepengeytelse = foreldrepenger,
-            svangerskapsytelse = svangerskapspenger,
+        foreldrepenger = Foreldrepenger(
+            foreldrepengeytelse = foreldrepenger
+        ),
+        svangerskapspenger = Svangerskapspenger(
+            svangerskapsytelse = svangerskapspenger
         ),
         pleiepenger = Pleiepenger(
             perioder = pleiepenger

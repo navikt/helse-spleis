@@ -6,7 +6,7 @@ import no.nav.helse.desember
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -141,8 +142,10 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-            foreldrepermisjon = Foreldrepermisjon(
+            foreldrepenger = Foreldrepenger(
                 foreldrepengeytelse = foreldrepengeYtelse,
+            ),
+            svangerskapspenger = Svangerskapspenger(
                 svangerskapsytelse = svangerskapYtelse
             ),
             pleiepenger = Pleiepenger(

@@ -27,6 +27,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
@@ -127,6 +128,15 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Overlappende svangerskapspenger`() {
+        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(3.januar til 20.januar))
+        assertVarsel(RV_AY_11)
+    }
+
+    @Test
     fun `Foreldrepenger starter mer enn 4 uker før sykefraværstilfellet`() {
         håndterSykmelding(Sykmeldingsperiode(3.mars, 19.mars))
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
@@ -144,6 +154,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode,
             foreldrepenger = listOf(20.januar til 31.januar),
+            svangerskapspenger = listOf(20.januar til 31.januar),
             omsorgspenger = listOf(20.januar til 31.januar),
             opplæringspenger = listOf(20.januar til 31.januar),
             pleiepenger = listOf(20.januar til 31.januar)
@@ -152,11 +163,13 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertVarsel(RV_AY_6, 1.vedtaksperiode.filter())
         assertVarsel(RV_AY_7, 1.vedtaksperiode.filter())
         assertVarsel(RV_AY_8, 1.vedtaksperiode.filter())
+        assertVarsel(RV_AY_11, 1.vedtaksperiode.filter())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode,
             foreldrepenger = listOf(20.januar til 31.januar),
+            svangerskapspenger = listOf(20.januar til 31.januar),
             omsorgspenger = listOf(20.januar til 31.januar),
             opplæringspenger = listOf(20.januar til 31.januar),
             pleiepenger = listOf(20.januar til 31.januar)
@@ -192,6 +205,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(1.februar til 28.februar, 1.mai til 31.mai ))
         assertIngenFunksjonelleFeil()
+        assertIngenVarsel(RV_AY_11)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 

@@ -5,16 +5,16 @@ import java.time.LocalDate
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -38,15 +38,13 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val dagpenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
-    private val foreldrepenger = packet["@løsning.${Foreldrepenger.name}.Foreldrepengeytelse"]
+    private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse"]
         .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asPeriode) ?: emptyList()
-    private val svangerskapsytelse = packet["@løsning.${Foreldrepenger.name}.Svangerskapsytelse"]
+    private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse"]
         .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asPeriode) ?: emptyList()
 
-    private val foreldrepermisjon = Foreldrepermisjon(
-        foreldrepengeytelse = foreldrepenger,
-        svangerskapsytelse = svangerskapsytelse
-    )
+    private val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
+    private val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
 
     private val pleiepenger =
         Pleiepenger(packet["@løsning.${Behovtype.Pleiepenger.name}"].map(::asPeriode))
@@ -88,7 +86,8 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            foreldrepermisjon = foreldrepermisjon,
+            foreldrepenger = foreldrepenger,
+            svangerskapspenger = svangerskapspenger,
             pleiepenger = pleiepenger,
             omsorgspenger = omsorgspenger,
             opplæringspenger = opplæringspenger,
