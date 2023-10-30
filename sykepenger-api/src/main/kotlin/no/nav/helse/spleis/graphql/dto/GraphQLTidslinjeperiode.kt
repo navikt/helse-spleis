@@ -168,7 +168,6 @@ data class GraphQLDag(
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
 interface GraphQLTidslinjeperiode {
-    val id: UUID
     val fom: LocalDate
     val tom: LocalDate
     val tidslinje: List<GraphQLDag>
@@ -194,9 +193,7 @@ data class GraphQLUberegnetPeriode(
     override val periodetilstand: GraphQLPeriodetilstand,
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<GraphQLHendelse>
-    ) : GraphQLTidslinjeperiode {
-    override val id: UUID = UUID.randomUUID()
-}
+    ) : GraphQLTidslinjeperiode
 
 data class GraphQLUberegnetVilkarsprovdPeriode(
     override val fom: LocalDate,
@@ -211,9 +208,7 @@ data class GraphQLUberegnetVilkarsprovdPeriode(
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<GraphQLHendelse>,
     val vilkarsgrunnlagId: UUID
-    ) : GraphQLTidslinjeperiode {
-    override val id: UUID = UUID.randomUUID()
-}
+    ) : GraphQLTidslinjeperiode
 
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,
@@ -252,6 +247,4 @@ data class GraphQLBeregnetPeriode(
     val utbetaling: GraphQLUtbetaling,
     val periodevilkar: GraphQLPeriodevilkar,
     val vilkarsgrunnlagId: UUID?
-) : GraphQLTidslinjeperiode {
-    override val id: UUID = UUID.randomUUID()
-}
+) : GraphQLTidslinjeperiode
