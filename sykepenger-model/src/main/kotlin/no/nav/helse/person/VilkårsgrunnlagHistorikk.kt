@@ -55,9 +55,20 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     }
 
     internal fun gjenoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?) {
-        if (sisteInnlag()?.gjennoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) != null) return hendelse.info("Kan ikke gjenopplive. Vilkårsgrunnlaget lever!")
+        if (!kanGjenopplive(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt)) return hendelse.info("Kan ikke gjenopplive. Vilkårsgrunnlaget lever!")
         val gjenopplivet = historikk.firstNotNullOfOrNull { it.gjennoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) } ?: return hendelse.info("Fant ikke vilkårsgrunnlag å gjenopplive")
         lagre(gjenopplivet)
+    }
+
+    private fun kanGjenopplive(
+        hendelse: IAktivitetslogg,
+        vilkårsgrunnlagId: UUID,
+        nyttSkjæringstidspunkt: LocalDate?
+    ): Boolean {
+        return when (nyttSkjæringstidspunkt) {
+            null -> sisteInnlag()?.gjennoppliv(hendelse, vilkårsgrunnlagId, null) == null
+            else -> sisteInnlag()?.vilkårsgrunnlagFor(nyttSkjæringstidspunkt) == null
+        }
     }
 
     internal fun sisteId() = sisteInnlag()!!.id
