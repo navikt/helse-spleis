@@ -134,7 +134,7 @@ spec:
           application: spesialist-migrering
           access: readwrite
         - team: tbd
-          application: spekulant
+          application: spinnvill
           access: readwrite
         - team: tbd
           application: spotter
