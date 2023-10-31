@@ -346,7 +346,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun gjenoppliv(hendelse: IAktivitetslogg, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): VilkårsgrunnlagElement? {
             if (this.vilkårsgrunnlagId != vilkårsgrunnlagId) return null
-            return kopierMed(hendelse, this.sykepengegrunnlag, this.opptjening, NullObserver, nyttSkjæringstidspunkt)
+            val gjenopplivetSykepengegrunnlag = nyttSkjæringstidspunkt?.let { this.sykepengegrunnlag.gjenoppliv(it) } ?: this.sykepengegrunnlag
+            return kopierMed(hendelse, gjenopplivetSykepengegrunnlag, this.opptjening, NullObserver, nyttSkjæringstidspunkt)
         }
 
         internal fun trengerFastsettelseEtterSkjønn() = sykepengegrunnlag.avventerFastsettelseEtterSkjønn()
@@ -510,7 +511,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             val opptjeningOk = opptjening?.valider(hendelse)
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
-                sykepengegrunnlag = nyttSkjæringstidspunkt?.let { sykepengegrunnlag.gjenoppliv(it) } ?: sykepengegrunnlag,
+                sykepengegrunnlag = sykepengegrunnlag,
                 opptjening = opptjening ?: this.opptjening,
                 medlemskapstatus = medlemskapstatus,
                 vurdertOk = vurdertOk && sykepengegrunnlagOk && (opptjeningOk ?: true),
@@ -556,7 +557,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ): InfotrygdVilkårsgrunnlag {
             return InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
-                sykepengegrunnlag = nyttSkjæringstidspunkt?.let { sykepengegrunnlag.gjenoppliv(it) } ?: sykepengegrunnlag,
+                sykepengegrunnlag = sykepengegrunnlag,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
