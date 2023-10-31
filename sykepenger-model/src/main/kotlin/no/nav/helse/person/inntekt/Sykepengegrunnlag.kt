@@ -242,18 +242,15 @@ internal class Sykepengegrunnlag private constructor(
         return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
 
-    internal fun gjenoppliv(
-        hendelse: GjenopplivVilkårsgrunnlag,
-        nyttSkjæringstidspunkt: LocalDate?,
-        arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>?
-    ): Sykepengegrunnlag? {
+    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, nyttSkjæringstidspunkt: LocalDate?): Sykepengegrunnlag? {
         val skjæringstidspunkt = nyttSkjæringstidspunkt ?: this.skjæringstidspunkt
-        if (arbeidsgiverInntektsopplysninger.isNotEmpty() && arbeidsgiveropplysninger?.isNotEmpty() == true) {
-            hendelse.info("Kan ikke gjenopplive sykepengegrunnlag med nye inntektsopplysninger hvor det allerede foreligger innteksopplysninger")
+        val nyeArbeidsgiverInntektsopplysninger = hendelse.arbeidsgiverinntektsopplysninger(skjæringstidspunkt)
+        if (arbeidsgiverInntektsopplysninger.isNotEmpty() && nyeArbeidsgiverInntektsopplysninger.isNotEmpty()) {
+            hendelse.info("Kan ikke gjenopplive sykepengegrunnlag med nye inntektsopplysninger hvor det allerede foreligger innteksopplysninger.")
             return null
         }
 
-        val gjenopplivetArbeidsgiverInntektsopplysninger = arbeidsgiveropplysninger ?: arbeidsgiverInntektsopplysninger
+        val gjenopplivetArbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger.takeUnless { it.isEmpty() } ?: arbeidsgiverInntektsopplysninger
 
         if (gjenopplivetArbeidsgiverInntektsopplysninger.isEmpty()) {
             hendelse.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.")

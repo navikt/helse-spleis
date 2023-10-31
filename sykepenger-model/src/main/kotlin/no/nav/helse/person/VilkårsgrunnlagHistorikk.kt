@@ -24,7 +24,6 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -56,15 +55,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         historikk.add(0, nytt)
     }
 
-    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?, arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>?) {
-        if (!kanGjenopplive(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt, arbeidsgiveropplysninger)) return hendelse.info("Kan ikke gjenopplive. Vilkårsgrunnlaget lever!")
-        val gjenopplivet = historikk.firstNotNullOfOrNull { it.gjennoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt, arbeidsgiveropplysninger) } ?: return hendelse.info("Fant ikke vilkårsgrunnlag å gjenopplive")
+    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?) {
+        if (!kanGjenopplive(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt)) return hendelse.info("Kan ikke gjenopplive. Vilkårsgrunnlaget lever!")
+        val gjenopplivet = historikk.firstNotNullOfOrNull { it.gjennoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) } ?: return hendelse.info("Fant ikke vilkårsgrunnlag å gjenopplive")
         lagre(gjenopplivet)
     }
 
-    private fun kanGjenopplive(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?, arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>?): Boolean {
+    private fun kanGjenopplive(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): Boolean {
         return when (nyttSkjæringstidspunkt) {
-            null -> sisteInnlag()?.gjennoppliv(hendelse, vilkårsgrunnlagId, null, arbeidsgiveropplysninger) == null
+            null -> sisteInnlag()?.gjennoppliv(hendelse, vilkårsgrunnlagId, null) == null
             else -> sisteInnlag()?.vilkårsgrunnlagFor(nyttSkjæringstidspunkt) == null
         }
     }
@@ -191,7 +190,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return vilkårsgrunnlag.filter { (dato, _) -> sykefraværstilfeller.erAktivtSkjæringstidspunkt(dato) }
         }
 
-        internal fun gjennoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?, arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>?) = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt, arbeidsgiveropplysninger) }
+        internal fun gjennoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?) = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) }
 
         internal companion object {
             fun gjenopprett(
@@ -340,9 +339,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag.byggGodkjenningsbehov(builder)
         }
 
-        internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?, arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>?): VilkårsgrunnlagElement? {
+        internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): VilkårsgrunnlagElement? {
             if (this.vilkårsgrunnlagId != vilkårsgrunnlagId) return null
-            val gjenopplivetSykepengegrunnlag = this.sykepengegrunnlag.gjenoppliv(hendelse, nyttSkjæringstidspunkt, arbeidsgiveropplysninger) ?: return null
+            val gjenopplivetSykepengegrunnlag = this.sykepengegrunnlag.gjenoppliv(hendelse, nyttSkjæringstidspunkt) ?: return null
             return kopierMed(hendelse, gjenopplivetSykepengegrunnlag, this.opptjening, NullObserver, nyttSkjæringstidspunkt)
         }
 

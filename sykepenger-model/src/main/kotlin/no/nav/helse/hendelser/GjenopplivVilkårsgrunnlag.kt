@@ -5,6 +5,10 @@ import java.util.UUID
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
+import no.nav.helse.økonomi.Inntekt
 
 class GjenopplivVilkårsgrunnlag(
     meldingsreferanseId: UUID,
@@ -12,17 +16,22 @@ class GjenopplivVilkårsgrunnlag(
     fødselsnummer: String,
     private val vilkårsgrunnlagId: UUID,
     private val nyttSkjæringstidspunkt: LocalDate?,
-    private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>?
+    private val arbeidsgiveropplysninger: Map<String, Inntekt>
 ): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()) {
 
     internal fun gjenoppliv(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
-        vilkårsgrunnlagHistorikk.gjenoppliv(this, vilkårsgrunnlagId, nyttSkjæringstidspunkt, arbeidsgiveropplysninger)
+        vilkårsgrunnlagHistorikk.gjenoppliv(this, vilkårsgrunnlagId, nyttSkjæringstidspunkt)
+    }
+
+    internal fun arbeidsgiverinntektsopplysninger(skjæringstidspunkt: LocalDate) = arbeidsgiveropplysninger.map { (organisasjonsnummer, inntekt) ->
+        val inntektsmeldingInntekt = Inntektsmelding(skjæringstidspunkt, meldingsreferanseId(), inntekt)
+        ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsmeldingInntekt, Refusjonsopplysning(meldingsreferanseId(), skjæringstidspunkt, null, inntekt).refusjonsopplysninger)
     }
 
     internal fun valider(organisasjonsnummere: List<String>) {
-        if (arbeidsgiveropplysninger.isNullOrEmpty()) return
-        check(arbeidsgiveropplysninger.all { arbeidsgiveropplysning ->
-            organisasjonsnummere.any { arbeidsgiveropplysning.gjelder(it) }
-        }) { "Det er forsøkt å legge til inntektsopplysnigner for arbeidsgiver som ikke finnes på personen." }
+        if (arbeidsgiveropplysninger.isEmpty()) return
+        check(organisasjonsnummere.containsAll(arbeidsgiveropplysninger.keys)) {
+            "Det er forsøkt å legge til inntektsopplysnigner for arbeidsgiver som ikke finnes på personen."
+        }
     }
 }

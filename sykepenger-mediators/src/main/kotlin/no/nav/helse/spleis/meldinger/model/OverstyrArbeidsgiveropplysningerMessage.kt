@@ -38,9 +38,9 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
             context
         )
 
-    internal companion object {
+    private companion object {
 
-        internal fun JsonMessage.arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
+        private fun JsonMessage.arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
             val arbeidsgivere = get("arbeidsgivere").takeUnless { it.isMissingOrNull() } ?: return emptyList()
             val id = UUID.fromString(get("@id").asText())
             val opprettet = get("@opprettet").asLocalDateTime()

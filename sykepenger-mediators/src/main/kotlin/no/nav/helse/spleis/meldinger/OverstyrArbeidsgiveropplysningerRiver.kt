@@ -24,12 +24,12 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
         message.requireArbeidsgiveropplysninger()
     }
 
-    internal companion object {
+    private companion object {
         private val JsonNode.gyldigTekst get() = isTextual && asText().isNotBlank()
         private val JsonNode.gyldigDouble get() = isNumber || asText().toDoubleOrNull() != null
         private val JsonNode.gyldigInt get() = isInt || asText().toIntOrNull() != null
 
-        internal fun JsonMessage.requireArbeidsgiveropplysninger() {
+        private fun JsonMessage.requireArbeidsgiveropplysninger() {
             require("arbeidsgivere") { require(it.size() > 0) { "Må settes minst en arbeidsgiver" } }
             requireArray("arbeidsgivere") {
                 require("organisasjonsnummer") { require(it.gyldigTekst) }
