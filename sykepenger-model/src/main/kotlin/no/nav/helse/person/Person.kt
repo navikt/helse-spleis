@@ -199,6 +199,7 @@ class Person private constructor(
     }
 
     fun håndter(gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag) {
+        gjenopplivVilkårsgrunnlag.valider(arbeidsgivere.map { it.organisasjonsnummer() })
         gjenopplivVilkårsgrunnlag.gjenoppliv(vilkårsgrunnlagHistorikk)
         gjenopptaBehandling(gjenopplivVilkårsgrunnlag)
         håndterGjenoppta(gjenopplivVilkårsgrunnlag)
@@ -559,9 +560,6 @@ class Person private constructor(
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
         observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
     }
-
-    internal fun nyesteIdForVilkårsgrunnlagHistorikk() =
-        vilkårsgrunnlagHistorikk.sisteId()
 
     internal fun skjæringstidspunkt(periode: Periode) =
         Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, periode, infotrygdhistorikk)

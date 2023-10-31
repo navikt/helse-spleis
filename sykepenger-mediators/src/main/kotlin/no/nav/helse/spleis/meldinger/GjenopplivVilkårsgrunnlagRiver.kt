@@ -6,6 +6,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.meldinger.OverstyrArbeidsgiveropplysningerRiver.Companion.requireArbeidsgiveropplysninger
 import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
 
 internal class GjenopplivVilkårsgrunnlagRiver(
@@ -24,6 +25,7 @@ internal class GjenopplivVilkårsgrunnlagRiver(
         )
         message.require("vilkårsgrunnlagId") { UUID.fromString(it.asText()) }
         message.interestedIn("nyttSkjæringstidspunkt", JsonNode::asLocalDate)
+        message.interestedIn("arbeidsgivere") { message.requireArbeidsgiveropplysninger() }
     }
 
     override fun createMessage(packet: JsonMessage) = GjenopplivVilkårsgrunnlagMessage(packet)

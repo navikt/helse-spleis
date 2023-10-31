@@ -7,6 +7,8 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -15,7 +17,6 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -242,6 +243,21 @@ internal class Sykepengegrunnlag private constructor(
         return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
 
+    internal fun gjenoppliv(
+        hendelse: GjenopplivVilkårsgrunnlag,
+        opptjening: Opptjening?,
+        nyttSkjæringstidspunkt: LocalDate?
+    ): Sykepengegrunnlag? {
+        val skjæringstidspunkt = nyttSkjæringstidspunkt ?: this.skjæringstidspunkt
+        val gjenopplivetArbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.ifEmpty {
+            val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, NullObserver)
+            hendelse.overstyr(builder)
+            builder.resultat() ?: arbeidsgiverInntektsopplysninger
+        }
+        if (gjenopplivetArbeidsgiverInntektsopplysninger.isEmpty()) return null.also { hendelse.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.") }
+        return kopierSykepengegrunnlag(gjenopplivetArbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, nyttSkjæringstidspunkt = skjæringstidspunkt)
+    }
+
     internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
@@ -301,12 +317,6 @@ internal class Sykepengegrunnlag private constructor(
     internal fun grunnbeløpsregulering() = kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger,
         deaktiverteArbeidsforhold
-    )
-
-    internal fun gjenoppliv(nyttSkjæringstidspunkt: LocalDate) = kopierSykepengegrunnlag(
-        nyttSkjæringstidspunkt = nyttSkjæringstidspunkt,
-        arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
-        deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
     )
 
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
