@@ -7,7 +7,6 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -245,16 +244,21 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun gjenoppliv(
         hendelse: GjenopplivVilkårsgrunnlag,
-        opptjening: Opptjening?,
-        nyttSkjæringstidspunkt: LocalDate?
+        nyttSkjæringstidspunkt: LocalDate?,
+        arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>?
     ): Sykepengegrunnlag? {
         val skjæringstidspunkt = nyttSkjæringstidspunkt ?: this.skjæringstidspunkt
-        val gjenopplivetArbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.ifEmpty {
-            val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, NullObserver)
-            hendelse.overstyr(builder)
-            builder.resultat() ?: arbeidsgiverInntektsopplysninger
+        if (arbeidsgiverInntektsopplysninger.isNotEmpty() && arbeidsgiveropplysninger?.isNotEmpty() == true) {
+            hendelse.info("Kan ikke gjenopplive sykepengegrunnlag med nye inntektsopplysninger hvor det allerede foreligger innteksopplysninger")
+            return null
         }
-        if (gjenopplivetArbeidsgiverInntektsopplysninger.isEmpty()) return null.also { hendelse.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.") }
+
+        val gjenopplivetArbeidsgiverInntektsopplysninger = arbeidsgiveropplysninger ?: arbeidsgiverInntektsopplysninger
+
+        if (gjenopplivetArbeidsgiverInntektsopplysninger.isEmpty()) {
+            hendelse.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.")
+            return null
+        }
         return kopierSykepengegrunnlag(gjenopplivetArbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, nyttSkjæringstidspunkt = skjæringstidspunkt)
     }
 
