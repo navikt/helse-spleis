@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -12,6 +13,7 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
@@ -22,7 +24,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
-    private val arbeidsgiveropplysninger = packet["arbeidsgivere"].asArbeidsgiveropplysninger()
+    private val arbeidsgiveropplysninger = packet.arbeidsgiveropplysninger(skjæringstidspunkt)
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(
@@ -36,28 +38,34 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
             context
         )
 
-    private fun JsonNode.asArbeidsgiveropplysninger() = map { arbeidsgiveropplysning ->
-        val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
-        val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
-        val forklaring = arbeidsgiveropplysning["forklaring"].asText()
-        val subsumsjon = arbeidsgiveropplysning.path("subsumsjon").asSubsumsjon()
+    internal companion object {
 
-        val saksbehandlerinntekt =
-            Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
-        val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger(id, opprettet)
+        internal fun JsonMessage.arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate): List<ArbeidsgiverInntektsopplysning> {
+            val arbeidsgivere = get("arbeidsgivere").takeUnless { it.isMissingOrNull() } ?: return emptyList()
+            val id = UUID.fromString(get("@id").asText())
+            val opprettet = get("@opprettet").asLocalDateTime()
+            return arbeidsgivere.map {arbeidsgiveropplysning ->
+                val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
+                val månedligInntekt = arbeidsgiveropplysning["månedligInntekt"].asDouble().månedlig
+                val forklaring = arbeidsgiveropplysning["forklaring"].asText()
+                val subsumsjon = arbeidsgiveropplysning.path("subsumsjon").asSubsumsjon()
 
-        ArbeidsgiverInntektsopplysning(orgnummer, saksbehandlerinntekt, refusjonsopplysninger)
-    }
+                val saksbehandlerinntekt =
+                    Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
+                val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger(id, opprettet)
 
-    private fun JsonNode.asSubsumsjon() = this.takeUnless(JsonNode::isMissingOrNull)?.let {
-        Subsumsjon(
-            paragraf = it["paragraf"].asText(),
-            ledd = it.path("ledd").takeUnless(JsonNode::isMissingOrNull)?.asInt(),
-            bokstav = it.path("bokstav").takeUnless(JsonNode::isMissingOrNull)?.asText()
-        )
-    }
+                ArbeidsgiverInntektsopplysning(orgnummer, saksbehandlerinntekt, refusjonsopplysninger)
+            }
+        }
 
-    private companion object {
+        private fun JsonNode.asSubsumsjon() = this.takeUnless(JsonNode::isMissingOrNull)?.let {
+            Subsumsjon(
+                paragraf = it["paragraf"].asText(),
+                ledd = it.path("ledd").takeUnless(JsonNode::isMissingOrNull)?.asInt(),
+                bokstav = it.path("bokstav").takeUnless(JsonNode::isMissingOrNull)?.asText()
+            )
+        }
+
         private fun JsonNode.asRefusjonsopplysninger(meldingsreferanseId: UUID, opprettet: LocalDateTime) = RefusjonsopplysningerBuilder().also { builder ->
             this.map { refusjonsopplysning ->
                 builder.leggTil(
