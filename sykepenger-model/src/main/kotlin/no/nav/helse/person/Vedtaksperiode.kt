@@ -104,6 +104,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad 
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
@@ -2186,6 +2187,14 @@ internal class Vedtaksperiode private constructor(
         private fun utbetaltIInfotrygd(vedtaksperiode: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk) =
             vedtaksperiode.finnArbeidsgiverperiode()?.utbetaltIInfotrygd(vedtaksperiode.periode, infotrygdhistorikk) == true
 
+        private fun forkastPåGrunnAvInfotrygdendring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
+            if (vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return false // Om vi har info kan vi sende den ut til Saksbehandler uansett
+            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return false // Perioden kan ikke forkastes
+            if (!utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk)) return false // Alt er ikke utbetalt i Infotrygd
+            check(vedtaksperiode.periode.endInclusive.year < 2023) { "Perioden ${vedtaksperiode.periode} er utbetalt i sin helhet i Infotrygd." }
+            return true
+        }
+
         private fun håndterInfotrygdendring(
             hendelse: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,
@@ -2193,6 +2202,12 @@ internal class Vedtaksperiode private constructor(
         ){
             håndterRevurdering(hendelse) {
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
+            }
+
+            if (forkastPåGrunnAvInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) {
+                hendelse.funksjonellFeil(RV_IT_3)
+                vedtaksperiode.person.forkastAuu(hendelse, vedtaksperiode)
+                return
             }
 
             hendelse.varsel(RV_IT_38)
