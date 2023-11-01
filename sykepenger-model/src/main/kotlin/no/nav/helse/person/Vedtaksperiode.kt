@@ -1406,13 +1406,6 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK_REVURDERING
 
-        override fun makstid(
-            tilstandsendringstidspunkt: LocalDateTime,
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: List<Arbeidsgiver>
-        ): LocalDateTime =
-            LocalDateTime.MAX
-
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne revurdering" }
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
@@ -1730,12 +1723,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerVilkårsprøving : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING
-        override fun makstid(
-            tilstandsendringstidspunkt: LocalDateTime,
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: List<Arbeidsgiver>
-        ): LocalDateTime =
-            tilstandsendringstidspunkt.plusDays(5)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
@@ -1772,13 +1759,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerHistorikk : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK
-
-        override fun makstid(
-            tilstandsendringstidspunkt: LocalDateTime,
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: List<Arbeidsgiver>
-        ): LocalDateTime = tilstandsendringstidspunkt
-            .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne utbetaling" }
@@ -1860,12 +1840,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSimulering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SIMULERING
-
-        override fun makstid(
-            tilstandsendringstidspunkt: LocalDateTime,
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: List<Arbeidsgiver>
-        ): LocalDateTime = tilstandsendringstidspunkt.plusDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             trengerSimulering(vedtaksperiode, hendelse)

@@ -635,15 +635,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `sykdomstidslinje tømmes helt når perioder blir forkastet, dersom det ikke finnes noen perioder igjen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar))
-        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, LocalDateTime.now().minusDays(200))
-        assertEquals(0, inspektør.sykdomshistorikk.sykdomstidslinje().count())
-    }
-
-    @Test
     fun `gjentatt annullering av periode fører ikke til duplikate innslag i utbetalinger`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
