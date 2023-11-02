@@ -2190,9 +2190,7 @@ internal class Vedtaksperiode private constructor(
         private fun forkastPåGrunnAvInfotrygdendring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
             if (vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return false // Om vi har info kan vi sende den ut til Saksbehandler uansett
             if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return false // Perioden kan ikke forkastes
-            if (!utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk)) return false // Alt er ikke utbetalt i Infotrygd
-            check(vedtaksperiode.periode.endInclusive.year < 2023) { "Perioden ${vedtaksperiode.periode} er utbetalt i sin helhet i Infotrygd." }
-            return true
+            return utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk) // Kan forkaste om alt er utbetalt i Infotrygd i sin helhet
         }
 
         private fun håndterInfotrygdendring(
@@ -2205,6 +2203,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             if (forkastPåGrunnAvInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) {
+                if (vedtaksperiode.periode.endInclusive.year >= 2023) return hendelse.info( "Perioden er utbetalt i sin helhet i Infotrygd." )
                 hendelse.funksjonellFeil(RV_IT_3)
                 vedtaksperiode.person.forkastAuu(hendelse, vedtaksperiode)
                 return
