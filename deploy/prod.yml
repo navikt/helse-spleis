@@ -48,7 +48,6 @@ spec:
               - name: spleis-api
               - name: spleis-avstemming
               - name: spleis-migrate
-              - name: sparsom
         flags:
           - name: max_wal_size
             value: "10240"

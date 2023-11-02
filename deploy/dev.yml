@@ -42,7 +42,6 @@ spec:
               - name: spleis-api
               - name: spleis-opprydding-dev
               - name: spleis-avstemming
-              - name: sparsom
   secureLogs:
     enabled: true
   env:
