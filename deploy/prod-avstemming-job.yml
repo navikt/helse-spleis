@@ -8,7 +8,8 @@ metadata:
   namespace: tbd
 spec:
   image: {{image}}
-  schedule: "0 2 * * *"
+  schedule: "0 1 * * *"
+  timeZone: Europe/Oslo
   kafka:
     pool: nav-prod
   secureLogs:
