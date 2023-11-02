@@ -4,6 +4,8 @@ import no.nav.helse.desember
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -25,6 +27,7 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
@@ -158,6 +161,26 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
             assertEquals("HJELP", it.venterPå.venteårsak.hva)
             assertEquals("VIL_UTBETALES", it.venterPå.venteårsak.hvorfor)
         }
+    }
+
+    @Test
+    fun `Periodene omgjøres i riktig rekkefølge`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1) // Denne bare for at a1 skal være først i lista for arbeidsgivere
+
+        håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
+        håndterSøknad(Sykdom(1.mai, 16.mai, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.mai til 16.mai), orgnummer = a1)
+
+        nullstillTilstandsendringer()
+
+        håndterUtbetalingshistorikkEtterInfotrygdendring(
+            ArbeidsgiverUtbetalingsperiode(a2, 1.mars, 5.mars, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1, 1.mai, 5.mai, 100.prosent, INNTEKT)
+        )
+
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
 
     private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiode: IdInnhenter) {

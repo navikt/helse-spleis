@@ -261,7 +261,7 @@ class Person private constructor(
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         utbetalingshistorikk.kontekst(aktivitetslogg, this)
         utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
-        finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk, infotrygdhistorikk)
+        arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk)
         håndterGjenoppta(utbetalingshistorikk)
     }
 

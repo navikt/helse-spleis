@@ -156,6 +156,12 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
+        internal fun List<Arbeidsgiver>.håndter(hendelse: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
+            forEach { arbeidsgiver ->
+                arbeidsgiver.håndter(hendelse, infotrygdhistorikk)
+            }
+        }
+
         private val List<Arbeidsgiver>.alleVedtaksperioder get() = flatMap { it.vedtaksperioder }
 
         internal fun List<Arbeidsgiver>.håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag) =
@@ -820,10 +826,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.firstOrNull { other ->
             vedtaksperiode.erVedtaksperiodeRettFør(other)
         }
-
-    internal fun finnTidligereVedtaksperioder(dato: LocalDate): List<Vedtaksperiode> = vedtaksperioder.filter {
-        dato > it.periode().endInclusive
-    }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
