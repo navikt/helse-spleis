@@ -873,6 +873,49 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `Skal ikke be om arbeidsgiverperiode når det er kort gap pga av arbeid gjenopptatt i slutten av perioden før en forlengelse`() {
+        nyPeriode(1.januar til 31.januar, orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 20.januar), orgnummer = a2)
+        håndterSøknad(Sykdom(3.januar, 20.januar, 100.prosent), Søknad.Søknadsperiode.Arbeid(13.januar, 20.januar), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        nyPeriode(21.januar til 31.januar, orgnummer = a2)
+
+        val expectedForespurteOpplysninger  = listOf(
+            PersonObserver.FastsattInntekt(INNTEKT),
+            PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT)))
+        )
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
+    }
+
+    @Test
+    fun `dersom kort periode allerede har fått inntektsmelding trenger ikke neste periode å be om AGP`() {
+        nyPeriode(1.januar til 16.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        nyPeriode(18.januar til 31.januar)
+
+        val expectedForespurteOpplysninger  = listOf(
+            PersonObserver.Inntekt(null),
+            PersonObserver.Refusjon(forslag = emptyList())
+        )
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
+    }
+
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(1.januar til 31.januar, a1)

@@ -189,6 +189,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         return this.generasjoner.erUtbetaltPåForskjelligeUtbetalinger(other.generasjoner)
     }
 
+    internal fun trengerArbeidsgiverperiode() = generasjoner.dokumentsporing.sisteInntektsmeldingId() == null
+
     internal class Generasjon constructor(
         private val id: UUID,
         private var tilstand: Tilstand,

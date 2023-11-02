@@ -777,12 +777,12 @@ internal class Vedtaksperiode private constructor(
         return null
     }
 
-    private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
-        val arbeidsgiverperiodeperioder = arbeidsgiverperiode?.toList()?.grupperSammenhengendePerioder().orEmpty()
-        return arbeidsgiver.tidligerePeriodeHarIkkeForespurtPeriode(periode().start, arbeidsgiverperiode)
-                || arbeidsgiverperiodeperioder.maxByOrNull { it.endInclusive }?.overlapperMed(periode())
-                ?: false
-    }
+    private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) = arbeidsgiver.erFørstePeriodeEtterArbeidsgiverperiode(periode().start, arbeidsgiverperiode)
+            && harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode)
+
+    private fun harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
+        arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
+            .all { it.generasjoner.trengerArbeidsgiverperiode() }
 
     private fun relevanteSykmeldingsperioder(arbeidsgiverperiode: Arbeidsgiverperiode?, vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
         if (trengerArbeidsgiverperiode(arbeidsgiverperiode)) return vedtaksperioder
