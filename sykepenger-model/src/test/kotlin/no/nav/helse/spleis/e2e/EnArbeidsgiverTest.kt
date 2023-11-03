@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -54,16 +53,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(3, inspektør.utbetalinger.size)
         val januar = inspektør.utbetalinger.first()
         val mars = inspektør.utbetalinger.last()
-
-        assertForventetFeil(
-            forklaring = "Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling & annullerer det som var utbetalt før",
-            nå = {
-                assertEquals(januar.inspektør.korrelasjonsId, mars.inspektør.korrelasjonsId)
-            },
-            ønsket = {
-                assertNotEquals(januar.inspektør.korrelasjonsId, mars.inspektør.korrelasjonsId)
-            }
-        )
+        assertNotEquals(januar.inspektør.korrelasjonsId, mars.inspektør.korrelasjonsId)
     }
 
     @Test

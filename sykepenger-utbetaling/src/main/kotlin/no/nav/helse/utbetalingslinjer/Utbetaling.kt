@@ -313,9 +313,7 @@ class Utbetaling private constructor(
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
         fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
-            .filter { utbetaling ->
-                utbetaling.periode.overlapperMed(periode) || utbetaling.periode.erRettFør(periode.start)
-            }
+            .filter { utbetaling -> utbetaling.periode.overlapperMed(periode) }
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this
                 .asSequence()
