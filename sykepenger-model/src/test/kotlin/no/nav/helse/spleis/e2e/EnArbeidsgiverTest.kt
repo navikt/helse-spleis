@@ -1,11 +1,13 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
@@ -26,10 +28,43 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(Sykdom(1.februar, 18.februar, 100.prosent), Arbeid(3.februar, 18.februar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterSøknad(Sykdom(19.februar, 19.mars, 100.prosent))
+        håndterInntektsmelding(listOf(19.februar til 6.mars))
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+
+        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(19.februar til 6.mars, inspektør.arbeidsgiverperiode(3.vedtaksperiode))
+
+        assertEquals(3, inspektør.utbetalinger.size)
+        val januar = inspektør.utbetalinger.first()
+        val mars = inspektør.utbetalinger.last()
+
+        assertForventetFeil(
+            forklaring = "Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling & annullerer det som var utbetalt før",
+            nå = {
+                assertEquals(januar.inspektør.korrelasjonsId, mars.inspektør.korrelasjonsId)
+            },
+            ønsket = {
+                assertNotEquals(januar.inspektør.korrelasjonsId, mars.inspektør.korrelasjonsId)
+            }
+        )
+    }
 
     @Test
     fun `drawio -- misc -- oppvarming`() {
