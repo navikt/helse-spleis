@@ -126,10 +126,8 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
     internal fun lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.serialize()
         sessionOf(dataSource, returnGeneratedKey = true).use {
-            it.run(queryOf("INSERT INTO unike_person (fnr, aktor_id) VALUES (?, ?)",
-                fødselsnummer.toLong(), aktørId.toLong()).asExecute)
-            val personId = it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
-                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
+            val personId = it.run(queryOf("INSERT INTO person (fnr, aktor_id, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                fødselsnummer.toLong(), aktørId.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
             it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
                 fødselsnummer.toLong(), personId!!).asExecute)
 

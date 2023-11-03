@@ -30,7 +30,6 @@ internal class AppTest: DBTest() {
         testRapid.sendTestMessage(slettemelding("123"))
         assertEquals(0, finnPerson("123"))
         assertEquals(0, finnMelding("123"))
-        assertEquals(0, finnUnikePerson("123"))
     }
 
     @Test
@@ -42,8 +41,6 @@ internal class AppTest: DBTest() {
         assertEquals(1, finnPerson("1234"))
         assertEquals(0, finnMelding("123"))
         assertEquals(1, finnMelding("1234"))
-        assertEquals(0, finnUnikePerson("123"))
-        assertEquals(1, finnUnikePerson("1234"))
     }
 
     private fun slettemelding(fødselsnummer: String) = JsonMessage.newMessage("slett_person", mapOf("fødselsnummer" to fødselsnummer)).toJson()
@@ -52,7 +49,6 @@ internal class AppTest: DBTest() {
         opprettDummyPerson(fødselsnummer)
         assertEquals(1, finnPerson(fødselsnummer))
         assertEquals(1, finnMelding(fødselsnummer))
-        assertEquals(1, finnUnikePerson(fødselsnummer))
     }
 
     private fun finnPerson(fødselsnummer: String): Int {
@@ -67,12 +63,6 @@ internal class AppTest: DBTest() {
         } ?: 0
     }
 
-    private fun finnUnikePerson(fødselsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT COUNT(1) FROM unike_person WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
-        } ?: 0
-    }
-
     private fun opprettDummyPerson(fødselsnummer: String) {
         sessionOf(dataSource).use { session ->
             session.transaction {
@@ -82,15 +72,10 @@ internal class AppTest: DBTest() {
                     queryOf(opprettMelding, fødselsnummer.toLong(), UUID.randomUUID(), "melding", "{}", LocalDateTime.now()).asUpdate
                 )
 
-                val opprettUnikePerson = "INSERT INTO unike_person(fnr, aktor_id, sist_avstemt) VALUES(?, ?, ?)"
-                it.run(
-                    queryOf(opprettUnikePerson, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), LocalDateTime.now()).asUpdate
-                )
-
                 val opprettPerson =
-                    "INSERT INTO person(skjema_versjon, fnr, data) VALUES(?, ?, ?::json)"
+                    "INSERT INTO person(skjema_versjon, fnr, aktor_id, data) VALUES(?, ?, ?, ?::json)"
                 it.run(
-                    queryOf(opprettPerson, 0, fødselsnummer.toLong(), "{}").asUpdate
+                    queryOf(opprettPerson, 0, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), "{}").asUpdate
                 )
             }
         }

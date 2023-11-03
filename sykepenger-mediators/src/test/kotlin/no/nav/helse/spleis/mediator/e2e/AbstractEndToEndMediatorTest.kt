@@ -111,9 +111,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
         testRapid.reset()
     }
 
-    protected fun antallUnikePersoner() = sessionOf(dataSource).use {
-        it.run(queryOf("SELECT COUNT(1) FROM unike_person").map { it.long(1) }.asSingle) ?: 0
-    }
     protected fun antallPersoner() = sessionOf(dataSource).use {
         it.run(queryOf("SELECT COUNT(1) FROM person").map { it.long(1) }.asSingle) ?: 0
     }

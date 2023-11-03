@@ -117,41 +117,31 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
 
     private fun opprettNyPerson(session: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> SerialisertPerson?): Triple<Long, SerialisertPerson, List<SerialisertPerson>>? {
         return lagNyPerson()?.let {
-            opprettNyPersonRad(session, personidentifikator, aktørId)
-            Triple(opprettNyPersonversjon(session, personidentifikator, it.skjemaVersjon, it.json), it, emptyList())
+            Triple(opprettNyPersonversjon(session, personidentifikator, aktørId, it.skjemaVersjon, it.json), it, emptyList())
         }
     }
 
-    private fun opprettNyPersonversjon(session: Session, personidentifikator: Personidentifikator, skjemaVersjon: Int, personJson: String): Long {
+    private fun opprettNyPersonversjon(session: Session, personidentifikator: Personidentifikator, aktørId: String, skjemaVersjon: Int, personJson: String): Long {
         @Language("PostgreSQL")
-        val statement = """ INSERT INTO person (fnr, skjema_versjon, data) VALUES (:fnr, :skjemaversjon, :data) """
+        val statement = """ INSERT INTO person (fnr, aktor_id, skjema_versjon, data) VALUES (:fnr, :aktorId, :skjemaversjon, :data) """
         return checkNotNull(session.run(queryOf(statement, mapOf(
             "fnr" to personidentifikator.toLong(),
+            "aktorId" to aktørId.toLong(),
             "skjemaversjon" to skjemaVersjon,
             "data" to personJson
         )).asUpdateAndReturnGeneratedKey)) { "klarte ikke inserte person" }
     }
 
-    private fun opprettNyPersonRad(session: Session, personidentifikator: Personidentifikator, aktørId: String) {
-        // om to prosesser inserter en person samtidig, så vil den ene klare å det mens den andre vil få 0 rader affected (pga. DO NOTHING)
-        @Language("PostgreSQL")
-        val statement = "INSERT INTO unike_person (fnr, aktor_id) VALUES (:fnr, :aktor) ON CONFLICT DO NOTHING"
-        check(1 == session.run(queryOf(statement, mapOf(
-            "fnr" to personidentifikator.toLong(),
-            "aktor" to aktørId.toLong()
-        )).asUpdate)) { "Forventet å påvirke én rad. Det kan indikere at vi har forsøkt å opprette en person samtidig (race condition)." }
-    }
-
     private fun oppdaterAvstemmingtidspunkt(session: Session, message: HendelseMessage, personidentifikator: Personidentifikator) {
         if (message !is AvstemmingMessage) return
         @Language("PostgreSQL")
-        val statement = "UPDATE unike_person SET sist_avstemt = now() WHERE fnr = :fnr"
+        val statement = "UPDATE person SET sist_avstemt = now() WHERE fnr = :fnr"
         session.run(queryOf(statement, mapOf("fnr" to personidentifikator.toLong())).asExecute)
     }
 
     internal fun manglerAvstemming(): Int {
         @Language("PostgresSQL")
-        val statement = "SELECT count(1) FROM unike_person WHERE sist_avstemt::date < now()::date - interval '31 DAYS'"
+        val statement = "SELECT count(1) FROM person WHERE sist_avstemt::date < now()::date - interval '31 DAYS'"
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(statement).map { row -> row.int(1) }.asSingle) ?: 0
         }

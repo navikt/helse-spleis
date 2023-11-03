@@ -26,7 +26,6 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
             testRapid.sendTestMessage(melding)
         }
 
-        assertEquals(1, antallUnikePersoner())
         assertEquals(1, antallPersoner())
         assertEquals(2, antallPersonalias())
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
@@ -49,7 +48,6 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
 
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
 
-        assertEquals(2, antallUnikePersoner())
         assertEquals(2, antallPersoner())
         assertEquals(2, antallPersonalias())
         assertEquals(1, antallPersonalias(FNR1))
@@ -75,7 +73,6 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
     fun `endrer fødselsnummer ved opphørt ident`() {
         sendSøknad(fnr = FNR1, perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendIdentOpphørt(FNR1, FNR2)
-        assertEquals(1, antallUnikePersoner())
         assertEquals(1, antallPersoner())
         assertEquals(2, antallPersonalias())
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)))

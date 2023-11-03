@@ -12,7 +12,6 @@ internal class PersonRepository(private val dataSource: DataSource) {
                 it.slettPersonAlias(fødselsnummer)
                 it.slettPerson(fødselsnummer)
                 it.slettMeldinger(fødselsnummer)
-                it.slettUnikePerson(fødselsnummer)
             }
         }
     }
@@ -29,11 +28,6 @@ internal class PersonRepository(private val dataSource: DataSource) {
 
     private fun TransactionalSession.slettMeldinger(fødselsnummer: String) {
         val query = "DELETE FROM melding WHERE fnr = ?"
-        run(queryOf(query, fødselsnummer.toLong()).asExecute)
-    }
-
-    private fun TransactionalSession.slettUnikePerson(fødselsnummer: String) {
-        val query = "DELETE FROM unike_person WHERE fnr = ?"
         run(queryOf(query, fødselsnummer.toLong()).asExecute)
     }
 }

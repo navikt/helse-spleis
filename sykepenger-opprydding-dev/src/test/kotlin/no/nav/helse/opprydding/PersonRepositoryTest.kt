@@ -29,11 +29,9 @@ internal class PersonRepositoryTest: DBTest() {
         opprettDummyPerson("123")
         assertEquals(1, finnPerson("123"))
         assertEquals(1, finnMelding("123"))
-        assertEquals(1, finnUnikePerson("123"))
         personRepository.slett("123")
         assertEquals(0, finnPerson("123"))
         assertEquals(0, finnMelding("123"))
-        assertEquals(0, finnUnikePerson("123"))
     }
 
     private fun runMigration(psql: PostgreSQLContainer<Nothing>): DataSource {
@@ -73,12 +71,6 @@ internal class PersonRepositoryTest: DBTest() {
         } ?: 0
     }
 
-    private fun finnUnikePerson(fødselsnummer: String): Int {
-        return sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT COUNT(1) FROM unike_person WHERE fnr = ?", fødselsnummer.toLong()).map { it.int(1) }.asSingle)
-        } ?: 0
-    }
-
     private fun opprettDummyPerson(fødselsnummer: String) {
         sessionOf(dataSource).transaction {
             val opprettMelding =
@@ -94,23 +86,14 @@ internal class PersonRepositoryTest: DBTest() {
                 ).asExecute
             )
 
-            val opprettUnikePerson = "INSERT INTO unike_person(fnr, aktor_id, sist_avstemt) VALUES(?, ?, ?)"
-            it.run(
-                queryOf(
-                    opprettUnikePerson,
-                    fødselsnummer.toLong(),
-                    fødselsnummer.reversed().toLong(),
-                    LocalDateTime.now(),
-                ).asExecute
-            )
-
             val opprettPerson =
-                "INSERT INTO person(skjema_versjon, fnr, data) VALUES(?, ?, ?::json)"
+                "INSERT INTO person(skjema_versjon, fnr, aktor_id, data) VALUES(?, ?, ?, ?::json)"
             it.run(
                 queryOf(
                     opprettPerson,
                     0,
                     fødselsnummer.toLong(),
+                    fødselsnummer.reversed().toLong(),
                     "{}"
                 ).asExecute
             )

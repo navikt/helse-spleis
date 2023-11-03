@@ -121,11 +121,6 @@ private fun arbeidFullført(session: Session, arbeidId: String, fnr: Long) {
     val query = "update arbeidstabell set arbeid_ferdig=now() where arbeid_id=? and fnr=?"
     session.run(queryOf(query, arbeidId, fnr).asUpdate)
 }
-private fun aktørId(session: Session, fnr: Long): List<Long> {
-    @Language("PostgreSQL")
-    val query = "select aktor_id from unike_person where fnr=?"
-    return session.run(queryOf(query, fnr).map { it.long("aktor_id") }.asList)
-}
 private fun arbeidFinnes(session: Session, arbeidId: String): Boolean {
     @Language("PostgreSQL")
     val query = "SELECT COUNT(1) as antall FROM arbeidstabell where arbeid_id=?"
@@ -161,18 +156,18 @@ private fun opprettOgUtførArbeid(arbeidId: String, arbeider: (session: Session,
 
 private fun testSpeilJsonTask(arbeidId: String) {
     opprettOgUtførArbeid(arbeidId) { session, fnr ->
-        hentPerson(session, fnr)?.let { data ->
+        hentPerson(session, fnr)?.let { (aktørId, data) ->
             try {
                 serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
             } catch (err: Exception) {
-                log.info("${aktørId(session, fnr)} lar seg ikke serialisere: ${err.message}")
+                log.info("$aktørId lar seg ikke serialisere: ${err.message}")
             }
         }
     }
 }
 private fun hentPerson(session: Session, fnr: Long) =
-    session.run(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
-        it.string("data")
+    session.run(queryOf("SELECT aktor_id, data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
+        it.string("aktor_id") to it.string("data")
     }.asSingle)
 
 private fun migrateTask(factory: ConsumerProducerFactory) {
@@ -180,7 +175,7 @@ private fun migrateTask(factory: ConsumerProducerFactory) {
         var count = 0L
         factory.createProducer().use { producer ->
             sessionOf(ds).use { session ->
-                session.run(queryOf("SELECT fnr,aktor_id FROM unike_person").map { row ->
+                session.run(queryOf("SELECT fnr,aktor_id FROM person").map { row ->
                     val fnr = row.string("fnr").padStart(11, '0')
                     fnr to row.string("aktor_id")
                 }.asList)
@@ -214,7 +209,7 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
         @Language("PostgreSQL")
         val statement = """
             SELECT fnr, aktor_id
-            FROM unike_person
+            FROM person
             WHERE (1 + mod(fnr, 28)) = :dayOfMonth AND (sist_avstemt is null or sist_avstemt < now() - interval '1 day')
             """
         session.run(queryOf(statement, mapOf("dayOfMonth" to dayOfMonth)).map { row ->
