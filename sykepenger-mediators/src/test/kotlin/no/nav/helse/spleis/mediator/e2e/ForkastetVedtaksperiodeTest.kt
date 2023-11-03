@@ -43,6 +43,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "2018-01-26",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
+              "påvirkerArbeidsgiverperioden" : false,
               "trengerArbeidsgiveropplysninger": true,
               "hendelser": ["$søknadId", "$søknadId2"],
               "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}]
@@ -61,6 +62,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "2018-01-27",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
+              "påvirkerArbeidsgiverperioden" : false,
               "trengerArbeidsgiveropplysninger": true,
               "hendelser": ["$søknadId2"],
               "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}, {"fom": "2018-01-03", "tom": "2018-01-27"}]
@@ -101,6 +103,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "2018-03-31",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
+              "påvirkerArbeidsgiverperioden" : false,
               "trengerArbeidsgiveropplysninger": true,  
               "hendelser": ["$søknadId2"],
               "sykmeldingsperioder": [{"fom": "2018-03-01", "tom": "2018-03-31"}]
@@ -155,6 +158,7 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "tom" : "$tom",
               "forlengerPeriode" : false,
               "harPeriodeInnenfor16Dager" : false,
+              "påvirkerArbeidsgiverperioden" : false,
               "trengerArbeidsgiveropplysninger": $trengerArbeidsgiveropplysninger, 
               "hendelser": ["$søknadId"], 
               "sykmeldingsperioder": [${sykmeldingsperioder.joinToString(transform = Periode::hardcodedJson)}]
