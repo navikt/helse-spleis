@@ -32,7 +32,7 @@ object SpleisDataSource {
     val migratedDb = instance.also { migrate(it) }
 }
 
-private val tabeller = listOf("person", "person_kopi", "person_alias", "melding", "unike_person")
+private val tabeller = listOf("person", "person_alias", "melding", "unike_person")
 fun resetDatabase() {
     //migrate(migratedDb)
     sessionOf(migratedDb).use { session ->
