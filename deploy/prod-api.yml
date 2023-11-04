@@ -70,8 +70,6 @@ spec:
   - name: DATABASE_REGION
     value: "europe-north1"
   - name: DATABASE_INSTANCE
-    value: "helse-spleis"
-  - name: DATABASE_DATABASE
     value: "spleis"
   - name: NyRevurdering
     value: "false"

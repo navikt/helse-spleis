@@ -29,7 +29,7 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
         databaseInstance = env["DATABASE_INSTANCE"],
         databaseUsername = env["DATABASE_SPLEIS_API_USERNAME"],
         databasePassword = env["DATABASE_SPLEIS_API_PASSWORD"],
-        databaseName = env["DATABASE_DATABASE"]
+        databaseName = env["DATABASE_SPLEIS_API_DATABASE"]
     )
 }
 

@@ -27,6 +27,6 @@ spec:
     - name: DATABASE_REGION
       value: "europe-north1"
     - name: DATABASE_INSTANCE
-      value: "helse-spleis"
+      value: "spleis"
     - name: RUNTIME_OPTS
       value: "avstemming"

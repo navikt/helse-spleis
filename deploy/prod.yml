@@ -33,12 +33,12 @@ spec:
     pool: nav-prod
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_15
         diskAutoresize: true
         pointInTimeRecovery: true
-        diskSize: 2048
+        diskSize: 1024
         diskType: SSD
-        name: helse-spleis
+        name: spleis
         tier: db-custom-32-212992
         retainedBackups: 14
         databases:
