@@ -95,7 +95,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -852,15 +851,17 @@ internal class Vedtaksperiode private constructor(
     }
 
     override fun avsluttetUtenVedtak(
+        hendelse: IAktivitetslogg,
         generasjonId: UUID,
         tidsstempel: LocalDateTime,
         periode: Periode,
         dokumentsporing: Set<UUID>
     ) {
-        sendVedtakFattet(periode, dokumentsporing)
+        sendVedtakFattet(hendelse, periode, dokumentsporing)
     }
 
     override fun vedtakIverksatt(
+        hendelse: IAktivitetslogg,
         generasjonId: UUID,
         tidsstempel: LocalDateTime,
         periode: Periode,
@@ -868,10 +869,11 @@ internal class Vedtaksperiode private constructor(
         utbetalingId: UUID,
         vedtakFattetTidspunkt: LocalDateTime
     ) {
-        sendVedtakFattet(periode, dokumentsporing, utbetalingId, vedtakFattetTidspunkt)
+        sendVedtakFattet(hendelse, periode, dokumentsporing, utbetalingId, vedtakFattetTidspunkt)
     }
 
     private fun sendVedtakFattet(
+        hendelse: IAktivitetslogg,
         periode: Periode,
         dokumentsporing: Set<UUID>,
         utbetalingId: UUID? = null,
@@ -895,7 +897,7 @@ internal class Vedtaksperiode private constructor(
 
         person.build(skjæringstidspunkt, builder)
         person.vedtakFattet(builder.result())
-        person.gjenopptaBehandling(Aktivitetslogg())
+        person.gjenopptaBehandling(hendelse)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {
@@ -2103,7 +2105,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.lås()
-            vedtaksperiode.generasjoner.avslutt()
+            vedtaksperiode.generasjoner.avslutt(hendelse)
             check(!vedtaksperiode.generasjoner.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
@@ -2129,7 +2131,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) {
-                return vedtaksperiode.generasjoner.avslutt()
+                return vedtaksperiode.generasjoner.avslutt(hendelse)
             }
             vedtaksperiode.generasjoner.sikreNyGenerasjon()
             revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)
