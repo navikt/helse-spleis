@@ -27,6 +27,7 @@ enum class GraphQLSykdomsdagtype {
     FriskHelgedag,
     Permisjonsdag,
     Sykedag,
+    SykedagNav,
     SykHelgedag,
     Ubestemtdag,
     AndreYtelserForeldrepenger,

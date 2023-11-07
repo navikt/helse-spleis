@@ -4800,6 +4800,11 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "SykedagNav",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "SykHelgedag",
           "description" : null,
           "isDeprecated" : false,

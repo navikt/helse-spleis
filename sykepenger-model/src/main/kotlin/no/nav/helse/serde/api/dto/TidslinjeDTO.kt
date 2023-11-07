@@ -32,6 +32,7 @@ enum class SykdomstidslinjedagType {
     FRISK_HELGEDAG,
     PERMISJONSDAG,
     SYKEDAG,
+    SYKEDAG_NAV,
     SYK_HELGEDAG,
     UBESTEMTDAG,
     ANDRE_YTELSER_FORELDREPENGER,
