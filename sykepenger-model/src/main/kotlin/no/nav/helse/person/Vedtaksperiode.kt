@@ -184,7 +184,7 @@ internal class Vedtaksperiode private constructor(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         tilstand = Start,
-        generasjoner = Generasjoner(sykmeldingsperiode, sykdomstidslinje, dokumentsporing),
+        generasjoner = Generasjoner(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad),
         opprettet = LocalDateTime.now(),
         arbeidsgiverjurist = jurist
     ) {
@@ -1205,7 +1205,7 @@ internal class Vedtaksperiode private constructor(
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)
-            vedtaksperiode.generasjoner.sikreNyGenerasjon()
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
@@ -1228,7 +1228,7 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.arbeidsgiver.vurderOmSøknadKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
             vedtaksperiode.håndterSøknad(søknad) {
-                vedtaksperiode.person.igangsettOverstyring(søknad, Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+                vedtaksperiode.person.igangsettOverstyring(søknad, Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
                     rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding) -> AvventerBlokkerendePeriode
@@ -2134,7 +2134,7 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.forventerInntekt()) {
                 return vedtaksperiode.generasjoner.avslutt(hendelse)
             }
-            vedtaksperiode.generasjoner.sikreNyGenerasjon()
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
             revurdering.inngåSomEndring(hendelse, vedtaksperiode, vedtaksperiode.periode)
             revurdering.loggDersomKorrigerendeSøknad(hendelse, "Startet omgjøring grunnet korrigerende søknad")
             hendelse.info(RV_RV_1.varseltekst)
@@ -2280,7 +2280,7 @@ internal class Vedtaksperiode private constructor(
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
             revurdering.inngåSomRevurdering(hendelse, vedtaksperiode, vedtaksperiode.periode)
             vedtaksperiode.jurist.`fvl § 35 ledd 1`()
-            vedtaksperiode.generasjoner.sikreNyGenerasjon()
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 

@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Hendelseinfo
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
@@ -23,12 +24,11 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
     private val skjæringstidspunkt: LocalDate,
-    private val periodeForEndring: Periode
+    private val periodeForEndring: Periode,
+    private val hendelseinfo: Hendelseinfo? = null
 ) {
     internal companion object {
-        fun nyPeriode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) =
-            Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring)
-
+        fun nyPeriode(hendelseinfo: Hendelseinfo, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring, hendelseinfo)
         fun arbeidsforhold(skjæringstidspunkt: LocalDate) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode())
         fun korrigertSøknad(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertSøknad, skjæringstidspunkt, periodeForEndring)
         fun reberegning(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Reberegning, skjæringstidspunkt, periodeForEndring)
@@ -44,6 +44,8 @@ class Revurderingseventyr private constructor(
     }
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
+
+    internal fun generasjonkilde() = hendelseinfo?.let { Generasjoner.Generasjonkilde(it) }
 
     internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode) =
         inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING, periode)

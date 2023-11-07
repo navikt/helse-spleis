@@ -5,8 +5,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.Hendelseinfo
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Dokumentsporing.Companion.ider
@@ -29,7 +31,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Generasjoner(generasjoner: List<Generasjon>) {
-    internal constructor(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing) : this(mutableListOf(Generasjon.nyGenerasjon(sykdomstidslinje, dokumentsporing, sykmeldingsperiode)))
+    internal constructor(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) : this(mutableListOf(Generasjon.nyGenerasjon(sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)))
 
     private val utbetalingene get() = generasjoner.mapNotNull(Generasjon::utbetaling)
     private val generasjoner = generasjoner.toMutableList()
@@ -137,8 +139,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
 
     // sørger for ny generasjon når vedtaksperioden går ut av Avsluttet/AUU,
     // men bare hvis det ikke er laget en ny allerede fra før
-    fun sikreNyGenerasjon() {
-        leggTilNyGenerasjon(generasjoner.last().sikreNyGenerasjon())
+    fun sikreNyGenerasjon(revurderingseventyr: Revurderingseventyr) {
+        leggTilNyGenerasjon(generasjoner.last().sikreNyGenerasjon(revurderingseventyr))
     }
 
     private fun leggTilNyGenerasjon(generasjon: Generasjon?) {
@@ -191,12 +193,22 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
 
     internal fun trengerArbeidsgiverperiode() = generasjoner.dokumentsporing.sisteInntektsmeldingId() == null
 
+    internal class Generasjonkilde private constructor(
+        private val meldingsreferanseId: UUID,
+        private val innsendt: LocalDateTime,
+        private val avsender: String
+    ) {
+        private val registrert = LocalDateTime.now()
+        constructor(hendelseinfo: Hendelseinfo): this(hendelseinfo.meldingsreferanseId(), hendelseinfo.innsendt(), hendelseinfo.avsender().toString())
+    }
+
     internal class Generasjon constructor(
         private val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
         private var vedtakFattet: LocalDateTime?,
-        private var avsluttet: LocalDateTime?
+        private var avsluttet: LocalDateTime?,
+        private val kilde: Generasjonkilde? = null
     ) {
         private val gjeldende get() = endringer.last()
         private val periode: Periode get() = gjeldende.periode
@@ -205,6 +217,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         private val observatører = mutableListOf<GenerasjonObserver>()
 
         constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet)
+        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde?) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
 
         init {
             check(endringer.isNotEmpty()) {
@@ -421,14 +434,16 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             return Generasjon(
                 tilstand = starttilstand,
                 endringer = listOf(håndtereEndring(arbeidsgiver, hendelse)),
-                avsluttet = null
+                avsluttet = null,
+                kilde = Generasjonkilde(hendelse)
             )
         }
-        private fun sikreNyGenerasjon(starttilstand: Tilstand): Generasjon {
+        private fun sikreNyGenerasjon(starttilstand: Tilstand, revurderingseventyr: Revurderingseventyr): Generasjon {
             return Generasjon(
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling()),
-                avsluttet = null
+                avsluttet = null,
+                kilde = revurderingseventyr.generasjonkilde()
             )
         }
 
@@ -438,8 +453,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             avsluttet = LocalDateTime.now()
         )
 
-        fun sikreNyGenerasjon(): Generasjon? {
-            return tilstand.sikreNyGenerasjon(this)
+        fun sikreNyGenerasjon(revurderingseventyr: Revurderingseventyr): Generasjon? {
+            return tilstand.sikreNyGenerasjon(this, revurderingseventyr)
         }
 
         fun tillaterNyGenerasjon(other: Generasjon): Boolean {
@@ -490,7 +505,7 @@ enum class Periodetilstand {
             val List<Generasjon>.sykmeldingsperiode get() = first().periode
             val List<Generasjon>.dokumentsporing get() = map { it.dokumentsporing }.reduce(Set<Dokumentsporing>::plus)
 
-            fun nyGenerasjon(sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode) =
+            fun nyGenerasjon(sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, søknad: Søknad) =
                 Generasjon(
                     tilstand = Tilstand.Uberegnet,
                     endringer = listOf(
@@ -503,7 +518,8 @@ enum class Periodetilstand {
                             periode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette generasjon på tom sykdomstidslinje" }
                         )
                     ),
-                    avsluttet = null
+                    avsluttet = null,
+                    kilde = Generasjonkilde(søknad)
                 )
 
             fun List<Generasjon>.jurist(jurist: MaskinellJurist, vedtaksperiodeId: UUID) =
@@ -559,7 +575,7 @@ enum class Periodetilstand {
 
             fun kanForkastes(generasjon: Generasjon, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean
 
-            fun sikreNyGenerasjon(generasjon: Generasjon): Generasjon? {
+            fun sikreNyGenerasjon(generasjon: Generasjon, revurderingseventyr: Revurderingseventyr): Generasjon? {
                 return null
             }
             fun tillaterNyGenerasjon(generasjon: Generasjon, other: Generasjon): Boolean = false
@@ -726,8 +742,8 @@ enum class Periodetilstand {
                     return true
                 }
 
-                override fun sikreNyGenerasjon(generasjon: Generasjon): Generasjon {
-                    return generasjon.sikreNyGenerasjon(UberegnetRevurdering)
+                override fun sikreNyGenerasjon(generasjon: Generasjon, revurderingseventyr: Revurderingseventyr): Generasjon {
+                    return generasjon.sikreNyGenerasjon(UberegnetRevurdering, revurderingseventyr)
                 }
 
                 override fun håndterUtbetalinghendelse(generasjon: Generasjon, hendelse: UtbetalingHendelse): Boolean {
@@ -777,8 +793,8 @@ enum class Periodetilstand {
 
                 override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
 
-                override fun sikreNyGenerasjon(generasjon: Generasjon): Generasjon {
-                    return generasjon.sikreNyGenerasjon(UberegnetOmgjøring)
+                override fun sikreNyGenerasjon(generasjon: Generasjon, revurderingseventyr: Revurderingseventyr): Generasjon {
+                    return generasjon.sikreNyGenerasjon(UberegnetOmgjøring, revurderingseventyr)
                 }
 
                 // det deles ut dokumentsporinger til alle vedtaksperioder så snart én har håndtert hendelsen;
@@ -795,8 +811,8 @@ enum class Periodetilstand {
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) =
                     generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetRevurdering)
 
-                override fun sikreNyGenerasjon(generasjon: Generasjon): Generasjon {
-                    return generasjon.sikreNyGenerasjon(UberegnetRevurdering)
+                override fun sikreNyGenerasjon(generasjon: Generasjon, revurderingseventyr: Revurderingseventyr): Generasjon {
+                    return generasjon.sikreNyGenerasjon(UberegnetRevurdering, revurderingseventyr)
                 }
             }
             data object VedtakIverksatt : Tilstand {
@@ -813,8 +829,8 @@ enum class Periodetilstand {
                     return true
                 }
 
-                override fun sikreNyGenerasjon(generasjon: Generasjon): Generasjon {
-                    return generasjon.sikreNyGenerasjon(UberegnetRevurdering)
+                override fun sikreNyGenerasjon(generasjon: Generasjon, revurderingseventyr: Revurderingseventyr): Generasjon {
+                    return generasjon.sikreNyGenerasjon(UberegnetRevurdering, revurderingseventyr)
                 }
 
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) =
