@@ -8,6 +8,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Alder
 import no.nav.helse.Toggle
+import no.nav.helse.april
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -2196,6 +2197,11 @@ internal class Vedtaksperiode private constructor(
             return utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk) // Kan forkaste om alt er utbetalt i Infotrygd i sin helhet
         }
 
+        private fun oppdatertEtterViBegynteÅForkasteAuuer(vedtaksperiode: Vedtaksperiode): Boolean {
+            val begynteÅForkasteAuuer = 12.april(2023)
+            return vedtaksperiode.oppdatert.toLocalDate() > begynteÅForkasteAuuer && vedtaksperiode.periode.endInclusive > begynteÅForkasteAuuer
+        }
+
         private fun håndterInfotrygdendring(
             hendelse: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,
@@ -2206,7 +2212,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             if (forkastPåGrunnAvInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) {
-                if (vedtaksperiode.periode.endInclusive.year >= 2023) return hendelse.info( "Perioden er utbetalt i sin helhet i Infotrygd." )
+                if (oppdatertEtterViBegynteÅForkasteAuuer(vedtaksperiode)) return hendelse.info( "Perioden er utbetalt i sin helhet i Infotrygd, men forkaster ikke." )
                 hendelse.funksjonellFeil(RV_IT_3)
                 vedtaksperiode.person.forkastAuu(hendelse, vedtaksperiode)
                 return

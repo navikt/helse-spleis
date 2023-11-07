@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.desember
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -24,7 +23,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -147,20 +145,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
         assertIngenOverlappendeInfotrygdutbetaling()
-    }
-
-    @Test
-    fun `"nye" perioder utbetalt i sin helhet i Infotrygd skal ikke igangsette overstyring, men forbli skrikende om hjelp`() {
-        val perioden = 15.desember(2022) til 1.januar(2023)
-        nyPeriode(perioden)
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, perioden.start, perioden.endInclusive, 100.prosent, INNTEKT))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-        assertInfo("Perioden er utbetalt i sin helhet i Infotrygd.", 1.vedtaksperiode.filter())
-        observatør.vedtaksperiodeVenter.last().let {
-            assertEquals(1.vedtaksperiode.id(ORGNUMMER), it.vedtaksperiodeId)
-            assertEquals("HJELP", it.venterPå.venteårsak.hva)
-            assertEquals("VIL_UTBETALES", it.venterPå.venteårsak.hvorfor)
-        }
     }
 
     @Test
