@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -392,6 +393,22 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
         assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
         assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
+    }
+
+    @Test
+    fun `sender med tidligere dokumenter etter revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        val overstyringId = UUID.randomUUID()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), meldingsreferanseId = overstyringId)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertEquals(1, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size)
+        val tidligereVedtak = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
+        håndterUtbetalt()
+        assertEquals(2, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode.id(ORGNUMMER)).size)
+        val nyttVedtak = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
+        assertEquals(tidligereVedtak.hendelseIder.plus(overstyringId), nyttVedtak.hendelseIder)
     }
 
     private val IdInnhenter.vedtakFattetEvent get() = observatør.vedtakFattetEvent.values.single {

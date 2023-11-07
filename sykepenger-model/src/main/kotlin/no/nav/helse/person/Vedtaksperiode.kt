@@ -885,7 +885,7 @@ internal class Vedtaksperiode private constructor(
             organisasjonsnummer,
             id,
             periode,
-            dokumentsporing,
+            hendelseIder(),
             skjæringstidspunkt
         )
 
