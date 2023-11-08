@@ -15,7 +15,5 @@ abstract class ArbeidstakerHendelse protected constructor(
 
     fun organisasjonsnummer() = organisasjonsnummer
 
-    override fun kontekst() = mapOf(
-        "organisasjonsnummer" to organisasjonsnummer()
-    )
+    override fun kontekst() = super.kontekst().plus("organisasjonsnummer" to organisasjonsnummer())
 }
