@@ -18,6 +18,6 @@ abstract class PersonHendelse protected constructor(
         "fødselsnummer" to fødselsnummer()
     )
 
-    override val innsendt: LocalDateTime = LocalDateTime.now()
-    override val avsender: Avsender = Avsender.SYSTEM
+    override fun innsendt(): LocalDateTime = LocalDateTime.now()
+    override fun avsender(): Avsender = Avsender.SYSTEM
 }

@@ -34,15 +34,15 @@ abstract class Hendelse protected constructor(
 
     fun meldingsreferanseId() = meldingsreferanseId
 
-    final override fun toSpesifikkKontekst() = SpesifikkKontekst(navn, mapOf(
+    final override fun toSpesifikkKontekst() = SpesifikkKontekst(navn(), mapOf(
         "meldingsreferanseId" to meldingsreferanseId().toString(),
     ) + kontekst())
 
     protected open fun kontekst(): Map<String, String> = emptyMap()
 
-    open val navn = this.javaClass.canonicalName.split('.').last()
-    abstract val innsendt: LocalDateTime
-    abstract val avsender: Avsender
+    open fun navn(): String = this.javaClass.canonicalName.split('.').last()
+    abstract fun innsendt(): LocalDateTime
+    abstract fun avsender(): Avsender
 
     fun toLogString() = aktivitetslogg.toString()
 
