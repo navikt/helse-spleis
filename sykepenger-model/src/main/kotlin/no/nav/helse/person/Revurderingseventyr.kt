@@ -26,7 +26,8 @@ class Revurderingseventyr private constructor(
     private val skjæringstidspunkt: LocalDate,
     private val periodeForEndring: Periode,
     private val hendelse: Hendelse
-) {
+) : Hendelse by hendelse {
+
     internal companion object {
         fun nyPeriode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun arbeidsforhold(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
@@ -40,19 +41,18 @@ class Revurderingseventyr private constructor(
         fun korrigertInntektsmeldingInntektsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
         fun korrigertInntektsmeldingArbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun grunnbeløpsregulering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
-
     }
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
 
-    internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode) =
-        inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING, periode)
+    internal fun inngåSomRevurdering(vedtaksperiode: Vedtaksperiode, periode: Periode) =
+        inngå(vedtaksperiode, TypeEndring.REVURDERING, periode)
 
-    internal fun inngåSomEndring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode) =
-        inngå(hendelse, vedtaksperiode, TypeEndring.ENDRING, periode)
+    internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode, periode: Periode) =
+        inngå(vedtaksperiode, TypeEndring.ENDRING, periode)
 
-    private fun inngå(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring, periode: Periode) {
-        hvorfor.dersomInngått(hendelse, vedtaksperioder.isEmpty())
+    private fun inngå(vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring, periode: Periode) {
+        hvorfor.dersomInngått(this, vedtaksperioder.isEmpty())
         vedtaksperiode.inngåIRevurderingseventyret(vedtaksperioder, typeEndring.name)
     }
 
