@@ -1,7 +1,16 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Hendelseinfo
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
@@ -19,31 +28,33 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 
+import no.nav.helse.hendelser.Grunnbeløpsregulering as GrunnbeløpsreguleringHendelse
 
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
     private val skjæringstidspunkt: LocalDate,
-    private val periodeForEndring: Periode
+    private val periodeForEndring: Periode,
+    private val hendelseinfo: Hendelseinfo
 ) {
     internal companion object {
-        fun nyPeriode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) =
-            Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring)
-
-        fun arbeidsforhold(skjæringstidspunkt: LocalDate) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode())
-        fun korrigertSøknad(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertSøknad, skjæringstidspunkt, periodeForEndring)
-        fun reberegning(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Reberegning, skjæringstidspunkt, periodeForEndring)
-        fun sykdomstidslinje(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Sykdomstidslinje, skjæringstidspunkt, periodeForEndring)
-        fun arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(Arbeidsgiveropplysninger, skjæringstidspunkt, endringsdato.somPeriode())
-        fun skjønnsmessigFastsettelse(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(SkjønssmessigFastsettelse, skjæringstidspunkt, endringsdato.somPeriode())
-        fun arbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
-        fun infotrygdendring(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.Infotrygdendring, skjæringstidspunkt, periodeForEndring)
-        fun korrigertInntektsmeldingInntektsopplysninger(skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode())
-        fun korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring)
-        fun grunnbeløpsregulering(skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode())
+        fun nyPeriode(søknad: Søknad, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(NyPeriode, skjæringstidspunkt, periodeForEndring, søknad)
+        fun arbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Arbeidsforhold, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), overstyrArbeidsforhold)
+        fun korrigertSøknad(søknad: Søknad, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertSøknad, skjæringstidspunkt, periodeForEndring, søknad)
+        fun reberegning(påminnelse: Påminnelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Reberegning, skjæringstidspunkt, periodeForEndring, påminnelse)
+        fun sykdomstidslinje(overstyrTidslinje: OverstyrTidslinje, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Sykdomstidslinje, skjæringstidspunkt, periodeForEndring, overstyrTidslinje)
+        fun arbeidsgiveropplysninger(hendelse: OverstyrArbeidsgiveropplysninger, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(Arbeidsgiveropplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
+        fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(SkjønssmessigFastsettelse, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
+        fun arbeidsgiverperiode(hendelse: DagerFraInntektsmelding, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
+        fun infotrygdendring(hendelse: Hendelseinfo, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.Infotrygdendring, skjæringstidspunkt, periodeForEndring, hendelse)
+        fun korrigertInntektsmeldingInntektsopplysninger(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), inntektsmelding)
+        fun korrigertInntektsmeldingArbeidsgiverperiode(dager: DagerFraInntektsmelding, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, dager)
+        fun grunnbeløpsregulering(hendelse: GrunnbeløpsreguleringHendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
 
     }
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
+
+    internal fun generasjonkilde() = hendelseinfo?.let { Generasjoner.Generasjonkilde(it) }
 
     internal fun inngåSomRevurdering(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, periode: Periode) =
         inngå(hendelse, vedtaksperiode, TypeEndring.REVURDERING, periode)
