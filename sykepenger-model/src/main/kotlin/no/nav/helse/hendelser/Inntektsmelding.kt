@@ -71,15 +71,14 @@ class Inntektsmelding(
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
     private val dager = DagerFraInntektsmelding(
-        meldingsreferanseId,
-        aktivitetslogg,
         this.arbeidsgiverperioder,
         førsteFraværsdag,
         mottatt,
         begrunnelseForReduksjonEllerIkkeUtbetalt,
         avsendersystem,
         harFlereInntektsmeldinger,
-        harOpphørAvNaturalytelser
+        harOpphørAvNaturalytelser,
+        this
     )
     private var håndtertInntekt = false
     private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)

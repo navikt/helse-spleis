@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Generasjoner
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
@@ -34,16 +33,15 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class DagerFraInntektsmelding(
-    private val meldingsreferanseId: UUID,
-    private val aktivitetslogg: Aktivitetslogg,
     private val arbeidsgiverperioder: List<Periode>,
     private val førsteFraværsdag: LocalDate?,
     private val mottatt: LocalDateTime,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val avsendersystem: Inntektsmelding.Avsendersystem?,
     private val harFlereInntektsmeldinger: Boolean,
-    private val harOpphørAvNaturalytelser: Boolean
-): Hendelse(meldingsreferanseId, aktivitetslogg) {
+    private val harOpphørAvNaturalytelser: Boolean,
+    hendelse: Hendelse
+): Hendelse by hendelse {
     private companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
             "BetvilerArbeidsufoerhet",
@@ -60,8 +58,8 @@ internal class DagerFraInntektsmelding(
 
     // TODO: kilden må være av en type som arver SykdomshistorikkHendelse; altså BitAvInntektsmelding
     // krever nok at vi json-migrerer alle "Inntektsmelding" til "BitAvInntektsmelding" først
-    internal val kilde = Hendelseskilde("Inntektsmelding", meldingsreferanseId, mottatt)
-    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
+    internal val kilde = Hendelseskilde("Inntektsmelding", meldingsreferanseId(), mottatt)
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
     private val arbeidsdager = mutableSetOf<LocalDate>()
     private var dagerHåndtert = false
@@ -198,7 +196,7 @@ internal class DagerFraInntektsmelding(
         val sykdomstidslinje = samletSykdomstidslinje(periode)
         gjenståendeDager.removeAll(periode)
         dagerHåndtert = true
-        return BitAvInntektsmelding(meldingsreferanseId, sykdomstidslinje, aktivitetslogg)
+        return BitAvInntektsmelding(meldingsreferanseId(), sykdomstidslinje, this)
     }
 
     private fun samletSykdomstidslinje(periode: Periode) =
@@ -284,7 +282,7 @@ internal class DagerFraInntektsmelding(
     internal class BitAvInntektsmelding(
         private val meldingsreferanseId: UUID,
         private val sykdomstidslinje: Sykdomstidslinje,
-        aktivitetslogg: Aktivitetslogg
+        aktivitetslogg: IAktivitetslogg
     ): SykdomshistorikkHendelse, IAktivitetslogg by (aktivitetslogg) {
         override fun oppdaterFom(other: Periode) =
             other.oppdaterFom(sykdomstidslinje().periode() ?: other)

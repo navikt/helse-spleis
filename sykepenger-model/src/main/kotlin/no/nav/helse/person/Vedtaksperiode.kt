@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
+import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -1079,7 +1080,10 @@ internal class Vedtaksperiode private constructor(
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
-        fun håndterRevurdering(hendelse: Hendelse, block: () -> Unit) = FunksjonelleFeilTilVarsler.wrap(hendelse, block)
+        fun håndterRevurdering(hendelse: Hendelse, block: () -> Unit) {
+            if (hendelse !is PersonHendelse) return block()
+            FunksjonelleFeilTilVarsler.wrap(hendelse, block)
+        }
         fun håndterFørstegangsbehandling(hendelse: Hendelse, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
             if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return block()
             // Om førstegangsbehandling ikke kan forkastes (typisk Out of Order/ omgjøring av AUU) så håndteres det som om det er en revurdering

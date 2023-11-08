@@ -12,6 +12,6 @@ class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivite
     override fun barn() = FunksjonelleFeilTilVarsler(other.barn())
 
     companion object {
-        fun wrap(hendelse: Hendelse, block: () -> Unit) = hendelse.wrap(::FunksjonelleFeilTilVarsler, block)
+        fun wrap(hendelse: PersonHendelse, block: () -> Unit) = hendelse.wrap(::FunksjonelleFeilTilVarsler, block)
     }
 }
