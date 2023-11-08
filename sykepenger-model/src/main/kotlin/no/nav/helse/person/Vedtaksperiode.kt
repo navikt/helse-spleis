@@ -16,6 +16,7 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -24,7 +25,6 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -1079,11 +1079,8 @@ internal class Vedtaksperiode private constructor(
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
-        fun håndterRevurdering(hendelse: IAktivitetslogg, block: () -> Unit) {
-            if (hendelse !is PersonHendelse) return block()
-            FunksjonelleFeilTilVarsler.wrap(hendelse, block)
-        }
-        fun håndterFørstegangsbehandling(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
+        fun håndterRevurdering(hendelse: Hendelse, block: () -> Unit) = FunksjonelleFeilTilVarsler.wrap(hendelse, block)
+        fun håndterFørstegangsbehandling(hendelse: Hendelse, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
             if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return block()
             // Om førstegangsbehandling ikke kan forkastes (typisk Out of Order/ omgjøring av AUU) så håndteres det som om det er en revurdering
             håndterRevurdering(hendelse, block)
@@ -2206,7 +2203,8 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,
             infotrygdhistorikk: Infotrygdhistorikk
-        ){
+        ) {
+            check(hendelse is Hendelse) { "Et lite hack for oss, et stort steg for eventyret" }
             håndterRevurdering(hendelse) {
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             }
@@ -2221,7 +2219,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.varsel(RV_IT_38)
             vedtaksperiode.person.igangsettOverstyring(
                 hendelse,
-                Revurderingseventyr.infotrygdendring(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+                Revurderingseventyr.infotrygdendring(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
         }
 
