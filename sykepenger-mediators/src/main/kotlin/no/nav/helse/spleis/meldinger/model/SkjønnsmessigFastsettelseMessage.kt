@@ -25,7 +25,8 @@ internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage) : Hendelse
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiveropplysninger = arbeidsgiveropplysninger
+                arbeidsgiveropplysninger = arbeidsgiveropplysninger,
+                opprettet = opprettet
             ),
             context
         )

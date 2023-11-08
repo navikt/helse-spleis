@@ -7,6 +7,7 @@ import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
@@ -101,6 +102,9 @@ class Søknad(
 
     override fun dokumentsporing() =
         Dokumentsporing.søknad(meldingsreferanseId())
+
+    override fun innsendt() = sendtTilNAVEllerArbeidsgiver
+    override fun avsender() = SYKMELDT
 
     override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 

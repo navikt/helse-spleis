@@ -19,7 +19,8 @@ internal class GrunnbeløpsreguleringMessage(val packet: JsonMessage) : Hendelse
                 id,
                 aktørId,
                 fødselsnummer,
-                skjæringstidspunkt
+                skjæringstidspunkt,
+                opprettet
             ),
             context
         )

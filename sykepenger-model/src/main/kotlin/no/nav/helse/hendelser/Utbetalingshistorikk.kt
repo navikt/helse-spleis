@@ -1,6 +1,8 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -13,7 +15,8 @@ class Utbetalingshistorikk(
     private val vedtaksperiodeId: String,
     private val element: InfotrygdhistorikkElement,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
+    private val besvart: LocalDateTime,
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg), Hendelseinfo {
 
     internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
         info("Oppdaterer Infotrygdhistorikk")
@@ -23,4 +26,7 @@ class Utbetalingshistorikk(
 
     internal fun erRelevant(vedtaksperiodeId: UUID) =
         vedtaksperiodeId.toString() == this.vedtaksperiodeId
+
+    override fun innsendt() = besvart
+    override fun avsender() = SYSTEM
 }

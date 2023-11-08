@@ -35,13 +35,15 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `skjæringstidspunkt oppdateres i vedtaksperiode når inntektsmelding håndteres`() {
-        person.håndter(UtbetalingshistorikkEtterInfotrygdendring(UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
-            oppdatert = LocalDateTime.now(),
-            hendelseId = UUID.randomUUID(),
-            perioder = emptyList(),
-            inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap()
-        )))
+        person.håndter(UtbetalingshistorikkEtterInfotrygdendring(
+            UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap()
+            ), besvart = LocalDateTime.now()
+        ))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         assertEquals(6.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -60,13 +62,15 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
-        person.håndter(UtbetalingshistorikkEtterInfotrygdendring(UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
-            oppdatert = LocalDateTime.now(),
-            hendelseId = UUID.randomUUID(),
-            perioder = emptyList(),
-            inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap()
-        )))
+        person.håndter(UtbetalingshistorikkEtterInfotrygdendring(
+            UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = UUID.randomUUID(),
+                perioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap()
+            ), besvart = LocalDateTime.now()
+        ))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding)

@@ -360,11 +360,12 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER,
         vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
-        tilstand = tilstandType,
         antallGangerPåminnet = 1,
+        tilstand = tilstandType,
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now()
+        nestePåminnelsestidspunkt = LocalDateTime.now(),
+        opprettet = LocalDateTime.now()
     ).apply {
         hendelse = this
     }

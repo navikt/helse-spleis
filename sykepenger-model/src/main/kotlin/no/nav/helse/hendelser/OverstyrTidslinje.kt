@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
@@ -44,7 +45,7 @@ class OverstyrTidslinje(
     aktørId: String,
     organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>,
-    opprettet: LocalDateTime
+    private val opprettet: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, opprettet) {
 
     private val periode: Periode
@@ -148,4 +149,7 @@ class OverstyrTidslinje(
     }
 
     override fun dokumentsporing() = Dokumentsporing.overstyrTidslinje(meldingsreferanseId())
+
+    override fun innsendt() = opprettet
+    override fun avsender() = SAKSBEHANDLER
 }

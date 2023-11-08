@@ -33,7 +33,8 @@ internal class PåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet)
             tilstandsendringstidspunkt = tilstandsendringstidspunkt,
             påminnelsestidspunkt = påminnelsestidspunkt,
             nestePåminnelsestidspunkt = nestePåminnelsestidspunkt,
-            ønskerReberegning = ønskerReberegning
+            ønskerReberegning = ønskerReberegning,
+            opprettet = opprettet
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

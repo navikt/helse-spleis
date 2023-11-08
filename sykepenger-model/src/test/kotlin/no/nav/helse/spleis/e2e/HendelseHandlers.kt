@@ -868,7 +868,8 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         skjæringstidspunkt = skjæringstidspunkt,
-        arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilOverstyrt(meldingsreferanseId, skjæringstidspunkt)
+        arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilOverstyrt(meldingsreferanseId, skjæringstidspunkt),
+        opprettet = LocalDateTime.now()
     ).håndter(Person::håndter)
     return meldingsreferanseId
 }
@@ -883,7 +884,8 @@ internal fun AbstractEndToEndTest.håndterSkjønnsmessigFastsettelse(
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         skjæringstidspunkt = skjæringstidspunkt,
-        arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilSkjønnsmessigFastsatt(meldingsreferanseId, skjæringstidspunkt)
+        arbeidsgiveropplysninger = arbeidsgiveropplysninger.tilSkjønnsmessigFastsatt(meldingsreferanseId, skjæringstidspunkt),
+        opprettet = LocalDateTime.now()
     ).håndter(Person::håndter)
     return meldingsreferanseId
 }
@@ -941,7 +943,8 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsforhold(
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         skjæringstidspunkt = skjæringstidspunkt,
-        overstyrteArbeidsforhold = overstyrteArbeidsforhold
+        overstyrteArbeidsforhold = overstyrteArbeidsforhold,
+        opprettet = LocalDateTime.now()
     ).håndter(Person::håndter)
 }
 

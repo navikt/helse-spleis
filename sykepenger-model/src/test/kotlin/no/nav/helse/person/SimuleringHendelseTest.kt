@@ -105,13 +105,15 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList())
     ) {
         person.håndter(
-            UtbetalingshistorikkEtterInfotrygdendring(UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
-                oppdatert = LocalDateTime.now(),
-                hendelseId = UUID.randomUUID(),
-                perioder = emptyList(),
-                inntekter = emptyList(),
-                arbeidskategorikoder = emptyMap()
-            )))
+            UtbetalingshistorikkEtterInfotrygdendring(
+                UUID.randomUUID(), "", "", InfotrygdhistorikkElement.opprett(
+                    oppdatert = LocalDateTime.now(),
+                    hendelseId = UUID.randomUUID(),
+                    perioder = emptyList(),
+                    inntekter = emptyList(),
+                    arbeidskategorikoder = emptyMap()
+                ), besvart = LocalDateTime.now()
+            ))
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding(refusjon))

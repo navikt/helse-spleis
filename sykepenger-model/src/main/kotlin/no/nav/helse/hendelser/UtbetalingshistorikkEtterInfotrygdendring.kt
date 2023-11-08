@@ -1,6 +1,8 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -11,7 +13,8 @@ class UtbetalingshistorikkEtterInfotrygdendring(
     fødselsnummer: String,
     private val element: InfotrygdhistorikkElement,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg) {
+    private val besvart: LocalDateTime,
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg), Hendelseinfo {
 
     internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk): Boolean {
         info("Oppdaterer Infotrygdhistorikk etter infotrygendring")
@@ -19,4 +22,7 @@ class UtbetalingshistorikkEtterInfotrygdendring(
         info("Oppfrisket Infotrygdhistorikk ble lagret etter infotrygdendring")
         return true
     }
+
+    override fun innsendt() = besvart
+    override fun avsender() = SYSTEM
 }

@@ -33,7 +33,8 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiveropplysninger = arbeidsgiveropplysninger
+                arbeidsgiveropplysninger = arbeidsgiveropplysninger,
+                opprettet = opprettet
             ),
             context
         )

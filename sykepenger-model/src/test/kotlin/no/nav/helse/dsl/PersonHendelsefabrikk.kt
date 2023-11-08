@@ -39,7 +39,8 @@ internal class PersonHendelsefabrikk(
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
-            overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList()
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList(),
+            opprettet = LocalDateTime.now()
         )
     internal fun lagPåminnelse() =
         PersonPåminnelse(
@@ -54,7 +55,8 @@ internal class PersonHendelsefabrikk(
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSkjønnsmessigFastsattInntekt(meldingsreferanseId, skjæringstidspunkt)
+            arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSkjønnsmessigFastsattInntekt(meldingsreferanseId, skjæringstidspunkt),
+            opprettet = LocalDateTime.now()
         )
 
     internal fun lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt: LocalDate, arbeidsgiveropplysninger: List<OverstyrtArbeidsgiveropplysning>, meldingsreferanseId: UUID) =
@@ -63,7 +65,8 @@ internal class PersonHendelsefabrikk(
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt)
+            arbeidsgiveropplysninger = arbeidsgiveropplysninger.medSaksbehandlerinntekt(meldingsreferanseId, skjæringstidspunkt),
+            opprettet = LocalDateTime.now()
         )
 
     internal fun lagUtbetalingshistorikkForFeriepenger(opptjeningsår: Year) =

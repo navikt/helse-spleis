@@ -611,7 +611,8 @@ class JsonBuilderTest {
             perioder = utbetalinger,
             inntekter = inntektsopplysning,
             arbeidskategorikoder = emptyMap()
-        )
+        ),
+        besvart = besvart
     )
 
     private fun ytelser(

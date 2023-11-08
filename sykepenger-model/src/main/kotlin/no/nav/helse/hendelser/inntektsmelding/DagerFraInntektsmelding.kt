@@ -7,6 +7,8 @@ import java.util.UUID
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.førsteArbeidsdag
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Hendelseinfo
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
@@ -41,7 +43,7 @@ internal class DagerFraInntektsmelding(
     private val avsendersystem: Inntektsmelding.Avsendersystem?,
     private val harFlereInntektsmeldinger: Boolean,
     private val harOpphørAvNaturalytelser: Boolean
-): IAktivitetslogg by aktivitetslogg {
+): IAktivitetslogg by aktivitetslogg, Hendelseinfo {
     private companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
             "BetvilerArbeidsufoerhet",
@@ -134,7 +136,10 @@ internal class DagerFraInntektsmelding(
         visitor.visitGjenståendeDager(gjenståendeDager)
     }
 
-    internal fun meldingsreferanseId() = meldingsreferanseId
+    override fun meldingsreferanseId() = meldingsreferanseId
+    override fun innsendt() = mottatt
+    override fun avsender() = ARBEIDSGIVER
+
     internal fun leggTil(generasjoner: Generasjoner) : Boolean {
         dagerHåndtert = true
         return generasjoner.oppdaterDokumentsporing(dokumentsporing)
@@ -194,7 +199,7 @@ internal class DagerFraInntektsmelding(
         val sykdomstidslinje = samletSykdomstidslinje(periode)
         gjenståendeDager.removeAll(periode)
         dagerHåndtert = true
-        return BitAvInntektsmelding(meldingsreferanseId, sykdomstidslinje, aktivitetslogg)
+        return BitAvInntektsmelding(meldingsreferanseId, sykdomstidslinje, aktivitetslogg, mottatt)
     }
 
     private fun samletSykdomstidslinje(periode: Periode) =
@@ -280,13 +285,17 @@ internal class DagerFraInntektsmelding(
     internal class BitAvInntektsmelding(
         private val meldingsreferanseId: UUID,
         private val sykdomstidslinje: Sykdomstidslinje,
-        aktivitetslogg: Aktivitetslogg
+        aktivitetslogg: Aktivitetslogg,
+        private val mottatt: LocalDateTime
     ): SykdomshistorikkHendelse, IAktivitetslogg by (aktivitetslogg) {
         override fun oppdaterFom(other: Periode) =
             other.oppdaterFom(sykdomstidslinje().periode() ?: other)
         override fun dokumentsporing() = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
         internal fun sykdomstidslinje() = sykdomstidslinje
         override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
+        override fun innsendt() = mottatt
+        override fun meldingsreferanseId() = meldingsreferanseId
+        override fun avsender() = ARBEIDSGIVER
     }
 }
 

@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
@@ -38,7 +39,7 @@ class Inntektsmelding(
     harOpphørAvNaturalytelser: Boolean = false,
     harFlereInntektsmeldinger: Boolean,
     avsendersystem: Avsendersystem?,
-    mottatt: LocalDateTime,
+    private val mottatt: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(
     meldingsreferanseId = meldingsreferanseId,
@@ -46,7 +47,7 @@ class Inntektsmelding(
     aktørId = aktørId,
     organisasjonsnummer = orgnummer,
     aktivitetslogg = aktivitetslogg
-) {
+), Hendelseinfo {
     companion object {
         fun aktuellForReplay(sammenhengendePeriode: Periode, førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode?, redusertUtbetaling: Boolean) : Boolean {
             if (arbeidsgiverperiode == null) return redusertUtbetaling && førsteFraværsdag in sammenhengendePeriode // dersom IM har oppgitt reduksjon, og AGP er tom, da benyttes første fraværsdag som en nødløsning (TM)
@@ -121,8 +122,11 @@ class Inntektsmelding(
                 refusjonshistorikk.refusjonsopplysninger(startskudd, this)
             )
         )
-
     }
+
+    override fun innsendt() = mottatt
+
+    override fun avsender() = ARBEIDSGIVER
 
     enum class Avsendersystem {
         NAV_NO,

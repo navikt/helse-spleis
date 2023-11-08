@@ -28,7 +28,8 @@ internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage): HendelseM
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
-                overstyrteArbeidsforhold = overstyrteArbeidsforhold
+                overstyrteArbeidsforhold = overstyrteArbeidsforhold,
+                opprettet = opprettet
             ),
             context
         )

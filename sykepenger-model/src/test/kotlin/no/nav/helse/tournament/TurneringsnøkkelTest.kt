@@ -3,6 +3,7 @@ package no.nav.helse.tournament
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -93,5 +94,15 @@ internal class TurneringsnøkkelTest {
         override fun element(): Sykdomshistorikk.Element {
             error("ikke i bruk")
         }
+
+        override fun innsendt(): LocalDateTime {
+            error("ikke i bruk")
+        }
+
+        override fun meldingsreferanseId(): UUID {
+            error("ikke i bruk")
+        }
+
+        override fun avsender() = SYSTEM
     }
 }

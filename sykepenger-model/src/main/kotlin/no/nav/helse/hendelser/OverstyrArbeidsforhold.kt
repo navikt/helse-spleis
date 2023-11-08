@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
@@ -15,7 +16,8 @@ class OverstyrArbeidsforhold(
     fødselsnummer: String,
     aktørId: String,
     private val skjæringstidspunkt: LocalDate,
-    private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
+    private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
+    private val opprettet: LocalDateTime
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()), OverstyrSykepengegrunnlag {
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
@@ -25,6 +27,8 @@ class OverstyrArbeidsforhold(
     override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: MaskinellJurist) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, this.skjæringstidspunkt, jurist)
     }
+
+    override fun innsendt() = opprettet
 
     internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         return overstyrteArbeidsforhold.fold(sykepengegrunnlag, ) { acc, overstyring ->

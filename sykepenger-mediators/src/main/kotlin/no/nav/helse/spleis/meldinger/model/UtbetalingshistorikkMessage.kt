@@ -120,7 +120,8 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             element = infotrygdhistorikk(id),
-            aktivitetslogg = Aktivitetslogg()
+            aktivitetslogg = Aktivitetslogg(),
+            besvart = besvart
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

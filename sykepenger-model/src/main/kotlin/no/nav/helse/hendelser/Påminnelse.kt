@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
@@ -21,8 +22,9 @@ class Påminnelse(
     private val påminnelsestidspunkt: LocalDateTime,
     private val nestePåminnelsestidspunkt: LocalDateTime,
     private val ønskerReberegning: Boolean = false,
-    private val nå: LocalDateTime = LocalDateTime.now()
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()) {
+    private val nå: LocalDateTime = LocalDateTime.now(),
+    private val opprettet: LocalDateTime
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()), Hendelseinfo {
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand
     fun tilstandsendringstidspunkt() = tilstandsendringstidspunkt
@@ -73,4 +75,7 @@ class Påminnelse(
         "påminnelsestidspunkt" to påminnelsestidspunkt,
         "nestePåminnelsestidspunkt" to nestePåminnelsestidspunkt
     )
+
+    override fun innsendt() = opprettet
+    override fun avsender() = SYSTEM
 }

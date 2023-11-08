@@ -79,6 +79,7 @@ internal abstract class AbstractPersonTest {
                         listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
                         emptyMap()
                     ),
+                    besvart = LocalDateTime.now(),
                 ),
             )
         }
@@ -95,6 +96,7 @@ internal abstract class AbstractPersonTest {
                         listOf(Inntektsopplysning(ORGNUMMER, 1.februar, TestPerson.INNTEKT, true)),
                         emptyMap()
                     ),
+                    besvart = LocalDateTime.now(),
                 ),
             )
         }
