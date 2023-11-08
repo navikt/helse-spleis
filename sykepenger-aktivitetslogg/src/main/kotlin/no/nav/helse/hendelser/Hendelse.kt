@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -9,6 +10,10 @@ import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
+
+enum class Avsender {
+    SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM
+}
 
 abstract class Hendelse protected constructor(
     private val meldingsreferanseId: UUID,
@@ -29,13 +34,15 @@ abstract class Hendelse protected constructor(
 
     fun meldingsreferanseId() = meldingsreferanseId
 
-    final override fun toSpesifikkKontekst() = this.javaClass.canonicalName.split('.').last().let {
-        SpesifikkKontekst(it, mapOf(
-            "meldingsreferanseId" to meldingsreferanseId().toString(),
-        ) + kontekst())
-    }
+    final override fun toSpesifikkKontekst() = SpesifikkKontekst(navn(), mapOf(
+        "meldingsreferanseId" to meldingsreferanseId().toString(),
+    ) + kontekst())
 
     protected open fun kontekst(): Map<String, String> = emptyMap()
+
+    open fun navn(): String = this.javaClass.canonicalName.split('.').last()
+    abstract fun innsendt(): LocalDateTime
+    abstract fun avsender(): Avsender
 
     fun toLogString() = aktivitetslogg.toString()
 
