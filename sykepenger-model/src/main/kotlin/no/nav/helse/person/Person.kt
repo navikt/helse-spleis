@@ -706,7 +706,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
         val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, subsumsjonObserver) ?: return)
         nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
-        igangsettOverstyring(inntektsmelding, eventyr)
+        igangsettOverstyring(eventyr)
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -717,7 +717,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         val (nyttGrunnlag, eventyr) = grunnlag.overstyrArbeidsgiveropplysninger(this, hendelse, subsumsjonObserver)
         nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
-        igangsettOverstyring(hendelse, eventyr)
+        igangsettOverstyring(eventyr)
     }
 
 
@@ -729,7 +729,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         val (nyttGrunnlag, eventyr) = grunnlag.skjønnsmessigFastsettelse(hendelse, subsumsjonObserver)
         nyttVilkårsgrunnlag(hendelse, nyttGrunnlag)
-        igangsettOverstyring(hendelse, eventyr)
+        igangsettOverstyring(eventyr)
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -739,7 +739,7 @@ class Person private constructor(
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
-        igangsettOverstyring(hendelse, Revurderingseventyr.arbeidsforhold(hendelse, skjæringstidspunkt))
+        igangsettOverstyring(Revurderingseventyr.arbeidsforhold(hendelse, skjæringstidspunkt))
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -750,7 +750,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         grunnlag.grunnbeløpsregulering(hendelse, subsumsjonObserver)?.let { grunnbeløpsregulert ->
             nyttVilkårsgrunnlag(hendelse, grunnbeløpsregulert)
-            igangsettOverstyring(hendelse, Revurderingseventyr.grunnbeløpsregulering(hendelse, skjæringstidspunkt))
+            igangsettOverstyring(Revurderingseventyr.grunnbeløpsregulering(hendelse, skjæringstidspunkt))
         }
     }
 
@@ -782,8 +782,8 @@ class Person private constructor(
         observers.forEach { it.behandlingUtført() }
     }
 
-    internal fun igangsettOverstyring(hendelse: IAktivitetslogg, revurdering: Revurderingseventyr) {
-        arbeidsgivere.igangsettOverstyring(hendelse, revurdering)
+    internal fun igangsettOverstyring(revurdering: Revurderingseventyr) {
+        arbeidsgivere.igangsettOverstyring(revurdering)
         revurdering.sendOverstyringIgangsattEvent(this)
     }
 
