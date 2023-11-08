@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
@@ -16,4 +17,7 @@ abstract class PersonHendelse protected constructor(
         "aktørId" to aktørId(),
         "fødselsnummer" to fødselsnummer()
     )
+
+    override val innsendt: LocalDateTime = LocalDateTime.now()
+    override val avsender: Avsender = Avsender.SYSTEM
 }
