@@ -533,7 +533,7 @@ internal class Vedtaksperiode private constructor(
     private fun igangsettOverstyringAvTidslinje(hendelse: OverstyrTidslinje) {
         val vedtaksperiodeTilRevurdering = arbeidsgiver.finnVedtaksperiodeFør(this)
             ?.takeIf { nyArbeidsgiverperiodeEtterEndring(it) } ?: this
-        person.igangsettOverstyring(hendelse, Revurderingseventyr.sykdomstidslinje(vedtaksperiodeTilRevurdering.skjæringstidspunkt, vedtaksperiodeTilRevurdering.periode))
+        person.igangsettOverstyring(hendelse, Revurderingseventyr.sykdomstidslinje(hendelse, vedtaksperiodeTilRevurdering.skjæringstidspunkt, vedtaksperiodeTilRevurdering.periode))
     }
 
     private fun nyArbeidsgiverperiodeEtterEndring(other: Vedtaksperiode): Boolean {
@@ -629,7 +629,7 @@ internal class Vedtaksperiode private constructor(
             oppdaterHistorikkBlock(søknad)
         }
 
-        person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(skjæringstidspunkt, periode))
+        person.igangsettOverstyring(søknad, Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode))
     }
 
     private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, håndterLås: (() -> Unit) -> Unit = { it() }) {
@@ -655,7 +655,7 @@ internal class Vedtaksperiode private constructor(
                     ))
             }
         }
-        person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(skjæringstidspunkt = skjæringstidspunkt, periodeForEndring = periode))
+        person.igangsettOverstyring(dager, Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(dager, skjæringstidspunkt = skjæringstidspunkt, periodeForEndring = periode))
         // setter kontekst tilbake siden igangsettelsen over kan endre på kontekstene
         kontekst(dager)
     }
@@ -1228,7 +1228,7 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.arbeidsgiver.vurderOmSøknadKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
             vedtaksperiode.håndterSøknad(søknad) {
-                vedtaksperiode.person.igangsettOverstyring(søknad, Revurderingseventyr.nyPeriode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+                vedtaksperiode.person.igangsettOverstyring(søknad, Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
                     rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding) -> AvventerBlokkerendePeriode
@@ -1427,7 +1427,7 @@ internal class Vedtaksperiode private constructor(
         }
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.skalReberegnes())
-                return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+                return vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
             vedtaksperiode.trengerYtelser(påminnelse)
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
@@ -2163,7 +2163,7 @@ internal class Vedtaksperiode private constructor(
 
             vedtaksperiode.person.igangsettOverstyring(
                 dager,
-                Revurderingseventyr.arbeidsgiverperiode(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
+                Revurderingseventyr.arbeidsgiverperiode(dager, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
         }
 
@@ -2228,7 +2228,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return påminnelse.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
             if (!påminnelse.skalReberegnes()) return
-            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -2295,7 +2295,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!påminnelse.skalReberegnes()) return
             påminnelse.info("Reberegner vedtaksperiode")
-            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            vedtaksperiode.person.igangsettOverstyring(påminnelse, Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
     }
 

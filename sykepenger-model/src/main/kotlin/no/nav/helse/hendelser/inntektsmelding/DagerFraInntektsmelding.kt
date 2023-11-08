@@ -7,6 +7,8 @@ import java.util.UUID
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.førsteArbeidsdag
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
@@ -41,7 +43,7 @@ internal class DagerFraInntektsmelding(
     private val avsendersystem: Inntektsmelding.Avsendersystem?,
     private val harFlereInntektsmeldinger: Boolean,
     private val harOpphørAvNaturalytelser: Boolean
-): IAktivitetslogg by aktivitetslogg {
+): Hendelse(meldingsreferanseId, aktivitetslogg) {
     private companion object {
         private val ikkeStøttedeBegrunnelserForReduksjon = setOf(
             "BetvilerArbeidsufoerhet",
@@ -134,7 +136,9 @@ internal class DagerFraInntektsmelding(
         visitor.visitGjenståendeDager(gjenståendeDager)
     }
 
-    internal fun meldingsreferanseId() = meldingsreferanseId
+    override fun innsendt() = mottatt
+    override fun avsender() = ARBEIDSGIVER
+
     internal fun leggTil(generasjoner: Generasjoner) : Boolean {
         dagerHåndtert = true
         return generasjoner.oppdaterDokumentsporing(dokumentsporing)

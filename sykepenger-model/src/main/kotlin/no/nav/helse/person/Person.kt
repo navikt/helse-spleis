@@ -739,7 +739,7 @@ class Person private constructor(
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
-        igangsettOverstyring(hendelse, Revurderingseventyr.arbeidsforhold(skjæringstidspunkt))
+        igangsettOverstyring(hendelse, Revurderingseventyr.arbeidsforhold(hendelse, skjæringstidspunkt))
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -750,7 +750,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         grunnlag.grunnbeløpsregulering(hendelse, subsumsjonObserver)?.let { grunnbeløpsregulert ->
             nyttVilkårsgrunnlag(hendelse, grunnbeløpsregulert)
-            igangsettOverstyring(hendelse, Revurderingseventyr.grunnbeløpsregulering(skjæringstidspunkt))
+            igangsettOverstyring(hendelse, Revurderingseventyr.grunnbeløpsregulering(hendelse, skjæringstidspunkt))
         }
     }
 
