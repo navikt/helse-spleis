@@ -36,6 +36,7 @@ abstract class PersonHendelse protected constructor(
 
     override fun meldingsreferanseId() = meldingsreferanseId
     override fun innsendt(): LocalDateTime = LocalDateTime.now()
+    override fun registrert(): LocalDateTime = innsendt()
     override fun avsender() = SYSTEM
     override fun navn(): String = javaClass.simpleName
 

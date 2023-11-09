@@ -11,6 +11,7 @@ enum class Avsender {
 interface Hendelse : IAktivitetslogg {
     fun meldingsreferanseId(): UUID
     fun innsendt(): LocalDateTime
+    fun registrert(): LocalDateTime
     fun avsender(): Avsender
     fun navn(): String
 }
