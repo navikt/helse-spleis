@@ -44,7 +44,7 @@ class OverstyrTidslinje(
     aktørId: String,
     organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>,
-    opprettet: LocalDateTime
+    private val opprettet: LocalDateTime,
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, opprettet) {
 
     private val periode: Periode
@@ -146,6 +146,10 @@ class OverstyrTidslinje(
     override fun trimSykdomstidslinje(fom: LocalDate) {
         sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
     }
+
+    override fun avsender() = Avsender.SAKSBEHANDLER
+
+    override fun innsendt() = opprettet
 
     override fun dokumentsporing() = Dokumentsporing.overstyrTidslinje(meldingsreferanseId())
 }

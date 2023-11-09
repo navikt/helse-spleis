@@ -111,7 +111,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 perioder = emptyList(),
                 inntekter = emptyList(),
                 arbeidskategorikoder = emptyMap()
-            )))
+            ), besvart = LocalDateTime.now()))
         person.håndter(sykmelding())
         person.håndter(søknad())
         person.håndter(inntektsmelding(refusjon))

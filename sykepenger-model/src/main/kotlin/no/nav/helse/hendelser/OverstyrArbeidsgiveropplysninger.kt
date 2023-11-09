@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Dokumentsporing
@@ -17,7 +18,8 @@ class OverstyrArbeidsgiveropplysninger(
     aktørId: String,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
-    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
+    private val opprettet: LocalDateTime
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg), OverstyrSykepengegrunnlag {
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
     override fun dokumentsporing() = Dokumentsporing.overstyrArbeidsgiveropplysninger(meldingsreferanseId())
@@ -29,6 +31,9 @@ class OverstyrArbeidsgiveropplysninger(
             jurist
         )
     }
+
+    override fun innsendt() = opprettet
+    override fun avsender() = Avsender.SAKSBEHANDLER
 
     internal fun overstyr(builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer) {
         arbeidsgiveropplysninger.forEach { builder.leggTilInntekt(it) }

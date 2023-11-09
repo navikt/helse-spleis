@@ -115,7 +115,8 @@ abstract class AbstractObservableTest {
             perioder = emptyList(),
             inntekter = emptyList(),
             arbeidskategorikoder = emptyMap()
-        )
+        ),
+        besvart = LocalDateTime.now()
     )
 
     protected fun inntektsmelding(

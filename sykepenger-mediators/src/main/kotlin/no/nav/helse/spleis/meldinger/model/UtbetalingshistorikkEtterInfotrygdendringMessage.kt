@@ -40,7 +40,8 @@ internal class UtbetalingshistorikkEtterInfotrygdendringMessage(packet: JsonMess
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             element = infotrygdhistorikk(id),
-            aktivitetslogg = Aktivitetslogg()
+            aktivitetslogg = Aktivitetslogg(),
+            besvart = besvart
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

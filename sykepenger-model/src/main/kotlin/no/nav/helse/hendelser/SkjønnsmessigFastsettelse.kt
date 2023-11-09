@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Dokumentsporing
@@ -15,7 +16,8 @@ class SkjønnsmessigFastsettelse(
     aktørId: String,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
-    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+    aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
+    private val opprettet: LocalDateTime
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg), OverstyrSykepengegrunnlag {
 
     internal fun overstyr(builder: ArbeidsgiverInntektsopplysningerOverstyringer) {
@@ -29,4 +31,8 @@ class SkjønnsmessigFastsettelse(
     override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: MaskinellJurist) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, skjæringstidspunkt, jurist)
     }
+
+    override fun avsender() = Avsender.SAKSBEHANDLER
+
+    override fun innsendt() = opprettet
 }

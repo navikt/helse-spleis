@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Dokumentsporing
@@ -12,7 +13,8 @@ class Grunnbeløpsregulering(
     meldingsreferanseId: UUID,
     aktørId: String,
     fødselsnummer: String,
-    private val skjæringstidspunkt: LocalDate
+    private val skjæringstidspunkt: LocalDate,
+    private val opprettet: LocalDateTime
 ): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()), OverstyrSykepengegrunnlag {
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) =
@@ -23,4 +25,6 @@ class Grunnbeløpsregulering(
     override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: MaskinellJurist) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(this, skjæringstidspunkt, jurist)
     }
+
+    override fun innsendt() = opprettet
 }

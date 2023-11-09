@@ -155,6 +155,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
                         inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
                         arbeidskategorikoder = emptyMap()
                     ),
+                    besvart = LocalDateTime.now()
                 ),
             )
         }

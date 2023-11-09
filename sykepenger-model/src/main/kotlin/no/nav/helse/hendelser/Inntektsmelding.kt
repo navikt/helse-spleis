@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
@@ -38,7 +39,7 @@ class Inntektsmelding(
     harOpphørAvNaturalytelser: Boolean = false,
     harFlereInntektsmeldinger: Boolean,
     avsendersystem: Avsendersystem?,
-    mottatt: LocalDateTime,
+    private val mottatt: LocalDateTime,
     private val opprettet: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(
@@ -126,9 +127,9 @@ class Inntektsmelding(
 
     override fun innsendt() = mottatt
 
-    override fun registrert() = opprettet
-
     override fun avsender() = ARBEIDSGIVER
+
+    override fun registrert() = opprettet
 
     enum class Avsendersystem {
         NAV_NO,

@@ -364,7 +364,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         antallGangerPåminnet = 1,
         tilstandsendringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now()
+        nestePåminnelsestidspunkt = LocalDateTime.now(),
+        opprettet = LocalDateTime.now()
     ).apply {
         hendelse = this
     }

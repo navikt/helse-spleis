@@ -190,7 +190,8 @@ internal class ArbeidsgiverHendelsefabrikk(
                 perioder = utbetalinger,
                 inntekter = inntektshistorikk,
                 arbeidskategorikoder = emptyMap()
-            )
+            ),
+            besvart = LocalDateTime.now()
         )
 
     internal fun lagUtbetalingshistorikkEtterInfotrygdendring(
@@ -208,7 +209,8 @@ internal class ArbeidsgiverHendelsefabrikk(
                 perioder = utbetalinger,
                 inntekter = inntektshistorikk,
                 arbeidskategorikoder = emptyMap()
-            )
+            ),
+            besvart = LocalDateTime.now()
         )
 
 
@@ -368,7 +370,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             tilstand,
             tilstandsendringstidspunkt,
             LocalDateTime.now(),
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            opprettet = LocalDateTime.now()
         )
 
     internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
@@ -376,7 +379,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId,
             personidentifikator.toString(),
-            skjæringstidspunkt = skjæringstidspunkt
+            skjæringstidspunkt = skjæringstidspunkt,
+            opprettet = LocalDateTime.now()
         )
 
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =

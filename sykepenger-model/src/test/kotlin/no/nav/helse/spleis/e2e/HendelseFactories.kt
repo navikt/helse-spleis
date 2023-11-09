@@ -269,7 +269,8 @@ internal fun påminnelse(
         tilstandsendringstidspunkt = tilstandsendringstidspunkt,
         påminnelsestidspunkt = LocalDateTime.now(),
         nestePåminnelsestidspunkt = LocalDateTime.now(),
-        ønskerReberegning = skalReberegnes
+        ønskerReberegning = skalReberegnes,
+        opprettet = LocalDateTime.now()
     )
 }
 
@@ -287,6 +288,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
+        besvart = LocalDateTime.now(),
         element = InfotrygdhistorikkElement.opprett(
             oppdatert = besvart,
             hendelseId = UUID.randomUUID(),
@@ -317,7 +319,8 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkEtterInfotrygdEndring(
             perioder = utbetalinger,
             inntekter = inntektshistorikk,
             arbeidskategorikoder = arbeidskategorikoder
-        )
+        ),
+        besvart = LocalDateTime.now()
     ).apply {
         hendelselogg = this
     }
