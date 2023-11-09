@@ -11,6 +11,7 @@ import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -983,4 +984,4 @@ internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, orgnummer: String 
     håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = orgnummer)
 }
 
-internal fun AbstractEndToEndTest.forkastAlle(hendelse: IAktivitetslogg) = person.søppelbøtte(hendelse) { true }
+internal fun AbstractEndToEndTest.forkastAlle(hendelse: Hendelse) = person.søppelbøtte(hendelse) { true }

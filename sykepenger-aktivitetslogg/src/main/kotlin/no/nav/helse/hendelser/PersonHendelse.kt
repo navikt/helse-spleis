@@ -73,5 +73,4 @@ abstract class PersonHendelse protected constructor(
     override fun register(observer: AktivitetsloggObserver) {
         aktivitetslogg.register(observer)
     }
-    open fun venter(block: () -> Unit) { block() }
 }

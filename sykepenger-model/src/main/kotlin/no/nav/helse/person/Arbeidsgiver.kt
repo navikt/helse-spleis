@@ -9,6 +9,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
@@ -122,7 +123,7 @@ internal class Arbeidsgiver private constructor(
             return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
         }
 
-        internal fun List<Arbeidsgiver>.forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk) {
+        internal fun List<Arbeidsgiver>.forkastAuu(hendelse: Hendelse, auu: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk) {
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
             alleVedtaksperioder.auuGruppering(auu, infotrygdhistorikk)?.forkast(hendelse, alleVedtaksperioder)
         }
@@ -243,10 +244,10 @@ internal class Arbeidsgiver private constructor(
 
         private fun Iterable<Arbeidsgiver>.sistePeriodeSomHarPågåendeUtbetaling() = vedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).maxOrNull()
         private fun Iterable<Arbeidsgiver>.førsteAuuSomVilUtbetales() = nåværendeVedtaksperioder(AUU_SOM_VIL_UTBETALES).minOrNull()
-        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
-            if (sistePeriodeSomHarPågåendeUtbetaling() != null) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
+        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(hendelse: Hendelse) {
+            if (sistePeriodeSomHarPågåendeUtbetaling() != null) return hendelse.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             val periodeSomSkalGjenopptas = periodeSomSkalGjenopptas() ?: return
-            periodeSomSkalGjenopptas.gjenopptaBehandling(aktivitetslogg, this)
+            periodeSomSkalGjenopptas.gjenopptaBehandling(hendelse, this)
         }
 
         internal fun Iterable<Arbeidsgiver>.nestemann() = sistePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas() ?: førsteAuuSomVilUtbetales()
@@ -255,7 +256,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun søppelbøtte(
             arbeidsgivere: List<Arbeidsgiver>,
-            hendelse: IAktivitetslogg,
+            hendelse: Hendelse,
             filter: VedtaksperiodeFilter
         ) {
             arbeidsgivere.flatMap { it.søppelbøtte(hendelse, filter) }.forEach { it.buildAndEmit() }
@@ -788,7 +789,7 @@ internal class Arbeidsgiver private constructor(
         refusjonsopplysninger.lagreTidsnær(nyFørsteFraværsdag, refusjonshistorikk)
     }
 
-    private fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter): List<Vedtaksperiode.VedtaksperiodeForkastetEventBuilder> {
+    private fun søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter): List<Vedtaksperiode.VedtaksperiodeForkastetEventBuilder> {
         hendelse.kontekst(this)
         val perioder: List<Pair<Vedtaksperiode, Vedtaksperiode.VedtaksperiodeForkastetEventBuilder>> = vedtaksperioder
             .filter(filter)

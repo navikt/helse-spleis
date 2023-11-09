@@ -14,4 +14,6 @@ interface Hendelse : IAktivitetslogg {
     fun registrert(): LocalDateTime
     fun avsender(): Avsender
     fun navn(): String
+
+    fun venter(block: () -> Unit) { block() }
 }

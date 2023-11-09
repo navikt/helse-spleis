@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.Grunnbeløpsregulering
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -569,7 +570,7 @@ class Person private constructor(
     internal fun skjæringstidspunkt(arbeidsgiver: Arbeidsgiver, sykdomstidslinje: Sykdomstidslinje, periode: Periode) =
         Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, arbeidsgiver, sykdomstidslinje, periode, infotrygdhistorikk)
 
-    internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) {
+    internal fun trengerHistorikkFraInfotrygd(hendelse: Hendelse, vedtaksperiode: Vedtaksperiode) {
         if (trengerHistorikkFraInfotrygd(hendelse)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
         hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
         vedtaksperiode.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
@@ -661,7 +662,7 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller)
     }
 
-    internal fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
+    internal fun søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter) {
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
         sykdomshistorikkEndret(hendelse)
@@ -766,7 +767,7 @@ class Person private constructor(
         gjenopptaBehandlingNy = true
     }
 
-    private fun håndterGjenoppta(hendelse: PersonHendelse) {
+    private fun håndterGjenoppta(hendelse: Hendelse) {
         while (gjenopptaBehandlingNy) {
             gjenopptaBehandlingNy = false
             arbeidsgivere.gjenopptaBehandling(hendelse)
@@ -810,7 +811,7 @@ class Person private constructor(
     }
     internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
-    internal fun forkastAuu(hendelse: IAktivitetslogg, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu, infotrygdhistorikk)
+    internal fun forkastAuu(hendelse: Hendelse, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu, infotrygdhistorikk)
 
     internal fun erBetaltInfotrygd(vedtaksperiode: Periode): Boolean {
         return infotrygdhistorikk.harUtbetaltI(vedtaksperiode)
