@@ -41,4 +41,22 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
     override fun element(): Sykdomshistorikk.Element {
         error("ikke i bruk")
     }
+
+    override fun innsendt(): LocalDateTime {
+        error("ikke i bruk")
+    }
+
+    override fun registrert(): LocalDateTime {
+        error("ikke i bruk")
+    }
+
+    override fun navn(): String {
+        error("ikke i bruk")
+    }
+
+    override fun meldingsreferanseId(): UUID {
+        error("ikke i bruk")
+    }
+
+    override fun avsender() = error("ikke i bruk")
 }

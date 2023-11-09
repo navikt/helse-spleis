@@ -185,7 +185,7 @@ internal class Vedtaksperiode private constructor(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         tilstand = Start,
-        generasjoner = Generasjoner(sykmeldingsperiode, sykdomstidslinje, dokumentsporing),
+        generasjoner = Generasjoner(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad),
         opprettet = LocalDateTime.now(),
         arbeidsgiverjurist = jurist
     ) {
@@ -1206,7 +1206,7 @@ internal class Vedtaksperiode private constructor(
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
-            vedtaksperiode.generasjoner.sikreNyGenerasjon()
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)
         }
 
@@ -2133,7 +2133,7 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.forventerInntekt()) {
                 return vedtaksperiode.generasjoner.avslutt(revurdering)
             }
-            vedtaksperiode.generasjoner.sikreNyGenerasjon()
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
             revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
             revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
             revurdering.info(RV_RV_1.varseltekst)
@@ -2278,7 +2278,7 @@ internal class Vedtaksperiode private constructor(
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
             vedtaksperiode.jurist.`fvl § 35 ledd 1`()
-            vedtaksperiode.generasjoner.sikreNyGenerasjon()
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)
         }
 

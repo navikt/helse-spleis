@@ -196,7 +196,7 @@ internal class DagerFraInntektsmelding(
         val sykdomstidslinje = samletSykdomstidslinje(periode)
         gjenståendeDager.removeAll(periode)
         dagerHåndtert = true
-        return BitAvInntektsmelding(meldingsreferanseId(), sykdomstidslinje, this)
+        return BitAvInntektsmelding(meldingsreferanseId(), sykdomstidslinje, this, innsendt(), registrert(), navn())
     }
 
     private fun samletSykdomstidslinje(periode: Periode) =
@@ -282,13 +282,22 @@ internal class DagerFraInntektsmelding(
     internal class BitAvInntektsmelding(
         private val meldingsreferanseId: UUID,
         private val sykdomstidslinje: Sykdomstidslinje,
-        aktivitetslogg: IAktivitetslogg
+        aktivitetslogg: IAktivitetslogg,
+        private val innsendt: LocalDateTime,
+        private val registert: LocalDateTime,
+        private val navn : String
     ): SykdomshistorikkHendelse, IAktivitetslogg by (aktivitetslogg) {
         override fun oppdaterFom(other: Periode) =
             other.oppdaterFom(sykdomstidslinje().periode() ?: other)
         override fun dokumentsporing() = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
         internal fun sykdomstidslinje() = sykdomstidslinje
         override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
+
+        override fun innsendt() = innsendt
+        override fun registrert() = registert
+        override fun navn() = navn
+        override fun meldingsreferanseId() = meldingsreferanseId
+        override fun avsender() = ARBEIDSGIVER
     }
 }
 

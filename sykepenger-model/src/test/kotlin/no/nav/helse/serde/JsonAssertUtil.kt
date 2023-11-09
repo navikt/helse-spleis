@@ -36,7 +36,7 @@ private class VedtaksperiodeMixin
 @JsonIgnoreProperties("observatører")
 private class GenerasjonerMixin
 
-@JsonIgnoreProperties("observatører")
+@JsonIgnoreProperties("observatører", "kilde")
 private class GenerasjonMixin
 
 @JsonIgnoreProperties("observers", "forrigeHendelse")

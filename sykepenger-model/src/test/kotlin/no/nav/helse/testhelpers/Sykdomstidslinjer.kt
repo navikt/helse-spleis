@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Collectors
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
 import no.nav.helse.person.Dokumentsporing
@@ -201,4 +202,9 @@ internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstid
     override fun dokumentsporing() = error("ikke i bruk")
     override fun oppdaterFom(other: Periode) = other
     override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, tidslinje)
+    override fun meldingsreferanseId() = error("ikke i bruk")
+    override fun innsendt() = error("ikke i bruk")
+    override fun registrert() = error("ikke i bruk")
+    override fun avsender() = error("ikke i bruk")
+    override fun navn() = error("ikke i bruk")
 }
