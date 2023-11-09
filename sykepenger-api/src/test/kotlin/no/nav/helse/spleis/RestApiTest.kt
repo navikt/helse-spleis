@@ -135,7 +135,8 @@ internal class RestApiTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
             avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
-            mottatt = LocalDateTime.now()
+            mottatt = LocalDateTime.now(),
+            opprettet = LocalDateTime.now()
         )
         val person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
         person.håndter(sykmelding)

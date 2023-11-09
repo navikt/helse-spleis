@@ -148,6 +148,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = avsendersystem,
                 mottatt = LocalDateTime.now(),
+                opprettet = LocalDateTime.now(),
                 aktivitetslogg = aktivitetslogg
             )
         }
@@ -161,7 +162,9 @@ internal class ArbeidsgiverHendelsefabrikk(
             if (!inntektsmelding.aktuellForReplay(sammenhengendePeriode)) null
             else InntektsmeldingReplay(
                 wrapped = inntektsmelding,
-                vedtaksperiodeId = vedtaksperiodeId
+                vedtaksperiodeId = vedtaksperiodeId,
+                innsendt = inntektsmelding.innsendt(),
+                registrert = inntektsmelding.registrert()
             )
         }
 

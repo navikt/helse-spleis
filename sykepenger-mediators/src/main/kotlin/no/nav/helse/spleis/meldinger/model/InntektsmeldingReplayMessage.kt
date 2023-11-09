@@ -12,6 +12,11 @@ internal class InntektsmeldingReplayMessage(packet: JsonMessage) : Inntektsmeldi
     override val skalDuplikatsjekkes = false
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
-        mediator.behandle(this, InntektsmeldingReplay(inntektsmelding, vedtaksperiodeId), context)
+        mediator.behandle(this, InntektsmeldingReplay(
+            wrapped = inntektsmelding,
+            vedtaksperiodeId = vedtaksperiodeId,
+            innsendt = mottatt,
+            registrert = opprettet
+        ), context)
     }
 }

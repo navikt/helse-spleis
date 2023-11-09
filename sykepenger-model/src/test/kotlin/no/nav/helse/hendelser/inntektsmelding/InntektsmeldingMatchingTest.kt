@@ -271,6 +271,7 @@ internal class InntektsmeldingMatchingTest {
             harFlereInntektsmeldinger = false,
             avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
             mottatt = LocalDateTime.now(),
+            opprettet = LocalDateTime.now(),
         ).dager()
     }
 }

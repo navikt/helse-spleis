@@ -33,7 +33,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
     private val aktørId = packet["arbeidstakerAktorId"].asText()
     private val fødselsdato = packet["fødselsdato"].asOptionalLocalDate() ?: tilFødselsnummer(fødselsnummer).fødselsdato
     private val dødsdato = packet["dødsdato"].asOptionalLocalDate()
-    private val mottatt = packet["mottattDato"].asLocalDateTime()
+    protected val mottatt = packet["mottattDato"].asLocalDateTime()
     private val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
     private val beregnetInntekt = packet["beregnetInntekt"].asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
@@ -61,7 +61,8 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
-            mottatt = mottatt
+            mottatt = mottatt,
+            opprettet = opprettet
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

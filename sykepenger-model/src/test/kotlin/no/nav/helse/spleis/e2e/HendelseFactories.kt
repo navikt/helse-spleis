@@ -158,7 +158,9 @@ internal fun AbstractEndToEndTest.inntektsmeldingReplay(
 ): InntektsmeldingReplay {
     return InntektsmeldingReplay(
         wrapped = inntektsmelding,
-        vedtaksperiodeId = vedtaksperiodeId
+        vedtaksperiodeId = vedtaksperiodeId,
+        innsendt = inntektsmelding.innsendt(),
+        registrert = inntektsmelding.registrert()
     ).apply {
         hendelselogg = this
     }

@@ -39,6 +39,7 @@ class Inntektsmelding(
     harFlereInntektsmeldinger: Boolean,
     avsendersystem: Avsendersystem?,
     mottatt: LocalDateTime,
+    private val opprettet: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(
     meldingsreferanseId = meldingsreferanseId,
@@ -122,6 +123,12 @@ class Inntektsmelding(
         )
 
     }
+
+    override fun innsendt() = mottatt
+
+    override fun registrert() = opprettet
+
+    override fun avsender() = ARBEIDSGIVER
 
     enum class Avsendersystem {
         NAV_NO,
