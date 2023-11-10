@@ -102,7 +102,8 @@ abstract class AbstractObservableTest {
         arbeidUtenforNorge = false,
         sendTilGosys = false,
         yrkesskade = false,
-        egenmeldinger = egenmeldinger
+        egenmeldinger = egenmeldinger,
+        opprettet = LocalDateTime.now()
     )
 
     protected fun utbetalinghistorikk() = UtbetalingshistorikkEtterInfotrygdendring(

@@ -59,6 +59,7 @@ class Søknad(
     private val egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag>,
     private val søknadstype: Søknadstype = Søknadstype.Arbeidstaker,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
+    private val opprettet: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
     private val sykdomsperiode: Periode
@@ -106,6 +107,7 @@ class Søknad(
     override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 
     override fun innsendt() = sendtTilNAVEllerArbeidsgiver
+    override fun registrert() = opprettet
     override fun avsender() = SYKMELDT
 
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
