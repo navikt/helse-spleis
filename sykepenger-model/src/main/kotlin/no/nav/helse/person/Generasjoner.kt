@@ -217,7 +217,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         private val dokumentsporing get() = endringer.dokumentsporing
         private val observatører = mutableListOf<GenerasjonObserver>()
 
-        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde?) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
+        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
 
         init {
             check(endringer.isNotEmpty()) {
