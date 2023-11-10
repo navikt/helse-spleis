@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
@@ -177,13 +178,14 @@ internal class TestPerson(
             andreInntektskilder: Boolean = false,
             arbeidUtenforNorge: Boolean = false,
             yrkesskade: Boolean = false,
-            sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
+            sendtTilNAVEllerArbeidsgiver: Temporal? = null,
             sykmeldingSkrevet: LocalDateTime? = null,
             orgnummer: String = "",
             søknadId: UUID = UUID.randomUUID(),
             utenlandskSykmelding: Boolean = false,
             søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
-            sendTilGosys: Boolean = false
+            sendTilGosys: Boolean = false,
+            opprettet: LocalDateTime = LocalDateTime.now()
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode {
@@ -198,7 +200,8 @@ internal class TestPerson(
                         yrkesskade = yrkesskade,
                         utenlandskSykmelding = utenlandskSykmelding,
                         søknadstype = søknadstype,
-                        sendTilGosys = sendTilGosys
+                        sendTilGosys = sendTilGosys,
+                        opprettet = opprettet
                     ).håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)){
@@ -221,7 +224,9 @@ internal class TestPerson(
             arbeidsforholdId: String? = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
-            orgnummer: String = ""
+            orgnummer: String = "",
+            mottatt: LocalDateTime = LocalDateTime.now(),
+            opprettet: LocalDateTime = LocalDateTime.now()
         ): UUID {
             arbeidsgiverHendelsefabrikk.lagInntektsmelding(
                 arbeidsgiverperioder,
@@ -232,7 +237,9 @@ internal class TestPerson(
                 harOpphørAvNaturalytelser,
                 arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
-                id
+                id,
+                mottatt = mottatt,
+                opprettet = opprettet
             ).håndter(Person::håndter)
             return id
         }
@@ -333,8 +340,8 @@ internal class TestPerson(
             }
         }
 
-        internal fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) {
-            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
+        internal fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(), reberegning: Boolean = false) {
+            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, reberegning = reberegning)
                 .håndter(Person::håndter)
         }
 
@@ -377,9 +384,10 @@ internal class TestPerson(
         internal fun håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger: List<Infotrygdperiode> = listOf(),
             inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-            besvart: LocalDateTime = LocalDateTime.now()
+            besvart: LocalDateTime = LocalDateTime.now(),
+            id: UUID = UUID.randomUUID()
         ) =
-            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger, inntektshistorikk, besvart)
+            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger, inntektshistorikk, besvart, id)
                 .håndter(Person::håndter)
 
         internal fun håndterUtbetalingshistorikkForFeriepenger(

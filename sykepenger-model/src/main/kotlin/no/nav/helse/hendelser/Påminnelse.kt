@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
@@ -27,7 +28,7 @@ class Påminnelse(
 
     override fun innsendt() = opprettet
 
-    override fun avsender() = Avsender.SAKSBEHANDLER
+    override fun avsender() = SYSTEM
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand

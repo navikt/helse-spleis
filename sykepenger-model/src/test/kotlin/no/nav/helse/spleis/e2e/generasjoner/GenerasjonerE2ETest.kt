@@ -7,6 +7,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -16,10 +17,16 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjonkilde
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET
@@ -34,10 +41,126 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
     @Test
     fun `ny periode har en generasjon`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
+            val søknadId = UUID.randomUUID()
+            val opprettet = LocalDateTime.now()
+            val innsendt = opprettet.minusHours(2)
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, opprettet = opprettet)
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
                 assertEquals(1, generasjoner.single().endringer.size)
+                assertEquals(Generasjonkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = opprettet, avsender = "SYKMELDT"), generasjoner.single().kilde)
+            }
+        }
+    }
+
+    @Test
+    fun `korrigerende inntektsmelding`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            val opprettet = LocalDateTime.now()
+            val mottatt = opprettet.minusHours(2)
+            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, opprettet = opprettet, mottatt = mottatt)
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(Generasjonkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = opprettet, avsender = "ARBEIDSGIVER"), generasjoner.last().kilde)
+            }
+        }
+    }
+
+    @Test
+    fun `Flere sykefraværstilfeller på flere arbeidsgivere med korrigerende inntektsmelding i snuten`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(1.mars, 31.mars)
+            assertEquals(1, inspektør(1.vedtaksperiode).generasjoner.size)
+            assertEquals(1, inspektør(2.vedtaksperiode).generasjoner.size)
+        }
+        a2 {
+            nyttVedtak(1.mai, 31.mai)
+            håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
+            assertEquals(1, inspektør(1.vedtaksperiode).generasjoner.size)
+            assertEquals(1, inspektør(2.vedtaksperiode).generasjoner.size)
+        }
+
+        val korrigerendeImA1 = UUID.randomUUID()
+        val opprettet = LocalDateTime.now()
+        val mottatt = opprettet.minusHours(2)
+        val forventetKilde = Generasjonkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = opprettet, avsender = "ARBEIDSGIVER")
+
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, opprettet = opprettet, mottatt = mottatt, id = korrigerendeImA1)
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(forventetKilde, generasjoner.last().kilde)
+            }
+            inspektør(2.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(forventetKilde, generasjoner.last().kilde)
+            }
+        }
+
+        a2 {
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(forventetKilde, generasjoner.last().kilde)
+            }
+            inspektør(2.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(1, generasjoner.size)
+                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
+            }
+        }
+    }
+
+    @Test
+    fun `Saksbehandler må behandle søknad i Infotrygd`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(1, generasjoner.size)
+                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
+            }
+        }
+    }
+    @Test
+    fun `Saksbehandler må annullere saken`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterAnnullering(inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
+                assertEquals("SAKSBEHANDLER", generasjoner.last().kilde?.avsender)
+            }
+        }
+    }
+
+    @Test
+    fun `Reberegner en periode`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, reberegning = true)
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
+                assertEquals("SYSTEM", generasjoner.last().kilde?.avsender)
+            }
+        }
+    }
+
+    @Test
+    fun `En utbetaling i Infotrygd blander seg`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+            val id = UUID.randomUUID()
+            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar, 100.prosent, INNTEKT)), id = id)
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
+                generasjoner.last().let {
+                    assertEquals("SYSTEM", it.kilde?.avsender)
+                    assertEquals(id, it.kilde?.meldingsreferanseId)
+                }
             }
         }
     }

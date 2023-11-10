@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 
 class AnnullerUtbetaling(
     meldingsreferanseId: UUID,
@@ -27,4 +28,6 @@ class AnnullerUtbetaling(
         opprettet,
         false
     )
+
+    override fun avsender() = SAKSBEHANDLER
 }

@@ -35,6 +35,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     }
 
     internal fun aktiveVedtaksperioder() = aktiveVedtaksperioder
+    internal fun forkastedeVedtaksperioder() = vedtaksperioder.values - aktiveVedtaksperioder
     internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
     internal val inntektshistorikk get() = sisteInntektshistorikk!!
 

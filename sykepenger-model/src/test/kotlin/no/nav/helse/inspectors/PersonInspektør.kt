@@ -56,6 +56,11 @@ internal class PersonInspektør(person: Person): PersonVisitor {
             vedtaksperiode.inspektør.id == vedtaksperiodeId
         }
     }
+    internal fun forkastetVedtaksperiode(vedtaksperiodeId: UUID) = arbeidsgivere.firstNotNullOf { (_, arbeidsgiver) ->
+        arbeidsgiver.inspektør.forkastedeVedtaksperioder().firstOrNull { vedtaksperiode ->
+            vedtaksperiode.inspektør.id == vedtaksperiodeId
+        }
+    }
     internal fun sisteVedtaksperiodeTilstander() = mutableMapOf<UUID, TilstandType>().apply {
         arbeidsgivere.forEach { (_, arbeidsgiver) ->
             putAll(arbeidsgiver.inspektør.sisteVedtaksperiodeTilstander())

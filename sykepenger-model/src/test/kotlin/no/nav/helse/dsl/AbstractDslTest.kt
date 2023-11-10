@@ -82,6 +82,7 @@ internal abstract class AbstractDslTest {
     protected fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
     protected fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
     protected fun inspektør(vedtaksperiodeId: UUID) = inspiser(personInspektør).vedtaksperiode(vedtaksperiodeId).inspektør
+    protected fun inspektørForkastet(vedtaksperiodeId: UUID) = inspiser(personInspektør).forkastetVedtaksperiode(vedtaksperiodeId).inspektør
 
     protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
         testperson.arbeidsgiver(this, testblokk)

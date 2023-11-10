@@ -2,6 +2,7 @@ package no.nav.helse.dsl
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -75,7 +76,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagSøknad(
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: Boolean = false,
-        sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
+        sendtTilNAVEllerArbeidsgiver: Temporal? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
         ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
         id: UUID = UUID.randomUUID(),
@@ -92,7 +93,13 @@ internal class ArbeidsgiverHendelsefabrikk(
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
         opprettet: LocalDateTime = LocalDateTime.now()
     ): Søknad {
-        val innsendt = sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
+        val innsendt = (sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive).let {
+            when (it) {
+                is LocalDateTime -> it
+                is LocalDate -> it.atStartOfDay()
+                else -> throw IllegalStateException("Innsendt må være enten LocalDate eller LocalDateTime")
+            }
+        }
         return Søknad(
             meldingsreferanseId = id,
             fnr = personidentifikator.toString(),
@@ -101,7 +108,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
             ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
-            sendtTilNAVEllerArbeidsgiver = innsendt.atStartOfDay(),
+            sendtTilNAVEllerArbeidsgiver = innsendt,
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
             sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
@@ -131,7 +138,9 @@ internal class ArbeidsgiverHendelsefabrikk(
         id: UUID = UUID.randomUUID(),
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
         harFlereInntektsmeldinger: Boolean = false,
-        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
+        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
+        mottatt: LocalDateTime = LocalDateTime.now(),
+        opprettet: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
@@ -149,8 +158,8 @@ internal class ArbeidsgiverHendelsefabrikk(
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = avsendersystem,
-                mottatt = LocalDateTime.now(),
-                opprettet = LocalDateTime.now(),
+                mottatt = mottatt,
+                opprettet = opprettet,
                 aktivitetslogg = aktivitetslogg
             )
         }
@@ -199,10 +208,11 @@ internal class ArbeidsgiverHendelsefabrikk(
     internal fun lagUtbetalingshistorikkEtterInfotrygdendring(
         utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-        besvart: LocalDateTime = LocalDateTime.now()
+        besvart: LocalDateTime = LocalDateTime.now(),
+        id: UUID = UUID.randomUUID()
     ) =
         UtbetalingshistorikkEtterInfotrygdendring(
-            meldingsreferanseId = UUID.randomUUID(),
+            meldingsreferanseId = id,
             aktørId = aktørId,
             fødselsnummer = personidentifikator.toString(),
             element = InfotrygdhistorikkElement.opprett(
@@ -361,7 +371,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             fødselsnummer = personidentifikator.toString()
         )
 
-    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime) =
+    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime, reberegning: Boolean = false) =
         Påminnelse(
             UUID.randomUUID(),
             aktørId,
@@ -373,7 +383,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             tilstandsendringstidspunkt,
             LocalDateTime.now(),
             LocalDateTime.now(),
-            opprettet = LocalDateTime.now()
+            opprettet = LocalDateTime.now(),
+            ønskerReberegning = reberegning
         )
 
     internal fun lagGrunnbeløpsregulering(skjæringstidspunkt: LocalDate) =
