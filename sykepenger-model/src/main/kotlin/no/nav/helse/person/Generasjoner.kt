@@ -200,6 +200,10 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         private val avsender: String
     ) {
         constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId(), hendelse.innsendt(), hendelse.registrert(), hendelse.avsender().toString())
+
+        internal fun accept(visitor: GenerasjonerVisistor) {
+            visitor.preVisitGenerasjonkilde(meldingsreferanseId, innsendt, registert, avsender)
+        }
     }
 
 
@@ -233,9 +237,10 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         override fun toString() = "$periode - $tilstand"
 
         fun accept(visitor: GenerasjonerVisistor) {
-            visitor.preVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet)
+            visitor.preVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
             endringer.forEach { it.accept(visitor) }
-            visitor.postVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet)
+            kilde?.accept(visitor)
+            visitor.postVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
         }
 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode

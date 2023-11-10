@@ -1599,7 +1599,8 @@ internal class JsonBuilder : AbstractBuilder() {
             tilstand: Generasjoner.Generasjon.Tilstand,
             periode: Periode,
             vedtakFattet: LocalDateTime?,
-            avsluttet: LocalDateTime?
+            avsluttet: LocalDateTime?,
+            kilde: Generasjoner.Generasjonkilde?
         ) {
             pushState(GenerasjonState(generasjoner))
         }
@@ -1629,7 +1630,8 @@ internal class JsonBuilder : AbstractBuilder() {
                 tilstand: Generasjoner.Generasjon.Tilstand,
                 periode: Periode,
                 vedtakFattet: LocalDateTime?,
-                avsluttet: LocalDateTime?
+                avsluttet: LocalDateTime?,
+                kilde: Generasjoner.Generasjonkilde?
             ) {
                 generasjoner.add(mapOf(
                     "id" to id,

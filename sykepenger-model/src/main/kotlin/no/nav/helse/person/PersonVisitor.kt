@@ -330,7 +330,8 @@ internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHisto
         tilstand: Generasjoner.Generasjon.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?
+        avsluttet: LocalDateTime?,
+        kilde: Generasjoner.Generasjonkilde?
     ) {}
     fun preVisitGenerasjonendring(
         id: UUID,
@@ -352,13 +353,20 @@ internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHisto
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje
     ) {}
+    fun preVisitGenerasjonkilde(
+        meldingsreferanseId: UUID,
+        innsendt: LocalDateTime,
+        registrert: LocalDateTime,
+        avsender: String
+    ) {}
     fun postVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
         tilstand: Generasjoner.Generasjon.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?
+        avsluttet: LocalDateTime?,
+        kilde: Generasjoner.Generasjonkilde?
     ) {}
 }
 

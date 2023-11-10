@@ -1039,9 +1039,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         tilstand: Generasjoner.Generasjon.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?
+        avsluttet: LocalDateTime?,
+        kilde: Generasjoner.Generasjonkilde?
     ) {
-        delegatee.preVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet)
+        delegatee.preVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
     }
     override fun preVisitGenerasjonendring(
         id: UUID,
@@ -1091,9 +1092,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         tilstand: Generasjoner.Generasjon.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?
+        avsluttet: LocalDateTime?,
+        kilde: Generasjoner.Generasjonkilde?
     ) {
-        delegatee.postVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet)
+        delegatee.postVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
     }
 
     override fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {

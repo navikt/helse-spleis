@@ -121,7 +121,8 @@ internal class SpeilGenerasjonerBuilder(
         tilstand: Generasjoner.Generasjon.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?
+        avsluttet: LocalDateTime?,
+        kilde: Generasjoner.Generasjonkilde?
     ) {
         if (tilstand.uberegnet) return this.tilstand.besøkUberegnetPeriode(this, periode, tidsstempel, avsluttet)
         this.tilstand.besøkBeregnetPeriode(this, periode, tidsstempel, vedtakFattet, avsluttet)
@@ -133,7 +134,8 @@ internal class SpeilGenerasjonerBuilder(
         tilstand: Generasjoner.Generasjon.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?
+        avsluttet: LocalDateTime?,
+        kilde: Generasjoner.Generasjonkilde?
     ) {
         if (tilstand.uberegnet) return this.tilstand.forlatUberegnetPeriode(this)
         this.tilstand.forlatBeregnetPeriode(this)

@@ -39,13 +39,21 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         val periode: Periode,
         val tilstand: PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData,
         val vedtakFattet: LocalDateTime?,
-        val avsluttet: LocalDateTime?
+        val avsluttet: LocalDateTime?,
+        val kilde: Generasjonkilde?
     ) {
         data class Generasjonendring(
             val grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
             val utbetaling: Utbetaling?,
             val periode: Periode,
             val dokumentsporing: Dokumentsporing
+        )
+
+        data class Generasjonkilde(
+           val meldingsreferanseId: UUID,
+           val innsendt: LocalDateTime,
+           val registert: LocalDateTime,
+           val avsender: String
         )
     }
 
@@ -72,7 +80,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         tilstand: Generasjoner.Generasjon.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
-        avsluttet: LocalDateTime?
+        avsluttet: LocalDateTime?,
+        kilde: Generasjoner.Generasjonkilde?
     ) {
         this.generasjoner.add(Generasjon(
             id = id,
@@ -80,7 +89,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
             periode = periode,
             tilstand = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
             vedtakFattet = vedtakFattet,
-            avsluttet = avsluttet
+            avsluttet = avsluttet,
+            kilde = null
         ))
     }
 
@@ -101,6 +111,18 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId ?: return
         val utbetalingId = utbetaling!!.inspektør.utbetalingId
         utbetalingIdTilVilkårsgrunnlagId = utbetalingId to vilkårsgrunnlagId
+    }
+
+    override fun preVisitGenerasjonkilde(
+        meldingsreferanseId: UUID,
+        innsendt: LocalDateTime,
+        registrert: LocalDateTime,
+        avsender: String
+    ) {
+        val sisteGenerasjon = this.generasjoner.last()
+        this.generasjoner[this.generasjoner.lastIndex] = sisteGenerasjon.copy(
+            kilde = Generasjon.Generasjonkilde(meldingsreferanseId, innsendt, registrert, avsender)
+        )
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
