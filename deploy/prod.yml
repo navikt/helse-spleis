@@ -16,6 +16,8 @@ spec:
   readiness:
     path: isready
     initialDelay: 5
+  replicas:
+    disableAutoScaling: true
   resources:
     limits:
       memory: 8Gi
