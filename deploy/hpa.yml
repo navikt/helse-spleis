@@ -1,0 +1,31 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: spleis
+  namespace: tbd
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: spleis
+  minReplicas: 2
+  maxReplicas: 24
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: kafka_consumergroup_group_lag
+          selector:
+            matchLabels:
+              topic: tbd.rapid.v1
+              group: tbd-spleis-v1
+        target:
+          type: AverageValue
+          averageValue: 200
+  behaviour:
+    # skalerer ned med en pod hvert 2. minutt
+    scaleDown:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 120
