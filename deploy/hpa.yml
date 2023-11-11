@@ -23,9 +23,11 @@ spec:
           type: AverageValue
           averageValue: 200
   behavior:
-    # skalerer ned med en pod hvert 2. minutt
     scaleDown:
+      # hvor langt tilbake i tid k8s skal vurdere om det skal skaleres ned basert på metrikken
+      stabilizationWindowSeconds: 120
       policies:
+        # skalerer ned med to poder hvert minutt
         - type: Pods
-          value: 1
-          periodSeconds: 120
+          value: 2
+          periodSeconds: 60
