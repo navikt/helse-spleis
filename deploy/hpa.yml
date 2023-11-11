@@ -22,7 +22,7 @@ spec:
         target:
           type: AverageValue
           averageValue: 200
-  behaviour:
+  behavior:
     # skalerer ned med en pod hvert 2. minutt
     scaleDown:
       policies:
