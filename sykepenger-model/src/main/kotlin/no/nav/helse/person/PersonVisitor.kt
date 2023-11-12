@@ -357,7 +357,7 @@ internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHisto
         meldingsreferanseId: UUID,
         innsendt: LocalDateTime,
         registrert: LocalDateTime,
-        avsender: String
+        avsender: Generasjoner.Generasjonkilde.Avsender
     ) {}
     fun postVisitGenerasjon(
         id: UUID,

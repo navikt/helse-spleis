@@ -30,6 +30,12 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
+import no.nav.helse.hendelser.Avsender as HendelseAvsender
+import no.nav.helse.hendelser.Avsender.SYKMELDT as HendelseFraSykmeldt
+import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER as HendelseFraArbeidsgiver
+import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER as HendelseFraSaksbehandler
+import no.nav.helse.hendelser.Avsender.SYSTEM as HendelseFraSystem
+
 internal class Generasjoner(generasjoner: List<Generasjon>) {
     internal constructor(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) : this(mutableListOf(Generasjon.nyGenerasjon(sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)))
 
@@ -197,12 +203,24 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         private val meldingsreferanseId: UUID,
         private val innsendt: LocalDateTime,
         private val registert: LocalDateTime,
-        private val avsender: String
+        private val avsender: Avsender
     ) {
-        constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId(), hendelse.innsendt(), hendelse.registrert(), hendelse.avsender().toString())
+        internal constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId(), hendelse.innsendt(), hendelse.registrert(), hendelse.avsender().tilGenerasjonAvsender)
 
         internal fun accept(visitor: GenerasjonerVisistor) {
             visitor.preVisitGenerasjonkilde(meldingsreferanseId, innsendt, registert, avsender)
+        }
+
+        internal enum class Avsender {
+            SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM
+        }
+        private companion object {
+            val HendelseAvsender.tilGenerasjonAvsender get() = when(this) {
+                HendelseFraSykmeldt -> Avsender.SYKMELDT
+                HendelseFraArbeidsgiver -> Avsender.ARBEIDSGIVER
+                HendelseFraSaksbehandler -> Avsender.SAKSBEHANDLER
+                HendelseFraSystem -> Avsender.SYSTEM
+            }
         }
     }
 

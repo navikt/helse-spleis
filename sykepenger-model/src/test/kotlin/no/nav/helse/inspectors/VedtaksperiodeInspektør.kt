@@ -53,7 +53,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
            val meldingsreferanseId: UUID,
            val innsendt: LocalDateTime,
            val registert: LocalDateTime,
-           val avsender: String
+           val avsender: Generasjoner.Generasjonkilde.Avsender
         )
     }
 
@@ -117,7 +117,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         meldingsreferanseId: UUID,
         innsendt: LocalDateTime,
         registrert: LocalDateTime,
-        avsender: String
+        avsender: Generasjoner.Generasjonkilde.Avsender
     ) {
         val sisteGenerasjon = this.generasjoner.last()
         this.generasjoner[this.generasjoner.lastIndex] = sisteGenerasjon.copy(
