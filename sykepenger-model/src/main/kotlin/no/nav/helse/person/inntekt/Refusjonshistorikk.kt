@@ -123,7 +123,6 @@ internal class Refusjonshistorikk {
                     val aktuelle = refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }
                     val første = aktuelle.minByOrNull { it.startskuddet() }
                     if (første != null && første.startskuddet() != skjæringstidspunkt) {
-                        aktivitetslogg?.varsel(Varselkode.RV_RE_1)
                         refusjonsopplysningBuilder.leggTil(Refusjonsopplysning(
                             meldingsreferanseId = første.meldingsreferanseId,
                             fom = skjæringstidspunkt,

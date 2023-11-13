@@ -150,17 +150,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `blir syk fra ghost lagrer ikke refusjonsopplysninger tilbake til skjæringstidspunktet`() {
-        utbetalPeriodeMedGhost(tilGodkjenning = true)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 18.januar, orgnummer = a2,)
-        assertVarsel(RV_RE_1, 1.vedtaksperiode.filter(a2))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-    }
-
-
-    @Test
     fun `blir syk fra ghost`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
@@ -184,7 +173,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a1))
         assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a2))
-        assertVarsel(RV_RE_1, AktivitetsloggFilter.arbeidsgiver(a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -237,7 +225,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             beregnetInntekt = 32000.månedlig,
             orgnummer = a2,
         )
-        assertVarsel(RV_RE_1, 1.vedtaksperiode.filter(a2))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.brukerutbetaling
 
+import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -9,6 +10,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -26,6 +28,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -693,21 +696,25 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Første utbetalte dag er før første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
+        val inntektsmeldingId = håndterInntektsmelding(
             listOf(),
             førsteFraværsdag = 17.januar,
             avsendersystem = Inntektsmelding.Avsendersystem.ALTINN,
         )
-
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(inntektsmeldingId, 1.januar, 16.januar, INNTEKT),
+                Refusjonsopplysning(inntektsmeldingId, 17.januar, null, INNTEKT)
+            ), inspektør.refusjonsopplysningerISykepengegrunnlaget(1.januar, a1)
+        )
         assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
-        assertVarsel(RV_RE_1, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -791,4 +798,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             assertTrue(utbetaling.inspektør.arbeidsgiverOppdrag.isEmpty())
         }
     }
+
+    private fun TestArbeidsgiverInspektør.refusjonsopplysningerISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger
 }

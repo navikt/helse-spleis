@@ -99,7 +99,7 @@ enum class Varselkode(
     RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag."),
 
     // RE: Refusjon
-    RV_RE_1("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."),
+    RV_RE_1("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", avviklet = true),
     RV_RE_2("Mangler refusjonsopplysninger", avviklet = true),
 
     // IT: Infotrygd

@@ -462,7 +462,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2,)
         assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a1))
         assertVarsel(RV_IM_4, AktivitetsloggFilter.arbeidsgiver(a2))
-        assertVarsel(RV_RE_1, AktivitetsloggFilter.arbeidsgiver(a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)

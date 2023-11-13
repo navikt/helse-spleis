@@ -226,7 +226,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         // Legger inntekt fra IM1 til grunn
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertVarsel(RV_RE_1, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
         assertInntektForDato(im2Inntekt, 17.januar, inspektør)
     }
@@ -1515,7 +1514,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-        assertVarsel(RV_RE_1)
         assertTilstander(
             2.vedtaksperiode,
             START,

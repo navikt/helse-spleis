@@ -45,32 +45,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `første fraværsdag oppgitt til dagen etter arbeidsgiverperioden over helg med en dags gap`(){
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar))
-            håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(4.januar til 19.januar), førsteFraværsdag = 23.januar)
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-            assertVarsel(RV_RE_1)
-        }
-    }
-
-    @Test
-    fun `første fraværsdag oppgitt med en dags gap til arbeidsgiverperioden`(){
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 18.januar)
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-            assertVarsel(RV_RE_1)
-        }
-    }
-
-    @Test
     fun `lager nytt innslag i vilkårsgrunnlaghistorikken med oppdaterte refusjonsopplysninger ved ny inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
@@ -124,42 +98,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         }
     }
 
-    @Test
-    fun `bruker først refusjonsopplysning også i gråsonen`(){
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar)
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-            assertVarsel(RV_RE_1)
-        }
-    }
-
-    @Test
-    fun `Automatisk revurdering av AUU ved inntektsmelding som mangler refusjonsopplysninger`() {
-        a1 {
-            (12.juli til 17.juli i 2022).avsluttUtenUtbetaling()
-            (17.august til 17.august i 2022).avsluttUtenUtbetaling()
-            (22.august til 22.august i 2022).avsluttUtenUtbetaling()
-            (23.august til 23.august i 2022).avsluttUtenUtbetaling()
-            val treffesAvInntektsmelding = (12.september til 23.september i 2022).avsluttUtenUtbetaling()
-            (24.oktober til 28.oktober i 2022).avsluttUtenUtbetaling()
-
-            val arbeidsgiverperioder = listOf(
-                (17.august til 17.august i 2022),
-                (22.august til 26.august i 2022),
-                (7.september til 7.september i 2022),
-                (12.september til 20.september i 2022)
-            )
-            håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 22.september i 2022)
-            håndterVilkårsgrunnlag(treffesAvInntektsmelding)
-            håndterYtelser(treffesAvInntektsmelding)
-            assertSisteTilstand(treffesAvInntektsmelding, AVVENTER_SIMULERING)
-            assertVarsel(RV_RE_1)
-        }
-    }
 
     @Test
     fun `Inntektsmelding uten refusjonsopplysninger tolkes som ingen refusjon`() {
