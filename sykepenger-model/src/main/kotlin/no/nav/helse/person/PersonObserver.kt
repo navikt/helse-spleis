@@ -663,6 +663,25 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val organisasjonsnummer: String
     )
 
+    data class GenerasjonOpprettetEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val generasjonId: UUID,
+        val type: Generasjontype,
+        val kilde: Generasjonkilde
+    ) {
+        data class Generasjonkilde(
+            val meldingsreferanseId: UUID,
+            val avsender: Avsender,
+            val innsendt: LocalDateTime,
+            val registrert: LocalDateTime
+        )
+        enum class Generasjontype { SØKNAD, OMGJØRING, REVURDERING }
+        enum class Avsender { SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM }
+    }
+
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {}
     fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
@@ -700,4 +719,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun behandlingUtført() {}
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
+
+    fun generasjonOpprettet(generasjonOpprettetEvent: GenerasjonOpprettetEvent) {}
 }

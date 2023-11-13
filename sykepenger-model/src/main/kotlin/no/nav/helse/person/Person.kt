@@ -820,5 +820,8 @@ class Person private constructor(
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
+
+    internal fun generasjonOpprettet(generasjonOpprettetEvent: PersonObserver.GenerasjonOpprettetEvent) = observers.forEach { it.generasjonOpprettet(generasjonOpprettetEvent) }
+
 }
 

@@ -852,6 +852,16 @@ internal class Vedtaksperiode private constructor(
         person.vedtaksperiodeEndret(event)
     }
 
+    override fun generasjonOpprettet(generasjon: Generasjoner.Generasjon) {
+        generasjon.sendGenerasjonOpprettet(
+            vedtaksperiodeId = id,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            person = person
+        )
+    }
+
     override fun avsluttetUtenVedtak(
         hendelse: IAktivitetslogg,
         generasjonId: UUID,

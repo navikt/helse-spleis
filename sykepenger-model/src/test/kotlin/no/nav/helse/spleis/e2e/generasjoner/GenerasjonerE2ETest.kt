@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.generasjoner
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
@@ -337,5 +338,15 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             }
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
+    }
+
+    @Test
+    fun `sender ut generasjon opprettet`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        assertForventetFeil(
+            forklaring = "Signalet sendes ei enda",
+            ønsket = { assertEquals(1, observatør.generasjonOpprettetEventer.size) },
+            nå = { assertEquals(0, observatør.generasjonOpprettetEventer.size)}
+        )
     }
 }

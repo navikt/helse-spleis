@@ -39,6 +39,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val inntektsmeldingHåndtert = mutableListOf<Pair<UUID, UUID>>()
     val søknadHåndtert = mutableListOf<Pair<UUID, UUID>>()
     val vedtaksperiodeAnnullertEventer = mutableListOf<PersonObserver.VedtaksperiodeAnnullertEvent>()
+    val generasjonOpprettetEventer = mutableListOf<PersonObserver.GenerasjonOpprettetEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
@@ -183,5 +184,9 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         vedtaksperiodeAnnullertEventer.add(vedtaksperiodeAnnullertEvent)
+    }
+
+    override fun generasjonOpprettet(generasjonOpprettetEvent: PersonObserver.GenerasjonOpprettetEvent) {
+        generasjonOpprettetEventer.add(generasjonOpprettetEvent)
     }
 }

@@ -210,6 +210,17 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         internal fun accept(visitor: GenerasjonerVisistor) {
             visitor.preVisitGenerasjonkilde(meldingsreferanseId, innsendt, registert, avsender)
         }
+        internal val utgåendeEvent get() = PersonObserver.GenerasjonOpprettetEvent.Generasjonkilde(
+            meldingsreferanseId = meldingsreferanseId,
+            innsendt = innsendt,
+            registrert = registert,
+            avsender = when (avsender) {
+                Avsender.SYKMELDT -> PersonObserver.GenerasjonOpprettetEvent.Avsender.SYKMELDT
+                Avsender.ARBEIDSGIVER -> PersonObserver.GenerasjonOpprettetEvent.Avsender.ARBEIDSGIVER
+                Avsender.SAKSBEHANDLER -> PersonObserver.GenerasjonOpprettetEvent.Avsender.SAKSBEHANDLER
+                Avsender.SYSTEM -> PersonObserver.GenerasjonOpprettetEvent.Avsender.SYSTEM
+            }
+        )
 
         internal enum class Avsender {
             SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM
@@ -239,7 +250,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         private val dokumentsporing get() = endringer.dokumentsporing
         private val observatører = mutableListOf<GenerasjonObserver>()
 
-        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
+        private constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
 
         init {
             check(endringer.isNotEmpty()) {
@@ -505,6 +516,33 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         }
         private fun avsluttetUtenVedtak(hendelse: IAktivitetslogg) {
             observatører.forEach { it.avsluttetUtenVedtak(hendelse, id, avsluttet!!, periode, dokumentsporing.ider()) }
+        }
+
+        internal fun sendGenerasjonOpprettet(
+            vedtaksperiodeId: UUID,
+            fødselsnummer: String,
+            aktørId: String,
+            organisasjonsnummer: String,
+            person: Person
+        ) {
+            val type = when (tilstand) {
+                Tilstand.Uberegnet -> PersonObserver.GenerasjonOpprettetEvent.Generasjontype.SØKNAD
+                Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Generasjontype.OMGJØRING
+                Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Generasjontype.REVURDERING
+                else -> throw IllegalStateException("Forventet ikke å opprette gjenerasjon i tilstand ${tilstand.javaClass.simpleName}")
+            }
+
+            checkNotNull(kilde) { "Forventet ikke å opprette generasjon uten kilde" }
+
+            person.generasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                generasjonId = id,
+                type = type,
+                kilde = kilde.utgåendeEvent
+            ))
         }
 
         /*
