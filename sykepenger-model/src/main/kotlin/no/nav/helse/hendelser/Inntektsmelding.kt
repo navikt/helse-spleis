@@ -118,6 +118,7 @@ class Inntektsmelding(
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,
+                skjæringstidspunkt til LocalDate.MAX,
                 Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt),
                 refusjonshistorikk.refusjonsopplysninger(startskudd, this)
             )

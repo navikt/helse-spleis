@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -95,6 +96,7 @@ internal class OverstyrtArbeidsgiveropplysning(
             map {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = it.orgnummer,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = inntektsopplysning(it),
                     refusjonsopplysninger = RefusjonsopplysningerBuilder().apply { it.refusjonsopplysninger(skjæringstidspunkt).forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now()) } }.build()
                 )

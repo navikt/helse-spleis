@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
@@ -31,6 +32,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
+                skjæringstidspunkt til LocalDate.MAX,
                 Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), this, LocalDateTime.now()),
                 refusjonsopplysninger
             )
@@ -50,6 +52,7 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
+                skjæringstidspunkt til LocalDate.MAX,
                 Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), this, LocalDateTime.now()),
                 Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, this).refusjonsopplysninger
             )

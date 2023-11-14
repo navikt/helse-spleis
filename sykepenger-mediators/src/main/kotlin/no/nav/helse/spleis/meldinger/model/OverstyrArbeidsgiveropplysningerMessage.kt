@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
@@ -55,7 +56,7 @@ internal class OverstyrArbeidsgiveropplysningerMessage(packet: JsonMessage) : He
                     Saksbehandler(skjæringstidspunkt, id, månedligInntekt, forklaring, subsumsjon, opprettet)
                 val refusjonsopplysninger = arbeidsgiveropplysning["refusjonsopplysninger"].asRefusjonsopplysninger(id, opprettet)
 
-                ArbeidsgiverInntektsopplysning(orgnummer, saksbehandlerinntekt, refusjonsopplysninger)
+                ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, saksbehandlerinntekt, refusjonsopplysninger)
             }
         }
 

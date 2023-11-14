@@ -1,6 +1,7 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -73,7 +74,8 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
 
     override fun preVisitArbeidsgiverInntektsopplysning(
         arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
-        orgnummer: String
+        orgnummer: String,
+        gjelder: Periode
     ) {
         arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer] = arbeidsgiverInntektsopplysning
     }

@@ -10,6 +10,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -133,6 +134,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 ALDER, listOf(
                     ArbeidsgiverInntektsopplysning(
                         "orgnr",
+                        skjæringstidspunkt til LocalDate.MAX,
                         Saksbehandler(
                             skjæringstidspunkt,
                             UUID.randomUUID(),

@@ -1,0 +1,29 @@
+{
+  "aktørId": "42",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "sykepengegrunnlag": {
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "123456789",
+                "fom": "2018-01-01",
+                "tom": "+999999999-12-31",
+                "inntektsopplysning": {}
+              },
+              {
+                "orgnummer": "987654321",
+                "fom": "2018-01-01",
+                "tom": "+999999999-12-31",
+                "inntektsopplysning": {}
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 284
+}

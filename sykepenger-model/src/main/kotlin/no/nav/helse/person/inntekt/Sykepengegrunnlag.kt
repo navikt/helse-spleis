@@ -86,7 +86,7 @@ internal class Sykepengegrunnlag private constructor(
     // sum av alle inntekter foruten skjønnsmessig fastsatt beløp; da brukes inntekten den fastsatte
     private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt()
     // summen av alle inntekter
-    private val beregningsgrunnlag = arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt()
+    private val beregningsgrunnlag = arbeidsgiverInntektsopplysninger.fastsattÅrsinntekt(skjæringstidspunkt)
     private val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 

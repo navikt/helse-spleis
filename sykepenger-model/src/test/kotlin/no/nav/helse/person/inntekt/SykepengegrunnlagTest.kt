@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -18,7 +17,9 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.nesteDag
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
+import no.nav.helse.person.AbstractPersonTest.Companion.a2
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -26,10 +27,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.person.inntekt.Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -38,21 +37,17 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import kotlin.properties.Delegates
 
 internal class SykepengegrunnlagTest {
@@ -336,17 +331,44 @@ internal class SykepengegrunnlagTest {
     }
 
     @Test
+    fun `tilkommen inntekt`() {
+        val skjæringstidspunkt = 1.januar
+        val a1Fom = skjæringstidspunkt
+        val a2Fom = skjæringstidspunkt.plusDays(1)
+        val a1Inntekt = 25000.månedlig
+        val a2Inntekt = 5000.månedlig
+        val inntekter = listOf(
+            ArbeidsgiverInntektsopplysning("a1", a1Fom til LocalDate.MAX, Inntektsmelding(a1Fom, UUID.randomUUID(), a1Inntekt, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+                leggTil(Refusjonsopplysning(UUID.randomUUID(), a1Fom, null, a1Inntekt), LocalDateTime.now())
+            }.build()),
+            ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmelding(a2Fom, UUID.randomUUID(), a2Inntekt, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+                leggTil(Refusjonsopplysning(UUID.randomUUID(), a2Fom, null, INGEN), LocalDateTime.now())
+            }.build()),
+        )
+
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            alder = UNG_PERSON_FØDSELSDATO.alder,
+            arbeidsgiverInntektsopplysninger = inntekter,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
+            skjæringstidspunkt = skjæringstidspunkt,
+            subsumsjonObserver = NullObserver
+        )
+        assertEquals(a1Inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(a1Inntekt, sykepengegrunnlag.inspektør.beregningsgrunnlag)
+    }
+
+    @Test
     fun `overstyre inntekt og refusjon - endre til samme`() {
         val opprinnelig = listOf(
-            ArbeidsgiverInntektsopplysning("a1", Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
             }.build()),
-            ArbeidsgiverInntektsopplysning("a2", Inntektsmelding(1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+            ArbeidsgiverInntektsopplysning("a2", 1.januar til LocalDate.MAX, Inntektsmelding(1.januar, UUID.randomUUID(), 5000.månedlig, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, INGEN), LocalDateTime.now())
             }.build()),
         )
         val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build())
         overstyring.leggTilInntekt(endretOpplysning)
@@ -363,18 +385,18 @@ internal class SykepengegrunnlagTest {
         val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build()
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1Refusjonsopplysninger)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", 1.januar til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 2000.månedlig), LocalDateTime.now())
         }.build()
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), a1EndretRefusjonsopplysninger)
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, Saksbehandler(1.januar, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysning)
 
-        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1EndretRefusjonsopplysninger)
+        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1Inntektsopplysning, a1EndretRefusjonsopplysninger)
         assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
     }
     @Test
@@ -387,8 +409,8 @@ internal class SykepengegrunnlagTest {
         val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build()
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1Refusjonsopplysninger)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", 1.januar til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
@@ -398,10 +420,10 @@ internal class SykepengegrunnlagTest {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build()
 
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysning)
 
-        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", a1EndretInntektsopplysning, a1Refusjonsopplysninger)
+        val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1EndretInntektsopplysning, a1Refusjonsopplysninger)
         assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
     }
     @Test
@@ -414,8 +436,8 @@ internal class SykepengegrunnlagTest {
         val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build()
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1Refusjonsopplysninger)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", 1.januar til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
@@ -425,7 +447,7 @@ internal class SykepengegrunnlagTest {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build()
 
-        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysning)
 
         assertNull(overstyring.resultat())
@@ -440,8 +462,8 @@ internal class SykepengegrunnlagTest {
         val a1Refusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build()
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Inntektsopplysning, a1Refusjonsopplysninger)
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Inntektsopplysning, a2Refusjonsopplysninger)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1Inntektsopplysning, a1Refusjonsopplysninger)
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", 1.januar til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
         val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(opprinnelig, null, NullObserver)
@@ -456,10 +478,10 @@ internal class SykepengegrunnlagTest {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 25000.månedlig), LocalDateTime.now())
         }.build()
 
-        val endretOpplysningA3 = ArbeidsgiverInntektsopplysning("a3", a3EndretInntektsopplysning, a3EndretRefusjonsopplysninger)
+        val endretOpplysningA3 = ArbeidsgiverInntektsopplysning("a3", 1.januar til LocalDate.MAX, a3EndretInntektsopplysning, a3EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysningA3)
 
-        val endretOpplysningA1 = ArbeidsgiverInntektsopplysning("a1", a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
+        val endretOpplysningA1 = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysningA1)
 
 
@@ -483,6 +505,7 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = Inntektsmelding(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
@@ -493,6 +516,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = SkattSykepengegrunnlag(
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
@@ -558,6 +582,7 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = Inntektsmelding(
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
@@ -568,6 +593,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = SkattSykepengegrunnlag(
                         hendelseId = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
@@ -613,6 +639,7 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = Inntektsmelding(
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
@@ -623,6 +650,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = Inntektsmelding(
                         dato = førsteFraværsdagAG2,
                         hendelseId = UUID.randomUUID(),
@@ -656,6 +684,7 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = Inntektsmelding(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
@@ -666,6 +695,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = Inntektsmelding(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
@@ -731,6 +761,7 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a1,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = Inntektsmelding(
                         dato = førsteFraværsdagAG1,
                         hendelseId = UUID.randomUUID(),
@@ -741,6 +772,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = a2,
+                    gjelder = skjæringstidspunkt til LocalDate.MAX,
                     inntektsopplysning = Inntektsmelding(
                         dato = førsteFraværsdagAG2,
                         hendelseId = UUID.randomUUID(),
@@ -774,6 +806,7 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer",
+                    gjelder = 1.januar til LocalDate.MAX,
                     inntektsopplysning = Infotrygd(
                         id = inntektID,
                         dato = 1.januar,
@@ -799,6 +832,7 @@ internal class SykepengegrunnlagTest {
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
+                        gjelder = 1.januar til LocalDate.MAX,
                         inntektsopplysning = Infotrygd(
                             id = inntektID,
                             dato = 1.januar,
@@ -813,6 +847,7 @@ internal class SykepengegrunnlagTest {
                 deaktiverteArbeidsforhold = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
+                        gjelder = 1.januar til LocalDate.MAX,
                         inntektsopplysning = Infotrygd(
                             id = inntektID,
                             dato = 1.januar,

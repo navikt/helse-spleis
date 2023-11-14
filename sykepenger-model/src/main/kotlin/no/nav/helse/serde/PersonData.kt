@@ -366,6 +366,8 @@ internal data class PersonData(
 
         data class ArbeidsgiverInntektsopplysningData(
             private val orgnummer: String,
+            private val fom: LocalDate,
+            private val tom: LocalDate,
             private val inntektsopplysning: InntektsopplysningData,
             private val refusjonsopplysninger: List<ArbeidsgiverData.RefusjonsopplysningData>
         ) {
@@ -375,7 +377,7 @@ internal data class PersonData(
 
                 internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(builder: VilkårsgrunnlaghistorikkBuilder) =
                     map {
-                        ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.tilModellobjekt(builder), it.refusjonsopplysninger.tilModellobjekt().gjennopprett())
+                        ArbeidsgiverInntektsopplysning(it.orgnummer, it.fom til it.tom, it.inntektsopplysning.tilModellobjekt(builder), it.refusjonsopplysninger.tilModellobjekt().gjennopprett())
                     }
             }
 

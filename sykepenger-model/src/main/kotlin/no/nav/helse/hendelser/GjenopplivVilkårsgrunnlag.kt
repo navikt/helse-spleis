@@ -9,6 +9,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 class GjenopplivVilkårsgrunnlag(
     meldingsreferanseId: UUID,
@@ -25,7 +26,7 @@ class GjenopplivVilkårsgrunnlag(
 
     internal fun arbeidsgiverinntektsopplysninger(skjæringstidspunkt: LocalDate) = arbeidsgiveropplysninger.map { (organisasjonsnummer, inntekt) ->
         val inntektsmeldingInntekt = Inntektsmelding(skjæringstidspunkt, meldingsreferanseId(), inntekt)
-        ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsmeldingInntekt, Refusjonsopplysning(meldingsreferanseId(), skjæringstidspunkt, null, inntekt).refusjonsopplysninger)
+        ArbeidsgiverInntektsopplysning(organisasjonsnummer, skjæringstidspunkt til LocalDate.MAX, inntektsmeldingInntekt, Refusjonsopplysning(meldingsreferanseId(), skjæringstidspunkt, null, inntekt).refusjonsopplysninger)
     }
 
     internal fun valider(organisasjonsnummere: List<String>) {

@@ -3,6 +3,7 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
@@ -36,7 +37,8 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
 
     override fun preVisitArbeidsgiverInntektsopplysning(
         arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
-        orgnummer: String
+        orgnummer: String,
+        gjelder: Periode
     ) {
         this.orgnummer = orgnummer
     }

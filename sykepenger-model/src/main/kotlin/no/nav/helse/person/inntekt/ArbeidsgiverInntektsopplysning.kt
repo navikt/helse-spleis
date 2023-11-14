@@ -22,33 +22,34 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Økonomi
 
 class ArbeidsgiverInntektsopplysning(
     private val orgnummer: String,
+    private val gjelder: Periode,
     private val inntektsopplysning: Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
-    private fun fastsattÅrsinntekt(acc: Inntekt): Inntekt {
-        return acc + inntektsopplysning.fastsattÅrsinntekt()
+    private fun fastsattÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
+        return acc + beregningsgrunnlag(skjæringstidspunkt)
     }
     private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
         return acc + inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
     }
 
     private fun beregningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
-        // TODO: bare returne fastsattÅrsinntekt() dersom arbeidsgiverInntektsopplysningen gjelder på skjæringstidspunktet
-        // if (this.gjelderFom > skjæringstidspunkt) return Inntekt.INGEN
+        if (this.gjelder.start > skjæringstidspunkt) return INGEN
         return inntektsopplysning.fastsattÅrsinntekt()
     }
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
-        visitor.preVisitArbeidsgiverInntektsopplysning(this, orgnummer)
+        visitor.preVisitArbeidsgiverInntektsopplysning(this, orgnummer, gjelder)
         inntektsopplysning.accept(visitor)
         refusjonsopplysninger.accept(visitor)
-        visitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer)
+        visitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer, gjelder)
     }
 
     private fun overstyr(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
@@ -57,10 +58,10 @@ class ArbeidsgiverInntektsopplysning(
     }
 
     private fun overstyrer(gammel: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
-        return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning), refusjonsopplysninger = gammel.refusjonsopplysninger.merge(this.refusjonsopplysninger))
+        return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, gjelder = this.gjelder, inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning), refusjonsopplysninger = gammel.refusjonsopplysninger.merge(this.refusjonsopplysninger))
     }
 
-    private fun rullTilbake() = ArbeidsgiverInntektsopplysning(this.orgnummer, this.inntektsopplysning.omregnetÅrsinntekt(), refusjonsopplysninger)
+    private fun rullTilbake() = ArbeidsgiverInntektsopplysning(this.orgnummer, gjelder = this.gjelder, this.inntektsopplysning.omregnetÅrsinntekt(), refusjonsopplysninger)
 
     private fun subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening?) {
         inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, opptjening?.startdatoFor(orgnummer))
@@ -77,6 +78,7 @@ class ArbeidsgiverInntektsopplysning(
         if (orgnummer != other.orgnummer) return false
         if (inntektsopplysning != other.inntektsopplysning) return false
         if (refusjonsopplysninger != other.refusjonsopplysninger) return false
+        if (this.gjelder != other.gjelder) return false
         return true
     }
 
@@ -84,6 +86,7 @@ class ArbeidsgiverInntektsopplysning(
         var result = orgnummer.hashCode()
         result = 31 * result + inntektsopplysning.hashCode()
         result = 31 * result + refusjonsopplysninger.hashCode()
+        result = 31 * result + gjelder.hashCode()
         return result
     }
 
@@ -114,7 +117,7 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.aktiver(aktiveres: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
             val (deaktiverte, aktiverte) = this.fjernInntekt(aktiveres, orgnummer, forklaring, false, subsumsjonObserver)
             // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før aktivering sikrer vi at alle "rulles tilbake" slik at vi ikke lager et sykepengegrunnlag med mix av SkjønnsmessigFastsatt & andre inntektstyper.
-            return deaktiverte to aktiverte.map { ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.omregnetÅrsinntekt(), it.refusjonsopplysninger) }
+            return deaktiverte to aktiverte.map { ArbeidsgiverInntektsopplysning(it.orgnummer, it.gjelder, it.inntektsopplysning.omregnetÅrsinntekt(), it.refusjonsopplysninger) }
         }
 
         // flytter inntekt for *orgnummer* fra *this* til *deaktiverte*
@@ -166,7 +169,7 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null) {
             subsumsjonObserver.`§ 8-30 ledd 1`(
                 grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig = omregnetÅrsinntektPerArbeidsgiver().mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } },
-                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig }
+                grunnlagForSykepengegrunnlagÅrlig = map { it.inntektsopplysning.fastsattÅrsinntekt() }.summer().reflection { årlig, _, _, _ -> årlig }
             )
             forEach { it.subsummer(subsumsjonObserver, opptjening) }
         }
@@ -206,8 +209,8 @@ class ArbeidsgiverInntektsopplysning(
             return refusjonsopplysninger.erTom
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.fastsattÅrsinntekt() =
-            fold(INGEN) { acc, item -> item.fastsattÅrsinntekt(acc)}
+        internal fun List<ArbeidsgiverInntektsopplysning>.fastsattÅrsinntekt(skjæringstidspunkt: LocalDate) =
+            fold(INGEN) { acc, item -> item.fastsattÅrsinntekt(acc, skjæringstidspunkt)}
 
         internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt() =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}

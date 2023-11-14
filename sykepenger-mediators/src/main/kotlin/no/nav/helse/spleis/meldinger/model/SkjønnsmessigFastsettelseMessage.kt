@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
@@ -38,7 +40,7 @@ internal class SkjønnsmessigFastsettelseMessage(packet: JsonMessage) : Hendelse
         val skjønnsmessigFastsattInntekt =
             SkjønnsmessigFastsatt(skjæringstidspunkt, id, årlig, opprettet)
 
-        ArbeidsgiverInntektsopplysning(orgnummer, skjønnsmessigFastsattInntekt, Refusjonsopplysninger())
+        ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, skjønnsmessigFastsattInntekt, Refusjonsopplysninger())
     }
 }
 

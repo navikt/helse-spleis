@@ -929,7 +929,7 @@ internal class JsonBuilder : AbstractBuilder() {
     class ArbeidsgiverInntektsopplysningerState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
         private val opplysninger = mutableListOf<Map<String, Any>>()
 
-        override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+        override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String, gjelder: Periode) {
             pushState(ArbeidsgiverInntektsopplysningState(opplysninger))
         }
 
@@ -1052,10 +1052,12 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(SkattSykepengegrunnlagState { inntektsopplysning -> tilstand.lagreInntekt(this, inntektsopplysning) })
         }
 
-        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String, gjelder: Periode) {
             this.arbeidsgiverInntektsopplysninger.add(
                 mapOf(
                     "orgnummer" to orgnummer,
+                    "fom" to gjelder.start,
+                    "tom" to gjelder.endInclusive,
                     "inntektsopplysning" to inntektsopplysning,
                     "refusjonsopplysninger" to refusjonsopplysninger.toList()
                 )

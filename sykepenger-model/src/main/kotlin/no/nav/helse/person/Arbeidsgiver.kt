@@ -307,7 +307,12 @@ internal class Arbeidsgiver private constructor(
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag)
         return when {
-            inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt, aktivitetslogg))
+            inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(
+                orgnummer = organisasjonsnummer,
+                gjelder = skjæringstidspunkt til LocalDate.MAX,
+                inntektsopplysning = inntektsopplysning,
+                refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt, aktivitetslogg)
+            )
             else -> null
         }
     }

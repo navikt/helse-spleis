@@ -6,6 +6,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -350,7 +351,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             deaktivert = false
         }
 
-        override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+        override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String, gjelder: Periode) {
             val inntektsopplysningBuilder = InntektsopplysningBuilder(
                 organisasjonsnummer = orgnummer,
                 inntektsopplysning = arbeidsgiverInntektsopplysning,
