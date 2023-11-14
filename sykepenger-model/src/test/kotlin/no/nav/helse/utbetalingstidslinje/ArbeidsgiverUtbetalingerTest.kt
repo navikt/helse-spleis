@@ -347,12 +347,11 @@ internal class ArbeidsgiverUtbetalingerTest {
         val utbetalinger = ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
             fødselsdato.alder,
-            { _, _, _, _ -> mapOf(person.arbeidsgiver(ORGNUMMER) to arbeidsgiverTidslinje) },
+            { _, _, _ -> mapOf(person.arbeidsgiver(ORGNUMMER) to arbeidsgiverTidslinje) },
             historiskTidslinje,
             vilkårsgrunnlagHistorikk
         )
         val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = utbetalinger.beregn(
-            1.januar,
             Periode(1.januar, 31.desember(2019)),
             Periode(1.januar, 31.desember(2019)),
             aktivitetslogg,

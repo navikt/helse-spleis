@@ -213,12 +213,11 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), event)
         }
 
-
         overstyringerIgangsatt[2].also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
+                årsak = "NY_PERIODE",
                 skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.mars.somPeriode(),
+                periodeForEndring = 1.mars til 20.mars,
                 berørtePerioder = listOf(
                     VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
                 )
@@ -227,9 +226,9 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         overstyringerIgangsatt[3].also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "NY_PERIODE",
+                årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
                 skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.mars til 20.mars,
+                periodeForEndring = 1.mars.somPeriode(),
                 berørtePerioder = listOf(
                     VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
                 )

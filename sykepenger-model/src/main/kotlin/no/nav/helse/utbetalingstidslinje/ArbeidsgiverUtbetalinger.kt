@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
@@ -11,7 +10,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 internal class ArbeidsgiverUtbetalinger(
     regler: ArbeidsgiverRegler,
     alder: Alder,
-    private val arbeidsgivere: (LocalDate, Periode, SubsumsjonObserver, IAktivitetslogg) -> Map<Arbeidsgiver, Utbetalingstidslinje>,
+    private val arbeidsgivere: (Periode, SubsumsjonObserver, IAktivitetslogg) -> Map<Arbeidsgiver, Utbetalingstidslinje>,
     infotrygdUtbetalingstidslinje: Utbetalingstidslinje,
     vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) {
@@ -26,13 +25,12 @@ internal class ArbeidsgiverUtbetalinger(
     internal val maksimumSykepenger by lazy { maksimumSykepengedagerfilter.maksimumSykepenger() }
 
     internal fun beregn(
-        skjæringstidspunkt: LocalDate,
         beregningsperiode: Periode,
         vedtaksperiode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
     ): Pair<Alder.MaksimumSykepenger, Map<Arbeidsgiver, Utbetalingstidslinje>> {
-        val arbeidsgivertidslinjer = arbeidsgivere(skjæringstidspunkt, beregningsperiode, subsumsjonObserver, aktivitetslogg)
+        val arbeidsgivertidslinjer = arbeidsgivere(beregningsperiode, subsumsjonObserver, aktivitetslogg)
         val tidslinjerPerArbeidsgiver = filtere.fold(arbeidsgivertidslinjer) { tidslinjer, filter ->
             val input = tidslinjer.entries.map { (key, value) -> key to value }
             val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, vedtaksperiode, aktivitetslogg, subsumsjonObserver)

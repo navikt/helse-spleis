@@ -59,6 +59,7 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -478,6 +479,8 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger.inntektsdata(skjæringstidspunkt, organisasjonsnummer,)
 
     internal fun loggInntektsvurdering(hendelse: IAktivitetslogg) = avviksprosent.loggInntektsvurdering(hendelse)
+    internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
+        arbeidsgiverInntektsopplysninger.firstNotNullOfOrNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }
 
     internal sealed interface Tilstand {
         fun entering(sykepengegrunnlag: Sykepengegrunnlag) {}

@@ -26,6 +26,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -96,6 +98,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate): Boolean {
         if (sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false) return false
         return forrigeInnslag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false
+    }
+
+    fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje {
+        return sisteInnlag()?.ghosttidslinje(organisasjonsnummer, sisteDag) ?: Sykdomstidslinje()
     }
 
     internal class Innslag private constructor(
@@ -191,6 +197,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal fun gjennoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?) = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) }
+        fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
+            vilkårsgrunnlag.mapNotNull { it.value.ghosttidslinje(organisasjonsnummer, sisteDag) }.merge()
 
         internal companion object {
             fun gjenopprett(
@@ -339,12 +347,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag.byggGodkjenningsbehov(builder)
         }
 
+        internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
+            sykepengegrunnlag.ghosttidslinje(organisasjonsnummer, sisteDag)
+
         internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): VilkårsgrunnlagElement? {
             if (this.vilkårsgrunnlagId != vilkårsgrunnlagId) return null
             val gjenopplivetSykepengegrunnlag = this.sykepengegrunnlag.gjenoppliv(hendelse, nyttSkjæringstidspunkt) ?: return null
             return kopierMed(hendelse, gjenopplivetSykepengegrunnlag, this.opptjening, NullObserver, nyttSkjæringstidspunkt)
         }
-
         internal fun trengerFastsettelseEtterSkjønn() = sykepengegrunnlag.avventerFastsettelseEtterSkjønn()
         internal fun loggInntektsvurdering(hendelse: IAktivitetslogg) = sykepengegrunnlag.loggInntektsvurdering(hendelse)
 

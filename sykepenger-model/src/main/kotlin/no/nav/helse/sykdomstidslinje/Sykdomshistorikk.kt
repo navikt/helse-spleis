@@ -4,9 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomshistorikkVisitor
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.tournament.Dagturnering
 
 class Sykdomshistorikk private constructor(
@@ -22,21 +20,11 @@ class Sykdomshistorikk private constructor(
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
-    internal fun nyesteId()= elementer.nyesteId()
-
-
     internal fun håndter(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {
         val nyttElement = hendelse.element()
         val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse) ?: return sykdomstidslinje()
         elementer.add(0, nyttElement.merge(this, uhåndtertSykdomstidslinje))
         return sykdomstidslinje()
-    }
-
-    internal fun fyllUtGhosttidslinje(periode: Periode) {
-        val sykdomstidslinje = if (isEmpty()) Sykdomstidslinje() else this.sykdomstidslinje()
-        val utvidetTidslinje = sykdomstidslinje.forsøkUtvidelse(periode) ?: return
-        val arbeidsdager = Sykdomstidslinje.arbeidsdager(periode, INGEN)
-        elementer.add(0, Element.opprettGhosttidslinje(arbeidsdager, utvidetTidslinje))
     }
 
     internal fun fjernDager(perioder: List<Periode>) {
@@ -96,11 +84,6 @@ class Sykdomshistorikk private constructor(
         internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
 
         companion object {
-
-            private val empty get() = Element()
-
-            internal fun List<Element>.nyesteId(): UUID = (this.firstOrNull() ?: empty).id
-
             internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomshistorikkHendelse) : Sykdomstidslinje? {
                 if (hendelse.element().hendelseSykdomstidslinje.periode() == null) return null // tom sykdomstidslinje
                 val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.element().hendelseSykdomstidslinje // Første gang vi ser hendelsen
@@ -125,11 +108,6 @@ class Sykdomshistorikk private constructor(
                     hendelseSykdomstidslinje = hendelseSykdomstidslinje,
                 )
             }
-
-            internal fun opprettGhosttidslinje(hendelseSykdomstidslinje: Sykdomstidslinje, sykdomstidslinje: Sykdomstidslinje) = Element(
-                hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                beregnetSykdomstidslinje = sykdomstidslinje
-            )
 
             internal fun opprettReset(
                 historikk: Sykdomshistorikk,

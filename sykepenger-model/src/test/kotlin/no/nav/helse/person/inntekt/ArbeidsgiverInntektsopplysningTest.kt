@@ -24,6 +24,8 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medI
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ghostdager
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.yearMonth
@@ -34,17 +36,33 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiverInntektsopplysningTest {
 
     @Test
+    fun ghosttidslinje() {
+        val skjæringstidspunkt = 1.januar
+        val a1Fom = skjæringstidspunkt
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Fom til 10.januar, Inntektsmelding(a1Fom, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        assertNull(a1Opplysning.ghosttidslinje("a2", skjæringstidspunkt))
+        assertEquals(Sykdomstidslinje(), a1Opplysning.ghosttidslinje("a1", 31.desember(2017)))
+        assertEquals(ghostdager(skjæringstidspunkt til 10.januar), a1Opplysning.ghosttidslinje("a1", 31.januar))
+        assertEquals(ghostdager(skjæringstidspunkt til 5.januar), a1Opplysning.ghosttidslinje("a1", 5.januar))
+    }
+
+    @Test
     fun `fastsatt årsinntekt - tilkommen inntekt`() {
         val skjæringstidspunkt = 1.januar
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt.plusDays(1) til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val a1Fom = skjæringstidspunkt
+        val a2Fom = skjæringstidspunkt.plusDays(1)
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Fom til 10.januar, Inntektsmelding(a1Fom, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmelding(a2Fom, UUID.randomUUID(), 2000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
         assertEquals(1000.månedlig, listOf(a1Opplysning, a2Opplysning).fastsattÅrsinntekt(skjæringstidspunkt))
+        assertEquals(ghostdager(skjæringstidspunkt til 10.januar), a1Opplysning.ghosttidslinje("a1", 31.januar))
+        assertEquals(ghostdager(a2Fom til 31.januar), a2Opplysning.ghosttidslinje("a2", 31.januar))
     }
 
     @Test

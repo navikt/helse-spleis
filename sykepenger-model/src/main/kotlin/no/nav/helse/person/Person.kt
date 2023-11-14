@@ -322,9 +322,8 @@ class Person private constructor(
         val arbeidsgiverUtbetalinger = ArbeidsgiverUtbetalinger(
             regler = regler,
             alder = alder,
-            arbeidsgivere = { skjæringstidspunkt: LocalDate, beregningsperiode: Periode, subsumsjonObserver: SubsumsjonObserver, hendelse: IAktivitetslogg ->
+            arbeidsgivere = { beregningsperiode: Periode, subsumsjonObserver: SubsumsjonObserver, hendelse: IAktivitetslogg ->
                 arbeidsgivere.associateWith { it.beregnUtbetalingstidslinje(
-                    skjæringstidspunkt,
                     beregningsperiode,
                     regler,
                     vilkårsgrunnlagHistorikk,

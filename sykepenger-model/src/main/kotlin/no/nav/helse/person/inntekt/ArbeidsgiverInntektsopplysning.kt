@@ -6,6 +6,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
@@ -19,6 +20,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterSkjønnBuil
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -102,6 +104,13 @@ class ArbeidsgiverInntektsopplysning(
         saksbehandleroverstyring: OverstyrArbeidsgiveropplysninger
     ) {
         inntektsopplysning.arbeidsgiveropplysningerKorrigert(person, orgnummer, saksbehandleroverstyring)
+    }
+
+    internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje? {
+        if (organisasjonsnummer != this.orgnummer) return null
+        if (sisteDag < gjelder.start) return Sykdomstidslinje()
+        val tom = minOf(gjelder.endInclusive, sisteDag)
+        return Sykdomstidslinje.ghostdager(gjelder.start til tom)
     }
 
     internal companion object {

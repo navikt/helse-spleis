@@ -858,7 +858,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun beregnUtbetalingstidslinje(
-        skjæringstidspunkt: LocalDate,
         periode: Periode,
         regler: ArbeidsgiverRegler,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
@@ -872,10 +871,8 @@ internal class Arbeidsgiver private constructor(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperioder = vedtaksperioder
         )
-        if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)!!.erArbeidsgiverRelevant(this.organisasjonsnummer))
-            sykdomshistorikk.fyllUtGhosttidslinje(skjæringstidspunkt til periode.endInclusive)
-
-        val sykdomstidslinje = sykdomstidslinje()
+        val ghosttidslinje = vilkårsgrunnlagHistorikk.ghosttidslinje(organisasjonsnummer, periode.endInclusive)
+        val sykdomstidslinje = ghosttidslinje.merge(sykdomstidslinje(), replace)
         if (sykdomstidslinje.count() == 0) return Utbetalingstidslinje()
         val builder = UtbetalingstidslinjeBuilder(inntekter, periode)
         infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
