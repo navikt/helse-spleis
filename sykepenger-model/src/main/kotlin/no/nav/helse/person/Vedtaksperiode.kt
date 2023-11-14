@@ -2018,7 +2018,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
+            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
             vedtaksperiode.trengerGodkjenning(påminnelse)
