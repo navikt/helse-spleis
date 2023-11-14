@@ -70,10 +70,11 @@ internal abstract class IVilkårsgrunnlag(
         if (arbeidsgivereMedInntekt.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
         val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
         if (inntekten == null || inntekten.omregnetÅrsinntekt?.kilde == null) return null
+        val sisteDag = minOf(inntekten.omregnetÅrsinntekt.tom, sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
         return GhostPeriodeDTO(
             id = UUID.randomUUID(),
-            fom = skjæringstidspunkt,
-            tom = sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive },
+            fom = inntekten.omregnetÅrsinntekt.fom,
+            tom = sisteDag,
             skjæringstidspunkt = skjæringstidspunkt,
             vilkårsgrunnlagId = this.id,
             deaktivert = inntekten.deaktivert
@@ -355,6 +356,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             val inntektsopplysningBuilder = InntektsopplysningBuilder(
                 organisasjonsnummer = orgnummer,
                 inntektsopplysning = arbeidsgiverInntektsopplysning,
+                gjelder = gjelder,
                 deaktivert = deaktivert
             )
             leggTilInntekt(inntektsopplysningBuilder.build())
@@ -373,7 +375,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 omregnetÅrsinntekt = null,
                 sammenligningsgrunnlag = InntektBuilder(rapportertInntekt).build().årlig,
                 skjønnsmessigFastsatt = null,
-                 deaktivert = false
+                deaktivert = false
             ))
         }
 
@@ -396,6 +398,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     private class InntektsopplysningBuilder(
         private val organisasjonsnummer: String,
         inntektsopplysning: ArbeidsgiverInntektsopplysning,
+        private val gjelder: Periode,
         private val deaktivert: Boolean,
     ) : VilkårsgrunnlagHistorikkVisitor {
         private lateinit var inntekt: IArbeidsgiverinntekt
@@ -432,7 +435,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null,
         ) = IArbeidsgiverinntekt(
             organisasjonsnummer,
-            IOmregnetÅrsinntekt(kilde, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningen),
+            IOmregnetÅrsinntekt(kilde, gjelder.start, gjelder.endInclusive, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningen),
             sammenligningsgrunnlag = null,
             deaktivert = deaktivert,
             skjønnsmessigFastsatt = null
@@ -445,10 +448,10 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null,
         ) = IArbeidsgiverinntekt(
             organisasjonsnummer,
-            omregnetÅrsinntekt = IOmregnetÅrsinntekt(omregnetÅrsinntektKilde, omregnetÅrsinntekt.årlig, omregnetÅrsinntekt.månedlig, inntekterFraAOrdningen),
+            omregnetÅrsinntekt = IOmregnetÅrsinntekt(omregnetÅrsinntektKilde, gjelder.start, gjelder.endInclusive, omregnetÅrsinntekt.årlig, omregnetÅrsinntekt.månedlig, inntekterFraAOrdningen),
             sammenligningsgrunnlag = null,
             deaktivert = deaktivert,
-            skjønnsmessigFastsatt = IOmregnetÅrsinntekt(IInntektkilde.SkjønnsmessigFastsatt, skjønnsmessigFastsattInntekt.årlig, skjønnsmessigFastsattInntekt.månedlig, inntekterFraAOrdningen)
+            skjønnsmessigFastsatt = IOmregnetÅrsinntekt(IInntektkilde.SkjønnsmessigFastsatt, gjelder.start, gjelder.endInclusive, skjønnsmessigFastsattInntekt.årlig, skjønnsmessigFastsattInntekt.månedlig, inntekterFraAOrdningen)
         )
 
         override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {

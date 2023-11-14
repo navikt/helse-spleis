@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.speil.builders
 
+import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
@@ -40,6 +41,8 @@ internal data class IArbeidsgiverrefusjon(
 
 internal data class IOmregnetÅrsinntekt(
     val kilde: IInntektkilde,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val beløp: Double,
     val månedsbeløp: Double,
     val inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
