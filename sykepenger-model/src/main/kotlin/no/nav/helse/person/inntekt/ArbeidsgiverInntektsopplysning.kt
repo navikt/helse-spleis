@@ -36,6 +36,12 @@ class ArbeidsgiverInntektsopplysning(
         return acc + inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
     }
 
+    private fun beregningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
+        // TODO: bare returne fastsattÅrsinntekt() dersom arbeidsgiverInntektsopplysningen gjelder på skjæringstidspunktet
+        // if (this.gjelderFom > skjæringstidspunkt) return Inntekt.INGEN
+        return inntektsopplysning.fastsattÅrsinntekt()
+    }
+
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
@@ -206,17 +212,18 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt() =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, `6G`: Inntekt, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
-            return singleOrNull { it.orgnummer == organisasjonsnummer }?.let { arbeidsgiverInntektsopplysning ->
-                val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.fastsattÅrsinntekt()
-                val refusjonsbeløp = arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: inntekt
-                økonomi.inntekt(
-                    aktuellDagsinntekt = inntekt,
-                    dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
-                    `6G` = `6G`,
-                    refusjonsbeløp = refusjonsbeløp
-                )
-            }
+        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
+            val arbeidsgiverInntektsopplysning = singleOrNull { it.orgnummer == organisasjonsnummer } ?: return null
+            val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.fastsattÅrsinntekt()
+            val beregningsgrunnlag = arbeidsgiverInntektsopplysning.beregningsgrunnlag(skjæringstidspunkt)
+            val refusjonsbeløp = arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: inntekt
+            return økonomi.inntekt(
+                aktuellDagsinntekt = inntekt,
+                beregningsgrunnlag = beregningsgrunnlag,
+                dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
+                `6G` = `6G`,
+                refusjonsbeløp = refusjonsbeløp
+            )
         }
 
         private fun List<ArbeidsgiverInntektsopplysning>.arbeidsgiverInntektsopplysning(organisasjonsnummer: String, dato: LocalDate) = checkNotNull(singleOrNull { it.orgnummer == organisasjonsnummer }) {
@@ -228,17 +235,18 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer, dato)
             val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.fastsattÅrsinntekt()
+            val beregningsgrunnlag = arbeidsgiverInntektsopplysning.beregningsgrunnlag(skjæringstidspunkt)
             val refusjonsbeløp = checkNotNull(arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato)) {
                 "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt for utbetalingsdag $dato"
             }
             return økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
+                beregningsgrunnlag = beregningsgrunnlag,
                 dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
                 `6G` = `6G`,
                 refusjonsbeløp = refusjonsbeløp
             )
         }
-
 
         internal fun List<ArbeidsgiverInntektsopplysning>.finnEndringsdato(
             skjæringstidspunkt: LocalDate,

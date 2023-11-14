@@ -71,7 +71,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     }
 
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        if (dato.erHelg()) return builder.addHelg(dato, inntekter.utenInntekt(dato, økonomi))
+        if (dato.erHelg()) return builder.addHelg(dato, inntekter.medInntekt(dato, økonomi.ikkeBetalt()))
         val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
             true -> inntekter.medUtbetalingsopplysninger(dato, økonomi)
             false -> inntekter.medInntekt(dato, økonomi)

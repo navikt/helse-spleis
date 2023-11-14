@@ -685,7 +685,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         tidslinje.inspektør.arbeidsdager.assertDekningsgrunnlag(3.januar(2020) til 3.januar(2020), INGEN)
         tidslinje.inspektør.fridager.assertDekningsgrunnlag(4.januar(2020) til 10.januar(2020), INGEN)
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(11.januar(2020) til 24.januar(2020), 30000.månedlig)
-        tidslinje.inspektør.navHelgdager.assertDekningsgrunnlag(25.januar(2020) til 26.januar(2020), 0.månedlig)
+        tidslinje.inspektør.navHelgdager.assertDekningsgrunnlag(25.januar(2020) til 26.januar(2020), 30000.månedlig)
         tidslinje.inspektør.navdager.assertDekningsgrunnlag(27.januar(2020) til 27.januar(2020), 30000.månedlig)
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
@@ -722,7 +722,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         )
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), INGEN)
         tidslinje.inspektør.arbeidsdager.assertDekningsgrunnlag(17.januar(2020) til 18.januar(2020), INGEN)
-        tidslinje.inspektør.navHelgdager.assertDekningsgrunnlag(19.januar(2020) til 19.januar(2020), INGEN)
+        tidslinje.inspektør.navHelgdager.assertDekningsgrunnlag(19.januar(2020) til 19.januar(2020), 30000.månedlig)
         tidslinje.inspektør.navdager.assertDekningsgrunnlag(20.januar(2020) til 21.januar(2020), 30000.månedlig)
     }
 
@@ -741,7 +741,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         tidslinje.inspektør.arbeidsdager.assertDekningsgrunnlag(2.januar(2020) til 12.januar(2020), INGEN)
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(13.januar(2020) til 27.januar(2020), 30000.månedlig)
         tidslinje.inspektør.navdager.assertDekningsgrunnlag(28.januar(2020) til 31.januar(2020), 30000.månedlig)
-        tidslinje.inspektør.navHelgdager.assertDekningsgrunnlag(1.februar(2020) til 2.februar(2020), INGEN)
+        tidslinje.inspektør.navHelgdager.assertDekningsgrunnlag(1.februar(2020) til 2.februar(2020), 30000.månedlig)
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(11, tidslinje.inspektør.arbeidsdagTeller)
         assertEquals(4, tidslinje.inspektør.navDagTeller)

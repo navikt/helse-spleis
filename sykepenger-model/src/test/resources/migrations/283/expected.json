@@ -1,0 +1,127 @@
+{
+  "aktørId": "42",
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "id": "2aea537f-3810-44c1-9624-03bfcc5e768e",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "type": "ArbeidsgiverperiodeDag",
+                "grad": 100.0,
+                "totalGrad": 100.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "grunnbeløpgrense": 561804.0,
+                "dekningsgrunnlag": 1430.7692307692307,
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "beregningsgrunnlag": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "er6GBegrenset": false
+              },
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-19",
+                "type": "NavDag",
+                "grad": 100.0,
+                "totalGrad": 100.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "grunnbeløpgrense": 561804.0,
+                "dekningsgrunnlag": 1430.7692307692307,
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "beregningsgrunnlag": 1430.7692307692307,
+                "arbeidsgiverbeløp": 1431.0,
+                "personbeløp": 0.0,
+                "er6GBegrenset": false
+              },
+              {
+                "dato": "2018-01-20",
+                "type": "NavHelgDag",
+                "grad": 100.0,
+                "totalGrad": 100.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "grunnbeløpgrense": 561804.0,
+                "dekningsgrunnlag": 1430.7692307692307,
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "beregningsgrunnlag": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "er6GBegrenset": false
+              }
+            ]
+          }
+        },
+        {
+          "id": "8eaccd20-bfb0-4209-b26a-f9609887df9a",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "type": "ArbeidsgiverperiodeDag",
+                "grad": 100.0,
+                "totalGrad": 100.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "grunnbeløpgrense": 561804.0,
+                "dekningsgrunnlag": 1430.7692307692307,
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "beregningsgrunnlag": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "er6GBegrenset": false
+              },
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-19",
+                "type": "NavDag",
+                "grad": 100.0,
+                "totalGrad": 100.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "grunnbeløpgrense": 561804.0,
+                "dekningsgrunnlag": 1430.7692307692307,
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "beregningsgrunnlag": 1430.7692307692307,
+                "arbeidsgiverbeløp": 1431.0,
+                "personbeløp": 0.0,
+                "er6GBegrenset": false
+              },
+              {
+                "dato": "2018-01-20",
+                "type": "NavHelgDag",
+                "grad": 100.0,
+                "totalGrad": 100.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "grunnbeløpgrense": 561804.0,
+                "dekningsgrunnlag": 1430.7692307692307,
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "beregningsgrunnlag": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "er6GBegrenset": false
+              },
+              {
+                "fom": "2018-01-21",
+                "tom": "2018-01-31",
+                "type": "Fridag",
+                "grad": 0.0,
+                "totalGrad": 0.0,
+                "arbeidsgiverRefusjonsbeløp": 1430.7692307692307,
+                "grunnbeløpgrense": 561804.0,
+                "dekningsgrunnlag": 1430.7692307692307,
+                "aktuellDagsinntekt": 1430.7692307692307,
+                "beregningsgrunnlag": 1430.7692307692307,
+                "arbeidsgiverbeløp": 0.0,
+                "personbeløp": 0.0,
+                "er6GBegrenset": false
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 283
+}

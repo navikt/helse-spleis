@@ -1343,6 +1343,7 @@ internal data class PersonData(
         data class UtbetalingsdagData(
             private val type: TypeData,
             private val aktuellDagsinntekt: Double,
+            private val beregningsgrunnlag: Double,
             private val dekningsgrunnlag: Double,
             private val grunnbeløpgrense: Double?,
             private val begrunnelse: BegrunnelseData?,
@@ -1360,6 +1361,7 @@ internal data class PersonData(
                 builder.grad(grad)
                     .totalGrad(totalGrad)
                     .aktuellDagsinntekt(aktuellDagsinntekt)
+                    .beregningsgrunnlag(beregningsgrunnlag)
                     .dekningsgrunnlag(dekningsgrunnlag)
                     .grunnbeløpsgrense(grunnbeløpgrense)
                     .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp)

@@ -25,14 +25,15 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
             subsumsjonObserver.block(GRENSE.toDouble())
         }
 
-        internal fun Collection<Pair<Prosentdel, Double>>.average(): Prosentdel {
-            return map { it.first to it.second.toBigDecimal(mc) }.average()
+        internal fun Collection<Pair<Prosentdel, Double>>.average(total: Double): Prosentdel {
+            return map { it.first to it.second.toBigDecimal(mc) }.average(total.toBigDecimal(mc))
         }
 
-        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(): Prosentdel {
-            val total = this.sumOf { it.second }
-            if (total <= BigDecimal.ZERO) return map { it.first to BigDecimal.ONE }.average()
-            return Prosentdel(this.sumOf { it.first.brøkdel.multiply(it.second, mc) }.divide(total, mc))
+        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(total: BigDecimal): Prosentdel {
+            if (total <= BigDecimal.ZERO) return map { it.first to BigDecimal.ONE }.average(size.toBigDecimal())
+            val teller = this.sumOf { it.first.not().brøkdel.multiply(it.second, mc) }
+            val totalInntektsbevaringsgrad = teller.divide(total, mc).coerceAtMost(BigDecimal.ONE)
+            return Prosentdel(totalInntektsbevaringsgrad).not()
         }
 
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
@@ -40,7 +41,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
 
     override fun equals(other: Any?) = other is Prosentdel && this.equals(other)
 
-    private fun equals(other: Prosentdel) = this.brøkdel == other.brøkdel
+    private fun equals(other: Prosentdel) = this.brøkdel.setScale(mc.precision) == other.brøkdel.setScale(mc.precision)
 
     override fun hashCode() = brøkdel.hashCode()
 

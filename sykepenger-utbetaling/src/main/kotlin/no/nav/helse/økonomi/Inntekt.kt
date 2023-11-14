@@ -22,8 +22,8 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         //8-10 ledd 3
         private const val ARBEIDSDAGER_PER_ÅR = 260
 
-        fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
-            return parene.map { it.first to it.second.årlig }.average()
+        fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>, total: Inntekt): Prosentdel {
+            return parene.map { it.first to it.second.årlig }.average(total.årlig)
         }
 
         fun fraGradert(inntekt: Inntekt, grad: Prosentdel): Inntekt {

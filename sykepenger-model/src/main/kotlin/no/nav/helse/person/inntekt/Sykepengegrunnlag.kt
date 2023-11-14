@@ -375,7 +375,7 @@ internal class Sykepengegrunnlag private constructor(
         )
     }
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-        return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, dato, økonomi, regler, subsumsjonObserver) ?: utenInntekt(økonomi)
+        return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver) ?: utenInntekt(økonomi)
     }
 
     internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =

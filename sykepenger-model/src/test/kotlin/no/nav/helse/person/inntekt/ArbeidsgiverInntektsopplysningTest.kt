@@ -316,6 +316,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             organisasjonsnummer = "orgnummer",
             `6G` = `6G`.beløp(1.januar),
             dato = 1.januar,
+            skjæringstidspunkt = 1.januar,
             økonomi = Økonomi.sykdomsgrad(100.prosent),
             regler = NormalArbeidstaker,
             subsumsjonObserver = NullObserver,

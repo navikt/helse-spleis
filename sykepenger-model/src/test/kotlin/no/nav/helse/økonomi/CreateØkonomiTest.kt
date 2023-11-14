@@ -110,6 +110,7 @@ internal class CreateØkonomiTest {
     ) = UtbetalingstidslinjeData.UtbetalingsdagData(
         UtbetalingstidslinjeData.TypeData.NavDag,
         aktuellDagsinntekt,
+        aktuellDagsinntekt,
         dekningsgrunnlag,
         `6G`.beløp(1.januar).reflection { årlig, _, _, _ -> årlig },
         null,

@@ -2003,6 +2003,7 @@ internal class JsonBuilder : AbstractBuilder() {
             this.compute("grunnbeløpgrense") { _, _ -> grunnbeløpgrense }
             this.compute("dekningsgrunnlag") { _, _ -> dekningsgrunnlag }
             this.compute("aktuellDagsinntekt") { _, _ -> aktuellDagsinntekt }
+            this.compute("beregningsgrunnlag") { _, _ -> beregningsgrunnlag }
             this.compute("arbeidsgiverbeløp") { _, _ -> arbeidsgiverbeløp }
             this.compute("personbeløp") { _, _ -> personbeløp }
             this.compute("er6GBegrenset") { _, _ -> er6GBegrenset }

@@ -416,6 +416,18 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `tilkommen inntekt - total grad bestemmes ut fra sykepengegrunnlaget`() {
+        val `6G` = `6G`.beløp(1.januar)
+        val a = 80.prosent.sykdomsgrad.inntekt(50000.månedlig, beregningsgrunnlag = 50000.månedlig, `6G` = `6G`)
+        val b = 40.prosent.sykdomsgrad.inntekt(30000.månedlig, beregningsgrunnlag = INGEN, refusjonsbeløp = INGEN, `6G` = `6G`)
+        val betalte = listOf(a, b).betal().also {
+            assertEquals(44.prosent, it.totalSykdomsgrad())
+        }
+        assertUtbetaling(betalte[0], 951.0, 0.0)
+        assertUtbetaling(betalte[1], 0.0, 0.0)
+    }
+
+    @Test
     fun `fordeling mellom arbeidsgivere mde ulik inntekt og refusjon`() {
         val a = 100.prosent.sykdomsgrad.inntekt(30000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 30000.månedlig)
         val b = 100.prosent.sykdomsgrad.inntekt(35000.månedlig, `6G` = `6G`.beløp(1.januar), refusjonsbeløp = 35000.månedlig)
@@ -448,8 +460,8 @@ internal class ØkonomiTest {
 
     private val Prosentdel.sykdomsgrad get() = Økonomi.sykdomsgrad(this)
 
-    private fun Økonomi.inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, `6G`: Inntekt) =
-        inntekt(aktuellDagsinntekt, dekningsgrunnlag, `6G`, aktuellDagsinntekt)
+    private fun Økonomi.inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, `6G`: Inntekt, beregningsgrunnlag: Inntekt = aktuellDagsinntekt) =
+        inntekt(aktuellDagsinntekt, dekningsgrunnlag, beregningsgrunnlag = beregningsgrunnlag, `6G` = `6G`, refusjonsbeløp = aktuellDagsinntekt)
 }
 
 private val Int.januar get() = LocalDate.of(2018, 1, this)
