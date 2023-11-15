@@ -20,9 +20,16 @@ internal class V284GjelderPeriodeArbeidsgiverInntektsopplysning: JsonMigration(2
     private fun migrerSykepengegrunnlag(aktørId: String, grunnlagsdata: JsonNode) {
         val skjæringstidspunkt = grunnlagsdata.path("skjæringstidspunkt").asText()
         grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").forEach { opplysning ->
-            opplysning as ObjectNode
-            opplysning.put("fom", skjæringstidspunkt.toString())
-            opplysning.put("tom", LocalDate.MAX.toString())
+            migrerOpplysning(skjæringstidspunkt, opplysning)
         }
+        grunnlagsdata.path("sykepengegrunnlag").path("deaktiverteArbeidsforhold").forEach { opplysning ->
+            migrerOpplysning(skjæringstidspunkt, opplysning)
+        }
+    }
+
+    private fun migrerOpplysning(skjæringstidspunkt: String, opplysning: JsonNode) {
+        opplysning as ObjectNode
+        opplysning.put("fom", skjæringstidspunkt)
+        opplysning.put("tom", LocalDate.MAX.toString())
     }
 }
