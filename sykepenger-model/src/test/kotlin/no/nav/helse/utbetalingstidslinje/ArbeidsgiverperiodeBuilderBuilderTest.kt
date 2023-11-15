@@ -82,7 +82,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
     fun `ferie i nesten fullført agp`() {
         undersøke(15.S + 5.F)
         assertEquals(1, perioder.size)
-        assertEquals(listOf(1.januar til 15.januar), perioder.first())
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
         assertTrue(16.januar til 20.januar in perioder.first())
     }
 
@@ -90,8 +90,8 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
     fun `arbeid etter ferie i agp`() {
         undersøke(5.S + 5.F + 5.A + 11.S + 1.F + 13.S)
         assertEquals(1, perioder.size)
-        assertEquals(listOf(1.januar til 5.januar, 16.januar til 26.januar), perioder.first())
-        assertTrue(perioder.first().forventerInntekt(29.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertEquals(listOf(1.januar til 10.januar, 16.januar til 21.januar), perioder.first())
+        assertTrue(perioder.first().forventerInntekt(22.januar til 31.januar, Sykdomstidslinje(), NullObserver))
     }
 
     @Test

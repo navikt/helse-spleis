@@ -334,8 +334,8 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
-    fun `ferie og permisjon før arbeidsdag tilbakestiller arbeidsgiverperioden`() {
-        undersøkeLike({ 1.S + 15.F + 1.A + 16.S }, { 1.S + 15.P + 1.A + 16.S }, { 1.S + 15.AIG + 1.A + 16.S }) {
+    fun `permisjon før arbeidsdag tilbakestiller arbeidsgiverperioden`() {
+        undersøkeLike({ 1.S + 15.P + 1.A + 16.S }, { 1.S + 15.AIG + 1.A + 16.S }) {
             assertEquals(33, inspektør.size)
             assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(15, inspektør.fridagTeller)
@@ -343,6 +343,20 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(2, perioder.size)
             assertEquals(listOf(1.januar til 1.januar), perioder.first())
             assertEquals(listOf(18.januar til 2.februar), perioder.last())
+        }
+    }
+
+    @Test
+    fun `ferie før arbeidsdag tilbakestiller ikke arbeidsgiverperioden`() {
+        undersøkeLike({ 1.S + 15.F + 1.A + 16.S }) {
+            assertEquals(33, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(0, inspektør.fridagTeller)
+            assertEquals(1, inspektør.arbeidsdagTeller)
+            assertEquals(12, inspektør.navDagTeller)
+            assertEquals(4, inspektør.navHelgDagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(listOf(1.januar til 16.januar), perioder.single())
         }
     }
 
@@ -373,8 +387,8 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
-    fun `ferie og permisjon før frisk helg tilbakestiller arbeidsgiverperioden`() {
-        undersøkeLike({ 5.S + 15.F + 1.A + 16.S }, { 5.S + 15.P + 1.A + 16.S }, { 5.S + 15.AIG + 1.A + 16.S }) {
+    fun `permisjon før frisk helg tilbakestiller arbeidsgiverperioden`() {
+        undersøkeLike({ 5.S + 15.P + 1.A + 16.S }, { 5.S + 15.AIG + 1.A + 16.S }) {
             assertEquals(37, inspektør.size)
             assertEquals(21, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(15, inspektør.fridagTeller)
@@ -382,6 +396,20 @@ internal class UtbetalingstidslinjeBuilderTest {
             assertEquals(2, perioder.size)
             assertEquals(listOf(1.januar til 5.januar), perioder.first())
             assertEquals(listOf(22.januar til 6.februar), perioder.last())
+        }
+    }
+
+    @Test
+    fun `ferie før frisk helg tilbakestiller ikke arbeidsgiverperioden`() {
+        undersøkeLike({ 5.S + 15.F + 1.A + 16.S }) {
+            assertEquals(37, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(4, inspektør.fridagTeller)
+            assertEquals(1, inspektør.arbeidsdagTeller)
+            assertEquals(12, inspektør.navDagTeller)
+            assertEquals(4, inspektør.navHelgDagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(listOf(1.januar til 16.januar), perioder.single())
         }
     }
 
@@ -421,14 +449,15 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
-    fun `fridager fullfører ikke arbeidsgiverperioden dersom etterfulgt av ukjent dager`() {
+    fun `fridager fullfører arbeidsgiverperioden dersom etterfulgt av ukjent dager`() {
         undersøke(15.S + 1.F + 12.opphold + 1.S)
         assertEquals(29, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(8, inspektør.arbeidsdagTeller)
-        assertEquals(5, inspektør.fridagTeller)
+        assertEquals(4, inspektør.fridagTeller)
+        assertEquals(1, inspektør.navDagTeller)
         assertEquals(1, perioder.size)
-        assertEquals(listOf(1.januar til 15.januar, 29.januar til 29.januar), perioder.first())
+        assertEquals(listOf(1.januar til 16.januar), perioder.single())
     }
 
     @Test

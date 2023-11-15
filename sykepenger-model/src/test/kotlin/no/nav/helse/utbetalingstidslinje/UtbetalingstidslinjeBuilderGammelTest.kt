@@ -145,15 +145,15 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     @Test
     fun `litt sykdom ellers bare ferie`() {
         (7.S + 20.F).utbetalingslinjer()
-        assertEquals(7, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(20, tidslinje.inspektør.fridagTeller)
+        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(11, tidslinje.inspektør.fridagTeller)
     }
 
     @Test
     fun `litt sykdom ellers bare ferie etterfulgt av arbeidsdag`() {
         (7.S + 20.F + 1.A).utbetalingslinjer()
-        assertEquals(7, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(20, tidslinje.inspektør.fridagTeller)
+        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(11, tidslinje.inspektør.fridagTeller)
         assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
     }
 
@@ -224,9 +224,9 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     @Test
     fun `Arbeidsdag etter ferie i arbeidsgiverperioden`() {
         (1.S + 2.F + 1.A + 1.S + 14.S + 3.S).utbetalingslinjer()
-        assertEquals(1, tidslinje.inspektør.navDagTeller)
+        assertEquals(3, tidslinje.inspektør.navDagTeller)
         assertEquals(2, tidslinje.inspektør.navHelgDagTeller)
-        assertEquals(2, tidslinje.inspektør.fridagTeller)
+        assertEquals(0, tidslinje.inspektør.fridagTeller)
         assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
     }
@@ -260,34 +260,6 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     }
 
     @Test
-    fun `ferie teller som opphold ved ufullstendig arbeidsgiverperiode`() {
-        (5.S + 14.F + 3.opphold + 19.S).utbetalingslinjer()
-        assertEquals(2, tidslinje.inspektør.navDagTeller)
-        assertEquals(1, tidslinje.inspektør.navHelgDagTeller)
-        assertEquals(21, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(16, tidslinje.inspektør.fridagTeller)
-        assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
-    }
-
-    @Test
-    fun `ferie fullfører nesten arbeidsgiverperioden`() {
-        (8.S + 7.F + 10.S).utbetalingslinjer()
-        assertEquals(7, tidslinje.inspektør.navDagTeller)
-        assertEquals(2, tidslinje.inspektør.navHelgDagTeller)
-        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(0, tidslinje.inspektør.fridagTeller)
-    }
-
-    @Test
-    fun `ferie fullfører arbeidsgiverperioden`() {
-        (8.S + 8.F + 9.S).utbetalingslinjer()
-        assertEquals(7, tidslinje.inspektør.navDagTeller)
-        assertEquals(2, tidslinje.inspektør.navHelgDagTeller)
-        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(0, tidslinje.inspektør.fridagTeller)
-    }
-
-    @Test
     fun `ferie fullfører arbeidsgiverperioden - slutter på en fredag`() {
         (3.opphold + 8.S + 8.F + 2.opphold + 9.S).utbetalingslinjer()
         assertEquals(7, tidslinje.inspektør.navDagTeller)
@@ -309,8 +281,8 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     @Test
     fun `Arbeidsdag etter ferie i arbeidsgiverperiode teller som gap, men ikke ferie`() {
         (15.S + 2.F + 1.A + 1.S).utbetalingslinjer()
-        assertEquals(0, tidslinje.inspektør.navDagTeller)
-        assertEquals(2, tidslinje.inspektør.fridagTeller)
+        assertEquals(1, tidslinje.inspektør.navDagTeller)
+        assertEquals(1, tidslinje.inspektør.fridagTeller)
         assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
     }
@@ -326,10 +298,10 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     }
 
     @Test
-    fun `Ferie i slutten av arbeidsgiverperioden teller som opphold`() {
+    fun `Ferie i slutten av arbeidsgiverperioden teller ikke som opphold`() {
         (15.S + 16.F + 1.A + 3.S).utbetalingslinjer()
-        assertEquals(18, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(16, tidslinje.inspektør.fridagTeller)
+        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(15, tidslinje.inspektør.fridagTeller)
         assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
     }
 
@@ -339,14 +311,6 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         assertEquals(4, tidslinje.inspektør.fridagTeller)
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(2, tidslinje.inspektør.arbeidsdagTeller)
-    }
-
-    @Test
-    fun `Arbeidsgiverperioden resettes når det er opphold over 16 dager`() {
-        (10.S + 20.F + 1.A + 10.S + 20.F).utbetalingslinjer()
-        assertEquals(20, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(40, tidslinje.inspektør.fridagTeller)
-        assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
     }
 
     @Test
@@ -385,12 +349,13 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     }
 
     @Test
-    fun `Ferie i arbeidsgiverperioden direkte etterfulgt av en arbeidsdag gjør at ferien teller som opphold`() {
+    fun `Ferie i arbeidsgiverperioden direkte etterfulgt av en arbeidsdag gjør ikke at ferien teller som opphold`() {
         (10.S + 15.F + 1.A + 10.S).utbetalingslinjer()
-        assertEquals(20, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
-        assertEquals(15, tidslinje.inspektør.fridagTeller)
-        assertEquals(0, tidslinje.inspektør.navDagTeller)
+        assertEquals(9, tidslinje.inspektør.fridagTeller)
+        assertEquals(6, tidslinje.inspektør.navDagTeller)
+        assertEquals(4, tidslinje.inspektør.navHelgDagTeller)
     }
 
     @Test
@@ -422,23 +387,23 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     }
 
     @Test
-    fun `starter ny arbeidsgiverperiode etter ferie og arbeidsdag dersom oppholdet er høyt nok`() {
+    fun `starter ikke ny arbeidsgiverperiode etter ferie og arbeidsdag dersom oppholdet er høyt nok`() {
         (2.S + 15.F + 1.A + 17.S).utbetalingslinjer()
-        assertEquals(18, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(0, tidslinje.inspektør.navDagTeller)
-        assertEquals(1, tidslinje.inspektør.navHelgDagTeller)
+        assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(11, tidslinje.inspektør.navDagTeller)
+        assertEquals(6, tidslinje.inspektør.navHelgDagTeller)
         assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
-        assertEquals(15, tidslinje.inspektør.fridagTeller)
+        assertEquals(1, tidslinje.inspektør.fridagTeller)
     }
 
     @Test
     fun `starter ikke ny arbeidsgiverperiode etter ferie og arbeidsdag dersom oppholdet er akkurat lavt nok`() {
         (2.S + 14.F + 1.A + 17.S).utbetalingslinjer()
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(2, tidslinje.inspektør.navDagTeller)
-        assertEquals(1, tidslinje.inspektør.navHelgDagTeller)
+        assertEquals(12, tidslinje.inspektør.navDagTeller)
+        assertEquals(5, tidslinje.inspektør.navHelgDagTeller)
         assertEquals(1, tidslinje.inspektør.arbeidsdagTeller)
-        assertEquals(14, tidslinje.inspektør.fridagTeller)
+        assertEquals(0, tidslinje.inspektør.fridagTeller)
     }
 
     @Test

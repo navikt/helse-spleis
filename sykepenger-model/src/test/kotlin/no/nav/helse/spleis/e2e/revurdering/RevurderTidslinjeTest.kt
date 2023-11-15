@@ -956,7 +956,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
         assertEquals(18.januar, førsteUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
         assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
-        assertEquals(15.januar, andreUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
+        assertEquals(18.januar, andreUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
         assertEquals(18.januar, tredjeUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
     }
 
