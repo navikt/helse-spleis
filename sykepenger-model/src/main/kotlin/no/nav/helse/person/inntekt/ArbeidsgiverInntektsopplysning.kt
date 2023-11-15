@@ -36,13 +36,23 @@ class ArbeidsgiverInntektsopplysning(
     private fun fastsattÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
         return acc + beregningsgrunnlag(skjæringstidspunkt)
     }
-    private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
-        return acc + inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
+    private fun omregnetÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
+        return acc + omregnetÅrsinntekt(skjæringstidspunkt)
+    }
+
+    private fun fastsattÅrsinntekt(dagen: LocalDate): Inntekt {
+        if (dagen > gjelder.endInclusive) return INGEN
+        return inntektsopplysning.fastsattÅrsinntekt()
     }
 
     private fun beregningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
         if (this.gjelder.start > skjæringstidspunkt) return INGEN
         return inntektsopplysning.fastsattÅrsinntekt()
+    }
+
+    private fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
+        if (this.gjelder.start > skjæringstidspunkt) return INGEN
+        return inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
     }
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
@@ -110,7 +120,7 @@ class ArbeidsgiverInntektsopplysning(
         if (organisasjonsnummer != this.orgnummer) return null
         if (sisteDag < gjelder.start) return Sykdomstidslinje()
         val tom = minOf(gjelder.endInclusive, sisteDag)
-        return Sykdomstidslinje.ghostdager(gjelder.start til tom)
+        return Sykdomstidslinje.ghostdager(gjelder.start til sisteDag)
     }
 
     internal companion object {
@@ -221,12 +231,12 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.fastsattÅrsinntekt(skjæringstidspunkt: LocalDate) =
             fold(INGEN) { acc, item -> item.fastsattÅrsinntekt(acc, skjæringstidspunkt)}
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt() =
-            fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}
+        internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt(skjæringstidspunkt: LocalDate) =
+            fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc, skjæringstidspunkt) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
             val arbeidsgiverInntektsopplysning = singleOrNull { it.orgnummer == organisasjonsnummer } ?: return null
-            val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.fastsattÅrsinntekt()
+            val inntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt(dato)
             val beregningsgrunnlag = arbeidsgiverInntektsopplysning.beregningsgrunnlag(skjæringstidspunkt)
             val refusjonsbeløp = arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: inntekt
             return økonomi.inntekt(
@@ -246,7 +256,7 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer, dato)
-            val inntekt = arbeidsgiverInntektsopplysning.inntektsopplysning.fastsattÅrsinntekt()
+            val inntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt(dato)
             val beregningsgrunnlag = arbeidsgiverInntektsopplysning.beregningsgrunnlag(skjæringstidspunkt)
             val refusjonsbeløp = checkNotNull(arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato)) {
                 "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt for utbetalingsdag $dato"

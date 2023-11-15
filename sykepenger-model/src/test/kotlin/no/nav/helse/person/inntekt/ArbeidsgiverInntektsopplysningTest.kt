@@ -49,7 +49,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Fom til 10.januar, Inntektsmelding(a1Fom, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
         assertNull(a1Opplysning.ghosttidslinje("a2", skjæringstidspunkt))
         assertEquals(Sykdomstidslinje(), a1Opplysning.ghosttidslinje("a1", 31.desember(2017)))
-        assertEquals(ghostdager(skjæringstidspunkt til 10.januar), a1Opplysning.ghosttidslinje("a1", 31.januar))
+        assertEquals(ghostdager(skjæringstidspunkt til 31.januar), a1Opplysning.ghosttidslinje("a1", 31.januar))
         assertEquals(ghostdager(skjæringstidspunkt til 5.januar), a1Opplysning.ghosttidslinje("a1", 5.januar))
     }
 
@@ -61,7 +61,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Fom til 10.januar, Inntektsmelding(a1Fom, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmelding(a2Fom, UUID.randomUUID(), 2000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
         assertEquals(1000.månedlig, listOf(a1Opplysning, a2Opplysning).fastsattÅrsinntekt(skjæringstidspunkt))
-        assertEquals(ghostdager(skjæringstidspunkt til 10.januar), a1Opplysning.ghosttidslinje("a1", 31.januar))
+        assertEquals(ghostdager(skjæringstidspunkt til 31.januar), a1Opplysning.ghosttidslinje("a1", 31.januar))
         assertEquals(ghostdager(a2Fom til 31.januar), a2Opplysning.ghosttidslinje("a2", 31.januar))
     }
 
