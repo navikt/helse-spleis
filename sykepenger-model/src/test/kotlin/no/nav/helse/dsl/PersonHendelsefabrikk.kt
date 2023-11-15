@@ -10,6 +10,7 @@ import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning.Companion.medSkjønnsmes
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
@@ -88,7 +89,8 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val inntekt: Inntekt,
     private val forklaring: String? = null,
     private val subsumsjon: Subsumsjon? = null,
-    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null
+    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
+    private val gjelder: Periode? = null
 ) {
     private fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) =  refusjonsopplysninger ?: listOf(Triple(skjæringstidspunkt, null, inntekt))
     internal companion object {
@@ -96,7 +98,7 @@ internal class OverstyrtArbeidsgiveropplysning(
             map {
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = it.orgnummer,
-                    gjelder = skjæringstidspunkt til LocalDate.MAX,
+                    gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX),
                     inntektsopplysning = inntektsopplysning(it),
                     refusjonsopplysninger = RefusjonsopplysningerBuilder().apply { it.refusjonsopplysninger(skjæringstidspunkt).forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now()) } }.build()
                 )

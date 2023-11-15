@@ -847,13 +847,14 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     inntekt: Inntekt = 31000.månedlig,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     skjæringstidspunkt: LocalDate,
+    gjelder: Periode = skjæringstidspunkt til LocalDate.MAX,
     meldingsreferanseId: UUID = UUID.randomUUID(),
     forklaring: String = "forklaring",
     subsumsjon: Subsumsjon? = null
 ) {
     håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt,
-        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, forklaring, subsumsjon, emptyList())),
+        listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, forklaring, subsumsjon, emptyList(), gjelder)),
         meldingsreferanseId
     )
 }
@@ -895,20 +896,24 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val inntekt: Inntekt,
     private val forklaring: String,
     private val subsumsjon: Subsumsjon?,
-    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>
+    private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>,
+    private val gjelder: Periode? = null
 ) {
-    internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, "forklaring", null, emptyList())
+    internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, "forklaring", null, emptyList(), null)
+    internal constructor(orgnummer: String, inntekt: Inntekt, gjelder: Periode) : this(orgnummer, inntekt, "forklaring", null, emptyList(), gjelder)
     internal companion object {
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {
-                ArbeidsgiverInntektsopplysning(it.orgnummer, skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
+                ArbeidsgiverInntektsopplysning(it.orgnummer, gjelder, Saksbehandler(skjæringstidspunkt, meldingsreferanseId, it.inntekt, it.forklaring, it.subsumsjon, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                     it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
                 }.build())
             }
 
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilSkjønnsmessigFastsatt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =
             map {
-                ArbeidsgiverInntektsopplysning(it.orgnummer, skjæringstidspunkt til LocalDate.MAX, SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
+                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
+                ArbeidsgiverInntektsopplysning(it.orgnummer, gjelder, SkjønnsmessigFastsatt(skjæringstidspunkt, meldingsreferanseId, it.inntekt, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
                     it.refusjonsopplysninger.forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now())}
                 }.build())
             }

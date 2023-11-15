@@ -35,6 +35,8 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
                 require("organisasjonsnummer") { require(it.gyldigTekst) }
                 require("månedligInntekt") { require(it.gyldigDouble) }
                 require("forklaring") { require(it.gyldigTekst) }
+                interestedIn("fom", JsonNode::asLocalDate)
+                interestedIn("tom", JsonNode::asLocalDate)
                 interestedIn("subsumsjon") { require(it.path("paragraf").gyldigTekst) }
                 interestedIn("subsumsjon.paragraf")
                 interestedIn("subsumsjon.ledd")  { require(it.gyldigInt) }
