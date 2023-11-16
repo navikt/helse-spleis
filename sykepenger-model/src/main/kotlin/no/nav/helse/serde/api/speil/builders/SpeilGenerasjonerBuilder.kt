@@ -573,7 +573,8 @@ internal class SpeilGenerasjonerBuilder(
                 oppdatert,
                 periode,
                 hendelser,
-                forrigeBeregnetPeriode
+                forrigeBeregnetPeriode,
+                generasjonOpprettet
             )
             internal fun nyUberegnetPeriode(periode: Periode, generasjonOpprettet: LocalDateTime, avsluttet: LocalDateTime?) = UberegnetPeriode.Builder(vedtaksperiodeId, skjæringstidspunkt, tilstand, generasjonOpprettet, avsluttet, opprettet, oppdatert, periode, hendelser)
         }

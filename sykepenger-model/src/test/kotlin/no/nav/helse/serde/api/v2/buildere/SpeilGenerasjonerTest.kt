@@ -319,6 +319,7 @@ internal class SpeilGenerasjonerTest {
         inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER,
         erForkastet = false,
         opprettet = LocalDateTime.now(),
+        generasjonOpprettet = LocalDateTime.now(),
         beregnet = LocalDateTime.now(),
         oppdatert = LocalDateTime.now(),
         periodetilstand = Periodetilstand.IngenUtbetaling,

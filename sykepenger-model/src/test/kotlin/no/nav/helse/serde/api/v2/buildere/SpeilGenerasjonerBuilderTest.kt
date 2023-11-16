@@ -129,6 +129,26 @@ import org.junit.jupiter.api.Test
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
+    fun foo() {
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 15.januar))
+        håndterSøknad(Sykdom(16.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, size)
+                uberegnetPeriode(0) fra 16.januar til 20.januar medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(1) fra 1.januar til 15.januar medTilstand ForberederGodkjenning
+            }
+            1.generasjon {
+                assertEquals(2, size)
+                uberegnetPeriode(0) fra 16.januar til 20.januar medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra 1.januar til 15.januar medTilstand IngenUtbetaling
+            }
+        }
+    }
+
+    @Test
     fun `Manglende generasjon når det kommer IM som endrer AGP ved å endre dager i forkant av perioden`() {
         håndterSøknad(Sykdom(7.august, 20.august, 100.prosent))
         håndterSøknad(Sykdom(21.august, 1.september, 100.prosent))
@@ -160,7 +180,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         // 21 & 22.August utbetalingsdager
 
         generasjoner {
-            assertEquals(3, size)
+            assertEquals(4, size)
             0.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) avType REVURDERING fra 21.august til 1.september medTilstand ForberederGodkjenning
@@ -175,6 +195,10 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 assertEquals(2, size)
                 beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
                 uberegnetVilkårsprøvdPeriode(1) medTilstand IngenUtbetaling
+            }
+            3.generasjon {
+                assertEquals(1, size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand IngenUtbetaling
             }
         }
     }
@@ -220,7 +244,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         generasjoner {
-            assertEquals(3, size)
+            assertEquals(4, size)
             0.generasjon {
                 assertEquals(3, size)
                 uberegnetVilkårsprøvdPeriode(0) fra 1.mars til 31.mars medTilstand UtbetaltVenterPåAnnenPeriode
@@ -233,6 +257,10 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(0) avType REVURDERING fra 1.januar til 31.januar medTilstand Utbetalt
             }
             2.generasjon {
+                assertEquals(1, size)
+                beregnetPeriode(0) avType UTBETALING fra 1.januar til 31.januar medTilstand Utbetalt
+            }
+            3.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
                 beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
@@ -263,7 +291,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         generasjoner {
-            assertEquals(3, size)
+            assertEquals(4, size)
             0.generasjon {
                 assertEquals(3, size)
                 uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
@@ -271,12 +299,16 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(2) medTilstand TilGodkjenning
             }
             1.generasjon {
-                assertEquals(3, size)
-                beregnetPeriode(0) avType REVURDERING medTilstand Utbetalt
-                beregnetPeriode(1) avType REVURDERING medTilstand Utbetalt
-                beregnetPeriode(2) avType REVURDERING medTilstand Utbetalt
+                assertEquals(1, size)
+                beregnetPeriode(0) avType REVURDERING fra 1.januar til 31.januar medTilstand Utbetalt
             }
             2.generasjon {
+                assertEquals(3, size)
+                beregnetPeriode(0) avType REVURDERING fra 1.mars til 31.mars medTilstand Utbetalt
+                beregnetPeriode(1) avType REVURDERING fra 1.februar til 28.februar medTilstand Utbetalt
+                beregnetPeriode(2) avType REVURDERING fra 1.januar til 31.januar  medTilstand Utbetalt
+            }
+            3.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
                 beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
@@ -1971,12 +2003,17 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
 
         generasjoner {
-            assertEquals(1, size)
+            assertEquals(2, size)
             0.generasjon {
                 assertEquals(3, perioder.size)
                 uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) avType UTBETALING medTilstand TilGodkjenning
                 uberegnetVilkårsprøvdPeriode(2) medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(2, perioder.size)
+                uberegnetVilkårsprøvdPeriode(0) medTilstand IngenUtbetaling
+                uberegnetVilkårsprøvdPeriode(1) medTilstand IngenUtbetaling
             }
         }
 
@@ -2235,7 +2272,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1) // her vi må bruke beregnet-tidspunktet og ikke generasjon opprettet
 
         generasjoner {
             assertEquals(3, size)

@@ -188,6 +188,7 @@ data class UberegnetPeriode(
     override fun medOpplysningerFra(other: UberegnetPeriode): UberegnetPeriode? {
         // kopierer bare -like- generasjoner; om en periode er strukket tilbake så bevarer vi generasjonen
         if (this.fom != other.fom) return null
+        if (this.periodetilstand == IngenUtbetaling && other.periodetilstand != IngenUtbetaling) return null
         return this.copy(
             hendelser = this.hendelser + other.hendelser,
             sammenslåttTidslinje = other.sammenslåttTidslinje
@@ -254,6 +255,7 @@ data class BeregnetPeriode(
     override val periodetype: Tidslinjeperiodetype,
     override val inntektskilde: UtbetalingInntektskilde, // verdien av dette feltet brukes bare for å sjekke !=null i speil
     override val opprettet: LocalDateTime,
+    val generasjonOpprettet: LocalDateTime,
     val beregnet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
@@ -376,7 +378,8 @@ data class BeregnetPeriode(
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
         private val hendelser: Set<HendelseDTO>,
-        private val forrigeBeregnetPeriode: BeregnetPeriode?
+        private val forrigeBeregnetPeriode: BeregnetPeriode?,
+        private val generasjonOpprettet: LocalDateTime
     ) {
         private lateinit var beregnet: LocalDateTime
         private lateinit var skjæringstidspunkt: LocalDate
@@ -427,6 +430,7 @@ data class BeregnetPeriode(
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 maksdato = maksdato,
+                generasjonOpprettet = generasjonOpprettet,
                 beregnet = beregnet,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
@@ -615,6 +619,7 @@ data class AnnullertPeriode(
             periodetype = periodetype,
             inntektskilde = inntektskilde,
             opprettet = opprettet,
+            generasjonOpprettet = beregnet,
             beregnet = beregnet,
             oppdatert = oppdatert,
             periodetilstand = periodetilstand,

@@ -63,10 +63,10 @@ class SpeilGenerasjoner {
     private interface Byggetilstand {
 
         fun uberegnetPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetPeriode) {
-            generasjoner.leggTilNyPeriode(periode)
+            generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
         }
         fun uberegnetVilkårsprøvdPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetVilkårsprøvdPeriode) {
-            generasjoner.leggTilNyPeriode(periode)
+            generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
         }
         fun utbetaltPeriode(generasjoner: SpeilGenerasjoner, periode: BeregnetPeriode) {
             generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
@@ -83,7 +83,7 @@ class SpeilGenerasjoner {
                 error("forventet ikke en revurdert periode i tilstand ${this::class.simpleName}!")
         }
 
-        class AktivGenerasjon(private val forrigeBeregnet: BeregnetPeriode) : Byggetilstand {
+        class AktivGenerasjon(private val forrigeBeregnet: SpeilTidslinjeperiode) : Byggetilstand {
             override fun utbetaltPeriode(generasjoner: SpeilGenerasjoner, periode: BeregnetPeriode) {
                 // en tidligere utbetalt periode vil bety at en tidligere uberegnet periode er omgjort/eller er out of order
                 if (periode < forrigeBeregnet) return generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
@@ -119,6 +119,11 @@ class SpeilGenerasjoner {
             override fun revurdertPeriode(generasjoner: SpeilGenerasjoner, periode: BeregnetPeriode) {
                 if (periode.ingenEndringerMellom(revurderingen)) return generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(periode))
                 generasjoner.leggTilNyRadOgPeriode(periode, RevurdertGenerasjon(periode))
+            }
+
+            override fun utbetaltPeriode(generasjoner: SpeilGenerasjoner, periode: BeregnetPeriode) {
+                if (periode > revurderingen) return generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(revurderingen))
+                generasjoner.leggTilNyRadOgPeriode(periode, AktivGenerasjon(periode))
             }
             override fun uberegnetVilkårsprøvdPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetVilkårsprøvdPeriode) {
                 if (periode > revurderingen) return generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(revurderingen))
