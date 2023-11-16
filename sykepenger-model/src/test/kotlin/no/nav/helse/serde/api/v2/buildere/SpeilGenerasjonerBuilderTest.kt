@@ -129,7 +129,7 @@ import org.junit.jupiter.api.Test
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
-    fun foo() {
+    fun `syk nav-dager i to korte perioder`() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 15.januar))
         håndterSøknad(Sykdom(16.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
