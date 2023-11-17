@@ -2597,6 +2597,13 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
+        internal fun List<Vedtaksperiode>.påvirkerArbeidsgiverperiode(organisasjonsnummer: String, periode: Periode): Boolean {
+            return any { vedtaksperiode ->
+                val dagerMellom = periode.periodeMellom(vedtaksperiode.periode.start)?.count() ?: return@any false
+                return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD && vedtaksperiode.organisasjonsnummer == organisasjonsnummer
+            }
+        }
+
         internal fun List<Vedtaksperiode>.slåSammenForkastedeSykdomstidslinjer(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje =
             map { it.sykdomstidslinje }.plusElement(sykdomstidslinje).slåSammenForkastedeSykdomstidslinjer()
 

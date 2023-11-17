@@ -169,7 +169,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingFørSøknad.add(event)
     }
 
-    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String) {
+    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {
         inntektsmeldingIkkeHåndtert.add(inntektsmeldingId)
     }
 

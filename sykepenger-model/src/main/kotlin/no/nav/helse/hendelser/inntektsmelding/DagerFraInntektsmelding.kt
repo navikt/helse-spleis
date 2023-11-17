@@ -18,6 +18,8 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Generasjoner
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.påvirkerArbeidsgiverperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
@@ -277,6 +279,11 @@ internal class DagerFraInntektsmelding(
         }
         info("Håndterer dager fordi perioden mellom gammel agp og opplyst agp er mindre enn 10 dager")
         return false
+    }
+
+    internal fun harPeriodeInnenfor16Dager(organisasjonsnummer: String, vedtaksperioder: List<Vedtaksperiode>): Boolean {
+        val periode = sykdomstidslinje.sykdomsperiode() ?: return false
+        return vedtaksperioder.påvirkerArbeidsgiverperiode(organisasjonsnummer, periode)
     }
 
     internal class BitAvInntektsmelding(
