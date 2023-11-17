@@ -2317,7 +2317,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = personOver67år,)
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = personOver67år)
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, fnr = personOver67år, inntekt = 187268.årlig)
+        håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,

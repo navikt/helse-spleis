@@ -6,6 +6,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -158,12 +159,18 @@ internal class Sykepengegrunnlag private constructor(
         }
     }
 
-    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode): List<Utbetalingstidslinje> {
+    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, subsumsjonObserver: SubsumsjonObserver): List<Utbetalingstidslinje> {
         val tidslinjeperiode = Utbetalingstidslinje.periode(tidslinjer) ?: return tidslinjer
         if (tidslinjeperiode.starterEtter(skjæringstidspunktperiode) || tidslinjeperiode.endInclusive < skjæringstidspunkt) return tidslinjer
 
         val avvisningsperiode = skjæringstidspunktperiode.start til minOf(tidslinjeperiode.endInclusive, skjæringstidspunktperiode.endInclusive)
         val avvisteDager = avvisningsperiode.filter { dato ->
+            subsumsjonObserver.`§ 8-51 ledd 2`(
+                oppfylt = oppfyllerMinsteinntektskrav,
+                skjæringstidspunkt = skjæringstidspunkt,
+                alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
+                beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
             val faktor = if (alder.forhøyetInntektskrav(dato)) `2G` else halvG
             beregningsgrunnlag < faktor.minsteinntekt(skjæringstidspunkt)
         }
