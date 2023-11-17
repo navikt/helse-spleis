@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
@@ -45,6 +44,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
@@ -55,7 +55,6 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -70,7 +69,6 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
@@ -1274,6 +1272,40 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
         }
+    }
+
+    @Test
+    fun `Assert forventet feil - skal ikke ha to vedtaksperioder til godkjenning samtidig`() {
+        a1 {
+            nyPeriode(12.januar til 16.januar)
+            håndterSykmelding(Sykmeldingsperiode(17.januar, 21.januar))
+            håndterSøknad(Sykdom(17.januar, 21.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlagMedGhostArbeidsforhold(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
+        a2 {
+            nyPeriode(30.januar til 31.januar)
+            //Overlappende vedtaksperiode men med senere skjæringstidspunkt enn a1
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
+            håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+        }
+
+        assertForventetFeil("Vi skal ikke ha to perioder til godkjenning samtidig",
+            nå = {
+                a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING) }
+                a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING) }
+            },
+            ønsket = {
+                a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING) }
+                a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
+            }
+        )
     }
 
     private val Utbetalingsdag.arbeidsgiverbeløp get() = this.økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, _, dagligInt -> dagligInt } ?: 0
