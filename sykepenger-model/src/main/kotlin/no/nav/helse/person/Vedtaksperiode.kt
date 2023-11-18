@@ -1906,7 +1906,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
+            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
             }
             vedtaksperiode.generasjoner.simuler(påminnelse)
