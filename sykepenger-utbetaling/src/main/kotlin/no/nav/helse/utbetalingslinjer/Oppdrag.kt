@@ -310,12 +310,21 @@ class Oppdrag private constructor(
 
     // Vi har endret tidligere utbetalte dager til ikke-utbetalte dager i starten av tidslinjen
     private fun fomHarFlyttetSegFremover(eldre: Oppdrag) = this.first().fom > eldre.first().fom
+
     // man opphører (annullerer) et annet oppdrag ved å lage en opphørslinje som dekker hele perioden som er utbetalt
-    private fun annulleringsoppdrag(tidligere: Oppdrag) = kopierMed(
-        linjer = listOf(tidligere.last().opphørslinje(tidligere.first().fom)),
-        fagsystemId = tidligere.fagsystemId,
-        endringskode = Endringskode.ENDR
-    )
+    // om det forrige oppdraget også var et opphør så kopieres siste linje for å bevare
+    // delytelseId-rekkefølgen slik at det nye oppdraget kan bygges videre på
+    private fun annulleringsoppdrag(tidligere: Oppdrag) =
+        if (tidligere.kopierUtenOpphørslinjer().erTomt()) kopierMed(
+            linjer = listOf(tidligere.last().markerUendret(tidligere.last())),
+            fagsystemId = tidligere.fagsystemId,
+            endringskode = Endringskode.UEND
+        )
+        else kopierMed(
+            linjer = listOf(tidligere.last().opphørslinje(tidligere.kopierUtenOpphørslinjer().first().fom)),
+            fagsystemId = tidligere.fagsystemId,
+            endringskode = Endringskode.ENDR
+        )
     // når man oppretter en NY linje med dato-intervall "(a, b)" vil oppdragsystemet
     // automatisk opphøre alle eventuelle linjer med fom > b.
     //

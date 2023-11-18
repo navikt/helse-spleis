@@ -893,15 +893,55 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
         håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode) // why
+        håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Permisjonsdag)))
         håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode) // why
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
         assertTrue(inspektør.periodeErIkkeForkastet(1.vedtaksperiode))
+    }
+
+    @Test
+    fun `revurdering uten utbetaling - som tidligere har vært utbetalt`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Permisjonsdag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        val revurdering1 = inspektør.utbetaling(1).inspektør
+        val revurdering2 = inspektør.utbetaling(2).inspektør
+        assertEquals(revurdering1.korrelasjonsId, revurdering2.korrelasjonsId)
+        revurdering1.also { utbetalingInspektør ->
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(0, utbetalingInspektør.personOppdrag.size)
+            utbetalingInspektør.arbeidsgiverOppdrag.also { oppdrag ->
+                assertEquals(Endringskode.ENDR, oppdrag.inspektør.endringskode)
+                oppdrag[0].inspektør.also { linjeInspektør ->
+                    assertEquals(Endringskode.ENDR, linjeInspektør.endringskode)
+                    assertEquals(17.januar til 31.januar, linjeInspektør.periode)
+                    assertEquals(17.januar, linjeInspektør.datoStatusFom)
+                }
+            }
+        }
+        revurdering2.also { utbetalingInspektør ->
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(0, utbetalingInspektør.personOppdrag.size)
+            utbetalingInspektør.arbeidsgiverOppdrag.also { oppdrag ->
+                assertEquals(Endringskode.UEND, oppdrag.inspektør.endringskode)
+                oppdrag[0].inspektør.also { linjeInspektør ->
+                    assertEquals(Endringskode.UEND, linjeInspektør.endringskode)
+                    assertEquals(17.januar til 31.januar, linjeInspektør.periode)
+                    assertEquals(17.januar, linjeInspektør.datoStatusFom)
+                }
+            }
+        }
     }
 
     @Test

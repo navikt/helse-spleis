@@ -418,6 +418,30 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
+    fun `tomt oppdrag bygg videre på opphørt`() {
+        val original = linjer(1.januar to 2.januar, 5.januar to 10.januar)
+        val recalculated = linjer(other = original)
+        val deleted = recalculated - original
+        val revised = linjer(other = deleted)
+        val actual = revised - deleted
+        assertUtbetalinger(linjer(
+            5.januar to 10.januar endrer original.first() opphører 1.januar endringskode UEND
+        ), actual)
+    }
+
+    @Test
+    fun `opphøre oppdrag som bygget videre på opphør`() {
+        val original = linjer(1.januar to 10.januar)
+        val recalculated = linjer(8.januar to 10.januar, other = original)
+        val deleted = recalculated - original
+        val revised = linjer()
+        val actual = revised - deleted
+        assertUtbetalinger(linjer(
+            8.januar to 10.januar endrer actual.last() opphører 8.januar
+        ), actual)
+    }
+
+    @Test
     fun `har egentlig flyttet bakover`() {
         val original = linjer(1.januar to 5.januar, 14.januar to 20.januar)
         val recalculated = linjer(4.januar to 5.januar, 14.januar to 20.januar)
@@ -1118,7 +1142,7 @@ internal class UtbetalingslinjeForskjellTest {
             assertEquals(a.grad, b.grad, "grad stemmer ikke overens")
             assertEquals(a.datoStatusFom, b.datoStatusFom)
             assertEquals(a.endringskode, b.endringskode) { "endringskode ${b.endringskode} matcher ikke forventet ${a.endringskode}" }
-            assertEquals(a.id, b.id) { "delytelseid ${b.id} matcher ikke forventet ${a.id} for ${a.fom}-${a.tom}"}
+            assertEquals(a.id, b.id) { "delytelseid ${b.id} matcher ikke forventet ${a.id} for ${a.fom} - ${a.tom}"}
             assertEquals(a.refId, b.refId) { "refdelytelseid ${b.refId} matcher ikke forventet ${a.refId}"}
         }
     }

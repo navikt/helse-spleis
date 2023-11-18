@@ -39,6 +39,8 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -46,6 +48,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -263,7 +266,6 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
@@ -277,6 +279,39 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         val overstyringerIgangsatt = observatør.overstyringIgangsatt.map { it.årsak }
         assertEquals(listOf("KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE", "KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE", "KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
+
+        val revurdering1Vedtaksperiode = inspektør.utbetaling(3).inspektør
+        revurdering1Vedtaksperiode.also { utbetalingInspektør ->
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(0, utbetalingInspektør.personOppdrag.size)
+            utbetalingInspektør.arbeidsgiverOppdrag.inspektør.also { oppdragInspektør ->
+                assertEquals(ENDR, oppdragInspektør.endringskode)
+                assertEquals(1, oppdragInspektør.delytelseId(0))
+                assertEquals(26.januar, oppdragInspektør.datoStatusFom(0))
+            }
+        }
+        val revurdering2Vedtaksperiode = inspektør.utbetaling(4).inspektør
+        assertEquals(revurdering1Vedtaksperiode.korrelasjonsId, revurdering2Vedtaksperiode.korrelasjonsId)
+        revurdering2Vedtaksperiode.also { utbetalingInspektør ->
+            assertEquals(UEND, revurdering2Vedtaksperiode.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            utbetalingInspektør.arbeidsgiverOppdrag[0].inspektør.also { linjeInspektør ->
+                assertEquals(UEND, linjeInspektør.endringskode)
+                assertEquals(26.januar til 28.februar, linjeInspektør.periode)
+                assertEquals(26.januar, linjeInspektør.datoStatusFom)
+            }
+            assertEquals(0, utbetalingInspektør.personOppdrag.size)
+        }
+        val revurdering3Vedtaksperiode = inspektør.utbetaling(5).inspektør
+        assertNotEquals(revurdering1Vedtaksperiode.korrelasjonsId, revurdering3Vedtaksperiode.korrelasjonsId)
+        revurdering3Vedtaksperiode.also { utbetalingInspektør ->
+            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
+            assertEquals(NY, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+            utbetalingInspektør.arbeidsgiverOppdrag[0].inspektør.also { linjeInspektør ->
+                assertEquals(17.februar til 28.februar, linjeInspektør.periode)
+            }
+            assertEquals(0, utbetalingInspektør.personOppdrag.size)
+        }
     }
 
     @Test
