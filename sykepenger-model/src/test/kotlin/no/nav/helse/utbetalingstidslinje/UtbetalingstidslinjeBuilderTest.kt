@@ -509,6 +509,40 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `egenmeldingsdager fullfører aarbeidsgiverperiode`() {
+        undersøke(16.U + 1.S)
+        assertEquals(17, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(1, inspektør.navDagTeller)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+    }
+
+    @Test
+    fun `egenmeldingsdager etter arbeidsgiverperiode teller som opphold`() {
+        undersøke(16.U + 16.U + 16.S)
+        assertEquals(48, inspektør.size)
+        assertEquals(32, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(12, inspektør.avvistDagTeller)
+        assertEquals(2, inspektør.navHelgDagTeller)
+        assertEquals(2, perioder.size)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+        assertEquals(listOf(2.februar til 17.februar), perioder.last())
+    }
+
+    @Test
+    fun `arbeid ikke gjenopptatt før egenmeldingsdager etter arbeidsgiverperiode teller som opphold`() {
+        undersøke(1.S + 15.AIG + 1.U + 16.S)
+        assertEquals(33, inspektør.size)
+        assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(15, inspektør.fridagTeller)
+        assertEquals(1, inspektør.avvistDagTeller)
+        assertEquals(0, inspektør.navHelgDagTeller)
+        assertEquals(2, perioder.size)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+        assertEquals(listOf(2.februar til 17.februar), perioder.last())
+    }
+
+    @Test
     fun `avviser egenmeldingsdager utenfor arbeidsgiverperioden`() {
         undersøke(15.U + 1.F + 1.U)
         assertEquals(17, inspektør.size)
