@@ -14,11 +14,9 @@ spec:
   liveness:
     path: /isalive
     initialDelay: 5
-    timeoutSeconds: 3
   readiness:
     path: /isready
     initialDelay: 5
-    timeoutSeconds: 3
   preStopHookPath: /stop
   resources:
     limits:
