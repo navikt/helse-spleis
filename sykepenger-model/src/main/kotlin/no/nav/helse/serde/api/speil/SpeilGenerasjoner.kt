@@ -6,6 +6,7 @@ import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.utledPeriodetyper
+import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 
@@ -91,12 +92,12 @@ class SpeilGenerasjoner {
             }
 
             override fun uberegnetPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetPeriode) {
-                if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
+                if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode)
                 generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
             }
 
             override fun uberegnetVilkårsprøvdPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetVilkårsprøvdPeriode) {
-                if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode, AktivGenerasjon(periode))
+                if (periode > forrigeBeregnet) return generasjoner.leggTilNyPeriode(periode)
                 generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
             }
         }

@@ -129,6 +129,38 @@ import org.junit.jupiter.api.Test
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
+    fun `revurdere før forlengelse utbetales`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 22.januar, 100.prosent))
+        håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(22.januar, Dagtype.Feriedag)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        generasjoner {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(3, size)
+                uberegnetVilkårsprøvdPeriode(0) fra 23.januar til 31.januar medTilstand VenterPåAnnenPeriode
+                beregnetPeriode(1) fra 17.januar til 22.januar avType REVURDERING medTilstand TilGodkjenning
+                uberegnetVilkårsprøvdPeriode(2) fra 1.januar til 16.januar medTilstand IngenUtbetaling
+            }
+            1.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) fra 17.januar til 22.januar avType UTBETALING medTilstand Utbetalt
+                uberegnetVilkårsprøvdPeriode(1) fra 1.januar til 16.januar medTilstand IngenUtbetaling
+            }
+        }
+    }
+
+    @Test
     fun `syk nav-dager i to korte perioder`() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 15.januar))
         håndterSøknad(Sykdom(16.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
