@@ -22,10 +22,10 @@ spec:
     limits:
       memory: 5Gi
     requests:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 100m
+      memory: 256Mi
   replicas:
-    min: 6
+    min: 2
     max: 6
     cpuThresholdPercentage: 75
   gcp:
