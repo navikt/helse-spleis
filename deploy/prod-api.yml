@@ -70,7 +70,7 @@ spec:
   - name: DATABASE_REGION
     value: "europe-north1"
   - name: DATABASE_INSTANCE
-    value: "spleis"
+    value: "spleis2"
   - name: NyRevurdering
     value: "false"
 

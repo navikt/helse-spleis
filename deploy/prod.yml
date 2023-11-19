@@ -34,9 +34,9 @@ spec:
       - type: POSTGRES_15
         diskAutoresize: true
         pointInTimeRecovery: true
-        diskSize: 1024
+        diskSize: 250
         diskType: SSD
-        name: spleis
+        name: spleis2
         tier: db-custom-4-8960
         retainedBackups: 14
         databases:
