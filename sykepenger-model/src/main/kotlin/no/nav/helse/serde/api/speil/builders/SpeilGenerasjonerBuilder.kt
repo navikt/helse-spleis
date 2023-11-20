@@ -20,8 +20,8 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.dto.AnnullertUtbetaling
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
-import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
+import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.sorterEtterHendelse
@@ -209,7 +209,10 @@ internal class SpeilGenerasjonerBuilder(
         avstemmingsnøkkel: Long?,
         annulleringer: Set<UUID>
     ) {
-        if (utbetalingstatus == Utbetalingstatus.FORKASTET) return
+        if (utbetalingstatus == Utbetalingstatus.FORKASTET) return tilstand.besøkForkastetUtbetaling(
+            builder = this,
+            tidsstempel = tidsstempel
+        )
         tilstand.besøkUtbetaling(
             builder = this,
             id = id,
@@ -297,6 +300,11 @@ internal class SpeilGenerasjonerBuilder(
             maksdato: LocalDate,
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?
+        ) {}
+
+        fun besøkForkastetUtbetaling(
+            builder: SpeilGenerasjonerBuilder,
+            tidsstempel: LocalDateTime
         ) {}
         fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
@@ -446,7 +454,7 @@ internal class SpeilGenerasjonerBuilder(
             }
 
             override fun forlatBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
-                beregnetPeriodeBuilder?.build(builder.alder)?.also {
+                beregnetPeriodeBuilder?.build(builder.alder)?.also {// TODO: her burde vi ha samlet opp utbetalingen på den forkastede utbetalingen
                     vedtaksperiodebuilder?.nyBeregnetPeriode(it)
                     nyBeregnetPeriode(builder, it)
                 }
@@ -473,6 +481,13 @@ internal class SpeilGenerasjonerBuilder(
                     Utbetalingtype.REVURDERING -> beregnetPeriodeBuilder?.medRevurdering(id, korrelasjonsId, utbetalingstatus.name, tidsstempel, maksdato, forbrukteSykedager!!, gjenståendeSykedager!!)
                     else -> { /* ignorer, aktive perioder kan ikke være annullerte */ }
                 }
+            }
+
+            final override fun besøkForkastetUtbetaling(
+                builder: SpeilGenerasjonerBuilder,
+                tidsstempel: LocalDateTime,
+            ) {
+                beregnetPeriodeBuilder?.medForkastetUtbetaling(opprettet = tidsstempel)
             }
 
             override fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {

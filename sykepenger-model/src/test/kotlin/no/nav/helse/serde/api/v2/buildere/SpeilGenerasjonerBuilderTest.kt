@@ -276,7 +276,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         generasjoner {
-            assertEquals(4, size)
+            assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
                 uberegnetVilkårsprøvdPeriode(0) fra 1.mars til 31.mars medTilstand UtbetaltVenterPåAnnenPeriode
@@ -289,10 +289,6 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(0) avType REVURDERING fra 1.januar til 31.januar medTilstand Utbetalt
             }
             2.generasjon {
-                assertEquals(1, size)
-                beregnetPeriode(0) avType UTBETALING fra 1.januar til 31.januar medTilstand Utbetalt
-            }
-            3.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
                 beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
@@ -2315,7 +2311,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
             1.generasjon {
-                assertEquals(3, perioder.size)
+                assertEquals(1, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
                 beregnetPeriode(1) fra (16.januar til 31.januar) medTilstand Utbetalt
                 uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling

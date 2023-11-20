@@ -7,16 +7,17 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
+import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
+import no.nav.helse.serde.api.dto.Periodetilstand.TilGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.SpeilGenerasjoner
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.merge
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
-import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
 
 data class SpeilGenerasjonDTO(
     val id: UUID, // Runtime
@@ -77,7 +78,7 @@ abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
 
     internal abstract fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode
     internal fun erSammeVedtaksperiode(other: SpeilTidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
-    internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon, UtbetaltVenterPåAnnenPeriode)
+    internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, TilGodkjenning, ManglerInformasjon, UtbetaltVenterPåAnnenPeriode)
 
     internal abstract fun tilGenerasjon(generasjoner: SpeilGenerasjoner)
     override fun compareTo(other: SpeilTidslinjeperiode) = tom.compareTo(other.tom)
@@ -272,7 +273,7 @@ data class BeregnetPeriode(
     val vilkårsgrunnlagId: UUID?, // dette feltet er i != for beregnede perioder, men må være nullable så lenge annullerte perioder mappes til beregnet periode
     val forrigeGenerasjon: BeregnetPeriode? = null
 ) : SpeilTidslinjeperiode() {
-    override val sorteringstidspunkt = beregnet
+    override val sorteringstidspunkt = if(forrigeGenerasjon != null) generasjonOpprettet else beregnet
 
     override fun venter(): Boolean = super.venter() && periodetilstand != Utbetalt
 
@@ -522,10 +523,14 @@ data class BeregnetPeriode(
             this.korrelasjonsId = korrelasjonsId
             this.utbetalingstatus = utledStatus(type, status)
             this.utbetalingId = id
-            this.beregnet = opprettet
+            if(!this::beregnet.isInitialized) this.beregnet = opprettet
             this.maksdato = maksdato
             this.forbrukteSykedager = forbrukteSykedager
             this.gjenståendeSykedager = gjenståendeDager
+        }
+
+        internal fun medForkastetUtbetaling(opprettet: LocalDateTime) {
+            //this.beregnet = opprettet
         }
 
         internal fun medVurdering(godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) = apply {

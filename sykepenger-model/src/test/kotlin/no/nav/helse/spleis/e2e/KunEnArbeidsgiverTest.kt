@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -31,9 +30,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
+import no.nav.helse.readResource
 import no.nav.helse.september
+import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
@@ -41,7 +44,6 @@ import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -50,6 +52,12 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KunEnArbeidsgiverTest : AbstractDslTest() {
+
+    @Test
+    fun `la oss debugge en pølse`() {
+        val p = SerialisertPerson("/personer/pølseperson.json".readResource()).deserialize(jurist, emptyList())
+        val r = serializePersonForSpeil(p)
+    }
 
     @Test
     fun `ingen historie med inntektsmelding først`() {
