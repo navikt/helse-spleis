@@ -33,7 +33,7 @@ spec:
     pool: nav-dev
   gcp:
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_15
         diskAutoresize: true
         databases:
           - name: spleis
