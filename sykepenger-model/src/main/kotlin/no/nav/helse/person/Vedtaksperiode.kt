@@ -2056,7 +2056,7 @@ internal class Vedtaksperiode private constructor(
             super.håndter(vedtaksperiode, hendelse, infotrygdhistorikk)
             if (vedtaksperiode.generasjoner.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(
                 hendelse,
-                AvventerHistorikkRevurdering
+                AvventerRevurdering
             ) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
