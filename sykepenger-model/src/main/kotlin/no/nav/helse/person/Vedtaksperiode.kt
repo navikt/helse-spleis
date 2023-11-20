@@ -2597,10 +2597,10 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
-        internal fun List<Vedtaksperiode>.påvirkerArbeidsgiverperiode(organisasjonsnummer: String, periode: Periode): Boolean {
+        internal fun List<Vedtaksperiode>.påvirkerArbeidsgiverperiode(periode: Periode): Boolean {
             return any { vedtaksperiode ->
                 val dagerMellom = periode.periodeMellom(vedtaksperiode.periode.start)?.count() ?: return@any false
-                return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD && vedtaksperiode.organisasjonsnummer == organisasjonsnummer
+                return dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
             }
         }
 

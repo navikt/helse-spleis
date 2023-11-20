@@ -281,9 +281,9 @@ internal class DagerFraInntektsmelding(
         return false
     }
 
-    internal fun harPeriodeInnenfor16Dager(organisasjonsnummer: String, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        val periode = sykdomstidslinje.sykdomsperiode() ?: return false
-        return vedtaksperioder.påvirkerArbeidsgiverperiode(organisasjonsnummer, periode)
+    internal fun harPeriodeInnenfor16Dager(vedtaksperioder: List<Vedtaksperiode>): Boolean {
+        val periode = sykdomstidslinje.periode() ?: return false
+        return vedtaksperioder.påvirkerArbeidsgiverperiode(periode)
     }
 
     internal class BitAvInntektsmelding(
