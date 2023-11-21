@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -2364,7 +2363,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-51 ledd 2 - avslag subsummeres når person blir 67 år underveis i sykefraværstilfellet og tjener mindre enn 2G`() = Toggle.SubsumsjonMinimumInntektOverSekstisyv.enable {
+    fun `§ 8-51 ledd 2 - avslag subsummeres når person blir 67 år underveis i sykefraværstilfellet og tjener mindre enn 2G`() {
         val personOver67år = "05025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 5.februar(1951))
         val inntekt = 100_000.årlig // mellom 0.5G og 2G - slik at kravet er oppfyllt før personen fyllte 67, men ikke etter

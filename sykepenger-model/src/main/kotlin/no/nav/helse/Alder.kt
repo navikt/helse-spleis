@@ -121,18 +121,16 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
         minimumInntektÅrlig: Double,
         jurist: SubsumsjonObserver
     ) {
-        if (Toggle.SubsumsjonMinimumInntektOverSekstisyv.enabled) {
-            jurist.`§ 8-51 ledd 2`(
-                oppfylt = oppfylt,
-                utfallFom = utfallFom,
-                utfallTom = utfallTom,
-                sekstisyvårsdag = redusertYtelseAlder,
-                periodeFom = periodeFom,
-                periodeTom = periodeTom,
-                beregningsgrunnlagÅrlig = beregningsgrunnlagÅrlig,
-                minimumInntektÅrlig = minimumInntektÅrlig
-            )
-        }
+        jurist.`§ 8-51 ledd 2`(
+            oppfylt = oppfylt,
+            utfallFom = utfallFom,
+            utfallTom = utfallTom,
+            sekstisyvårsdag = redusertYtelseAlder,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            beregningsgrunnlagÅrlig = beregningsgrunnlagÅrlig,
+            minimumInntektÅrlig = minimumInntektÅrlig
+        )
     }
 
     internal fun maksimumSykepenger(dato: LocalDate, forbrukteDager: Int, gjenståendeSykepengedager: Int, gjenståendeSykepengedagerOver67: Int): MaksimumSykepenger {

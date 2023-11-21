@@ -57,5 +57,3 @@ spec:
     value: "true"
   - name: AIG
     value: "true"
-  - name: SUBSUMSJON_MINIMUMINNTEKT_OVER_SEKSTISYV
-    value: "true"
