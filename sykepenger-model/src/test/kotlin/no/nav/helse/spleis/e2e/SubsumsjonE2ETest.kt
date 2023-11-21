@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -35,6 +36,8 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -69,6 +72,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
@@ -77,7 +81,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-2 ledd 1 - opptjeningstid tilfredstilt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 4.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
         håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold)
 
@@ -133,7 +137,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         createTestPerson(fnr, 20.januar(1948))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
         håndterVilkårsgrunnlag(fnr = fnr)
         håndterYtelser(fnr = fnr)
 
@@ -1699,7 +1703,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-28 tredje ledd bokstav c - saksbehandler overstyrer inntekt pga varig lønnsendring som ikke ble hensyntatt`() {
+    fun `§ 8-28 tredje ledd bokstav c - saksbehandler overstyrer inntekt pga varig lønnsendring som ikke ble hensyntatt`(){
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
@@ -2360,6 +2364,68 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `§ 8-51 ledd 2 - avslag subsummeres når person blir 67 år underveis i sykefraværstilfellet og tjener mindre enn 2G`() = Toggle.SubsumsjonMinimumInntektOverSekstisyv.enable {
+        val personOver67år = "05025100065".somPersonidentifikator()
+        createTestPerson(personOver67år, 5.februar(1951))
+        val inntekt = 100_000.årlig // mellom 0.5G og 2G - slik at kravet er oppfyllt før personen fyllte 67, men ikke etter
+
+        nyttVedtak(1.januar, 31.januar, fnr = personOver67år, beregnetInntekt = inntekt)
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_2, ledd = LEDD_2)
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_2,
+            punktum = 1.punktum,
+            input = null,
+            versjon = 16.desember(2011)
+        )
+
+        forlengVedtak(1.februar, 28.februar)
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_2,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "sekstisyvårsdag" to 5.februar(2018),
+                "utfallFom" to 6.februar,
+                "utfallTom" to 28.februar,
+                "periodeFom" to 1.februar,
+                "periodeTom" to 28.februar,
+                "grunnlagForSykepengegrunnlag" to 100000.0,
+                "minimumInntekt" to 187268.0
+            ),
+            output = emptyMap()
+        )
+
+        forlengVedtak(1.mars, 31.mars)
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            bokstav = null
+        ))
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
+            index = 0,
+            forventetAntall = 1,
+            paragraf = PARAGRAF_8_51,
+            versjon = 16.desember(2011),
+            ledd = LEDD_2,
+            input = mapOf(
+                "sekstisyvårsdag" to 5.februar(2018),
+                "utfallFom" to 6.februar,
+                "utfallTom" to 31.mars,
+                "periodeFom" to 1.mars,
+                "periodeTom" to 31.mars,
+                "grunnlagForSykepengegrunnlag" to 100000.0,
+                "minimumInntekt" to 187268.0
+            ),
+            output = emptyMap(),
+            vedtaksperiodeId = 3.vedtaksperiode,
+            utfall = VILKAR_IKKE_OPPFYLT
+        )
+    }
+
+    @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 60-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
         val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
@@ -2387,12 +2453,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = personOver67år)
         håndterUtbetalt(fnr = personOver67år)
 
-        SubsumsjonInspektør(jurist).assertOppfyltPaaIndeks(
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 0,
             forventetAntall = 2,
             paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
             versjon = 16.desember(2011),
+            ledd = LEDD_3,
             input = mapOf(
                 "fom" to 1.januar,
                 "tom" to 31.januar,
@@ -2414,16 +2480,17 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 11,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode,
+            utfall = VILKAR_OPPFYLT
         )
 
 
-        SubsumsjonInspektør(jurist).assertOppfyltPaaIndeks(
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 1,
             forventetAntall = 2,
             paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
             versjon = 16.desember(2011),
+            ledd = LEDD_3,
             input = mapOf(
                 "fom" to 1.januar,
                 "tom" to 31.januar,
@@ -2446,7 +2513,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 11,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode,
+            utfall = VILKAR_OPPFYLT
         )
 
         SubsumsjonInspektør(jurist).assertOppfylt(
@@ -2508,12 +2576,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = personOver67år)
         håndterUtbetalt(fnr = personOver67år)
 
-        SubsumsjonInspektør(jurist).assertOppfyltPaaIndeks(
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 0,
             forventetAntall = 2,
             paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
             versjon = 16.desember(2011),
+            ledd = LEDD_3,
             input = mapOf(
                 "fom" to 1.januar,
                 "tom" to 1.februar,
@@ -2535,15 +2603,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 12,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode,
+            utfall = VILKAR_OPPFYLT
         )
 
-        SubsumsjonInspektør(jurist).assertOppfyltPaaIndeks(
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
             index = 1,
             forventetAntall = 2,
             paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
             versjon = 16.desember(2011),
+            ledd = LEDD_3,
             input = mapOf(
                 "fom" to 1.januar,
                 "tom" to 1.februar,
@@ -2566,7 +2635,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forbrukteSykedager" to 12,
                 "maksdato" to 26.april
             ),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 1.vedtaksperiode,
+            utfall = VILKAR_OPPFYLT
         )
 
         SubsumsjonInspektør(jurist).assertOppfylt(

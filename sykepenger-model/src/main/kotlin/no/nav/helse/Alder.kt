@@ -111,6 +111,30 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
         )
     }
 
+    internal fun fraOgMedFylte67(
+        oppfylt: Boolean,
+        utfallFom: LocalDate,
+        utfallTom: LocalDate,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate,
+        beregningsgrunnlagÅrlig: Double,
+        minimumInntektÅrlig: Double,
+        jurist: SubsumsjonObserver
+    ) {
+        if (Toggle.SubsumsjonMinimumInntektOverSekstisyv.enabled) {
+            jurist.`§ 8-51 ledd 2`(
+                oppfylt = oppfylt,
+                utfallFom = utfallFom,
+                utfallTom = utfallTom,
+                sekstisyvårsdag = redusertYtelseAlder,
+                periodeFom = periodeFom,
+                periodeTom = periodeTom,
+                beregningsgrunnlagÅrlig = beregningsgrunnlagÅrlig,
+                minimumInntektÅrlig = minimumInntektÅrlig
+            )
+        }
+    }
+
     internal fun maksimumSykepenger(dato: LocalDate, forbrukteDager: Int, gjenståendeSykepengedager: Int, gjenståendeSykepengedagerOver67: Int): MaksimumSykepenger {
         val maksdatoOrdinærRett = MaksimumSykepenger.ordinærRett(dato, forbrukteDager, gjenståendeSykepengedager)
         val maksdatoBegrensetRett =

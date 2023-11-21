@@ -805,6 +805,38 @@ class MaskinellJurist private constructor(
         )
     }
 
+    override fun `§ 8-51 ledd 2`(
+        oppfylt: Boolean,
+        utfallFom: LocalDate,
+        utfallTom: LocalDate,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate,
+        sekstisyvårsdag: LocalDate,
+        beregningsgrunnlagÅrlig: Double,
+        minimumInntektÅrlig: Double
+    ) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                lovverk = "folketrygdloven",
+                versjon = LocalDate.of(2011, 12, 16),
+                paragraf = PARAGRAF_8_51,
+                ledd = LEDD_2,
+                input = mapOf(
+                    "sekstisyvårsdag" to sekstisyvårsdag,
+                    "utfallFom" to utfallFom,
+                    "utfallTom" to utfallTom,
+                    "periodeFom" to periodeFom,
+                    "periodeTom" to periodeTom,
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
+                    "minimumInntekt" to minimumInntektÅrlig
+                ),
+                output = emptyMap(),
+                kontekster = kontekster()
+            )
+        )
+    }
+
     override fun `§ 8-51 ledd 3`(
         periode: ClosedRange<LocalDate>,
         tidslinjegrunnlag: List<List<Tidslinjedag>>,

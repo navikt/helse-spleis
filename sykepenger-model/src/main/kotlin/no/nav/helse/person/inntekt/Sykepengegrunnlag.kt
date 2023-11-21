@@ -59,7 +59,6 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -158,7 +157,7 @@ internal class Sykepengegrunnlag private constructor(
         }
     }
 
-    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode): List<Utbetalingstidslinje> {
+    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode, periode: Periode, subsumsjonObserver: SubsumsjonObserver): List<Utbetalingstidslinje> {
         val tidslinjeperiode = Utbetalingstidslinje.periode(tidslinjer) ?: return tidslinjer
         if (tidslinjeperiode.starterEtter(skjæringstidspunktperiode) || tidslinjeperiode.endInclusive < skjæringstidspunkt) return tidslinjer
 
@@ -170,6 +169,18 @@ internal class Sykepengegrunnlag private constructor(
         if (avvisteDager.isEmpty()) return tidslinjer
         val (avvisteDagerOver67, avvisteDagerTil67) = avvisteDager.partition { alder.forhøyetInntektskrav(it) }
 
+        if (avvisteDagerOver67.isNotEmpty()) {
+            alder.fraOgMedFylte67(
+                oppfylt = false,
+                utfallFom = avvisteDagerOver67.min(),
+                utfallTom = avvisteDagerOver67.max(),
+                periodeFom = periode.start,
+                periodeTom = periode.endInclusive,
+                beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                minimumInntektÅrlig = `2G`.minsteinntekt(avvisteDagerOver67.min()).reflection { årlig, _, _, _ -> årlig },
+                jurist = subsumsjonObserver
+            )
+        }
         val dager = listOf(
             Begrunnelse.MinimumInntektOver67 to avvisteDagerOver67.grupperSammenhengendePerioder(),
             Begrunnelse.MinimumInntekt to avvisteDagerTil67.grupperSammenhengendePerioder()

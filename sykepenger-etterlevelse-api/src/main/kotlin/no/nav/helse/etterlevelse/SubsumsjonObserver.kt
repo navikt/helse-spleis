@@ -456,6 +456,31 @@ interface SubsumsjonObserver {
     ) {}
 
     /**
+     * Løpende vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år, trer i kraft når vedkommende fyller 67 år i løpet av sykefraværstilfellet0
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
+     *
+     * @param oppfylt dersom vedkommende fyller 67 år i løpet av sykefraværstilfellet og har inntekt større enn eller lik to ganger grunnbeløpet.
+     * @param utfallFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
+     * @param utfallTom til-og-med-dato [oppfylt]-vurderingen gjelder for
+     * @param sekstisyvårsdag dato vedkommene fyller 67 år
+     * @param periodeFom fra-og-med-dato for perioden til behandling som vurderer kravet om minimum inntekt
+     * @param periodeTom til-og-med-dato for perioden til behandling som vurderer kravet om minimum inntekt
+     * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
+     * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
+     */
+    fun `§ 8-51 ledd 2`(
+        oppfylt: Boolean,
+        utfallFom: LocalDate,
+        utfallTom: LocalDate,
+        periodeFom: LocalDate,
+        periodeTom: LocalDate,
+        sekstisyvårsdag: LocalDate,
+        beregningsgrunnlagÅrlig: Double,
+        minimumInntektÅrlig: Double
+    ) {}
+
+    /**
      * Vurdering av maksimalt antall sykepengedager ved fytle 67 år
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)

@@ -2,19 +2,19 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.etterlevelse.Bokstav
-import no.nav.helse.person.IdInnhenter
+import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Punktum
-import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.SubsumsjonVisitor
+import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
+import no.nav.helse.person.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
 
 
@@ -139,7 +139,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         assertResultat(input, output, subsumsjon)
     }
 
-    internal fun assertOppfyltPaaIndeks(
+    internal fun assertPaaIndeks(
         lovverk: String = "folketrygdloven",
         index: Int,
         forventetAntall: Int,
@@ -151,12 +151,13 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         input: Map<String, Any>? = null,
         output: Map<String, Any>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = ORGNUMMER,
+        utfall: Utfall
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         val subsumsjon = resultat[index]
         assertEquals(forventetAntall, resultat.size, "Forventer $forventetAntall subsumsjoner for vilkåret. Subsumsjoner funnet: ${resultat.size}")
-        assertEquals(VILKAR_OPPFYLT, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
+        assertEquals(utfall, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, subsumsjon)
     }
 
