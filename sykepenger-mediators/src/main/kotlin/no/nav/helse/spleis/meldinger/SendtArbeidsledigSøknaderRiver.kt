@@ -7,8 +7,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 
 internal class SendtArbeidsledigSøknaderRiver(
     rapidsConnection: RapidsConnection,
