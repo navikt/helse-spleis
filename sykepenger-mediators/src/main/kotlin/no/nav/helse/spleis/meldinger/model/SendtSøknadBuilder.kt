@@ -22,6 +22,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
     private var utenlandskSykmelding: Boolean = false
     private var sendTilGosys: Boolean = false
+    private var søknadstype = Søknad.Søknadstype.Arbeidstaker
 
     internal fun build() = Søknad(
         meldingsreferanseId = meldingsreferanseId,
@@ -43,6 +44,10 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         egenmeldinger = egenmeldinger,
         opprettet = opprettet
     )
+
+    fun arbeidsledigsøknad() {
+        søknadstype = Søknad.Søknadstype.Arbeidledig
+    }
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {
         harAndreInntektskilder = andreInntektskilder

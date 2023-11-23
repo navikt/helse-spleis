@@ -152,9 +152,10 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected fun sendNySøknadArbeidsledig(
         vararg perioder: SoknadsperiodeDTO,
         meldingOpprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
-        fnr: String = UNG_PERSON_FNR_2018
+        fnr: String = UNG_PERSON_FNR_2018,
+        tidligereArbeidsgiverOrgnummer: String? = null
     ): UUID {
-        val (id, message) = meldingsfabrikk.lagNySøknadArbeidsledig(*perioder, opprettet = meldingOpprettet, fnr = fnr)
+        val (id, message) = meldingsfabrikk.lagNySøknadArbeidsledig(*perioder, opprettet = meldingOpprettet, fnr = fnr, tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer)
         testRapid.sendTestMessage(message)
         return id.toUUID()
     }
@@ -237,6 +238,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected fun sendArbeidsledigsøknad(
         fnr: String = UNG_PERSON_FNR_2018,
         perioder: List<SoknadsperiodeDTO>,
+        tidligereArbeidsgiverOrgnummer: String? = null,
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         korrigerer: UUID? = null,
@@ -247,6 +249,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadArbeidsledig(
             fnr = fnr,
+            tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer,
             perioder = perioder,
             andreInntektskilder = andreInntektskilder,
             sendtNav = sendtNav,

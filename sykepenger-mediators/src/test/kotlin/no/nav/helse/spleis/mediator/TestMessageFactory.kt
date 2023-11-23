@@ -151,7 +151,8 @@ internal class TestMessageFactory(
         vararg perioder: SoknadsperiodeDTO,
         opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         historiskeFolkeregisteridenter: List<String> = emptyList(),
-        fnr: String = fødselsnummer
+        fnr: String = fødselsnummer,
+        tidligereArbeidsgiverOrgnummer: String? = null
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
         val nySøknad = SykepengesoknadDTO(
@@ -160,6 +161,7 @@ internal class TestMessageFactory(
             sykmeldingId = UUID.randomUUID().toString(),
             fnr = fnr,
             arbeidsgiver = null,
+            tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer,
             fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
             type = SoknadstypeDTO.ARBEIDSLEDIG,
@@ -354,6 +356,7 @@ internal class TestMessageFactory(
     fun lagSøknadArbeidsledig(
         fnr: String = fødselsnummer,
         perioder: List<SoknadsperiodeDTO>,
+        tidligereArbeidsgiverOrgnummer: String? = null,
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         korrigerer: UUID? = null,
@@ -367,6 +370,7 @@ internal class TestMessageFactory(
             status = SoknadsstatusDTO.SENDT,
             id = UUID.randomUUID().toString(),
             fnr = fnr,
+            tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer,
             arbeidsgiver = null,
             fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
