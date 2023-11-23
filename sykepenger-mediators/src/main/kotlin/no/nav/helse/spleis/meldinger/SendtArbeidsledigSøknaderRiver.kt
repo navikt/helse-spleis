@@ -18,11 +18,9 @@ internal class SendtArbeidsledigSøknaderRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey("id")
         message.forbid("arbeidsgiver.orgnummer")
-        message.forbid("papirsykmeldinger")
-        message.forbid("fravar")
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
-        message.interestedIn("tidligereArbeidsgiverOrgnummer", "sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
+        message.interestedIn("tidligereArbeidsgiverOrgnummer", "sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger")
     }
 
     override fun createMessage(packet: JsonMessage) = SendtSøknadArbeidsledigMessage(packet)

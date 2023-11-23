@@ -15,7 +15,7 @@ internal class NyeArbeidsledigSøknaderRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey("sykmeldingId")
         message.requireValue("status", "NY")
-        message.interestedIn("fremtidig_søknad")
+        message.interestedIn("fremtidig_søknad", "tidligereArbeidsgiverOrgnummer")
         message.forbid("arbeidsgiver.orgnummer")
     }
 
