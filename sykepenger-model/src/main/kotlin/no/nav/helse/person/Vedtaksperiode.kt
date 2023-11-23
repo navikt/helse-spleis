@@ -779,7 +779,8 @@ internal class Vedtaksperiode private constructor(
         return null
     }
 
-    private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) = arbeidsgiver.erFørstePeriodeEtterArbeidsgiverperiode(periode().start, arbeidsgiverperiode)
+    private fun trengerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
+        arbeidsgiverperiode != null && arbeidsgiverperiode.forventerArbeidsgiverperiodeopplysning(periode)
             && harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode)
 
     private fun harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =

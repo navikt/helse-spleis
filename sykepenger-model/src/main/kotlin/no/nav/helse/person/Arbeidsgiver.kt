@@ -920,12 +920,6 @@ internal class Arbeidsgiver private constructor(
         return ForkastetVedtaksperiode.hørerTilArbeidsgiverperiode(forkastede, vedtaksperioder, arbeidsgiverperiode)
     }
 
-    fun erFørstePeriodeEtterArbeidsgiverperiode(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
-        val sisteDag = arbeidsgiverperiode?.maxOrNull() ?: return false
-        val førsteSykehverdagEtter = sykdomstidslinje().førsteSykehverdagEtter(sisteDag) ?: return false
-        return dato <= førsteSykehverdagEtter
-    }
-
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
     internal fun sykefraværsfortelling(list: List<Sykefraværstilfelleeventyr>) =
         vedtaksperioder.fold(list) { input, vedtaksperiode ->

@@ -85,6 +85,12 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return erOppholdMellom(utbetalingsperiodeFør, utbetalingsperiode)
     }
 
+    fun forventerArbeidsgiverperiodeopplysning(periode: Periode): Boolean {
+        if (dekkesAvArbeidsgiver(periode)) return false // trenger ikke opplysninger om perioden er innenfor agp
+        val utbetalingsperiode = utbetalingsdager.firstOrNull() ?: return false
+        return utbetalingsperiode.start in periode
+    }
+
     private fun utbetalingsperiodeForPeriode(periode: Periode) =
         utbetalingsdager
             .firstOrNull { utbetalingsperiode -> utbetalingsperiode.start in periode }
