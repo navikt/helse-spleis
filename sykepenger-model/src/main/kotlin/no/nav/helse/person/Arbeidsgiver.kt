@@ -26,7 +26,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
@@ -307,16 +306,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag)
-        return when {
-            inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(
-                orgnummer = organisasjonsnummer,
-                gjelder = skjæringstidspunkt til LocalDate.MAX,
-                inntektsopplysning = inntektsopplysning,
-                refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt, aktivitetslogg)
-            )
-            else -> null
-        }
+        return yrkesaktivitet.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

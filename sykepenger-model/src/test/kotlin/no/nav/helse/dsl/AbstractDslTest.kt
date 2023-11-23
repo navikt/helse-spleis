@@ -22,9 +22,12 @@ import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.person.Arbeidsledig
+import no.nav.helse.person.Frilans
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -53,11 +56,11 @@ internal abstract class AbstractDslTest {
         @JvmStatic
         protected val a3 = "a3"
         @JvmStatic
-        protected val frilans = Yrkesaktivitet.Frilans
+        protected val frilans = Frilans
         @JvmStatic
-        protected val selvstendig = Yrkesaktivitet.Selvstendig
+        protected val selvstendig = Selvstendig
         @JvmStatic
-        protected val arbeidsledig = Yrkesaktivitet.Arbeidsledig
+        protected val arbeidsledig = Arbeidsledig
         @JvmStatic
         @Deprecated("må bruke a1")
         protected val ORGNUMMER = a1
