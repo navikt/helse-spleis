@@ -26,6 +26,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
@@ -52,11 +53,11 @@ internal abstract class AbstractDslTest {
         @JvmStatic
         protected val a3 = "a3"
         @JvmStatic
-        protected val frilans = Person.Frilans
+        protected val frilans = Yrkesaktivitet.Frilans
         @JvmStatic
-        protected val selvstendig = Person.Selvstendig
+        protected val selvstendig = Yrkesaktivitet.Selvstendig
         @JvmStatic
-        protected val arbeidsledig = Person.Arbeidsledig
+        protected val arbeidsledig = Yrkesaktivitet.Arbeidsledig
         @JvmStatic
         @Deprecated("må bruke a1")
         protected val ORGNUMMER = a1

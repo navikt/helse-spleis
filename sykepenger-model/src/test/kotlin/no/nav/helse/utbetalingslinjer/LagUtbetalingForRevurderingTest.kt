@@ -20,6 +20,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
@@ -359,7 +360,7 @@ internal class LagUtbetalingForRevurderingTest {
     }
 
     private fun person() = Person(AKTØRID, FNR, fødselsdato.alder, maskinellJurist)
-    private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
+    private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), Arbeidstaker(organisasjonsnummer), maskinellJurist)
     private fun søknad(periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)
         return hendelsefabrikk.lagSøknad(

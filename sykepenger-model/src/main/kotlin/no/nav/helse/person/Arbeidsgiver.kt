@@ -32,9 +32,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
-import no.nav.helse.person.Person.Companion.Arbeidsledig
-import no.nav.helse.person.Person.Companion.Frilans
-import no.nav.helse.person.Person.Companion.Selvstendig
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
@@ -53,7 +50,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -97,11 +93,12 @@ internal class Arbeidsgiver private constructor(
     private val utbetalinger: MutableList<Utbetaling>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonshistorikk: Refusjonshistorikk,
+    private val yrkesaktivitet: Yrkesaktivitet,
     private val jurist: MaskinellJurist
 ) : Aktivitetskontekst, UtbetalingObserver {
-    internal constructor(person: Person, organisasjonsnummer: String, jurist: MaskinellJurist) : this(
+    internal constructor(person: Person, yrkesaktivitet: Yrkesaktivitet, jurist: MaskinellJurist) : this(
         person = person,
-        organisasjonsnummer = organisasjonsnummer,
+        organisasjonsnummer = yrkesaktivitet.identifikator(),
         id = UUID.randomUUID(),
         inntektshistorikk = Inntektshistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
@@ -111,7 +108,8 @@ internal class Arbeidsgiver private constructor(
         utbetalinger = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
         refusjonshistorikk = Refusjonshistorikk(),
-        jurist.medOrganisasjonsnummer(organisasjonsnummer)
+        yrkesaktivitet = yrkesaktivitet,
+        jurist = yrkesaktivitet.jurist(jurist)
     )
 
     init {
@@ -119,7 +117,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal companion object {
-        internal fun List<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }
+        internal fun List<Arbeidsgiver>.finn(yrkesaktivitet: Yrkesaktivitet) = find { it.erSammeYrkesaktivitet(yrkesaktivitet) }
 
         internal fun List<Arbeidsgiver>.tidligsteDato(): LocalDate {
             return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
@@ -264,6 +262,8 @@ internal class Arbeidsgiver private constructor(
             arbeidsgivere.flatMap { it.søppelbøtte(hendelse, filter) }.forEach { it.buildAndEmit() }
         }
     }
+
+    private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
 
     /* hvorvidt arbeidsgiver ikke inngår i sykepengegrunnlaget som er på et vilkårsgrunnlag,
         for eksempel i saker hvor man var syk på én arbeidsgiver på skjæringstidspunktet, også blir man
@@ -442,15 +442,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun vurderOmSøknadKanHåndteres(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         // sjekker først egen arbeidsgiver først
-        return erYrkesaktivitetenIkkeStøttet(hendelse) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode)
+        return yrkesaktivitet.erYrkesaktivitetenIkkeStøttet(hendelse) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode)
                 || arbeidsgivere.any { it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode) }
                 || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse, vedtaksperiode)
-    }
-
-    private fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean {
-        if (organisasjonsnummer !in setOf(Frilans, Selvstendig, Arbeidsledig)) return false
-        hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
-        return true
     }
 
     private fun harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {
@@ -956,6 +950,7 @@ internal class Arbeidsgiver private constructor(
                 utbetalinger: List<Utbetaling>,
                 feriepengeutbetalinger: List<Feriepengeutbetaling>,
                 refusjonshistorikk: Refusjonshistorikk,
+                yrkesaktivitet: Yrkesaktivitet,
                 jurist: MaskinellJurist
             ) = Arbeidsgiver(
                 person,
@@ -969,6 +964,7 @@ internal class Arbeidsgiver private constructor(
                 utbetalinger.toMutableList(),
                 feriepengeutbetalinger.toMutableList(),
                 refusjonshistorikk,
+                yrkesaktivitet,
                 jurist
             )
         }

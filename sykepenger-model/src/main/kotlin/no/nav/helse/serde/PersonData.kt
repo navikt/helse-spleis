@@ -24,6 +24,8 @@ import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.Yrkesaktivitet
+import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -609,6 +611,7 @@ internal data class PersonData(
                 modelUtbetalinger,
                 feriepengeutbetalinger.map { it.createFeriepengeutbetaling(alder) },
                 refusjonshistorikk.parseRefusjon(),
+                organisasjonsnummer.tilYrkesaktivitet(),
                 arbeidsgiverJurist
             )
 

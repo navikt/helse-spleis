@@ -58,6 +58,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.varsleObservers
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -95,9 +96,6 @@ class Person private constructor(
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
     companion object {
-        const val Frilans = "FRILANS"
-        const val Selvstendig = "SELVSTENDIG"
-        const val Arbeidsledig = "ARBEIDSLEDIG"
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         internal fun ferdigPerson(
             aktørId: String,
@@ -305,7 +303,7 @@ class Person private constructor(
         }
 
         utbetalingshistorikk.sikreAtArbeidsgivereEksisterer {
-            arbeidsgivere.finnEllerOpprett(it, utbetalingshistorikk)
+            arbeidsgivere.finnEllerOpprett(Yrkesaktivitet.Arbeidstaker(it), utbetalingshistorikk)
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(
             aktørId,
@@ -433,7 +431,7 @@ class Person private constructor(
 
     fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(aktivitetslogg, this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer().tilYrkesaktivitet())?.håndter(hendelse)
             ?: hendelse.funksjonellFeil(RV_AG_1)
         håndterGjenoppta(hendelse)
     }
@@ -604,19 +602,19 @@ class Person private constructor(
     }
 
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        finnEllerOpprettArbeidsgiver(hendelse.organisasjonsnummer(), hendelse)
+        finnEllerOpprettArbeidsgiver(hendelse.organisasjonsnummer().tilYrkesaktivitet(), hendelse)
 
-    private fun finnEllerOpprettArbeidsgiver(orgnummer: String, aktivitetslogg: IAktivitetslogg) =
-        arbeidsgivere.finnEllerOpprett(orgnummer, aktivitetslogg)
+    private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
+        arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
-        hendelse.organisasjonsnummer().let { orgnr ->
-            arbeidsgivere.finn(orgnr) ?: hendelse.logiskFeil("Finner ikke arbeidsgiver")
+        hendelse.organisasjonsnummer().tilYrkesaktivitet().let { yrkesaktivitet ->
+            arbeidsgivere.finn(yrkesaktivitet) ?: hendelse.logiskFeil("Finner ikke arbeidsgiver")
         }
 
-    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(orgnr: String, aktivitetslogg: IAktivitetslogg) =
-        finn(orgnr) ?: Arbeidsgiver(this@Person, orgnr, jurist).also { arbeidsgiver ->
-            aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", orgnr)
+    private fun MutableList<Arbeidsgiver>.finnEllerOpprett(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
+        finn(yrkesaktivitet) ?: Arbeidsgiver(this@Person, yrkesaktivitet, jurist).also { arbeidsgiver ->
+            aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", yrkesaktivitet)
             add(arbeidsgiver)
         }
 
@@ -646,7 +644,7 @@ class Person private constructor(
         skatteopplysninger: Map<String, SkattSykepengegrunnlag>,
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
-        skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr, hendelse) } // oppretter evt. nye arbeidsgivere
+        skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), hendelse) } // oppretter evt. nye arbeidsgivere
         return Sykepengegrunnlag.opprett(
             alder,
             arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
