@@ -33,7 +33,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             SELECT melding_type, data FROM melding 
-            WHERE fnr=? AND melding_type IN ('NY_SØKNAD', 'NY_SØKNAD_FRILANS', 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_ARBEIDSGIVER', 'INNTEKTSMELDING')
+            WHERE fnr=? AND melding_type IN ('NY_SØKNAD', 'NY_SØKNAD_FRILANS', 'NY_SØKNAD_SELVSTENDIG', 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_SELVSTENDIG', 'SENDT_SØKNAD_ARBEIDSGIVER', 'INNTEKTSMELDING')
         """
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(statement, fødselsnummer).map { row ->
@@ -56,6 +56,13 @@ internal class HendelseDao(private val dataSource: DataSource) {
                         tom = LocalDate.parse(node.path("tom").asText()),
                         rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
                     )
+                    Meldingstype.NY_SØKNAD_SELVSTENDIG -> HendelseDTO.nySelvstendigsøknad(
+                        id = node.path("@id").asText(),
+                        eksternDokumentId = node.path("id").asText(),
+                        fom = LocalDate.parse(node.path("fom").asText()),
+                        tom = LocalDate.parse(node.path("tom").asText()),
+                        rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
+                    )
                     Meldingstype.SENDT_SØKNAD_NAV -> HendelseDTO.sendtSøknadNav(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
@@ -65,6 +72,14 @@ internal class HendelseDao(private val dataSource: DataSource) {
                         sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
                     )
                     Meldingstype.SENDT_SØKNAD_FRILANS -> HendelseDTO.sendtSøknadFrilans(
+                        id = node.path("@id").asText(),
+                        eksternDokumentId = node.path("id").asText(),
+                        fom = LocalDate.parse(node.path("fom").asText()),
+                        tom = LocalDate.parse(node.path("tom").asText()),
+                        rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
+                        sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
+                    )
+                    Meldingstype.SENDT_SØKNAD_SELVSTENDIG -> HendelseDTO.sendtSøknadSelvstendig(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
                         fom = LocalDate.parse(node.path("fom").asText()),
@@ -112,8 +127,10 @@ internal class HendelseDao(private val dataSource: DataSource) {
     internal enum class Meldingstype {
         NY_SØKNAD,
         NY_SØKNAD_FRILANS,
+        NY_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,
+        SENDT_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_ARBEIDSGIVER,
         INNTEKTSMELDING
     }

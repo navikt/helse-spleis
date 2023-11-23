@@ -27,6 +27,7 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
+import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
@@ -36,6 +37,7 @@ import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
@@ -107,9 +109,11 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     private fun meldingstype(melding: HendelseMessage) = when (melding) {
         is NySøknadMessage -> NY_SØKNAD
         is NyFrilansSøknadMessage -> NY_SØKNAD_FRILANS
+        is NySelvstendigSøknadMessage -> NY_SØKNAD_SELVSTENDIG
         is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
+        is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
         is InntektsmeldingMessage -> INNTEKTSMELDING
         is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
         is YtelserMessage -> YTELSER
@@ -159,9 +163,11 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     private enum class Meldingstype {
         NY_SØKNAD,
         NY_SØKNAD_FRILANS,
+        NY_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,
+        SENDT_SØKNAD_SELVSTENDIG,
         INNTEKTSMELDING,
         PÅMINNELSE,
         PERSONPÅMINNELSE,

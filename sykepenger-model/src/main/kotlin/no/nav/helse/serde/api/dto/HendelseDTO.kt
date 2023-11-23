@@ -6,8 +6,10 @@ import java.time.LocalDateTime
 enum class HendelsetypeDto {
     NY_SØKNAD,
     NY_SØKNAD_FRILANS,
+    NY_SØKNAD_SELVSTENDIG,
     SENDT_SØKNAD_NAV,
     SENDT_SØKNAD_FRILANS,
+    SENDT_SØKNAD_SELVSTENDIG,
     SENDT_SØKNAD_ARBEIDSGIVER,
     INNTEKTSMELDING
 }
@@ -46,6 +48,14 @@ data class HendelseDTO(
             tom = tom,
             rapportertdato = rapportertdato,
         )
+        fun nySelvstendigsøknad(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime) = HendelseDTO(
+            type = HendelsetypeDto.NY_SØKNAD_SELVSTENDIG,
+            id = id,
+            eksternDokumentId = eksternDokumentId,
+            fom = fom,
+            tom = tom,
+            rapportertdato = rapportertdato,
+        )
         fun sendtSøknadNav(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.SENDT_SØKNAD_NAV,
             id = id,
@@ -57,6 +67,15 @@ data class HendelseDTO(
         )
         fun sendtSøknadFrilans(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
             type = HendelsetypeDto.SENDT_SØKNAD_FRILANS,
+            id = id,
+            eksternDokumentId = eksternDokumentId,
+            fom = fom,
+            tom = tom,
+            rapportertdato = rapportertdato,
+            sendtNav = sendtNav,
+        )
+        fun sendtSøknadSelvstendig(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime, sendtNav: LocalDateTime) = HendelseDTO(
+            type = HendelsetypeDto.SENDT_SØKNAD_SELVSTENDIG,
             id = id,
             eksternDokumentId = eksternDokumentId,
             fom = fom,

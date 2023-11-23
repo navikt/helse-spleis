@@ -33,6 +33,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.Person.Companion.Frilans
+import no.nav.helse.person.Person.Companion.Selvstendig
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
@@ -446,7 +447,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun erFrilans(hendelse: IAktivitetslogg): Boolean {
-        if (organisasjonsnummer != Frilans) return false
+        if (organisasjonsnummer !in setOf(Frilans, Selvstendig)) return false
         hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
         return true
     }
