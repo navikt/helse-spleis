@@ -36,6 +36,7 @@ import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
@@ -116,6 +117,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
         is SendtSøknadSelvstendigMessage -> SENDT_SØKNAD_SELVSTENDIG
+        is SendtSøknadArbeidsledigMessage -> SENDT_SØKNAD_ARBEIDSLEDIG
         is InntektsmeldingMessage -> INNTEKTSMELDING
         is UtbetalingpåminnelseMessage -> UTBETALINGPÅMINNELSE
         is YtelserMessage -> YTELSER
@@ -171,6 +173,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,
         SENDT_SØKNAD_SELVSTENDIG,
+        SENDT_SØKNAD_ARBEIDSLEDIG,
         INNTEKTSMELDING,
         PÅMINNELSE,
         PERSONPÅMINNELSE,
