@@ -3,8 +3,7 @@ package no.nav.helse.spleis.meldinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NySøknadMessage
+import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 
 internal class NyeSelvstendigSøknaderRiver(
     rapidsConnection: RapidsConnection,
@@ -20,5 +19,5 @@ internal class NyeSelvstendigSøknaderRiver(
         message.forbid("arbeidsgiver.orgnummer")
     }
 
-    override fun createMessage(packet: JsonMessage) = NyFrilansSøknadMessage(packet)
+    override fun createMessage(packet: JsonMessage) = NySelvstendigSøknadMessage(packet)
 }
