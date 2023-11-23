@@ -56,6 +56,8 @@ internal abstract class AbstractDslTest {
         @JvmStatic
         protected val selvstendig = Person.Selvstendig
         @JvmStatic
+        protected val arbeidsledig = Person.Arbeidsledig
+        @JvmStatic
         @Deprecated("må bruke a1")
         protected val ORGNUMMER = a1
         @JvmStatic

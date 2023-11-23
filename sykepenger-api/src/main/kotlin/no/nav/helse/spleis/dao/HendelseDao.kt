@@ -63,6 +63,13 @@ internal class HendelseDao(private val dataSource: DataSource) {
                         tom = LocalDate.parse(node.path("tom").asText()),
                         rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
                     )
+                    Meldingstype.NY_SØKNAD_ARBEIDSLEDIG -> HendelseDTO.nyArbeidsledigsøknad(
+                        id = node.path("@id").asText(),
+                        eksternDokumentId = node.path("id").asText(),
+                        fom = LocalDate.parse(node.path("fom").asText()),
+                        tom = LocalDate.parse(node.path("tom").asText()),
+                        rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
+                    )
                     Meldingstype.SENDT_SØKNAD_NAV -> HendelseDTO.sendtSøknadNav(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
@@ -80,6 +87,14 @@ internal class HendelseDao(private val dataSource: DataSource) {
                         sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
                     )
                     Meldingstype.SENDT_SØKNAD_SELVSTENDIG -> HendelseDTO.sendtSøknadSelvstendig(
+                        id = node.path("@id").asText(),
+                        eksternDokumentId = node.path("id").asText(),
+                        fom = LocalDate.parse(node.path("fom").asText()),
+                        tom = LocalDate.parse(node.path("tom").asText()),
+                        rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
+                        sendtNav = LocalDateTime.parse(node.path("sendtNav").asText())
+                    )
+                    Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG -> HendelseDTO.sendtSøknadArbeidsledig(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
                         fom = LocalDate.parse(node.path("fom").asText()),
@@ -128,10 +143,12 @@ internal class HendelseDao(private val dataSource: DataSource) {
         NY_SØKNAD,
         NY_SØKNAD_FRILANS,
         NY_SØKNAD_SELVSTENDIG,
+        NY_SØKNAD_ARBEIDSLEDIG,
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,
         SENDT_SØKNAD_SELVSTENDIG,
         SENDT_SØKNAD_ARBEIDSGIVER,
+        SENDT_SØKNAD_ARBEIDSLEDIG,
         INNTEKTSMELDING
     }
 }

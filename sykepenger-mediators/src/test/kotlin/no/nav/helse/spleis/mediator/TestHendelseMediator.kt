@@ -48,6 +48,7 @@ import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
@@ -57,6 +58,7 @@ import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
 import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
@@ -79,6 +81,8 @@ internal class TestHendelseMediator : IHendelseMediator {
         private set
     internal var lestNySøknadSelvstendig = false
         private set
+    internal var lestNySøknadArbeidsledig = false
+        private set
     internal var lestSendtSøknadArbeidsgiver = false
         private set
     internal var lestSendtSøknad = false
@@ -86,6 +90,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     internal var lestSendtSøknadFrilans = false
         private set
     internal var lestSendtSøknadSelvstendig = false
+        private set
+    internal var lestSendtSøknadArbeidsledig = false
         private set
     internal var lestInntektsmelding = false
         private set
@@ -146,10 +152,12 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestNySøknad = false
         lestNySøknadFrilans = false
         lestNySøknadSelvstendig = false
+        lestNySøknadArbeidsledig = false
         lestSendtSøknadArbeidsgiver = false
         lestSendtSøknad = false
         lestSendtSøknadFrilans = false
         lestSendtSøknadSelvstendig = false
+        lestSendtSøknadArbeidsledig = false
         lestInntektsmelding = false
         lestPåminnelse = false
         lestPersonpåminnelse = false
@@ -206,6 +214,16 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(
         personopplysninger: Personopplysninger,
+        message: NyArbeidsledigSøknadMessage,
+        sykmelding: Sykmelding,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    ) {
+        lestNySøknadArbeidsledig = true
+    }
+
+    override fun behandle(
+        personopplysninger: Personopplysninger,
         message: SendtSøknadFrilansMessage,
         søknad: Søknad,
         context: MessageContext,
@@ -222,6 +240,16 @@ internal class TestHendelseMediator : IHendelseMediator {
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestSendtSøknadSelvstendig = true
+    }
+
+    override fun behandle(
+        personopplysninger: Personopplysninger,
+        message: SendtSøknadArbeidsledigMessage,
+        søknad: Søknad,
+        context: MessageContext,
+        historiskeFolkeregisteridenter: Set<Personidentifikator>
+    ) {
+        lestSendtSøknadArbeidsledig = true
     }
 
     override fun behandle(

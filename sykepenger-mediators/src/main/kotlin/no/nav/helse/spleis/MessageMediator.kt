@@ -10,15 +10,16 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
-import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
 import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
 import no.nav.helse.spleis.meldinger.GjenopplivVilkårsgrunnlagRiver
+import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
 import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingReplayUtførtRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
+import no.nav.helse.spleis.meldinger.NyeArbeidsledigSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeFrilansSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeSelvstendigSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeSøknaderRiver
@@ -29,6 +30,7 @@ import no.nav.helse.spleis.meldinger.PersonAvstemmingRiver
 import no.nav.helse.spleis.meldinger.PersonPåminnelserRiver
 import no.nav.helse.spleis.meldinger.PåminnelserRiver
 import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
+import no.nav.helse.spleis.meldinger.SendtArbeidsledigSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtFrilansSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtSelvstendigSøknaderRiver
@@ -43,7 +45,6 @@ import no.nav.helse.spleis.meldinger.UtbetalingshistorikkRiver
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import org.slf4j.LoggerFactory
 
 internal class MessageMediator(
@@ -61,10 +62,12 @@ internal class MessageMediator(
             NyeSøknaderRiver(it, this)
             NyeFrilansSøknaderRiver(it, this)
             NyeSelvstendigSøknaderRiver(it, this)
+            NyeArbeidsledigSøknaderRiver(it, this)
             SendtArbeidsgiverSøknaderRiver(it, this)
             SendtNavSøknaderRiver(it, this)
             SendtFrilansSøknaderRiver(it, this)
             SendtSelvstendigSøknaderRiver(it, this)
+            SendtArbeidsledigSøknaderRiver(it, this)
             InntektsmeldingerRiver(it, this)
             InntektsmeldingerReplayRiver(it, this)
             InntektsmeldingReplayUtførtRiver(it, this)

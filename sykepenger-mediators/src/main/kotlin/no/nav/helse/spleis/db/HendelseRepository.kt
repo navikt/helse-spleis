@@ -26,6 +26,7 @@ import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
@@ -110,6 +111,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is NySøknadMessage -> NY_SØKNAD
         is NyFrilansSøknadMessage -> NY_SØKNAD_FRILANS
         is NySelvstendigSøknadMessage -> NY_SØKNAD_SELVSTENDIG
+        is NyArbeidsledigSøknadMessage -> NY_SØKNAD_ARBEIDSLEDIG
         is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
@@ -164,6 +166,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         NY_SØKNAD,
         NY_SØKNAD_FRILANS,
         NY_SØKNAD_SELVSTENDIG,
+        NY_SØKNAD_ARBEIDSLEDIG,
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,

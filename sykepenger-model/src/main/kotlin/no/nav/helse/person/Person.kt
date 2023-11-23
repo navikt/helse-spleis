@@ -97,6 +97,7 @@ class Person private constructor(
     companion object {
         const val Frilans = "FRILANS"
         const val Selvstendig = "SELVSTENDIG"
+        const val Arbeidsledig = "ARBEIDSLEDIG"
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         internal fun ferdigPerson(
             aktørId: String,

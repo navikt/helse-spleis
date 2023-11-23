@@ -32,6 +32,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
+import no.nav.helse.person.Person.Companion.Arbeidsledig
 import no.nav.helse.person.Person.Companion.Frilans
 import no.nav.helse.person.Person.Companion.Selvstendig
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
@@ -441,13 +442,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun vurderOmSøknadKanHåndteres(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         // sjekker først egen arbeidsgiver først
-        return erFrilans(hendelse) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode)
+        return erYrkesaktivitetenIkkeStøttet(hendelse) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode)
                 || arbeidsgivere.any { it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode) }
                 || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse, vedtaksperiode)
     }
 
-    private fun erFrilans(hendelse: IAktivitetslogg): Boolean {
-        if (organisasjonsnummer !in setOf(Frilans, Selvstendig)) return false
+    private fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean {
+        if (organisasjonsnummer !in setOf(Frilans, Selvstendig, Arbeidsledig)) return false
         hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
         return true
     }
