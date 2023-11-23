@@ -104,12 +104,6 @@ spec:
           application: speider
           access: readwrite
         - team: tbd
-          application: speil
-          access: readwrite
-        - team: tbd
-          application: speil-redis
-          access: readwrite
-        - team: tbd
           application: sprute
           access: readwrite
         - team: tbd
@@ -183,9 +177,6 @@ spec:
           access: readwrite
         - team: tbd
           application: spre-stonadsstatistikk
-          access: readwrite
-        - team: tbd
-          application: sputnik
           access: readwrite
         - team: tbd
           application: sparkel-sputnik
