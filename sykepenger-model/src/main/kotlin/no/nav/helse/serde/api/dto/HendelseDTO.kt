@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 enum class HendelsetypeDto {
     NY_SØKNAD,
-    NY_FRILANS_SØKNAD,
+    NY_SØKNAD_FRILANS,
     SENDT_SØKNAD_NAV,
     SENDT_SØKNAD_FRILANS,
     SENDT_SØKNAD_ARBEIDSGIVER,
@@ -39,7 +39,7 @@ data class HendelseDTO(
             rapportertdato = rapportertdato,
         )
         fun nyFrilanssøknad(id: String, eksternDokumentId: String, fom: LocalDate, tom: LocalDate, rapportertdato: LocalDateTime) = HendelseDTO(
-            type = HendelsetypeDto.NY_FRILANS_SØKNAD,
+            type = HendelsetypeDto.NY_SØKNAD_FRILANS,
             id = id,
             eksternDokumentId = eksternDokumentId,
             fom = fom,

@@ -106,7 +106,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
 
     private fun meldingstype(melding: HendelseMessage) = when (melding) {
         is NySøknadMessage -> NY_SØKNAD
-        is NyFrilansSøknadMessage -> NY_FRILANS_SØKNAD
+        is NyFrilansSøknadMessage -> NY_SØKNAD_FRILANS
         is SendtSøknadArbeidsgiverMessage -> SENDT_SØKNAD_ARBEIDSGIVER
         is SendtSøknadNavMessage -> SENDT_SØKNAD_NAV
         is SendtSøknadFrilansMessage -> SENDT_SØKNAD_FRILANS
@@ -158,7 +158,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
 
     private enum class Meldingstype {
         NY_SØKNAD,
-        NY_FRILANS_SØKNAD,
+        NY_SØKNAD_FRILANS,
         SENDT_SØKNAD_ARBEIDSGIVER,
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,

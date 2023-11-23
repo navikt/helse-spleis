@@ -33,7 +33,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             SELECT melding_type, data FROM melding 
-            WHERE fnr=? AND melding_type IN ('NY_SØKNAD', 'NY_FRILANS_SØKNAD', 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_ARBEIDSGIVER', 'INNTEKTSMELDING')
+            WHERE fnr=? AND melding_type IN ('NY_SØKNAD', 'NY_SØKNAD_FRILANS', 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_ARBEIDSGIVER', 'INNTEKTSMELDING')
         """
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(statement, fødselsnummer).map { row ->
@@ -49,7 +49,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
                         tom = LocalDate.parse(node.path("tom").asText()),
                         rapportertdato = LocalDateTime.parse(node.path("@opprettet").asText()),
                     )
-                    Meldingstype.NY_FRILANS_SØKNAD -> HendelseDTO.nyFrilanssøknad(
+                    Meldingstype.NY_SØKNAD_FRILANS -> HendelseDTO.nyFrilanssøknad(
                         id = node.path("@id").asText(),
                         eksternDokumentId = node.path("id").asText(),
                         fom = LocalDate.parse(node.path("fom").asText()),
@@ -111,7 +111,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
 
     internal enum class Meldingstype {
         NY_SØKNAD,
-        NY_FRILANS_SØKNAD,
+        NY_SØKNAD_FRILANS,
         SENDT_SØKNAD_NAV,
         SENDT_SØKNAD_FRILANS,
         SENDT_SØKNAD_ARBEIDSGIVER,

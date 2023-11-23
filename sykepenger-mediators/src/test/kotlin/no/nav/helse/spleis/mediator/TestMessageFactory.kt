@@ -117,7 +117,7 @@ internal class TestMessageFactory(
             opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_frilans_søknad", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
+        return nyHendelse("ny_søknad_frilans", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
     }
 
     fun lagSøknadArbeidsgiver(
