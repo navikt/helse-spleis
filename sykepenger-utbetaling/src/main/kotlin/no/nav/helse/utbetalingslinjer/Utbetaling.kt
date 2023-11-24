@@ -30,7 +30,6 @@ import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -125,11 +124,6 @@ class Utbetaling private constructor(
     fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
 
     fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
-
-    fun erAlleDagerBetalte(dagene: List<LocalDate>) = dagene.all { utbetalingstidslinje.navDagMedBeløp(it) }
-    private fun Utbetalingstidslinje.navDagMedBeløp(dag: LocalDate) = get(dag).let {
-        it is Utbetalingsdag.NavDag && it.økonomi.harBeløp()
-    }
 
     fun opprett(hendelse: IAktivitetslogg) {
         tilstand.opprett(this, hendelse)
@@ -707,9 +701,6 @@ class Utbetaling private constructor(
         private val tidspunkt: LocalDateTime,
         private val automatiskBehandling: Boolean
     ) {
-        companion object {
-            val automatiskGodkjent get() = Vurdering(true, systemident, "tbd@nav.no", LocalDateTime.now(), true)
-        }
 
         fun accept(visitor: UtbetalingVurderingVisitor) {
             visitor.visitVurdering(this, ident, epost, tidspunkt, automatiskBehandling, godkjent)
@@ -811,8 +802,6 @@ enum class Utbetalingstatus {
         ANNULLERT -> Utbetaling.Annullert
         FORKASTET -> Utbetaling.Forkastet
     }
-
-    fun tilstandsnavn() = tilTilstand()::class.simpleName!!
 }
 
 enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }

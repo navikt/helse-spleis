@@ -73,7 +73,6 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Inntekter
@@ -915,10 +914,6 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.fold(list) { input, vedtaksperiode ->
             vedtaksperiode.sykefraværsfortelling(input)
         }
-
-    internal fun utbetalingssituasjon(arbeidsgiverperiode: Arbeidsgiverperiode, perioder: List<Periode>): Utbetalingssituasjon {
-        return arbeidsgiverperiode.utbetalingssituasjon(perioder, utbetalinger.lastOrNull())
-    }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

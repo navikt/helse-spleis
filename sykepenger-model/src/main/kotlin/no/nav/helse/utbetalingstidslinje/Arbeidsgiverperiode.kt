@@ -7,7 +7,6 @@ import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.intersect
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -18,11 +17,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.ukedager
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.IKKE_UTBETALT
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.INGENTING_Å_UTBETALE
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.Utbetalingssituasjon.UTBETALT
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -184,14 +179,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return this
     }
 
-    internal fun utbetalingssituasjon(perioder: List<Periode>, utbetaling: Utbetaling?): Utbetalingssituasjon {
-        val overlapp = perioder.intersect(utbetalingsdager).flatten()
-        if (overlapp.isEmpty()) return INGENTING_Å_UTBETALE
-        if (utbetaling == null) return IKKE_UTBETALT
-        if (utbetaling.erAlleDagerBetalte(overlapp)) return UTBETALT
-        return IKKE_UTBETALT
-    }
-
     internal fun klinLik(other: Arbeidsgiverperiode?): Boolean {
         if (other == null) return false
         if (this.toSet().containsAll(other.toSet())) return true
@@ -213,11 +200,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     internal companion object {
-        internal enum class Utbetalingssituasjon {
-            UTBETALT,
-            IKKE_UTBETALT,
-            INGENTING_Å_UTBETALE
-        }
 
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 

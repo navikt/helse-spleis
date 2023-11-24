@@ -39,7 +39,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
         if (event.venterPå.venteårsak.hva != "HJELP") return // Om vi venter på noe annet enn hjelp er det OK 👍
         if (event.revurderingFeilet()) return // For tester som ender opp i revurdering feilet er det riktig at vi trenger hjelp 🛟
-        if (event.auuVilUtbetales()) return // For tester som ikke lar en AUU gå videre i livet 🛟
+        if (event.auuVilOmgjøres()) return // For tester som ikke lar en AUU gå videre i livet 🛟
         """
         Har du endret/opprettet en vedtaksperiodetilstand uten å vurdre konsekvensene av 'venteårsak'? 
         Eller har du klart å skriv en test vi ikke støtter? 
@@ -58,8 +58,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun PersonObserver.VedtaksperiodeVenterEvent.revurderingFeilet() = gjeldendeTilstander[venterPå.vedtaksperiodeId] == REVURDERING_FEILET
-    private fun PersonObserver.VedtaksperiodeVenterEvent.auuVilUtbetales() =
-        vedtaksperiodeId == venterPå.vedtaksperiodeId && gjeldendeTilstander[venterPå.vedtaksperiodeId] == AVSLUTTET_UTEN_UTBETALING && venterPå.venteårsak.hvorfor == "VIL_UTBETALES"
+    private fun PersonObserver.VedtaksperiodeVenterEvent.auuVilOmgjøres() =
+        vedtaksperiodeId == venterPå.vedtaksperiodeId && gjeldendeTilstander[venterPå.vedtaksperiodeId] == AVSLUTTET_UTEN_UTBETALING && venterPå.venteårsak.hvorfor == "VIL_OMGJØRES"
     private fun PersonObserver.VedtaksperiodeVenterEvent.tilstander() = when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
         true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp! 😱"
         false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger hjelp! 😱"

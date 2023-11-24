@@ -174,9 +174,6 @@ class Økonomi private constructor(
 
     fun er6GBegrenset() = tilstand.er6GBegrenset(this)
 
-    private val totalbeløp get() = (personbeløp ?: INGEN) + (arbeidsgiverbeløp ?: INGEN)
-    fun harBeløp() = totalbeløp > INGEN
-
     private fun _betal(): Økonomi {
         val total = (dekningsgrunnlag * utbetalingsgrad()).rundTilDaglig()
         val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * utbetalingsgrad()).rundTilDaglig()

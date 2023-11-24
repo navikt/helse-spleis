@@ -80,8 +80,7 @@ internal class Venteårsak private constructor(
         INNTEKTSMELDING,
         BEREGNING,
         UTBETALING,
-        HJELP,
-        SKJØNNSMESSIG_FASTSETTELSE
+        HJELP
     }
 
     enum class Hvorfor {
@@ -91,9 +90,7 @@ internal class Venteårsak private constructor(
         MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE,
         MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE,
         OVERSTYRING_IGANGSATT,
-        VIL_UTBETALES,
-        VIL_AVSLUTTES,
-        ALLEREDE_UTBETALT
+        VIL_OMGJØRES
     }
 
     internal companion object {
