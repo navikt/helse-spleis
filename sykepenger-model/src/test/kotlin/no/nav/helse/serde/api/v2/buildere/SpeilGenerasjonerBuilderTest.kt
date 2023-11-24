@@ -113,7 +113,6 @@ import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.søknadDTOer
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -2572,7 +2571,6 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
         val generasjonerBuilder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
-            søknadDTOer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),
             vilkårsgrunnlagHistorikkBuilderResult

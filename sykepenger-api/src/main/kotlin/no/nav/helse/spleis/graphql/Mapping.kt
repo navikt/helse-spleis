@@ -5,8 +5,7 @@ import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.HendelseDTO
-import no.nav.helse.serde.api.dto.HendelsetypeDto
+import no.nav.helse.spleis.dto.HendelsetypeDto
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.Inntektkilde
@@ -64,6 +63,8 @@ import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.spleis.dto.HendelseDTO
+import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
 import kotlin.Double.Companion.POSITIVE_INFINITY
@@ -286,7 +287,7 @@ private fun mapInntektstype(kilde: UtbetalingInntektskilde) = when (kilde) {
     UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE -> GraphQLInntektstype.FlereArbeidsgivere
 }
 
-internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode) =
+internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List<HendelseDTO>) =
     when (periode) {
         is BeregnetPeriode -> GraphQLBeregnetPeriode(
             fom = periode.fom,
@@ -303,7 +304,7 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode) =
             skjaeringstidspunkt = periode.skjæringstidspunkt,
             maksdato = periode.maksdato,
             utbetaling = mapUtbetaling(periode.utbetaling),
-            hendelser = periode.hendelser.mapNotNull { mapHendelse(it) },
+            hendelser = periode.hendelser.tilHendelseDTO(hendelser),
             periodevilkar = mapPeriodevilkår(periode.periodevilkår),
             periodetilstand = mapTilstand(periode.periodetilstand),
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
@@ -319,7 +320,7 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode) =
             vedtaksperiodeId = periode.vedtaksperiodeId,
             periodetilstand = mapTilstand(periode.periodetilstand),
             skjaeringstidspunkt = periode.skjæringstidspunkt,
-            hendelser = periode.hendelser.mapNotNull { mapHendelse(it) },
+            hendelser = periode.hendelser.tilHendelseDTO(hendelser),
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
         )
         else -> GraphQLUberegnetPeriode(
@@ -333,9 +334,15 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode) =
             vedtaksperiodeId = periode.vedtaksperiodeId,
             periodetilstand = mapTilstand(periode.periodetilstand),
             skjaeringstidspunkt = periode.skjæringstidspunkt,
-            hendelser = periode.hendelser.mapNotNull { mapHendelse(it) }
+            hendelser = periode.hendelser.tilHendelseDTO(hendelser)
         )
     }
+
+private fun Set<UUID>.tilHendelseDTO(hendelser: List<HendelseDTO>): List<GraphQLHendelse> {
+    return this
+        .mapNotNull { dokumentId -> hendelser.firstOrNull { hendelseDTO -> hendelseDTO.id == dokumentId.toString() } }
+        .mapNotNull { mapHendelse(it) }
+}
 
 private fun mapTilstand(tilstand: Periodetilstand) = when (tilstand) {
     Periodetilstand.TilUtbetaling -> GraphQLPeriodetilstand.TilUtbetaling

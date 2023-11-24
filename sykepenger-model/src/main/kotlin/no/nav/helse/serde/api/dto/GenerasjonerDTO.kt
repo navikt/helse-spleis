@@ -68,7 +68,7 @@ abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val oppdatert: LocalDateTime
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
-    abstract val hendelser: Set<HendelseDTO>
+    abstract val hendelser: Set<UUID>
     abstract val sorteringstidspunkt: LocalDateTime
 
     internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): SpeilTidslinjeperiode {
@@ -118,7 +118,7 @@ data class UberegnetVilkårsprøvdPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: Set<HendelseDTO>,
+    override val hendelser: Set<UUID>,
     val vilkårsgrunnlagId: UUID
 ) : SpeilTidslinjeperiode() {
 
@@ -162,7 +162,7 @@ data class UberegnetPeriode(
     override val sorteringstidspunkt: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: Set<HendelseDTO>
+    override val hendelser: Set<UUID>
 ) : SpeilTidslinjeperiode() {
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
@@ -204,7 +204,7 @@ data class UberegnetPeriode(
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
-        private val hendelser: Set<HendelseDTO>
+        private val hendelser: Set<UUID>
     ) {
         private lateinit var sykdomstidslinje: List<Sykdomstidslinjedag>
 
@@ -260,7 +260,7 @@ data class BeregnetPeriode(
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
-    override val hendelser: Set<HendelseDTO>,
+    override val hendelser: Set<UUID>,
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
     val beregningId: UUID,
@@ -377,7 +377,7 @@ data class BeregnetPeriode(
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
-        private val hendelser: Set<HendelseDTO>,
+        private val hendelser: Set<UUID>,
         private val forrigeBeregnetPeriode: BeregnetPeriode?,
         private val generasjonOpprettet: LocalDateTime
     ) {
@@ -584,7 +584,7 @@ data class AnnullertPeriode(
     val beregnet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
-    override val hendelser: Set<HendelseDTO>,
+    override val hendelser: Set<UUID>,
 
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.

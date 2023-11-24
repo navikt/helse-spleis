@@ -5,17 +5,16 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
-import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.speil.builders.PersonBuilder
 
-fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = emptyList()): PersonDTO {
-    val jsonBuilder = SpeilBuilder(hendelser)
+fun serializePersonForSpeil(person: Person): PersonDTO {
+    val jsonBuilder = SpeilBuilder()
     person.accept(jsonBuilder)
     return jsonBuilder.build()
 }
 
-internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : AbstractBuilder() {
+internal class SpeilBuilder : AbstractBuilder() {
 
     private companion object {
         /* Økes for å signalisere til spesialist at strukturen i snapshot'et
@@ -26,7 +25,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : Abstract
 
     private lateinit var personBuilder: PersonBuilder
 
-    fun build() = personBuilder.build(hendelser)
+    fun build() = personBuilder.build()
 
     override fun preVisitPerson(
         person: Person,

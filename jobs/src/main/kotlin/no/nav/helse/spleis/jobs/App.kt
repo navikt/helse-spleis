@@ -6,11 +6,9 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.sql.DataSource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotliquery.Session
-import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.etterlevelse.MaskinellJurist
@@ -158,7 +156,7 @@ private fun testSpeilJsonTask(arbeidId: String) {
     opprettOgUtførArbeid(arbeidId) { session, fnr ->
         hentPerson(session, fnr)?.let { (aktørId, data) ->
             try {
-                serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()), emptyList())
+                serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()))
             } catch (err: Exception) {
                 log.info("$aktørId lar seg ikke serialisere: ${err.message}")
             }

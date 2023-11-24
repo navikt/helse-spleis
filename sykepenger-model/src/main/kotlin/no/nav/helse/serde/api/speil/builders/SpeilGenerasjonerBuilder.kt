@@ -21,7 +21,6 @@ import no.nav.helse.serde.api.dto.AnnullertUtbetaling
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
-import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.sorterEtterHendelse
@@ -47,7 +46,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 // Besøker hele arbeidsgiver-treet
 internal class SpeilGenerasjonerBuilder(
     private val organisasjonsnummer: String,
-    private val hendelser: List<HendelseDTO>,
     private val alder: Alder,
     arbeidsgiver: Arbeidsgiver,
     private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
@@ -103,7 +101,7 @@ internal class SpeilGenerasjonerBuilder(
         skjæringstidspunkt: () -> LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {
-        val hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) }.toSet()
+        val hendelser = hendelseIder.ider()
         this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, skjæringstidspunkt(), tilstand, opprettet, oppdatert, periode, hendelser)
     }
 
@@ -327,7 +325,7 @@ internal class SpeilGenerasjonerBuilder(
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             periode: Periode,
-            hendelser: Set<HendelseDTO>
+            hendelser: Set<UUID>
         ) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
@@ -410,7 +408,7 @@ internal class SpeilGenerasjonerBuilder(
                 opprettet: LocalDateTime,
                 oppdatert: LocalDateTime,
                 periode: Periode,
-                hendelser: Set<HendelseDTO>
+                hendelser: Set<UUID>
             ) {
                 vedtaksperiodebuilder = TidslinjeperioderBuilder(vedtaksperiode, vedtaksperiodeId, skjæringstidspunkt, tilstand, opprettet, oppdatert, periode, hendelser)
             }
@@ -561,7 +559,7 @@ internal class SpeilGenerasjonerBuilder(
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime,
             private val periode: Periode,
-            private val hendelser: Set<HendelseDTO>
+            private val hendelser: Set<UUID>
         ) {
             private var forrigeBeregnetPeriode: BeregnetPeriode? = null
 

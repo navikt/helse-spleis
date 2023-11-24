@@ -41,7 +41,6 @@ import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.spleis.e2e.søknadDTOer
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -59,7 +58,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
         SpeilGenerasjonerBuilder(
             organisasjonsnummer,
-            søknadDTOer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),
             vilkårsgrunnlagHistorikkBuilderResult

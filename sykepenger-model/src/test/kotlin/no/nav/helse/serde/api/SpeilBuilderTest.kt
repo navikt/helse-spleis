@@ -385,7 +385,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `hendelser på uberegnet periode`() {
         val søknadId = håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         val periode = speilApi().arbeidsgivere.single().generasjoner.single().perioder.single() as UberegnetPeriode
-        assertEquals(listOf(søknadId), periode.hendelser.map { UUID.fromString(it.id) })
+        assertEquals(setOf(søknadId), periode.hendelser)
     }
 
     @Test

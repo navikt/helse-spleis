@@ -6,9 +6,9 @@ import java.util.*
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
+import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.objectMapper
 import org.intellij.lang.annotations.Language
 

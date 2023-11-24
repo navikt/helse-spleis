@@ -7,6 +7,7 @@ import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
+import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.dto.håndterPerson
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
@@ -29,12 +30,12 @@ private object ApiMetrikker {
 internal fun personResolver(personDao: PersonDao, hendelseDao: HendelseDao): (fnr: String) -> GraphQLPerson? = { fnr ->
     ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
         ApiMetrikker.målDeserialisering { serialisertPerson.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
-            .let { ApiMetrikker.målByggSnapshot { håndterPerson(fnr.toLong(), it, hendelseDao) } }
-            .let { person -> mapTilDto(person) }
+            .let { ApiMetrikker.målByggSnapshot { håndterPerson(it) } }
+            .let { person -> mapTilDto(person, hendelseDao.hentHendelser(fnr.toLong())) }
     }
 }
 
-private fun mapTilDto(person: PersonDTO) =
+private fun mapTilDto(person: PersonDTO, hendelser: List<HendelseDTO>) =
     GraphQLPerson(
         aktorId = person.aktørId,
         fodselsnummer = person.fødselsnummer,
@@ -45,7 +46,7 @@ private fun mapTilDto(person: PersonDTO) =
                 generasjoner = arbeidsgiver.generasjoner.map { generasjon ->
                     GraphQLGenerasjon(
                         id = generasjon.id,
-                        perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode) }
+                        perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode, hendelser) }
                     )
                 },
                 ghostPerioder = arbeidsgiver.ghostPerioder.map { periode ->

@@ -9,7 +9,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.BuilderState
-import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.Alder
 
@@ -24,10 +23,10 @@ internal class  PersonBuilder(
     private var dødsdato: LocalDate? = null
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
 
-    internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
+    internal fun build(): PersonDTO {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk).build()
         val arbeidsgivere = arbeidsgivere
-            .map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) }
+            .map { it.build(alder, vilkårsgrunnlagHistorikk) }
             .let { arbeidsgivere ->
                 arbeidsgivere.map { it.medGhostperioder(vilkårsgrunnlagHistorikk, arbeidsgivere) }
             }
