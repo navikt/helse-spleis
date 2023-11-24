@@ -76,7 +76,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val tom: LocalDate,
         val forlengerPeriode: Boolean,
         val harPeriodeInnenfor16Dager: Boolean,
-        val påvirkerArbeidsgiverperioden: Boolean,
         val trengerArbeidsgiveropplysninger: Boolean,
         val sykmeldingsperioder: List<Periode>
     ) {
@@ -90,7 +89,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                 "tom" to tom,
                 "forlengerPeriode" to forlengerPeriode,
                 "harPeriodeInnenfor16Dager" to harPeriodeInnenfor16Dager,
-                "påvirkerArbeidsgiverperioden" to påvirkerArbeidsgiverperioden,
                 "trengerArbeidsgiveropplysninger" to trengerArbeidsgiveropplysninger,
                 "sykmeldingsperioder" to sykmeldingsperioder.map {
                     mapOf(
