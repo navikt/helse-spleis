@@ -8,7 +8,13 @@ enum class GraphQLHendelsetype {
     Inntektsmelding,
     SendtSoknadNav,
     SendtSoknadArbeidsgiver,
+    SendtSoknadFrilans,
+    SendtSoknadSelvstendig,
+    SendtSoknadArbeidsledig,
     NySoknad,
+    NySoknadFrilans,
+    NySoknadSelvstendig,
+    NySoknadArbeidsledig,
     Ukjent
 }
 
@@ -39,6 +45,37 @@ data class GraphQLSoknadNav(
     override val type = GraphQLHendelsetype.SendtSoknadNav
 }
 
+data class GraphQLSoknadFrilans(
+    override val id: String,
+    override val eksternDokumentId: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val rapportertDato: LocalDateTime,
+    val sendtNav: LocalDateTime
+) : GraphQLHendelse {
+    override val type = GraphQLHendelsetype.SendtSoknadFrilans
+}
+data class GraphQLSoknadSelvstendig(
+    override val id: String,
+    override val eksternDokumentId: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val rapportertDato: LocalDateTime,
+    val sendtNav: LocalDateTime
+) : GraphQLHendelse {
+    override val type = GraphQLHendelsetype.SendtSoknadSelvstendig
+}
+data class GraphQLSoknadArbeidsledig(
+    override val id: String,
+    override val eksternDokumentId: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val rapportertDato: LocalDateTime,
+    val sendtNav: LocalDateTime
+) : GraphQLHendelse {
+    override val type = GraphQLHendelsetype.SendtSoknadArbeidsledig
+}
+
 data class GraphQLSoknadArbeidsgiver(
     override val id: String,
     override val eksternDokumentId: String,
@@ -58,4 +95,32 @@ data class GraphQLSykmelding(
     val rapportertDato: LocalDateTime
 ) : GraphQLHendelse {
     override val type = GraphQLHendelsetype.NySoknad
+}
+
+data class GraphQLNySoknadFrilans(
+    override val id: String,
+    override val eksternDokumentId: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val rapportertDato: LocalDateTime
+) : GraphQLHendelse {
+    override val type = GraphQLHendelsetype.NySoknadFrilans
+}
+data class GraphQLNySoknadSelvstendig(
+    override val id: String,
+    override val eksternDokumentId: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val rapportertDato: LocalDateTime
+) : GraphQLHendelse {
+    override val type = GraphQLHendelsetype.NySoknadSelvstendig
+}
+data class GraphQLNySoknadArbeidsledig(
+    override val id: String,
+    override val eksternDokumentId: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val rapportertDato: LocalDateTime
+) : GraphQLHendelse {
+    override val type = GraphQLHendelsetype.NySoknadArbeidsledig
 }

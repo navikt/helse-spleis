@@ -65,6 +65,12 @@ import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
+import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadArbeidsledig
+import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadFrilans
+import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadSelvstendig
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsledig
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadFrilans
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadSelvstendig
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.NaN
 import kotlin.Double.Companion.POSITIVE_INFINITY
@@ -231,7 +237,52 @@ private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse.type) {
         tom = hendelse.tom!!,
         rapportertDato = hendelse.rapportertdato!!
     )
+    HendelsetypeDto.NY_SØKNAD_FRILANS -> GraphQLNySoknadFrilans(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!
+    )
+    HendelsetypeDto.NY_SØKNAD_SELVSTENDIG -> GraphQLNySoknadSelvstendig(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!
+    )
+    HendelsetypeDto.NY_SØKNAD_ARBEIDSLEDIG -> GraphQLNySoknadArbeidsledig(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!
+    )
     HendelsetypeDto.SENDT_SØKNAD_NAV -> GraphQLSoknadNav(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!,
+        sendtNav = hendelse.sendtNav!!
+    )
+    HendelsetypeDto.SENDT_SØKNAD_FRILANS -> GraphQLSoknadFrilans(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!,
+        sendtNav = hendelse.sendtNav!!
+    )
+    HendelsetypeDto.SENDT_SØKNAD_SELVSTENDIG -> GraphQLSoknadSelvstendig(
+        id = hendelse.id,
+        eksternDokumentId = hendelse.eksternDokumentId,
+        fom = hendelse.fom!!,
+        tom = hendelse.tom!!,
+        rapportertDato = hendelse.rapportertdato!!,
+        sendtNav = hendelse.sendtNav!!
+    )
+    HendelsetypeDto.SENDT_SØKNAD_ARBEIDSLEDIG -> GraphQLSoknadArbeidsledig(
         id = hendelse.id,
         eksternDokumentId = hendelse.eksternDokumentId,
         fom = hendelse.fom!!,

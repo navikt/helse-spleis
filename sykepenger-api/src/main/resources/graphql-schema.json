@@ -4654,7 +4654,37 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "SendtSoknadFrilans",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "SendtSoknadSelvstendig",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "SendtSoknadArbeidsledig",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "NySoknad",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "NySoknadFrilans",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "NySoknadSelvstendig",
+          "description" : null,
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "NySoknadArbeidsledig",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null
