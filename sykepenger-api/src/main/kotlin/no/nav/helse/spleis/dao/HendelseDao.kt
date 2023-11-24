@@ -33,7 +33,11 @@ internal class HendelseDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             SELECT melding_type, data FROM melding 
-            WHERE fnr=? AND melding_type IN ('NY_SØKNAD', 'NY_SØKNAD_FRILANS', 'NY_SØKNAD_SELVSTENDIG', 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_SELVSTENDIG', 'SENDT_SØKNAD_ARBEIDSGIVER', 'INNTEKTSMELDING')
+            WHERE fnr=? AND melding_type IN (
+                'NY_SØKNAD', 'NY_SØKNAD_FRILANS', 'NY_SØKNAD_SELVSTENDIG', 'NY_SØKNAD_ARBEIDSLEDIG',
+                'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_SELVSTENDIG', 'SENDT_SØKNAD_ARBEIDSGIVER', 'SENDT_SØKNAD_ARBEIDSLEDIG', 
+                'INNTEKTSMELDING'
+            )
         """
         return sessionOf(dataSource).use { session ->
             session.run(queryOf(statement, fødselsnummer).map { row ->
