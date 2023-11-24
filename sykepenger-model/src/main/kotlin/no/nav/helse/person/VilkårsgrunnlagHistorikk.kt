@@ -344,6 +344,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun byggGodkjenningsbehov(builder: GodkjenningsbehovBuilder) {
             builder.erInfotrygd(this is InfotrygdVilkårsgrunnlag)
             builder.skjæringstidspunkt(skjæringstidspunkt)
+            builder.vilkårsgrunnlagId(vilkårsgrunnlagId)
             sykepengegrunnlag.byggGodkjenningsbehov(builder)
         }
 

@@ -1,10 +1,12 @@
 package no.nav.helse.person.aktivitetslogg
 
 import java.time.LocalDate
+import java.util.UUID
 
 class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val kanAvvises: Boolean) {
     private val tags: MutableSet<String> = mutableSetOf()
     private lateinit var skjæringstidspunkt: LocalDate
+    private lateinit var vilkårsgrunnlagId: UUID
     private lateinit var periodeFom: LocalDate
     private lateinit var periodeTom: LocalDate
     private lateinit var periodetype: UtbetalingPeriodetype
@@ -22,6 +24,11 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
     fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) = apply {
         this.skjæringstidspunkt = skjæringstidspunkt
     }
+
+    fun vilkårsgrunnlagId(vilkårsgrunnlagId: UUID) = apply {
+        this.vilkårsgrunnlagId = vilkårsgrunnlagId
+    }
+
     fun periode(fom: LocalDate, tom: LocalDate) = apply {
         this.periodeFom = fom
         this.periodeTom = tom
@@ -65,6 +72,7 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
         "periodeFom" to periodeFom.toString(),
         "periodeTom" to periodeTom.toString(),
         "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+        "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
         "periodetype" to periodetype.name,
         "førstegangsbehandling" to førstegangsbehandling,
         "utbetalingtype" to utbetalingtype,
