@@ -148,7 +148,7 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         is Dag.SykHelgedag -> SykdomstidslinjedagType.SYK_HELGEDAG
         is Dag.Permisjonsdag -> SykdomstidslinjedagType.PERMISJONSDAG
         is Dag.ProblemDag -> SykdomstidslinjedagType.UBESTEMTDAG
-        is Dag.SykedagNav -> SykdomstidslinjedagType.SYKEDAG
+        is Dag.SykedagNav -> SykdomstidslinjedagType.SYKEDAG_NAV
         is Dag.AndreYtelser -> error("denne må settes manuelt")
     }
 }

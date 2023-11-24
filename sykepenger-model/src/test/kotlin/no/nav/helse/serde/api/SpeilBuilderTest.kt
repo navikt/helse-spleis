@@ -101,7 +101,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val tidslinje = speilJson.arbeidsgivere.single().generasjoner.single().perioder.single().sammenslåttTidslinje
         val forventetFørstedag = SammenslåttDag(
             dagen = 1.januar,
-            sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
+            sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG_NAV,
             utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
             kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Saksbehandler, id),
             grad = 100,
