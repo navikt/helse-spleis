@@ -507,7 +507,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 hendelser = setOf(søknad2),
                 fom = 10.januar,
                 tom = 15.januar,
-                forlengerPeriode = false,
+                forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
                 påvirkerArbeidsgiverperioden = false,
                 trengerArbeidsgiveropplysninger = false,
