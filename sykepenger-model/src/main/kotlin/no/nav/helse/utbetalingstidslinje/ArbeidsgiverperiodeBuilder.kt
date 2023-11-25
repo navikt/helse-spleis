@@ -105,6 +105,7 @@ internal class ArbeidsgiverperiodeBuilder(
     }
 
     override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: Hendelseskilde) {
+        fridager.somSykedager(kilde)
         tilstand.feriedagMedSykmelding(this, dato, kilde)
     }
 

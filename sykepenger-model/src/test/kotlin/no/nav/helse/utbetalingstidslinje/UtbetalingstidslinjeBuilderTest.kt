@@ -251,6 +251,19 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `ferie med sykmelding etter permisjon fullfører agp`() {
+        undersøkeLike({ 1.S + 10.P + 6.F + 5.S }) {
+            assertEquals(22, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(3, inspektør.navDagTeller)
+            assertEquals(2, inspektør.navHelgDagTeller)
+            assertEquals(1, inspektør.fridagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(1.januar til 16.januar, perioder.first())
+        }
+    }
+
+    @Test
     fun `ferie og permisjon etter utbetaling`() {
         undersøkeLike({ 16.S + 15.F }, { 16.S + 15.P }, { 16.S + 15.AIG }) {
             assertEquals(31, inspektør.size)
