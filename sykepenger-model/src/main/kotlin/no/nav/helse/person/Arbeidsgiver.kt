@@ -843,6 +843,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun beregnUtbetalingstidslinje(
+        hendelse: IAktivitetslogg,
         periode: Periode,
         regler: ArbeidsgiverRegler,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
@@ -850,6 +851,7 @@ internal class Arbeidsgiver private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ): Utbetalingstidslinje {
         val inntekter = Inntekter(
+            hendelse = hendelse,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = regler,
             subsumsjonObserver = subsumsjonObserver,

@@ -8,6 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
@@ -35,6 +36,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     fun `ekskluderer dager før første dag`() {
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
+                hendelse = Aktivitetslogg(),
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
@@ -53,6 +55,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     fun `ekskluderer infotrygd-snuter`() {
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
+                hendelse = Aktivitetslogg(),
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
@@ -71,6 +74,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     fun `ekskluderer infotrygd-haler`() {
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
+                hendelse = Aktivitetslogg(),
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
@@ -89,6 +93,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     fun `legger ikke til samme ukjente dag flere ganger selv om det er utbetalt for flere arbeidsgivere`() {
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
+                hendelse = Aktivitetslogg(),
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),

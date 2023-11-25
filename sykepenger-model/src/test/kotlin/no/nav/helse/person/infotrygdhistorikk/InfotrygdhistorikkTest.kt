@@ -329,6 +329,7 @@ internal class InfotrygdhistorikkTest {
         val sykdomstidslinje = 31.S
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
+                hendelse = Aktivitetslogg(),
                 organisasjonsnummer = "a1",
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
@@ -350,6 +351,7 @@ internal class InfotrygdhistorikkTest {
         val sykdomstidslinje = 31.opphold + 28.S
         val builder = UtbetalingstidslinjeBuilder(
             Inntekter(
+                hendelse = Aktivitetslogg(),
                 organisasjonsnummer = "a1",
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())

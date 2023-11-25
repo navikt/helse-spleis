@@ -324,6 +324,7 @@ class Person private constructor(
             alder = alder,
             arbeidsgivere = { beregningsperiode: Periode, subsumsjonObserver: SubsumsjonObserver, hendelse: IAktivitetslogg ->
                 arbeidsgivere.associateWith { it.beregnUtbetalingstidslinje(
+                    hendelse,
                     beregningsperiode,
                     regler,
                     vilkårsgrunnlagHistorikk,

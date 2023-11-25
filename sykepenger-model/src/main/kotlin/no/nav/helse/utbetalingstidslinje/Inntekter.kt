@@ -8,9 +8,11 @@ import no.nav.helse.person.Vedtaksperiode.Companion.manglerVilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Companion.ugyldigUtbetalingstidslinje
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Økonomi
 
 internal class Inntekter(
+    private val hendelse: IAktivitetslogg,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val organisasjonsnummer: String,
     private val regler: ArbeidsgiverRegler,
@@ -21,14 +23,11 @@ internal class Inntekter(
         vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
 
     internal fun medUtbetalingsopplysninger(dato: LocalDate, økonomi: Økonomi) = try {
-        vilkårsgrunnlagHistorikk.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
+        vilkårsgrunnlagHistorikk.medUtbetalingsopplysninger(hendelse, organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
     } catch (exception: IllegalStateException) {
         exception.håndter(dato, vedtaksperioder)
         throw exception
     }
-
-    internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi) =
-        vilkårsgrunnlagHistorikk.utenInntekt(dato, økonomi)
 
     internal fun ugyldigUtbetalingstidslinje(dager: Set<LocalDate>) =
         vedtaksperioder.ugyldigUtbetalingstidslinje(dager)

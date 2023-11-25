@@ -131,22 +131,6 @@ internal class VilkårsgrunnlagHistorikkTest {
     }
 
     @Test
-    fun `setter ingen inntekt på økonomi`() {
-        val inntekt = 21000.månedlig
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ))
-        val økonomi: Økonomi = historikk.utenInntekt(1.januar, Økonomi.ikkeBetalt())
-        assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
-    }
-
-    @Test
     fun `setter inntekt hvis finnes`() {
         val inntekt = 21000.månedlig
         val skjæringstidspunkt = 2.januar

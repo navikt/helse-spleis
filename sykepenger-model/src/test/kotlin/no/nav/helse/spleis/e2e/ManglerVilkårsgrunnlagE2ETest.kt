@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -15,10 +15,15 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -71,8 +76,51 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
-        assertIllegalStateException("Fant ikke vilkårsgrunnlag for 2018-02-01. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene [2018-03-10]") {
-            håndterYtelser(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        assertVarsel(Varselkode.RV_IV_8)
+    }
+
+    @Test
+    fun `søknad omgjør paddet arbeidsdager til syk`() {
+        håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
+        håndterSøknad(Sykdom(31.januar, 5.februar, 100.prosent))
+        // perioden 4. til 9.januar er paddet arbeidsdager; perioden 23.januar til 30.januar er "implisitte arbeidsdager" (ukjentdager på sykdomtsidslinjen)
+        håndterInntektsmelding(listOf(1.januar til 3.januar, 10.januar til 22.januar), førsteFraværsdag = 31.januar)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
+            assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[4.januar])
+            assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[9.januar])
+            assertInstanceOf(Dag.UkjentDag::class.java, sykdomstidslinjeInspektør[23.januar])
+            assertInstanceOf(Dag.UkjentDag::class.java, sykdomstidslinjeInspektør[30.januar])
+        }
+
+        håndterSøknad(Sykdom(10.januar, 26.januar, 100.prosent))
+
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
+            assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[4.januar])
+            assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[9.januar])
+            assertInstanceOf(Dag.Sykedag::class.java, sykdomstidslinjeInspektør[23.januar])
+            assertInstanceOf(Dag.Sykedag::class.java, sykdomstidslinjeInspektør[26.januar])
+        }
+
+        håndterYtelser(2.vedtaksperiode)
+
+        assertEquals(31.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertVarsel(Varselkode.RV_IV_8, 2.vedtaksperiode.filter())
+        inspektør.utbetaling(1).inspektør.also { utbetalingInspektør ->
+            utbetalingInspektør.utbetalingstidslinje[23.januar].also { dagen ->
+                assertInstanceOf(Utbetalingsdag.NavDag::class.java, dagen)
+                assertEquals(INGEN, dagen.økonomi.inspektør.aktuellDagsinntekt)
+            }
+            utbetalingInspektør.utbetalingstidslinje[31.januar].also { dagen ->
+                assertInstanceOf(Utbetalingsdag.NavDag::class.java, dagen)
+                assertEquals(INNTEKT, dagen.økonomi.inspektør.aktuellDagsinntekt)
+            }
         }
     }
 
@@ -104,7 +152,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
         // arbeidsgiver, også lengre tilbake i tid enn vedtaksperioden som blir truffet.
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent))
         assertTilstandFørInnteksmeldingHensyntas()
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -116,7 +164,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `korrigert arbeidsgiverperiode under pågående revurdering`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar, 100.prosent)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 80.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -134,7 +182,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar, 100.prosent)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 80.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 80.prosent))
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

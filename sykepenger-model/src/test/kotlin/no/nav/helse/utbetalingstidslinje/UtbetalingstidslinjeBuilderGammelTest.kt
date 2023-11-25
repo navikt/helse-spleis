@@ -10,6 +10,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -888,6 +889,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val inntekter = Inntekter(
+            hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
