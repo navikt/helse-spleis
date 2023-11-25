@@ -53,6 +53,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -60,6 +61,32 @@ import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
 internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
+
+    @Test
+    fun `kort periode i forkant endrer skjæringstidspunktet tilbake`() {
+        a1 {
+            håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
+            håndterSøknad(Sykdom(6.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(3.januar til 19.januar))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
+                assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[1.januar])
+                assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[2.januar])
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }
+    }
 
     @Test
     fun `vedtaksperiode strekker seg tilbake og endrer skjæringstidspunktet`() {
