@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingslinjer
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.hendelser.SimuleringResultat
 
@@ -10,7 +9,6 @@ interface OppdragVisitor: UtbetalingslinjeVisitor {
         fagområde: Fagområde,
         fagsystemId: String,
         mottaker: String,
-        sisteArbeidsgiverdag: LocalDate?,
         stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
@@ -29,7 +27,6 @@ interface OppdragVisitor: UtbetalingslinjeVisitor {
         fagområde: Fagområde,
         fagsystemId: String,
         mottaker: String,
-        sisteArbeidsgiverdag: LocalDate?,
         stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,

@@ -12,12 +12,10 @@ class UtbetalingkladdBuilder(private var periode: Periode, arbeidsgivermottaker:
     // kan ikke meldingene mappes til riktig oppdrag
     // private val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
     private var arbeidsgiveroppdragBuilder = OppdragBuilder(
-        sisteArbeidsgiverdag = periode.endInclusive,
         mottaker = arbeidsgivermottaker,
         fagområde = SykepengerRefusjon
     )
     private var personoppdragBuilder = OppdragBuilder(
-        sisteArbeidsgiverdag = periode.endInclusive,
         mottaker = personmottaker,
         fagområde = Sykepenger
     )

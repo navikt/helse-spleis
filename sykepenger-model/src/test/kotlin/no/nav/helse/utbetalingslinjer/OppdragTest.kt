@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.inspectors.inspektør
@@ -19,37 +18,38 @@ internal class OppdragTest {
     @Test
     fun `begrense oppdrag til siste dato`() {
         val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 19.januar,
-                tom = 25.januar,
-                endringskode = Endringskode.UEND,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 1,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 26.januar,
-                tom = 28.januar,
-                endringskode = Endringskode.ENDR,
-                beløp = 500,
-                grad = 50,
-                delytelseId = 2,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 29.januar,
-                tom = 31.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 3,
-                refDelytelseId = null,
-                refFagsystemId = null
+                Utbetalingslinje(
+                    fom = 19.januar,
+                    tom = 25.januar,
+                    endringskode = Endringskode.UEND,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 1,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 26.januar,
+                    tom = 28.januar,
+                    endringskode = Endringskode.ENDR,
+                    beløp = 500,
+                    grad = 50,
+                    delytelseId = 2,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 29.januar,
+                    tom = 31.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 3,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                )
             )
-        ), sisteArbeidsgiverdag = 18.januar)
+        )
 
         assertTrue(oppdrag1.begrensTil(18.januar).isEmpty())
         oppdrag1.begrensTil(20.januar).also { result ->
@@ -69,37 +69,38 @@ internal class OppdragTest {
     @Test
     fun `begrense oppdrag fra første dato`() {
         val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 19.januar,
-                tom = 25.januar,
-                endringskode = Endringskode.UEND,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 1,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 26.januar,
-                tom = 28.januar,
-                endringskode = Endringskode.ENDR,
-                beløp = 500,
-                grad = 50,
-                delytelseId = 2,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 29.januar,
-                tom = 31.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 3,
-                refDelytelseId = null,
-                refFagsystemId = null
+                Utbetalingslinje(
+                    fom = 19.januar,
+                    tom = 25.januar,
+                    endringskode = Endringskode.UEND,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 1,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 26.januar,
+                    tom = 28.januar,
+                    endringskode = Endringskode.ENDR,
+                    beløp = 500,
+                    grad = 50,
+                    delytelseId = 2,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 29.januar,
+                    tom = 31.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 3,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                )
             )
-        ), sisteArbeidsgiverdag = 18.januar)
+        )
 
         assertTrue(oppdrag1.begrensFra(1.februar).isEmpty())
         oppdrag1.begrensFra(29.januar).also { result ->
@@ -122,28 +123,29 @@ internal class OppdragTest {
     @Test
     fun `begrense oppdrag tar ikke med opphørslinjer`() {
         val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 19.januar,
-                tom = 25.januar,
-                endringskode = Endringskode.ENDR,
-                datoStatusFom = 16.januar,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 1,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 26.januar,
-                tom = 29.januar,
-                endringskode = Endringskode.NY,
-                beløp = 500,
-                grad = 50,
-                delytelseId = 2,
-                refDelytelseId = null,
-                refFagsystemId = null
+                Utbetalingslinje(
+                    fom = 19.januar,
+                    tom = 25.januar,
+                    endringskode = Endringskode.ENDR,
+                    datoStatusFom = 16.januar,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 1,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 26.januar,
+                    tom = 29.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 500,
+                    grad = 50,
+                    delytelseId = 2,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                )
             )
-        ), sisteArbeidsgiverdag = 18.januar)
+        )
 
         oppdrag1.begrensFra(19.januar).also { result ->
             assertEquals(1, result.size)
@@ -163,115 +165,119 @@ internal class OppdragTest {
     @Test
     fun `prepend oppdrag`() {
         val oppdrag1 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 19.januar,
-                tom = 25.januar,
-                endringskode = Endringskode.UEND,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 1,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 26.januar,
-                tom = 28.januar,
-                endringskode = Endringskode.ENDR,
-                beløp = 500,
-                grad = 50,
-                delytelseId = 2,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 29.januar,
-                tom = 31.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 3,
-                refDelytelseId = null,
-                refFagsystemId = null
+                Utbetalingslinje(
+                    fom = 19.januar,
+                    tom = 25.januar,
+                    endringskode = Endringskode.UEND,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 1,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 26.januar,
+                    tom = 28.januar,
+                    endringskode = Endringskode.ENDR,
+                    beløp = 500,
+                    grad = 50,
+                    delytelseId = 2,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 29.januar,
+                    tom = 31.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 3,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                )
             )
-        ), sisteArbeidsgiverdag = 18.januar)
+        )
         val oppdrag2 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 17.januar,
-                tom = 18.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 17.januar,
+                    tom = 18.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 16.januar)
+        )
 
         val oppdrag3 = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 17.januar,
-                tom = 25.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 1,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 26.januar,
-                tom = 28.januar,
-                endringskode = Endringskode.ENDR,
-                beløp = 500,
-                grad = 50,
-                delytelseId = 2,
-                refDelytelseId = null,
-                refFagsystemId = null
-            ),
-            Utbetalingslinje(
-                fom = 29.januar,
-                tom = 31.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 3,
-                refDelytelseId = null,
-                refFagsystemId = null
+                Utbetalingslinje(
+                    fom = 17.januar,
+                    tom = 25.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 1,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 26.januar,
+                    tom = 28.januar,
+                    endringskode = Endringskode.ENDR,
+                    beløp = 500,
+                    grad = 50,
+                    delytelseId = 2,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                ),
+                Utbetalingslinje(
+                    fom = 29.januar,
+                    tom = 31.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 3,
+                    refDelytelseId = null,
+                    refFagsystemId = null
+                )
             )
-        ), sisteArbeidsgiverdag = 16.januar)
+        )
         assertEquals(oppdrag3, oppdrag1 + oppdrag2)
         assertEquals(oppdrag3, oppdrag2 + oppdrag1)
 
         val oppdragSomKanUtbetales = oppdrag3.minus(oppdrag1, Aktivitetslogg())
         val expectedOppdragSomKanUtbetales = Oppdrag("", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 17.januar,
-                tom = 25.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 4,
-                refDelytelseId = 3,
-                refFagsystemId = oppdrag1.inspektør.fagsystemId()
-            ),
-            Utbetalingslinje(
-                fom = 26.januar,
-                tom = 28.januar,
-                endringskode = Endringskode.NY,
-                beløp = 500,
-                grad = 50,
-                delytelseId = 5,
-                refDelytelseId = 4,
-                refFagsystemId = oppdrag1.inspektør.fagsystemId()
-            ),
-            Utbetalingslinje(
-                fom = 29.januar,
-                tom = 31.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100,
-                delytelseId = 6,
-                refDelytelseId = 5,
-                refFagsystemId = oppdrag1.inspektør.fagsystemId()
+                Utbetalingslinje(
+                    fom = 17.januar,
+                    tom = 25.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 4,
+                    refDelytelseId = 3,
+                    refFagsystemId = oppdrag1.inspektør.fagsystemId()
+                ),
+                Utbetalingslinje(
+                    fom = 26.januar,
+                    tom = 28.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 500,
+                    grad = 50,
+                    delytelseId = 5,
+                    refDelytelseId = 4,
+                    refFagsystemId = oppdrag1.inspektør.fagsystemId()
+                ),
+                Utbetalingslinje(
+                    fom = 29.januar,
+                    tom = 31.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100,
+                    delytelseId = 6,
+                    refDelytelseId = 5,
+                    refFagsystemId = oppdrag1.inspektør.fagsystemId()
+                )
             )
-        ), sisteArbeidsgiverdag = 16.januar)
+        )
         assertEquals(expectedOppdragSomKanUtbetales, oppdragSomKanUtbetales)
     }
 
@@ -300,14 +306,15 @@ internal class OppdragTest {
     @Test
     fun `tomme oppdrag er synkroniserte med andre ikke tomme`() {
         val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 31.desember(2017))
+        )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
@@ -316,14 +323,15 @@ internal class OppdragTest {
     @Test
     fun `oppdrag med status er synkronisert med tomt oppdrag`() {
         val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 31.desember(2017))
+        )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger)
         oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag1))
@@ -333,23 +341,25 @@ internal class OppdragTest {
     @Test
     fun `oppdrag med ulik status er ikke synkroniserte`() {
         val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 31.desember(2017))
+        )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 31.desember(2017))
+        )
         oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
     }
@@ -357,23 +367,25 @@ internal class OppdragTest {
     @Test
     fun `oppdrag med ulik status er ikke synkroniserte 2`() {
         val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 31.desember(2017))
+        )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 31.desember(2017))
+        )
         oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AVVIST, "", 1234L, LocalDateTime.now()))
         assertFalse(Oppdrag.synkronisert(oppdrag1, oppdrag2))
@@ -382,23 +394,25 @@ internal class OppdragTest {
     @Test
     fun `oppdrag med lik status er synkroniserte`() {
         val oppdrag1 = Oppdrag("mottaker", Fagområde.SykepengerRefusjon, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 31.desember(2017))
+        )
         val oppdrag2 = Oppdrag("mottaker", Fagområde.Sykepenger, listOf(
-            Utbetalingslinje(
-                fom = 1.januar,
-                tom = 16.januar,
-                endringskode = Endringskode.NY,
-                beløp = 1000,
-                grad = 100
+                Utbetalingslinje(
+                    fom = 1.januar,
+                    tom = 16.januar,
+                    endringskode = Endringskode.NY,
+                    beløp = 1000,
+                    grad = 100
+                )
             )
-        ), sisteArbeidsgiverdag = 31.desember(2017))
+        )
         oppdrag1.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag1.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         oppdrag2.lagreOverføringsinformasjon(UtbetalingHendelse(UUID.randomUUID(), "aktør", "fnr", "orgnr", oppdrag2.fagsystemId(), UUID.randomUUID().toString(), Oppdragstatus.AKSEPTERT, "", 1234L, LocalDateTime.now()))
         assertTrue(Oppdrag.synkronisert(oppdrag1, oppdrag2))
@@ -424,7 +438,7 @@ internal class OppdragTest {
                     grad = 100
                 )
 
-            ), sisteArbeidsgiverdag = 16.januar
+            )
         )
         val annullering = oppdrag.annuller(Aktivitetslogg())
         assertEquals(-1 * oppdrag.totalbeløp(), annullering.nettoBeløp())
@@ -442,7 +456,7 @@ internal class OppdragTest {
                     grad = 100
                 )
 
-            ), sisteArbeidsgiverdag = 16.januar
+            )
         )
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
@@ -477,7 +491,7 @@ internal class OppdragTest {
     fun `er relevant`() {
         val fagsystemId = "a"
         val fagområde = Fagområde.SykepengerRefusjon
-        val oppdrag = Oppdrag("mottaker", fagområde, fagsystemId = fagsystemId, sisteArbeidsgiverdag = 1.januar)
+        val oppdrag = Oppdrag("mottaker", fagområde, fagsystemId = fagsystemId)
         assertTrue(oppdrag.erRelevant(fagsystemId, fagområde))
         assertFalse(oppdrag.erRelevant(fagsystemId, Fagområde.Sykepenger))
         assertFalse(oppdrag.erRelevant("b", fagområde))
@@ -495,7 +509,7 @@ internal class OppdragTest {
                     grad = 100
                 )
 
-            ), sisteArbeidsgiverdag = 16.januar
+            )
         )
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.simuler(aktivitetslogg, 1.januar, "Sara Saksbehandler")
@@ -514,7 +528,7 @@ internal class OppdragTest {
                     grad = 100
                 )
 
-            ), sisteArbeidsgiverdag = 16.januar
+            )
         )
         val aktivitetslogg = Aktivitetslogg()
         oppdrag.overfør(aktivitetslogg, 1.januar, "Sara Saksbehandler")
@@ -533,7 +547,7 @@ internal class OppdragTest {
                     grad = 100
                 )
 
-            ), sisteArbeidsgiverdag = 16.januar
+            )
         )
         val avstemmingsnøkkel: Long = 1235
         val overføringstidspunkt = LocalDateTime.now()
@@ -568,7 +582,7 @@ internal class OppdragTest {
                     grad = 100
                 )
 
-            ), sisteArbeidsgiverdag = 16.januar
+            )
         )
         val avstemmingsnøkkel: Long = 1235
         val overføringstidspunkt = LocalDateTime.now()
@@ -617,7 +631,7 @@ internal class OppdragTest {
                     grad = 100
                 )
 
-            ), sisteArbeidsgiverdag = 16.januar
+            )
         )
 
         oppdrag.lagreOverføringsinformasjon(UtbetalingHendelse(

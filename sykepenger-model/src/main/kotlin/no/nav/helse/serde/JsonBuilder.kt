@@ -438,7 +438,6 @@ internal class JsonBuilder : AbstractBuilder() {
             fagområde: Fagområde,
             fagsystemId: String,
             mottaker: String,
-            sisteArbeidsgiverdag: LocalDate?,
             stønadsdager: Int,
             totalBeløp: Int,
             nettoBeløp: Int,
@@ -455,7 +454,6 @@ internal class JsonBuilder : AbstractBuilder() {
             oppdragMap["linjer"] = linjer
             oppdragMap["fagsystemId"] = fagsystemId
             oppdragMap["endringskode"] = "$endringskode"
-            oppdragMap["sisteArbeidsgiverdag"] = sisteArbeidsgiverdag
             oppdragMap["tidsstempel"] = tidsstempel
             oppdragMap["totalbeløp"] = totalBeløp
             oppdragMap["nettoBeløp"] = nettoBeløp

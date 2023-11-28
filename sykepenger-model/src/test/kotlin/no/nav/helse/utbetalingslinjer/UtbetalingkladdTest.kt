@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar

@@ -11,7 +11,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `kan starte oppdrag på helg`() {
-        val builder = OppdragBuilder(sisteArbeidsgiverdag = 19.januar, mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
+        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
         builder.betalingsdag(beløpskilde(500, 0), 22.januar, 100)
@@ -24,7 +24,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `kan slutte linje på helg`() {
-        val builder = OppdragBuilder(sisteArbeidsgiverdag = 19.januar, mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
+        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
         builder.betalingsdag(beløpskilde(500, 0), 22.januar, 100)
@@ -45,7 +45,7 @@ internal class OppdragBuilderTest {
 
     @Test
     fun `kan slutte oppdrag på helg`() {
-        val builder = OppdragBuilder(sisteArbeidsgiverdag = 19.januar, mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
+        val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
         builder.betalingsdag(beløpskilde(500, 0), 22.januar, 100)

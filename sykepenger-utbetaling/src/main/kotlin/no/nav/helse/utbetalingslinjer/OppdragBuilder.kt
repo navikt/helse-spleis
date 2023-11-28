@@ -5,7 +5,6 @@ import java.util.UUID
 
 class OppdragBuilder(
     private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
-    private val sisteArbeidsgiverdag: LocalDate,
     private val mottaker: String,
     private val fagområde: Fagområde
 ) {
@@ -13,7 +12,7 @@ class OppdragBuilder(
     private var tilstand: Tilstand = MellomLinjer()
     private val linje get() = utbetalingslinjer.last()
 
-    fun build() = Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId, sisteArbeidsgiverdag)
+    fun build() = Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId)
 
     fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, grad: Int) {
         if (utbetalingslinjer.isEmpty() || !fagområde.kanLinjeUtvides(linje, beløpkilde, grad))

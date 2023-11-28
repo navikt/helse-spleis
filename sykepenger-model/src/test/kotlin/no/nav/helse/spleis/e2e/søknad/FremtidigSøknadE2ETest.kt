@@ -76,8 +76,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
         val oppdragInspektør = arbeidsgiverOppdrag.inspektør
         assertEquals(sisteArbeidsgiverdag.plusDays(1), arbeidsgiverOppdrag.first().inspektør.fom)
         assertEquals(tom, arbeidsgiverOppdrag.last().inspektør.tom)
-        assertEquals(sisteArbeidsgiverdag, oppdragInspektør.periode.start)
-        assertEquals(tom, oppdragInspektør.periode.endInclusive)
+        assertEquals(tom, oppdragInspektør.periode?.endInclusive)
     }
 
 }

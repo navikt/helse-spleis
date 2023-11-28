@@ -4,9 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.august
-import no.nav.helse.desember
 import no.nav.helse.februar
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -50,35 +48,33 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `periode uten siste arbeidsgiverdag`() {
-        val oppdrag1 = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = null)
-        val oppdrag2 = linjer(1.februar to 28.februar, sisteArbeidsgiverdag = null)
+        val oppdrag1 = linjer(2.januar to 5.januar)
+        val oppdrag2 = linjer(1.februar to 28.februar)
         assertEquals(2.januar til 28.februar, Oppdrag.periode(oppdrag1, oppdrag2))
     }
 
     @Test
     fun `periode med siste arbeidsgiverdag`() {
-        val oppdrag1 = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
-        val oppdrag2 = linjer(1.februar to 28.februar, sisteArbeidsgiverdag = 1.januar)
+        val oppdrag1 = linjer(2.januar to 5.januar)
+        val oppdrag2 = linjer(1.februar to 28.februar)
         assertEquals(2.januar til 28.februar, Oppdrag.periode(oppdrag1, oppdrag2))
     }
 
     @Test
     fun `periode med tomt oppdrag`() {
-        val oppdrag1 = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
-        val oppdrag2 = linjer(sisteArbeidsgiverdag = 1.januar)
-        val oppdrag3 = linjer(sisteArbeidsgiverdag = null)
+        val oppdrag1 = linjer(2.januar to 5.januar)
+        val oppdrag2 = linjer()
+        val oppdrag3 = linjer()
         assertEquals(2.januar til 5.januar, Oppdrag.periode(oppdrag1, oppdrag2))
         assertEquals(2.januar til 5.januar, Oppdrag.periode(oppdrag1, oppdrag3))
-        assertEquals(2.januar.somPeriode(), Oppdrag.periode(oppdrag2, oppdrag3))
+        assertNull(Oppdrag.periode(oppdrag2, oppdrag3))
     }
 
     @Test
     fun `periode med bare tomme oppdrag`() {
         assertNull(Oppdrag.periode())
-        assertNull(Oppdrag.periode(linjer(sisteArbeidsgiverdag = null)))
-        assertNull(Oppdrag.periode(linjer(sisteArbeidsgiverdag = null), linjer(sisteArbeidsgiverdag = null)))
-        assertEquals(2.januar.somPeriode(), Oppdrag.periode(linjer(sisteArbeidsgiverdag = 1.januar)))
-        assertEquals(2.januar til 3.januar, Oppdrag.periode(linjer(sisteArbeidsgiverdag = 2.januar), linjer(sisteArbeidsgiverdag = 1.januar)))
+        assertNull(Oppdrag.periode(linjer()))
+        assertNull(Oppdrag.periode(linjer(), linjer()))
     }
 
     @Test
@@ -172,8 +168,8 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `helt separate utbetalingslinjer`() {
-        val original = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
-        val recalculated = linjer(5.februar to 9.februar, sisteArbeidsgiverdag = 4.februar)
+        val original = linjer(2.januar to 5.januar)
+        val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated - original
         val linje1 = 2.januar to 5.januar endrer original.last() opphører 2.januar
         val linje2 = 5.februar to 9.februar pekerPå linje1
@@ -193,7 +189,12 @@ internal class UtbetalingslinjeForskjellTest {
         val linje2 = 8.januar to 20.januar grad 100 pekerPå linje1
         val linje3 = 21.januar to 31.januar grad 90 pekerPå linje2
         val original = linjer(linje1, linje2, linje3)
-        val fjernetEnDag = linjer(1.januar to 7.januar grad 80, 9.januar to 20.januar grad 100, 21.januar to 25.januar grad 90, 26.januar to 31.januar grad 100)
+        val fjernetEnDag = linjer(
+            1.januar to 7.januar grad 80,
+            9.januar to 20.januar grad 100,
+            21.januar to 25.januar grad 90,
+            26.januar to 31.januar grad 100
+        )
         val actual = fjernetEnDag - original
         val linje4 = 21.januar to 31.januar grad 90 endrer original.last() opphører 8.januar
         val linje5 = 9.januar to 20.januar grad 100 pekerPå linje4
@@ -243,8 +244,8 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `kjeder seg på forrige oppdrag når sisteArbeidsgiverdag er lik`() {
-        val original = linjer(2.januar to 5.januar, sisteArbeidsgiverdag = 1.januar)
-        val recalculated = linjer(*emptyArray<TestUtbetalingslinje>(), sisteArbeidsgiverdag = 1.januar)
+        val original = linjer(2.januar to 5.januar)
+        val recalculated = linjer(*emptyArray<TestUtbetalingslinje>())
         val actual = recalculated - original
         assertUtbetalinger(linjer(2.januar to 5.januar endringskode ENDR opphører 2.januar), actual)
         assertEquals(0, actual.stønadsdager())
@@ -256,7 +257,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test
     fun `overtar fagsystemId fra et tomt oppdrag`() {
         val original = tomtOppdrag(sisteArbeidsgiverdag = 4.februar)
-        val recalculated = linjer(5.februar to 9.februar, sisteArbeidsgiverdag = 4.februar)
+        val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
@@ -267,7 +268,7 @@ internal class UtbetalingslinjeForskjellTest {
     @Test
     fun `overtar fagsystemId fra et tomt oppdrag når siste arbeidsgiverdag er ulik`() {
         val original = tomtOppdrag(sisteArbeidsgiverdag = 1.mars)
-        val recalculated = linjer(5.februar to 9.februar, sisteArbeidsgiverdag = 4.februar)
+        val recalculated = linjer(5.februar to 9.februar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
@@ -648,7 +649,12 @@ internal class UtbetalingslinjeForskjellTest {
         val intermediate = linjer(1.januar to 5.januar, 8.januar to 13.januar)
         val extended = intermediate - original
 
-        val recalculated = linjer(1.januar to 5.januar, 8.januar to 20.januar, 23.januar to 26.januar, 28.januar to 5.februar)
+        val recalculated = linjer(
+            1.januar to 5.januar,
+            8.januar to 20.januar,
+            23.januar to 26.januar,
+            28.januar to 5.februar
+        )
         val actual = recalculated - extended
 
         val tilbakeført = linjer(1.januar to 5.januar, 8.januar to 13.januar)
@@ -662,7 +668,12 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `trekke periode frem potpourri 1`() {
-        val original = linjer(1.januar to 5.januar, 8.januar to 20.januar, 23.januar to 26.januar, 28.januar to 5.februar)
+        val original = linjer(
+            1.januar to 5.januar,
+            8.januar to 20.januar,
+            23.januar to 26.januar,
+            28.januar to 5.februar
+        )
         val tilbakeført = linjer(1.januar to 6.januar, 8.januar to 13.januar)
         val revised = tilbakeført - original
         assertUtbetalinger(linjer(
@@ -680,7 +691,12 @@ internal class UtbetalingslinjeForskjellTest {
         val recalculated = linjer(1.januar to 5.januar, 8.januar to 13.januar, 23.januar to 5.februar)
         val actual = recalculated - extended
 
-        val tilbakeført = linjer(1.januar to 5.januar, 8.januar to 13.januar, 23.januar to 26.januar, 1.februar to 5.februar)
+        val tilbakeført = linjer(
+            1.januar to 5.januar,
+            8.januar to 13.januar,
+            23.januar to 26.januar,
+            1.februar to 5.februar
+        )
         val revised = tilbakeført - actual
 
         assertUtbetalinger(linjer(
@@ -870,8 +886,8 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `ingen overlapp og ulik fagsystemId`() {
-        val original = linjer(5.januar to 10.januar, sisteArbeidsgiverdag = 4.januar)
-        val recalculated = linjer(1.januar to 3.januar, sisteArbeidsgiverdag = 31.desember(2017))
+        val original = linjer(5.januar to 10.januar)
+        val recalculated = linjer(1.januar to 3.januar)
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 3.januar endringskode NY pekerPå original.last()), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
@@ -958,7 +974,8 @@ internal class UtbetalingslinjeForskjellTest {
         val recalculated = tomtOppdrag()
         val actual = recalculated - original
         assertUtbetalinger(linjer(
-            4.januar to 12.januar grad 50 endrer original.last() opphører 1.januar), actual)
+            4.januar to 12.januar grad 50 endrer original.last() opphører 1.januar
+        ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
@@ -1119,7 +1136,7 @@ internal class UtbetalingslinjeForskjellTest {
 
 
     private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag: LocalDate? = null) =
-        Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId)
 
     private val Oppdrag.endringskode get() = this.get<Endringskode>("endringskode")
 
@@ -1147,14 +1164,27 @@ internal class UtbetalingslinjeForskjellTest {
         }
     }
 
-    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null, sisteArbeidsgiverdag: LocalDate? = 31.desember(2017)): Oppdrag {
+    private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null): Oppdrag {
         val fagsystemId = other?.inspektør?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID())
-        return Oppdrag.ferdigOppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList().tilUtbetalingslinjer(fagsystemId), fagsystemId, NY, sisteArbeidsgiverdag, 0, null, null, null, LocalDateTime.now(), false, null)
+        return Oppdrag.ferdigOppdrag(
+            mottaker = ORGNUMMER,
+            from = SykepengerRefusjon,
+            utbetalingslinjer = linjer.toList().tilUtbetalingslinjer(fagsystemId),
+            fagsystemId = fagsystemId,
+            endringskode = NY,
+            nettoBeløp = 0,
+            overføringstidspunkt = null,
+            avstemmingsnøkkel = null,
+            status = null,
+            tidsstempel = LocalDateTime.now(),
+            erSimulert = false,
+            simuleringResultat = null
+        )
     }
 
-    private fun linjer(vararg linjer: Utbetalingslinje, sisteArbeidsgiverdag: LocalDate = 31.desember(2017)): Oppdrag {
+    private fun linjer(vararg linjer: Utbetalingslinje): Oppdrag {
         val fagsystemId = genererUtbetalingsreferanse(UUID.randomUUID())
-        return Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
+        return Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), fagsystemId = fagsystemId)
     }
 
     private fun List<TestUtbetalingslinje>.tilUtbetalingslinjer(fagsystemId: String): List<Utbetalingslinje> {

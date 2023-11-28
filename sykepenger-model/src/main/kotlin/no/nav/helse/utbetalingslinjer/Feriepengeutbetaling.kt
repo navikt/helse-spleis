@@ -179,7 +179,6 @@ internal class Feriepengeutbetaling private constructor(
                     )
                 ),
                 fagsystemId = fagsystemId,
-                sisteArbeidsgiverdag = null,
             )
 
             if (forrigeOppdrag == null) return nyttOppdrag

@@ -6,10 +6,8 @@ import java.util.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -29,7 +27,6 @@ class Oppdrag private constructor(
     private val linjer: MutableList<Utbetalingslinje>,
     private val fagsystemId: String,
     private val endringskode: Endringskode,
-    private val sisteArbeidsgiverdag: LocalDate?,
     private var nettoBeløp: Int = linjer.sumOf { it.totalbeløp() },
     private var overføringstidspunkt: LocalDateTime? = null,
     private var avstemmingsnøkkel: Long? = null,
@@ -41,7 +38,7 @@ class Oppdrag private constructor(
     companion object {
         fun periode(vararg oppdrag: Oppdrag): Periode? {
             return oppdrag
-                .mapNotNull { it.linjeperiode ?: it.sisteArbeidsgiverdag?.nesteDag?.somPeriode() }
+                .mapNotNull { it.linjeperiode }
                 .takeIf(List<*>::isNotEmpty)
                 ?.reduce(Periode::plus)
         }
@@ -66,7 +63,6 @@ class Oppdrag private constructor(
             utbetalingslinjer: List<Utbetalingslinje>,
             fagsystemId: String,
             endringskode: Endringskode,
-            sisteArbeidsgiverdag: LocalDate?,
             nettoBeløp: Int,
             overføringstidspunkt: LocalDateTime?,
             avstemmingsnøkkel: Long?,
@@ -80,7 +76,6 @@ class Oppdrag private constructor(
             linjer = utbetalingslinjer.toMutableList(),
             fagsystemId = fagsystemId,
             endringskode = endringskode,
-            sisteArbeidsgiverdag = sisteArbeidsgiverdag,
             nettoBeløp = nettoBeløp,
             overføringstidspunkt = overføringstidspunkt,
             avstemmingsnøkkel = avstemmingsnøkkel,
@@ -96,26 +91,19 @@ class Oppdrag private constructor(
         }
     }
 
-    private val overlapperiode get() = when {
-        sisteArbeidsgiverdag == null && isEmpty() -> null
-        sisteArbeidsgiverdag == null -> linjeperiode
-        else -> linjeperiode?.oppdaterFom(sisteArbeidsgiverdag)
-    }
     private val linjeperiode get() = firstOrNull()?.let { (it.datoStatusFom() ?: it.fom) til last().tom }
 
     constructor(
         mottaker: String,
         fagområde: Fagområde,
         linjer: List<Utbetalingslinje> = listOf(),
-        fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
-        sisteArbeidsgiverdag: LocalDate? = null
+        fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())
     ) : this(
         mottaker,
         fagområde,
         normaliserLinjer(fagsystemId, linjer).toMutableList(),
         fagsystemId,
         Endringskode.NY,
-        sisteArbeidsgiverdag,
         tidsstempel = LocalDateTime.now()
     )
 
@@ -125,7 +113,6 @@ class Oppdrag private constructor(
             fagområde,
             fagsystemId,
             mottaker,
-            sisteArbeidsgiverdag,
             stønadsdager(),
             totalbeløp(),
             nettoBeløp,
@@ -143,7 +130,6 @@ class Oppdrag private constructor(
             fagområde,
             fagsystemId,
             mottaker,
-            sisteArbeidsgiverdag,
             stønadsdager(),
             totalbeløp(),
             nettoBeløp,
@@ -160,14 +146,11 @@ class Oppdrag private constructor(
     fun fagsystemId() = fagsystemId
     fun mottaker() = mottaker
 
-    private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other) || sammenhengendeUtbetalingsperiode(other)
+    private operator fun contains(other: Oppdrag) = this.tilhører(other) || this.overlapperMed(other)
 
     fun tilhører(other: Oppdrag) = this.fagsystemId == other.fagsystemId && this.fagområde == other.fagområde
     private fun overlapperMed(other: Oppdrag) =
-        this.overlapperiode?.let { other.overlapperiode?.overlapperMed(it) } ?: false
-
-    private fun sammenhengendeUtbetalingsperiode(other: Oppdrag) =
-        this.sisteArbeidsgiverdag != null && this.sisteArbeidsgiverdag == other.sisteArbeidsgiverdag
+        this.linjeperiode?.let { other.linjeperiode?.overlapperMed(it) } ?: false
 
     fun overfør(
         aktivitetslogg: IAktivitetslogg,
@@ -237,8 +220,7 @@ class Oppdrag private constructor(
         Oppdrag(
             mottaker = mottaker,
             fagområde = fagområde,
-            fagsystemId = fagsystemId,
-            sisteArbeidsgiverdag = sisteArbeidsgiverdag
+            fagsystemId = fagsystemId
         )
 
     fun begrensFra(førsteDag: LocalDate): Oppdrag {
@@ -363,7 +345,6 @@ class Oppdrag private constructor(
         linjer = linjer.map { it.kopier() }.toMutableList(),
         fagsystemId = fagsystemId,
         endringskode = endringskode,
-        sisteArbeidsgiverdag = sisteArbeidsgiverdag,
         overføringstidspunkt = overføringstidspunkt,
         avstemmingsnøkkel = avstemmingsnøkkel,
         status = status,

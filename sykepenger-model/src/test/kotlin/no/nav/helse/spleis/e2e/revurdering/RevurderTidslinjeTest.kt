@@ -954,10 +954,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         val tredjeUtbetaling = inspektør.utbetaling(2).inspektør
 
         assertEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
-        assertEquals(18.januar, førsteUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
         assertEquals(andreUtbetaling.korrelasjonsId, tredjeUtbetaling.korrelasjonsId)
-        assertEquals(18.januar, andreUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
-        assertEquals(18.januar, tredjeUtbetaling.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
     }
 
     @Test

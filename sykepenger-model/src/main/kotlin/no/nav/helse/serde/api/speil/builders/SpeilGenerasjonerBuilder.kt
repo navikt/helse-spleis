@@ -230,7 +230,6 @@ internal class SpeilGenerasjonerBuilder(
         fagområde: Fagområde,
         fagsystemId: String,
         mottaker: String,
-        sisteArbeidsgiverdag: LocalDate?,
         stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,

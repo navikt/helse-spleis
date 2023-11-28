@@ -552,7 +552,7 @@ internal class UtbetalingTest {
         val utbetalingInspektør = annullering.inspektør
         assertEquals(første.inspektør.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
         assertEquals(1.januar til 2.februar, utbetalingInspektør.periode)
-        assertEquals(16.januar, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.periode.start)
+        assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.periode?.start)
         assertEquals(30.januar, utbetalingInspektør.arbeidsgiverOppdrag.first().inspektør.fom)
         assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag.first().inspektør.datoStatusFom)
         assertEquals(2.februar, utbetalingInspektør.arbeidsgiverOppdrag.last().inspektør.tom)
@@ -582,7 +582,7 @@ internal class UtbetalingTest {
         assertEquals(første.inspektør.korrelasjonsId, tredje.inspektør.korrelasjonsId)
         assertEquals(17.januar, tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
         assertEquals(26.januar, tredje.inspektør.arbeidsgiverOppdrag.last().inspektør.tom)
-        assertEquals(16.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode.start)
+        assertEquals(17.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode?.start)
     }
 
     @Test
@@ -617,8 +617,7 @@ internal class UtbetalingTest {
         assertEquals(27.januar, tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.fom)
         assertNull(tredje.inspektør.arbeidsgiverOppdrag.first().inspektør.datoStatusFom)
         assertEquals(5.februar, tredje.inspektør.arbeidsgiverOppdrag.last().inspektør.tom)
-        assertEquals(16.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.sisteArbeidsgiverdag)
-        assertEquals(16.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode.start)
+        assertEquals(27.januar, tredje.inspektør.arbeidsgiverOppdrag.inspektør.periode?.start)
     }
 
     @Test

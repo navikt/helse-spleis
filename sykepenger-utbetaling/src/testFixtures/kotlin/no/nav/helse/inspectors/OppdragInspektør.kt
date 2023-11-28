@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.hendelser.til
 import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
@@ -38,12 +39,11 @@ class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     private val delytelseIder = mutableListOf<Int>()
     private val refDelytelseIder = mutableListOf<Int?>()
     private val refFagsystemIder = mutableListOf<String?>()
-    var sisteArbeidsgiverdag: LocalDate? = null
     var overføringstidspunkt: LocalDateTime? = null
     var avstemmingsnøkkel: Long? = null
     private var status: Oppdragstatus? = null
     private var simuleringsResultat: SimuleringResultat? = null
-    var periode: Periode = LocalDate.MIN.somPeriode()
+    var periode: Periode? = null
         private set
 
     init {
@@ -55,7 +55,6 @@ class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         fagområde: Fagområde,
         fagsystemId: String,
         mottaker: String,
-        sisteArbeidsgiverdag: LocalDate?,
         stønadsdager: Int,
         totalBeløp: Int,
         nettoBeløp: Int,
@@ -74,12 +73,8 @@ class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         this.nettoBeløp = nettoBeløp
         this.status = status
         this.simuleringsResultat = simuleringsResultat
-        this.sisteArbeidsgiverdag = sisteArbeidsgiverdag
         this.avstemmingsnøkkel = avstemmingsnøkkel
         this.overføringstidspunkt = overføringstidspunkt
-        sisteArbeidsgiverdag?.somPeriode()?.also {
-            this.periode = it
-        }
     }
 
     override fun visitUtbetalingslinje(
@@ -109,8 +104,8 @@ class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         this.grad.add(grad)
         this.beløp.add(beløp)
         this.datoStatusFom.add(datoStatusFom)
-        datoStatusFom?.also { this.periode = this.periode.oppdaterFom(it) }
-        this.periode = this.periode.oppdaterTom(tom)
+        datoStatusFom?.also { this.periode = this.periode?.oppdaterFom(it) ?: it.somPeriode() }
+        this.periode = this.periode?.oppdaterFom(fom)?.oppdaterTom(tom) ?: (fom til tom)
     }
 
     fun antallLinjer() = linjeteller

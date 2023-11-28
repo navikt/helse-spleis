@@ -24,7 +24,6 @@ import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -1207,7 +1206,6 @@ internal data class PersonData(
         private val linjer: List<UtbetalingslinjeData>,
         private val fagsystemId: String,
         private val endringskode: String,
-        private val sisteArbeidsgiverdag: LocalDate?,
         private val tidsstempel: LocalDateTime,
         private val nettoBeløp: Int,
         private val avstemmingsnøkkel: Long?,
@@ -1222,7 +1220,6 @@ internal data class PersonData(
             utbetalingslinjer = linjer.map { it.konverterTilUtbetalingslinje() },
             fagsystemId = fagsystemId,
             endringskode = Endringskode.valueOf(endringskode),
-            sisteArbeidsgiverdag = sisteArbeidsgiverdag,
             nettoBeløp = nettoBeløp,
             overføringstidspunkt = overføringstidspunkt,
             avstemmingsnøkkel = avstemmingsnøkkel,
