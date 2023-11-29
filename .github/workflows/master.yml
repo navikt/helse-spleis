@@ -5,8 +5,8 @@ on:
     paths-ignore:
       - 'sykepenger-api/**'
       - 'sykepenger-opprydding-dev/**'
-      - 'workflows/spleis-jobs.yml'
-      - 'workflows/spleis-opprydding-dev.yml'
+      - '.github/workflows/spleis-jobs.yml'
+      - '.github/workflows/spleis-opprydding-dev.yml'
       - 'jobs/**'
       - 'doc/**'
       - '.idea/**'
