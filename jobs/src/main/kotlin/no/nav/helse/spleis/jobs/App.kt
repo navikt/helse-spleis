@@ -184,6 +184,7 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
             try {
                 val node = objectMapper.readTree(data)
                 val vurderinger = hentAvviksvurderinger(node)
+                if (vurderinger.isEmpty()) return@let
                 val event = AvviksvurderingerEvent(vurderinger)
                 sikkerlogg.info("Ville skrevet avviksvurderinger til rapid:\n{}", objectMapper.writeValueAsString(event))
             } catch (err: Exception) {
