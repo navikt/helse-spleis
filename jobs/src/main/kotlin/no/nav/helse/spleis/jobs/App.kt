@@ -191,6 +191,10 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
             }
         }
     }
+    runBlocking {
+        log.info("Venter med å skru av i ett minutt for at securelogs-sidecar forhåpentligvis skal synce loggene")
+        delay(60000L)
+    }
 }
 
 private fun hentAvviksvurderinger(node: JsonNode): List<AvviksvurderingDto> {
