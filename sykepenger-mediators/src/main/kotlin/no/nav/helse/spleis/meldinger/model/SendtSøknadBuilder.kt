@@ -42,11 +42,12 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         sendTilGosys = sendTilGosys,
         yrkesskade = yrkesskade,
         egenmeldinger = egenmeldinger,
-        opprettet = opprettet
+        opprettet = opprettet,
+        søknadstype = søknadstype
     )
 
     fun arbeidsledigsøknad() {
-        søknadstype = Søknad.Søknadstype.Arbeidledig
+        søknadstype = Søknad.Søknadstype.Arbeidsledig
     }
 
     override fun inntektskilde(andreInntektskilder: Boolean) = apply {

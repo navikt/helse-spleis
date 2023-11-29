@@ -57,7 +57,7 @@ class Søknad(
     private val sendTilGosys: Boolean,
     private val yrkesskade: Boolean,
     private val egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag>,
-    private val søknadstype: Søknadstype = Søknadstype.Arbeidstaker,
+    private val søknadstype: Søknadstype,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     private val opprettet: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
@@ -199,7 +199,7 @@ class Søknad(
     class Søknadstype(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, organisasjonsnummer: String) {
             if (this == Arbeidstaker) return
-            if (this != Arbeidledig) return aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
+            if (this != Arbeidsledig) return aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
             if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`)
             if (!vilkårsgrunnlag.validerAnnenSøknadstype(aktivitetslogg, organisasjonsnummer)) return
             aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
@@ -211,7 +211,7 @@ class Søknad(
         override fun hashCode() = type.hashCode()
         companion object {
             val Arbeidstaker = Søknadstype("ARBEIDSTAKERE")
-            val Arbeidledig = Søknadstype("ARBEIDSLEDIG")
+            val Arbeidsledig = Søknadstype("ARBEIDSLEDIG")
         }
     }
 

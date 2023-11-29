@@ -3,7 +3,7 @@ package no.nav.helse.spleis.e2e.søknad
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadstype.Companion.Arbeidledig
+import no.nav.helse.hendelser.Søknad.Søknadstype.Companion.Arbeidsledig
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -22,7 +22,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
     fun `støtter arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidledig)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
             assertVarsel(`Arbeidsledigsøknad er lagt til grunn`, 2.vedtaksperiode.filter())
         }
@@ -31,7 +31,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
     @Test
     fun `støtter ikke arbeidsledigsøknad som førstegangssøknad`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), søknadstype = Arbeidledig)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), søknadstype = Arbeidsledig)
             assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertFunksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`, 1.vedtaksperiode.filter())
         }
@@ -41,7 +41,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
     fun `støtter ikke arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt med fler arbeidsgivere i sykepengegrunnlaget`() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar)
         a1 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidledig)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
             assertFunksjonellFeil(`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`, 2.vedtaksperiode.filter())
         }
@@ -51,7 +51,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
     fun `støtter ikke arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt hvor arbeidsgiver ikke inngår i sykepengegrunnlaget`() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar)
         a3 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidledig)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
             assertFunksjonellFeil(`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`, 1.vedtaksperiode.filter())
         }
