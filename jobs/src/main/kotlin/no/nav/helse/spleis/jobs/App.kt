@@ -223,7 +223,7 @@ private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode)
                 beløp = omregnetÅrsinntekt(node, opplysning.path("inntektsopplysning"))
             )
         },
-        sammenligningsgrunnlag = grunnlagsdata.path("sammenligningsgrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
+        sammenligningsgrunnlag = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
             SammenligningsgrunnlagDto(
                 orgnummer = opplysning.path("orgnummer").asText(),
                 skatteopplysninger = opplysning.path("skatteopplysninger").map { skatt ->
@@ -310,8 +310,8 @@ private data class AvviksvurderingDto(
 }
 
 private class OmregnetÅrsinntektDto(
-    private val orgnummer: String,
-    private val beløp: Double
+    val orgnummer: String,
+    val beløp: Double
 )
 
 private class SammenligningsgrunnlagDto(
