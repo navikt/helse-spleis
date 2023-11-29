@@ -1,10 +1,17 @@
 package no.nav.helse.spleis.jobs
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -26,6 +33,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 private val log = LoggerFactory.getLogger("no.nav.helse.spleis.gc.App")
+private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
 @ExperimentalTime
 fun main(args: Array<String>) {
@@ -45,6 +53,7 @@ fun main(args: Array<String>) {
         "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
         "migrate_v2" -> migrateV2Task(args[1].trim())
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
+        "migrere_avviksvurderinger" -> migrereAvviksvurderinger(ConsumerProducerFactory(AivenConfig.default), args[1].trim())
         else -> log.error("Unknown task $task")
     }
 }
@@ -163,6 +172,161 @@ private fun testSpeilJsonTask(arbeidId: String) {
         }
     }
 }
+
+internal val objectMapper: ObjectMapper = jacksonObjectMapper()
+    .registerModule(JavaTimeModule())
+    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId: String) {
+    opprettOgUtførArbeid(arbeidId) { session, fnr ->
+        hentPerson(session, fnr)?.let { (aktørId, data) ->
+            try {
+                val node = objectMapper.readTree(data)
+                val vurderinger = hentAvviksvurderinger(node)
+                val event = AvviksvurderingerEvent(vurderinger)
+                sikkerlogg.info("Ville skrevet avviksvurderinger til rapid:\n{}", objectMapper.writeValueAsString(event))
+            } catch (err: Exception) {
+                log.info("$aktørId lar seg ikke serialisere: ${err.message}")
+            }
+        }
+    }
+}
+
+private fun hentAvviksvurderinger(node: JsonNode): List<AvviksvurderingDto> {
+    return node.path("vilkårsgrunnlagHistorikk")
+        .path(0)
+        .path("vilkårsgrunnlag")
+        .mapNotNull { vilkårsgrunnlag ->
+            val type = vilkårsgrunnlag.path("type").asText()
+            when (type) {
+                "Vilkårsprøving" -> parseSpleisVilkårsgrunnlag(node, vilkårsgrunnlag)
+                "Infotrygd" -> parseInfotrygdVilkårsgrunnlag(vilkårsgrunnlag)
+                else -> null
+            }
+        }
+}
+
+private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode): AvviksvurderingDto {
+    val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
+    return AvviksvurderingDto(
+        skjæringstidspunkt = skjæringstidspunkt,
+        vurderingstidspunkt = finnTidligsteTidspunktForSkjæringstidspunkt(node, skjæringstidspunkt),
+        type = VilkårsgrunnlagtypeDto.SPLEIS,
+        omregnedeÅrsinntekter = grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
+            OmregnetÅrsinntektDto(
+                orgnummer = opplysning.path("orgnummer").asText(),
+                beløp = omregnetÅrsinntekt(node, opplysning.path("inntektsopplysning"))
+            )
+        },
+        sammenligningsgrunnlag = grunnlagsdata.path("sammenligningsgrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
+            SammenligningsgrunnlagDto(
+                orgnummer = opplysning.path("orgnummer").asText(),
+                skatteopplysninger = opplysning.path("skatteopplysninger").map { skatt ->
+                    SkatteopplysningDto(
+                        beløp = skatt.path("beløp").asDouble(),
+                        måned = YearMonth.parse(skatt.path("måned").asText()),
+                        type = skatt.path("type").asText(),
+                        fordel = skatt.path("fordel").asText(),
+                        beskrivelse = skatt.path("beskrivelse").asText()
+                    )
+                }
+            )
+        }
+    )
+}
+private fun omregnetÅrsinntekt(node: JsonNode, opplysning: JsonNode): Double {
+    if (opplysning.path("kilde").asText() == "SKJØNNSMESSIG_FASTSATT") return omregnetÅrsinntekt(node, finnInntektsopplysning(node, opplysning.path("overstyrtInntektId").asText()))
+    return opplysning.path("beløp").asDouble()
+}
+private fun finnInntektsopplysning(node: JsonNode, opplysningId: String): JsonNode {
+    return node.path("vilkårsgrunnlagHistorikk").firstNotNullOf { vilkårsgrunnlag ->
+        vilkårsgrunnlag.path("vilkårsgrunnlag").firstNotNullOfOrNull { grunnlagsdata ->
+            grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").firstOrNull { opplysning ->
+                opplysning.path("inntektsopplysning").path("id").asText() == opplysningId
+            }
+        }
+    }
+}
+private fun parseInfotrygdVilkårsgrunnlag(grunnlagsdata: JsonNode): AvviksvurderingDto {
+    return AvviksvurderingDto(
+        skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText()),
+        vurderingstidspunkt = LocalDate.EPOCH.atStartOfDay(),
+        type = VilkårsgrunnlagtypeDto.INFOTRYGD,
+        omregnedeÅrsinntekter = emptyList(),
+        sammenligningsgrunnlag = emptyList()
+    )
+}
+
+private fun finnTidligsteTidspunktForSkjæringstidspunkt(node: JsonNode, skjæringstidspunkt: LocalDate): LocalDateTime {
+    val relevanteVilkårsgrunnlag = vilkårsgrunnlagFor(node, skjæringstidspunkt)
+    val beregningstidspunkter = node.path("arbeidsgivere").flatMap { arbeidsgiver ->
+        arbeidsgiver.path("vedtaksperioder").flatMap { vedtaksperiode ->
+            vedtaksperiode.path("generasjoner").flatMap { generasjon ->
+                generasjon.path("endringer")
+                    .filter { endring ->
+                        endring.hasNonNull("vilkårsgrunnlagId")
+                    }
+                    .filter { endring ->
+                        UUID.fromString(endring.path("vilkårsgrunnlagId").asText()) in relevanteVilkårsgrunnlag
+                    }
+                    .map { endring ->
+                        LocalDateTime.parse(endring.path("tidsstempel").asText())
+                    }
+            }
+        }
+    }
+    return beregningstidspunkter.min()
+}
+
+private fun vilkårsgrunnlagFor(node: JsonNode, skjæringstidspunkt: LocalDate): Set<UUID> {
+    return node.path("vilkårsgrunnlagHistorikk")
+        .flatMap { vilkårsgrunnlag ->
+            vilkårsgrunnlag.path("vilkårsgrunnlag").filter { grunnlagsdata ->
+                LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText()) == skjæringstidspunkt
+            }
+        }
+        .map { grunnlagsdata ->
+            UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
+        }
+        .toSet()
+}
+
+private data class AvviksvurderingerEvent(
+    val skjæringstidspunkter: List<AvviksvurderingDto>
+)
+private data class AvviksvurderingDto(
+    val skjæringstidspunkt: LocalDate,
+    val vurderingstidspunkt: LocalDateTime,
+    val type: VilkårsgrunnlagtypeDto,
+    val omregnedeÅrsinntekter: List<OmregnetÅrsinntektDto>,
+    val sammenligningsgrunnlag: List<SammenligningsgrunnlagDto>
+) {
+
+}
+
+private class OmregnetÅrsinntektDto(
+    private val orgnummer: String,
+    private val beløp: Double
+)
+
+private class SammenligningsgrunnlagDto(
+    val orgnummer: String,
+    val skatteopplysninger: List<SkatteopplysningDto>
+)
+
+private class SkatteopplysningDto(
+    val beløp: Double,
+    val måned: YearMonth,
+    val type: String,
+    val fordel: String,
+    val beskrivelse: String
+)
+
+private enum class VilkårsgrunnlagtypeDto {
+    INFOTRYGD, SPLEIS
+}
+
 private fun hentPerson(session: Session, fnr: Long) =
     session.run(queryOf("SELECT aktor_id, data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
         it.string("aktor_id") to it.string("data")
