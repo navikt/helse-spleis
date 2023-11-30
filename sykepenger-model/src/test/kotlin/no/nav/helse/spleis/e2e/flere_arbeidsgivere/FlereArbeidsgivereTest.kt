@@ -1275,7 +1275,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Assert forventet feil - skal ikke ha to vedtaksperioder til godkjenning samtidig`() {
+    fun `skal ikke ha to vedtaksperioder til godkjenning samtidig`() {
         a1 {
             nyPeriode(12.januar til 16.januar)
             håndterSykmelding(Sykmeldingsperiode(17.januar, 21.januar))
@@ -1291,21 +1291,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(30.januar til 31.januar)
             //Overlappende vedtaksperiode men med senere skjæringstidspunkt enn a1
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
-            håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
         }
 
-        assertForventetFeil("Vi skal ikke ha to perioder til godkjenning samtidig",
-            nå = {
-                a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING) }
-                a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING) }
-            },
-            ønsket = {
-                a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING) }
-                a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
-            }
-        )
+        a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING) }
+        a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
     }
 
     private val Utbetalingsdag.arbeidsgiverbeløp get() = this.økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, _, dagligInt -> dagligInt } ?: 0

@@ -2424,10 +2424,28 @@ internal class Vedtaksperiode private constructor(
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
 
+        internal fun Iterable<Vedtaksperiode>.nestePeriodeSomSkalGjenopptas(): Vedtaksperiode? {
+            var minste: Vedtaksperiode? = null
+            this
+                .filter(IKKE_FERDIG_BEHANDLET)
+                .forEach { vedtaksperiode ->
+                    minste = minste?.takeIf { it.erTidligereEnn(vedtaksperiode) } ?: vedtaksperiode
+                }
+            return minste
+        }
+
+        private fun Vedtaksperiode.erTidligereEnn(other: Vedtaksperiode): Boolean = this <= other || this.skjæringstidspunkt < other.skjæringstidspunkt
+
         internal fun List<Vedtaksperiode>.trengerInntektsmelding() = filter {
             it.tilstand == AvventerInntektsmelding
         }.filter {
             it.forventerInntekt()
+        }
+
+        internal fun Iterable<Vedtaksperiode>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) {
+            check(this.filterNot { it == periodeSomSkalGjenopptas }.none(HAR_AVVENTENDE_GODKJENNING)) {
+                "Ugyldig situasjon! Flere perioder til godkjenning samtidig"
+            }
         }
 
         internal fun List<Vedtaksperiode>.trengerFastsettelseEtterSkjønn() = filter { it.trengerFastsettelseEtterSkjønn }
