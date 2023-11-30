@@ -20,6 +20,9 @@ import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektstype
+import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadArbeidsledig
+import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadFrilans
+import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadSelvstendig
 import no.nav.helse.spleis.graphql.dto.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
@@ -31,7 +34,10 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsutbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsledig
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadFrilans
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadNav
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadSelvstendig
 import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkildetype
@@ -94,7 +100,13 @@ private fun SchemaBuilder.hendelseTypes() {
     type<GraphQLInntektsmelding>()
     type<GraphQLSoknadNav>()
     type<GraphQLSoknadArbeidsgiver>()
+    type<GraphQLSoknadArbeidsledig>()
+    type<GraphQLSoknadFrilans>()
+    type<GraphQLSoknadSelvstendig>()
     type<GraphQLSykmelding>()
+    type<GraphQLNySoknadArbeidsledig>()
+    type<GraphQLNySoknadFrilans>()
+    type<GraphQLNySoknadSelvstendig>()
 }
 
 private fun SchemaBuilder.inntektsgrunnlagTypes() {
