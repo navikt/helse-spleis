@@ -65,9 +65,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
-import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadArbeidsledig
-import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadFrilans
-import no.nav.helse.spleis.graphql.dto.GraphQLNySoknadSelvstendig
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsledig
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadFrilans
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadSelvstendig
@@ -231,27 +228,6 @@ private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
 
 private fun mapHendelse(hendelse: HendelseDTO) = when (hendelse.type) {
     HendelsetypeDto.NY_SØKNAD -> GraphQLSykmelding(
-        id = hendelse.id,
-        eksternDokumentId = hendelse.eksternDokumentId,
-        fom = hendelse.fom!!,
-        tom = hendelse.tom!!,
-        rapportertDato = hendelse.rapportertdato!!
-    )
-    HendelsetypeDto.NY_SØKNAD_FRILANS -> GraphQLNySoknadFrilans(
-        id = hendelse.id,
-        eksternDokumentId = hendelse.eksternDokumentId,
-        fom = hendelse.fom!!,
-        tom = hendelse.tom!!,
-        rapportertDato = hendelse.rapportertdato!!
-    )
-    HendelsetypeDto.NY_SØKNAD_SELVSTENDIG -> GraphQLNySoknadSelvstendig(
-        id = hendelse.id,
-        eksternDokumentId = hendelse.eksternDokumentId,
-        fom = hendelse.fom!!,
-        tom = hendelse.tom!!,
-        rapportertDato = hendelse.rapportertdato!!
-    )
-    HendelsetypeDto.NY_SØKNAD_ARBEIDSLEDIG -> GraphQLNySoknadArbeidsledig(
         id = hendelse.id,
         eksternDokumentId = hendelse.eksternDokumentId,
         fom = hendelse.fom!!,

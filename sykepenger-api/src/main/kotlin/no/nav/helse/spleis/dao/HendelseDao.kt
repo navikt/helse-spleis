@@ -34,7 +34,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
         val statement = """
             SELECT melding_type, data FROM melding 
             WHERE fnr=? AND melding_type IN (
-                'NY_SØKNAD', 'NY_SØKNAD_FRILANS', 'NY_SØKNAD_SELVSTENDIG', 'NY_SØKNAD_ARBEIDSLEDIG',
+                'NY_SØKNAD',
                 'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_SELVSTENDIG', 'SENDT_SØKNAD_ARBEIDSGIVER', 'SENDT_SØKNAD_ARBEIDSLEDIG', 
                 'INNTEKTSMELDING'
             )
