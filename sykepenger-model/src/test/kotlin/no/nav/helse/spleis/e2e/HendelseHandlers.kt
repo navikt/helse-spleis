@@ -900,6 +900,7 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val gjelder: Periode? = null
 ) {
     internal constructor(orgnummer: String, inntekt: Inntekt) : this(orgnummer, inntekt, "forklaring", null, emptyList(), null)
+    internal constructor(orgnummer: String, inntekt: Inntekt, subsumsjon: Subsumsjon) : this(orgnummer, inntekt, "forklaring", subsumsjon, emptyList(), null)
     internal constructor(orgnummer: String, inntekt: Inntekt, gjelder: Periode) : this(orgnummer, inntekt, "forklaring", null, emptyList(), gjelder)
     internal companion object {
         internal fun List<OverstyrtArbeidsgiveropplysning>.tilOverstyrt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) =

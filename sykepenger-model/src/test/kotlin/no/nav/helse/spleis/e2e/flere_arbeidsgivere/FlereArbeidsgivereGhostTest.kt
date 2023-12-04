@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import java.lang.IllegalArgumentException
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -11,6 +12,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -36,17 +38,18 @@ import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.EN_ARBEIDSGIVE
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_8
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -59,6 +62,7 @@ import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -77,6 +81,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import kotlin.reflect.KClass
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 
@@ -214,6 +219,38 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2,)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+    }
+
+    @Test
+    fun `blir syk fra ghost annen måned enn skjæringstidspunkt etter at saksbehandler har overstyrt inntekten etter 8-28, 3 ledd bokstav b`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        val veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile = Subsumsjon("8-28", 3, "b")
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, veldigViktigSubsumsjonSomMåVæreSattForAtDetteSkalFeile)))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to Saksbehandler::class))
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        assertEquals(
+            "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken",
+            assertThrows<IllegalArgumentException> { håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT) }.message
+        )
     }
 
     @Test
