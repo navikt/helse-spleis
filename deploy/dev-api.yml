@@ -72,6 +72,4 @@ spec:
     value: "helse-spleis"
   - name: DATABASE_DATABASE
     value: "spleis"
-  - name: AVVIKSAKER
-    value: "true"
 

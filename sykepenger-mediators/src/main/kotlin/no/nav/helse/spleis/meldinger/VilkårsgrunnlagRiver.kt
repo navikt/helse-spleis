@@ -13,27 +13,20 @@ internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
+    override val behov = listOf(InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
 
     override val riverName = "Vilkårsgrunnlag"
 
     override fun validate(message: JsonMessage) {
         message.requireKey("vedtaksperiodeId", "tilstand")
-        message.require("${InntekterForSammenligningsgrunnlag.name}.skjæringstidspunkt", JsonNode::asLocalDate)
+        message.interestedIn("${InntekterForSammenligningsgrunnlag.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${ArbeidsforholdV2.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${Medlemskap.name}.skjæringstidspunkt", JsonNode::asLocalDate)
-        message.requireArray("@løsning.${InntekterForSammenligningsgrunnlag.name}") {
-            require("årMåned", JsonNode::asYearMonth)
-            requireArray("inntektsliste") {
-                requireKey("beløp")
-                requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
-                interestedIn("orgnummer", "fødselsnummer", "aktørId", "fordel", "beskrivelse")
-            }
-        }
         message.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
             require(it.asText() in listOf("JA", "NEI", "UAVKLART")) { "svar (${it.asText()}) er ikke JA, NEI eller UAVKLART" }
         }
+        message.interestedIn("@løsning.${InntekterForSammenligningsgrunnlag.name}")
         message.requireArray("@løsning.${InntekterForSykepengegrunnlag.name}") {
             require("årMåned", JsonNode::asYearMonth)
             requireArray("inntektsliste") {

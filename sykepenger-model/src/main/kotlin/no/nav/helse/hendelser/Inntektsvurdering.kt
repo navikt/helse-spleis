@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
@@ -16,6 +17,7 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
     }
 
     internal fun sammenligningsgrunnlag(skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {
+        if (Toggle.AvviksvurderingFlyttet.enabled) return Sammenligningsgrunnlag(emptyList())
         val arbeidsgiverInntektsopplysninger = inntekter.map {
             it.tilSammenligningsgrunnlag(meldingsreferanseId)
         }

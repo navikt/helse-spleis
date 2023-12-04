@@ -11,8 +11,9 @@ class Avviksprosent private constructor(private val desimal: Double) : Comparabl
     companion object {
         private const val EPSILON = 0.000001
         private val MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT = Avviksprosent(0.25)
+        private val AVVIKSVURDERING_FLYTTET = System.getenv("AVVIKSAKER_FLYTTET").toBoolean()
 
-        private fun ratio(ratio: Double) = Avviksprosent(ratio)
+        private fun ratio(ratio: Double) = if (AVVIKSVURDERING_FLYTTET) Avviksprosent(0.0) else Avviksprosent(ratio)
 
         fun avvik(a: Double, b: Double) =
             if (b == 0.0) ratio(1.0)
@@ -36,6 +37,7 @@ class Avviksprosent private constructor(private val desimal: Double) : Comparabl
     }
 
     fun subsummér(omregnetÅrsinntekt: Inntekt, sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) {
+        if (AVVIKSVURDERING_FLYTTET) return
         subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(
             maksimaltTillattAvvikPåÅrsinntekt = MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.toInt(),
             grunnlagForSykepengegrunnlagÅrlig = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },

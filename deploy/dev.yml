@@ -53,7 +53,5 @@ spec:
     value: earliest
   - name: IDENTBYTTE
     value: "true"
-  - name: AVVIKSAKER
-    value: "true"
-  - name: AIG
+  - name: AVVIKSAKER_FLYTTET
     value: "true"
