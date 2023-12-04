@@ -115,7 +115,7 @@ class Søknad(
     internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagElement?, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         valider(subsumsjonObserver)
         validerInntektskilder(vilkårsgrunnlag)
-        søknadstype.valider(this, vilkårsgrunnlag, organisasjonsnummer)
+        søknadstype.valider(this, vilkårsgrunnlag)
         return this
     }
 
@@ -197,11 +197,10 @@ class Søknad(
     }
 
     class Søknadstype(private val type: String) {
-        internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?, organisasjonsnummer: String) {
+        internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
             if (this == Arbeidstaker) return
             if (this != Arbeidsledig) return aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
             if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`)
-            if (!vilkårsgrunnlag.validerAnnenSøknadstype(aktivitetslogg, organisasjonsnummer)) return
             aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
         }
         override fun equals(other: Any?): Boolean {

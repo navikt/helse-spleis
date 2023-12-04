@@ -21,7 +21,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -216,7 +215,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>) = true
-        abstract fun validerAnnenSøknadstype(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = sykepengegrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
@@ -447,9 +445,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 
-        override fun validerAnnenSøknadstype(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) =
-            sykepengegrunnlag.validerAnnenSøknadstype(aktivitetslogg, organisasjonsnummer)
-
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(
                 skjæringstidspunkt,
@@ -533,11 +528,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, null) {
-
-        override fun validerAnnenSøknadstype(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) : Boolean {
-            aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd`)
-            return false
-        }
 
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,

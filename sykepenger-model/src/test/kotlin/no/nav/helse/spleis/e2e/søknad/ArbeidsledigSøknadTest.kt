@@ -6,12 +6,14 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadstype.Companion.Arbeidsledig
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
-import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -38,12 +40,11 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
     }
 
     @Test
-    fun `støtter ikke arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt med fler arbeidsgivere i sykepengegrunnlaget`() {
+    fun `støtter arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt med fler arbeidsgivere i sykepengegrunnlaget`() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar)
         a1 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-            assertFunksjonellFeil(`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`, 2.vedtaksperiode.filter())
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
 
@@ -53,7 +54,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
         a3 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
-            assertFunksjonellFeil(`Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`, 1.vedtaksperiode.filter())
+            assertFunksjonellFeil(Varselkode.RV_SV_2, 1.vedtaksperiode.filter())
         }
     }
 }

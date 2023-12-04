@@ -56,7 +56,7 @@ enum class Varselkode(
 
     RV_SØ_39("Støtter ikke søknadstypen"),
     RV_SØ_40("Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd"),
-    RV_SØ_41("Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget"),
+    RV_SØ_41("Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget", avviklet = true),
 
     // Arbeidsledig søknader
     RV_SØ_42("Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader"),
@@ -276,12 +276,7 @@ enum class Varselkode(
     override fun toString() = "${this.name}: $varseltekst"
 
     companion object {
-        val aktiveVarselkoder = values().filterNot { it.avviklet }
-
         val `Mottatt søknad som delvis overlapper` = RV_SØ_13
-
-        val `Overlapper med arbeidsavklaringspenger` = RV_AY_3
-        val `Overlapper med dagpenger` = RV_AY_4
 
         val `Overlapper med foreldrepenger` = RV_AY_5
         val `Overlapper med pleiepenger` = RV_AY_6
@@ -292,8 +287,6 @@ enum class Varselkode(
 
 
         val `Støtter ikke søknadstypen` = RV_SØ_39
-        val `Støtter ikke søknadstypen for forlengelser vilkårsprøvd i Infotrygd` = RV_SØ_40
-        val `Støtter kun søknadstypen hvor den aktuelle arbeidsgiveren er den eneste i sykepengegrunnlaget`= RV_SØ_41
         val `Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader` = RV_SØ_42
         val `Arbeidsledigsøknad er lagt til grunn` =  RV_SØ_43
 

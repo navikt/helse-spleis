@@ -164,11 +164,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     private val testgrunnlag
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement(UUID.randomUUID(), 1.januar, Inntekt.INGEN.sykepengegrunnlag, null) {
-            override fun validerAnnenSøknadstype(
-                aktivitetslogg: IAktivitetslogg,
-                organisasjonsnummer: String
-            ) = false
-
             override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
             override fun vilkårsgrunnlagtype() = "testgrunnlag"
 
