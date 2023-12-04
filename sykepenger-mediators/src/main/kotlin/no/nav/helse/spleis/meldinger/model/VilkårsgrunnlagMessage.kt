@@ -73,9 +73,9 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
     }
 
-    private val skjæringstidspunkter = listOf(
+    private val skjæringstidspunkter = listOfNotNull(
         packet["${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt"].asLocalDate(),
-        packet["${InntekterForSammenligningsgrunnlag.name}.skjæringstidspunkt"].asLocalDate(),
+        packet["${InntekterForSammenligningsgrunnlag.name}.skjæringstidspunkt"].asOptionalLocalDate(),
         packet["${ArbeidsforholdV2.name}.skjæringstidspunkt"].asLocalDate(),
         packet["${Medlemskap.name}.skjæringstidspunkt"].asLocalDate(),
     )
