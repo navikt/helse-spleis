@@ -252,8 +252,15 @@ class Person private constructor(
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
+        val skjæringstidspunkterFørEndring = skjæringstidspunkter()
         utbetalingshistorikk.kontekst(aktivitetslogg, this)
         if(!utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)) return
+        val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
+        if (!skjæringstidspunkterEtterEndring.containsAll(skjæringstidspunkterFørEndring)) {
+            arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
+                    arbeidsgiver.sykefraværsfortelling(acc)
+                }.varsleObservers(observers)
+            }
         arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk)
         gjenopptaBehandling(utbetalingshistorikk)
         håndterGjenoppta(utbetalingshistorikk)

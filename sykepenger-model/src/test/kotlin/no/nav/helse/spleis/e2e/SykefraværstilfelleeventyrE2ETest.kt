@@ -1,17 +1,17 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.inntektsmelding.InntektsmeldingMatchingTest
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
@@ -194,4 +194,30 @@ internal class SykefraværstilfelleeventyrE2ETest : AbstractDslTest() {
             assertEquals(10.januar, tilfelle.tom)
         }
     }
+
+    @Test
+    fun `Infotrygd utbetaler periode i forkant - Skjæringstidspunktet flytter seg`() {
+        a1 {
+            nyttVedtak(1.februar, 28.februar)
+            assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            Assertions.assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+
+            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent,
+                TestPerson.INNTEKT
+            )))
+        }
+
+        val sisteEventyr = observatør.sykefraværstilfelleeventyr.last()
+        assertEquals(1, sisteEventyr.size)
+        val sykefraværstilfelle = sisteEventyr.single()
+        assertEquals(1.januar, sykefraværstilfelle.dato)
+        assertEquals(1, sykefraværstilfelle.perioder.size)
+        sykefraværstilfelle.perioder[0].also { tilfelle ->
+            assertEquals(a1 { 1.vedtaksperiode }, tilfelle.id)
+            assertEquals(a1, tilfelle.organisasjonsnummer)
+            assertEquals(1.februar, tilfelle.fom)
+            assertEquals(28.februar, tilfelle.tom)
+        }
+    }
+
 }
