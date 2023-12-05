@@ -7,8 +7,11 @@ import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
+import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
 import no.nav.helse.etterlevelse.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
@@ -75,6 +78,49 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `subsummerer ikke inntektsspesfikke subsumsjoner ved overstyring som ikke fører til endrede inntekter i sykpengegrunnlaget`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            )
+        )
+        // Ved første vilkårsprøving subsummerer vi inntekter i hele sykepengegrunnlaget + de som er spesifikke for Ghost-inntekten
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_30, ledd = LEDD_1, versjon = 1.januar(2019)))
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, INNTEKT * 1.1, Subsumsjon("8-28", 3, "b"))))
+
+        // Når ghost-inntekt overstyres av saksbehandler skal inntekter i hele sykepengegrunnlaget subsummeres på ny i tillegg til det saksbehandler har sagt
+        assertEquals(2, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_30, ledd = LEDD_1, versjon = 1.januar(2019)))
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_B, versjon = 1.januar(2019)))
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT)
+        // Når det kommer IM for ghost i annen måned enn skjæringstidspunktet beholdes Saksbehandlerinntekten og vi bruker kun refusjonsopplysningene. Derfor subsummerer vi ikke noe nytt om inntekter
+        assertEquals(2, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_30, ledd = LEDD_1, versjon = 1.januar(2019)))
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
+        assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_B, versjon = 1.januar(2019)))
+    }
 
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid tilfredstilt`() {
@@ -1683,7 +1729,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 1.januar(2019),
             paragraf = PARAGRAF_8_28,
             ledd = 3.ledd,
-            bokstav = Bokstav.BOKSTAV_B,
+            bokstav = BOKSTAV_B,
             input = mapOf(
                 "organisasjonsnummer" to a2,
                 "skjæringstidspunkt" to 1.januar,
@@ -2047,7 +2093,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             )
         ), meldingsreferanseId = hendelseId2)
 
-        val nyInntekt = INNTEKT + 500.daglig
+        val nyInntekt = INNTEKT + 750.daglig
         val hendelseId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(

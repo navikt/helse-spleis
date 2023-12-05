@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
-import java.lang.IllegalArgumentException
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -76,12 +75,10 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import kotlin.reflect.KClass
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 
@@ -246,11 +243,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertInntektstype(1.januar, mapOf(a1 to InntektsmeldingInntekt::class, a2 to Saksbehandler::class))
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT)
 
-        assertEquals(
-            "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken",
-            assertThrows<IllegalArgumentException> { håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2, beregnetInntekt = INNTEKT) }.message
-        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
     }
 
     @Test
@@ -556,7 +558,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
-        Assertions.assertTrue(inspektør(a2).utbetalinger.isEmpty())
+        assertTrue(inspektør(a2).utbetalinger.isEmpty())
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
@@ -607,7 +609,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(30.mars, a1Linje.tom)
         assertEquals(499, a1Linje.beløp)
 
-        Assertions.assertTrue(inspektør(a2).utbetalinger.isEmpty())
+        assertTrue(inspektør(a2).utbetalinger.isEmpty())
     }
 
     @Test
@@ -665,7 +667,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(30.april, a1Linje.tom)
         assertEquals(997, a1Linje.beløp)
 
-        Assertions.assertTrue(inspektør(a2).utbetalinger.isEmpty())
+        assertTrue(inspektør(a2).utbetalinger.isEmpty())
         assertEquals(FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 

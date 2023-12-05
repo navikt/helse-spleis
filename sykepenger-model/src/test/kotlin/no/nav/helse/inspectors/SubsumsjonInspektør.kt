@@ -66,9 +66,9 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         lovverk: String = "folketrygdloven",
         paragraf: Paragraf,
         versjon: LocalDate?,
-        ledd: Ledd?,
-        punktum: Punktum?,
-        bokstav: Bokstav?,
+        ledd: Ledd? = null,
+        punktum: Punktum? = null,
+        bokstav: Bokstav? = null,
         utfall: Utfall? = null,
         vedtaksperiodeId: UUID? = null
     ) = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId).size

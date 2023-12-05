@@ -105,7 +105,7 @@ internal class Sykepengegrunnlag private constructor(
         vurdertInfotrygd: Boolean = false
     ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), vurdertInfotrygd, sammenligningsgrunnlag) {
         subsumsjonObserver.apply {
-            arbeidsgiverInntektsopplysninger.subsummer(this)
+            arbeidsgiverInntektsopplysninger.subsummer(this, forrige = emptyList())
             `§ 8-10 ledd 2 punktum 1`(
                 erBegrenset = begrensning == ER_6G_BEGRENSET,
                 maksimaltSykepengegrunnlagÅrlig = `6G`.reflection { årlig, _, _, _ -> årlig },

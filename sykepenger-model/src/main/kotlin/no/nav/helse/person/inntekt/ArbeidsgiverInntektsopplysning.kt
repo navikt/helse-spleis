@@ -79,8 +79,8 @@ class ArbeidsgiverInntektsopplysning(
         inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, opptjening?.startdatoFor(orgnummer))
     }
 
-    private fun deaktiver(forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver): ArbeidsgiverInntektsopplysning? {
-        inntektsopplysning.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, oppfylt) ?: return null
+    private fun deaktiver(forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver): ArbeidsgiverInntektsopplysning {
+        inntektsopplysning.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, oppfylt)
         return this
     }
 
@@ -119,7 +119,6 @@ class ArbeidsgiverInntektsopplysning(
     internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje? {
         if (organisasjonsnummer != this.orgnummer) return null
         if (sisteDag < gjelder.start) return Sykdomstidslinje()
-        val tom = minOf(gjelder.endInclusive, sisteDag)
         return Sykdomstidslinje.ghostdager(gjelder.start til sisteDag)
     }
 
@@ -155,7 +154,7 @@ class ArbeidsgiverInntektsopplysning(
             val omregnetÅrsinntekt = map { it.inntektsopplysning }
             val endringen = this
                 .map { inntekt -> inntekt.overstyr(other) }
-                .also { it.subsummer(subsumsjonObserver, opptjening) }
+                .also { it.subsummer(subsumsjonObserver, opptjening, this) }
             val omregnetÅrsinntektEtterpå = endringen.map { it.inntektsopplysning }
             if (Inntektsopplysning.erOmregnetÅrsinntektEndret(omregnetÅrsinntekt, omregnetÅrsinntektEtterpå)) return endringen.map { it.rullTilbake() }
             return endringen
@@ -185,12 +184,20 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
             firstOrNull { it.gjelder(organisasjonsnummer) }?.inntektsopplysning?.inntektsdata(skjæringstidspunkt)
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null) {
+
+        private fun List<ArbeidsgiverInntektsopplysning>.finnEndredeInntektsopplysninger(forrige: List<ArbeidsgiverInntektsopplysning>): List<ArbeidsgiverInntektsopplysning> {
+            val forrigeInntektsopplysninger = forrige.map { it.inntektsopplysning }
+            return filterNot { it.inntektsopplysning in forrigeInntektsopplysninger }
+        }
+        internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null, forrige: List<ArbeidsgiverInntektsopplysning>) {
+            val endredeInntektsopplysninger = finnEndredeInntektsopplysninger(forrige)
+            if (endredeInntektsopplysninger.isEmpty()) return
+
             subsumsjonObserver.`§ 8-30 ledd 1`(
                 grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig = omregnetÅrsinntektPerArbeidsgiver().mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } },
                 grunnlagForSykepengegrunnlagÅrlig = map { it.inntektsopplysning.fastsattÅrsinntekt() }.summer().reflection { årlig, _, _, _ -> årlig }
             )
-            forEach { it.subsummer(subsumsjonObserver, opptjening) }
+            endredeInntektsopplysninger.forEach { it.subsummer(subsumsjonObserver, opptjening) }
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder) {
