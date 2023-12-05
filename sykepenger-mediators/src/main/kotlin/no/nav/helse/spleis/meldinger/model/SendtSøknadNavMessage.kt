@@ -54,8 +54,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             packet["opprinneligSendt"].takeUnless(JsonNode::isMissingOrNull)?.let {
                 builder.opprinneligSendt(it.asLocalDateTime())
             }
-            val friskmeldtFom = packet["arbeidGjenopptatt"].asOptionalLocalDate() ?: friskmeldtFom(packet["sporsmal"])
-            builder.arbeidsgjennopptatt(friskmeldtFom)
+            builder.arbeidsgjennopptatt(packet["arbeidGjenopptatt"].asOptionalLocalDate())
             builder.utenlandskSykmelding(packet["utenlandskSykmelding"].asBoolean(false))
             builder.sendTilGosys(packet["sendTilGosys"].asBoolean(false))
         }
@@ -66,17 +65,6 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             return andreInntektskilder
                 .map { it.path("type").asText() }
                 .filterNot { kilde -> kilde == "ANDRE_ARBEIDSFORHOLD" && ikkeJobbetIDetSisteFraAnnetArbeidsforhold }
-        }
-
-        private fun friskmeldtFom(listeAvSpørsmål: JsonNode): LocalDate? {
-            val svarene = spørsmål(listeAvSpørsmål)
-            val friskmeldtFom = svarene
-                .firstOrNull { it.path("tag").asText() == "FRISKMELDT_START" }
-                ?.path("svar")
-                ?.singleOrNull()
-                ?.path("verdi")
-                ?.asOptionalLocalDate()
-            return friskmeldtFom
         }
 
         private fun harSvartNeiOmIkkeJobbetIDetSisteFraAnnetArbeidsforhold(listeAvSpørsmål: JsonNode): Boolean {

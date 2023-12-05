@@ -7,7 +7,7 @@ plugins {
 val mainClass = "no.nav.helse.AppKt"
 
 val innteksmeldingKontraktVersion = "2023.06.20-08-54-d1c6c"
-val syfokafkaVersion = "2023.11.23-14.00-f17b7ee4"
+val syfokafkaVersion = "2023.12.05-10.16-3ffa06f7"
 val mockkVersion = "1.12.4"
 val jsonSchemaValidatorVersion = "1.0.70"
 val jsonassertVersion = "1.5.0"
