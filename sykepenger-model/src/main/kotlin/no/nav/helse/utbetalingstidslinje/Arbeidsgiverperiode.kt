@@ -201,7 +201,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     internal fun loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(sykdomstidslinje: Sykdomstidslinje) {
-        val periodeUtoverArbeidsgiverperioden = kjenteDager.filter { it.starterEtter(arbeidsgiverperioden) }.periode() ?: return
+        val periodeUtoverArbeidsgiverperioden = kjenteDager.filter { it.starterEtter(arbeidsgiverperioden) }.periode()?.utenHelgehale() ?: return
         sikkerlogg.info("Periode som går til avsluttet uten utbetaling og strekker seg utover arbeidsgiverperioden ${sykdomstidslinje.subset(periodeUtoverArbeidsgiverperioden)}")
     }
 

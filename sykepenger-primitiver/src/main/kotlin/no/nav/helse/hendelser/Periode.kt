@@ -1,5 +1,7 @@
 package no.nav.helse.hendelser
 
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.helse.erRettFør
@@ -118,6 +120,15 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
     fun oppdaterFom(other: Periode) = oppdaterFom(other.start)
     fun oppdaterTom(other: LocalDate) = Periode(this.start, maxOf(other, this.endInclusive))
     fun oppdaterTom(other: Periode) = oppdaterTom(other.endInclusive)
+
+    fun utenHelgehale(): Periode? {
+        val nåværendeTom = endInclusive
+        val ukedag = endInclusive.dayOfWeek
+        if (ukedag !in setOf(SATURDAY, SUNDAY)) return this
+        val nyTom = nåværendeTom.minusDays(if (ukedag == SATURDAY) 1 else 2)
+        if (nyTom < start) return null
+        return start til nyTom
+    }
 
     fun beholdDagerEtter(cutoff: LocalDate): Periode? = when {
         endInclusive <= cutoff -> null

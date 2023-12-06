@@ -5,6 +5,7 @@ import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Periode.Companion.intersect
@@ -16,7 +17,10 @@ import no.nav.helse.hendelser.Periode.Companion.slutterEtter
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
+import no.nav.helse.lørdag
 import no.nav.helse.mai
+import no.nav.helse.mandag
+import no.nav.helse.søndag
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -27,6 +31,24 @@ import org.junit.jupiter.api.assertThrows
 
 internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
+
+    @Test
+    fun `uten helgehale`() {
+        val fredag = fredag(5.januar)
+        val lørdag = lørdag(6.januar)
+        val søndag = søndag(7.januar)
+        val mandag = mandag(8.januar)
+        assertEquals(fredag til fredag, (fredag til lørdag).utenHelgehale())
+        assertNull((lørdag til lørdag).utenHelgehale())
+        assertNull((lørdag til søndag).utenHelgehale())
+        assertNull((søndag til søndag).utenHelgehale())
+
+        assertEquals(fredag til fredag, (fredag til søndag).utenHelgehale())
+
+        (fredag til mandag).let { assertEquals(it, it.utenHelgehale()) }
+        val langPeriode = lørdag(7.januar(2017)) til søndag
+        assertEquals(lørdag(7.januar(2017)) til fredag, langPeriode.utenHelgehale())
+    }
 
     @Test
     fun `grupperer perioder`() {
