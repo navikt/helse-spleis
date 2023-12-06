@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -21,6 +22,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.søndag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -54,6 +56,15 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertEquals(Sykdomstidslinje(), inspektør.arbeidsgiverperioden(1.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje.subset(periode1)))
         assertEquals(Sykdomstidslinje(), inspektør.arbeidsgiverperioden(2.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje.subset(periode2)))
         assertEquals("FFF FFF", inspektør.arbeidsgiverperioden(3.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje.subset(periode3)).toShortString())
+    }
+
+    @Test
+    fun `en auu som strekker seg utover arbeidsgiverperioden kun med helg`() {
+        håndterSøknad(Sykdom(4.januar, søndag(21.januar), 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(4.januar til fredag(19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        val utoverAgp = inspektør.arbeidsgiverperioden(1.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje)
+        assertEquals(Sykdomstidslinje(), utoverAgp)
     }
 
     @Test

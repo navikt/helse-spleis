@@ -202,7 +202,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal fun sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         val periode = sykdomstidslinje.periode() ?: return Sykdomstidslinje()
         val sisteDagIArbeidsgiverperioden = perioder.lastOrNull()?.endInclusive ?: return Sykdomstidslinje()
-        val periodeUtoverArbeidsgiverperioden = periode.beholdDagerEtter(sisteDagIArbeidsgiverperioden) ?: return Sykdomstidslinje()
+        val periodeUtoverArbeidsgiverperioden = periode.beholdDagerEtter(sisteDagIArbeidsgiverperioden)?.utenHelgehale() ?: return Sykdomstidslinje()
         return sykdomstidslinje.subset(periodeUtoverArbeidsgiverperioden)
     }
 
