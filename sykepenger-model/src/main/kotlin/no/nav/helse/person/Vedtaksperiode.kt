@@ -2105,11 +2105,16 @@ internal class Vedtaksperiode private constructor(
         override val erFerdigBehandlet = true
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-            vedtaksperiode.finnArbeidsgiverperiode()?.loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode.sykdomstidslinje)
+            loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode)
             vedtaksperiode.lås()
             vedtaksperiode.generasjoner.avslutt(hendelse)
             check(!vedtaksperiode.generasjoner.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
+        }
+
+        private fun loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode: Vedtaksperiode) {
+            val sykdomstidslinjeUtoverAgp = vedtaksperiode.finnArbeidsgiverperiode()?.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode.sykdomstidslinje)?.takeUnless { it.periode() == null } ?: return
+            sikkerlogg.info("Periode som går til avsluttet uten utbetaling og strekker seg utover arbeidsgiverperioden $sykdomstidslinjeUtoverAgp")
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
