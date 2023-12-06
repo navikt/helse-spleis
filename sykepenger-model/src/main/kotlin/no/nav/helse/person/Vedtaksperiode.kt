@@ -2114,7 +2114,11 @@ internal class Vedtaksperiode private constructor(
 
         private fun loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode: Vedtaksperiode) {
             val sykdomstidslinjeUtoverAgp = vedtaksperiode.finnArbeidsgiverperiode()?.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode.sykdomstidslinje)?.takeUnless { it.periode() == null } ?: return
-            sikkerlogg.info("Periode som går til avsluttet uten utbetaling og strekker seg utover arbeidsgiverperioden $sykdomstidslinjeUtoverAgp")
+            sikkerlogg.info("Periode som går til avsluttet uten utbetaling og strekker seg utover arbeidsgiverperioden $sykdomstidslinjeUtoverAgp",
+                keyValue("aktørId", vedtaksperiode.aktørId),
+                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
+                keyValue("fom", "${vedtaksperiode.periode.start}")
+            )
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
