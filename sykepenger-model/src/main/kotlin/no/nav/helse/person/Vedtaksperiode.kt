@@ -2105,6 +2105,7 @@ internal class Vedtaksperiode private constructor(
         override val erFerdigBehandlet = true
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
+            vedtaksperiode.finnArbeidsgiverperiode()?.loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode.sykdomstidslinje)
             vedtaksperiode.lås()
             vedtaksperiode.generasjoner.avslutt(hendelse)
             check(!vedtaksperiode.generasjoner.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }

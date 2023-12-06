@@ -18,6 +18,7 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import org.slf4j.LoggerFactory
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -199,7 +200,13 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return utbetalingsdagerIVedtaksperiode.all { infotrygdhistorikk.harUtbetaltI(it.somPeriode()) }
     }
 
+    internal fun loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(sykdomstidslinje: Sykdomstidslinje) {
+        val periodeUtoverArbeidsgiverperioden = kjenteDager.filter { it.starterEtter(arbeidsgiverperioden) }.periode() ?: return
+        sikkerlogg.info("Periode som går til avsluttet uten utbetaling og strekker seg utover arbeidsgiverperioden ${sykdomstidslinje.subset(periodeUtoverArbeidsgiverperioden)}")
+    }
+
     internal companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 
