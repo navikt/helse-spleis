@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -54,6 +55,23 @@ internal class MaksimumSykepengedagerfilterTest {
     @BeforeEach
     internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
+    }
+
+    @Test
+    fun `avviser ikke dager som strekker seg forbi arbeidsgiver som beregner utbetalinger`() {
+        val a1 = tidslinjeOf(16.AP, 248.NAVDAGER)
+        val a2 = tidslinjeOf(16.AP, 250.NAVDAGER, 182.ARB, 10.NAV)
+        val avvisteDager = listOf(a1, a2).utbetalingsavgrenser(UNG_PERSON_FNR_2018, a1.periode())
+        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        assertForventetFeil(
+            forklaring = "Om arbeidsgiver som _ikke_ beregner utbetalinger har dager som skal avvises etter arbeidsgiver som beregner utbetalinger, avvises dem ikke",
+            nå = {
+                 assertEquals(emptyList<LocalDate>(), avvisteDager)
+            },
+            ønsket = {
+                assertEquals(listOf(31.desember, 1.januar(2019)), avvisteDager)
+            }
+        )
     }
 
     @Test
