@@ -20,6 +20,40 @@ import org.junit.jupiter.api.Test
 internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
 
     @Test
+    fun `siste refusjonsdag er satt til før første fraværsdag`() {
+        val im = UUID.randomUUID()
+        val refusjonshistorikk = Refusjonshistorikk().apply {
+            leggTilRefusjon(Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = im,
+                førsteFraværsdag = 20.januar,
+                arbeidsgiverperioder = emptyList(),
+                beløp = 0.daglig,
+                sisteRefusjonsdag = 3.januar,
+                endringerIRefusjon = emptyList(),
+                tidsstempel = LocalDateTime.now(),
+            ))
+        }
+        assertEquals(listOf(Refusjonsopplysning(im, 4.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(20.januar).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `siste refusjonsdag er satt til før starten på siste del av arbeidsgiverperioden`() {
+        val im = UUID.randomUUID()
+        val refusjonshistorikk = Refusjonshistorikk().apply {
+            leggTilRefusjon(Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = im,
+                førsteFraværsdag = null,
+                arbeidsgiverperioder = listOf(1.januar til 5.januar, 10.januar til 20.januar),
+                beløp = 0.daglig,
+                sisteRefusjonsdag = 6.januar,
+                endringerIRefusjon = emptyList(),
+                tidsstempel = LocalDateTime.now(),
+            ))
+        }
+        assertEquals(listOf(Refusjonsopplysning(im, 7.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(10.januar).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
     fun `opphører ikke refusjon allikevel`() {
         val inntektsmelding1 = UUID.fromString("00000000-0000-0000-0000-000000000001")
         val inntektsmelding2 = UUID.fromString("00000000-0000-0000-0000-000000000002")
