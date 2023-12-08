@@ -2550,7 +2550,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 ),
                 "beregnetTidslinje" to listOf(
                     mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
+                    mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                 )
             ),
             output = mapOf(
@@ -2672,7 +2673,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 ),
                 "beregnetTidslinje" to listOf(
                     mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                    mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                    mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100),
+                    mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                 )
             ),
             output = mapOf(
