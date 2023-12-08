@@ -530,7 +530,7 @@ internal class MaksimumSykepengedagerfilterTest {
     @Test
     fun `gyldig ferie påvirker 26 ukers telling`() {
         val tidslinje = tidslinjeOf(247.NAVDAGER, 182.FRI, 10.NAVDAGER)
-        assertTrue(tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).isEmpty())
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
     }
 
     @Test

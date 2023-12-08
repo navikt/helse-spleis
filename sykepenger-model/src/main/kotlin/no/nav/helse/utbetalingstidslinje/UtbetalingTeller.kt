@@ -56,6 +56,26 @@ internal class UtbetalingTeller(
         gammelPersonDager = 0
     }
 
+
+    internal fun erDagerOver67ÅrForbrukte(): Boolean {
+        val gjenståendeSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67() - gammelPersonDager
+        return gjenståendeSykepengedagerOver67 == 0
+    }
+    internal fun erAlleDagerForbrukte(): Boolean {
+        val gjenståendeSykepengedager = arbeidsgiverRegler.maksSykepengedager() - forbrukteDager
+        return gjenståendeSykepengedager == 0 || erDagerOver67ÅrForbrukte()
+    }
+
+    // hvor mange sykepengedager den sykmeldte har igjen, hensyntatt alder:
+    // en 70-åring har 0 dager igjen
+    // en person mellom 67-70 har opp til 60 dager igjen
+    // en person under 67 år har enten <248 - forbrukte dager> igjen -eller- 60, om vedkommende blir 67 år snart
+    internal fun gjenståendeDager(dato: LocalDate): Int {
+        val gjenståendeSykepengedager = arbeidsgiverRegler.maksSykepengedager() - forbrukteDager
+        val gjenståendeSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67() - gammelPersonDager
+        return alder.maksimumSykepenger(dato, forbrukteDager, gjenståendeSykepengedager, gjenståendeSykepengedagerOver67).gjenståendeDager()
+    }
+
     internal fun maksimumSykepenger(sisteKjenteDag: LocalDate? = null): Alder.MaksimumSykepenger {
         val gjenståendeSykepengedager = arbeidsgiverRegler.maksSykepengedager() - forbrukteDager
         val gjenståendeSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67() - gammelPersonDager

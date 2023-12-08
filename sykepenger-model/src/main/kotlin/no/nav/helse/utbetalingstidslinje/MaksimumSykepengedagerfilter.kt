@@ -163,7 +163,7 @@ internal class MaksimumSykepengedagerfilter(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        state.fridag(this, dato)
+        fridag(dato)
     }
 
     override fun visit(
@@ -188,26 +188,38 @@ internal class MaksimumSykepengedagerfilter(
         state.oppholdsdag(this, dagen)
     }
 
-    private fun nextState(dagen: LocalDate): State? {
-        val maksimumSykepenger = teller.maksimumSykepenger(dagen)
-        (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).let { harTilstrekkeligOpphold ->
-            subsumsjonObserver.`§ 8-12 ledd 2`(
-                oppfylt = harTilstrekkeligOpphold,
-                dato = dagen,
-                gjenståendeSykepengedager = maksimumSykepenger.gjenståendeDager(),
-                beregnetAntallOppholdsdager = opphold,
-                tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-                tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
-                beregnetTidslinje = beregnetTidslinjesubsumsjon,
-            )
-            if (harTilstrekkeligOpphold) {
-                teller.resett()
-                return State.Initiell
-            }
-        }
-        if (state == State.Karantene) return null
-        if (maksimumSykepenger.sisteDag() > dagen) return null
-        return State.Karantene
+    private fun fridag(dagen: LocalDate) {
+        opphold += 1
+        state.fridag(this, dagen)
+    }
+
+    private fun håndterBetalbarDag(dagen: LocalDate, justerTreårsvindu: Boolean = false) {
+        teller.inkrementer(dagen)
+        if (justerTreårsvindu) teller.dekrementer(dagen)
+        subsumsjonObserver.`§ 8-12 ledd 2`(
+            oppfylt = false,
+            dato = dagen,
+            gjenståendeSykepengedager = teller.gjenståendeDager(dagen),
+            beregnetAntallOppholdsdager = opphold,
+            tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+            tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
+            beregnetTidslinje = beregnetTidslinjesubsumsjon,
+        )
+        if (!teller.erAlleDagerForbrukte()) return state(State.Syk)
+        state(if (teller.erDagerOver67ÅrForbrukte()) State.Karantene(Begrunnelse.SykepengedagerOppbruktOver67) else State.Karantene(Begrunnelse.SykepengedagerOppbrukt))
+    }
+    private fun tilstrekkeligOppholdNådd(dagen: LocalDate): Boolean {
+        val harTilstrekkeligOpphold = opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
+        subsumsjonObserver.`§ 8-12 ledd 2`(
+            oppfylt = harTilstrekkeligOpphold,
+            dato = dagen,
+            gjenståendeSykepengedager = teller.gjenståendeDager(dagen),
+            beregnetAntallOppholdsdager = opphold,
+            tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+            tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
+            beregnetTidslinje = beregnetTidslinjesubsumsjon,
+        )
+        return harTilstrekkeligOpphold
     }
 
     private interface State {
@@ -215,12 +227,13 @@ internal class MaksimumSykepengedagerfilter(
         fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
         fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
         fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-        fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = avgrenser.oppholdsdag(dagen)
+        fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
         fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
         fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
 
         object Initiell : State {
             override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
+                avgrenser.teller.resett()
                 avgrenser.opphold = 0
             }
 
@@ -237,26 +250,22 @@ internal class MaksimumSykepengedagerfilter(
             }
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.teller.inkrementer(dagen)
-                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
-                avgrenser.opphold = 0
+                avgrenser.håndterBetalbarDag(dagen)
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.state(avgrenser.nextState(dagen) ?: Opphold)
+                avgrenser.state(Opphold)
             }
 
             override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.opphold += 1
+                avgrenser.state(OppholdFri)
             }
         }
 
         object Opphold : State {
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.teller.inkrementer(dagen)
-                avgrenser.teller.dekrementer(dagen)
-                avgrenser.state(avgrenser.nextState(dagen) ?: Syk)
+                avgrenser.håndterBetalbarDag(dagen, true)
             }
 
             override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
@@ -265,39 +274,76 @@ internal class MaksimumSykepengedagerfilter(
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
+                if (!avgrenser.tilstrekkeligOppholdNådd(dagen)) return
+                avgrenser.state(Initiell)
             }
         }
 
-        object Karantene : State {
+        object OppholdFri : State {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.håndterBetalbarDag(dagen)
+            }
+
+            override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                if (!avgrenser.tilstrekkeligOppholdNådd(dagen)) return
+                avgrenser.state(Initiell)
+            }
+
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                if (!avgrenser.tilstrekkeligOppholdNådd(dagen)) return avgrenser.state(Opphold)
+                avgrenser.state(Initiell)
+            }
+        }
+
+        class Karantene(private val begrunnelse: Begrunnelse) : State {
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
-                avvistDag(avgrenser, dagen)
+                vurderTilstrekkeligOppholdNådd(avgrenser)
+                avgrenser.state.avvistDag(avgrenser, dagen)
             }
 
             override fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avvisDag(avgrenser, dagen)
-            }
-
-            private fun avvisDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.avvisDag(dagen, when (avgrenser.opphold > TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
-                    true -> Begrunnelse.NyVilkårsprøvingNødvendig
-                    false -> avgrenser.teller.maksimumSykepenger().begrunnelse()
-                })
+                avgrenser.avvisDag(dagen, begrunnelse)
             }
 
             override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
                 /* helg skal ikke medføre ny rettighet */
+                vurderTilstrekkeligOppholdNådd(avgrenser)
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.nextState(dagen)?.run { avgrenser.state(this) }
+                if (!avgrenser.tilstrekkeligOppholdNådd(dagen)) return
+                avgrenser.state(Initiell)
             }
 
             override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.opphold += 1
+                vurderTilstrekkeligOppholdNådd(avgrenser)
             }
+
+            private fun vurderTilstrekkeligOppholdNådd(avgrenser: MaksimumSykepengedagerfilter) {
+                if (avgrenser.opphold <= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return
+                avgrenser.state(KaranteneTilstrekkeligOppholdNådd)
+            }
+        }
+
+        object KaranteneTilstrekkeligOppholdNådd : State {
+            override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avvistDag(avgrenser, dagen)
+            }
+
+            override fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.avvisDag(dagen, Begrunnelse.NyVilkårsprøvingNødvendig)
+            }
+
+            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.teller.resett()
+                avgrenser.state(Initiell)
+            }
+
+            override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
         }
 
         object ForGammel : State {
