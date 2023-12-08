@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
@@ -18,6 +19,49 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
+
+    private fun endringIRefusjonFraOgMed(dag: LocalDate) = UUID.randomUUID().let {
+        it to Refusjonshistorikk().apply {
+            leggTilRefusjon(Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = it,
+                førsteFraværsdag = 1.januar,
+                arbeidsgiverperioder = emptyList(),
+                beløp = 100.daglig,
+                sisteRefusjonsdag = 1.februar,
+                endringerIRefusjon = listOf(EndringIRefusjon(200.daglig, dag)),
+                tidsstempel = LocalDateTime.now(),
+            ))
+        }.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
+    }
+
+    @Test
+    fun `bruker endringer i refusjon oppgitt før siste refusjonsdag`() {
+        val (id, refusjonsopplysninger) = endringIRefusjonFraOgMed(31.januar)
+        assertEquals(listOf(
+            Refusjonsopplysning(id, 1.januar, 30.januar, 100.daglig),
+            Refusjonsopplysning(id, 31.januar, 1.februar, 200.daglig),
+            Refusjonsopplysning(id, 2.februar, null, 0.daglig)
+        ), refusjonsopplysninger)
+    }
+
+    @Test
+    fun `bruker endringer i refusjon oppgitt lik siste refusjonsdag`() {
+        val (id, refusjonsopplysninger) = endringIRefusjonFraOgMed(1.februar)
+        assertEquals(listOf(
+            Refusjonsopplysning(id, 1.januar, 31.januar, 100.daglig),
+            Refusjonsopplysning(id, 1.februar, 1.februar, 200.daglig),
+            Refusjonsopplysning(id, 2.februar, null, 0.daglig)
+        ), refusjonsopplysninger)
+    }
+
+    @Test
+    fun `ignorer endringer i refusjon etter siste refusjonsdag`() {
+        val (id, refusjonsopplysninger) = endringIRefusjonFraOgMed(2.februar)
+        assertEquals(listOf(
+            Refusjonsopplysning(id, 1.januar, 1.februar, 100.daglig),
+            Refusjonsopplysning(id, 2.februar, null, 0.daglig)
+        ), refusjonsopplysninger)
+    }
 
     @Test
     fun `siste refusjonsdag er satt til før første fraværsdag`() {
