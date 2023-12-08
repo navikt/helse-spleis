@@ -15,6 +15,7 @@ import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.N
+import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.UK
@@ -35,6 +36,14 @@ internal class SykdomstidslinjeTest {
     @BeforeEach
     fun setup() {
         resetSeed()
+    }
+
+    @Test
+    fun `unik dagtype short string `() {
+        assertEquals("Tom tidslinje", Sykdomstidslinje().toUnikDagtypeShortString())
+        val tidslinje = 5.S + 5.F+ 5.UK + 5.P
+        assertEquals("SSSSSFF FFF???? ?PPPPP", tidslinje.toShortString())
+        assertEquals("?FPS", tidslinje.toUnikDagtypeShortString())
     }
 
     @Test

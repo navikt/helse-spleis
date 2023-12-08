@@ -195,6 +195,11 @@ internal class Sykdomstidslinje private constructor(
 
     override fun toString() = toShortString()
 
+    internal fun toUnikDagtypeShortString(): String {
+        if (periode == null) return "Tom tidslinje"
+        return String(toShortString().replace(" ", "").toSortedSet().toCharArray())
+    }
+
     internal fun toShortString(): String {
         return periode?.joinToString(separator = "") {
             (if (it.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
