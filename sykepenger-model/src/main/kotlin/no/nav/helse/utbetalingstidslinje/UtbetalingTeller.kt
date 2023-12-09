@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.plus
 import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon.Maksdatobestemmelse
-import kotlin.math.max
 
 internal class UtbetalingTeller(
     private val alder: Alder,
@@ -22,56 +21,29 @@ internal class UtbetalingTeller(
     private companion object {
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
-    private var forbrukteDager: Int = 0
-    private var gammelPersonDager: Int = 0
-    private var startdatoSykepengerettighet: LocalDate = LocalDate.MIN
-    private var startdatoTreårsvindu: LocalDate = LocalDate.MIN
-    private val betalteDager = mutableSetOf<LocalDate>()
+
+    private var gjeldende: Maksdatosituasjon? = null
 
     internal fun inkrementer(dato: LocalDate) {
-        if (forbrukteDager == 0) {
-            startdatoSykepengerettighet = dato
-            startdatoTreårsvindu = dato.minusYears(HISTORISK_PERIODE_I_ÅR)
-        }
-        betalteDager.add(dato)
-        forbrukteDager += 1
-        if (alder.innenfor67årsgrense(dato)) return
-        gammelPersonDager += 1
+        gjeldende = gjeldende?.inkrementer(dato) ?: Maksdatosituasjon(arbeidsgiverRegler, dato, alder, dato, dato.minusYears(HISTORISK_PERIODE_I_ÅR), setOf(dato))
     }
 
     internal fun dekrementer(dato: LocalDate) {
-        val nyStartdatoTreårsvindu = dato.minusYears(HISTORISK_PERIODE_I_ÅR)
-        if (nyStartdatoTreårsvindu >= startdatoSykepengerettighet) {
-            startdatoTreårsvindu.datesUntil(nyStartdatoTreårsvindu).filter { it in betalteDager }.forEach { dekrementer ->
-                dekrementerDag(dekrementer)
-            }
-        }
-        startdatoTreårsvindu = nyStartdatoTreårsvindu
-    }
-
-    private fun dekrementerDag(dato: LocalDate) {
-        if (dato < startdatoSykepengerettighet) return
-        forbrukteDager = max(0, forbrukteDager - 1)
+        gjeldende = gjeldende?.dekrementer(dato.minusYears(HISTORISK_PERIODE_I_ÅR))
     }
 
     internal fun resett() {
-        betalteDager.clear()
-        startdatoSykepengerettighet = LocalDate.MIN
-        startdatoTreårsvindu = LocalDate.MIN
-        forbrukteDager = 0
-        gammelPersonDager = 0
+        gjeldende = null
     }
 
     fun maksdatosituasjon(dato: LocalDate) =
-        Maksdatosituasjon(arbeidsgiverRegler, dato, alder, forbrukteDager, gammelPersonDager, startdatoSykepengerettighet, startdatoTreårsvindu, betalteDager.toSet())
+        gjeldende?.maksdatoFor(dato) ?: Maksdatosituasjon(arbeidsgiverRegler, dato, alder, LocalDate.MIN, LocalDate.MIN, emptySet())
 }
 
 internal class Maksdatosituasjon(
-    regler: ArbeidsgiverRegler,
+    private val regler: ArbeidsgiverRegler,
     private val dato: LocalDate,
-    alder: Alder,
-    internal val forbrukteDager: Int,
-    private val forbrukteDagerOver67: Int,
+    private val alder: Alder,
     startdatoSykepengerettighet: LocalDate,
     private val startdatoTreårsvindu: LocalDate,
     private val betalteDager: Set<LocalDate>
@@ -79,6 +51,9 @@ internal class Maksdatosituasjon(
     private val redusertYtelseAlder = alder.redusertYtelseAlder
     private val syttiårsdagen = alder.syttiårsdagen
     private val sisteVirkedagFørFylte70år = syttiårsdagen.forrigeVirkedagFør()
+
+    internal val forbrukteDager = betalteDager.size
+    private val forbrukteDagerOver67 = betalteDager.count { it > redusertYtelseAlder }
 
     private val gjenståendeSykepengedagerUnder67 = regler.maksSykepengedager() - forbrukteDager
 
@@ -162,6 +137,20 @@ internal class Maksdatosituasjon(
             tidslinjeTom = periode.endInclusive,
             avvistePerioder = emptyList()
         )
+    }
+
+    fun inkrementer(dato: LocalDate): Maksdatosituasjon {
+        return Maksdatosituasjon(regler, dato, alder, startdatoSykepengerettighet!!, startdatoTreårsvindu, betalteDager + setOf(dato))
+    }
+
+    // tilgir forbrukte dager som følge av at treårsvinduet forskyves
+    fun dekrementer(nyStartdatoTreårsvindu: LocalDate): Maksdatosituasjon {
+        val nyBetalteDager = betalteDager.filter { it >= nyStartdatoTreårsvindu }.toSet()
+        return Maksdatosituasjon(regler, dato, alder, startdatoSykepengerettighet!!, nyStartdatoTreårsvindu, nyBetalteDager)
+    }
+
+    fun maksdatoFor(dato: LocalDate): Maksdatosituasjon {
+        return Maksdatosituasjon(regler, dato, alder, startdatoSykepengerettighet!!, startdatoTreårsvindu, betalteDager)
     }
 
     private fun interface Maksdatobestemmelse {

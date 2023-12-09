@@ -83,11 +83,9 @@ internal class MaksdatosituasjonTest {
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             dato = sisteBetalteDag,
             alder = alder,
-            forbrukteDager = forbrukteDager,
-            forbrukteDagerOver67 = forbrukteDagerOver67,
             startdatoSykepengerettighet = LocalDate.EPOCH,
             startdatoTreårsvindu = LocalDate.EPOCH,
-            betalteDager = setOf(sisteBetalteDag)
+            betalteDager = if (forbrukteDager > 0) (sisteBetalteDag.minusDays(forbrukteDager.toLong() - 1) til sisteBetalteDag).toSet() else emptySet()
         )
         val hjemmebestemmelse = FangeHjemmebestemmelse()
         assertEquals(forventet, situasjon.maksdato)

@@ -479,6 +479,8 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `sykepengedager eldre enn tre år teller ikke lenger som forbrukte dager`() {
         val tidslinje = tilbakevendendeSykdom(1.NAVDAGER, 3.ARB, 5.NAVDAGER, 1.NAVDAGER)
         assertEquals(listOf(12.januar(2021)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(248, forbrukteDager)
+        assertEquals(0, gjenståendeDager)
     }
 
     @Test
