@@ -1,10 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -18,6 +16,7 @@ import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.plus
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.testhelpers.AP
@@ -31,6 +30,7 @@ import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.NyVilkårsprøvingNødvendig
@@ -48,7 +48,9 @@ internal class MaksimumSykepengedagerfilterTest {
         private val PERSON_67_ÅR_11_JANUAR_2018 = 11.januar(1951)
     }
 
-    private lateinit var maksimumSykepenger: Alder.MaksimumSykepenger
+    private lateinit var maksdato: LocalDate
+    private var forbrukteDager = -1
+    private var gjenståendeDager = -1
     private lateinit var avvisteTidslinjer: List<Utbetalingstidslinje>
     private lateinit var aktivitetslogg: Aktivitetslogg
 
@@ -62,7 +64,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val a1 = tidslinjeOf(16.AP, 248.NAVDAGER)
         val a2 = tidslinjeOf(16.AP, 250.NAVDAGER, 182.ARB, 10.NAV)
         val avvisteDager = listOf(a1, a2).utbetalingsavgrenser(UNG_PERSON_FNR_2018, a1.periode())
-        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        assertEquals(28.desember, maksdato)
         assertEquals(listOf(31.desember, 1.januar(2019)), avvisteDager)
     }
 
@@ -70,14 +72,14 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `riktig antall dager - nav utbetaler arbeidsgiverperioden`() {
         val tidslinje = tidslinjeOf(16.NAP, 10.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        assertEquals(28.desember, maksdato)
     }
 
     @Test
     fun `stopper betaling etter 260 dager dersom nav utbetaler arbeidsgiverperioden`() {
         val tidslinje = tidslinjeOf(16.NAP, 249.NAVDAGER)
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        assertEquals(28.desember, maksdato)
         aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
@@ -94,7 +96,7 @@ internal class MaksimumSykepengedagerfilterTest {
             8.april(2019) til 12.april(2019),
             15.april(2019) til 17.april(2019),
         ).flatten(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(12.desember, maksimumSykepenger.sisteDag())
+        assertEquals(12.desember, maksdato)
         aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
@@ -102,8 +104,8 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `bare avviste dager`() {
         val tidslinje = tidslinjeOf(16.AP, 10.AVV)
         assertEquals((17.januar til 26.januar).toList(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(0, maksimumSykepenger.forbrukteDager())
-        assertEquals(248, maksimumSykepenger.gjenståendeDager())
+        assertEquals(0, forbrukteDager)
+        assertEquals(248, gjenståendeDager)
     }
 
     @Test
@@ -118,16 +120,16 @@ internal class MaksimumSykepengedagerfilterTest {
                 a != null && b != null
             }
         )
-        assertEquals(0, maksimumSykepenger.forbrukteDager())
-        assertEquals(248, maksimumSykepenger.gjenståendeDager())
+        assertEquals(0, forbrukteDager)
+        assertEquals(248, gjenståendeDager)
     }
 
     @Test
     fun `avviste dager etter opphold`() {
         val tidslinje = tidslinjeOf(1.NAVDAGER, 15.ARB, 10.AVV)
         assertEquals((17.januar til 26.januar).toList(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(1, maksimumSykepenger.forbrukteDager())
-        assertEquals(247, maksimumSykepenger.gjenståendeDager())
+        assertEquals(1, forbrukteDager)
+        assertEquals(247, gjenståendeDager)
     }
 
     @Test
@@ -144,28 +146,28 @@ internal class MaksimumSykepengedagerfilterTest {
                 a != null && b != null
             }
         )
-        assertEquals(31.desember, maksimumSykepenger.sisteDag())
+        assertEquals(31.desember, maksdato)
     }
 
     @Test
     fun `maksdato med fravær på slutten`() {
         val tidslinje = tidslinjeOf(16.AP, 10.FRI)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(9.januar(2019), maksimumSykepenger.sisteDag())
+        assertEquals(9.januar(2019), maksdato)
     }
 
     @Test
     fun `riktig antall dager`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        assertEquals(28.desember, maksdato)
     }
 
     @Test
     fun `stopper betaling etter 248 dager`() {
         val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER)
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
-        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        assertEquals(28.desember, maksdato)
         aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
@@ -203,18 +205,18 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `utbetalingsgrense resettes ikke når oppholdsdager nås ved sykedager 1`() {
         val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
-        assertEquals(248, maksimumSykepenger.forbrukteDager())
-        assertEquals(0, maksimumSykepenger.gjenståendeDager())
-        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        assertEquals(248, forbrukteDager)
+        assertEquals(0, gjenståendeDager)
+        assertEquals(28.desember, maksdato)
     }
 
     @Test
     fun `utbetalingsgrense resettes ikke når oppholdsdager nås ved sykedager 2`() {
         val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (25 * 7).ARB)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
-        assertEquals(248, maksimumSykepenger.forbrukteDager())
-        assertEquals(0, maksimumSykepenger.gjenståendeDager())
-        assertEquals(28.desember, maksimumSykepenger.sisteDag())
+        assertEquals(248, forbrukteDager)
+        assertEquals(0, gjenståendeDager)
+        assertEquals(28.desember, maksdato)
     }
 
     @Test
@@ -278,6 +280,20 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `opphold på mindre enn 26 uker skal ikke nullstille telleren`() {
         val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, (26 * 7 - 1).FRI, 1.NAVDAGER)
         assertEquals(listOf(28.juni(2019)), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+    }
+
+    @Test
+    fun `forbrukte dager før 67 år`() {
+        tidslinjeOf(11.NAVDAGER, startDato = 1.desember(2017)).also { tidslinje ->
+            assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
+            assertEquals(11.januar + 60.ukedager, maksdato)
+            assertEquals(79, gjenståendeDager)
+        }
+        tidslinjeOf(10.NAV).also { tidslinje ->
+            assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018))
+            assertEquals(11.januar + 60.ukedager, maksdato)
+            assertEquals(61, gjenståendeDager)
+        }
     }
 
     @Test
@@ -469,9 +485,9 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `246 dager nådd på 3 år`() {
         val tidslinje = tilbakevendendeSykdom()
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
-        assertEquals(246, maksimumSykepenger.forbrukteDager())
-        assertEquals(2, maksimumSykepenger.gjenståendeDager())
-        assertEquals(4.januar(2021), maksimumSykepenger.sisteDag())
+        assertEquals(246, forbrukteDager)
+        assertEquals(2, gjenståendeDager)
+        assertEquals(4.januar(2021), maksdato)
     }
 
     @Test
@@ -484,8 +500,8 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `ugyldig ferie påvirker 3 årsvinduet`() {
         val tidslinje = tilbakevendendeSykdom(10.FRI, 3.NAVDAGER)
         assertTrue(tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).isEmpty())
-        assertEquals(241, maksimumSykepenger.forbrukteDager())
-        assertEquals(7, maksimumSykepenger.gjenståendeDager())
+        assertEquals(241, forbrukteDager)
+        assertEquals(7, gjenståendeDager)
     }
 
     @Test
@@ -501,16 +517,16 @@ internal class MaksimumSykepengedagerfilterTest {
             163.ARB, 14.NAV, 108.ARB, 8.NAV, 83.ARB, 13.NAV, 103.ARB, 34.NAV, startDato = 25.juni(2019))
 
         assertTrue(listOf(ag1, ag2).utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = infotrygd).isEmpty())
-        assertEquals(236, maksimumSykepenger.forbrukteDager())
-        assertEquals(12, maksimumSykepenger.gjenståendeDager())
+        assertEquals(236, forbrukteDager)
+        assertEquals(12, gjenståendeDager)
     }
 
     @Test
     fun `nødvendig opphold nådd nesten ved ferie, fullført med én arbeidsdag`() {
         val tidslinje = tidslinjeOf(247.NAVDAGER, 181.FRI, 1.ARB, 1.NAVDAGER)
         assertTrue(tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018).isEmpty())
-        assertEquals(1, maksimumSykepenger.forbrukteDager())
-        assertEquals(247, maksimumSykepenger.gjenståendeDager())
+        assertEquals(1, forbrukteDager)
+        assertEquals(247, gjenståendeDager)
     }
 
     @Test
@@ -554,7 +570,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = enAnnenSykdom()
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
         assertEquals(1.januar til 31.desember(2020), tidslinje.periode())
-        assertEquals(54, maksimumSykepenger.forbrukteDager())
+        assertEquals(54, forbrukteDager)
     }
 
     @Test
@@ -562,7 +578,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(12.NAV, startDato = 1.mars)
         val historikk = tidslinjeOf(45.NAV, startDato = 1.januar(2018))
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
-        assertEquals(41, maksimumSykepenger.forbrukteDager())
+        assertEquals(41, forbrukteDager)
     }
 
     @Test
@@ -570,7 +586,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(12.NAV, startDato = 1.februar)
         val historikk = tidslinjeOf(12.ARB, 45.NAV, startDato = 1.januar(2018))
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
-        assertEquals(31, maksimumSykepenger.forbrukteDager())
+        assertEquals(31, forbrukteDager)
     }
 
     @Test
@@ -578,7 +594,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(12.NAV)
         val historikk = tidslinjeOf(12.ARB, 45.NAV)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = historikk)
-        assertEquals(41, maksimumSykepenger.forbrukteDager())
+        assertEquals(41, forbrukteDager)
     }
 
     @Test
@@ -676,7 +692,10 @@ internal class MaksimumSykepengedagerfilterTest {
             Periode::plus)
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, NormalArbeidstaker, personTidslinje)
         avvisteTidslinjer = maksimumSykepengedagerfilter.filter(this, filterperiode, aktivitetslogg, NullObserver)
-        maksimumSykepenger = maksimumSykepengedagerfilter.maksimumSykepenger(filterperiode, NullObserver)
+        val maksdatosituasjon = maksimumSykepengedagerfilter.maksimumSykepenger(filterperiode, NullObserver)
+        maksdato = maksdatosituasjon.maksdato
+        forbrukteDager = maksdatosituasjon.forbrukteDager
+        gjenståendeDager = maksdatosituasjon.gjenståendeDager
         return avvisteTidslinjer.flatMap { it.inspektør.avvistedatoer }
     }
 }

@@ -12,7 +12,6 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
@@ -357,9 +356,9 @@ internal class ArbeidsgiverUtbetalingerTest {
             aktivitetslogg,
             SubsumsjonObserver.NullObserver
         )
-        maksdato = maksimumSykepenger.sisteDag()
-        gjenståendeSykedager = maksimumSykepenger.gjenståendeDager()
-        forbrukteSykedager = maksimumSykepenger.forbrukteDager()
+        maksdato = maksimumSykepenger.maksdato
+        gjenståendeSykedager = maksimumSykepenger.gjenståendeDager
+        forbrukteSykedager = maksimumSykepenger.forbrukteDager
         inspektør = tidslinjerPerArbeidsgiver.entries
             .single { (arbeidsgiver, _) -> arbeidsgiver.inspektør.organisasjonsnummer == ORGNUMMER }
             .value

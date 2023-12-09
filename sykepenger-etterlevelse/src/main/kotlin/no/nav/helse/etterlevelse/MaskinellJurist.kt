@@ -244,8 +244,9 @@ class MaskinellJurist private constructor(
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
-        startdatoSykepengerettighet: LocalDate
+        startdatoSykepengerettighet: LocalDate?
     ) {
+        if (startdatoSykepengerettighet == null) return
         val iterator = RangeIterator(periode).subsetFom(startdatoSykepengerettighet)
         val (dagerOppfylt, dagerIkkeOppfylt) = iterator
             .asSequence()
@@ -844,8 +845,9 @@ class MaskinellJurist private constructor(
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
-        startdatoSykepengerettighet: LocalDate
+        startdatoSykepengerettighet: LocalDate?
     ) {
+        if (startdatoSykepengerettighet == null) return
         val iterator = RangeIterator(periode).subsetFom(startdatoSykepengerettighet)
         val (dagerOppfylt, dagerIkkeOppfylt) = iterator.asSequence().partition { it <= maksdato }
 

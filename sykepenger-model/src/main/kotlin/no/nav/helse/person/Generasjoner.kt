@@ -28,6 +28,7 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
+import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Generasjoner(generasjoner: List<Generasjon>) {
@@ -108,11 +109,11 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         grunnlagsdata: VilkårsgrunnlagElement,
         periode: Periode,
         hendelse: IAktivitetslogg,
-        maksimumSykepenger: Alder.MaksimumSykepenger,
+        maksimumSykepenger: Maksdatosituasjon,
         utbetalingstidslinje: Utbetalingstidslinje
     ): Utbetalingstidslinje {
         val strategi = if (this.harAvsluttede()) Arbeidsgiver::lagRevurdering else Arbeidsgiver::lagUtbetaling
-        val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksimumSykepenger.sisteDag(), maksimumSykepenger.forbrukteDager(), maksimumSykepenger.gjenståendeDager(), periode)
+        val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksimumSykepenger.maksdato, maksimumSykepenger.forbrukteDager, maksimumSykepenger.gjenståendeDager, periode)
         denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
         generasjoner.last().utbetaling(denNyeUtbetalingen, grunnlagsdata, hendelse)
         return utbetalingstidslinje.subset(periode)

@@ -480,7 +480,8 @@ data class BeregnetPeriode(
             val sisteSykepengedag = avgrensetUtbetalingstidslinje.sisteNavDag()?.dato ?: periode.endInclusive
             val sykepengedager = Sykepengedager(skjæringstidspunkt, maksdato, forbrukteSykedager, gjenståendeSykedager, maksdato > sisteSykepengedag)
             val alderSisteSykepengedag = alder.let {
-                Alder(it.alderPåDato(sisteSykepengedag), it.innenfor70årsgrense(sisteSykepengedag))
+                val alderSisteSykedag = it.alderPåDato(sisteSykepengedag)
+                Alder(alderSisteSykedag, alderSisteSykedag < 70)
             }
             return Vilkår(sykepengedager, alderSisteSykepengedag)
         }

@@ -15,57 +15,58 @@ internal class UtbetalingTellerTest {
     private val PERSON_67_ÅR_FNR_2018 = 15.januar(1951).alder
     private val PERSON_70_ÅR_FNR_2018 = 15.januar(1948).alder
     private lateinit var grense: UtbetalingTeller
+    private lateinit var maksdatosituasjon: Maksdatosituasjon
 
     @Test
     fun `Person under 67 år får utbetalt 248 dager`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
         grense.inkrementer(31.desember)
-        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(0, grense.maksdatosituasjon(31.desember).gjenståendeDager)
     }
 
    @Test
     fun `Person som blir 67 år får utbetalt 60 dager etter 67 årsdagen`() {
         grense(PERSON_67_ÅR_FNR_2018, 15 + 59)
-        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
         grense.inkrementer(31.desember)
-        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(0, grense.maksdatosituasjon(31.desember).gjenståendeDager)
     }
 
     @Test
     fun `Person som blir 70 år har ikke utbetaling på 70 årsdagen`() {
         grense(PERSON_70_ÅR_FNR_2018, 11)
-        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
         grense.inkrementer(12.januar)
-        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(0, grense.maksdatosituasjon(12.januar).gjenståendeDager)
     }
 
     @Test
     fun `Person under 67 år får utbetalt 248 `() {
         grense(UNG_PERSON_FNR_2018, 248)
-        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(0, maksdatosituasjon.gjenståendeDager)
         grense.resett()
-        assertEquals(248, grense.maksimumSykepenger(1.januar).gjenståendeDager())
+        assertEquals(248, grense.maksdatosituasjon(1.januar).gjenståendeDager)
     }
 
     @Test
     fun `Person under 67`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
         grense.dekrementer(2.januar(2021))
         grense.inkrementer(30.desember)
-        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(1, grense.maksdatosituasjon(30.januar).gjenståendeDager)
         grense.inkrementer(31.desember)
-        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(0, grense.maksdatosituasjon(31.desember).gjenståendeDager)
     }
 
     @Test
     fun `Reset decrement impact`() {
         grense(UNG_PERSON_FNR_2018, 247)
-        assertEquals(1, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
         grense.dekrementer(1.januar.minusDays(1))
         grense.inkrementer(31.desember)
-        assertEquals(0, grense.maksimumSykepenger().gjenståendeDager())
+        assertEquals(0, grense.maksdatosituasjon(31.januar).gjenståendeDager)
     }
 
     @Test
@@ -84,7 +85,7 @@ internal class UtbetalingTellerTest {
 
     private fun undersøke(expected: LocalDate, alder: Alder, dager: Int, sisteUtbetalingsdag: LocalDate) {
         grense(alder, dager, sisteUtbetalingsdag.minusDays(dager.toLong() - 1))
-        assertEquals(expected, grense.maksimumSykepenger(sisteUtbetalingsdag).sisteDag())
+        assertEquals(expected, maksdatosituasjon.maksdato)
     }
 
     private fun grense(alder: Alder, dager: Int, dato: LocalDate = 1.januar) {
@@ -92,6 +93,7 @@ internal class UtbetalingTellerTest {
             this.resett()
             (0 until dager).forEach { this.inkrementer(dato.plusDays(it.toLong())) }
         }
+        maksdatosituasjon = grense.maksdatosituasjon(dato.plusDays(dager.toLong() - 1))
     }
 
 }

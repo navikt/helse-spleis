@@ -129,7 +129,7 @@ interface SubsumsjonObserver {
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
-        startdatoSykepengerettighet: LocalDate
+        startdatoSykepengerettighet: LocalDate?
     ) {}
 
     /**
@@ -500,7 +500,7 @@ interface SubsumsjonObserver {
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
-        startdatoSykepengerettighet: LocalDate
+        startdatoSykepengerettighet: LocalDate?
     ) {}
 
     /**

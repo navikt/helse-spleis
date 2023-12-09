@@ -35,12 +35,11 @@ internal class MaksimumSykepengedagerfilter(
     private val tidslinjegrunnlagsubsumsjon by lazy { tidslinjegrunnlag.subsumsjonsformat() }
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
 
-    private val maksdatoer = mutableMapOf<LocalDate, UtbetalingTeller>()
+    private val maksdatoer = mutableMapOf<LocalDate, Maksdatosituasjon>()
 
-    internal fun maksimumSykepenger(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Alder.MaksimumSykepenger {
-        val telleren = maksdatoer.getValue(periode.endInclusive)
-        val maksimumSykepenger = telleren.maksimumSykepenger(periode.endInclusive)
-        maksimumSykepenger.sisteDag(karantenesporing(telleren, periode, subsumsjonObserver))
+    internal fun maksimumSykepenger(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Maksdatosituasjon {
+        val maksimumSykepenger = maksdatoer.getValue(periode.endInclusive)
+        maksimumSykepenger.vurderMaksdatobestemmelse(subsumsjonObserver, periode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, avvisteDager)
         return maksimumSykepenger
     }
 
@@ -48,36 +47,6 @@ internal class MaksimumSykepengedagerfilter(
         begrunnelserForAvvisteDager.getOrPut(begrunnelse) {
             mutableSetOf()
         }.add(dag)
-    }
-
-    private fun karantenesporing(teller: UtbetalingTeller, periode: Periode, subsumsjonObserver: SubsumsjonObserver) = object : Alder.MaksimumSykepenger.Begrunnelse {
-        override fun `§ 8-12 ledd 1 punktum 1`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
-            val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
-            subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
-                periode,
-                tidslinjegrunnlagsubsumsjon,
-                beregnetTidslinjesubsumsjon,
-                gjenståendeDager,
-                forbrukteDager,
-                sisteDag,
-                sakensStartdato
-            )
-        }
-
-        override fun `§ 8-51 ledd 3`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
-            val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
-            subsumsjonObserver.`§ 8-51 ledd 3`(
-                periode,
-                tidslinjegrunnlagsubsumsjon,
-                beregnetTidslinjesubsumsjon,
-                gjenståendeDager,
-                forbrukteDager,
-                sisteDag,
-                sakensStartdato
-            )
-        }
-
-        override fun `§ 8-3 ledd 1 punktum 2`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
     }
 
     override fun filter(
@@ -96,9 +65,6 @@ internal class MaksimumSykepengedagerfilter(
         val avvisteTidslinjer = begrunnelserForAvvisteDager.entries.fold(tidslinjer) { result, (begrunnelse, dager) ->
             Utbetalingstidslinje.avvis(result, dager.grupperSammenhengendePerioder(), listOf(begrunnelse))
         }
-
-        // TODO: logge juridisk vurdering for 70 år i "karantenesporing"
-        alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, subsumsjonObserver)
 
         if (begrunnelserForAvvisteDager[Begrunnelse.NyVilkårsprøvingNødvendig]?.any { it in periode } == true) {
             aktivitetslogg.funksjonellFeil(RV_VV_9)
@@ -119,7 +85,7 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     override fun visit(dag: Utbetalingsdag.ForeldetDag, dato: LocalDate, økonomi: Økonomi) {
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     override fun visit(
@@ -129,7 +95,7 @@ internal class MaksimumSykepengedagerfilter(
     ) {
         if (alder.mistetSykepengerett(dato)) state(State.ForGammel)
         state.betalbarDag(this, dato)
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     override fun visit(
@@ -139,7 +105,7 @@ internal class MaksimumSykepengedagerfilter(
     ) {
         if (alder.mistetSykepengerett(dato)) state(State.ForGammel)
         state.sykdomshelg(this, dato)
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     override fun visit(
@@ -148,7 +114,7 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     override fun visit(
@@ -157,12 +123,12 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     override fun visit(
@@ -171,7 +137,7 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         fridag(dato)
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     override fun visit(
@@ -181,7 +147,7 @@ internal class MaksimumSykepengedagerfilter(
     ) {
         state.avvistDag(this, dato)
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     override fun visit(
@@ -190,7 +156,7 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.clone()
+        maksdatoer[dato] = teller.maksdatosituasjon(dato)
     }
 
     private fun oppholdsdag(dagen: LocalDate) {
@@ -206,30 +172,16 @@ internal class MaksimumSykepengedagerfilter(
     private fun håndterBetalbarDag(dagen: LocalDate, justerTreårsvindu: Boolean = false) {
         teller.inkrementer(dagen)
         if (justerTreårsvindu) teller.dekrementer(dagen)
-        subsumsjonObserver.`§ 8-12 ledd 2`(
-            oppfylt = false,
-            dato = dagen,
-            gjenståendeSykepengedager = teller.gjenståendeDager(dagen),
-            beregnetAntallOppholdsdager = opphold,
-            tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-            tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
-            beregnetTidslinje = beregnetTidslinjesubsumsjon,
-        )
-        if (!teller.erAlleDagerForbrukte()) return state(State.Syk)
-        state(if (teller.erDagerOver67ÅrForbrukte()) State.Karantene(Begrunnelse.SykepengedagerOppbruktOver67) else State.Karantene(Begrunnelse.SykepengedagerOppbrukt))
+        val maksdatosituasjon = teller.maksdatosituasjon(dagen)
+        maksdatosituasjon.vurderHarTilstrekkeligOpphold(subsumsjonObserver, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
+        when {
+            maksdatosituasjon.erDagerUnder67ÅrForbrukte() -> state(State.Karantene(Begrunnelse.SykepengedagerOppbrukt))
+            maksdatosituasjon.erDagerOver67ÅrForbrukte() -> state(State.Karantene(Begrunnelse.SykepengedagerOppbruktOver67))
+            else -> state(State.Syk)
+        }
     }
     private fun tilstrekkeligOppholdNådd(dagen: LocalDate): Boolean {
-        val harTilstrekkeligOpphold = opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
-        subsumsjonObserver.`§ 8-12 ledd 2`(
-            oppfylt = harTilstrekkeligOpphold,
-            dato = dagen,
-            gjenståendeSykepengedager = teller.gjenståendeDager(dagen),
-            beregnetAntallOppholdsdager = opphold,
-            tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-            tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
-            beregnetTidslinje = beregnetTidslinjesubsumsjon,
-        )
-        return harTilstrekkeligOpphold
+        return teller.maksdatosituasjon(dagen).vurderHarTilstrekkeligOpphold(subsumsjonObserver, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
     }
 
     private interface State {
