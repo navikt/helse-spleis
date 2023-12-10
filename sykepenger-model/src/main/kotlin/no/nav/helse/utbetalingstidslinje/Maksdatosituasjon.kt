@@ -14,32 +14,6 @@ import no.nav.helse.plus
 import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon.Maksdatobestemmelse
 
-internal class UtbetalingTeller(
-    private val alder: Alder,
-    private val arbeidsgiverRegler: ArbeidsgiverRegler
-) {
-    private companion object {
-        private const val HISTORISK_PERIODE_I_ÅR: Long = 3
-    }
-
-    private var gjeldende: Maksdatosituasjon? = null
-
-    internal fun inkrementer(dato: LocalDate) {
-        gjeldende = gjeldende?.inkrementer(dato) ?: Maksdatosituasjon(arbeidsgiverRegler, dato, alder, dato, dato.minusYears(HISTORISK_PERIODE_I_ÅR), setOf(dato))
-    }
-
-    internal fun dekrementer(dato: LocalDate) {
-        gjeldende = gjeldende?.dekrementer(dato.minusYears(HISTORISK_PERIODE_I_ÅR))
-    }
-
-    internal fun resett() {
-        gjeldende = null
-    }
-
-    fun maksdatosituasjon(dato: LocalDate) =
-        gjeldende?.maksdatoFor(dato) ?: Maksdatosituasjon(arbeidsgiverRegler, dato, alder, LocalDate.MIN, LocalDate.MIN, emptySet())
-}
-
 internal class Maksdatosituasjon(
     private val regler: ArbeidsgiverRegler,
     private val dato: LocalDate,

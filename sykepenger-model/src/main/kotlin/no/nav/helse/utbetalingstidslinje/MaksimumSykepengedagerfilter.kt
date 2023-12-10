@@ -21,10 +21,11 @@ internal class MaksimumSykepengedagerfilter(
 
     private companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
+        private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
 
-    private lateinit var state: State
-    private lateinit var teller: UtbetalingTeller
+    private var teller: Maksdatosituasjon? = null
+    private var state: State = State.Initiell
     private var opphold = 0
     private val begrunnelserForAvvisteDager = mutableMapOf<Begrunnelse, MutableSet<LocalDate>>()
     private val avvisteDager get() = begrunnelserForAvvisteDager.values.flatten().toSet()
@@ -58,8 +59,6 @@ internal class MaksimumSykepengedagerfilter(
         this.subsumsjonObserver = subsumsjonObserver
         tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje)
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
-        teller = UtbetalingTeller(alder, arbeidsgiverRegler)
-        state = State.Initiell
         beregnetTidslinje.accept(this)
 
         val avvisteTidslinjer = begrunnelserForAvvisteDager.entries.fold(tidslinjer) { result, (begrunnelse, dager) ->
@@ -84,8 +83,12 @@ internal class MaksimumSykepengedagerfilter(
         state.entering(this)
     }
 
+    private fun Maksdatosituasjon?.maksdatoFor(dato: LocalDate): Maksdatosituasjon {
+        return this?.maksdatoFor(dato) ?: Maksdatosituasjon(arbeidsgiverRegler, dato, alder, LocalDate.MIN, LocalDate.MIN, emptySet())
+    }
+
     override fun visit(dag: Utbetalingsdag.ForeldetDag, dato: LocalDate, økonomi: Økonomi) {
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     override fun visit(
@@ -95,7 +98,7 @@ internal class MaksimumSykepengedagerfilter(
     ) {
         if (alder.mistetSykepengerett(dato)) state(State.ForGammel)
         state.betalbarDag(this, dato)
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     override fun visit(
@@ -105,7 +108,7 @@ internal class MaksimumSykepengedagerfilter(
     ) {
         if (alder.mistetSykepengerett(dato)) state(State.ForGammel)
         state.sykdomshelg(this, dato)
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     override fun visit(
@@ -114,7 +117,7 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     override fun visit(
@@ -123,12 +126,12 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     override fun visit(
@@ -137,7 +140,7 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         fridag(dato)
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     override fun visit(
@@ -147,7 +150,7 @@ internal class MaksimumSykepengedagerfilter(
     ) {
         state.avvistDag(this, dato)
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     override fun visit(
@@ -156,7 +159,7 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         oppholdsdag(dato)
-        maksdatoer[dato] = teller.maksdatosituasjon(dato)
+        maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
     private fun oppholdsdag(dagen: LocalDate) {
@@ -169,19 +172,19 @@ internal class MaksimumSykepengedagerfilter(
         state.fridag(this, dagen)
     }
 
-    private fun håndterBetalbarDag(dagen: LocalDate, justerTreårsvindu: Boolean = false) {
-        teller.inkrementer(dagen)
-        if (justerTreårsvindu) teller.dekrementer(dagen)
-        val maksdatosituasjon = teller.maksdatosituasjon(dagen)
-        maksdatosituasjon.vurderHarTilstrekkeligOpphold(subsumsjonObserver, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
+    private fun håndterBetalbarDag(dagen: LocalDate) {
+        var situasjon = checkNotNull(this.teller)
+        situasjon = situasjon.inkrementer(dagen)
+        situasjon.vurderHarTilstrekkeligOpphold(subsumsjonObserver, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
         when {
-            maksdatosituasjon.erDagerUnder67ÅrForbrukte() -> state(State.Karantene(Begrunnelse.SykepengedagerOppbrukt))
-            maksdatosituasjon.erDagerOver67ÅrForbrukte() -> state(State.Karantene(Begrunnelse.SykepengedagerOppbruktOver67))
+            situasjon.erDagerUnder67ÅrForbrukte() -> state(State.Karantene(Begrunnelse.SykepengedagerOppbrukt))
+            situasjon.erDagerOver67ÅrForbrukte() -> state(State.Karantene(Begrunnelse.SykepengedagerOppbruktOver67))
             else -> state(State.Syk)
         }
+        this.teller = situasjon
     }
     private fun tilstrekkeligOppholdNådd(dagen: LocalDate): Boolean {
-        return teller.maksdatosituasjon(dagen).vurderHarTilstrekkeligOpphold(subsumsjonObserver, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
+        return checkNotNull(this.teller).maksdatoFor(dagen).vurderHarTilstrekkeligOpphold(subsumsjonObserver, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
     }
 
     private interface State {
@@ -195,13 +198,12 @@ internal class MaksimumSykepengedagerfilter(
 
         object Initiell : State {
             override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
-                avgrenser.teller.resett()
+                avgrenser.teller = null
                 avgrenser.opphold = 0
             }
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.teller.inkrementer(dagen)
-                avgrenser.teller.dekrementer(dagen)
+                avgrenser.teller = Maksdatosituasjon(avgrenser.arbeidsgiverRegler, dagen, avgrenser.alder, dagen, dagen.minusYears(HISTORISK_PERIODE_I_ÅR), setOf(dagen))
                 avgrenser.state(Syk)
             }
         }
@@ -227,7 +229,8 @@ internal class MaksimumSykepengedagerfilter(
         object Opphold : State {
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
-                avgrenser.håndterBetalbarDag(dagen, true)
+                avgrenser.teller = checkNotNull(avgrenser.teller).dekrementer(dagen.minusYears(HISTORISK_PERIODE_I_ÅR))
+                avgrenser.håndterBetalbarDag(dagen)
             }
 
             override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
