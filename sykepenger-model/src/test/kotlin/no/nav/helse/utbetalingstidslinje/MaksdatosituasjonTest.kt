@@ -14,10 +14,13 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
+import no.nav.helse.februar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.plus
 import no.nav.helse.ukedager
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -76,11 +79,83 @@ internal class MaksdatosituasjonTest {
         assertSisteDagMedSykepenger(9.januar, 6, Hjemmelbegrunnelse.OVER_67, 1.januar, FYLLER_70_ÅR_10_JANUAR_2018, 54, 54)
     }
 
+    @Test
+    fun `Person under 67 år får utbetalt 248 dager`() {
+        grense(FYLLER_18_ÅR_2_NOVEMBER_2018, 247)
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
+        maksdatosituasjon = maksdatosituasjon.inkrementer(31.desember)
+        assertEquals(0, maksdatosituasjon.gjenståendeDager)
+    }
+
+    @Test
+    fun `Person som blir 67 år får utbetalt 60 dager etter 67 årsdagen`() {
+        grense(FYLLER_67_ÅR_1_JANUAR_2018, 15 + 59, førsteForbrukteDag = 18.desember(2017))
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
+        maksdatosituasjon = maksdatosituasjon.inkrementer(31.desember)
+        assertEquals(0, maksdatosituasjon.gjenståendeDager)
+    }
+
+    @Test
+    fun `Person som blir 70 år har ikke utbetaling på 70 årsdagen`() {
+        grense(FYLLER_70_ÅR_10_JANUAR_2018, 8)
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
+        maksdatosituasjon = maksdatosituasjon.inkrementer(12.januar)
+        assertEquals(0, maksdatosituasjon.gjenståendeDager)
+    }
+
+    @Test
+    fun `Person under 67`() {
+        grense(FYLLER_18_ÅR_2_NOVEMBER_2018, 247)
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
+        maksdatosituasjon = maksdatosituasjon.dekrementer(2.januar)
+        maksdatosituasjon = maksdatosituasjon.inkrementer(30.desember)
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
+        maksdatosituasjon = maksdatosituasjon.inkrementer(31.desember)
+        assertEquals(0, maksdatosituasjon.gjenståendeDager)
+    }
+
+    @Test
+    fun `Reset decrement impact`() {
+        grense(FYLLER_18_ÅR_2_NOVEMBER_2018, 247)
+        assertEquals(1, maksdatosituasjon.gjenståendeDager)
+        maksdatosituasjon = maksdatosituasjon.dekrementer(1.januar.minusDays(1))
+        maksdatosituasjon = maksdatosituasjon.inkrementer(31.desember)
+        assertEquals(0, maksdatosituasjon.gjenståendeDager)
+    }
+
+    @Test
+    fun maksdato() {
+        undersøke(15.mai, FYLLER_18_ÅR_2_NOVEMBER_2018, 248, 15.mai)
+        undersøke(18.mai, FYLLER_18_ÅR_2_NOVEMBER_2018, 244, 14.mai)
+        undersøke(21.mai, FYLLER_18_ÅR_2_NOVEMBER_2018, 243, 14.mai)
+        undersøke(22.mai, FYLLER_18_ÅR_2_NOVEMBER_2018, 242, 14.mai)
+        undersøke(28.desember, FYLLER_18_ÅR_2_NOVEMBER_2018, 1, 17.januar)
+        undersøke(9.februar, 12.februar(1948).alder, 1, 17.januar)
+        undersøke(22.januar, 12.februar(1948).alder, 57, 17.januar)
+        undersøke(7.mai, 12.februar(1951).alder, 65, 17.januar)
+        undersøke(12.februar, 12.februar(1951).alder, 247, 9.februar)
+        undersøke(13.februar, 12.februar(1951).alder, 246, 9.februar)
+    }
+
+    private lateinit var maksdatosituasjon: Maksdatosituasjon
+
+    private fun undersøke(expected: LocalDate, alder: Alder, dager: Int, sisteUtbetalingsdag: LocalDate) {
+        grense(alder, dager, sisteUtbetalingsdag.minusDays(dager.toLong() - 1))
+        assertEquals(expected, maksdatosituasjon.maksdato)
+    }
+
+    private fun grense(alder: Alder, dager: Int, førsteForbrukteDag: LocalDate = 1.januar) {
+        maksdatosituasjon = Maksdatosituasjon(NormalArbeidstaker, førsteForbrukteDag, alder, førsteForbrukteDag, førsteForbrukteDag.minusYears(3L), setOf(førsteForbrukteDag))
+        (1 until dager).forEach {
+            maksdatosituasjon = maksdatosituasjon.inkrementer(førsteForbrukteDag.plusDays(it.toLong()))
+        }
+    }
+
     private enum class Hjemmelbegrunnelse { UNDER_67, OVER_67, OVER_70 }
 
     private fun assertSisteDagMedSykepenger(forventet: LocalDate, forventetDagerIgjen: Int, begrunnelse: Hjemmelbegrunnelse, sisteBetalteDag: LocalDate, alder: Alder, forbrukteDager: Int, forbrukteDagerOver67: Int): Maksdatosituasjon {
         val situasjon = Maksdatosituasjon(
-            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+            regler = NormalArbeidstaker,
             dato = sisteBetalteDag,
             alder = alder,
             startdatoSykepengerettighet = LocalDate.EPOCH,
