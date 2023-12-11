@@ -53,6 +53,26 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `to arbeidsgivere gikk inn i en bar og ba om 20 prosent hver`() {
+        val inntektA1 = 18199.7.månedlig
+        val inntektA2 = 22966.54.månedlig
+        val økonomi = listOf(
+            20.prosent.sykdomsgrad.inntekt(inntektA1, `6G` = `6G`.beløp(1.januar)),
+            20.prosent.sykdomsgrad.inntekt(inntektA2, `6G` = `6G`.beløp(1.januar))
+        )
+        val abc = ((18199.7 * 0.2) + (22966.54 * 0.2)) / (18199.7 + 22966.54) // 19.999999999999996
+        assertForventetFeil(
+            forklaring = "0.2 er et tall som ikke lar seg uttrykke med flyt-tall",
+            nå = {
+                assertTrue(økonomi.totalSykdomsgrad() < 20.prosent)
+            },
+            ønsket = {
+                assertEquals(20.prosent, økonomi.totalSykdomsgrad())
+            }
+        )
+    }
+
+    @Test
     fun `kan ikke sette dagsats mer enn en gang`() {
         assertThrows<IllegalStateException> {
             25.prosent.sykdomsgrad.inntekt(1200.daglig, 1200.daglig, `6G` = `6G`.beløp(1.januar)).inntekt(
