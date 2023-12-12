@@ -1420,9 +1420,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode)
         }
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes())
-                return vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
-            vedtaksperiode.trengerYtelser(påminnelse)
+            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
+                påminnelse.info("Reberegner perioden ettersom det er ønsket")
+                vedtaksperiode.person.igangsettOverstyring(it)
+            } ?: vedtaksperiode.trengerYtelser(påminnelse)
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
@@ -1797,10 +1798,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
+            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
-            }
-            vedtaksperiode.trengerYtelser(påminnelse)
+                vedtaksperiode.person.igangsettOverstyring(it)
+            } ?: vedtaksperiode.trengerYtelser(påminnelse)
         }
 
         override fun håndter(
@@ -1866,10 +1867,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
+            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
-            }
-            trengerSimulering(vedtaksperiode, påminnelse)
+                vedtaksperiode.person.igangsettOverstyring(it)
+            } ?: trengerSimulering(vedtaksperiode, påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -1904,10 +1905,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerRevurdering) {
+            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
-            }
-            vedtaksperiode.generasjoner.simuler(påminnelse)
+                vedtaksperiode.person.igangsettOverstyring(it)
+            } ?: vedtaksperiode.generasjoner.simuler(påminnelse)
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
@@ -1971,10 +1972,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
+            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
-            }
-            vedtaksperiode.trengerGodkjenning(påminnelse)
+                vedtaksperiode.person.igangsettOverstyring(it)
+            } ?: vedtaksperiode.trengerGodkjenning(påminnelse)
         }
 
         override fun håndter(
@@ -2016,10 +2017,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerRevurdering) {
+            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
-            }
-            vedtaksperiode.trengerGodkjenning(påminnelse)
+                vedtaksperiode.person.igangsettOverstyring(it)
+            } ?: vedtaksperiode.trengerGodkjenning(påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -2231,8 +2232,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return påminnelse.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
-            if (!påminnelse.skalReberegnes()) return
-            vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
+                påminnelse.info("Reberegner perioden ettersom det er ønsket")
+                vedtaksperiode.person.igangsettOverstyring(it)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -2297,9 +2300,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!påminnelse.skalReberegnes()) return
-            påminnelse.info("Reberegner vedtaksperiode")
-            vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.reberegning(påminnelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
+                påminnelse.info("Reberegner perioden ettersom det er ønsket")
+                vedtaksperiode.person.igangsettOverstyring(it)
+            }
         }
     }
 

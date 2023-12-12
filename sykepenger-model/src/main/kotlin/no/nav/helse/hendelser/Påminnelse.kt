@@ -1,10 +1,12 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.Revurderingseventyr
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVenter
@@ -80,4 +82,9 @@ class Påminnelse(
         "påminnelsestidspunkt" to påminnelsestidspunkt,
         "nestePåminnelsestidspunkt" to nestePåminnelsestidspunkt
     )
+
+    fun eventyr(skjæringstidspunkt: LocalDate, periode: Periode): Revurderingseventyr? {
+        if (!skalReberegnes()) return null
+        return Revurderingseventyr.reberegning(this, skjæringstidspunkt, periode)
+    }
 }
