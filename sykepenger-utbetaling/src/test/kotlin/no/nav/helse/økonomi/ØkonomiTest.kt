@@ -34,8 +34,8 @@ internal class ØkonomiTest {
     @Test
     fun `akkurat under 20-prosent-grensen`() {
         val økonomi = listOf(
-            9.prosent.sykdomsgrad.inntekt(30000.månedlig, `6G` = `6G`.beløp(1.januar)),
-            52.prosent.sykdomsgrad.inntekt(10312.40.månedlig, `6G` = `6G`.beløp(1.januar))
+            8.prosent.sykdomsgrad.inntekt(30000.månedlig, `6G` = `6G`.beløp(1.januar)),
+            54.prosent.sykdomsgrad.inntekt(10312.40.månedlig, `6G` = `6G`.beløp(1.januar))
         )
         val totalSykdomsgrad = totalSykdomsgrad(økonomi)
         assertNotEquals(20.prosent, totalSykdomsgrad)
