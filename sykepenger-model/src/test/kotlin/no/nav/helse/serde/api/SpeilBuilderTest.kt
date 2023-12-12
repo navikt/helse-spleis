@@ -3,6 +3,9 @@ package no.nav.helse.serde.api
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -18,6 +21,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -46,6 +50,7 @@ import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
@@ -480,6 +485,90 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(Inntektkilde.Inntektsmelding.name, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.kilde.name)
         assertEquals(inntektIm * 12, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.beløp)
         assertEquals(inntektIm, vilkårsgrunnlag.inntekter.single().omregnetÅrsinntekt!!.månedsbeløp)
+    }
+
+    @Test
+    fun `Sykmeldt 20 % fra to forskjellige arbeidsforhold gir faktisk rett på sykepenger`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to 18199.7.månedlig,
+                    a2 to 22966.54.månedlig
+                ), 1.januar
+            ),
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(
+                listOf(
+                    a1 to 18199.7.månedlig,
+                    a2 to 22966.54.månedlig
+                ), 1.januar
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            ), orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        val personDto = speilApi()
+        assertEquals(20,
+            (personDto
+                .arbeidsgivere[0]
+                .generasjoner[0]
+                .perioder[0] as BeregnetPeriode)
+                .sammenslåttTidslinje[28]
+                .utbetalingsinfo!!
+                .totalGrad)
+    }
+
+    @Test
+    fun `Sykmeldt rett under 20 % fra to forskjellige arbeidsforhold gir ikke rett på sykepenger`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 19.99.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 19.99.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                listOf(
+                    a1 to 18199.7.månedlig,
+                    a2 to 22966.54.månedlig
+                ), 1.januar
+            ),
+            inntektsvurdering = lagStandardSammenligningsgrunnlag(
+                listOf(
+                    a1 to 18199.7.månedlig,
+                    a2 to 22966.54.månedlig
+                ), 1.januar
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            ), orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        val personDto = speilApi()
+        assertEquals(19,
+            (personDto
+                .arbeidsgivere[0]
+                .generasjoner[0]
+                .perioder[0] as BeregnetPeriode)
+                .sammenslåttTidslinje[28]
+                .utbetalingsinfo!!
+                .totalGrad)
     }
 
 }
