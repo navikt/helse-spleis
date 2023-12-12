@@ -271,10 +271,18 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonObserver: SubsumsjonObserver
         ): VilkårsgrunnlagElement?
 
-        abstract fun grunnbeløpsregulering(
+        internal fun grunnbeløpsregulering(
             hendelse: Grunnbeløpsregulering,
             subsumsjonObserver: SubsumsjonObserver
-        ): VilkårsgrunnlagElement?
+        ): VilkårsgrunnlagElement? {
+            val nyttSykepengegrunnlag = sykepengegrunnlag.grunnbeløpsregulering()
+            if (nyttSykepengegrunnlag == sykepengegrunnlag) {
+                hendelse.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
+                return null
+            }
+            hendelse.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt korrigeres til rett beløp.")
+            return kopierMed(hendelse, nyttSykepengegrunnlag, opptjening, subsumsjonObserver)
+        }
 
         internal fun nyeArbeidsgiverInntektsopplysninger(
             person: Person,
@@ -489,18 +497,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonObserver,
         )
 
-        override fun grunnbeløpsregulering(
-            hendelse: Grunnbeløpsregulering,
-            subsumsjonObserver: SubsumsjonObserver
-        ): VilkårsgrunnlagElement? {
-            val nyttSykepengegrunnlag = sykepengegrunnlag.grunnbeløpsregulering()
-            if (nyttSykepengegrunnlag == sykepengegrunnlag) {
-                hendelse.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt er allerede korrekt.")
-                return null
-            }
-            hendelse.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt korrigeres til rett beløp.")
-            return kopierMed(hendelse, nyttSykepengegrunnlag, opptjening, subsumsjonObserver)
-        }
 
         override fun kopierMed(
             hendelse: IAktivitetslogg,
@@ -537,13 +533,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return null
         }
 
-        override fun grunnbeløpsregulering(
-            hendelse: Grunnbeløpsregulering,
-            subsumsjonObserver: SubsumsjonObserver
-        ): Grunnlagsdata? {
-            hendelse.funksjonellFeil(RV_VV_11)
-            return null
-        }
 
         override fun kopierMed(
             hendelse: IAktivitetslogg,

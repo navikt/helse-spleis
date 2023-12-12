@@ -7,7 +7,6 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.til
@@ -171,11 +170,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 hendelse: OverstyrArbeidsforhold,
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
-
-            override fun grunnbeløpsregulering(
-                hendelse: Grunnbeløpsregulering,
-                subsumsjonObserver: SubsumsjonObserver
-            ): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
 
             override fun kopierMed(
                 hendelse: IAktivitetslogg,
