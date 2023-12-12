@@ -17,6 +17,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         private val SIKKER_BRØK = 1.0.toBigDecimal(mc)
         private val HUNDRE_PROSENT = 100.0.toBigDecimal(mc)
         private val GRENSE = 20.prosent
+        private val EPSILON = BigDecimal("0.00001")
 
         internal fun ratio(a: Double, b: Double) =
             Prosentdel(if (a < b) a.toBigDecimal(mc).divide(b.toBigDecimal(mc), mc) else SIKKER_BRØK)
@@ -41,7 +42,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
 
     override fun equals(other: Any?) = other is Prosentdel && this.equals(other)
 
-    private fun equals(other: Prosentdel) = this.brøkdel.setScale(mc.precision) == other.brøkdel.setScale(mc.precision)
+    private fun equals(other: Prosentdel) = (this.brøkdel - other.brøkdel).abs() < EPSILON
 
     override fun hashCode() = brøkdel.hashCode()
 
@@ -49,7 +50,7 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
 
     internal operator fun div(other: Prosentdel) = Prosentdel(this.brøkdel.divide(other.brøkdel, mc))
 
-    override fun compareTo(other: Prosentdel) = this.brøkdel.compareTo(other.brøkdel)
+    override fun compareTo(other: Prosentdel) = if(this.equals(other)) 0 else this.brøkdel.compareTo(other.brøkdel)
 
     override fun toString(): String {
         return "${(toDouble())} %"
