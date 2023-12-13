@@ -61,6 +61,9 @@ spec:
         - application: sporing
           namespace: tbd
           cluster: dev-gcp
+    outbound:
+      rules:
+        - application: spurtedu
   secureLogs:
     enabled: true
   envFrom:
