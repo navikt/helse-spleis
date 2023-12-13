@@ -33,6 +33,15 @@ internal class MedlemskapsvurderingTest {
     }
 
     @Test
+    fun `får varsel ved status UavklartMedBrukerspørsmål`() {
+        Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål)
+            .valider(aktivitetslogg).also {
+                assertTrue(aktivitetslogg.harVarslerEllerVerre())
+                assertTrue(it)
+            }
+    }
+
+    @Test
     fun `bruker er ikke medlem`() {
         assertFalse(
             Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei)

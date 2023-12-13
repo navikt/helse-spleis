@@ -286,6 +286,7 @@ internal data class PersonData(
                     medlemskapstatus = when (medlemskapstatus!!) {
                         JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
                         JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                        JsonMedlemskapstatus.UAVKLART_MED_BRUKERSPØRSMÅL -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
                         JsonMedlemskapstatus.VET_IKKE -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                     },
                     vurdertOk = vurdertOk!!,

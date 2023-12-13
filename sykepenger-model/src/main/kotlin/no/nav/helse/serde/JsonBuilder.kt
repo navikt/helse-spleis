@@ -837,6 +837,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "medlemskapstatus" to when (medlemskapstatus) {
                         Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
                         Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI
+                        Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> JsonMedlemskapstatus.UAVKLART_MED_BRUKERSPØRSMÅL
                         Medlemskapsvurdering.Medlemskapstatus.VetIkke -> JsonMedlemskapstatus.VET_IKKE
                     },
                     "vurdertOk" to vurdertOk,

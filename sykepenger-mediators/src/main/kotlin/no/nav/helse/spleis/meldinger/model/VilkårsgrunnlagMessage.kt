@@ -70,6 +70,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     private val medlemskapstatus = when (packet["@løsning.${Medlemskap.name}.resultat.svar"].asText()) {
         "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
         "NEI" -> Medlemskapsvurdering.Medlemskapstatus.Nei
+        "UAVKLART_MED_BRUKERSPORSMAAL" -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
         else -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
     }
 
