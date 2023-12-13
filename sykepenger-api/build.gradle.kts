@@ -33,6 +33,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-call-id:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion") {
         exclude(group = "junit")
     }
@@ -42,7 +43,6 @@ dependencies {
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
     }
-    testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("com.github.tomakehurst:wiremock-jre8:$wireMockVersion") {

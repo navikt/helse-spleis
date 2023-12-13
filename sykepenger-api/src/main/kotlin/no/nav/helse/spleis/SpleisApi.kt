@@ -1,10 +1,13 @@
 package no.nav.helse.spleis
 
+import com.fasterxml.jackson.core.JsonParseException
 import io.ktor.http.ContentType
+import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.request.header
@@ -23,15 +26,15 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 
-internal fun Application.spannerApi(dataSource: DataSource) {
+internal fun Application.spannerApi(dataSource: DataSource, spurteDuClient: SpurteDuClient?, azureClient: AzureClient?) {
     val hendelseDao = HendelseDao(dataSource)
     val personDao = PersonDao(dataSource)
 
     routing {
         authenticate {
-            get("/api/person-json") {
+            get("/api/person-json/{maskertId?}") {
                 withContext(Dispatchers.IO) {
-                    val ident = fnr(personDao)
+                    val ident = fnr(personDao, spurteDuClient, azureClient)
                     val person = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     call.respond(
                         person.deserialize(
@@ -85,11 +88,48 @@ internal fun Application.sporingApi(dataSource: DataSource) {
     }
 }
 
-private fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao): Long {
-    val fnr = call.request.header("fnr")?.toLong()
-    if (fnr != null) {
-        return fnr
+private suspend fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao, spurteDuClient: SpurteDuClient? = null, azureClient: AzureClient? = null): Long {
+    val maskertId = call.parameters["maskertId"]
+    val (fnr, aktorid) = call.identFraSpurteDu(spurteDuClient, azureClient, maskertId) ?: call.identFraRequest()
+    return fnr(personDao, fnr, aktorid) ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
+}
+
+private suspend fun ApplicationCall.identFraSpurteDu(spurteDuClient: SpurteDuClient?, azureClient: AzureClient?, maskertId: String?): Pair<Long?, Long?>? {
+    if (spurteDuClient == null || azureClient == null || maskertId == null) return null
+    val id = try {
+        UUID.fromString(maskertId)
+    } catch (err: Exception) {
+        return null
     }
-    val aktorid = call.request.header("aktorId")?.toLong() ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
-    return personDao.hentFødselsnummer(aktorid) ?: throw NotFoundException("Fant ikke aktør-ID")
+    val token = bearerToken ?: return null
+    val obo = azureClient.veksleTilOnBehalfOf(token, "api://${System.getenv("NAIS_CLUSTER_NAME")}.tbd.spurtedu/.default")
+    val tekstinnhold = spurteDuClient.utveksleSpurteDu(obo, id.toString()) ?: return null
+    return try {
+        val node = objectMapper.readTree(tekstinnhold)
+        val ident = node.path("ident").asLong()
+        val identype = node.path("identtype").asText()
+        when (identype.lowercase()) {
+            "fnr" -> Pair(ident, null)
+            "aktorid" -> Pair(null, ident)
+            else -> null
+        }
+    } catch (err: JsonParseException) {
+        null
+    }
+}
+private fun ApplicationCall.identFraRequest(): Pair<Long?, Long?> {
+    return Pair(
+        request.header("fnr")?.toLong(),
+        request.header("aktorId")?.toLong()
+    )
+}
+
+private fun fnr(personDao: PersonDao, fnr: Long?, aktørId: Long?): Long? {
+    return fnr ?: aktørId?.let { personDao.hentFødselsnummer(aktørId) }
+}
+
+private val ApplicationCall.bearerToken: String? get() {
+    val httpAuthHeader = request.parseAuthorizationHeader() ?: return null
+    if (httpAuthHeader !is HttpAuthHeader.Single) return null
+    return httpAuthHeader.blob
 }

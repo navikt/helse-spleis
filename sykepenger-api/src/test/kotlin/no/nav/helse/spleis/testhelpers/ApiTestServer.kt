@@ -87,6 +87,8 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
                 clientId = "spleis_azure_ad_app_id",
                 configurationUrl = "${wireMockServer.baseUrl()}/config"
             ),
+            null,
+            null,
             DataSourceConfiguration(
                 jdbcUrl = DB.instance.jdbcUrl,
                 databaseUsername = DB.instance.username,

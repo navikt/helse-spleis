@@ -35,20 +35,25 @@ internal val nyObjectmapper get() = jacksonObjectMapper()
     })
 
 internal val objectMapper = nyObjectmapper
+internal val logg = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")
 
 fun main() {
+    Thread.setDefaultUncaughtExceptionHandler { thread, err ->
+        logg.error("Uncaught exception in thread ${thread.name}: {}", err.message, err)
+    }
+
     val config = ApplicationConfiguration()
     val teller = AtomicInteger(0)
-    val app = createApp(config.ktorConfig, config.azureConfig, config.dataSourceConfiguration, teller)
+    val app = createApp(config.ktorConfig, config.azureConfig, config.azureClient, config.spurteDuClient, config.dataSourceConfiguration, teller)
     app.start(wait = true)
 }
 
-internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, dataSourceConfiguration: DataSourceConfiguration, teller: AtomicInteger) =
+internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, azureClient: AzureClient?, spurteDuClient: SpurteDuClient?, dataSourceConfiguration: DataSourceConfiguration, teller: AtomicInteger) =
     embeddedServer(
         factory = Netty,
         environment = applicationEngineEnvironment {
             ktorConfig.configure(this)
-            log = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")
+            log = logg
             module {
                 install(CallId) {
                     header("callId")
@@ -68,7 +73,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
                 nais(teller)
                 azureAdAppAuthentication(azureConfig)
                 val dataSource = dataSourceConfiguration.getDataSource()
-                spannerApi(dataSource)
+                spannerApi(dataSource, spurteDuClient, azureClient)
                 sporingApi(dataSource)
                 installGraphQLApi(dataSource)
             }
