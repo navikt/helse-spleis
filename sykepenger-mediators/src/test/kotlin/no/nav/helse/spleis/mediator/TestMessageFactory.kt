@@ -871,6 +871,7 @@ internal class TestMessageFactory(
                         "svar" to when (medlemskapstatus) {
                             Medlemskapsvurdering.Medlemskapstatus.Ja -> "JA"
                             Medlemskapsvurdering.Medlemskapstatus.Nei -> "NEI"
+                            Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> "UAVKLART_MED_BRUKERSPORSMAAL"
                             else -> "UAVKLART"
                         }
                     )

@@ -24,7 +24,7 @@ internal class VilkårsgrunnlagRiver(
         message.require("${ArbeidsforholdV2.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${Medlemskap.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
-            require(it.asText() in listOf("JA", "NEI", "UAVKLART")) { "svar (${it.asText()}) er ikke JA, NEI eller UAVKLART" }
+            require(it.asText() in listOf("JA", "NEI", "UAVKLART", "UAVKLART_MED_BRUKERSPORSMAAL")) { "svar (${it.asText()}) er ikke JA, NEI, UAVKLART, eller UAVKLART_MED_BRUKERSPORSMAAL" }
         }
         message.interestedIn("@løsning.${InntekterForSammenligningsgrunnlag.name}")
         message.requireArray("@løsning.${InntekterForSykepengegrunnlag.name}") {
