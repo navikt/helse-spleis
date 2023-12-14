@@ -47,6 +47,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
 import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
@@ -251,33 +252,26 @@ class Person private constructor(
         håndterGjenoppta(infotrygdendring)
     }
 
-    fun håndter(utbetalingshistorikk: UtbetalingshistorikkEtterInfotrygdendring) {
-        val skjæringstidspunkterFørEndring = skjæringstidspunkter()
-        utbetalingshistorikk.kontekst(aktivitetslogg, this)
-        if(!utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)) return
-        val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
-        if (!skjæringstidspunkterEtterEndring.containsAll(skjæringstidspunkterFørEndring)) {
-            arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
-                    arbeidsgiver.sykefraværsfortelling(acc)
-                }.varsleObservers(observers)
-            }
-        arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk)
-        gjenopptaBehandling(utbetalingshistorikk)
-        håndterGjenoppta(utbetalingshistorikk)
+    fun håndter(utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring) = håndterHistorikkFraInfotrygd(utbetalingshistorikkEtterInfotrygdendring) {
+        utbetalingshistorikkEtterInfotrygdendring.oppdaterHistorikk(it)
     }
 
-    fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
+    fun håndter(utbetalingshistorikk: Utbetalingshistorikk) = håndterHistorikkFraInfotrygd(utbetalingshistorikk) {
+        utbetalingshistorikk.oppdaterHistorikk(it)
+    }
+
+    private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Unit) {
         val skjæringstidspunkterFørEndring = skjæringstidspunkter()
-        utbetalingshistorikk.kontekst(aktivitetslogg, this)
-        utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
+        hendelse.kontekst(aktivitetslogg, this)
+        oppdatertHistorikk(infotrygdhistorikk)
         val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
         if (!skjæringstidspunkterEtterEndring.containsAll(skjæringstidspunkterFørEndring)) {
             arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
                 arbeidsgiver.sykefraværsfortelling(acc)
             }.varsleObservers(observers)
         }
-        arbeidsgivere.håndter(utbetalingshistorikk, infotrygdhistorikk)
-        håndterGjenoppta(utbetalingshistorikk)
+        arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
+        håndterGjenoppta(hendelse)
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {

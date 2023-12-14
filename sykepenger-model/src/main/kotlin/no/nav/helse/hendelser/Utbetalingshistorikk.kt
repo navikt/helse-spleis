@@ -24,9 +24,6 @@ class Utbetalingshistorikk(
         info("Oppfrisket Infotrygdhistorikk ble lagret")
     }
 
-    internal fun erRelevant(vedtaksperiodeId: UUID) =
-        vedtaksperiodeId.toString() == this.vedtaksperiodeId
-
     override fun innsendt() = besvart
     override fun avsender() = SYSTEM
 }

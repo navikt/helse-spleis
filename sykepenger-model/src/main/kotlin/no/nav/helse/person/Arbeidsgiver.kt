@@ -20,8 +20,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -36,7 +34,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_AVVENTENDE_GODKJENNING
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
-import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
@@ -148,18 +145,10 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.håndter(
-            hendelse: UtbetalingshistorikkEtterInfotrygdendring,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            forEach { arbeidsgiver ->
-                arbeidsgiver.håndter(hendelse, infotrygdhistorikk)
-            }
-        }
 
-        internal fun List<Arbeidsgiver>.håndter(hendelse: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
+        internal fun List<Arbeidsgiver>.håndterHistorikkFraInfotrygd(hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk) {
             forEach { arbeidsgiver ->
-                arbeidsgiver.håndter(hendelse, infotrygdhistorikk)
+                arbeidsgiver.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
             }
         }
 
@@ -473,10 +462,6 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.ikkeHåndert(person, vedtaksperioder, sykmeldingsperioder, dager)
     }
 
-    private fun håndter(hendelse: UtbetalingshistorikkEtterInfotrygdendring, infotrygdhistorikk: Infotrygdhistorikk) {
-        håndter(hendelse) { håndter(hendelse, infotrygdhistorikk) }
-    }
-
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
         inntektsmelding.fortsettÅBehandle(this)
     }
@@ -486,9 +471,9 @@ internal class Arbeidsgiver private constructor(
         håndter(inntektsmeldingReplayUtført) { håndter(inntektsmeldingReplayUtført) }
     }
 
-    internal fun håndter(utbetalingshistorikk: Utbetalingshistorikk, infotrygdhistorikk: Infotrygdhistorikk) {
-        utbetalingshistorikk.kontekst(this)
-        håndter(utbetalingshistorikk) { håndter(utbetalingshistorikk, infotrygdhistorikk) }
+    internal fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk) {
+        hendelse.kontekst(this)
+        håndter(hendelse) { håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk) }
     }
 
     internal fun håndter(
