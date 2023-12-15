@@ -192,6 +192,7 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                 sikkerlogg.info("Ville skrevet avviksvurderinger til rapid:\n{}", objectMapper.writeValueAsString(event))
             } catch (err: Exception) {
                 log.info("$aktørId lar seg ikke serialisere: ${err.message}")
+                sikkerlogg.error("$aktørId lar seg ikke serialisere: ${err.message}", err)
             } finally {
                 MDC.setContextMap(mdcContextMap)
             }
@@ -250,13 +251,13 @@ private fun omregnetÅrsinntekt(node: JsonNode, opplysning: JsonNode): Double {
     return opplysning.path("beløp").asDouble()
 }
 private fun finnInntektsopplysning(node: JsonNode, opplysningId: String): JsonNode {
-    return node.path("vilkårsgrunnlagHistorikk").firstNotNullOf { vilkårsgrunnlag ->
+    return node.path("vilkårsgrunnlagHistorikk").firstNotNullOfOrNull { vilkårsgrunnlag ->
         vilkårsgrunnlag.path("vilkårsgrunnlag").firstNotNullOfOrNull { grunnlagsdata ->
             grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").firstOrNull { opplysning ->
                 opplysning.path("inntektsopplysning").path("id").asText() == opplysningId
             }
         }
-    }
+    } ?: throw IllegalStateException("Finner ikke vilkårsgrunnlag med inntektsopplysning med $opplysningId")
 }
 private fun parseInfotrygdVilkårsgrunnlag(grunnlagsdata: JsonNode): AvviksvurderingDto {
     return AvviksvurderingDto(
@@ -286,7 +287,9 @@ private fun finnTidligsteTidspunktForSkjæringstidspunkt(node: JsonNode, skjæri
             }
         }
     }
-    return beregningstidspunkter.min()
+    return checkNotNull(beregningstidspunkter.minOrNull()) {
+        "Finner ikke beregningstidspunkt for $skjæringstidspunkt"
+    }
 }
 
 private fun vilkårsgrunnlagFor(node: JsonNode, skjæringstidspunkt: LocalDate): Set<UUID> {
