@@ -218,33 +218,38 @@ private fun hentAvviksvurderinger(node: JsonNode): List<AvviksvurderingDto> {
         }
 }
 
-private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode): AvviksvurderingDto {
+private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode): AvviksvurderingDto? {
     val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
-    return AvviksvurderingDto(
-        skjæringstidspunkt = skjæringstidspunkt,
-        vurderingstidspunkt = finnTidligsteTidspunktForSkjæringstidspunkt(node, skjæringstidspunkt),
-        type = VilkårsgrunnlagtypeDto.SPLEIS,
-        omregnedeÅrsinntekter = grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
-            OmregnetÅrsinntektDto(
-                orgnummer = opplysning.path("orgnummer").asText(),
-                beløp = omregnetÅrsinntekt(node, opplysning.path("inntektsopplysning"))
-            )
-        },
-        sammenligningsgrunnlag = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
-            SammenligningsgrunnlagDto(
-                orgnummer = opplysning.path("orgnummer").asText(),
-                skatteopplysninger = opplysning.path("skatteopplysninger").map { skatt ->
-                    SkatteopplysningDto(
-                        beløp = skatt.path("beløp").asDouble(),
-                        måned = YearMonth.parse(skatt.path("måned").asText()),
-                        type = skatt.path("type").asText(),
-                        fordel = skatt.path("fordel").asText(),
-                        beskrivelse = skatt.path("beskrivelse").asText()
-                    )
-                }
-            )
-        }
-    )
+    return try {
+        AvviksvurderingDto(
+            skjæringstidspunkt = skjæringstidspunkt,
+            vurderingstidspunkt = finnTidligsteTidspunktForSkjæringstidspunkt(node, skjæringstidspunkt),
+            type = VilkårsgrunnlagtypeDto.SPLEIS,
+            omregnedeÅrsinntekter = grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
+                OmregnetÅrsinntektDto(
+                    orgnummer = opplysning.path("orgnummer").asText(),
+                    beløp = omregnetÅrsinntekt(node, opplysning.path("inntektsopplysning"))
+                )
+            },
+            sammenligningsgrunnlag = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
+                SammenligningsgrunnlagDto(
+                    orgnummer = opplysning.path("orgnummer").asText(),
+                    skatteopplysninger = opplysning.path("skatteopplysninger").map { skatt ->
+                        SkatteopplysningDto(
+                            beløp = skatt.path("beløp").asDouble(),
+                            måned = YearMonth.parse(skatt.path("måned").asText()),
+                            type = skatt.path("type").asText(),
+                            fordel = skatt.path("fordel").asText(),
+                            beskrivelse = skatt.path("beskrivelse").asText()
+                        )
+                    }
+                )
+            }
+        )
+    } catch (err: Exception) {
+        sikkerlogg.error("Klarte ikke migrere skjæringstidspunkt $skjæringstidspunkt: ${err.message}", err)
+        null
+    }
 }
 private fun omregnetÅrsinntekt(node: JsonNode, opplysning: JsonNode): Double {
     if (opplysning.path("kilde").asText() == "SKJØNNSMESSIG_FASTSATT") return omregnetÅrsinntekt(node, finnInntektsopplysning(node, opplysning.path("overstyrtInntektId").asText()))
