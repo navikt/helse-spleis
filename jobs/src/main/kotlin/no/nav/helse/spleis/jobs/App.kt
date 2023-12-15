@@ -440,15 +440,14 @@ private class DataSourceConfiguration(dbUsername: DbUser) {
         username = databaseUsername
         password = databasePassword
 
-        maximumPoolSize = 1
-        minimumIdle = 1
+        maximumPoolSize = 2
         initializationFailTimeout = Duration.ofMinutes(1).toMillis()
         connectionTimeout = Duration.ofSeconds(5).toMillis()
         maxLifetime = Duration.ofMinutes(30).toMillis()
         idleTimeout = Duration.ofMinutes(10).toMillis()
     }
 
-    fun dataSource(maximumPoolSize: Int = 1) = HikariDataSource(hikariConfig.apply {
+    fun dataSource(maximumPoolSize: Int = 2) = HikariDataSource(hikariConfig.apply {
         this.maximumPoolSize = maximumPoolSize
     })
 }
