@@ -27,6 +27,7 @@ import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -181,7 +182,9 @@ internal val objectMapper: ObjectMapper = jacksonObjectMapper()
 private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId: String) {
     opprettOgUtførArbeid(arbeidId) { session, fnr ->
         hentPerson(session, fnr)?.let { (aktørId, data) ->
+            val mdcContextMap = MDC.getCopyOfContextMap() ?: emptyMap()
             try {
+                MDC.put("aktørId", aktørId)
                 val node = objectMapper.readTree(data)
                 val vurderinger = hentAvviksvurderinger(node)
                 if (vurderinger.isEmpty()) return@let
@@ -189,6 +192,8 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                 sikkerlogg.info("Ville skrevet avviksvurderinger til rapid:\n{}", objectMapper.writeValueAsString(event))
             } catch (err: Exception) {
                 log.info("$aktørId lar seg ikke serialisere: ${err.message}")
+            } finally {
+                MDC.setContextMap(mdcContextMap)
             }
         }
     }
@@ -307,7 +312,10 @@ private data class AvviksvurderingDto(
     val omregnedeÅrsinntekter: List<OmregnetÅrsinntektDto>,
     val sammenligningsgrunnlag: List<SammenligningsgrunnlagDto>
 ) {
-
+    init {
+        if (omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
+        if (sammenligningsgrunnlag.isEmpty()) sikkerlogg.error("Ingen sammenligningsgrunnlag for $skjæringstidspunkt")
+    }
 }
 
 private class OmregnetÅrsinntektDto(
