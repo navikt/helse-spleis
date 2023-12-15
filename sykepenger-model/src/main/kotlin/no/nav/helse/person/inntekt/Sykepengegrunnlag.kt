@@ -261,7 +261,7 @@ internal class Sykepengegrunnlag private constructor(
             return null
         }
 
-        val gjenopplivetArbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger.takeUnless { it.isEmpty() } ?: arbeidsgiverInntektsopplysninger
+        val gjenopplivetArbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger.takeUnless { it.isEmpty() } ?: arbeidsgiverInntektsopplysninger.map { it.gjenoppliv(skjæringstidspunkt) }
 
         if (gjenopplivetArbeidsgiverInntektsopplysninger.isEmpty()) {
             hendelse.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.")
