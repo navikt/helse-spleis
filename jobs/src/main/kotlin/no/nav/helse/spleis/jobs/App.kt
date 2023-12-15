@@ -292,7 +292,17 @@ private fun finnTidligsteTidspunktForSkjæringstidspunkt(node: JsonNode, skjæri
             }
         }
     }
-    return checkNotNull(beregningstidspunkter.minOrNull()) {
+    val vilkårsgrunnlagtidspunkter = node.path("vilkårsgrunnlagHistorikk")
+        .filter { innslag ->
+            innslag.path("vilkårsgrunnlag")
+                .any { vilkårsgrunnlag ->
+                    UUID.fromString(vilkårsgrunnlag.path("vilkårsgrunnlagId").asText()) in relevanteVilkårsgrunnlag
+                }
+        }
+        .map { innslag ->
+            LocalDateTime.parse(innslag.path("opprettet").asText())
+        }
+    return checkNotNull(beregningstidspunkter.minOrNull() ?: vilkårsgrunnlagtidspunkter.minOrNull()) {
         "Finner ikke beregningstidspunkt for $skjæringstidspunkt"
     }
 }
@@ -321,8 +331,8 @@ private data class AvviksvurderingDto(
     val sammenligningsgrunnlag: List<SammenligningsgrunnlagDto>
 ) {
     init {
-        if (omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
-        if (sammenligningsgrunnlag.isEmpty()) sikkerlogg.error("Ingen sammenligningsgrunnlag for $skjæringstidspunkt")
+        if (type == VilkårsgrunnlagtypeDto.SPLEIS && omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
+        if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlag.isEmpty()) sikkerlogg.error("Ingen sammenligningsgrunnlag for $skjæringstidspunkt")
     }
 }
 
