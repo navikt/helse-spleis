@@ -131,6 +131,9 @@ spec:
           application: spinnvill
           access: readwrite
         - team: tbd
+          application: spinnvill-opprydding-dev
+          access: readwrite
+        - team: tbd
           application: spotter
           access: readwrite
         - team: tbd
