@@ -11,7 +11,7 @@ class Avviksprosent private constructor(private val desimal: Double) : Comparabl
     companion object {
         private const val EPSILON = 0.000001
         private val MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT = Avviksprosent(0.25)
-        private val AVVIKSVURDERING_FLYTTET = System.getenv("AVVIKSAKER_FLYTTET").toBoolean()
+        private val AVVIKSVURDERING_FLYTTET get() = System.getenv("AVVIKSAKER_FLYTTET").toBoolean() || System.getProperty("AVVIKSAKER_FLYTTET").toBoolean()
 
         private fun ratio(ratio: Double) = if (AVVIKSVURDERING_FLYTTET) Avviksprosent(0.0) else Avviksprosent(ratio)
 

@@ -9,6 +9,7 @@ import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
@@ -268,7 +269,8 @@ internal class TestPerson(
             arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
             orgnummer: String = "aa"
         ) {
-            behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
+            if (Toggle.AvviksvurderingFlyttet.enabled) behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
+            else behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
             arbeidsgiverHendelsefabrikk.lagVilkårsgrunnlag(
                 vedtaksperiodeId,
                 inspektør.skjæringstidspunkt(vedtaksperiodeId),
