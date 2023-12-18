@@ -352,7 +352,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = mapOf(a1 to 1.januar, a2 to 2.januar),
+            førsteFraværsdager = listOf(
+                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar),
+                mapOf("organisasjonsnummer" to a2, "førsteFraværsdag" to 2.januar)
+            ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(null),
                 PersonObserver.Refusjon(forslag = emptyList()),
@@ -841,7 +844,9 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             sykmeldingsperioder = listOf(2.januar til 17.januar),
             egenmeldingsperioder = listOf(1.januar til 1.januar),
-            førsteFraværsdager = mapOf(a1 to 1.januar),
+            førsteFraværsdager = listOf(
+                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar),
+            ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(null),
                 PersonObserver.Refusjon(forslag = emptyList()),

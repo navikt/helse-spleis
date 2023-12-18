@@ -131,7 +131,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val skjæringstidspunkt: LocalDate,
         val sykmeldingsperioder: List<Periode>,
         val egenmeldingsperioder: List<Periode>,
-        val førsteFraværsdager: Map<String, LocalDate>,
+        val førsteFraværsdager: List<Map<String, Any>>,
         val forespurteOpplysninger: List<ForespurtOpplysning>
     ) {
         fun toJsonMap(): Map<String, Any> =

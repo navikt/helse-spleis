@@ -38,6 +38,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "organisasjonsnummer",
             "skjæringstidspunkt",
             "sykmeldingsperioder",
+            "førsteFraværsdager",
             "egenmeldingsperioder",
             "forespurteOpplysninger",
             "aktørId",
@@ -68,6 +69,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
                 "@event_name",
                 "organisasjonsnummer",
                 "skjæringstidspunkt",
+                "førsteFraværsdager",
                 "sykmeldingsperioder",
                 "egenmeldingsperioder",
                 "forespurteOpplysninger",
@@ -117,6 +119,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "organisasjonsnummer",
             "skjæringstidspunkt",
             "sykmeldingsperioder",
+            "førsteFraværsdager",
             "egenmeldingsperioder",
             "forespurteOpplysninger",
             "aktørId",
@@ -220,6 +223,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "organisasjonsnummer",
             "skjæringstidspunkt",
             "sykmeldingsperioder",
+            "førsteFraværsdager",
             "egenmeldingsperioder",
             "forespurteOpplysninger",
             "aktørId",
@@ -253,6 +257,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "organisasjonsnummer",
             "skjæringstidspunkt",
             "sykmeldingsperioder",
+            "førsteFraværsdager",
             "egenmeldingsperioder",
             "forespurteOpplysninger",
             "aktørId",
@@ -289,6 +294,16 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             }
           ],
           "egenmeldingsperioder": [],
+          "førsteFraværsdager": [
+            { 
+                "organisasjonsnummer": "ag1",
+                "førsteFraværsdag": "2018-01-01"
+            },
+            { 
+                "organisasjonsnummer": "ag2",
+                "førsteFraværsdag": "2018-01-01"
+            }
+          ],
           "forespurteOpplysninger": [
             {
               "opplysningstype": "FastsattInntekt",
@@ -330,6 +345,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "tom": "2018-01-01"
             }
           ],
+          "førsteFraværsdager": [
+            { 
+                "organisasjonsnummer": "987654321",
+                "førsteFraværsdag": "2018-01-01"
+            }
+          ],
           "forespurteOpplysninger": [
             {
               "opplysningstype": "Inntekt",
@@ -362,6 +383,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             }
           ],
           "egenmeldingsperioder": [],
+          "førsteFraværsdager": [
+            { 
+                "organisasjonsnummer": "987654321",
+                "førsteFraværsdag": "2018-03-01"
+            }
+          ],
           "forespurteOpplysninger": [
             {
               "opplysningstype": "Inntekt",
@@ -409,6 +436,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             }
           ],
           "egenmeldingsperioder": [],
+          "førsteFraværsdager": [
+            { 
+                "organisasjonsnummer": "987654321",
+                "førsteFraværsdag": "2018-03-01"
+            }
+          ],
           "forespurteOpplysninger": [
             {
               "opplysningstype": "Inntekt",
@@ -452,6 +485,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
 
           ],
           "egenmeldingsperioder": [],
+          "førsteFraværsdager": [
+            { 
+                "organisasjonsnummer": "987654321",
+                "førsteFraværsdag": "2018-02-10"
+            }
+          ],
           "forespurteOpplysninger": [
             {
               "opplysningstype": "Inntekt",
