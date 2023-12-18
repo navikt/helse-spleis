@@ -144,7 +144,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                         ),
                         Refusjonsopplysninger()
                     )
-                ), skjæringstidspunkt, Sammenligningsgrunnlag(emptyList()), MaskinellJurist()
+                ), skjæringstidspunkt, Sammenligningsgrunnlag(emptyList()), MaskinellJurist(), emptyList()
             ),
             opptjening = Opptjening.nyOpptjening(opptjening, 1.januar, MaskinellJurist()),
             medlemskapstatus = when (erMedlem) {

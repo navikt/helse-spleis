@@ -19,6 +19,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
@@ -54,6 +55,9 @@ private class SkattSykepengegrunnlagMixin
 @JsonIgnoreProperties("opptjeningsdager\$delegate")
 private class OpptjeningMixin
 
+@JsonIgnoreProperties("ønsketVilkårsgrunnlagId")
+private class SykepengegrunnlagMixin
+
 internal class BigDecimalSerializer : JsonSerializer<BigDecimal>() {
     private companion object {
         private const val PRECISION = 15
@@ -83,7 +87,8 @@ private val objectMapper = jacksonObjectMapper()
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
             Prosentdel::class.java to ProsentdelMixin::class.java,
             SkattSykepengegrunnlag::class.java to SkattSykepengegrunnlagMixin::class.java,
-            Opptjening::class.java to OpptjeningMixin::class.java
+            Opptjening::class.java to OpptjeningMixin::class.java,
+            Sykepengegrunnlag::class.java to SykepengegrunnlagMixin::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)

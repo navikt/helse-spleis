@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -30,6 +31,9 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
         result = 31 * result + inntektsopplysninger.hashCode()
         return result
     }
+
+    internal fun sammenligningsgrunnlagSomSkalBrukesIAvviksprosentBeregnetEvent(): PersonObserver.AvviksprosentBeregnetEvent.Sammenligningsgrunnlag =
+        PersonObserver.AvviksprosentBeregnetEvent.Sammenligningsgrunnlag(orgnummer, skatteopplysninger = inntektsopplysninger.map { it.skatteopplysningerSomSkalBrukesIAvviksprosentBeregnetEvent() })
 
     internal companion object {
 

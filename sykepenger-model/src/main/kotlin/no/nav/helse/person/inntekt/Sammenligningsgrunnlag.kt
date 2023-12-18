@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattISpleisBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
@@ -31,4 +32,7 @@ internal class Sammenligningsgrunnlag(
     internal fun build(builder: FastsattISpleisBuilder) {
         builder.innrapportertÅrsinntekt(sammenligningsgrunnlag)
     }
+
+    internal fun sammenligningsgrunnlagSomSkalBrukersIAvviksprosentBeregnetEvent(): List<PersonObserver.AvviksprosentBeregnetEvent.Sammenligningsgrunnlag> =
+        arbeidsgiverInntektsopplysninger.map { it.sammenligningsgrunnlagSomSkalBrukesIAvviksprosentBeregnetEvent() }
 }

@@ -350,7 +350,8 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = inntekter,
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             skjæringstidspunkt = skjæringstidspunkt,
-            subsumsjonObserver = NullObserver
+            subsumsjonObserver = NullObserver,
+            personObservers = emptyList()
         )
         assertEquals(a1Inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(a1Inntekt, sykepengegrunnlag.inspektør.beregningsgrunnlag)

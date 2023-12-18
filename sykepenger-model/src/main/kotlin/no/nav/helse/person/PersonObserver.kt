@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
@@ -661,6 +662,35 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val organisasjonsnummer: String
     )
 
+    data class AvviksprosentBeregnetEvent(
+        val omregnetÅrsinntekt: Double,
+        val sammenligningsgrunnlag: Double,
+        val avviksprosent: Double,
+        val skjæringstidspunkt: LocalDate,
+        val vurderingstidspunkt: LocalDateTime,
+        val omregnetÅrsinntektPerArbeidsgiver: List<OmregnetÅrsinntekt>,
+        val sammenligningsgrunnlagPerArbeidsgiver: List<Sammenligningsgrunnlag>,
+        val vilkårsgrunnlagId: UUID
+    ) {
+        data class OmregnetÅrsinntekt(
+            val orgnummer: String,
+            val beløp: Double
+        )
+
+        data class Sammenligningsgrunnlag(
+            val orgnummer: String,
+            val skatteopplysninger: List<Skatteopplysning>
+        ) {
+            data class Skatteopplysning(
+                val beløp: Double,
+                val måned: YearMonth,
+                val type: String,
+                val fordel: String,
+                val beskrivelse: String
+            )
+        }
+    }
+
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {}
     fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
@@ -682,6 +712,10 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(event: VedtakFattetEvent) {}
+
+    fun avviksprosentBeregnet(
+        event: AvviksprosentBeregnetEvent
+    ) {}
 
     fun nyVedtaksperiodeUtbetaling(
         personidentifikator: Personidentifikator,

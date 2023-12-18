@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -117,6 +116,11 @@ abstract class Inntektsopplysning protected constructor(
     internal fun omregnetÅrsinntekt(builder: GodkjenningsbehovBuilder, orgnummer: String) {
         builder.omregnedeÅrsinntekter(orgnummer, omregnetÅrsinntekt().beløp.reflection { årlig, _, _, _ -> årlig })
     }
+
+    // TODO: Destroy with fire
+    internal fun omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent(orgnummer: String) = PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(
+        orgnummer,
+        beløp.reflection { årlig, _, _, _ -> årlig })
 
     internal companion object {
         internal fun erOmregnetÅrsinntektEndret(før: Inntektsopplysning, etter: Inntektsopplysning) =

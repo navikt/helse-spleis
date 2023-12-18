@@ -168,7 +168,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 emptyList(),
                 1.januar,
                 Sammenligningsgrunnlag(inntekterForSammenligningsgrunnlag.map { it.tilSammenligningsgrunnlag(uuid) }),
-                NullObserver
+                NullObserver,
+                emptyList()
             ),
             NullObserver
         )

@@ -11,6 +11,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -33,6 +34,8 @@ class ArbeidsgiverInntektsopplysning(
     private val inntektsopplysning: Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
+    internal fun omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent(): PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt =
+        inntektsopplysning.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent(orgnummer)
     private fun fastsattÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
         return acc + beregningsgrunnlag(skjæringstidspunkt)
     }

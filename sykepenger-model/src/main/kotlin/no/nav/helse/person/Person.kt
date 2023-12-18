@@ -661,7 +661,8 @@ class Person private constructor(
             arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,
             sammenligningsgrunnlag,
-            subsumsjonObserver
+            subsumsjonObserver,
+            observers.toList()
         )
     }
 

@@ -43,7 +43,8 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
             listOf(ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(orgnr, innteker))
         } ?: emptyList()),
         skjæringstidspunkt = skjæringstidspunkt,
-        subsumsjonObserver = subsumsjonObserver
+        subsumsjonObserver = subsumsjonObserver,
+        personObservers = emptyList()
     )
 internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
     Sykepengegrunnlag.ferdigSykepengegrunnlag(
