@@ -2148,12 +2148,16 @@ internal class Vedtaksperiode private constructor(
             }
 
             if (forkastPåGrunnAvInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) {
-                if (oppdatertEtterViBegynteÅForkasteAuuer(vedtaksperiode)) return hendelse.info( "Perioden er utbetalt i sin helhet i Infotrygd, men forkaster ikke." )
+                if (oppdatertEtterViBegynteÅForkasteAuuer(vedtaksperiode)) return igangsettOverstyringInfotrygdendring(vedtaksperiode, hendelse)
                 hendelse.funksjonellFeil(RV_IT_3)
                 vedtaksperiode.person.forkastAuu(hendelse, vedtaksperiode)
                 return
             }
 
+            igangsettOverstyringInfotrygdendring(vedtaksperiode, hendelse)
+        }
+
+        private fun igangsettOverstyringInfotrygdendring(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             hendelse.varsel(RV_IT_38)
             vedtaksperiode.person.igangsettOverstyring(
                 Revurderingseventyr.infotrygdendring(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
