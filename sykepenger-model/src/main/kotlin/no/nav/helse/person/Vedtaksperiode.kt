@@ -7,7 +7,6 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Toggle
-import no.nav.helse.april
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -2148,16 +2147,11 @@ internal class Vedtaksperiode private constructor(
             }
 
             if (forkastPåGrunnAvInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) {
-                if (oppdatertEtterViBegynteÅForkasteAuuer(vedtaksperiode)) return igangsettOverstyringInfotrygdendring(vedtaksperiode, hendelse)
                 hendelse.funksjonellFeil(RV_IT_3)
                 vedtaksperiode.person.forkastAuu(hendelse, vedtaksperiode)
                 return
             }
 
-            igangsettOverstyringInfotrygdendring(vedtaksperiode, hendelse)
-        }
-
-        private fun igangsettOverstyringInfotrygdendring(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             hendelse.varsel(RV_IT_38)
             vedtaksperiode.person.igangsettOverstyring(
                 Revurderingseventyr.infotrygdendring(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
@@ -2171,11 +2165,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return false // Om vi har info kan vi sende den ut til Saksbehandler uansett
             if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return false // Perioden kan ikke forkastes
             return utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk) // Kan forkaste om alt er utbetalt i Infotrygd i sin helhet
-        }
-
-        private fun oppdatertEtterViBegynteÅForkasteAuuer(vedtaksperiode: Vedtaksperiode): Boolean {
-            val begynteÅForkasteAuuer = 12.april(2023)
-            return vedtaksperiode.oppdatert.toLocalDate() > begynteÅForkasteAuuer && vedtaksperiode.periode.endInclusive > begynteÅForkasteAuuer
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
