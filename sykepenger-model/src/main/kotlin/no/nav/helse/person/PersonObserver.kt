@@ -675,13 +675,13 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     )
 
     data class AvviksprosentBeregnetEvent(
-        val omregnetÅrsinntekt: Double,
-        val sammenligningsgrunnlag: Double,
+        val beregningsgrunnlagTotalbeløp: Double,
+        val sammenligningsgrunnlagTotalbeløp: Double,
         val avviksprosent: Double,
         val skjæringstidspunkt: LocalDate,
         val vurderingstidspunkt: LocalDateTime,
-        val omregnetÅrsinntektPerArbeidsgiver: List<OmregnetÅrsinntekt>,
-        val sammenligningsgrunnlagPerArbeidsgiver: List<Sammenligningsgrunnlag>,
+        val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
+        val sammenligningsgrunnlag: List<Sammenligningsgrunnlag>,
         val vilkårsgrunnlagId: UUID
     ) {
         data class OmregnetÅrsinntekt(

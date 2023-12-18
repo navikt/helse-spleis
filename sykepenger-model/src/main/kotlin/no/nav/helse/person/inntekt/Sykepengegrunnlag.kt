@@ -135,10 +135,10 @@ internal class Sykepengegrunnlag private constructor(
             personObserver.avviksprosentBeregnet(
                 PersonObserver.AvviksprosentBeregnetEvent(
                     skjæringstidspunkt = skjæringstidspunkt,
-                    omregnetÅrsinntekt = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
-                    omregnetÅrsinntektPerArbeidsgiver = arbeidsgiverInntektsopplysninger.map { it.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent() },
-                    sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    sammenligningsgrunnlagPerArbeidsgiver = sammenligningsgrunnlag.sammenligningsgrunnlagSomSkalBrukersIAvviksprosentBeregnetEvent(),
+                    beregningsgrunnlagTotalbeløp = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
+                    omregnedeÅrsinntekter = arbeidsgiverInntektsopplysninger.map { it.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent() },
+                    sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlagSomSkalBrukersIAvviksprosentBeregnetEvent(),
                     avviksprosent = avviksprosent.prosent(),
                     vilkårsgrunnlagId = ønsketVilkårsgrunnlagId,
                     vurderingstidspunkt = LocalDateTime.now()

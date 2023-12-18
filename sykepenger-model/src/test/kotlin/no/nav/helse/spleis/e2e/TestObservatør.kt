@@ -39,6 +39,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val inntektsmeldingHåndtert = mutableListOf<Pair<UUID, UUID>>()
     val søknadHåndtert = mutableListOf<Pair<UUID, UUID>>()
     val vedtaksperiodeAnnullertEventer = mutableListOf<PersonObserver.VedtaksperiodeAnnullertEvent>()
+    val avviksprosentBeregnetEventer = mutableListOf<PersonObserver.AvviksprosentBeregnetEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
@@ -113,6 +114,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         vedtaksperioder.getOrPut(event.organisasjonsnummer) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstandsendringer.getOrPut(event.vedtaksperiodeId) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(event.vedtaksperiodeId)
+    }
+
+    override fun avviksprosentBeregnet(event: PersonObserver.AvviksprosentBeregnetEvent) {
+        avviksprosentBeregnetEventer.add(event)
     }
 
     internal fun nullstillTilstandsendringer() {
