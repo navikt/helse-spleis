@@ -1,12 +1,10 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import java.util.NoSuchElementException
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class FjerneGodkjenningsbehovOgVedtakFattetTest: AbstractEndToEndMediatorTest() {
 
@@ -28,6 +26,8 @@ internal class FjerneGodkjenningsbehovOgVedtakFattetTest: AbstractEndToEndMediat
          *  - "tags" kan hardkodes til tom liste []
          *      Enkelte AUU'er i dag kan nok ha taggen "IngenNyArbeidsgiverperiode" - men ettersom de ikke vises til sykmeldte
          *      kan den bare fjernes 🚮
+         *
+         *  - "vedtakFattetTidspunkt" kan settes til "avsluttetTidspunkt", eller now() i Spesialist, det er kanskje mer riktig?
          */
 
         @Language("JSON")
@@ -65,13 +65,10 @@ internal class FjerneGodkjenningsbehovOgVedtakFattetTest: AbstractEndToEndMediat
             "hendelser": ["$søknadId"],
             "vedtaksperiodeId": "<uuid>",
             "generasjonId": "<uuid>",
-            "tidspunkt": "<timestamp>"
+            "avsluttetTidspunkt": "<timestamp>"
         }
         """
 
-        // Dette eventet finnes ikke enda..
-        assertThrows<NoSuchElementException> {
-            testRapid.assertUtgåendeMelding(forventetAvsluttetUtenVedtak)
-        }
+        testRapid.assertUtgåendeMelding(forventetAvsluttetUtenVedtak)
     }
 }

@@ -568,6 +568,18 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         }
     }
 
+    data class AvsluttetUtenVedtakEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val generasjonId: UUID,
+        val periode: Periode,
+        val hendelseIder: Set<UUID>,
+        val skjæringstidspunkt: LocalDate,
+        val avsluttetTidspunkt: LocalDateTime
+    )
+
     data class VedtakFattetEvent(
         val fødselsnummer: String,
         val aktørId: String,
@@ -712,6 +724,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(event: VedtakFattetEvent) {}
+    fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
 
     fun avviksprosentBeregnet(
         event: AvviksprosentBeregnetEvent

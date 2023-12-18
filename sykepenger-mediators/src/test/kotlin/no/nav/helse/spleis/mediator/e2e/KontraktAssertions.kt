@@ -66,7 +66,7 @@ internal object KontraktAssertions {
     internal fun ObjectNode.assertOgFjernLocalDateTime(key: String) = assertOgFjern(key) { LocalDateTime.parse(it.asText()) }
     internal fun ObjectNode.assertOgFjern(key: String, validation:(value: JsonNode) -> Unit) {
         if (!key.contains(".")) {
-            assertDoesNotThrow { validation(path(key)) }
+            assertDoesNotThrow({ validation(path(key))}, "$key er ikke på forventet format!")
             remove(key)
             return
         }
