@@ -45,6 +45,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
+import no.nav.helse.person.Arbeidsgiver.Companion.førsteFraværsdager
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterHistorikkFraInfotrygd
@@ -631,6 +632,7 @@ class Person private constructor(
         arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
+    internal fun førsteFraværsdager(skjæringstidspunkt: LocalDate) = arbeidsgivere.førsteFraværsdager(skjæringstidspunkt)
 
     internal fun build(skjæringstidspunkt: LocalDate, builder: VedtakFattetBuilder) {
         vilkårsgrunnlagHistorikk.build(skjæringstidspunkt, builder)

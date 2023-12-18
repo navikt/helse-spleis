@@ -44,6 +44,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = listOf(1.januar til 1.januar),
+            førsteFraværsdager = mapOf(a1 to 1.januar),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
@@ -73,6 +74,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             skjæringstidspunkt = 5.januar,
             sykmeldingsperioder = listOf(5.januar til 31.januar),
             egenmeldingsperioder = listOf(1.januar til 2.januar),
+            førsteFraværsdager = mapOf(a1 to 5.januar),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
@@ -122,6 +124,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = emptyList(),
+            førsteFraværsdager = mapOf(a1 to 2.januar, a2 to 1.januar),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
                 PersonObserver.Refusjon(forslag = emptyList()),
@@ -183,6 +186,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                 skjæringstidspunkt = 1.januar,
                 sykmeldingsperioder = listOf(1.mars til 31.mars),
                 egenmeldingsperioder = emptyList(),
+                førsteFraværsdager = mapOf(a1 to 1.januar, a2 to 1.februar),
                 forespurteOpplysninger = listOf(
                     PersonObserver.FastsattInntekt(INNTEKT),
                     PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT))),
@@ -225,6 +229,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                     skjæringstidspunkt = 10.februar,
                     sykmeldingsperioder = listOf(1.januar til 31.januar, 10.februar til 10.mars),
                     egenmeldingsperioder = emptyList(),
+                    førsteFraværsdager = mapOf(ORGNUMMER to 10.februar),
                     forespurteOpplysninger = listOf(
                         PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
                         PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT))),

@@ -339,6 +339,30 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `sender med første fraværsdag på alle arbeidsgivere for skjæringstidspunktet`() {
+        nyeVedtakMedUlikFom(mapOf(
+            a1 to (1.januar til 31.januar),
+            a2 to (2.januar til 31.januar)
+        ))
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
+        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            organisasjonsnummer = a2,
+            vedtaksperiodeId = 1.vedtaksperiode.id(a2),
+            skjæringstidspunkt = 1.januar,
+            sykmeldingsperioder = listOf(2.januar til 31.januar),
+            egenmeldingsperioder = emptyList(),
+            førsteFraværsdager = mapOf(a1 to 1.januar, a2 to 2.januar),
+            forespurteOpplysninger = listOf(
+                PersonObserver.Inntekt(null),
+                PersonObserver.Refusjon(forslag = emptyList()),
+                PersonObserver.Arbeidsgiverperiode
+            )
+        )
+        assertEquals(expectedForespørsel, actualForespørsel)
+    }
+
+    @Test
     fun `sender med FastsattInntekt når vi allerede har inntekt fra skatt lagt til grunn på skjæringstidspunktet`() {
         nyeVedtakMedUlikFom(
             mapOf(
@@ -817,6 +841,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             sykmeldingsperioder = listOf(2.januar til 17.januar),
             egenmeldingsperioder = listOf(1.januar til 1.januar),
+            førsteFraværsdager = mapOf(a1 to 1.januar),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(null),
                 PersonObserver.Refusjon(forslag = emptyList()),
@@ -946,14 +971,17 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(ag1Periode.start til ag1Periode.endInclusive, a1)
         nyPeriode(ag2Periode.start til ag2Periode.endInclusive, a2)
 
+        val inntektsdato = sykefraværHosArbeidsgiver.values.minOf { it.start }
         håndterInntektsmelding(
             listOf(ag1Periode.start til ag1Periode.start.plusDays(15)),
             beregnetInntekt = inntekt,
+            inntektsdato = inntektsdato,
             orgnummer = a1,
         )
         håndterInntektsmelding(
             listOf(ag2Periode.start til ag2Periode.start.plusDays(15)),
             beregnetInntekt = inntekt,
+            inntektsdato = inntektsdato,
             orgnummer = a2,
         )
 

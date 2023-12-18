@@ -163,6 +163,12 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.vedtaksperioder(filter: VedtaksperiodeFilter) =
             map { it.vedtaksperioder.filter(filter) }.flatten()
 
+        internal fun Iterable<Arbeidsgiver>.førsteFraværsdager(skjæringstidspunkt: LocalDate) =
+            mapNotNull { arbeidsgiver ->
+                val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
+                if (førsteFraværsdag != null) return@mapNotNull arbeidsgiver.organisasjonsnummer to førsteFraværsdag
+                null
+            }.toMap()
 
         internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>) =
             mapNotNull { arbeidsgiver -> arbeidsgiver.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger[arbeidsgiver.organisasjonsnummer], aktivitetslogg) }

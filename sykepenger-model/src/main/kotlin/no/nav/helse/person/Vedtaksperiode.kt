@@ -696,6 +696,8 @@ internal class Vedtaksperiode private constructor(
             forespurtArbeidsgiverperiode(arbeidsgiverperiode)
         )
 
+        val førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
+
         person.trengerArbeidsgiveropplysninger(
             PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 organisasjonsnummer = organisasjonsnummer,
@@ -703,6 +705,7 @@ internal class Vedtaksperiode private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykmeldingsperioder = relevanteSykmeldingsperioder(arbeidsgiverperiode, vedtaksperioderKnyttetTilArbeidsgiverperiode),
                 egenmeldingsperioder = sykdomstidslinjeKnyttetTilArbeidsgiverperiode.egenmeldingerFraSøknad(),
+                førsteFraværsdager = førsteFraværsdager,
                 forespurteOpplysninger = forespurteOpplysninger
             )
         )
