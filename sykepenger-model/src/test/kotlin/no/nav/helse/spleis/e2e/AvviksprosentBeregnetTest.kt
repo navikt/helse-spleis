@@ -2,17 +2,20 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AvviksprosentBeregnetTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Sender forventet AvviksprosentBeregnetTest ved enkelt førstegangsbehandling`() {
+    fun `Sender forventet AvviksprosentBeregnetEvent ved enkel førstegangsbehandling`() {
         nyttVedtak(1.januar, 31.januar)
 
         assertEquals(1, observatør.avviksprosentBeregnetEventer.size)
@@ -25,6 +28,38 @@ internal class AvviksprosentBeregnetTest : AbstractEndToEndTest() {
             listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 372000.0)),
             listOf(forventetSammenligningsgrunnlag(a1, 1.januar, 31000.0))
         )
+    }
+
+    @Test
+    fun `Sender forventet AvviksprosentBeregnetEvent for periode med overstyrt inntekt`() {
+        tilGodkjenning(1.mars, 31.mars, a1)
+        håndterOverstyrInntekt(22000.månedlig, orgnummer = a1, skjæringstidspunkt = 1.mars)
+
+        assertForventetFeil("Skal sende ut nytt event ved ny avviksvurdering",
+            nå = {
+                assertEvent(
+                    observatør.avviksprosentBeregnetEventer.last(),
+                    1.mars,
+                    0.0,
+                    240000.0,
+                    240000.0,
+                    listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 240000.0)),
+                    listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
+                )
+            },
+            ønsket = {
+                assertEvent(
+                    observatør.avviksprosentBeregnetEventer.last(),
+                    1.mars,
+                    10.1,
+                    240000.0,
+                    252000.0,
+                    listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 252000.0)),
+                    listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
+                )
+            }
+        )
+
     }
 
     private fun assertEvent(
