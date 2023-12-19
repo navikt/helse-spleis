@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -31,33 +30,54 @@ internal class AvviksprosentBeregnetTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Sender forventet AvviksprosentBeregnetEvent for periode med ny inntektsmelding etter vilkårsprøving`() {
+        tilGodkjenning(1.mars, 31.mars, a1)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = 22000.månedlig)
+
+        assertEquals(2, observatør.avviksprosentBeregnetEventer.size)
+        assertEvent(
+            observatør.avviksprosentBeregnetEventer.first(),
+            1.mars,
+            0.0,
+            240000.0,
+            240000.0,
+            listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 240000.0)),
+            listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
+        )
+        assertEvent(
+            observatør.avviksprosentBeregnetEventer.last(),
+            1.mars,
+            10.0,
+            240000.0,
+            264000.0,
+            listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 264000.0)),
+            listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
+        )
+    }
+
+    @Test
     fun `Sender forventet AvviksprosentBeregnetEvent for periode med overstyrt inntekt`() {
         tilGodkjenning(1.mars, 31.mars, a1)
         håndterOverstyrInntekt(22000.månedlig, orgnummer = a1, skjæringstidspunkt = 1.mars)
 
-        assertForventetFeil("Skal sende ut nytt event ved ny avviksvurdering",
-            nå = {
-                assertEvent(
-                    observatør.avviksprosentBeregnetEventer.last(),
-                    1.mars,
-                    0.0,
-                    240000.0,
-                    240000.0,
-                    listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 240000.0)),
-                    listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
-                )
-            },
-            ønsket = {
-                assertEvent(
-                    observatør.avviksprosentBeregnetEventer.last(),
-                    1.mars,
-                    10.1,
-                    240000.0,
-                    252000.0,
-                    listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 252000.0)),
-                    listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
-                )
-            }
+        assertEquals(2, observatør.avviksprosentBeregnetEventer.size)
+        assertEvent(
+            observatør.avviksprosentBeregnetEventer.first(),
+            1.mars,
+            0.0,
+            240000.0,
+            240000.0,
+            listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 240000.0)),
+            listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
+        )
+        assertEvent(
+            observatør.avviksprosentBeregnetEventer.last(),
+            1.mars,
+            10.0,
+            240000.0,
+            264000.0,
+            listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 264000.0)),
+            listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
         )
 
     }

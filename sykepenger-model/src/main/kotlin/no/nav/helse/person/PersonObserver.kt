@@ -725,10 +725,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(event: VedtakFattetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
-
-    fun avviksprosentBeregnet(
-        event: AvviksprosentBeregnetEvent
-    ) {}
+    fun avviksprosentBeregnet(event: AvviksprosentBeregnetEvent) {}
 
     fun nyVedtaksperiodeUtbetaling(
         personidentifikator: Personidentifikator,

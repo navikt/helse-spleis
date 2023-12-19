@@ -100,12 +100,12 @@ internal class Sykepengegrunnlag private constructor(
     private var tilstand: Tilstand = tilstand ?: tilstand(Start)
 
     internal constructor(
+        person: Person,
         alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         subsumsjonObserver: SubsumsjonObserver,
-        personObservers: List<PersonObserver>,
         vurdertInfotrygd: Boolean = false
     ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), vurdertInfotrygd, sammenligningsgrunnlag) {
         subsumsjonObserver.apply {
@@ -130,35 +130,39 @@ internal class Sykepengegrunnlag private constructor(
                     beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
         }
-        //vilkårsgrunnlagId
-        personObservers.forEach { personObserver ->
-            personObserver.avviksprosentBeregnet(
-                PersonObserver.AvviksprosentBeregnetEvent(
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    beregningsgrunnlagTotalbeløp = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
-                    omregnedeÅrsinntekter = arbeidsgiverInntektsopplysninger.map { it.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent() },
-                    sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlagSomSkalBrukersIAvviksprosentBeregnetEvent(),
-                    avviksprosent = avviksprosent.prosent(),
-                    vilkårsgrunnlagId = ønsketVilkårsgrunnlagId,
-                    vurderingstidspunkt = LocalDateTime.now()
-                )
+        person.avviksprosentBeregnet(
+            PersonObserver.AvviksprosentBeregnetEvent(
+                skjæringstidspunkt = skjæringstidspunkt,
+                beregningsgrunnlagTotalbeløp = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
+                omregnedeÅrsinntekter = arbeidsgiverInntektsopplysninger.map { it.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent() },
+                sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlagSomSkalBrukersIAvviksprosentBeregnetEvent(),
+                avviksprosent = avviksprosent.prosent(),
+                vilkårsgrunnlagId = ønsketVilkårsgrunnlagId,
+                vurderingstidspunkt = LocalDateTime.now()
             )
-        }
+        )
         avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
     }
 
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         fun opprett(
+            person: Person,
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
-            subsumsjonObserver: SubsumsjonObserver,
-            personObserver: List<PersonObserver>
+            subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
-            return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, skjæringstidspunkt, sammenligningsgrunnlag, subsumsjonObserver, personObserver)
+            return Sykepengegrunnlag(
+                person,
+                alder,
+                arbeidsgiverInntektsopplysninger,
+                skjæringstidspunkt,
+                sammenligningsgrunnlag,
+                subsumsjonObserver
+            )
         }
 
         fun ferdigSykepengegrunnlag(
@@ -269,7 +273,7 @@ internal class Sykepengegrunnlag private constructor(
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
         arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
-        return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
+        return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver, person)
     }
 
     internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, nyttSkjæringstidspunkt: LocalDate?): Sykepengegrunnlag? {
@@ -317,15 +321,28 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger
             .finn(inntektsmelding.organisasjonsnummer())
             ?.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
-        return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
+        return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver, person)
     }
 
     private fun kopierSykepengegrunnlagOgValiderAvvik(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonObserver: SubsumsjonObserver,
+        person: Person
     ): Sykepengegrunnlag {
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
+           person.avviksprosentBeregnet(
+                PersonObserver.AvviksprosentBeregnetEvent(
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    beregningsgrunnlagTotalbeløp = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
+                    omregnedeÅrsinntekter = arbeidsgiverInntektsopplysninger.map { it.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent() },
+                    sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlagSomSkalBrukersIAvviksprosentBeregnetEvent(),
+                    avviksprosent = avviksprosent.prosent(),
+                    vilkårsgrunnlagId = ønsketVilkårsgrunnlagId,
+                    vurderingstidspunkt = LocalDateTime.now()
+                )
+            )
             avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
         }
     }
@@ -572,6 +589,9 @@ internal class Sykepengegrunnlag private constructor(
         override fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
             return sykepengegrunnlag.arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, sykepengegrunnlag.`6G`, sykepengegrunnlag.skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
         }
+    }
+    internal interface AvviksprosentBeregnetObserver {
+        fun avviksprosentBeregnet(event: PersonObserver.AvviksprosentBeregnetEvent) {}
     }
 }
 

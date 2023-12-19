@@ -164,12 +164,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         vilkårsgrunnlag.valider(
             Sykepengegrunnlag(
+                this.person,
                 1.januar.alder,
                 emptyList(),
                 1.januar,
                 Sammenligningsgrunnlag(inntekterForSammenligningsgrunnlag.map { it.tilSammenligningsgrunnlag(uuid) }),
-                NullObserver,
-                emptyList()
+                NullObserver
             ),
             NullObserver
         )

@@ -548,6 +548,10 @@ class Person private constructor(
         observers.forEach { it.overstyringIgangsatt(event) }
     }
 
+    internal fun avviksprosentBeregnet(event: PersonObserver.AvviksprosentBeregnetEvent) {
+        observers.forEach { it.avviksprosentBeregnet(event) }
+    }
+
     internal fun emitOverlappendeInfotrygdperiodeEtterInfotrygdendring(
         vedtaksperiodeId: UUID,
         vedtaksperiode: Periode,
@@ -661,12 +665,12 @@ class Person private constructor(
     ): Sykepengegrunnlag {
         skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), hendelse) } // oppretter evt. nye arbeidsgivere
         return Sykepengegrunnlag.opprett(
+            this,
             alder,
             arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,
             sammenligningsgrunnlag,
-            subsumsjonObserver,
-            observers.toList()
+            subsumsjonObserver
         )
     }
 

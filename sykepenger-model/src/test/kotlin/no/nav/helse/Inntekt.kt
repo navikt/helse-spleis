@@ -4,9 +4,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -28,6 +30,7 @@ internal fun Inntekt.sykepengegrunnlag(skjæringstidspunkt: LocalDate) =
 
 internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver = SubsumsjonObserver.NullObserver, skattInntekt: Inntekt? = null, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
     Sykepengegrunnlag(
+        person = TestPerson(object: PersonObserver {}).person,
         alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
@@ -37,14 +40,13 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
                 refusjonsopplysninger
             )
         ),
+        skjæringstidspunkt = skjæringstidspunkt,
         sammenligningsgrunnlag = Sammenligningsgrunnlag(skattInntekt?.let {
             val meldingsreferanseId = UUID.randomUUID()
             val innteker = (1L..12L).map { Skatteopplysning(meldingsreferanseId, skattInntekt, skjæringstidspunkt.yearMonth.minusMonths(it), LØNNSINNTEKT, "", "") }
             listOf(ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(orgnr, innteker))
         } ?: emptyList()),
-        skjæringstidspunkt = skjæringstidspunkt,
-        subsumsjonObserver = subsumsjonObserver,
-        personObservers = emptyList()
+        subsumsjonObserver = subsumsjonObserver
     )
 internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
     Sykepengegrunnlag.ferdigSykepengegrunnlag(
