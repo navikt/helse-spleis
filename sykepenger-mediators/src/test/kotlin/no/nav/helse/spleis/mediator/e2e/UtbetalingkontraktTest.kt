@@ -16,8 +16,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjern
-import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernLocalDateTime
-import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernUUID
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -47,10 +45,12 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
               "@event_name": "vedtaksperiode_ny_utbetaling", 
               "aktørId": "42", 
               "fødselsnummer": "12029240045",
-              "organisasjonsnummer": "987654321"
+              "organisasjonsnummer": "987654321",
+              "vedtaksperiodeId": "<uuid>",
+              "utbetalingId": "<uuid>"
            }
         """
-        assertNyUtbetaling(forventet)
+        testRapid.assertUtgåendeMelding(forventet)
     }
 
     @Test
@@ -275,10 +275,12 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
                 "tom" : "2018-01-26",
                 "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
                 "personFagsystemId": "$personFagsystemId",
-                "korrelasjonsId": "$korrelasjonsId"
+                "korrelasjonsId": "$korrelasjonsId",
+                "tidspunkt": "<timestamp>",
+                "utbetalingId": "<uuid>"
             }
         """
-        assertUtbetalingAnnullert(forventet)
+        testRapid.assertUtgåendeMelding(forventet)
         val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
         assertUtbetalingEndret(utbetalingEndret, "OVERFØRT", "ANNULLERT", true)
     }
@@ -314,10 +316,12 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
                 "tom" : "2018-01-26",
                 "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
                 "personFagsystemId": "$personFagsystemId",
-                "korrelasjonsId": "$korrelasjonsId"
+                "korrelasjonsId": "$korrelasjonsId",
+                "tidspunkt": "<timestamp>",
+                "utbetalingId": "<uuid>"
             }
         """
-        assertUtbetalingAnnullert(forventet)
+        testRapid.assertUtgåendeMelding(forventet)
     }
 
     @Test
@@ -351,11 +355,12 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
                 "tom" : "2018-01-26",
                 "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
                 "personFagsystemId": "$personFagsystemId",
-                "korrelasjonsId": "$korrelasjonsId"
+                "korrelasjonsId": "$korrelasjonsId",
+                "tidspunkt": "<timestamp>",
+                "utbetalingId": "<uuid>"
             }
         """
-        assertUtbetalingAnnullert(forventet)
-
+        testRapid.assertUtgåendeMelding(forventet)
     }
 
     private fun assertUtbetaltInkluderAvviste(melding: JsonNode) {
@@ -460,9 +465,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
     private fun assertUtbetalingUtbetalt(forventetMelding: String) {
         testRapid.assertUtgåendeMelding(forventetMelding) {
-            it.assertOgFjernUUID("utbetalingId")
-            it.assertOgFjernUUID("korrelasjonsId")
-            it.assertOgFjernLocalDateTime("tidspunkt")
             it.assertOgFjernFagsystemId("arbeidsgiverOppdrag.fagsystemId")
             it.assertOgFjernFagsystemId("personOppdrag.fagsystemId")
             it.assertOgFjern("vedtaksperiodeIder") { vedtaksperiodeIder ->
@@ -473,19 +475,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         }
     }
 
-    private fun assertNyUtbetaling(forventetMelding: String) {
-        testRapid.assertUtgåendeMelding(forventetMelding) {
-            it.assertOgFjernUUID("utbetalingId")
-            it.assertOgFjernUUID("vedtaksperiodeId")
-        }
-    }
-
-    private fun assertUtbetalingAnnullert(forventetMelding: String) {
-        testRapid.assertUtgåendeMelding(forventetMelding) {
-            it.assertOgFjernLocalDateTime("tidspunkt")
-            it.assertOgFjernUUID("utbetalingId")
-        }
-    }
     private val arbeidsgiverFagsystemId get() = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText().also { check(it.matches(
         FagsystemIdRegex
     )) }
@@ -505,6 +494,9 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         private val utbetalingUtbetaltForventetJson = """
         {
             "@event_name": "utbetaling_utbetalt",
+            "korrelasjonsId": "<uuid>",
+            "utbetalingId": "<uuid>",
+            "tidspunkt": "<timestamp>",
             "organisasjonsnummer": "987654321",
             "type": "UTBETALING",
             "fom": "2018-01-03",
