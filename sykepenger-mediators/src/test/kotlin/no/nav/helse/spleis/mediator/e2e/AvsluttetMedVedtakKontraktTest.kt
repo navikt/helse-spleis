@@ -1,14 +1,11 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.TestMessageFactory
-import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernLocalDateTime
-import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernUUID
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -35,6 +32,9 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
         {
             "@event_name": "avsluttet_med_vedtak",
+            "vedtakFattetTidspunkt": "<timestamp>",
+            "vedtaksperiodeId": "<uuid>",
+            "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
@@ -85,6 +85,9 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
         {
             "@event_name": "avsluttet_med_vedtak",
+            "vedtakFattetTidspunkt": "<timestamp>",
+            "vedtaksperiodeId": "<uuid>",
+            "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
@@ -149,7 +152,9 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         """
 
         testRapid.assertUtgåendeMelding(forventet)
-        assertEquals(emptyList<JsonNode>(), testRapid.inspektør.meldinger("avsluttet_med_vedtak"))
+        assertTrue(testRapid.inspektør.meldinger("avsluttet_med_vedtak").isEmpty())
+        assertTrue(testRapid.inspektør.meldinger("utbetaling_utbetalt").isEmpty())
+        assertTrue(testRapid.inspektør.meldinger("utbetaling_uten_utbetaling").isEmpty())
     }
 
     @Test
@@ -176,6 +181,9 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         val forventet = """
         {
             "@event_name": "avsluttet_med_vedtak",
+            "vedtakFattetTidspunkt": "<timestamp>",
+            "vedtaksperiodeId": "<uuid>",
+            "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
@@ -210,21 +218,11 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_uten_utbetaling")
     }
 
-    private fun assertVedtakFattet(forventetMelding: String, forventetUtbetalingEventNavn: String?) {
-        val vedtakFattet = testRapid.assertUtgåendeMelding(forventetMelding) {
-            it.assertOgFjernUUID("vedtaksperiodeId")
-            it.assertOgFjernLocalDateTime("vedtakFattetTidspunkt")
-            if (forventetUtbetalingEventNavn != null) it.assertOgFjernUUID("utbetalingId")
-        }
-
-        if (forventetUtbetalingEventNavn != null) {
-            val vedtakFattetUtbetalingId = vedtakFattet.path("utbetalingId").asText()
-            val utbetalingEventUtbetalingId = testRapid.inspektør.siste(forventetUtbetalingEventNavn).path("utbetalingId").asText()
-            assertEquals(vedtakFattetUtbetalingId, utbetalingEventUtbetalingId)
-        } else {
-            assertTrue(testRapid.inspektør.meldinger("utbetaling_utbetalt").isEmpty())
-            assertTrue(testRapid.inspektør.meldinger("utbetaling_uten_utbetaling").isEmpty())
-        }
+    private fun assertVedtakFattet(forventetMelding: String, forventetUtbetalingEventNavn: String) {
+        val vedtakFattet = testRapid.assertUtgåendeMelding(forventetMelding)
+        val vedtakFattetUtbetalingId = vedtakFattet.path("utbetalingId").asText()
+        val utbetalingEventUtbetalingId = testRapid.inspektør.siste(forventetUtbetalingEventNavn).path("utbetalingId").asText()
+        assertEquals(vedtakFattetUtbetalingId, utbetalingEventUtbetalingId)
     }
 }
 
