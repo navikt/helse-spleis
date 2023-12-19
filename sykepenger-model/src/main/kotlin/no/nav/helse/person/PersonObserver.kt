@@ -684,22 +684,55 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val sammenligningsgrunnlag: List<Sammenligningsgrunnlag>,
         val vilkårsgrunnlagId: UUID
     ) {
+
+        fun toJsonMap(): Map<String, Any> =
+            mapOf(
+                "beregningsgrunnlagTotalbeløp" to beregningsgrunnlagTotalbeløp,
+                "sammenligningsgrunnlagTotalbeløp" to sammenligningsgrunnlagTotalbeløp,
+                "avviksprosent" to avviksprosent,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "vurderingstidspunkt" to vurderingstidspunkt,
+                "omregnedeÅrsinntekter" to omregnedeÅrsinntekter.map { it.toJsonMap() },
+                "sammenligningsgrunnlag" to sammenligningsgrunnlag.map { it.toJsonMap() }
+            )
+
         data class OmregnetÅrsinntekt(
             val orgnummer: String,
             val beløp: Double
-        )
+        ) {
+            fun toJsonMap(): Map<String, Any> =
+                mapOf(
+                    "orgnummer" to orgnummer,
+                    "beløp" to beløp
+                )
+        }
 
         data class Sammenligningsgrunnlag(
             val orgnummer: String,
             val skatteopplysninger: List<Skatteopplysning>
         ) {
+            fun toJsonMap() =
+                mapOf(
+                    "orgnummer" to orgnummer,
+                    "skatteopplysninger" to skatteopplysninger.map { it.toJsonMap() }
+                )
+
             data class Skatteopplysning(
                 val beløp: Double,
                 val måned: YearMonth,
                 val type: String,
                 val fordel: String,
                 val beskrivelse: String
-            )
+            ) {
+                fun toJsonMap() =
+                    mapOf(
+                        "beløp" to beløp,
+                        "måned" to måned,
+                        "type" to type,
+                        "fordel" to fordel,
+                        "beskrivelse" to beskrivelse
+                    )
+            }
         }
     }
 

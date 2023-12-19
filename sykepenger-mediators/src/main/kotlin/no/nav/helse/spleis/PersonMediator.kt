@@ -463,6 +463,10 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("arbeidsgiveropplysninger_korrigert", event.toJsonMap()))
     }
 
+    override fun avviksprosentBeregnet(event: PersonObserver.AvviksprosentBeregnetEvent) {
+        queueMessage(JsonMessage.newMessage("avviksprosent_beregnet_event", event.toJsonMap()))
+    }
+
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
         this["aktørId"] = hendelse.aktørId()
         this["fødselsnummer"] = hendelse.fødselsnummer()
