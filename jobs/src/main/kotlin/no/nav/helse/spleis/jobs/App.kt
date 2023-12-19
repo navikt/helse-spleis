@@ -222,6 +222,9 @@ private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode)
     val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
     return try {
         AvviksvurderingDto(
+            beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble(),
+            sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble(),
+            avviksprosent = grunnlagsdata.path("sykepengegrunnlag").path("avviksprosent").asDouble(),
             skjæringstidspunkt = skjæringstidspunkt,
             vurderingstidspunkt = finnTidligsteTidspunktForSkjæringstidspunkt(node, skjæringstidspunkt),
             type = VilkårsgrunnlagtypeDto.SPLEIS,
@@ -244,7 +247,8 @@ private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode)
                         )
                     }
                 )
-            }
+            },
+            vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
         )
     } catch (err: Exception) {
         sikkerlogg.error("Klarte ikke migrere skjæringstidspunkt $skjæringstidspunkt: ${err.message}", err)
@@ -266,11 +270,15 @@ private fun finnInntektsopplysning(node: JsonNode, opplysningId: String): JsonNo
 }
 private fun parseInfotrygdVilkårsgrunnlag(grunnlagsdata: JsonNode): AvviksvurderingDto {
     return AvviksvurderingDto(
+        beregningsgrunnlagTotalbeløp = null,
+        sammenligningsgrunnlagTotalbeløp = null,
+        avviksprosent = null,
         skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText()),
         vurderingstidspunkt = LocalDate.EPOCH.atStartOfDay(),
         type = VilkårsgrunnlagtypeDto.INFOTRYGD,
         omregnedeÅrsinntekter = emptyList(),
-        sammenligningsgrunnlag = emptyList()
+        sammenligningsgrunnlag = emptyList(),
+        vilkårsgrunnlagId = null
     )
 }
 
@@ -324,11 +332,15 @@ private data class AvviksvurderingerEvent(
     val skjæringstidspunkter: List<AvviksvurderingDto>
 )
 private data class AvviksvurderingDto(
+    val beregningsgrunnlagTotalbeløp: Double?,
+    val sammenligningsgrunnlagTotalbeløp: Double?,
+    val avviksprosent: Double?,
     val skjæringstidspunkt: LocalDate,
     val vurderingstidspunkt: LocalDateTime,
     val type: VilkårsgrunnlagtypeDto,
     val omregnedeÅrsinntekter: List<OmregnetÅrsinntektDto>,
-    val sammenligningsgrunnlag: List<SammenligningsgrunnlagDto>
+    val sammenligningsgrunnlag: List<SammenligningsgrunnlagDto>,
+    val vilkårsgrunnlagId: UUID?
 ) {
     init {
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
