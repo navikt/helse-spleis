@@ -1,9 +1,11 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -16,6 +18,8 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.IKKE_GODKJENT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.UTBETALT
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
@@ -97,6 +101,66 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
             assertEquals(IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
             assertVarsel(RV_UT_1, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `mottak av vedtak fattet i 'Avsluttet' etter godkjent godkjennigsbehov`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+
+            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
+                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+            }
+
+            assertForventetFeil(
+                forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
+                nå = { assertTrue(nyeFunksjonelleFeil) },
+                ønsket = { assertFalse(nyeFunksjonelleFeil) }
+            )
+        }
+    }
+
+    @Test
+    fun `mottak av vedtak fattet i 'TilUtbetaling' etter godkjent godkjennigsbehov`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
+            assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING)
+
+            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
+                håndterKanIkkeBehandlesHer(1.vedtaksperiode)
+            }
+
+            assertForventetFeil(
+                forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
+                nå = { assertTrue(nyeFunksjonelleFeil) },
+                ønsket = { assertFalse(nyeFunksjonelleFeil) }
+            )
+        }
+    }
+
+    @Test
+    fun `mottak av kan ikke behandles her etter avvist godkjennigsbehov`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            val utbetalingId = inspektør.utbetalingId { 1.vedtaksperiode }
+            assertEquals(IKKE_GODKJENT, inspektør.utbetalinger.single { it.inspektør.utbetalingId == utbetalingId }.inspektør.tilstand)
+
+            val nyeFunksjonelleFeil = nyeFunksjonelleFeil {
+                håndterKanIkkeBehandlesHer(1.vedtaksperiode, utbetalingId)
+            }
+
+            assertForventetFeil(
+                forklaring = "Får funksjonelle feil på at vi ikke forventer godkjenning",
+                nå = { assertTrue(nyeFunksjonelleFeil) },
+                ønsket = { assertFalse(nyeFunksjonelleFeil) }
+            )
         }
     }
 }

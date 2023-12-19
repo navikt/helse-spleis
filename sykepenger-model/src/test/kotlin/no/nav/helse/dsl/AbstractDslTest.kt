@@ -29,7 +29,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Yrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
@@ -195,6 +194,10 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil, *filtre)
     protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(funksjonellFeil: Varselkode, vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil.funksjonellFeilTekst, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.ingenNyeFunksjonelleFeil(block:() -> Unit) =
+        testArbeidsgiverAsserter.ingenNyeFunksjonelleFeil(block)
+    protected fun TestPerson.TestArbeidsgiver.nyeFunksjonelleFeil(block:() -> Unit) =
+        testArbeidsgiverAsserter.nyeFunksjonelleFeil(block)
     protected fun TestPerson.TestArbeidsgiver.assertVarsler(vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertVarsler(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =

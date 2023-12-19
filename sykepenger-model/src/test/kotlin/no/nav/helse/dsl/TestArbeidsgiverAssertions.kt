@@ -106,6 +106,21 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
     }
 
+    private fun funksjonelleFeilFørOgEtter(block: () -> Unit): Pair<Map<String,Int>, Map<String, Int>>{
+        val funksjonelleFeilFør = collectFunksjonelleFeil().groupBy { it }.mapValues { it.value.size }
+        block()
+        val funksjonelleFeilEtter = collectFunksjonelleFeil().groupBy { it }.mapValues { it.value.size }
+        return funksjonelleFeilFør to funksjonelleFeilEtter
+    }
+    internal fun ingenNyeFunksjonelleFeil(block: () -> Unit) {
+        val (før, etter) = funksjonelleFeilFørOgEtter(block)
+        assertEquals(før, etter) { "Det er tilkommet nye funksjonelle feil, eller fler tilfeller av funksjonelle feil!" }
+    }
+    internal fun nyeFunksjonelleFeil(block: () -> Unit): Boolean {
+        val (før, etter) = funksjonelleFeilFørOgEtter(block)
+        return før != etter
+    }
+
     internal fun assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
         val errors = collectFunksjonelleFeil(*filtre)
         assertTrue(errors.isNotEmpty(), "forventet errors, fant ingen.")
