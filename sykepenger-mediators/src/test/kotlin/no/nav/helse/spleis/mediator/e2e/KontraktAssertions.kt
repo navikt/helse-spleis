@@ -44,22 +44,20 @@ internal object KontraktAssertions {
         assertOgFjern("system_participating_services") { check(it.isArray) }
     }
 
-    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernUUIDTemplates() {
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernTemplates(template: String, assertOgFjern: (faktiskJson: ObjectNode, key: String) -> Unit) {
         val (faktiskJson, forventetJson) = this
-        val uuidTemplates = forventetJson.properties().filter { it.value.asText() == "<uuid>" }.map { it.key }
+        val uuidTemplates = forventetJson.properties().filter { it.value.asText() == template }.map { it.key }
         uuidTemplates.forEach {
             forventetJson.remove(it)
-            faktiskJson.assertOgFjernUUID(it)
+            assertOgFjern(faktiskJson, it)
         }
     }
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernUUIDTemplates() = assertOgFjernTemplates("<uuid>") { faktiskJson, key ->
+        faktiskJson.assertOgFjernUUID(key)
+    }
 
-    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernLocalDateTimeTemplates() {
-        val (faktiskJson, forventetJson) = this
-        val uuidTemplates = forventetJson.properties().filter { it.value.asText() == "<timestamp>" }.map { it.key }
-        uuidTemplates.forEach {
-            forventetJson.remove(it)
-            faktiskJson.assertOgFjernLocalDateTime(it)
-        }
+    private fun Pair<ObjectNode, ObjectNode>.assertOgFjernLocalDateTimeTemplates() = assertOgFjernTemplates("<timestamp>") { faktiskJson, key ->
+        faktiskJson.assertOgFjernLocalDateTime(key)
     }
 
     internal fun ObjectNode.assertOgFjernUUID(key: String) = assertOgFjern(key) { UUID.fromString(it.asText()) }

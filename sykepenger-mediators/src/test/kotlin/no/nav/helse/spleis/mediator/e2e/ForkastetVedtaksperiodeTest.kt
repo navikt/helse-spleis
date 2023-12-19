@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertAntallUtgåendeMeldinger
-import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjernUUID
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -45,7 +44,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "harPeriodeInnenfor16Dager" : false,
               "trengerArbeidsgiveropplysninger": true,
               "hendelser": ["$søknadId", "$søknadId2"],
-              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}]
+              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}],
+              "vedtaksperiodeId": "<uuid>"
             }
         """
         assertVedtaksperiodeForkastet(forventet1, 0)
@@ -63,7 +63,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "harPeriodeInnenfor16Dager" : false,
               "trengerArbeidsgiveropplysninger": true,
               "hendelser": ["$søknadId2"],
-              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}, {"fom": "2018-01-03", "tom": "2018-01-27"}]
+              "sykmeldingsperioder": [{"fom": "2018-01-03", "tom": "2018-01-26"}, {"fom": "2018-01-03", "tom": "2018-01-27"}],
+              "vedtaksperiodeId": "<uuid>"
             }
         """
         assertVedtaksperiodeForkastet(forventet2, 1)
@@ -103,7 +104,8 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "harPeriodeInnenfor16Dager" : false,
               "trengerArbeidsgiveropplysninger": true,  
               "hendelser": ["$søknadId2"],
-              "sykmeldingsperioder": [{"fom": "2018-03-01", "tom": "2018-03-31"}]
+              "sykmeldingsperioder": [{"fom": "2018-03-01", "tom": "2018-03-31"}],
+              "vedtaksperiodeId": "<uuid>"
             }
         """
         assertVedtaksperiodeForkastet(forventet, 0)
@@ -157,15 +159,13 @@ internal class ForkastetVedtaksperiodeTest : AbstractEndToEndMediatorTest() {
               "harPeriodeInnenfor16Dager" : false,
               "trengerArbeidsgiveropplysninger": $trengerArbeidsgiveropplysninger, 
               "hendelser": ["$søknadId"], 
-              "sykmeldingsperioder": [${sykmeldingsperioder.joinToString(transform = Periode::hardcodedJson)}]
+              "sykmeldingsperioder": [${sykmeldingsperioder.joinToString(transform = Periode::hardcodedJson)}],
+              "vedtaksperiodeId": "<uuid>"
             }
         """
 
-    private fun assertVedtaksperiodeForkastet(forventetMelding: String, index: Int) {
-        testRapid.assertUtgåendeMelding(forventetMelding, faktiskMelding = { it[index] }) {
-            it.assertOgFjernUUID("vedtaksperiodeId")
-        }
-    }
+    private fun assertVedtaksperiodeForkastet(forventetMelding: String, index: Int) =
+        testRapid.assertUtgåendeMelding(forventetMelding, faktiskMelding = { it[index] })
 }
 
 private fun Periode.hardcodedJson(): String =
