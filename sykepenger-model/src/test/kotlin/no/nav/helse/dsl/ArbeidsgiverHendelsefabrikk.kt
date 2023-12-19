@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
@@ -34,6 +35,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
+import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -331,6 +333,40 @@ internal class ArbeidsgiverHendelsefabrikk(
         utbetalingGodkjent = utbetalingGodkjent,
         godkjenttidspunkt = godkjenttidspunkt,
         automatiskBehandling = automatiskBehandling,
+    )
+
+    internal fun lagVedtakFattet(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        automatisert: Boolean = true,
+        vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()
+    ) = VedtakFattet(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = personidentifikator.toString(),
+        organisasjonsnummer = organisasjonsnummer,
+        utbetalingId = utbetalingId,
+        vedtaksperiodeId = vedtaksperiodeId,
+        saksbehandlerIdent = "Vedtak fattesen",
+        saksbehandlerEpost = "vedtak.fattesen@nav.no",
+        vedtakFattetTidspunkt = vedtakFattetTidspunkt,
+        automatisert = automatisert
+    )
+    internal fun lagKanIkkeBehandlesHer(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        automatisert: Boolean = true
+    ) = KanIkkeBehandlesHer(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = personidentifikator.toString(),
+        organisasjonsnummer = organisasjonsnummer,
+        utbetalingId = utbetalingId,
+        vedtaksperiodeId = vedtaksperiodeId,
+        saksbehandlerIdent = "Info trygdesen",
+        saksbehandlerEpost = "info.trygdesen@nav.no",
+        opprettet = LocalDateTime.now(),
+        automatisert = automatisert
     )
 
     internal fun lagUtbetalinghendelse(

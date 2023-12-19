@@ -18,10 +18,10 @@ class VedtakFattet(
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
     private val vedtakFattetTidspunkt: LocalDateTime,
-    override val automatisert: Boolean,
-    override val godkjent: Boolean
+    override val automatisert: Boolean
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()), Utbetalingsavgjørelse {
     override val avgjørelsestidspunkt = vedtakFattetTidspunkt
+    override val godkjent = true
     override fun saksbehandler() = Saksbehandler(saksbehandlerIdent, saksbehandlerEpost)
     override fun relevantVedtaksperiode(id: UUID) = vedtaksperiodeId == id
     override fun relevantUtbetaling(id: UUID) = utbetalingId == id

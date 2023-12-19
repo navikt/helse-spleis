@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -35,6 +36,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -352,6 +354,18 @@ class Person private constructor(
         registrer(utbetalingsgodkjenning, "Behandler utbetalingsgodkjenning")
         finnArbeidsgiver(utbetalingsgodkjenning).håndter(utbetalingsgodkjenning)
         håndterGjenoppta(utbetalingsgodkjenning)
+    }
+
+    fun håndter(vedtakFattet: VedtakFattet) {
+        registrer(vedtakFattet, "Behandler vedtak fattet")
+        finnArbeidsgiver(vedtakFattet).håndter(vedtakFattet)
+        håndterGjenoppta(vedtakFattet)
+    }
+
+    fun håndter(kanIkkeBehandlesHer: KanIkkeBehandlesHer) {
+        registrer(kanIkkeBehandlesHer, "Behandler kan ikke behandles her")
+        finnArbeidsgiver(kanIkkeBehandlesHer).håndter(kanIkkeBehandlesHer)
+        håndterGjenoppta(kanIkkeBehandlesHer)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {

@@ -18,10 +18,10 @@ class KanIkkeBehandlesHer(
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
     private val opprettet: LocalDateTime,
-    override val automatisert: Boolean,
-    override val godkjent: Boolean
+    override val automatisert: Boolean
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()), Utbetalingsavgjørelse {
     override val avgjørelsestidspunkt = opprettet
+    override val godkjent = false
     override fun saksbehandler() = Saksbehandler(saksbehandlerIdent, saksbehandlerEpost)
     override fun relevantVedtaksperiode(id: UUID) = vedtaksperiodeId == id
     override fun relevantUtbetaling(id: UUID) = utbetalingId == id
