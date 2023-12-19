@@ -345,6 +345,10 @@ private data class AvviksvurderingDto(
     init {
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlag.isEmpty()) sikkerlogg.error("Ingen sammenligningsgrunnlag for $skjæringstidspunkt")
+        if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlagTotalbeløp == null) sikkerlogg.error("sammenligningsgrunnlagTotalbeløp er null for $skjæringstidspunkt")
+        if (type == VilkårsgrunnlagtypeDto.SPLEIS && beregningsgrunnlagTotalbeløp == null) sikkerlogg.error("beregningsgrunnlagTotalbeløp er null for $skjæringstidspunkt")
+        if (type == VilkårsgrunnlagtypeDto.SPLEIS && avviksprosent == null) sikkerlogg.error("avviksprosent er null for $skjæringstidspunkt")
+        if (type == VilkårsgrunnlagtypeDto.SPLEIS && vilkårsgrunnlagId == null) sikkerlogg.error("vilkårsgrunnlagId er null for $skjæringstidspunkt")
     }
 }
 
