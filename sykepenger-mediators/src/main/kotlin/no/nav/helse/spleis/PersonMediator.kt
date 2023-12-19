@@ -367,7 +367,7 @@ internal class PersonMediator(
     }
 
     override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
-        queueMessage(JsonMessage.newMessage("utkast_til_vedtak", mutableMapOf(
+        queueMessage(JsonMessage.newMessage("avsluttet_med_vedtak", mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "fom" to event.periode.start,

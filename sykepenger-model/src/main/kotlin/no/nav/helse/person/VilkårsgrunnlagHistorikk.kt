@@ -70,10 +70,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
     }
 
-    internal fun build(skjæringstidspunkt: LocalDate, builder: VedtakFattetBuilder) {
-        vilkårsgrunnlagFor(skjæringstidspunkt)?.build(builder)
-    }
-
     internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: List<Sykefraværstilfelleeventyr>) {
         val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller) ?: return
         if (nyttInnslag == sisteInnlag()) return

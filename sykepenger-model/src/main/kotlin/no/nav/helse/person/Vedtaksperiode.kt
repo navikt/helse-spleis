@@ -853,7 +853,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             avsluttetTidspunkt = tidsstempel
         ))
-        sendVedtakFattet(hendelse, periode, dokumentsporing)
+        person.gjenopptaBehandling(hendelse)
     }
 
     override fun vedtakIverksatt(
@@ -865,33 +865,13 @@ internal class Vedtaksperiode private constructor(
         utbetalingId: UUID,
         vedtakFattetTidspunkt: LocalDateTime
     ) {
-        sendVedtakFattet(hendelse, periode, dokumentsporing, utbetalingId, vedtakFattetTidspunkt)
-    }
-
-    private fun sendVedtakFattet(
-        hendelse: IAktivitetslogg,
-        periode: Periode,
-        dokumentsporing: Set<UUID>,
-        utbetalingId: UUID? = null,
-        vedtakFattetTidspunkt: LocalDateTime? = null
-    ) {
-        val builder = VedtakFattetBuilder(
-            fødselsnummer,
-            aktørId,
-            organisasjonsnummer,
-            id,
-            periode,
-            hendelseIder(),
-            skjæringstidspunkt
-        )
-
+        val vilkårsgrunnlag = checkNotNull(vilkårsgrunnlag) { "Særdeles besynderlig at vi ikke har vilkårsgrunnlag nå som vedtaket iverksettes!" }
+        val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id, periode, hendelseIder(), skjæringstidspunkt)
         val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
         this.finnArbeidsgiverperiode()?.tags(this.periode, builder, harPeriodeRettFør)
-
-        if (utbetalingId != null) builder.utbetalingId(utbetalingId)
-        if (vedtakFattetTidspunkt != null) builder.utbetalingVurdert(vedtakFattetTidspunkt)
-
-        person.build(skjæringstidspunkt, builder)
+        builder.utbetalingId(utbetalingId)
+        builder.utbetalingVurdert(vedtakFattetTidspunkt)
+        vilkårsgrunnlag.build(builder)
         person.vedtakFattet(builder.result())
         person.gjenopptaBehandling(hendelse)
     }

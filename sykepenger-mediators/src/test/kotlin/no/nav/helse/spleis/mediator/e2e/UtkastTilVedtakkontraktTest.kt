@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
@@ -33,7 +34,7 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
         @Language("JSON")
         val forventet = """
         {
-            "@event_name": "utkast_til_vedtak",
+            "@event_name": "avsluttet_med_vedtak",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
@@ -83,7 +84,7 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
         @Language("JSON")
         val forventet = """
         {
-            "@event_name": "utkast_til_vedtak",
+            "@event_name": "avsluttet_med_vedtak",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
@@ -129,26 +130,26 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
         )
+
         @Language("JSON")
         val forventet = """
         {
-            "@event_name": "utkast_til_vedtak",
+            "@event_name": "avsluttet_uten_vedtak",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
             "fom": "2018-01-03",
             "tom": "2018-01-26",
             "skjæringstidspunkt": "2018-01-03",
-            "sykepengegrunnlag": 0.0,
-            "grunnlagForSykepengegrunnlag": 0.0,
-            "inntekt" : 0.0,
-            "grunnlagForSykepengegrunnlagPerArbeidsgiver": {},
             "hendelser": ["$søknadId"],
-            "begrensning" : "VET_IKKE",
-            "tags": []
+            "vedtaksperiodeId": "<uuid>",
+            "generasjonId": "<uuid>",
+            "avsluttetTidspunkt": "<timestamp>"
         }
         """
-        assertVedtakFattet(forventet, forventetUtbetalingEventNavn = null)
+
+        testRapid.assertUtgåendeMelding(forventet)
+        assertEquals(emptyList<JsonNode>(), testRapid.inspektør.meldinger("avsluttet_med_vedtak"))
     }
 
     @Test
@@ -174,7 +175,7 @@ internal class UtkastTilVedtakkontraktTest : AbstractEndToEndMediatorTest() {
         @Language("JSON")
         val forventet = """
         {
-            "@event_name": "utkast_til_vedtak",
+            "@event_name": "avsluttet_med_vedtak",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "organisasjonsnummer": "$ORGNUMMER",
