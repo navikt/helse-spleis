@@ -79,7 +79,35 @@ internal class AvviksprosentBeregnetTest : AbstractEndToEndTest() {
             listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 264000.0)),
             listOf(forventetSammenligningsgrunnlag(a1, 1.mars, 20000.0))
         )
+    }
 
+    @Test
+    fun `Sender forventet AvviksprosentBeregnetEvent ved flere arbeidsgivere`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+
+        assertEquals(1, observatør.avviksprosentBeregnetEventer.size)
+        assertEvent(
+            observatør.avviksprosentBeregnetEventer.first(),
+            1.januar,
+            0.0,
+            480000.0,
+            480000.0,
+            listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 240000.0), PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a2, 240000.0)),
+            listOf(forventetSammenligningsgrunnlag(a1, 1.januar, 20000.0), forventetSammenligningsgrunnlag(a2, 1.januar, 20000.0))
+        )
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 22000.månedlig, orgnummer = a1)
+
+        assertEquals(2, observatør.avviksprosentBeregnetEventer.size)
+        assertEvent(
+            observatør.avviksprosentBeregnetEventer.last(),
+            1.januar,
+            5.0,
+            480000.0,
+            504000.0,
+            listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 264000.0), PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a2, 240000.0)),
+            listOf(forventetSammenligningsgrunnlag(a1, 1.januar, 20000.0), forventetSammenligningsgrunnlag(a2, 1.januar, 20000.0))
+        )
     }
 
     private fun assertEvent(
