@@ -842,6 +842,17 @@ internal class Vedtaksperiode private constructor(
         periode: Periode,
         dokumentsporing: Set<UUID>
     ) {
+        person.avsluttetUtenVedtak(PersonObserver.AvsluttetUtenVedtakEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = id,
+            generasjonId = generasjonId,
+            periode = periode,
+            hendelseIder = hendelseIder(),
+            skjæringstidspunkt = skjæringstidspunkt,
+            avsluttetTidspunkt = tidsstempel
+        ))
         sendVedtakFattet(hendelse, periode, dokumentsporing)
     }
 
