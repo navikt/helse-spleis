@@ -17,7 +17,9 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.Isolated
 
+@Isolated
 @EnableToggle(Toggle.AvviksvurderingFlyttet::class)
 internal class SkjønnsmessigFastsettelseVersjon2Test: AbstractDslTest() {
 
