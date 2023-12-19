@@ -9,6 +9,7 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -415,6 +416,9 @@ internal class PersonMediator(
                         "fastsatt" to it.fastsatt,
                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt
                     )
+                }.let { sykepengegrunnlagsfakta ->
+                    if (Toggle.AvviksvurderingFlyttet.enabled) sykepengegrunnlagsfakta.minus(setOf("innrapportertÅrsinntekt", "avviksprosent"))
+                    else sykepengegrunnlagsfakta
                 }
             }
         }))
