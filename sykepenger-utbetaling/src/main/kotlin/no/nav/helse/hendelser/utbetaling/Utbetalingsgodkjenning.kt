@@ -3,10 +3,8 @@ package no.nav.helse.hendelser.utbetaling
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.ArbeidstakerHendelse
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_18
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_19
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
+import no.nav.helse.hendelser.Avsender.SYSTEM
 
 class Utbetalingsgodkjenning(
     meldingsreferanseId: UUID,
@@ -17,45 +15,17 @@ class Utbetalingsgodkjenning(
     private val vedtaksperiodeId: String,
     private val saksbehandler: String,
     private val saksbehandlerEpost: String,
-    private val utbetalingGodkjent: Boolean,
+    utbetalingGodkjent: Boolean,
     private val godkjenttidspunkt: LocalDateTime,
-    private val automatiskBehandling: Boolean
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
+    automatiskBehandling: Boolean
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer), Utbetalingsavgjørelse {
+    override fun relevantVedtaksperiode(id: UUID) = id.toString() == this.vedtaksperiodeId
+    override fun relevantUtbetaling(id: UUID) = id == utbetalingId
+    override fun saksbehandler() = Saksbehandler(saksbehandler, saksbehandlerEpost)
+    override val godkjent = utbetalingGodkjent
+    override val avgjørelsestidspunkt = godkjenttidspunkt
+    override val automatisert = automatiskBehandling
+    override fun innsendt() = godkjenttidspunkt
+    override fun avsender() = if (automatisert) SYSTEM else SAKSBEHANDLER
 
-    fun erRelevant(vedtaksperiodeId: String) = vedtaksperiodeId == this.vedtaksperiodeId
-    fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
-
-    fun automatiskBehandling() = automatiskBehandling
-    fun vurdering() = Utbetaling.Vurdering(
-        utbetalingGodkjent,
-        saksbehandler,
-        saksbehandlerEpost,
-        godkjenttidspunkt,
-        automatiskBehandling
-    )
-
-    fun vedtakFattetTidspunkt() = godkjenttidspunkt
-    fun vedtakGodkjent() = utbetalingGodkjent
-
-    fun valider(trengerFastsettelseEtterSkjønn: Boolean): IAktivitetslogg {
-        if (trengerFastsettelseEtterSkjønn && utbetalingGodkjent) {
-            // i dette tilfellet må det enten skjønnsfastsettes først eller så må utbetalingen annulleres
-            throw IllegalStateException("Sykepengegrunnlaget må skjønnsfastsettes før utbetalingen eventuelt godkjennes, dette må ryddes opp i!")
-        }
-        when {
-            !utbetalingGodkjent && !automatiskBehandling -> {
-                funksjonellFeil(RV_UT_19)
-                info("Utbetaling markert som ikke godkjent av saksbehandler $saksbehandler $godkjenttidspunkt")
-            }
-            !utbetalingGodkjent && automatiskBehandling -> {
-                funksjonellFeil(RV_UT_18)
-                info("Utbetaling markert som ikke godkjent automatisk $godkjenttidspunkt")
-            }
-            utbetalingGodkjent && !automatiskBehandling ->
-                info("Utbetaling markert som godkjent av saksbehandler $saksbehandler $godkjenttidspunkt")
-            else ->
-                info("Utbetaling markert som godkjent automatisk $godkjenttidspunkt")
-        }
-        return this
-    }
 }

@@ -27,7 +27,8 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
+import no.nav.helse.hendelser.utbetaling.avvist
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -494,11 +495,19 @@ internal class Arbeidsgiver private constructor(
         håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
     }
 
-    internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
-        utbetalingsgodkjenning.kontekst(this)
+    internal fun håndter(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+        utbetalingsavgjørelse.kontekst(this)
+        utbetalingsavgjørelse.validerSkjønnsmessigFastsettelse()
+        utbetalinger.forEach { it.håndter(utbetalingsavgjørelse) }
+        håndter(utbetalingsavgjørelse, Vedtaksperiode::håndter)
+    }
+
+    private fun Utbetalingsavgjørelse.validerSkjønnsmessigFastsettelse() {
         val trengerFastsettelseEtterSkjønn = vedtaksperioder.filter(HAR_AVVENTENDE_GODKJENNING).trengerFastsettelseEtterSkjønn().isNotEmpty()
-        utbetalinger.forEach { it.håndter(utbetalingsgodkjenning, trengerFastsettelseEtterSkjønn) }
-        håndter(utbetalingsgodkjenning, Vedtaksperiode::håndter)
+        if (!trengerFastsettelseEtterSkjønn) return
+        if (avvist) return
+        // i dette tilfellet må det enten skjønnsfastsettes først eller så må utbetalingen annulleres
+        throw IllegalStateException("Sykepengegrunnlaget må skjønnsfastsettes før utbetalingen eventuelt godkjennes, dette må ryddes opp i!")
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {

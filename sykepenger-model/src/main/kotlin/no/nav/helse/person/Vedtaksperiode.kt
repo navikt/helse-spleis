@@ -35,7 +35,7 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
@@ -348,11 +348,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
     }
 
-    internal fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
-        if (!utbetalingsgodkjenning.erRelevant(id.toString())) return
-        if (generasjoner.gjelderIkkeFor(utbetalingsgodkjenning)) return utbetalingsgodkjenning.info("Ignorerer løsning på godkjenningsbehov, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
-        kontekst(utbetalingsgodkjenning)
-        tilstand.håndter(person, arbeidsgiver, this, utbetalingsgodkjenning)
+    internal fun håndter(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+        if (!utbetalingsavgjørelse.relevantVedtaksperiode(id)) return
+        if (generasjoner.gjelderIkkeFor(utbetalingsavgjørelse)) return utbetalingsavgjørelse.info("Ignorerer løsning på utbetalingsavgjørelse, utbetalingid på løsningen matcher ikke vedtaksperiodens nåværende utbetaling")
+        kontekst(utbetalingsavgjørelse)
+        tilstand.håndter(person, arbeidsgiver, this, utbetalingsavgjørelse)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -1153,9 +1153,9 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingsgodkjenning: Utbetalingsgodkjenning
+            utbetalingsavgjørelse: Utbetalingsavgjørelse
         ) {
-            utbetalingsgodkjenning.info("Forventet ikke utbetalingsgodkjenning i %s".format(type.name))
+            utbetalingsavgjørelse.info("Forventet ikke utbetalingsavgjørelse i %s".format(type.name))
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
@@ -1930,15 +1930,15 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingsgodkjenning: Utbetalingsgodkjenning
+            utbetalingsavgjørelse: Utbetalingsavgjørelse
         ) {
-            vedtaksperiode.generasjoner.vedtakFattet(utbetalingsgodkjenning)
+            vedtaksperiode.generasjoner.vedtakFattet(utbetalingsavgjørelse)
             if (vedtaksperiode.generasjoner.erAvvist()) {
-                return if (arbeidsgiver.kanForkastes(vedtaksperiode)) vedtaksperiode.forkast(utbetalingsgodkjenning)
-                else utbetalingsgodkjenning.varsel(RV_UT_24)
+                return if (arbeidsgiver.kanForkastes(vedtaksperiode)) vedtaksperiode.forkast(utbetalingsavgjørelse)
+                else utbetalingsavgjørelse.varsel(RV_UT_24)
             }
             vedtaksperiode.tilstand(
-                utbetalingsgodkjenning,
+                utbetalingsavgjørelse,
                 when {
                     vedtaksperiode.generasjoner.harUtbetalinger() -> TilUtbetaling
                     else -> Avsluttet
@@ -2009,17 +2009,17 @@ internal class Vedtaksperiode private constructor(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
-            utbetalingsgodkjenning: Utbetalingsgodkjenning
+            utbetalingsavgjørelse: Utbetalingsavgjørelse
         ) {
-            vedtaksperiode.generasjoner.vedtakFattet(utbetalingsgodkjenning)
+            vedtaksperiode.generasjoner.vedtakFattet(utbetalingsavgjørelse)
             if (vedtaksperiode.generasjoner.erAvvist()) {
-                if (utbetalingsgodkjenning.automatiskBehandling()) {
-                    utbetalingsgodkjenning.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
+                if (utbetalingsavgjørelse.automatisert) {
+                    utbetalingsavgjørelse.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
                     return sikkerlogg.error("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
                 }
-                utbetalingsgodkjenning.varsel(RV_UT_1)
+                utbetalingsavgjørelse.varsel(RV_UT_1)
             }
-            vedtaksperiode.tilstand(utbetalingsgodkjenning, when {
+            vedtaksperiode.tilstand(utbetalingsavgjørelse, when {
                 vedtaksperiode.generasjoner.erAvvist() -> RevurderingFeilet
                 vedtaksperiode.generasjoner.harUtbetalinger() -> TilUtbetaling
                 else -> Avsluttet

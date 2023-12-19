@@ -3,14 +3,14 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
+import no.nav.helse.hendelser.utbetaling.avvist
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
@@ -80,7 +80,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         generasjoner.lagreTidsnæreInntekter(arbeidsgiver, skjæringstidspunkt, hendelse, oppholdsperiodeMellom)
     }
 
-    internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
+    internal fun gjelderIkkeFor(hendelse: Utbetalingsavgjørelse) = siste?.gjelderFor(hendelse) != true
 
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
         infotrygdhistorikk.harEndretHistorikk(siste!!)
@@ -128,8 +128,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     internal fun harIkkeUtbetaling() = generasjoner.last().harIkkeUtbetaling()
 
 
-    fun vedtakFattet(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
-        this.generasjoner.last().vedtakFattet(utbetalingsgodkjenning)
+    fun vedtakFattet(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+        this.generasjoner.last().vedtakFattet(utbetalingsavgjørelse)
     }
     fun avslutt(hendelse: IAktivitetslogg) {
         this.generasjoner.last().avslutt(hendelse)
@@ -355,9 +355,9 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         internal fun harÅpenGenerasjon() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd)
         internal fun harIkkeUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd)
 
-        internal fun vedtakFattet(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
-            if (!utbetalingsgodkjenning.vedtakGodkjent()) return tilstand.vedtakAvvist(this, utbetalingsgodkjenning)
-            tilstand.vedtakFattet(this, utbetalingsgodkjenning)
+        internal fun vedtakFattet(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+            if (utbetalingsavgjørelse.avvist) return tilstand.vedtakAvvist(this, utbetalingsavgjørelse)
+            tilstand.vedtakFattet(this, utbetalingsavgjørelse)
         }
 
         internal fun avslutt(hendelse: IAktivitetslogg) {
@@ -560,10 +560,10 @@ enum class Periodetilstand {
             fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
-            fun vedtakAvvist(generasjon: Generasjon, utbetalingsgodkjenning: Utbetalingsgodkjenning) {
+            fun vedtakAvvist(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
                 error("Kan ikke avvise vedtak for generasjon i $this")
             }
-            fun vedtakFattet(generasjon: Generasjon, utbetalingsgodkjenning: Utbetalingsgodkjenning) {
+            fun vedtakFattet(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
                 error("Kan ikke fatte vedtak for generasjon i $this")
             }
             fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
@@ -682,13 +682,13 @@ enum class Periodetilstand {
                     generasjon.tilstand(Uberegnet, hendelse)
                 }
 
-                override fun vedtakAvvist(generasjon: Generasjon, utbetalingsgodkjenning: Utbetalingsgodkjenning) {
+                override fun vedtakAvvist(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
                     // perioden kommer til å bli kastet til infotrygd
                 }
 
-                override fun vedtakFattet(generasjon: Generasjon, utbetalingsgodkjenning: Utbetalingsgodkjenning) {
-                    generasjon.vedtakFattet = utbetalingsgodkjenning.vedtakFattetTidspunkt()
-                    generasjon.tilstand(if (generasjon.gjeldende.utbetaling?.erAvsluttet() == true) VedtakIverksatt else VedtakFattet, utbetalingsgodkjenning)
+                override fun vedtakFattet(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+                    generasjon.vedtakFattet = utbetalingsavgjørelse.avgjørelsestidspunkt
+                    generasjon.tilstand(if (generasjon.gjeldende.utbetaling?.erAvsluttet() == true) VedtakIverksatt else VedtakFattet, utbetalingsavgjørelse)
                 }
             }
             data object BeregnetOmgjøring : Tilstand by (Beregnet) {
@@ -718,8 +718,8 @@ enum class Periodetilstand {
                     generasjon.utenUtbetaling(hendelse)
                     generasjon.tilstand(UberegnetRevurdering, hendelse)
                 }
-                override fun vedtakAvvist(generasjon: Generasjon, utbetalingsgodkjenning: Utbetalingsgodkjenning) {
-                    generasjon.tilstand(RevurdertVedtakAvvist, utbetalingsgodkjenning)
+                override fun vedtakAvvist(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+                    generasjon.tilstand(RevurdertVedtakAvvist, utbetalingsavgjørelse)
                 }
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon? {
                     generasjon.gjeldende.forkastUtbetaling(hendelse)

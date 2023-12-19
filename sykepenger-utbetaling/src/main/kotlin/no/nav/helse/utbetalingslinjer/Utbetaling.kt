@@ -9,7 +9,9 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
-import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
+import no.nav.helse.hendelser.utbetaling.valider
+import no.nav.helse.hendelser.utbetaling.vurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
@@ -129,10 +131,10 @@ class Utbetaling private constructor(
         tilstand.opprett(this, hendelse)
     }
 
-    fun håndter(hendelse: Utbetalingsgodkjenning, trengerFastsettelseEtterSkjønn: Boolean) {
-        if (!hendelse.erRelevant(id)) return
-        hendelse.valider(trengerFastsettelseEtterSkjønn)
-        godkjenn(hendelse, hendelse.vurdering())
+    fun håndter(hendelse: Utbetalingsavgjørelse) {
+        if (!hendelse.relevantUtbetaling(id)) return
+        hendelse.valider()
+        godkjenn(hendelse, hendelse.vurdering)
     }
 
     fun håndter(utbetaling: UtbetalingHendelse) {
@@ -177,8 +179,8 @@ class Utbetaling private constructor(
     private fun hendelseErRelevant(hendelse: UtbetalingHendelse) =
         hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId(), personOppdrag.fagsystemId(), id)
 
-    fun gjelderFor(hendelse: Utbetalingsgodkjenning) =
-        hendelse.erRelevant(id)
+    fun gjelderFor(hendelse: Utbetalingsavgjørelse) =
+        hendelse.relevantUtbetaling(id)
 
     fun valider(simulering: Simulering) {
         arbeidsgiverOppdrag.valider(simulering)
