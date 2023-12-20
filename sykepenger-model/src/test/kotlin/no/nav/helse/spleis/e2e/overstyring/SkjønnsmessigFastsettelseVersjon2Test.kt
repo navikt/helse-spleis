@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
@@ -16,6 +17,8 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 
@@ -70,6 +73,48 @@ internal class SkjønnsmessigFastsettelseVersjon2Test: AbstractDslTest() {
                 )
 
             ), utkastTilVedtak)
+            System.setProperty("AVVIKSAKER_FLYTTET", "false")
+        }
+    }
+    @Test
+    fun `Skal ikke avviksvurdere på nytt etter overstyring der kun refusjon har blitt endret`() {
+        System.setProperty("AVVIKSAKER_FLYTTET", "true")
+        a1 {
+            val imInntekt = INNTEKT * 2
+            val sammenligningsgrunnlag = INNTEKT
+            val skjønnsinntekt = INNTEKT*3
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = imInntekt)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = sammenligningsgrunnlag)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, skjønnsinntekt)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, overstyringer = listOf(
+                OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = imInntekt, forklaring = "forklaring", refusjonsopplysninger = listOf(
+                    Triple(1.januar, null, imInntekt*0.8)))
+            ))
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            val utkastTilVedtak = observatør.vedtakFattetEventer[1.vedtaksperiode]?.last()
+
+            assertForventetFeil(
+                forklaring = "Skal fortsatt være skjønnsmessig vurdert når vi kun har overstyrt refusjon",
+                nå = {
+                    assertFalse(utkastTilVedtak?.sykepengegrunnlagsfakta is PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn)
+                },
+                ønsket = {
+                    assertTrue(utkastTilVedtak?.sykepengegrunnlagsfakta is PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn)
+                }
+            )
+
             System.setProperty("AVVIKSAKER_FLYTTET", "false")
         }
     }
