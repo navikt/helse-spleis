@@ -1,0 +1,20 @@
+name: Aiven config for de andre topicene våre
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - 'deploy/topic-avviksvurdering-migreringer-dev.yml'
+
+jobs:
+  deployDev:
+    name: apply dev-gcp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/topic-avviksvurdering-migreringer-dev.yml
