@@ -17,7 +17,7 @@ spec:
     retentionHours: 168  # -1 means unlimited
   acl:
     - team: tbd
-      application: helse-spleis
+      application: spleis-migrate
       access: readwrite
     - team: tbd
       application: spinnvill
