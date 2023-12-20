@@ -3,12 +3,12 @@ kind: Naisjob
 metadata:
   labels:
     team: tbd
-    db: spleis # trengs bare ifm. 'spleis-db-policy'
+    db: helse-spleis # trengs bare ifm. 'spleis-db-policy'
   name: spleis-migrate
   namespace: tbd
 spec:
   image: {{ image }}
-  parallelism: 30
+  parallelism: 3
   resources:
     limits:
       memory: 4096Mi
@@ -17,6 +17,7 @@ spec:
   secureLogs:
     enabled: true
   envFrom:
+    - secret: google-sql-helse-spleis-spleis-spleis-migrate-70ddf3c6
   gcp:
     permissions:
       - resource:
@@ -28,7 +29,7 @@ spec:
     - name: DATABASE_REGION
       value: "europe-north1"
     - name: DATABASE_INSTANCE
-      value: "spleis2"
+      value: "helse-spleis"
     #- name: RUNTIME_OPTS
     #  value: "migrate"    # gjør migrering ved å pushe events på kafka, og lar spleis gjøre jobben (lager nedetid)
     - name: RUNTIME_OPTS
