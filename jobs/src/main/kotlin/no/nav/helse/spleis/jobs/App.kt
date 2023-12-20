@@ -198,7 +198,7 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                 val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
                 producer.send(
                     ProducerRecord(
-                        "tbd.avviksvurdering.migreringer",
+                        "avviksvurdering.migreringer",
                         null,
                         fødselsnummer,
                         objectMapper.writeValueAsString(event)
