@@ -196,6 +196,7 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                 if (vurderinger.isEmpty()) return@let
                 val fødselsnummer = fødselsnummerSomString(fnr)
                 val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
+                sikkerlogg.info("Ønsker å skrive avviksvurdering til kafka:\n {}", objectMapper.writeValueAsString(event))
                 producer.send(
                     ProducerRecord(
                         "tbd.avviksvurdering.migreringer",
@@ -204,7 +205,7 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                         objectMapper.writeValueAsString(event)
                     )
                 ).get()
-                sikkerlogg.info("Skrev avviksvurderinger til avviksvurdering.migreringer:\n{}", objectMapper.writeValueAsString(event))
+                sikkerlogg.info("Skrev avviksvurderinger til avviksvurdering.migreringer")
 
             } catch (err: Exception) {
                 log.info("$aktørId lar seg ikke serialisere: ${err.message}")
