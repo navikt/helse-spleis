@@ -367,7 +367,7 @@ private fun vilkårsgrunnlagFor(node: JsonNode, skjæringstidspunkt: LocalDate):
 }
 
 private data class AvviksvurderingerEvent(
-    val fødselsenummer: String,
+    val fødselsnummer: String,
     val skjæringstidspunkter: List<AvviksvurderingDto>,
     @JsonProperty("@event_name")
     val eventName: String = "avviksvurderinger"
