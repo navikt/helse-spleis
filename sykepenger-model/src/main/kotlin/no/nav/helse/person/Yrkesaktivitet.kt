@@ -115,6 +115,18 @@ internal sealed interface Yrkesaktivitet {
             return true
         }
 
+        override fun avklarSykepengegrunnlag(
+            skjæringstidspunkt: LocalDate,
+            førsteFraværsdag: LocalDate?,
+            inntektshistorikk: Inntektshistorikk,
+            skattSykepengegrunnlag: SkattSykepengegrunnlag?,
+            refusjonshistorikk: Refusjonshistorikk,
+            aktivitetslogg: IAktivitetslogg?
+        ): ArbeidsgiverInntektsopplysning? {
+            val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag) ?: return null
+            return super.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
+        }
+
         override fun hashCode(): Int {
             throw NotImplementedError()
         }
