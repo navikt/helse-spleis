@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.jobs
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -368,6 +369,7 @@ private fun vilkårsgrunnlagFor(node: JsonNode, skjæringstidspunkt: LocalDate):
 private data class AvviksvurderingerEvent(
     val fødselsenummer: String,
     val skjæringstidspunkter: List<AvviksvurderingDto>,
+    @JsonProperty("@event_name")
     val eventName: String = "avviksvurderinger"
 )
 private data class AvviksvurderingDto(
