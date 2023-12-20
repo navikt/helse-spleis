@@ -3,11 +3,11 @@ kind: Naisjob
 metadata:
   labels:
     team: tbd
-    db: helse-spleis # trengs bare ifm. 'spleis-db-policy'
+    db: spleis # trengs bare ifm. 'spleis-db-policy'
   name: spleis-migrate
   namespace: tbd
 spec:
-  image: {{ image }}
+  image: { image }
   parallelism: 3
   resources:
     limits:
@@ -17,6 +17,7 @@ spec:
   secureLogs:
     enabled: true
   envFrom:
+    - secret: google-sql-helse-spleis-spleis-spleis-avstemming-038f9535
     - secret: google-sql-helse-spleis-spleis-spleis-migrate-70ddf3c6
   gcp:
     permissions:
@@ -33,6 +34,6 @@ spec:
     #- name: RUNTIME_OPTS
     #  value: "migrate"    # gjør migrering ved å pushe events på kafka, og lar spleis gjøre jobben (lager nedetid)
     - name: RUNTIME_OPTS
-      value: "migrere_avviksvurderinger [avviksprosent_dry_001]"   # gjør migrering direkte mot databasen ved at alle personer løftes opp til siste versjon.
+      value: "migrere_avviksvurderinger avviksprosent_dev_006"   # gjør migrering direkte mot databasen ved at alle personer løftes opp til siste versjon.
                                                 # [en_unik_arbeid_id] er en tekst du bestemmer selv, den må bare ikke finnes i <arbeidstabellen> fra før
                                                 # Etter at migreringen er ferdig kan det være greit å slette fra arbeidstabellen etterpå
