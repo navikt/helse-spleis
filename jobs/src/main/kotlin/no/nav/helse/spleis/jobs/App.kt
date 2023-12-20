@@ -12,6 +12,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.Properties
 import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -24,7 +25,11 @@ import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.serialize
 import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
+import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.config.SslConfigs
+import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -180,6 +185,7 @@ internal val objectMapper: ObjectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId: String) {
+    val producer = factory.createProducer(createAivenProperties(System.getenv()))
     opprettOgUtførArbeid(arbeidId) { session, fnr ->
         hentPerson(session, fnr)?.let { (aktørId, data) ->
             val mdcContextMap = MDC.getCopyOfContextMap() ?: emptyMap()
@@ -188,8 +194,18 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                 val node = objectMapper.readTree(data)
                 val vurderinger = hentAvviksvurderinger(node)
                 if (vurderinger.isEmpty()) return@let
-                val event = AvviksvurderingerEvent(vurderinger)
-                sikkerlogg.info("Ville skrevet avviksvurderinger til rapid:\n{}", objectMapper.writeValueAsString(event))
+                val fødselsnummer = fødselsnummerSomString(fnr)
+                val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
+                producer.send(
+                    ProducerRecord(
+                        "tbd.arbeidsgiveropplysninger",
+                        null,
+                        fødselsnummer,
+                        objectMapper.writeValueAsString(event)
+                    )
+                ).get()
+                sikkerlogg.info("Skrev avviksvurderinger til avviksvurdering.migreringer:\n{}", objectMapper.writeValueAsString(event))
+
             } catch (err: Exception) {
                 log.info("$aktørId lar seg ikke serialisere: ${err.message}")
                 sikkerlogg.error("$aktørId lar seg ikke serialisere: ${err.message}", err)
@@ -203,6 +219,26 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
         delay(60000L)
     }
 }
+
+private fun fødselsnummerSomString(fnr: Long) = fnr.toString().let { if (it.length == 11) it else "0$it" }
+
+private fun createAivenProperties(env: Map<String, String>) =
+     Properties().apply {
+        put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env.getValue("KAFKA_BROKERS"))
+        put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)
+        put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "")
+        put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks")
+        put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12")
+        put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, env.getValue("KAFKA_TRUSTSTORE_PATH"))
+        put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, env.getValue("KAFKA_CREDSTORE_PASSWORD"))
+        put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, env.getValue("KAFKA_KEYSTORE_PATH"))
+        put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, env.getValue("KAFKA_CREDSTORE_PASSWORD"))
+
+        put(ProducerConfig.ACKS_CONFIG, "1")
+        put(ProducerConfig.LINGER_MS_CONFIG, "0")
+        put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
+    }
+
 
 private fun hentAvviksvurderinger(node: JsonNode): List<AvviksvurderingDto> {
     return node.path("vilkårsgrunnlagHistorikk")
@@ -329,7 +365,9 @@ private fun vilkårsgrunnlagFor(node: JsonNode, skjæringstidspunkt: LocalDate):
 }
 
 private data class AvviksvurderingerEvent(
-    val skjæringstidspunkter: List<AvviksvurderingDto>
+    val fødselsenummer: String,
+    val skjæringstidspunkter: List<AvviksvurderingDto>,
+    val eventName: String = "avviksvurderinger"
 )
 private data class AvviksvurderingDto(
     val beregningsgrunnlagTotalbeløp: Double?,
