@@ -47,7 +47,14 @@ abstract class Inntektsopplysning protected constructor(
     protected open fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
         // kun saksbehandlerinntekt eller annen inntektsmelding kan overstyre inntektsmelding-inntekt
         if (ny is SkjønnsmessigFastsatt) return true
-        if (ny is Saksbehandler) return ny.fastsattÅrsinntekt() != this.beløp
+        if (ny is Saksbehandler){
+            return when {
+                // hvis inntekten er skjønnsmessig fastsatt og det overstyres til samme omregnede årsinntekt, så beholdes den skjønnsmessig fastsatte inntekten
+                this is SkjønnsmessigFastsatt && this.omregnetÅrsinntekt().fastsattÅrsinntekt() == ny.fastsattÅrsinntekt() -> false
+                this is SkjønnsmessigFastsatt -> true
+                else -> ny.fastsattÅrsinntekt() != this.beløp
+            }
+        }
         if (ny !is Inntektsmelding) return false
         val måned = this.dato.withDayOfMonth(1) til this.dato.withDayOfMonth(this.dato.lengthOfMonth())
         return ny.dato in måned
