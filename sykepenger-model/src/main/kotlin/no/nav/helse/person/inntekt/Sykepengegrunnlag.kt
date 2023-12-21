@@ -116,19 +116,7 @@ internal class Sykepengegrunnlag private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
             )
-            if (alder.forhøyetInntektskrav(skjæringstidspunkt))
-                `§ 8-51 ledd 2`(
-                    oppfylt = oppfyllerMinsteinntektskrav,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
-                    beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
-            else
-                `§ 8-3 ledd 2 punktum 1`(
-                    oppfylt = oppfyllerMinsteinntektskrav,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
+            subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, this)
         }
         person.avviksprosentBeregnet(
             PersonObserver.AvviksprosentBeregnetEvent(
@@ -143,6 +131,26 @@ internal class Sykepengegrunnlag private constructor(
             )
         )
         avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
+    }
+
+    private fun subsummerMinsteSykepengegrunnlag(
+        alder: Alder,
+        skjæringstidspunkt: LocalDate,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
+        if (alder.forhøyetInntektskrav(skjæringstidspunkt))
+            subsumsjonObserver.`§ 8-51 ledd 2`(
+                oppfylt = oppfyllerMinsteinntektskrav,
+                skjæringstidspunkt = skjæringstidspunkt,
+                alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
+                beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
+        else
+            subsumsjonObserver.`§ 8-3 ledd 2 punktum 1`(
+                oppfylt = oppfyllerMinsteinntektskrav,
+                skjæringstidspunkt = skjæringstidspunkt,
+                beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
     }
 
     internal companion object {
@@ -297,6 +305,7 @@ internal class Sykepengegrunnlag private constructor(
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
+        subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonObserver)
         return tilstand.fastsattEtterSkjønn(this, resultat)
     }
 
@@ -344,6 +353,7 @@ internal class Sykepengegrunnlag private constructor(
                 )
             )
             avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
+            subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonObserver)
         }
     }
 

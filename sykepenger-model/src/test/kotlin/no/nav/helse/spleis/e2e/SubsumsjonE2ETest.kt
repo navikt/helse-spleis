@@ -340,6 +340,50 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `§ 8-3 ledd 2 punktum 1 - har minimum inntekt halv G - også ved overstyring`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46817.årlig,)
+        val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.november(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
+        håndterVilkårsgrunnlag(arbeidsforhold = arbeidsforhold, inntekt = 50000.årlig)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 46817.0,
+                "minimumInntekt" to 46817.0
+            ),
+            output = emptyMap()
+        )
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
+
+        håndterYtelser()
+        håndterSimulering()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, 50000.årlig)))
+
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
+            index = 1,
+            forventetAntall = 2,
+            utfall = VILKAR_OPPFYLT,
+            paragraf = PARAGRAF_8_3,
+            ledd = LEDD_2,
+            punktum = 1.punktum,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "grunnlagForSykepengegrunnlag" to 50000.0,
+                "minimumInntekt" to 46817.0
+            ),
+            output = emptyMap()
+        )
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
+    }
+
+    @Test
     fun `§ 8-3 ledd 2 punktum 1 - har inntekt mindre enn en halv G`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
