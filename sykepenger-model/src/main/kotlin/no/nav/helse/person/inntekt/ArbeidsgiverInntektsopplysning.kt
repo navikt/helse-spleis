@@ -129,6 +129,9 @@ class ArbeidsgiverInntektsopplysning(
 
     internal companion object {
 
+        private val AVVIKSVURDERING_FLYTTET get() = System.getenv("AVVIKSAKER_FLYTTET").toBoolean() || System.getProperty("AVVIKSAKER_FLYTTET").toBoolean()
+
+
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet() = map { it.inntektsopplysning }.validerSkjønnsmessigAltEllerIntet()
         internal fun List<ArbeidsgiverInntektsopplysning>.erSkjønnsmessigFastsatt() = any { it.inntektsopplysning is SkjønnsmessigFastsatt }
 
@@ -198,7 +201,7 @@ class ArbeidsgiverInntektsopplysning(
             val endredeInntektsopplysninger = finnEndredeInntektsopplysninger(forrige)
             if (endredeInntektsopplysninger.isEmpty()) return
 
-            subsumsjonObserver.`§ 8-30 ledd 1`(
+            if (!AVVIKSVURDERING_FLYTTET) subsumsjonObserver.`§ 8-30 ledd 1`(
                 grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig = omregnetÅrsinntektPerArbeidsgiver().mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } },
                 grunnlagForSykepengegrunnlagÅrlig = map { it.inntektsopplysning.fastsattÅrsinntekt() }.summer().reflection { årlig, _, _, _ -> årlig }
             )
