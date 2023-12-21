@@ -249,7 +249,7 @@ private fun hentAvviksvurderinger(node: JsonNode): List<AvviksvurderingDto> {
         .mapNotNull { vilkårsgrunnlag ->
             val type = vilkårsgrunnlag.path("type").asText()
             when (type) {
-//                "Vilkårsprøving" -> parseSpleisVilkårsgrunnlag(node, vilkårsgrunnlag)
+                "Vilkårsprøving" -> parseSpleisVilkårsgrunnlag(node, vilkårsgrunnlag)
                 "Infotrygd" -> parseInfotrygdVilkårsgrunnlag(vilkårsgrunnlag)
                 else -> null
             }
