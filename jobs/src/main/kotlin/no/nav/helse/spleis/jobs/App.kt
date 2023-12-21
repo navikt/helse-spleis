@@ -198,15 +198,15 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                 val fødselsnummer = fødselsnummerSomString(fnr)
                 val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
                 sikkerlogg.info("Ønsker å skrive avviksvurdering til kafka:\n {}", objectMapper.writeValueAsString(event))
-                producer.send(
-                    ProducerRecord(
-                        "tbd.avviksvurdering.migreringer",
-                        null,
-                        fødselsnummer,
-                        objectMapper.writeValueAsString(event)
-                    )
-                ).get()
-                sikkerlogg.info("Skrev avviksvurderinger til avviksvurdering.migreringer")
+//                producer.send(
+//                    ProducerRecord(
+//                        "tbd.avviksvurdering.migreringer",
+//                        null,
+//                        fødselsnummer,
+//                        objectMapper.writeValueAsString(event)
+//                    )
+//                ).get()
+//                sikkerlogg.info("Skrev avviksvurderinger til avviksvurdering.migreringer")
 
             } catch (err: Exception) {
                 log.info("$aktørId lar seg ikke serialisere: ${err.message}")
@@ -387,6 +387,7 @@ private data class AvviksvurderingDto(
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlag.isEmpty()) sikkerlogg.error("Ingen sammenligningsgrunnlag for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlagTotalbeløp == null) sikkerlogg.error("sammenligningsgrunnlagTotalbeløp er null for $skjæringstidspunkt")
+        if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlagTotalbeløp == 0.0) sikkerlogg.error("sammenligningsgrunnlagTotalbeløp er 0 for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && beregningsgrunnlagTotalbeløp == null) sikkerlogg.error("beregningsgrunnlagTotalbeløp er null for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && avviksprosent == null) sikkerlogg.error("avviksprosent er null for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && vilkårsgrunnlagId == null) sikkerlogg.error("vilkårsgrunnlagId er null for $skjæringstidspunkt")
