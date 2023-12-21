@@ -1,0 +1,24 @@
+---
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: avviksvurdering.migreringer.v2
+  namespace: tbd
+  labels:
+    team: tbd
+spec:
+  pool: nav-prod
+  config:  # optional; all fields are optional too; defaults shown
+    cleanupPolicy: delete  # delete, compact
+    minimumInSyncReplicas: 1
+    partitions: 70
+    replication: 3  # see min/max requirements
+    retentionBytes: -1  # -1 means unlimited
+    retentionHours: 168  # -1 means unlimited
+  acl:
+    - team: tbd
+      application: spleis-migrate
+      access: readwrite
+    - team: tbd
+      application: spinnvill
+      access: readwrite

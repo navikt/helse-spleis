@@ -5,8 +5,8 @@ on:
     branches:
     - master
     paths:
-    - 'deploy/topic-avviksvurdering-migreringer-dev.yml'
-    - 'deploy/topic-avviksvurdering-migreringer-prod.yml'
+    - 'deploy/topic-avviksvurdering-migreringer-v2-dev.yml'
+    - 'deploy/topic-avviksvurdering-migreringer-v2-prod.yml'
 
 jobs:
   deployDev:
@@ -18,7 +18,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: deploy/topic-avviksvurdering-migreringer-dev.yml
+          RESOURCE: deploy/topic-avviksvurdering-migreringer-v2-dev.yml
 
   deployProd:
     name: apply prod-gcp
@@ -29,4 +29,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: deploy/topic-avviksvurdering-migreringer-prod.yml
+          RESOURCE: deploy/topic-avviksvurdering-migreringer-v2-prod.yml

@@ -200,7 +200,7 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                 sikkerlogg.info("Ønsker å skrive avviksvurdering til kafka:\n {}", objectMapper.writeValueAsString(event))
                 producer.send(
                     ProducerRecord(
-                        "tbd.avviksvurdering.migreringer",
+                        "tbd.avviksvurdering.migreringer.v2",
                         null,
                         fødselsnummer,
                         objectMapper.writeValueAsString(event)
