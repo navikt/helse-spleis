@@ -2,8 +2,10 @@ package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
@@ -14,7 +16,8 @@ internal class AvviksprosentBeregnetTest : AbstractEndToEndMediatorTest() {
     fun `Sender ut forventet avviksprosent_beregnet_event`() {
         nyttVedtak()
         assertEquals(1, testRapid.inspektør.meldinger("avviksprosent_beregnet_event").size)
-        val event = testRapid.inspektør.meldinger("avviksprosent_beregnet_event").single()
+        val event = testRapid.inspektør.siste("avviksprosent_beregnet_event")
+        assertFalse(event.path("vilkårsgrunnlagId").isMissingOrNull())
         val faktiskResultat = event.json(
             "@event_name",
             "skjæringstidspunkt",

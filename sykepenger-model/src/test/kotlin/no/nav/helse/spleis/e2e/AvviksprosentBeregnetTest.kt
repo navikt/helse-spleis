@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -99,8 +100,9 @@ internal class AvviksprosentBeregnetTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 22000.månedlig, orgnummer = a1)
 
         assertEquals(2, observatør.avviksprosentBeregnetEventer.size)
+        val event = observatør.avviksprosentBeregnetEventer.last()
         assertEvent(
-            observatør.avviksprosentBeregnetEventer.last(),
+            event,
             1.januar,
             5.0,
             480000.0,
@@ -108,6 +110,7 @@ internal class AvviksprosentBeregnetTest : AbstractEndToEndTest() {
             listOf(PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a1, 264000.0), PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt(a2, 240000.0)),
             listOf(forventetSammenligningsgrunnlag(a1, 1.januar, 20000.0), forventetSammenligningsgrunnlag(a2, 1.januar, 20000.0))
         )
+        assertNotNull(event.vilkårsgrunnlagId)
     }
 
     private fun assertEvent(

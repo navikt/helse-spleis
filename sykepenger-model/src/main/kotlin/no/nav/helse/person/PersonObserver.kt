@@ -693,7 +693,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                 "skjæringstidspunkt" to skjæringstidspunkt,
                 "vurderingstidspunkt" to vurderingstidspunkt,
                 "omregnedeÅrsinntekter" to omregnedeÅrsinntekter.map { it.toJsonMap() },
-                "sammenligningsgrunnlag" to sammenligningsgrunnlag.map { it.toJsonMap() }
+                "sammenligningsgrunnlag" to sammenligningsgrunnlag.map { it.toJsonMap() },
+                "vilkårsgrunnlagId" to vilkårsgrunnlagId
             )
 
         data class OmregnetÅrsinntekt(
