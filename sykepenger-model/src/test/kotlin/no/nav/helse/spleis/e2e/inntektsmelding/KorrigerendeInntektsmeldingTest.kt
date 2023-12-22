@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -250,6 +251,30 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         assertEquals("SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+    }
+
+    @Test
+    fun `her er det et gap mellom første og andre vedtaksperiode og mer enn 10 dager mellom agps, men mindre enn 16 dager mellom periodene`() {
+        nyttVedtak(10.januar, 29.januar)
+        nyttVedtak(10.februar, 26.februar, arbeidsgiverperiode = listOf(10.januar til 16.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(10.februar til 26.februar))
+        assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+
+        assertForventetFeil(
+            forklaring = "Nå er det uklart hvorvidt vi håndterer denne inntektsmeldingen eller ei. Vi legger på varsel og sender inntektsmelding_håndtert men blir stående i Avsluttet. Burde gått i revurdering",
+            nå = {
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+                assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+                assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
+            },
+            ønsket = {
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+                assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+                assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
+            }
+        )
     }
 
     @Test
