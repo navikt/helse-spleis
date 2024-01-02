@@ -1052,7 +1052,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
       "fodselsnummer": "12029240045",
       "vilkarsgrunnlag": [
         {
-          "vilkarsgrunnlagtype": "Spleis",
           "id": "00000000-0000-0000-0000-000000000000",
           "inntekter": [
             {
@@ -1062,10 +1061,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 "inntekterFraAOrdningen": null,
                 "kilde": "Inntektsmelding",
                 "manedsbelop": 31000.0
-              },
-              "sammenligningsgrunnlag": {
-                "belop": 372000.0,
-                "inntekterFraAOrdningen": []
               },
               "deaktivert": false
             }
@@ -1084,12 +1079,10 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             }
           ],
           "omregnetArsinntekt": 372000.0,
-          "sammenligningsgrunnlag": 372000.0,
           "skjaeringstidspunkt": "2018-01-01",
           "sykepengegrunnlag": 372000.0,
           "__typename": "GraphQLSpleisVilkarsgrunnlag",
           "antallOpptjeningsdagerErMinst": 365,
-          "avviksprosent": 0.0,
           "grunnbelop": 93634,
           "sykepengegrunnlagsgrense": {
             "grunnbelop": 93634,

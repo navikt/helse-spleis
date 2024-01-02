@@ -1565,17 +1565,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "sammenligningsgrunnlag",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "Float",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "skjaeringstidspunkt",
           "description" : null,
           "args" : [ ],
@@ -1600,21 +1589,6 @@
             "ofType" : {
               "kind" : "SCALAR",
               "name" : "Float",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "vilkarsgrunnlagtype",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "ENUM",
-              "name" : "GraphQLVilkarsgrunnlagtype",
               "ofType" : null
             }
           },
@@ -1780,20 +1754,13 @@
           "description" : null,
           "args" : [ ],
           "type" : {
-            "kind" : "OBJECT",
-            "name" : "GraphQLOmregnetArsinntekt",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "sammenligningsgrunnlag",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "OBJECT",
-            "name" : "GraphQLSammenligningsgrunnlag",
-            "ofType" : null
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "OBJECT",
+              "name" : "GraphQLOmregnetArsinntekt",
+              "ofType" : null
+            }
           },
           "isDeprecated" : false,
           "deprecationReason" : null
@@ -1916,53 +1883,6 @@
               "kind" : "SCALAR",
               "name" : "Float",
               "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        } ],
-        "inputFields" : null,
-        "interfaces" : [ ],
-        "enumValues" : null,
-        "possibleTypes" : null
-      }, {
-        "kind" : "OBJECT",
-        "name" : "GraphQLSammenligningsgrunnlag",
-        "description" : "",
-        "fields" : [ {
-          "name" : "belop",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "SCALAR",
-              "name" : "Float",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "inntekterFraAOrdningen",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "LIST",
-              "name" : null,
-              "ofType" : {
-                "kind" : "NON_NULL",
-                "name" : null,
-                "ofType" : {
-                  "kind" : "OBJECT",
-                  "name" : "GraphQLInntekterFraAOrdningen",
-                  "ofType" : null
-                }
-              }
             }
           },
           "isDeprecated" : false,
@@ -4433,17 +4353,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "avviksprosent",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "Float",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "grunnbelop",
           "description" : null,
           "args" : [ ],
@@ -4568,17 +4477,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "sammenligningsgrunnlag",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "Float",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "skjaeringstidspunkt",
           "description" : null,
           "args" : [ ],
@@ -4629,21 +4527,6 @@
             "ofType" : {
               "kind" : "OBJECT",
               "name" : "GraphQLSykepengegrunnlagsgrense",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "vilkarsgrunnlagtype",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "ENUM",
-              "name" : "GraphQLVilkarsgrunnlagtype",
               "ofType" : null
             }
           },
@@ -4793,17 +4676,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "sammenligningsgrunnlag",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "SCALAR",
-            "name" : "Float",
-            "ofType" : null
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "skjaeringstidspunkt",
           "description" : null,
           "args" : [ ],
@@ -4828,21 +4700,6 @@
             "ofType" : {
               "kind" : "SCALAR",
               "name" : "Float",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "vilkarsgrunnlagtype",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "ENUM",
-              "name" : "GraphQLVilkarsgrunnlagtype",
               "ofType" : null
             }
           },
@@ -5561,30 +5418,6 @@
           "deprecationReason" : null
         }, {
           "name" : "Utbetalt",
-          "description" : null,
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        } ],
-        "possibleTypes" : null
-      }, {
-        "kind" : "ENUM",
-        "name" : "GraphQLVilkarsgrunnlagtype",
-        "description" : "",
-        "fields" : null,
-        "inputFields" : null,
-        "interfaces" : null,
-        "enumValues" : [ {
-          "name" : "Infotrygd",
-          "description" : null,
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "Spleis",
-          "description" : null,
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "Ukjent",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null

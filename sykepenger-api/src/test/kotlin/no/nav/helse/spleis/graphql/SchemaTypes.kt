@@ -25,7 +25,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodevilkar
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
-import no.nav.helse.spleis.graphql.dto.GraphQLSammenligningsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
@@ -49,7 +48,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
-import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
 
 internal fun SchemaBuilder.personSchema(personResolver: (fnr: String) -> GraphQLPerson?) {
@@ -107,7 +105,6 @@ private fun SchemaBuilder.inntektsgrunnlagTypes() {
     enum<GraphQLInntektskilde>()
     type<GraphQLInntekterFraAOrdningen>()
     type<GraphQLOmregnetArsinntekt>()
-    type<GraphQLSammenligningsgrunnlag>()
     type<GraphQLArbeidsgiverinntekt>()
 }
 
@@ -136,7 +133,7 @@ private fun SchemaBuilder.tidslinjeperiodeTypes() {
     type<GraphQLSykdomsdagkilde>()
     type<GraphQLUtbetalingsinfo>()
     type<GraphQLVurdering>()
-    type<GraphQLUtbetaling>() {
+    type<GraphQLUtbetaling> {
         property(GraphQLUtbetaling::type) {
             deprecate("Burde bruke enum \"typeEnum\"")
         }
@@ -155,7 +152,6 @@ private fun SchemaBuilder.tidslinjeperiodeTypes() {
 }
 
 private fun SchemaBuilder.vilkarsgrunnlagTypes() {
-    enum<GraphQLVilkarsgrunnlagtype>()
     type<GraphQLVilkarsgrunnlag>()
     type<GraphQLSpleisVilkarsgrunnlag>()
     type<GraphQLInfotrygdVilkarsgrunnlag>()

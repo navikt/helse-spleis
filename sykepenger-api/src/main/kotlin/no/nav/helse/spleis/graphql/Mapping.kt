@@ -1,21 +1,21 @@
 package no.nav.helse.spleis.graphql
 
 import java.util.UUID
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.spleis.dto.HendelsetypeDto
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.Periodetilstand
 import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpeilOppdrag
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
-import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Utbetaling
@@ -23,11 +23,14 @@ import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
+import no.nav.helse.spleis.dto.HendelseDTO
+import no.nav.helse.spleis.dto.HendelsetypeDto
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse
 import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLDag
+import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
@@ -39,13 +42,15 @@ import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
 import no.nav.helse.spleis.graphql.dto.GraphQLPeriodevilkar
 import no.nav.helse.spleis.graphql.dto.GraphQLRefusjonselement
-import no.nav.helse.spleis.graphql.dto.GraphQLSammenligningsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsutbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsledig
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadFrilans
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadNav
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadSelvstendig
 import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkildetype
@@ -58,19 +63,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
-import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
-import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
-import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
-import no.nav.helse.spleis.dto.HendelseDTO
-import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsledig
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadFrilans
-import no.nav.helse.spleis.graphql.dto.GraphQLSoknadSelvstendig
-import kotlin.Double.Companion.NEGATIVE_INFINITY
-import kotlin.Double.Companion.NaN
-import kotlin.Double.Companion.POSITIVE_INFINITY
 
 private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     dato = dag.dagen,
@@ -401,12 +394,13 @@ private fun mapArbeidsgiverRefusjon(arbeidsgiverrefusjon: Arbeidsgiverrefusjon) 
 
 private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
     arbeidsgiver = inntekt.organisasjonsnummer,
-    omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.tilGraphQLOmregnetArsinntekt(),
-    skjonnsmessigFastsatt = inntekt.skjønnsmessigFastsatt?.tilGraphQLOmregnetArsinntekt(),
-    sammenligningsgrunnlag = inntekt.sammenligningsgrunnlag?.let {
-        GraphQLSammenligningsgrunnlag(
-            belop = it,
-            inntekterFraAOrdningen = emptyList()
+    omregnetArsinntekt = inntekt.omregnetÅrsinntekt.tilGraphQLOmregnetArsinntekt(),
+    skjonnsmessigFastsatt = inntekt.skjønnsmessigFastsatt?.let {
+        GraphQLOmregnetArsinntekt(
+            kilde = GraphQLInntektskilde.SkjonnsmessigFastsatt,
+            belop = it.årlig,
+            manedsbelop = it.månedlig,
+            inntekterFraAOrdningen = null
         )
     },
     deaktivert = inntekt.deaktivert
@@ -419,7 +413,6 @@ private fun Inntekt.tilGraphQLOmregnetArsinntekt() = GraphQLOmregnetArsinntekt(
         Inntektkilde.Infotrygd -> GraphQLInntektskilde.Infotrygd
         Inntektkilde.AOrdningen -> GraphQLInntektskilde.AOrdningen
         Inntektkilde.IkkeRapportert -> GraphQLInntektskilde.IkkeRapportert
-        Inntektkilde.SkjønnsmessigFastsatt -> GraphQLInntektskilde.SkjonnsmessigFastsatt
     },
     belop = this.beløp,
     manedsbelop = this.månedsbeløp,
@@ -431,27 +424,14 @@ private fun Inntekt.tilGraphQLOmregnetArsinntekt() = GraphQLOmregnetArsinntekt(
     }
 )
 
-private fun Double?.mapAvviksprosent() =
-    if (this in setOf(POSITIVE_INFINITY, NEGATIVE_INFINITY, NaN)) 100.0 else this
-
-internal fun mapVilkårsgrunnlagHistorikk(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnlag>) =
-    GraphQLVilkarsgrunnlaghistorikk(
-        id = id,
-        grunnlag = vilkårsgrunnlag.map { grunnlag ->
-            mapVilkårsgrunnlag(id, grunnlag)
-        }
-    )
-
 internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
         when (vilkårsgrunnlag) {
             is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
                 id = id,
                 skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
                 omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
-                sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
                 sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
                 inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
-                avviksprosent = vilkårsgrunnlag.avviksprosent.mapAvviksprosent(),
                 grunnbelop = vilkårsgrunnlag.grunnbeløp,
                 sykepengegrunnlagsgrense = mapSykepengergrunnlagsgrense(vilkårsgrunnlag.sykepengegrunnlagsgrense),
                 antallOpptjeningsdagerErMinst = vilkårsgrunnlag.antallOpptjeningsdagerErMinst,
@@ -460,27 +440,17 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
                 oppfyllerKravOmOpptjening = vilkårsgrunnlag.oppfyllerKravOmOpptjening,
                 oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap,
                 arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)},
-                skjonnsmessigFastsattAarlig = vilkårsgrunnlag.skjønnsmessigFastsattÅrlig
+                skjonnsmessigFastsattAarlig = vilkårsgrunnlag.inntekter.mapNotNull { it.skjønnsmessigFastsatt }.takeIf(List<*>::isNotEmpty)?.sumOf { it.årlig }
             )
             is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
                 id = id,
                 skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
                 omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag, // For infotrygd har vi ikke noe konsept for hvorvidt en inntekt er skjønnsfastsatt
-                sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
                 sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
                 inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
                 arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)}
             )
-            else -> object : GraphQLVilkarsgrunnlag {
-                override val id = id
-                override val skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt
-                override val omregnetArsinntekt = vilkårsgrunnlag.beregningsgrunnlag
-                override val sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag
-                override val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag
-                override val inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
-                override val arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)}
-                override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.Ukjent
-            }
+            else -> throw IllegalStateException("har ikke mapping for vilkårsgrunnlag ${vilkårsgrunnlag::class.simpleName ?: "[ukjent klassenavn]"}")
         }
 
 

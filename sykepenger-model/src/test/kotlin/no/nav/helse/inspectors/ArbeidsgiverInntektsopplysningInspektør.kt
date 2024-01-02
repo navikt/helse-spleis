@@ -57,14 +57,14 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     }
 
     override fun preVisitSkjønnsmessigFastsatt(
-        saksbehandler: SkjønnsmessigFastsatt,
+        skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        this.tilstand.lagreInntekt(this, saksbehandler)
+        this.tilstand.lagreInntekt(this, skjønnsmessigFastsatt)
     }
 
     override fun visitInntektsmelding(

@@ -8,20 +8,19 @@ import no.nav.helse.serde.api.dto.Inntekt
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.Refusjonselement
+import no.nav.helse.serde.api.dto.SkjønnsmessigFastsattDTO
 
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,
-    val omregnetÅrsinntekt: IOmregnetÅrsinntekt?,
-    val sammenligningsgrunnlag: Double? = null,
-    val skjønnsmessigFastsatt: IOmregnetÅrsinntekt?,
+    val omregnetÅrsinntekt: IOmregnetÅrsinntekt,
+    val skjønnsmessigFastsatt: SkjønnsmessigFastsattDTO?,
     val deaktivert: Boolean
 ) {
     internal fun toDTO(): Arbeidsgiverinntekt {
         return Arbeidsgiverinntekt(
             organisasjonsnummer = arbeidsgiver,
-            omregnetÅrsinntekt = omregnetÅrsinntekt?.toDTO(),
-            sammenligningsgrunnlag = sammenligningsgrunnlag,
-            skjønnsmessigFastsatt = skjønnsmessigFastsatt?.toDTO(),
+            omregnetÅrsinntekt = omregnetÅrsinntekt.toDTO(),
+            skjønnsmessigFastsatt = skjønnsmessigFastsatt,
             deaktivert = deaktivert
         )
     }
@@ -58,7 +57,7 @@ internal data class IOmregnetÅrsinntekt(
 }
 
 internal enum class IInntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert, SkjønnsmessigFastsatt;
+    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert;
 
     internal fun toDTO() = when (this) {
         Saksbehandler -> Inntektkilde.Saksbehandler
@@ -66,7 +65,6 @@ internal enum class IInntektkilde {
         Infotrygd -> Inntektkilde.Infotrygd
         AOrdningen -> Inntektkilde.AOrdningen
         IkkeRapportert -> Inntektkilde.IkkeRapportert
-        SkjønnsmessigFastsatt -> Inntektkilde.SkjønnsmessigFastsatt
     }
 }
 

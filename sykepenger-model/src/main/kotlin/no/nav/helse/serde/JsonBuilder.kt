@@ -978,7 +978,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun preVisitSkjønnsmessigFastsatt(
-            saksbehandler: SkjønnsmessigFastsatt,
+            skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
             id: UUID,
             dato: LocalDate,
             hendelseId: UUID,
@@ -1130,7 +1130,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun preVisitSkjønnsmessigFastsatt(
-            saksbehandler: SkjønnsmessigFastsatt,
+            skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
             id: UUID,
             dato: LocalDate,
             hendelseId: UUID,
@@ -1238,7 +1238,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun preVisitSkjønnsmessigFastsatt(
-            saksbehandler: SkjønnsmessigFastsatt,
+            skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
             id: UUID,
             dato: LocalDate,
             hendelseId: UUID,
@@ -1262,7 +1262,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun postVisitSkjønnsmessigFastsatt(
-            saksbehandler: SkjønnsmessigFastsatt,
+            skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
             id: UUID,
             dato: LocalDate,
             hendelseId: UUID,

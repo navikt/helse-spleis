@@ -92,14 +92,14 @@ internal class InntektsopplysningInspektør(inntektsopplysning: Inntektsopplysni
     }
 
     override fun preVisitSkjønnsmessigFastsatt(
-        saksbehandler: SkjønnsmessigFastsatt,
+        skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        this.tilstand.lagreInntekt(this, saksbehandler, beløp, hendelseId, tidsstempel)
+        this.tilstand.lagreInntekt(this, skjønnsmessigFastsatt, beløp, hendelseId, tidsstempel)
     }
 
     private sealed interface Tilstand {

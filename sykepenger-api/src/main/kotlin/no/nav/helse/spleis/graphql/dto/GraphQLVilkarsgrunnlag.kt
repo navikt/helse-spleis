@@ -4,34 +4,24 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.util.UUID
 
-enum class GraphQLVilkarsgrunnlagtype {
-    Infotrygd,
-    Spleis,
-    Ukjent
-}
-
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
 interface GraphQLVilkarsgrunnlag {
     val id: UUID
     val skjaeringstidspunkt: LocalDate
     val omregnetArsinntekt: Double
-    val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<GraphQLArbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>
-    val vilkarsgrunnlagtype: GraphQLVilkarsgrunnlagtype
 }
 
 data class GraphQLSpleisVilkarsgrunnlag(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val omregnetArsinntekt: Double,
-    override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<GraphQLArbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>,
     val skjonnsmessigFastsattAarlig: Double?,
-    val avviksprosent: Double?,
     val grunnbelop: Int,
     val sykepengegrunnlagsgrense: GraphQLSykepengegrunnlagsgrense,
     val antallOpptjeningsdagerErMinst: Int,
@@ -39,21 +29,16 @@ data class GraphQLSpleisVilkarsgrunnlag(
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
-) : GraphQLVilkarsgrunnlag {
-    override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.Spleis
-}
+) : GraphQLVilkarsgrunnlag
 
 data class GraphQLInfotrygdVilkarsgrunnlag(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val omregnetArsinntekt: Double,
-    override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val arbeidsgiverrefusjoner: List<GraphQLArbeidsgiverrefusjon>,
     override val inntekter: List<GraphQLArbeidsgiverinntekt>
-) : GraphQLVilkarsgrunnlag {
-    override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.Infotrygd
-}
+) : GraphQLVilkarsgrunnlag
 
 data class GraphQLVilkarsgrunnlaghistorikk(
     val id: UUID,

@@ -8,28 +8,18 @@ import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
 interface Vilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
     val beregningsgrunnlag: Double
-    val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<Arbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
-    val vilkårsgrunnlagtype: Vilkårsgrunnlagtype
-}
-
-enum class Vilkårsgrunnlagtype {
-    INFOTRYGD,
-    SPLEIS
 }
 
 data class SpleisVilkårsgrunnlag(
     override val skjæringstidspunkt: LocalDate,
     override val beregningsgrunnlag: Double,
-    override val sammenligningsgrunnlag: Double,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
-    val skjønnsmessigFastsattÅrlig: Double?,
     val omregnetÅrsinntekt: Double,
-    val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
     val antallOpptjeningsdagerErMinst: Int,
@@ -37,26 +27,20 @@ data class SpleisVilkårsgrunnlag(
     val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
-) : Vilkårsgrunnlag {
-    override val vilkårsgrunnlagtype = Vilkårsgrunnlagtype.SPLEIS
-}
+) : Vilkårsgrunnlag
 
 data class InfotrygdVilkårsgrunnlag(
     override val skjæringstidspunkt: LocalDate,
     override val beregningsgrunnlag: Double,
-    override val sammenligningsgrunnlag: Double?,
     override val sykepengegrunnlag: Double,
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
-) : Vilkårsgrunnlag {
-    override val vilkårsgrunnlagtype = Vilkårsgrunnlagtype.INFOTRYGD
-}
+) : Vilkårsgrunnlag
 
 data class Arbeidsgiverinntekt(
     val organisasjonsnummer: String,
-    val omregnetÅrsinntekt: Inntekt?,
-    val sammenligningsgrunnlag: Double? = null,
-    val skjønnsmessigFastsatt: Inntekt? = null,
+    val omregnetÅrsinntekt: Inntekt,
+    val skjønnsmessigFastsatt: SkjønnsmessigFastsattDTO? = null,
     val deaktivert: Boolean
 )
 
@@ -73,8 +57,13 @@ data class Refusjonselement(
 )
 
 enum class Inntektkilde {
-    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert, SkjønnsmessigFastsatt
+    Saksbehandler, Inntektsmelding, Infotrygd, AOrdningen, IkkeRapportert
 }
+
+data class SkjønnsmessigFastsattDTO(
+    val årlig: Double,
+    val månedlig: Double
+)
 
 data class Inntekt(
     val kilde: Inntektkilde,

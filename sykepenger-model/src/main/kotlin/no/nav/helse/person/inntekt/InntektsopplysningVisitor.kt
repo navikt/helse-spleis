@@ -31,7 +31,7 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
     }
 
     fun preVisitSkjønnsmessigFastsatt(
-        saksbehandler: SkjønnsmessigFastsatt,
+        skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
@@ -40,7 +40,7 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
     ) {
     }
     fun postVisitSkjønnsmessigFastsatt(
-        saksbehandler: SkjønnsmessigFastsatt,
+        skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,

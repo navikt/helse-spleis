@@ -25,16 +25,10 @@ data class GraphQLOmregnetArsinntekt(
     val inntekterFraAOrdningen: List<GraphQLInntekterFraAOrdningen>?
 )
 
-data class GraphQLSammenligningsgrunnlag(
-    val belop: Double,
-    val inntekterFraAOrdningen: List<GraphQLInntekterFraAOrdningen>
-)
-
 data class GraphQLArbeidsgiverinntekt(
     val arbeidsgiver: String,
-    val omregnetArsinntekt: GraphQLOmregnetArsinntekt?,
-    val skjonnsmessigFastsatt: GraphQLOmregnetArsinntekt?,
-    val sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag?,
+    val omregnetArsinntekt: GraphQLOmregnetArsinntekt,
+    val skjonnsmessigFastsatt: GraphQLOmregnetArsinntekt?, // TODO: speil bruker kun <beløp>, og verdien kunne altså vært foreklet til en <Double?>
     val deaktivert: Boolean? = null,
 )
 

@@ -871,25 +871,25 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun preVisitSkjønnsmessigFastsatt(
-        saksbehandler: SkjønnsmessigFastsatt,
+        skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.preVisitSkjønnsmessigFastsatt(saksbehandler, id, dato, hendelseId, beløp, tidsstempel)
+        delegatee.preVisitSkjønnsmessigFastsatt(skjønnsmessigFastsatt, id, dato, hendelseId, beløp, tidsstempel)
     }
 
     override fun postVisitSkjønnsmessigFastsatt(
-        saksbehandler: SkjønnsmessigFastsatt,
+        skjønnsmessigFastsatt: SkjønnsmessigFastsatt,
         id: UUID,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.postVisitSkjønnsmessigFastsatt(saksbehandler, id, dato, hendelseId, beløp, tidsstempel)
+        delegatee.postVisitSkjønnsmessigFastsatt(skjønnsmessigFastsatt, id, dato, hendelseId, beløp, tidsstempel)
     }
 
     override fun visitInntektsmelding(

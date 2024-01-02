@@ -448,7 +448,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                         InntekterFraAOrdningen(YearMonth.of(2017, Month.DECEMBER), 1000.0)
                     )
                 ),
-                sammenligningsgrunnlag = 12000.0,
                 deaktivert = true
             ),
             vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
@@ -495,61 +494,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `legger ved sammenligningsgrunnlag ved manglende sykepengegrunnlag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
-                    sammenligningsgrunnlag(a2, 1.oktober(2017), 1000.månedlig.repeat(9))
-                )
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 30.september(2017), Arbeidsforholdtype.ORDINÆRT)
-            ),
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val personDto = serializePersonForSpeil(person)
-        val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
-        assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
-        assertEquals(listOf(
-            Arbeidsgiverinntekt(
-                organisasjonsnummer = a1,
-                omregnetÅrsinntekt = Inntekt(
-                    kilde = Inntektkilde.Inntektsmelding,
-                    beløp = 372000.0,
-                    månedsbeløp = 31000.0,
-                    inntekterFraAOrdningen = null
-                ),
-                sammenligningsgrunnlag = 372000.0,
-                deaktivert = false
-            ),
-            Arbeidsgiverinntekt(
-                organisasjonsnummer = a2,
-                omregnetÅrsinntekt = null,
-                sammenligningsgrunnlag = 9000.0,
-                deaktivert = false
-            )),
-            vilkårsgrunnlag?.inntekter
-        )
-        assertEquals(listOf(a1, a2), personDto.arbeidsgivere.map { it.organisasjonsnummer })
-    }
-
-    @Test
     fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -587,7 +531,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                     månedsbeløp = 31000.0,
                     inntekterFraAOrdningen = null
                 ),
-                sammenligningsgrunnlag = 372000.0,
                 deaktivert = false
             ),
             Arbeidsgiverinntekt(
@@ -598,7 +541,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                     månedsbeløp = 0.0,
                     inntekterFraAOrdningen = null
                 ),
-                sammenligningsgrunnlag = null,
                 deaktivert = true
             )
         )
