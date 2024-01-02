@@ -122,7 +122,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
         }
     }
 
-    object SendFeriepengeOppdrag : Toggle("SEND_FERIEPENGEOPPDRAG", false)
+    object SendFeriepengeOppdrag : Toggle("SEND_FERIEPENGEOPPDRAG", true)
     object AltAvTjuefemprosentAvvikssaker : Toggle("AVVIKSAKER", false)
     object AvviksvurderingFlyttet : Toggle("AVVIKSAKER_FLYTTET", false)
 }
