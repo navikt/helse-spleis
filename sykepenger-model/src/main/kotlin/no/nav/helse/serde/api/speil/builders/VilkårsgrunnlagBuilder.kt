@@ -17,7 +17,6 @@ import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.InntektsopplysningVisitor
 import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt

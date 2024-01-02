@@ -9,8 +9,7 @@ enum class GraphQLInntektskilde {
     Inntektsmelding,
     Infotrygd,
     AOrdningen,
-    IkkeRapportert,
-    SkjonnsmessigFastsatt
+    IkkeRapportert
 }
 
 data class GraphQLInntekterFraAOrdningen(
@@ -21,10 +20,7 @@ data class GraphQLInntekterFraAOrdningen(
 data class GraphQLSkjonnsmessigFastsatt(
     val belop: Double,
     val manedsbelop: Double,
-) {
-    val kilde = GraphQLInntektskilde.SkjonnsmessigFastsatt
-    val inntekterFraAOrdningen: List<GraphQLInntekterFraAOrdningen>? = null
-}
+)
 
 data class GraphQLOmregnetArsinntekt(
     val kilde: GraphQLInntektskilde,

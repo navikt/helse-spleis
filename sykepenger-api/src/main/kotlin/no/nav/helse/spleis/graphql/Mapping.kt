@@ -438,8 +438,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
                 oppfyllerKravOmMinstelonn = vilkårsgrunnlag.oppfyllerKravOmMinstelønn,
                 oppfyllerKravOmOpptjening = vilkårsgrunnlag.oppfyllerKravOmOpptjening,
                 oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap,
-                arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)},
-                skjonnsmessigFastsattAarlig = vilkårsgrunnlag.inntekter.mapNotNull { it.skjønnsmessigFastsatt }.takeIf(List<*>::isNotEmpty)?.sumOf { it.årlig }
+                arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map{ refusjon -> mapArbeidsgiverRefusjon(refusjon)}
             )
             is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
                 id = id,

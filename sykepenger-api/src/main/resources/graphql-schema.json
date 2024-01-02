@@ -1912,40 +1912,6 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
-          "name" : "inntekterFraAOrdningen",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "LIST",
-            "name" : null,
-            "ofType" : {
-              "kind" : "NON_NULL",
-              "name" : null,
-              "ofType" : {
-                "kind" : "OBJECT",
-                "name" : "GraphQLInntekterFraAOrdningen",
-                "ofType" : null
-              }
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "kilde",
-          "description" : null,
-          "args" : [ ],
-          "type" : {
-            "kind" : "NON_NULL",
-            "name" : null,
-            "ofType" : {
-              "kind" : "ENUM",
-              "name" : "GraphQLInntektskilde",
-              "ofType" : null
-            }
-          },
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
           "name" : "manedsbelop",
           "description" : null,
           "args" : [ ],
@@ -5005,11 +4971,6 @@
           "deprecationReason" : null
         }, {
           "name" : "IkkeRapportert",
-          "description" : null,
-          "isDeprecated" : false,
-          "deprecationReason" : null
-        }, {
-          "name" : "SkjonnsmessigFastsatt",
           "description" : null,
           "isDeprecated" : false,
           "deprecationReason" : null
