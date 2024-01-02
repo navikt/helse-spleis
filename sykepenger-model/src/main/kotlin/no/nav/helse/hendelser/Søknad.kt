@@ -255,7 +255,6 @@ class Søknad(
 
         internal open fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonObserver: SubsumsjonObserver) {}
 
-        // TODO: trenger en søknadsperiode for arbeidsgiverdag
         class Sykdom(
             fom: LocalDate,
             tom: LocalDate,
