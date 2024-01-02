@@ -46,6 +46,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsutbetaling
+import no.nav.helse.spleis.graphql.dto.GraphQLSkjonnsmessigFastsatt
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsledig
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadFrilans
@@ -396,11 +397,9 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
     arbeidsgiver = inntekt.organisasjonsnummer,
     omregnetArsinntekt = inntekt.omregnetÅrsinntekt.tilGraphQLOmregnetArsinntekt(),
     skjonnsmessigFastsatt = inntekt.skjønnsmessigFastsatt?.let {
-        GraphQLOmregnetArsinntekt(
-            kilde = GraphQLInntektskilde.SkjonnsmessigFastsatt,
+        GraphQLSkjonnsmessigFastsatt(
             belop = it.årlig,
-            manedsbelop = it.månedlig,
-            inntekterFraAOrdningen = null
+            manedsbelop = it.månedlig
         )
     },
     deaktivert = inntekt.deaktivert

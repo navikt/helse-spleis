@@ -18,6 +18,14 @@ data class GraphQLInntekterFraAOrdningen(
     val sum: Double
 )
 
+data class GraphQLSkjonnsmessigFastsatt(
+    val belop: Double,
+    val manedsbelop: Double,
+) {
+    val kilde = GraphQLInntektskilde.SkjonnsmessigFastsatt
+    val inntekterFraAOrdningen: List<GraphQLInntekterFraAOrdningen>? = null
+}
+
 data class GraphQLOmregnetArsinntekt(
     val kilde: GraphQLInntektskilde,
     val belop: Double,
@@ -28,7 +36,7 @@ data class GraphQLOmregnetArsinntekt(
 data class GraphQLArbeidsgiverinntekt(
     val arbeidsgiver: String,
     val omregnetArsinntekt: GraphQLOmregnetArsinntekt,
-    val skjonnsmessigFastsatt: GraphQLOmregnetArsinntekt?, // TODO: speil bruker kun <beløp>, og verdien kunne altså vært foreklet til en <Double?>
+    val skjonnsmessigFastsatt: GraphQLSkjonnsmessigFastsatt?, // TODO: speil bruker kun <beløp>, og verdien kunne altså vært foreklet til en <Double?>
     val deaktivert: Boolean? = null,
 )
 

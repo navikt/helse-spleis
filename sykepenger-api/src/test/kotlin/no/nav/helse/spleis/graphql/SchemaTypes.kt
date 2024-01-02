@@ -29,6 +29,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsutbetaling
+import no.nav.helse.spleis.graphql.dto.GraphQLSkjonnsmessigFastsatt
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsledig
 import no.nav.helse.spleis.graphql.dto.GraphQLSoknadFrilans
@@ -104,6 +105,7 @@ private fun SchemaBuilder.hendelseTypes() {
 private fun SchemaBuilder.inntektsgrunnlagTypes() {
     enum<GraphQLInntektskilde>()
     type<GraphQLInntekterFraAOrdningen>()
+    type<GraphQLSkjonnsmessigFastsatt>()
     type<GraphQLOmregnetArsinntekt>()
     type<GraphQLArbeidsgiverinntekt>()
 }
