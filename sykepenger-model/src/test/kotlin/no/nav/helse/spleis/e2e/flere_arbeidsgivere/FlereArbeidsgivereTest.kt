@@ -74,6 +74,55 @@ import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
     @Test
+    fun `replay av inntektsmelding medfører at to perioder går til godkjenning samtidig`() {
+        a1 {
+            nyPeriode(1.januar til 16.januar)
+            nyPeriode(20.januar til 31.januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
+            håndterVilkårsgrunnlag(2.vedtaksperiode,
+                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 20.januar),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 1.januar),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                )
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+        }
+        a2 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, beregnetInntekt = INNTEKT)
+            nyPeriode(20.januar til 31.januar)
+        }
+
+        assertForventetFeil(
+            forklaring = "a2 blir strukket tilbake som følge av replay, men a1 blir ikke forhindret fra å gå fremover",
+            nå = {
+                a1 {
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+                }
+                a2 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+                }
+            },
+            ønsket = {
+                a1 {
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                }
+                a2 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+                }
+            }
+        )
+    }
+
+    @Test
     fun `out of order på ghost`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
