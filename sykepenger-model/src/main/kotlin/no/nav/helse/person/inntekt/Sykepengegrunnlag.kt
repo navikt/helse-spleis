@@ -7,6 +7,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding

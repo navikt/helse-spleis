@@ -562,6 +562,7 @@ class Person private constructor(
     }
 
     internal fun avviksprosentBeregnet(event: PersonObserver.AvviksprosentBeregnetEvent) {
+        if (Toggle.AvviksvurderingFlyttet.enabled) return
         observers.forEach { it.avviksprosentBeregnet(event) }
     }
 
