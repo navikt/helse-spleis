@@ -219,7 +219,7 @@ internal class Feriepengeberegner(
 
         private companion object {
             // Hardkodet dato skal være datoen Infotrygd sist kjørte feriepenger
-            private val DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD = LocalDate.of(2023, 10, 21)
+            private val DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD = LocalDate.of(2023, 12, 28)
         }
 
         private inner class InfotrygdUtbetalteDagerVisitor : FeriepengeutbetalingsperiodeVisitor {
