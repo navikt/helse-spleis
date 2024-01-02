@@ -63,6 +63,6 @@ spec:
   - name: KAFKA_MAX_POLL_INTERVAL_MS
     value: "1500000" # 1,500,000 millisekunder er 25 minutter
   - name: SEND_FERIEPENGEOPPDRAG
-    value: "false"
+    value: "true"
   - name: AVVIKSAKER_FLYTTET
     value: "true"
