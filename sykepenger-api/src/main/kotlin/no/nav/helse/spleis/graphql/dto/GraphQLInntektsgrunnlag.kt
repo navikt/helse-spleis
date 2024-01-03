@@ -33,6 +33,7 @@ data class GraphQLArbeidsgiverinntekt(
     val arbeidsgiver: String,
     val omregnetArsinntekt: GraphQLOmregnetArsinntekt,
     val skjonnsmessigFastsatt: GraphQLSkjonnsmessigFastsatt?, // TODO: speil bruker kun <beløp>, og verdien kunne altså vært foreklet til en <Double?>
+    val skjonnsmessigFastsattAarlig: Double?,
     val deaktivert: Boolean? = null,
 )
 
