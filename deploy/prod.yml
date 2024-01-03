@@ -37,7 +37,7 @@ spec:
         diskSize: 250
         diskType: SSD
         name: spleis2
-        tier: db-custom-96-215040
+        tier: db-custom-4-8960
         retainedBackups: 14
         databases:
           - name: spleis
@@ -48,7 +48,7 @@ spec:
               - name: spleis-migrate
         flags:
           - name: max_connections
-            value: "350"
+            value: "200"
   secureLogs:
     enabled: true
   env:
