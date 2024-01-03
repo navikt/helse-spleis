@@ -119,16 +119,18 @@ private fun fyllArbeidstabell(session: Session, arbeidId: String) {
     """
     session.run(queryOf(query, arbeidId).asExecute)
 }
-private fun hentArbeid(session: Session, arbeidId: String): Long? {
+private fun hentArbeid(session: Session, arbeidId: String, size: Int = 500): List<Long> {
     @Language("PostgreSQL")
     val query = """
-    select fnr from arbeidstabell where arbeid_startet IS NULL and arbeid_id = ? limit 1 for update skip locked; 
+    select fnr from arbeidstabell where arbeid_startet IS NULL and arbeid_id = ? limit $size for update skip locked; 
     """
     @Language("PostgreSQL")
-    val oppdater = "update arbeidstabell set arbeid_startet=now() where arbeid_id=? and fnr=?"
+    val oppdater = "update arbeidstabell set arbeid_startet=now() where arbeid_id=? and fnr IN(%s)"
     return session.transaction { txSession ->
-        txSession.run(queryOf(query, arbeidId).map { it.long("fnr") }.asSingle)?.also { fnr ->
-            txSession.run(queryOf(oppdater, arbeidId, fnr).asUpdate)
+        txSession.run(queryOf(query, arbeidId).map { it.long("fnr") }.asList).also { personer ->
+            if (personer.isNotEmpty()) {
+                txSession.run(queryOf(String.format(oppdater, personer.joinToString { "?" }), arbeidId, *personer.toTypedArray()).asUpdate)
+            }
         }
     }
 }
@@ -144,7 +146,7 @@ private fun arbeidFinnes(session: Session, arbeidId: String): Boolean {
     return antall > 0
 }
 
-private fun opprettOgUtførArbeid(arbeidId: String, arbeider: (session: Session, fnr: Long) -> Unit) {
+private fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: Session, fnr: Long) -> Unit) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         sessionOf(ds).use { session ->
             fyllArbeidstabell(session, arbeidId)
@@ -154,17 +156,20 @@ private fun opprettOgUtførArbeid(arbeidId: String, arbeider: (session: Session,
                 log.info("Arbeid finnes ikke ennå, venter litt")
                 runBlocking { delay(250) }
             }
-            var fnr: Long?
             do {
                 log.info("Forsøker å hente arbeid")
-                fnr = hentArbeid(session, arbeidId)?.also { fnr ->
-                    try {
-                        arbeider(session, fnr)
-                    } finally {
-                        arbeidFullført(session, arbeidId, fnr)
+                val arbeidsliste = hentArbeid(session, arbeidId, size)
+                    .also {
+                        if (it.isNotEmpty()) log.info("Fikk ${it.size} stk")
                     }
-                }
-            } while (fnr != null)
+                    .onEach { fnr ->
+                        try {
+                            arbeider(session, fnr)
+                        } finally {
+                            arbeidFullført(session, arbeidId, fnr)
+                        }
+                    }
+            } while (arbeidsliste.isNotEmpty())
             log.info("Fant ikke noe arbeid, avslutter")
         }
     }
@@ -189,7 +194,7 @@ internal val objectMapper: ObjectMapper = jacksonObjectMapper()
 
 private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId: String) {
     val producer = factory.createProducer(createAivenProperties(System.getenv()))
-    opprettOgUtførArbeid(arbeidId) { session, fnr ->
+    opprettOgUtførArbeid(arbeidId, size = 500) { session, fnr ->
         hentPerson(session, fnr)?.let { (aktørId, data) ->
             val mdcContextMap = MDC.getCopyOfContextMap() ?: emptyMap()
             try {
@@ -354,52 +359,6 @@ private fun parseInfotrygdVilkårsgrunnlag(grunnlagsdata: JsonNode, opprettet: L
     )
 }
 
-private fun finnTidligsteTidspunktForSkjæringstidspunkt(node: JsonNode, skjæringstidspunkt: LocalDate): LocalDateTime {
-    val relevanteVilkårsgrunnlag = vilkårsgrunnlagFor(node, skjæringstidspunkt)
-    val beregningstidspunkter = node.path("arbeidsgivere").flatMap { arbeidsgiver ->
-        arbeidsgiver.path("vedtaksperioder").flatMap { vedtaksperiode ->
-            vedtaksperiode.path("generasjoner").flatMap { generasjon ->
-                generasjon.path("endringer")
-                    .filter { endring ->
-                        endring.hasNonNull("vilkårsgrunnlagId")
-                    }
-                    .filter { endring ->
-                        UUID.fromString(endring.path("vilkårsgrunnlagId").asText()) in relevanteVilkårsgrunnlag
-                    }
-                    .map { endring ->
-                        LocalDateTime.parse(endring.path("tidsstempel").asText())
-                    }
-            }
-        }
-    }
-    val vilkårsgrunnlagtidspunkter = node.path("vilkårsgrunnlagHistorikk")
-        .filter { innslag ->
-            innslag.path("vilkårsgrunnlag")
-                .any { vilkårsgrunnlag ->
-                    UUID.fromString(vilkårsgrunnlag.path("vilkårsgrunnlagId").asText()) in relevanteVilkårsgrunnlag
-                }
-        }
-        .map { innslag ->
-            LocalDateTime.parse(innslag.path("opprettet").asText())
-        }
-    return checkNotNull(beregningstidspunkter.minOrNull() ?: vilkårsgrunnlagtidspunkter.minOrNull()) {
-        "Finner ikke beregningstidspunkt for $skjæringstidspunkt"
-    }
-}
-
-private fun vilkårsgrunnlagFor(node: JsonNode, skjæringstidspunkt: LocalDate): Set<UUID> {
-    return node.path("vilkårsgrunnlagHistorikk")
-        .flatMap { vilkårsgrunnlag ->
-            vilkårsgrunnlag.path("vilkårsgrunnlag").filter { grunnlagsdata ->
-                LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText()) == skjæringstidspunkt
-            }
-        }
-        .map { grunnlagsdata ->
-            UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
-        }
-        .toSet()
-}
-
 private data class AvviksvurderingerEvent(
     val fødselsnummer: String,
     val skjæringstidspunkter: List<AvviksvurderingDto>,
@@ -420,10 +379,7 @@ private data class AvviksvurderingDto(
     init {
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlag.isEmpty()) sikkerlogg.error("Ingen sammenligningsgrunnlag for $skjæringstidspunkt")
-        if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlagTotalbeløp == null) sikkerlogg.error("sammenligningsgrunnlagTotalbeløp er null for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlagTotalbeløp == 0.0) sikkerlogg.error("sammenligningsgrunnlagTotalbeløp er 0 for $skjæringstidspunkt")
-        if (type == VilkårsgrunnlagtypeDto.SPLEIS && beregningsgrunnlagTotalbeløp == null) sikkerlogg.error("beregningsgrunnlagTotalbeløp er null for $skjæringstidspunkt")
-        if (type == VilkårsgrunnlagtypeDto.SPLEIS && avviksprosent == null) sikkerlogg.error("avviksprosent er null for $skjæringstidspunkt")
     }
 }
 
