@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.google.api.client.json.Json
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
@@ -34,6 +35,7 @@ import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import kotlin.math.roundToInt
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
@@ -193,7 +195,8 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
             try {
                 MDC.put("aktørId", aktørId)
                 val node = objectMapper.readTree(data)
-                val vurderinger = hentAvviksvurderinger(node)
+                val aktuelleVilkårsgrunnlag = finnAktuelleAvviksvurderinger(node)
+                val vurderinger = hentAvviksvurderinger(node, aktuelleVilkårsgrunnlag)
                 if (vurderinger.isEmpty()) return@let
                 val fødselsnummer = fødselsnummerSomString(fnr)
                 val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
@@ -241,30 +244,61 @@ private fun createAivenProperties(env: Map<String, String>) =
         put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
     }
 
-
-private fun hentAvviksvurderinger(node: JsonNode): List<AvviksvurderingDto> {
-    return node.path("vilkårsgrunnlagHistorikk")
-        .path(0)
-        .path("vilkårsgrunnlag")
-        .mapNotNull { vilkårsgrunnlag ->
-            val type = vilkårsgrunnlag.path("type").asText()
-            when (type) {
-                "Vilkårsprøving" -> parseSpleisVilkårsgrunnlag(node, vilkårsgrunnlag)
-                "Infotrygd" -> parseInfotrygdVilkårsgrunnlag(vilkårsgrunnlag)
-                else -> null
-            }
+private fun finnAktuelleAvviksvurderinger(node: JsonNode): Set<UUID> {
+    return node
+        .path("arbeidsgivere")
+        .fold(emptySet<UUID>()) { aktuelle, arbeidsgiver ->
+            arbeidsgiver
+                .path("vedtaksperioder")
+                .fold(aktuelle) { aktuelle, vedtaksperiode ->
+                    vedtaksperiode
+                        .path("generasjoner")
+                        .fold(aktuelle) { aktuelle, generasjon ->
+                            generasjon
+                                .path("endringer")
+                                .fold(aktuelle) { aktuelle, endring ->
+                                    endring
+                                        .path("vilkårsgrunnlagId")
+                                        .takeIf(JsonNode::isTextual)
+                                        ?.let {
+                                            aktuelle.plus(UUID.fromString(it.asText()))
+                                        } ?: aktuelle
+                                }
+                        }
+                }
         }
 }
 
-private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode): AvviksvurderingDto? {
+private fun hentAvviksvurderinger(node: JsonNode, aktuelleVilkårsgrunnlag: Set<UUID>): List<AvviksvurderingDto> {
+    return node.path("vilkårsgrunnlagHistorikk")
+        .flatMap { innslag ->
+            val opprettet = LocalDateTime.parse(innslag.path("opprettet").asText())
+            innslag.path("vilkårsgrunnlag")
+                .filter { vilkårsgrunnlag ->
+                    UUID.fromString(vilkårsgrunnlag.path("vilkårsgrunnlagId").asText()) in aktuelleVilkårsgrunnlag
+                }
+                .mapNotNull { vilkårsgrunnlag ->
+                    val type = vilkårsgrunnlag.path("type").asText()
+                    when (type) {
+                        "Vilkårsprøving" -> parseSpleisVilkårsgrunnlag(node, vilkårsgrunnlag, opprettet)
+                        "Infotrygd" -> parseInfotrygdVilkårsgrunnlag(vilkårsgrunnlag, opprettet)
+                        else -> null
+                    }
+                }
+        }
+        .groupBy { it.vilkårsgrunnlagId }
+        .map { (_, values) -> values.minByOrNull { it.vurderingstidspunkt }!! }
+}
+
+private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode, opprettet: LocalDateTime): AvviksvurderingDto? {
     val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
     return try {
         AvviksvurderingDto(
             beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble(),
             sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble(),
-            avviksprosent = grunnlagsdata.path("sykepengegrunnlag").path("avviksprosent").asDouble(),
+            avviksprosent = (grunnlagsdata.path("sykepengegrunnlag").path("avviksprosent").asDouble() * 10000).roundToInt() / 100.0,
             skjæringstidspunkt = skjæringstidspunkt,
-            vurderingstidspunkt = finnTidligsteTidspunktForSkjæringstidspunkt(node, skjæringstidspunkt),
+            vurderingstidspunkt = opprettet,
             type = VilkårsgrunnlagtypeDto.SPLEIS,
             omregnedeÅrsinntekter = grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
                 OmregnetÅrsinntektDto(
@@ -306,13 +340,13 @@ private fun finnInntektsopplysning(node: JsonNode, opplysningId: String): JsonNo
         }
     } ?: throw IllegalStateException("Finner ikke vilkårsgrunnlag med inntektsopplysning med $opplysningId")
 }
-private fun parseInfotrygdVilkårsgrunnlag(grunnlagsdata: JsonNode): AvviksvurderingDto {
+private fun parseInfotrygdVilkårsgrunnlag(grunnlagsdata: JsonNode, opprettet: LocalDateTime): AvviksvurderingDto {
     return AvviksvurderingDto(
         beregningsgrunnlagTotalbeløp = null,
         sammenligningsgrunnlagTotalbeløp = null,
         avviksprosent = null,
         skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText()),
-        vurderingstidspunkt = LocalDate.EPOCH.atStartOfDay(),
+        vurderingstidspunkt = opprettet,
         type = VilkårsgrunnlagtypeDto.INFOTRYGD,
         omregnedeÅrsinntekter = emptyList(),
         sammenligningsgrunnlag = emptyList(),
@@ -381,7 +415,7 @@ private data class AvviksvurderingDto(
     val type: VilkårsgrunnlagtypeDto,
     val omregnedeÅrsinntekter: List<OmregnetÅrsinntektDto>,
     val sammenligningsgrunnlag: List<SammenligningsgrunnlagDto>,
-    val vilkårsgrunnlagId: UUID?
+    val vilkårsgrunnlagId: UUID
 ) {
     init {
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
@@ -390,7 +424,6 @@ private data class AvviksvurderingDto(
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlagTotalbeløp == 0.0) sikkerlogg.error("sammenligningsgrunnlagTotalbeløp er 0 for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && beregningsgrunnlagTotalbeløp == null) sikkerlogg.error("beregningsgrunnlagTotalbeløp er null for $skjæringstidspunkt")
         if (type == VilkårsgrunnlagtypeDto.SPLEIS && avviksprosent == null) sikkerlogg.error("avviksprosent er null for $skjæringstidspunkt")
-        if (type == VilkårsgrunnlagtypeDto.SPLEIS && vilkårsgrunnlagId == null) sikkerlogg.error("vilkårsgrunnlagId er null for $skjæringstidspunkt")
     }
 }
 
