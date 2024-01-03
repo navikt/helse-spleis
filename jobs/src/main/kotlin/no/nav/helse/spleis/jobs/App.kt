@@ -319,7 +319,12 @@ private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode,
 }
 private fun omregnetÅrsinntekt(node: JsonNode, opplysning: JsonNode): Double {
     if (opplysning.path("kilde").asText() == "SKJØNNSMESSIG_FASTSATT") return omregnetÅrsinntekt(node, finnInntektsopplysning(node, opplysning.path("overstyrtInntektId").asText()))
-    return opplysning.path("beløp").asDouble()
+    val månedsbeløp = opplysning.path("skatteopplysninger")
+        .takeIf(JsonNode::isArray)
+        ?.sumOf { skatt -> skatt.path("beløp").asDouble() }
+        ?.div(3)
+        ?: opplysning.path("beløp").asDouble()
+    return månedsbeløp * 12
 }
 private fun finnInntektsopplysning(node: JsonNode, opplysningId: String): JsonNode {
     return node.path("vilkårsgrunnlagHistorikk").firstNotNullOfOrNull { vilkårsgrunnlag ->
