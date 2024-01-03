@@ -48,7 +48,7 @@ spec:
               - name: spleis-migrate
         flags:
           - name: max_connections
-            value: "250"
+            value: "350"
   secureLogs:
     enabled: true
   env:
