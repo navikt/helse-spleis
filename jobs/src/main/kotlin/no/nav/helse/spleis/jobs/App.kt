@@ -193,36 +193,38 @@ internal val objectMapper: ObjectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId: String) {
-    val producer = factory.createProducer(createAivenProperties(System.getenv()))
-    opprettOgUtførArbeid(arbeidId, size = 500) { session, fnr ->
-        hentPerson(session, fnr)?.let { (aktørId, data) ->
-            val mdcContextMap = MDC.getCopyOfContextMap() ?: emptyMap()
-            try {
-                MDC.put("aktørId", aktørId)
-                val node = objectMapper.readTree(data)
-                val aktuelleVilkårsgrunnlag = finnAktuelleAvviksvurderinger(node)
-                val vurderinger = hentAvviksvurderinger(node, aktuelleVilkårsgrunnlag)
-                if (vurderinger.isEmpty()) return@let
-                val fødselsnummer = fødselsnummerSomString(fnr)
-                val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
-                sikkerlogg.info("Ønsker å skrive avviksvurdering til kafka:\n {}", objectMapper.writeValueAsString(event))
-                producer.send(
-                    ProducerRecord(
-                        "tbd.avviksvurdering.migreringer.v2",
-                        null,
-                        fødselsnummer,
-                        objectMapper.writeValueAsString(event)
+    factory.createProducer().use { producer ->
+        opprettOgUtførArbeid(arbeidId, size = 500) { session, fnr ->
+            hentPerson(session, fnr)?.let { (aktørId, data) ->
+                val mdcContextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+                try {
+                    MDC.put("aktørId", aktørId)
+                    val node = objectMapper.readTree(data)
+                    val aktuelleVilkårsgrunnlag = finnAktuelleAvviksvurderinger(node)
+                    val vurderinger = hentAvviksvurderinger(node, aktuelleVilkårsgrunnlag)
+                    if (vurderinger.isEmpty()) return@let
+                    val fødselsnummer = fødselsnummerSomString(fnr)
+                    val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
+                    sikkerlogg.info("Ønsker å skrive avviksvurdering til kafka:\n {}", objectMapper.writeValueAsString(event))
+                    producer.send(
+                        ProducerRecord(
+                            "tbd.avviksvurdering.migreringer.v2",
+                            null,
+                            fødselsnummer,
+                            objectMapper.writeValueAsString(event)
+                        )
                     )
-                ).get()
-                sikkerlogg.info("Skrev avviksvurderinger til avviksvurdering.migreringer")
+                    sikkerlogg.info("Skrev avviksvurderinger til avviksvurdering.migreringer")
 
-            } catch (err: Exception) {
-                log.info("$aktørId lar seg ikke serialisere: ${err.message}")
-                sikkerlogg.error("$aktørId lar seg ikke serialisere: ${err.message}", err)
-            } finally {
-                MDC.setContextMap(mdcContextMap)
+                } catch (err: Exception) {
+                    log.info("$aktørId lar seg ikke serialisere: ${err.message}")
+                    sikkerlogg.error("$aktørId lar seg ikke serialisere: ${err.message}", err)
+                } finally {
+                    MDC.setContextMap(mdcContextMap)
+                }
             }
         }
+        producer.flush()
     }
     runBlocking {
         log.info("Venter med å skru av i ett minutt for at securelogs-sidecar forhåpentligvis skal synce loggene")
@@ -231,23 +233,6 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
 }
 
 private fun fødselsnummerSomString(fnr: Long) = fnr.toString().let { if (it.length == 11) it else "0$it" }
-
-private fun createAivenProperties(env: Map<String, String>) =
-     Properties().apply {
-        put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, env.getValue("KAFKA_BROKERS"))
-        put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name)
-        put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "")
-        put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks")
-        put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12")
-        put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, env.getValue("KAFKA_TRUSTSTORE_PATH"))
-        put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, env.getValue("KAFKA_CREDSTORE_PASSWORD"))
-        put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, env.getValue("KAFKA_KEYSTORE_PATH"))
-        put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, env.getValue("KAFKA_CREDSTORE_PASSWORD"))
-
-        put(ProducerConfig.ACKS_CONFIG, "1")
-        put(ProducerConfig.LINGER_MS_CONFIG, "0")
-        put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")
-    }
 
 private fun finnAktuelleAvviksvurderinger(node: JsonNode): Set<UUID> {
     return node
