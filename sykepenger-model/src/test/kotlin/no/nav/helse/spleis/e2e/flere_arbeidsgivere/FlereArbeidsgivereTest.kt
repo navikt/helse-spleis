@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
@@ -14,22 +15,30 @@ import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.lørdag
 import no.nav.helse.mai
+import no.nav.helse.mandag
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.onsdag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -55,6 +64,9 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
+import no.nav.helse.til
+import no.nav.helse.tirsdag
+import no.nav.helse.torsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -72,6 +84,83 @@ import org.junit.jupiter.api.assertThrows
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `mangler refusjonsopplysninger etter at skjæringstidspunktet flyttes`() {
+        a1 {
+            nyPeriode(3.januar til onsdag den 17.januar)
+        }
+        a2 {
+            nyPeriode(8.januar til onsdag den 17.januar)
+            nyPeriode(mandag den 22.januar til 23.januar)
+        }
+        a1 {
+            håndterSøknad(
+                Sykdom(mandag den 22.januar, 23.januar, 100.prosent),
+                egenmeldinger = listOf(
+                    Arbeidsgiverdag(fredag den 19.januar, fredag den 19.januar)
+                )
+            )
+            håndterInntektsmelding(listOf(3.januar til 17.januar, 19.januar.somPeriode()), beregnetInntekt = INNTEKT)
+            håndterVilkårsgrunnlag(2.vedtaksperiode,
+                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 19.januar),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 19.januar),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                )
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+        }
+        a1 {
+            nyPeriode(24.januar til 31.januar)
+        }
+        a2 {
+            nyPeriode(24.januar til 31.januar)
+            håndterInntektsmelding(listOf(
+                8.januar til onsdag den 17.januar,
+                // nå blir helgen 20. januar - 21.januar tolket som frisk,
+                // og flytter i praksis skjæringstidspunktet fra 19. januar til 22. januar
+                mandag den 22.januar til 25.januar
+            ))
+        }
+        a1 {
+            håndterVilkårsgrunnlag(2.vedtaksperiode,
+                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 22.januar),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
+                    a1 to INNTEKT,
+                    a2 to INNTEKT
+                ), 22.januar),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                )
+            )
+            assertForventetFeil(
+                forklaring = "vedtaksperioden til a1 går til vilkårsprøving selv om det ikke er tilstrekkelig refusjonsopplysninger",
+                nå = {
+                    assertThrows<IllegalStateException> {
+                        håndterYtelser(2.vedtaksperiode)
+                    }
+                },
+                ønsket = {
+                    assertDoesNotThrow {
+                        håndterYtelser(2.vedtaksperiode)
+                    }
+                }
+            )
+        }
+    }
 
     @Test
     fun `replay av inntektsmelding medfører at to perioder går til godkjenning samtidig`() {
