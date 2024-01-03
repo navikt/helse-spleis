@@ -14,7 +14,7 @@ spec:
     partitions: 70
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
-    retentionHours: 0  # -1 means unlimited
+    retentionHours: -1  # -1 means unlimited
   acl:
     - team: tbd
       application: spleis-migrate
