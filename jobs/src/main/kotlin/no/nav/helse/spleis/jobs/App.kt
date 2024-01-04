@@ -284,12 +284,13 @@ private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode,
     val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
     return try {
         val vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
-        val avviksprosentSomBrøk = grunnlagsdata.path("sykepengegrunnlag").path("avviksprosent").asDouble()
-        sikkerlogg.info("avviksprosent fra json er $avviksprosentSomBrøk for skjæringstidspunkt=$skjæringstidspunkt med vilkårsgrunnlagId=$vilkårsgrunnlagId")
+        val avviksprosentSomBrøk = grunnlagsdata.path("sykepengegrunnlag").path("avviksprosent")
+        val sykepengegrunnlagNode = grunnlagsdata.path("sykepengegrunnlag")
+        sikkerlogg.info("avviksprosent fra json er $avviksprosentSomBrøk for skjæringstidspunkt=$skjæringstidspunkt med vilkårsgrunnlagId=$vilkårsgrunnlagId\n\t$sykepengegrunnlagNode")
         AvviksvurderingDto(
             beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble(),
             sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble(),
-            avviksprosent = (avviksprosentSomBrøk * 10_000).roundToInt() / 100.0,
+            avviksprosent = (avviksprosentSomBrøk.asDouble() * 10_000).roundToInt() / 100.0,
             skjæringstidspunkt = skjæringstidspunkt,
             vurderingstidspunkt = opprettet,
             type = VilkårsgrunnlagtypeDto.SPLEIS,
