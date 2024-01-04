@@ -283,10 +283,13 @@ private fun hentAvviksvurderinger(node: JsonNode, aktuelleVilkårsgrunnlag: Set<
 private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode, opprettet: LocalDateTime): AvviksvurderingDto? {
     val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
     return try {
+        val vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
+        val avviksprosentSomBrøk = grunnlagsdata.path("sykepengegrunnlag").path("avviksprosent").asDouble()
+        sikkerlogg.info("avviksprosent fra json er $avviksprosentSomBrøk for skjæringstidspunkt=$skjæringstidspunkt med vilkårsgrunnlagId=$vilkårsgrunnlagId")
         AvviksvurderingDto(
             beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble(),
             sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble(),
-            avviksprosent = (grunnlagsdata.path("sykepengegrunnlag").path("avviksprosent").asDouble() * 10000).roundToInt() / 100.0,
+            avviksprosent = (avviksprosentSomBrøk * 10_000).roundToInt() / 100.0,
             skjæringstidspunkt = skjæringstidspunkt,
             vurderingstidspunkt = opprettet,
             type = VilkårsgrunnlagtypeDto.SPLEIS,
@@ -310,7 +313,7 @@ private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode,
                     }
                 )
             },
-            vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
+            vilkårsgrunnlagId = vilkårsgrunnlagId
         )
     } catch (err: Exception) {
         sikkerlogg.error("Klarte ikke migrere skjæringstidspunkt $skjæringstidspunkt: ${err.message}", err)
