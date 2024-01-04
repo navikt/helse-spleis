@@ -281,14 +281,14 @@ private fun hentAvviksvurderinger(node: JsonNode, aktuelleVilkårsgrunnlag: Set<
         .map { (_, values) -> values.minByOrNull { it.vurderingstidspunkt }!! }
 }
 
-private val DA_SPINNVILL_TOK_OVER = LocalDateTime.of(2024, 1, 2, 10, 32, 23, 291)
+private val DA_SPINNVILL_TOK_OVER = LocalDateTime.of(2024, 1, 2, 10, 0, 0, 0)
 private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode, opprettet: LocalDateTime): AvviksvurderingDto? {
-    if (opprettet >= DA_SPINNVILL_TOK_OVER) return null
+    val sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble()
+    if (opprettet >= DA_SPINNVILL_TOK_OVER && sammenligningsgrunnlagTotalbeløp == 0.0) return null
     val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
     return try {
         val vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
         val beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble()
-        val sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble()
         val avviksprosentSomBrøk = when {
             sammenligningsgrunnlagTotalbeløp == 0.0 -> 1.0
             else -> (sammenligningsgrunnlagTotalbeløp - beregningsgrunnlagTotalbeløp).absoluteValue / sammenligningsgrunnlagTotalbeløp
