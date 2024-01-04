@@ -35,6 +35,7 @@ import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
@@ -280,17 +281,23 @@ private fun hentAvviksvurderinger(node: JsonNode, aktuelleVilkårsgrunnlag: Set<
         .map { (_, values) -> values.minByOrNull { it.vurderingstidspunkt }!! }
 }
 
+private val DA_SPINNVILL_TOK_OVER = LocalDateTime.of(2024, 1, 2, 10, 32, 23, 291)
 private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode, opprettet: LocalDateTime): AvviksvurderingDto? {
+    if (opprettet >= DA_SPINNVILL_TOK_OVER) return null
     val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
     return try {
         val vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
-        val avviksprosentSomBrøk = grunnlagsdata.path("sykepengegrunnlag").path("avviksprosent")
-        val sykepengegrunnlagNode = grunnlagsdata.path("sykepengegrunnlag")
-        sikkerlogg.info("avviksprosent fra json er $avviksprosentSomBrøk for skjæringstidspunkt=$skjæringstidspunkt med vilkårsgrunnlagId=$vilkårsgrunnlagId\n\t$sykepengegrunnlagNode")
+        val beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble()
+        val sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble()
+        val avviksprosentSomBrøk = when {
+            sammenligningsgrunnlagTotalbeløp == 0.0 -> 1.0
+            else -> (sammenligningsgrunnlagTotalbeløp - beregningsgrunnlagTotalbeløp).absoluteValue / sammenligningsgrunnlagTotalbeløp
+        }
+        sikkerlogg.info("avviksprosent fra json er $avviksprosentSomBrøk for skjæringstidspunkt=$skjæringstidspunkt med vilkårsgrunnlagId=$vilkårsgrunnlagId")
         AvviksvurderingDto(
-            beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble(),
-            sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble(),
-            avviksprosent = (avviksprosentSomBrøk.asDouble() * 10_000).roundToInt() / 100.0,
+            beregningsgrunnlagTotalbeløp = beregningsgrunnlagTotalbeløp,
+            sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlagTotalbeløp,
+            avviksprosent = (avviksprosentSomBrøk * 10_000).roundToInt() / 100.0,
             skjæringstidspunkt = skjæringstidspunkt,
             vurderingstidspunkt = opprettet,
             type = VilkårsgrunnlagtypeDto.SPLEIS,
