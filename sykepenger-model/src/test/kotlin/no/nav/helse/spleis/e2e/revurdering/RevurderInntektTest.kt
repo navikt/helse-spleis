@@ -31,7 +31,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -41,7 +40,6 @@ import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengTilGodkjentVedtak
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
