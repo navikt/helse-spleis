@@ -14,7 +14,6 @@ import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
@@ -22,7 +21,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsforho
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
@@ -476,10 +474,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
         vedtaksperiodeIndeks: Int,
         skjæringstidspunkt: LocalDate = 1.januar,
         orgnummer: String = ORGNUMMER,
-        inntekter: List<InntekterForSammenligningsgrunnlagFraLøsning> = sammenligningsgrunnlag(
-            skjæringstidspunkt = skjæringstidspunkt,
-            inntekter = listOf(InntekterForSammenligningsgrunnlagFraLøsning.Inntekt(INNTEKT, orgnummer))
-        ),
         arbeidsforhold: List<Arbeidsforhold> = listOf(
             Arbeidsforhold(orgnummer, 1.januar(2010), null, Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)
         ),
@@ -489,21 +483,16 @@ internal abstract class AbstractEndToEndMediatorTest() {
             inntekter = listOf(InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, orgnummer))
         ),
     ) {
-        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSammenligningsgrunnlag))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
         val (_, message) = meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
             skjæringstidspunkt = testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate(),
-            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(
-                vedtaksperiodeIndeks,
-                InntekterForSammenligningsgrunnlag
-            ),
-            inntekter = inntekter,
+            tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag),
+            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             arbeidsforhold = (arbeidsforhold),
             medlemskapstatus = medlemskapstatus,
-            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             orgnummer = orgnummer
         )
         testRapid.sendTestMessage(message)

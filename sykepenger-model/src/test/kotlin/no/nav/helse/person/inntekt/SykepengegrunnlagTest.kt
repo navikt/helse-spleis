@@ -7,7 +7,6 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.dsl.TestPerson
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
@@ -22,8 +21,6 @@ import no.nav.helse.nesteDag
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FØDSELSDATO
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_2
@@ -349,7 +346,6 @@ internal class SykepengegrunnlagTest {
         )
 
         val sykepengegrunnlag = Sykepengegrunnlag(
-            person = TestPerson(object:PersonObserver{}).person,
             alder = UNG_PERSON_FØDSELSDATO.alder,
             arbeidsgiverInntektsopplysninger = inntekter,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -541,8 +537,7 @@ internal class SykepengegrunnlagTest {
             ),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             deaktiverteArbeidsforhold = emptyList(),
-            vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            vurdertInfotrygd = false
         )
 
         val opptjening = Opptjening.nyOpptjening(listOf(
@@ -618,8 +613,7 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            vurdertInfotrygd = false
         )
 
 
@@ -665,8 +659,7 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            vurdertInfotrygd = false
         )
 
 
@@ -710,8 +703,7 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            vurdertInfotrygd = false
         )
 
         val opptjeningUtenA2 = Opptjening.nyOpptjening(listOf(
@@ -787,8 +779,7 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            vurdertInfotrygd = false
         )
 
 
@@ -822,8 +813,7 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            vurdertInfotrygd = false,
-            tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+            vurdertInfotrygd = false
         )
 
         assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.grunnbeløpsregulering()) { "grunnbeløpet trenger ikke justering" }
@@ -861,8 +851,7 @@ internal class SykepengegrunnlagTest {
                         refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
-                vurdertInfotrygd = false,
-                tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+                vurdertInfotrygd = false
             )
         )
     }

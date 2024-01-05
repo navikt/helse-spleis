@@ -8,14 +8,12 @@ import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
-import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -114,7 +112,6 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -470,13 +467,6 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 1000.månedlig
-                    a2 inntekt 600.månedlig
-                    a2 inntekt 400.månedlig
-                }
-            }),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
                     a1 inntekt 1000.månedlig
@@ -499,8 +489,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 val periode = beregnetPeriode(0)
                 val vilkårsgrunnlag = periode.vilkårsgrunnlag()
                 val omregnetÅrsinntekt = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
-                assertEquals(3, omregnetÅrsinntekt?.inntekterFraAOrdningen?.size)
-                assertTrue(omregnetÅrsinntekt?.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
+                assertEquals(3, omregnetÅrsinntekt.inntekterFraAOrdningen?.size)
+                assertTrue(omregnetÅrsinntekt.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
             }
         }
     }
@@ -515,11 +505,6 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
@@ -2417,7 +2402,6 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
-            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
             arbeidsforhold = listOf(
                 Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
                 Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.ORDINÆRT)

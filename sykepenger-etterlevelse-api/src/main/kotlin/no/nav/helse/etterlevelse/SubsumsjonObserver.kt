@@ -391,46 +391,6 @@ interface SubsumsjonObserver {
         organisasjonsnummer: String
     ) {}
 
-    /**
-     * Fastsettelse av sykepengegrunnlaget
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-30)
-     *
-     * Merk: Alltid oppfylt
-     *
-     * @param grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig beregnet inntekt per arbeidsgiver
-     * @param grunnlagForSykepengegrunnlagÅrlig beregnet inntekt på tvers av arbeidsgivere
-     */
-    fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig: Map<String, Double>, grunnlagForSykepengegrunnlagÅrlig: Double) {}
-
-    /**
-     * Vurdering av avvik mellom omregnet årsinntekt og innrapportert inntekt til a-ordningen
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-30)
-     *
-     * @param maksimaltTillattAvvikPåÅrsinntekt margin
-     * @param grunnlagForSykepengegrunnlagÅrlig beregnet inntekt på tvers av arbeidsgivere
-     * @param sammenligningsgrunnlag innrapportert inntekt til a-ordningen
-     * @param avvik beregnet avvik mellom omregnet årsinntekt og innrapportert inntekt til a-ordningen
-     */
-    fun `§ 8-30 ledd 2 punktum 1`(
-        maksimaltTillattAvvikPåÅrsinntekt: Int,
-        grunnlagForSykepengegrunnlagÅrlig: Double,
-        sammenligningsgrunnlag: Double,
-        avvik: Double
-    ) {}
-
-    /**
-     * Beregning av sammenligningsgrunnlaget
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-30)
-     *
-     * @param skjæringstidspunkt dato inntekter fra a-ordningen er hentet relativt til
-     * @param sammenligningsgrunnlag inneholder beregnet sammenligningsgrunnlag samt hver enkelt inntekt som er innregnet i sammenligningsgrunnlaget
-     */
-    fun `§ 8-30 ledd 2`(skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: SammenligningsgrunnlagDTO) {}
-
-
     fun `§ 8-33 ledd 1`() {}
 
     @Suppress("UNUSED_PARAMETER")

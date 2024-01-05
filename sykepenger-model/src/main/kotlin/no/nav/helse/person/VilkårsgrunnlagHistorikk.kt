@@ -354,8 +354,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             val gjenopplivetSykepengegrunnlag = this.sykepengegrunnlag.gjenoppliv(hendelse, nyttSkjæringstidspunkt) ?: return null
             return kopierMed(hendelse, gjenopplivetSykepengegrunnlag, this.opptjening, NullObserver, nyttSkjæringstidspunkt)
         }
-        internal fun trengerFastsettelseEtterSkjønn() = sykepengegrunnlag.avventerFastsettelseEtterSkjønn()
-        internal fun loggInntektsvurdering(hendelse: IAktivitetslogg) = sykepengegrunnlag.loggInntektsvurdering(hendelse)
 
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {

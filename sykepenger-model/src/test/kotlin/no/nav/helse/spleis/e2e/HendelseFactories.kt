@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -209,7 +208,6 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)),
-    inntektsvurdering: Inntektsvurdering,
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018
 ): Vilkårsgrunnlag {
@@ -220,7 +218,6 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
         aktørId = AKTØRID,
         personidentifikator = fnr,
         orgnummer = orgnummer,
-        inntektsvurdering = inntektsvurdering,
         medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         arbeidsforhold = arbeidsforhold
@@ -502,12 +499,6 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     hendelselogg = this
 }
 
-internal fun inntektsvurdering(inntekt: Inntekt, skjæringstidspunkt: LocalDate, vararg orgnummere: String) = Inntektsvurdering(
-    inntekter = orgnummere.map { orgnummer ->
-        sammenligningsgrunnlag(orgnummer, skjæringstidspunkt, inntekt.repeat(12))
-    }
-)
-
 internal fun inntektsvurderingForSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate, vararg orgnummere: String) = InntektForSykepengegrunnlag(
     inntekter = orgnummere.map { orgnummer ->
         grunnlag(orgnummer, skjæringstidspunkt, inntekt.repeat(3))
@@ -516,12 +507,6 @@ internal fun inntektsvurderingForSykepengegrunnlag(inntekt: Inntekt, skjæringst
 )
 
 internal fun grunnlag(
-    orgnummer: String,
-    skjæringstidspunkt: LocalDate,
-    inntekter: List<Inntekt>
-) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter)
-
-internal fun sammenligningsgrunnlag(
     orgnummer: String,
     skjæringstidspunkt: LocalDate,
     inntekter: List<Inntekt>

@@ -4,7 +4,6 @@ import java.time.LocalDate.EPOCH
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
-import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -44,7 +43,6 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
@@ -87,7 +85,6 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
                     listOf(
                         a1 to INNTEKT,
@@ -139,7 +136,6 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
         a2 {
             håndterVilkårsgrunnlag(
                 2.vedtaksperiode,
-                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
                     listOf(
                         a1 to INNTEKT,
@@ -184,7 +180,6 @@ internal class DelvisRevurderingTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig)
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to 30000.månedlig, a2 to 35000.månedlig), 1.januar),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 30000.månedlig, a2 to 35000.månedlig), 1.januar),
                 arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),

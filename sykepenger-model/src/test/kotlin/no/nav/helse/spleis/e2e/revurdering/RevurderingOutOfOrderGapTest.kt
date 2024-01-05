@@ -6,7 +6,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Sykedag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -69,11 +68,9 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
@@ -485,12 +482,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.februar(2017) til 1.januar(2018) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            }),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
                 1.november(2017) til 1.januar(2018) inntekter {
                     a1 inntekt INNTEKT
@@ -564,13 +555,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent), orgnummer = a1)
         val inntekt = 20000.månedlig
         håndterInntektsmelding(listOf(1.april til 16.april), beregnetInntekt = inntekt, orgnummer = a1,)
-        val sammenligningsgrunnlag = Inntektsvurdering(
-            listOf(
-                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(12)),
-                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(12)),
-                sammenligningsgrunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(12))
-            )
-        )
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
             listOf(
                 grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
@@ -585,7 +569,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurdering = sammenligningsgrunnlag,
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
@@ -606,13 +589,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a2,)
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a3,)
 
-        val sammenligningsgrunnlag2 = Inntektsvurdering(
-            listOf(
-                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(12)),
-                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(12)),
-                sammenligningsgrunnlag(a3, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(12))
-            )
-        )
         val sykepengegrunnlag2 = InntektForSykepengegrunnlag(
             listOf(
                 grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
@@ -627,7 +603,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurdering = sammenligningsgrunnlag2,
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag2,
             arbeidsforhold = arbeidsforhold2,
             orgnummer = a2
@@ -654,13 +629,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val inntekt = 20000.månedlig
         håndterInntektsmelding(listOf(1.april til 16.april), beregnetInntekt = inntekt, orgnummer = a1,)
 
-        val sammenligningsgrunnlag = Inntektsvurdering(
-            listOf(
-                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(12)),
-                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(12)),
-                sammenligningsgrunnlag(a3, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(12))
-            )
-        )
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
             listOf(
                 grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), inntekt.repeat(3)),
@@ -675,7 +643,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurdering = sammenligningsgrunnlag,
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
@@ -695,13 +662,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a2,)
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = inntekt, orgnummer = a3,)
 
-        val sammenligningsgrunnlag2 = Inntektsvurdering(
-            listOf(
-                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(12)),
-                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(12)),
-                sammenligningsgrunnlag(a3, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(12))
-            )
-        )
         val sykepengegrunnlag2 = InntektForSykepengegrunnlag(
             listOf(
                 grunnlag(a1, finnSkjæringstidspunkt(a2, 1.vedtaksperiode), inntekt.repeat(3)),
@@ -716,7 +676,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         )
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurdering = sammenligningsgrunnlag2,
             inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag2,
             arbeidsforhold = arbeidsforhold2,
             orgnummer = a2
@@ -1021,14 +980,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             orgnummer = a1,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.mars(2017) til 1.februar inntekter {
-                        a1 inntekt INNTEKT
-                        a2 inntekt INNTEKT
-                    }
-                }
-            ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 listOf(
                     grunnlag(a1, 1.mars, INNTEKT.repeat(3)),

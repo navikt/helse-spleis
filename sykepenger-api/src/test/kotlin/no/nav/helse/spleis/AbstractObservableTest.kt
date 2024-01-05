@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
@@ -35,7 +34,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.testhelpers.TestObservatør
-import no.nav.helse.spleis.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.spleis.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
@@ -158,13 +156,6 @@ abstract class AbstractObservableTest {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, FOM.minusYears(1), type = Arbeidsforholdtype.ORDINÆRT)),
-        inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
-                    inntekter = inntektperioderForSammenligningsgrunnlag {
-                        Periode(FOM.minusYears(1), FOM.minusDays(1)) inntekter {
-                            ORGNUMMER inntekt INNTEKT
-                        }
-                    }
-            ),
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = inntektperioderForSykepengegrunnlag {
                         Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
@@ -179,7 +170,6 @@ abstract class AbstractObservableTest {
             aktørId = AKTØRID,
             personidentifikator = fnr.somPersonidentifikator(),
             orgnummer = orgnummer,
-            inntektsvurdering = inntektsvurdering,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             arbeidsforhold = arbeidsforhold

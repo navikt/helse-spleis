@@ -770,8 +770,7 @@ internal class JsonBuilder : AbstractBuilder() {
             begrensning: Sykepengegrunnlag.Begrensning,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean,
-            tilstand: Sykepengegrunnlag.Tilstand
+            oppfyllerMinsteinntektskrav: Boolean
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
@@ -809,8 +808,7 @@ internal class JsonBuilder : AbstractBuilder() {
             begrensning: Sykepengegrunnlag.Begrensning,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean,
-            tilstand: Sykepengegrunnlag.Tilstand
+            oppfyllerMinsteinntektskrav: Boolean
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
@@ -878,8 +876,7 @@ internal class JsonBuilder : AbstractBuilder() {
             begrensning: Sykepengegrunnlag.Begrensning,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean,
-            tilstand: Sykepengegrunnlag.Tilstand
+            oppfyllerMinsteinntektskrav: Boolean
         ) {
             this.sykepengegrunnlag.putAll(
                 mapOf(
@@ -894,13 +891,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "deaktiverteArbeidsforhold" to deaktiverteArbeidsgiverInntektsopplysninger,
                     "vurdertInfotrygd" to vurdertInfotrygd,
                     "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
-                    "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav,
-                    "tilstand" to when (tilstand) {
-                        is Sykepengegrunnlag.FastsattEtterHovedregel -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.FASTSATT_ETTER_HOVEDREGEL
-                        is Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.AVVENTER_FASTSETTELSE_ETTER_SKJØNN
-                        is Sykepengegrunnlag.FastsattEtterSkjønn -> PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData.TilstandData.FASTSATT_ETTER_SKJØNN
-                        is Sykepengegrunnlag.Start -> throw IllegalStateException("Forventet ikke tilstand ${tilstand.javaClass.simpleName}")
-                    }
+                    "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav
                 )
             )
             popState()

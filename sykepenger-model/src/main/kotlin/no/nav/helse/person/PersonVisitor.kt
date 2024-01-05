@@ -135,8 +135,7 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         begrensning: Sykepengegrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean,
-        tilstand: Sykepengegrunnlag.Tilstand
+        oppfyllerMinsteinntektskrav: Boolean
     ) {}
     fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {}
 
@@ -157,8 +156,7 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         begrensning: Sykepengegrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
-        oppfyllerMinsteinntektskrav: Boolean,
-        tilstand: Sykepengegrunnlag.Tilstand
+        oppfyllerMinsteinntektskrav: Boolean
     ) {}
 }
 

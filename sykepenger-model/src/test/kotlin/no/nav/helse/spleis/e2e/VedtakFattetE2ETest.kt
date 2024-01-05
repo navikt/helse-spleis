@@ -1,13 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.august
-import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -20,16 +17,14 @@ import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattEtterHovedregel
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattIInfotrygd
+import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattISpeil
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag.IngenNyArbeidsgiverperiode
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -42,7 +37,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `sender ikke vedtak fattet for perioder innenfor arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(0, inspektør.utbetalinger.size)
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
@@ -62,13 +57,11 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val event = observatør.vedtakFattetEvent.getValue(1.vedtaksperiode.id(ORGNUMMER))
         assertEquals(inspektør.utbetaling(0).inspektør.utbetalingId, event.utbetalingId)
         assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetaling(0).inspektør.tilstand)
-        val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
+        val forventetSykepengegrunnlagsfakta = FastsattISpeil(
             omregnetÅrsinntekt = 372000.0,
-            innrapportertÅrsinntekt = 372000.0,
-            avviksprosent = 0.0,
             `6G` = 561804.0,
             tags = emptySet(),
-            arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0))
+            arbeidsgivere = listOf(FastsattISpeil.Arbeidsgiver(a1, 372000.0, null))
         )
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
     }
@@ -92,7 +85,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     fun `sender vedtak fattet for forlengelseperioder utenfor arbeidsgiverperioden med bare ferie`() {
         nyttVedtak(1.januar, 20.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
+        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
@@ -103,13 +96,11 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val event = observatør.vedtakFattetEvent.getValue(2.vedtaksperiode.id(ORGNUMMER))
         assertEquals(inspektør.utbetaling(1).inspektør.utbetalingId, event.utbetalingId)
         assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetaling(1).inspektør.tilstand)
-        val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
+        val forventetSykepengegrunnlagsfakta = FastsattISpeil(
             omregnetÅrsinntekt = 372000.0,
-            innrapportertÅrsinntekt = 372000.0,
-            avviksprosent = 0.0,
             `6G` = 561804.0,
             tags = emptySet(),
-            arbeidsgivere = listOf(FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0))
+            arbeidsgivere = listOf(FastsattISpeil.Arbeidsgiver(a1, 372000.0, null))
         )
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
     }
@@ -122,14 +113,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a1,)
         håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a2,)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2019) til 1.desember(2019) inntekter {
-                    a1 inntekt INNTEKT + 1000.månedlig
-                    a2 inntekt INNTEKT + 2000.månedlig
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -145,22 +129,20 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val a2Sykepengegrunnlagsfakta = observatør.vedtakFattetEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
-        val forventetSykepengegrunnlagsfakta = FastsattEtterHovedregel(
+        val forventetSykepengegrunnlagsfakta = FastsattISpeil(
             omregnetÅrsinntekt = 744000.0,
-            innrapportertÅrsinntekt = 780000.0,
-            avviksprosent = 4.62,
             `6G` = 599148.0,
             tags = setOf(Tag.`6GBegrenset`),
             arbeidsgivere = listOf(
-                FastsattEtterHovedregel.Arbeidsgiver(a1, 372000.0),
-                FastsattEtterHovedregel.Arbeidsgiver(a2, 372000.0),
+                FastsattISpeil.Arbeidsgiver(a1, 372000.0, null),
+                FastsattISpeil.Arbeidsgiver(a2, 372000.0, null),
             )
         )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)
     }
 
     @Test
-    fun `sender vedtak fattet etter skjønnsmessig fastsettelse med flere arbeidsgivere`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `sender vedtak fattet etter skjønnsmessig fastsettelse med flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a1)
@@ -175,14 +157,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = 44000.månedlig,
             orgnummer = a2,
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2019) til 1.desember(2019) inntekter {
-                    a1 inntekt INNTEKT + 65.67.månedlig
-                    a2 inntekt INNTEKT + 113.53.månedlig
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         håndterSkjønnsmessigFastsettelse(1.januar(2020), listOf(OverstyrtArbeidsgiveropplysning(a1, 46000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 45000.månedlig)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -200,16 +175,13 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val a2Sykepengegrunnlagsfakta = observatør.vedtakFattetEvent.values.first { it.organisasjonsnummer == a2 }.sykepengegrunnlagsfakta
         assertEquals(a1Sykepengegrunnlagsfakta, a2Sykepengegrunnlagsfakta)
 
-        val forventetSykepengegrunnlagsfakta = FastsattEtterSkjønn(
+        val forventetSykepengegrunnlagsfakta = FastsattISpeil(
             omregnetÅrsinntekt = 1068000.0,
-            innrapportertÅrsinntekt = 746150.40,
-            skjønnsfastsatt = 1092000.0,
-            avviksprosent = 43.13,
             `6G` = 599148.0,
             tags = setOf(Tag.`6GBegrenset`),
             arbeidsgivere = listOf(
-                FastsattEtterSkjønn.Arbeidsgiver(a1, 540000.0, 552000.0),
-                FastsattEtterSkjønn.Arbeidsgiver(a2, 528000.0, 540000.0),
+                FastsattISpeil.Arbeidsgiver(a1, 540000.0, 552000.0),
+                FastsattISpeil.Arbeidsgiver(a2, 528000.0, 540000.0),
             )
         )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)

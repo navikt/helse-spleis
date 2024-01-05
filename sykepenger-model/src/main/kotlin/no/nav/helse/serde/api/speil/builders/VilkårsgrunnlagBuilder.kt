@@ -299,8 +299,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             begrensning: Sykepengegrunnlag.Begrensning,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
-            oppfyllerMinsteinntektskrav: Boolean,
-            tilstand: Sykepengegrunnlag.Tilstand
+            oppfyllerMinsteinntektskrav: Boolean
         ) {
             this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
             this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav

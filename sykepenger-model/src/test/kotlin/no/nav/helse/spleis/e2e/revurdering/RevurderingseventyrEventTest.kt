@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -64,7 +63,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skjønnsfastsetting`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `skjønnsfastsetting`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 60000.månedlig,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 30000.månedlig)

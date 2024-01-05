@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -83,7 +82,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavkla
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
@@ -101,7 +99,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_2
@@ -674,7 +671,6 @@ internal class Vedtaksperiode private constructor(
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntekterForSykepengegrunnlag(hendelse, skjæringstidspunkt, beregningSlutt.minusMonths(2), beregningSlutt)
         arbeidsforhold(hendelse, skjæringstidspunkt)
-        if (Toggle.AvviksvurderingFlyttet.disabled) inntekterForSammenligningsgrunnlag(hendelse, skjæringstidspunkt, beregningSlutt.minusMonths(11), beregningSlutt)
         medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
@@ -1354,8 +1350,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private val trengerFastsettelseEtterSkjønn get() = vilkårsgrunnlag?.trengerFastsettelseEtterSkjønn() == true
-
     private fun nesteTilstandForAktivRevurdering(hendelse: Hendelse) {
         vilkårsgrunnlag ?: return tilstand(hendelse, AvventerVilkårsprøvingRevurdering) {
             hendelse.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
@@ -1369,8 +1363,6 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne revurdering" }
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
-            if (vedtaksperiode.trengerFastsettelseEtterSkjønn) hendelse.varsel(RV_IV_2)
-            vedtaksperiode.vilkårsgrunnlag?.loggInntektsvurdering(hendelse)
             vedtaksperiode.trengerYtelser(hendelse)
         }
 
@@ -1725,22 +1717,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne utbetaling" }
-            håndterAvvik(vedtaksperiode, hendelse) {
-                vedtaksperiode.vilkårsgrunnlag?.loggInntektsvurdering(hendelse)
-                vedtaksperiode.loggInnenforArbeidsgiverperiode()
-                vedtaksperiode.trengerYtelser(hendelse)
-                hendelse.info("Forespør sykdoms- og inntektshistorikk")
-            }
-        }
-
-        private fun håndterAvvik(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, block: () -> Unit) {
-            if (!vedtaksperiode.trengerFastsettelseEtterSkjønn) return block()
-            if (Toggle.AltAvTjuefemprosentAvvikssaker.enabled || hendelse is OverstyrSykepengegrunnlag || !vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) {
-                hendelse.varsel(RV_IV_2)
-                return block()
-            }
-            hendelse.funksjonellFeil(RV_IV_2)
-            vedtaksperiode.forkast(hendelse)
+            vedtaksperiode.loggInnenforArbeidsgiverperiode()
+            vedtaksperiode.trengerYtelser(hendelse)
+            hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
@@ -2395,8 +2374,6 @@ internal class Vedtaksperiode private constructor(
                 "Ugyldig situasjon! Flere perioder til godkjenning samtidig"
             }
         }
-
-        internal fun List<Vedtaksperiode>.trengerFastsettelseEtterSkjønn() = filter { it.trengerFastsettelseEtterSkjønn }
 
         internal abstract class AuuGruppering protected constructor(
             protected val organisasjonsnummer: String,

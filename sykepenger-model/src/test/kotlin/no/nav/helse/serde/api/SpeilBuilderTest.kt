@@ -2,14 +2,11 @@ package no.nav.helse.serde.api
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
-import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -24,7 +21,6 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
@@ -34,8 +30,6 @@ import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
-import no.nav.helse.serde.api.dto.Periodetilstand
-import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
@@ -55,7 +49,6 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
@@ -68,7 +61,6 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.standardSimuleringsresultat
 import no.nav.helse.spleis.e2e.tilGodkjenning
@@ -77,7 +69,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -172,11 +163,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
-                )
-            ),
             orgnummer = a1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
@@ -391,54 +377,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode til skjønnsfastsettelse`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig,)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
-        nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK)
-
-        val speilDto = speilApi()
-        val periode = speilDto.arbeidsgivere.single().generasjoner.single().perioder.single() as UberegnetVilkårsprøvdPeriode
-        assertEquals(ForberederGodkjenning, periode.periodetilstand)
-        val vilkårsgrunnlagId = periode.vilkårsgrunnlagId
-        assertEquals(setOf(vilkårsgrunnlagId), speilDto.vilkårsgrunnlag.keys)
-    }
-
-    @Test
-    fun `periode til skjønnsfastsettelse - revurdering`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig,)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 15000.månedlig)
-        håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 30000.månedlig)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 45000.månedlig)))
-        nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-
-        val speilDto = speilApi()
-        val generasjoner = speilDto.arbeidsgivere.single().generasjoner
-        assertEquals(2, generasjoner.size)
-        generasjoner[0].also { generasjon ->
-            assertEquals(1, generasjon.perioder.size)
-            assertInstanceOf(UberegnetVilkårsprøvdPeriode::class.java, generasjon.perioder[0])
-            val periode = generasjon.perioder[0] as UberegnetVilkårsprøvdPeriode
-            assertEquals(ForberederGodkjenning, periode.periodetilstand)
-        }
-        generasjoner[1].also { generasjon ->
-            assertEquals(1, generasjon.perioder.size)
-            assertInstanceOf(BeregnetPeriode::class.java, generasjon.perioder[0])
-            val periode = generasjon.perioder[0] as BeregnetPeriode
-            assertEquals(Periodetilstand.Utbetalt, periode.periodetilstand)
-        }
-        assertEquals(2, speilDto.vilkårsgrunnlag.keys.size)
-    }
-
-    @Test
-    fun `legger ved skjønnsmessig fastsatt sykepengegrunnlag`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `legger ved skjønnsmessig fastsatt sykepengegrunnlag`() {
         val inntektIm = 31000.0
         val inntektSkatt = 31000.0 * 2
         val inntektSkjønnsfastsatt = 31000 * 1.5
@@ -499,12 +438,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     a2 to 22966.54.månedlig
                 ), 1.januar
             ),
-            inntektsvurdering = lagStandardSammenligningsgrunnlag(
-                listOf(
-                    a1 to 18199.7.månedlig,
-                    a2 to 22966.54.månedlig
-                ), 1.januar
-            ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
@@ -536,12 +469,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                listOf(
-                    a1 to 18199.7.månedlig,
-                    a2 to 22966.54.månedlig
-                ), 1.januar
-            ),
-            inntektsvurdering = lagStandardSammenligningsgrunnlag(
                 listOf(
                     a1 to 18199.7.månedlig,
                     a2 to 22966.54.månedlig

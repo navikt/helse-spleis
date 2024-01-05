@@ -1,12 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -39,7 +37,6 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -274,13 +271,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             beregnetInntekt = INNTEKT,
             førsteFraværsdag = 21.september(2020)
         ) // 20. september er en søndag
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.september(2019) til 1.august(2020) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
         assertIngenFunksjonelleFeil()
@@ -659,76 +650,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `inntekter på flere arbeidsgivere oppretter arbeidsgivere med tom sykdomshistorikk`() {
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt INNTEKT
-                    }
-                    1.januar(2017) til 1.januar(2017) inntekter {
-                        "123412344" inntekt 1
-                    }
-                }
-            ))
-            håndterYtelser(1.vedtaksperiode)
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-               AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
-            )
-        }
-    }
-
-    @Test
-    fun `håndterer fler arbeidsgivere så lenge kun én har sykdomshistorikk`() {
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt INNTEKT
-                    }
-                    1.januar(2017) til 1.januar(2017) inntekter {
-                        "123412344" inntekt 1
-                    }
-                }
-            ))
-            håndterYtelser(1.vedtaksperiode)
-            assertTilstander(
-                1.vedtaksperiode,
-                START,
-                AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-               AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING
-            )
-            håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars))
-            håndterSøknad(Sykdom(1.mars, 28.mars, 100.prosent))
-            håndterInntektsmelding(listOf(1.mars til 16.mars), INNTEKT)
-            assertTilstander(
-                2.vedtaksperiode,
-                START,
-                AVVENTER_INFOTRYGDHISTORIKK,
-                AVVENTER_INNTEKTSMELDING,
-                AVVENTER_BLOKKERENDE_PERIODE
-            )
-        }
-    }
-
-    @Test
     fun `Person uten skjæringstidspunkt feiler ikke i validering av Utbetalingshistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020)))
         håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100.prosent), Ferie(23.oktober(2020), 18.november(2020)))
@@ -752,13 +673,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020)))
         håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2020) til 16.desember(2020)), INNTEKT)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.desember(2019) til 1.november(2020) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -798,13 +713,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             ), INNTEKT
         )
 
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.desember(2020) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -833,13 +742,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             ), INNTEKT
         )
 
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.desember(2020) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -867,13 +770,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 20.januar(2021) til 25.januar(2021)
             ), INNTEKT, førsteFraværsdag = 5.februar(2021)
         )
-        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2020) til 1.desember(2020) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
 
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)

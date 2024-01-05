@@ -11,13 +11,10 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterHovedregelBuilder
-import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterSkjønnBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -25,7 +22,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Økonomi
 
 class ArbeidsgiverInntektsopplysning(
@@ -34,8 +30,6 @@ class ArbeidsgiverInntektsopplysning(
     private val inntektsopplysning: Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
-    internal fun omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent(): PersonObserver.AvviksprosentBeregnetEvent.OmregnetÅrsinntekt =
-        inntektsopplysning.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent(orgnummer)
     private fun fastsattÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
         return acc + beregningsgrunnlag(skjæringstidspunkt)
     }
@@ -128,12 +122,7 @@ class ArbeidsgiverInntektsopplysning(
     internal fun gjenoppliv(skjæringstidspunkt: LocalDate) = ArbeidsgiverInntektsopplysning(orgnummer, gjelder.oppdaterFom(skjæringstidspunkt), inntektsopplysning, refusjonsopplysninger)
 
     internal companion object {
-
-        private val AVVIKSVURDERING_FLYTTET get() = System.getenv("AVVIKSAKER_FLYTTET").toBoolean() || System.getProperty("AVVIKSAKER_FLYTTET").toBoolean()
-
-
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet() = map { it.inntektsopplysning }.validerSkjønnsmessigAltEllerIntet()
-        internal fun List<ArbeidsgiverInntektsopplysning>.erSkjønnsmessigFastsatt() = any { it.inntektsopplysning is SkjønnsmessigFastsatt }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.finn(orgnummer: String) = firstOrNull { it.gjelder(orgnummer) }
 
@@ -200,40 +189,18 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null, forrige: List<ArbeidsgiverInntektsopplysning>) {
             val endredeInntektsopplysninger = finnEndredeInntektsopplysninger(forrige)
             if (endredeInntektsopplysninger.isEmpty()) return
-
-            if (!AVVIKSVURDERING_FLYTTET) subsumsjonObserver.`§ 8-30 ledd 1`(
-                grunnlagForSykepengegrunnlagPerArbeidsgiverMånedlig = omregnetÅrsinntektPerArbeidsgiver().mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } },
-                grunnlagForSykepengegrunnlagÅrlig = map { it.inntektsopplysning.fastsattÅrsinntekt() }.summer().reflection { årlig, _, _, _ -> årlig }
-            )
             endredeInntektsopplysninger.forEach { it.subsummer(subsumsjonObserver, opptjening) }
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder) {
-            builder.omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiver().mapValues { it.value.reflection { årlig, _, _, _ -> årlig } })
-        }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: FastsattEtterSkjønnBuilder) {
-            check(all { it.inntektsopplysning is SkjønnsmessigFastsatt }) { "Forventer at alle inntekter i sykepengegrunnlaget skal være SkjønnsmessigFastsatt ved vedtak på skjønnsfastsatt sykepengegrunnlag" }
+        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder.FastsattISpleisBuilder) {
             forEach { arbeidsgiver ->
                 builder.arbeidsgiver(
                     arbeidsgiver = arbeidsgiver.orgnummer,
                     omregnetÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt(),
-                    skjønnsfastsatt = arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt()
+                    skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt() else null
                 )
             }
         }
-        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: FastsattEtterHovedregelBuilder) {
-            check(none { it.inntektsopplysning is SkjønnsmessigFastsatt }) { "Forventer ikke at noen inntekter i sykepengegrunnlaget skal være SkjønnsmessigFastsatt ved vedtak på sykepengegrunnlag fastsatt etter hovedregel" }
-            forEach { arbeidsgiver ->
-                builder.arbeidsgiver(
-                    arbeidsgiver = arbeidsgiver.orgnummer,
-                    omregnetÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
-                )
-            }
-        }
-
-        private fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntektPerArbeidsgiver() =
-            associate { it.orgnummer to it.inntektsopplysning.fastsattÅrsinntekt() }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer } != null

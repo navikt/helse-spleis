@@ -1,7 +1,6 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
 
 internal class V33BehovtypeAktivitetslogg : JsonMigration(version = 33) {
 
@@ -14,7 +13,7 @@ internal class V33BehovtypeAktivitetslogg : JsonMigration(version = 33) {
             .filter { it.has("behovtype") && it["behovtype"].asText() == "Inntektsberegning" }
             .onEach { aktivitet ->
                 aktivitet as ObjectNode
-                aktivitet.put("behovtype", InntekterForSammenligningsgrunnlag.name)
+                aktivitet.put("behovtype", "InntekterForSammenligningsgrunnlag")
             }
     }
 }

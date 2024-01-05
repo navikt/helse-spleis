@@ -171,23 +171,6 @@ sealed class Aktivitet(
                 )
             }
 
-            fun inntekterForSammenligningsgrunnlag(
-                aktivitetslogg: IAktivitetslogg,
-                skjæringstidspunkt: LocalDate,
-                beregningStart: YearMonth,
-                beregningSlutt: YearMonth
-            ) {
-                aktivitetslogg.behov(
-                    Behovtype.InntekterForSammenligningsgrunnlag,
-                    "Trenger inntekter for sammenligningsgrunnlag",
-                    mapOf(
-                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-                        "beregningStart" to beregningStart.toString(),
-                        "beregningSlutt" to beregningSlutt.toString()
-                    )
-                )
-            }
-
             fun inntekterForSykepengegrunnlag(
                 aktivitetslogg: IAktivitetslogg,
                 skjæringstidspunkt: LocalDate,
@@ -259,16 +242,11 @@ sealed class Aktivitet(
             Opplæringspenger,
             Institusjonsopphold,
 
-            @Deprecated("Behovet er ikke i bruk, men beholdes for derserialisering av aktivitetsloggen")
-            EgenAnsatt,
             Godkjenning,
             Simulering,
             Utbetaling,
-            InntekterForSammenligningsgrunnlag,
             InntekterForSykepengegrunnlag,
 
-            @Deprecated("Behovet er ikke i bruk, men beholdes for derserialisering av aktivitetsloggen")
-            Opptjening,
             Dagpenger,
             Arbeidsavklaringspenger,
             Medlemskap,

@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -29,7 +27,6 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
 
-    private val inntekterForSammenligningsgrunnlag = mapSkatteopplysninger(packet["@løsning.${InntekterForSammenligningsgrunnlag.name}"])
     private val inntekterForSykepengegrunnlag = mapSkatteopplysninger(packet["@løsning.${InntekterForSykepengegrunnlag.name}"])
     private val arbeidsforholdForSykepengegrunnlag = packet["@løsning.${InntekterForSykepengegrunnlag.name}"]
         .flatMap { måned ->
@@ -76,7 +73,6 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
 
     private val skjæringstidspunkter = listOfNotNull(
         packet["${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt"].asLocalDate(),
-        packet["${InntekterForSammenligningsgrunnlag.name}.skjæringstidspunkt"].asOptionalLocalDate(),
         packet["${ArbeidsforholdV2.name}.skjæringstidspunkt"].asLocalDate(),
         packet["${Medlemskap.name}.skjæringstidspunkt"].asLocalDate(),
     )
@@ -89,9 +85,6 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             aktørId = aktørId,
             personidentifikator = fødselsnummer.somPersonidentifikator(),
             orgnummer = organisasjonsnummer,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = inntekterForSammenligningsgrunnlag
-            ),
             medlemskapsvurdering = Medlemskapsvurdering(
                 medlemskapstatus = medlemskapstatus
             ),

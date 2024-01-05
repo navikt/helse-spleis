@@ -27,12 +27,10 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtaksperiodeBehov(
             behov,
             Dagpenger,
-            InntekterForSammenligningsgrunnlag,
             InntekterForSykepengegrunnlag,
             Medlemskap,
             ArbeidsforholdV2
         )
-        assertInntekterForSammenligningsgrunnlagdetaljer(behov)
         assertMedlemskapdetaljer(behov)
         assertInntekterForSykepengegrunnlagdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
@@ -163,12 +161,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertDagpengerdetaljer(behov: JsonNode) {
         assertDato(behov.path(Dagpenger.name).path("periodeFom").asText())
         assertDato(behov.path(Dagpenger.name).path("periodeTom").asText())
-    }
-
-    private fun assertInntekterForSammenligningsgrunnlagdetaljer(behov: JsonNode) {
-        assertDato(behov.path(InntekterForSammenligningsgrunnlag.name).path("skjæringstidspunkt").asText())
-        assertÅrMåned(behov.path(InntekterForSammenligningsgrunnlag.name).path("beregningStart").asText())
-        assertÅrMåned(behov.path(InntekterForSammenligningsgrunnlag.name).path("beregningSlutt").asText())
     }
 
     private fun assertInntekterForSykepengegrunnlagdetaljer(behov: JsonNode) {

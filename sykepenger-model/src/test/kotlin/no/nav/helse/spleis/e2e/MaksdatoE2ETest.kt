@@ -116,8 +116,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     private fun nyPeriode(forrigePeriode: Periode): Periode {
         val nestePeriode = nestePeriode(forrigePeriode)
         håndterSykmelding(Sykmeldingsperiode(nestePeriode.start, nestePeriode.endInclusive))
-        val id: IdInnhenter = observatør.sisteVedtaksperiode()
-        håndterSøknadMedValidering(id, Søknad.Søknadsperiode.Sykdom(nestePeriode.start, nestePeriode.endInclusive, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(nestePeriode.start, nestePeriode.endInclusive, 100.prosent))
         return nestePeriode
     }
 

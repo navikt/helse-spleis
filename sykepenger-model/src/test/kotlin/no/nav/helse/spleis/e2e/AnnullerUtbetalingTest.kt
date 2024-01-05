@@ -342,7 +342,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `annuller over ikke utbetalt forlengelse`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(27.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(27.januar, 31.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
@@ -390,7 +390,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(17.mars, 20.mars))
-        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(1.mars til 16.mars),)
+        håndterInntektsmelding(listOf(1.mars til 16.mars),)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))

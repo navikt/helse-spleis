@@ -833,7 +833,6 @@ internal class TestMessageFactory(
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
         tilstand: TilstandType,
-        inntekter: List<InntekterForSammenligningsgrunnlagFraLøsning>,
         inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning>,
         arbeidsforhold: List<Arbeidsforhold>,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
@@ -841,7 +840,6 @@ internal class TestMessageFactory(
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf(
-                InntekterForSammenligningsgrunnlag.name,
                 Arbeidsavklaringspenger.name,
                 Medlemskap.name,
                 InntekterForSykepengegrunnlag.name,
@@ -851,21 +849,6 @@ internal class TestMessageFactory(
             orgnummer = orgnummer,
             tilstand = tilstand,
             løsninger = mapOf(
-                InntekterForSammenligningsgrunnlag.name to inntekter
-                    .map { inntekterForMnd ->
-                        mapOf(
-                            "årMåned" to inntekterForMnd.måned,
-                            "inntektsliste" to inntekterForMnd.inntekter.map { inntekt ->
-                                mapOf(
-                                    "beløp" to inntekt.beløp,
-                                    "inntektstype" to "LOENNSINNTEKT",
-                                    "orgnummer" to inntekt.orgnummer,
-                                    "fordel" to "kontantytelse",
-                                    "beskrivelse" to "fastloenn"
-                                )
-                            }
-                        )
-                    },
                 Medlemskap.name to mapOf<String, Any>(
                     "resultat" to mapOf<String, Any>(
                         "svar" to when (medlemskapstatus) {
@@ -908,9 +891,6 @@ internal class TestMessageFactory(
             ),
             ekstraFelter = mapOf(
                 InntekterForSykepengegrunnlag.name to mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt
-                ),
-                InntekterForSammenligningsgrunnlag.name to mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt
                 ),
                 ArbeidsforholdV2.name to mapOf(

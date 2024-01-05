@@ -39,7 +39,6 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -504,8 +503,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode,
+        håndterInntektsmelding(
             listOf(
                 1.januar til 5.januar,
                 9.januar til 12.januar,
@@ -552,8 +550,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar))
         håndterSøknad(Sykdom(13.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(
-            1.vedtaksperiode,
+        håndterInntektsmelding(
             listOf(
                 1.januar til 5.januar,
                 9.januar til 19.januar

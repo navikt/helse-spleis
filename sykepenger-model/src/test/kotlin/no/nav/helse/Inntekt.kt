@@ -4,11 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.dsl.TestPerson
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.AbstractPersonTest
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -30,7 +28,6 @@ internal fun Inntekt.sykepengegrunnlag(skjæringstidspunkt: LocalDate) =
 
 internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver = SubsumsjonObserver.NullObserver, skattInntekt: Inntekt? = null, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
     Sykepengegrunnlag(
-        person = TestPerson(object: PersonObserver {}).person,
         alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
@@ -63,6 +60,5 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
         deaktiverteArbeidsforhold = emptyList(),
         vurdertInfotrygd = false,
-        `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt),
-        tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+        `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt)
     )

@@ -1,13 +1,11 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -22,7 +20,6 @@ import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfakta
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -30,13 +27,9 @@ import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterHovedregelBuilder
-import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattEtterSkjønnBuilder
-import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattIInfotrygdBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.erSkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
@@ -67,7 +60,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
-import org.slf4j.LoggerFactory
 
 internal class Sykepengegrunnlag private constructor(
     private val alder: Alder,
@@ -76,8 +68,7 @@ internal class Sykepengegrunnlag private constructor(
     private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
     private val vurdertInfotrygd: Boolean,
     private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
-    `6G`: Inntekt? = null,
-    tilstand: Tilstand? = null
+    `6G`: Inntekt? = null
 ) : Comparable<Inntekt> {
 
     init {
@@ -98,10 +89,7 @@ internal class Sykepengegrunnlag private constructor(
     private val oppfyllerMinsteinntektskrav = beregningsgrunnlag >= minsteinntekt
     private val avviksprosent = sammenligningsgrunnlag.avviksprosent(omregnetÅrsinntekt)
 
-    private var tilstand: Tilstand = tilstand ?: tilstand(Start)
-
     internal constructor(
-        person: Person,
         alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         skjæringstidspunkt: LocalDate,
@@ -119,19 +107,6 @@ internal class Sykepengegrunnlag private constructor(
             )
             subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, this)
         }
-        person.avviksprosentBeregnet(
-            PersonObserver.AvviksprosentBeregnetEvent(
-                skjæringstidspunkt = skjæringstidspunkt,
-                beregningsgrunnlagTotalbeløp = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
-                omregnedeÅrsinntekter = arbeidsgiverInntektsopplysninger.map { it.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent() },
-                sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlagSomSkalBrukersIAvviksprosentBeregnetEvent(),
-                avviksprosent = avviksprosent.prosent(),
-                vilkårsgrunnlagId = ønsketVilkårsgrunnlagId,
-                vurderingstidspunkt = LocalDateTime.now()
-            )
-        )
-        avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
     }
 
     private fun subsummerMinsteSykepengegrunnlag(
@@ -155,9 +130,7 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     internal companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         fun opprett(
-            person: Person,
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
@@ -165,7 +138,6 @@ internal class Sykepengegrunnlag private constructor(
             subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
             return Sykepengegrunnlag(
-                person,
                 alder,
                 arbeidsgiverInntektsopplysninger,
                 skjæringstidspunkt,
@@ -181,10 +153,9 @@ internal class Sykepengegrunnlag private constructor(
             deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
             vurdertInfotrygd: Boolean,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
-            `6G`: Inntekt? = null,
-            tilstand: Tilstand
+            `6G`: Inntekt? = null
         ): Sykepengegrunnlag {
-            return Sykepengegrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag, `6G`, tilstand)
+            return Sykepengegrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag, `6G`)
         }
     }
 
@@ -272,9 +243,7 @@ internal class Sykepengegrunnlag private constructor(
             }
 
     internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
-        return hendelse.overstyr(this, subsumsjonObserver).apply {
-            avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
-        }
+        return hendelse.overstyr(this, subsumsjonObserver)
     }
 
     internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
@@ -282,7 +251,7 @@ internal class Sykepengegrunnlag private constructor(
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
         arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
-        return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver, person)
+        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
 
     internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, nyttSkjæringstidspunkt: LocalDate?): Sykepengegrunnlag? {
@@ -299,15 +268,14 @@ internal class Sykepengegrunnlag private constructor(
             hendelse.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.")
             return null
         }
-        return kopierSykepengegrunnlag(gjenopplivetArbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, nyttSkjæringstidspunkt = skjæringstidspunkt)
+        return kopierSykepengegrunnlag(gjenopplivetArbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt)
     }
 
     internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
         val resultat = builder.resultat() ?: return null
-        subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonObserver)
-        return tilstand.fastsattEtterSkjønn(this, resultat)
+        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
 
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
@@ -331,37 +299,22 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger
             .finn(inntektsmelding.organisasjonsnummer())
             ?.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
-        return kopierSykepengegrunnlagOgValiderAvvik(resultat, deaktiverteArbeidsforhold, subsumsjonObserver, person)
+        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
 
-    private fun kopierSykepengegrunnlagOgValiderAvvik(
+    private fun kopierSykepengegrunnlagOgValiderMinsteinntekt(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-        subsumsjonObserver: SubsumsjonObserver,
-        person: Person
+        subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
-           person.avviksprosentBeregnet(
-                PersonObserver.AvviksprosentBeregnetEvent(
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    beregningsgrunnlagTotalbeløp = omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
-                    omregnedeÅrsinntekter = arbeidsgiverInntektsopplysninger.map { it.omregnetÅrsinntektSomSkalBrukesIAvviksprosentBeregnetEvent() },
-                    sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlag.sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    sammenligningsgrunnlag = sammenligningsgrunnlag.sammenligningsgrunnlagSomSkalBrukersIAvviksprosentBeregnetEvent(),
-                    avviksprosent = avviksprosent.prosent(),
-                    vilkårsgrunnlagId = ønsketVilkårsgrunnlagId,
-                    vurderingstidspunkt = LocalDateTime.now()
-                )
-            )
-            avviksprosent.subsummér(omregnetÅrsinntekt, sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver)
-            subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonObserver)
+           subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonObserver)
         }
     }
 
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
-        tilstand: Tilstand? = null,
         nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt
     ) = Sykepengegrunnlag(
             alder = alder,
@@ -369,8 +322,7 @@ internal class Sykepengegrunnlag private constructor(
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
-            sammenligningsgrunnlag = sammenligningsgrunnlag,
-            tilstand = tilstand
+            sammenligningsgrunnlag = sammenligningsgrunnlag
         )
 
     internal fun grunnbeløpsregulering() = kopierSykepengegrunnlag(
@@ -390,8 +342,7 @@ internal class Sykepengegrunnlag private constructor(
             begrensning,
             vurdertInfotrygd,
             minsteinntekt,
-            oppfyllerMinsteinntektskrav,
-            tilstand,
+            oppfyllerMinsteinntektskrav
         )
         visitor.preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
         arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
@@ -411,8 +362,7 @@ internal class Sykepengegrunnlag private constructor(
             begrensning,
             vurdertInfotrygd,
             minsteinntekt,
-            oppfyllerMinsteinntektskrav,
-            tilstand
+            oppfyllerMinsteinntektskrav
         )
     }
 
@@ -437,18 +387,24 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
-        tilstand.medUtbetalingsopplysninger(this, organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
+        arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
 
     internal fun build(builder: VedtakFattetBuilder) {
+        val fakta = when (vurdertInfotrygd) {
+            true -> VedtakFattetBuilder.FastsattIInfotrygdBuilder(omregnetÅrsinntekt)
+            false -> VedtakFattetBuilder.FastsattISpleisBuilder(omregnetÅrsinntekt, `6G`, begrensning).apply {
+                arbeidsgiverInntektsopplysninger.build(this)
+            }
+        }.build()
+        // TODO: alt sykepengegrunnlagrelatert burde kanskje vært inni én fakta-ting
         builder
             .sykepengegrunnlag(this.sykepengegrunnlag)
             .beregningsgrunnlag(this.beregningsgrunnlag)
             .begrensning(this.begrensning)
-            .sykepengegrunnlagsfakta(tilstand.sykpengegrunnlagsfakta(this))
+            .sykepengegrunnlagsfakta(fakta)
         if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) {
             builder.sykepengergrunnlagErUnder2G()
         }
-        arbeidsgiverInntektsopplysninger.build(builder)
     }
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false
@@ -514,95 +470,13 @@ internal class Sykepengegrunnlag private constructor(
         }
     }
 
-    internal fun avventerFastsettelseEtterSkjønn() = tilstand == AvventerFastsettelseEtterSkjønn
-
     internal fun leggTil(hendelseIder: Generasjoner, organisasjonsnummer: String, block: (inntektsmeldingId: UUID) -> Unit) =
         arbeidsgiverInntektsopplysninger.leggTil(hendelseIder, organisasjonsnummer, block)
-
-    private fun tilstand(nyTilstand: Tilstand): Tilstand {
-        if (tilstand == nyTilstand) return tilstand
-        tilstand = nyTilstand
-        tilstand.entering(this)
-        return tilstand
-    }
 
     internal fun inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.inntektsdata(skjæringstidspunkt, organisasjonsnummer,)
 
-    internal fun loggInntektsvurdering(hendelse: IAktivitetslogg) = avviksprosent.loggInntektsvurdering(hendelse)
     internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
         arbeidsgiverInntektsopplysninger.firstNotNullOfOrNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }
-
-    internal sealed interface Tilstand {
-        fun entering(sykepengegrunnlag: Sykepengegrunnlag) {}
-
-        fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
-            throw IllegalStateException("kan ikke fastsette etter skjønn i ${this::class.simpleName}")
-        }
-
-        fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
-            throw IllegalStateException("forventet ikke å sende ut vedtak fattet i ${this::class.simpleName}")
-        }
-
-        fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-            throw IllegalStateException("forventet ikke å sette utbetalingsopplysninger i ${this::class.simpleName}")
-        }
-    }
-
-    object Start : Tilstand {
-        override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
-            val tilstand = when {
-                sykepengegrunnlag.arbeidsgiverInntektsopplysninger.erSkjønnsmessigFastsatt() -> FastsattEtterSkjønn
-                sykepengegrunnlag.avviksprosent.harAkseptabeltAvvik() -> FastsattEtterHovedregel
-                else -> AvventerFastsettelseEtterSkjønn
-            }
-            sykepengegrunnlag.tilstand(tilstand)
-        }
-    }
-    object FastsattEtterHovedregel : Tilstand {
-        override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
-            return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
-        }
-        override fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
-            if (sykepengegrunnlag.vurdertInfotrygd) return FastsattIInfotrygdBuilder(sykepengegrunnlag.omregnetÅrsinntekt).build()
-            val builder = FastsattEtterHovedregelBuilder(sykepengegrunnlag.omregnetÅrsinntekt, sykepengegrunnlag.avviksprosent, sykepengegrunnlag.`6G`, sykepengegrunnlag.begrensning)
-            sykepengegrunnlag.sammenligningsgrunnlag.build(builder)
-            sykepengegrunnlag.arbeidsgiverInntektsopplysninger.build(builder)
-            return builder.build()
-        }
-        override fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-            return sykepengegrunnlag.arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, sykepengegrunnlag.`6G`, sykepengegrunnlag.skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
-        }
-    }
-    object AvventerFastsettelseEtterSkjønn : Tilstand {
-        override fun entering(sykepengegrunnlag: Sykepengegrunnlag) {
-            sikkerLogg.info("Sykepengegrunnlag har tilstand AvventerFastsettelseEtterSkjønn")
-        }
-        override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
-            return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
-        }
-
-        override fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-            return sykepengegrunnlag.arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, sykepengegrunnlag.`6G`, sykepengegrunnlag.skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
-        }
-    }
-    object FastsattEtterSkjønn : Tilstand {
-        override fun sykpengegrunnlagsfakta(sykepengegrunnlag: Sykepengegrunnlag): Sykepengegrunnlagsfakta {
-            check(!sykepengegrunnlag.vurdertInfotrygd) { "Forventer ikke å fatte vedtak som er vurdert i Infotrygd & skjønnsmessig fastsatt" }
-            val builder = FastsattEtterSkjønnBuilder(sykepengegrunnlag.omregnetÅrsinntekt, sykepengegrunnlag.avviksprosent, sykepengegrunnlag.`6G`, sykepengegrunnlag.begrensning, sykepengegrunnlag.beregningsgrunnlag)
-            sykepengegrunnlag.sammenligningsgrunnlag.build(builder)
-            sykepengegrunnlag.arbeidsgiverInntektsopplysninger.build(builder)
-            return builder.build()
-        }
-        override fun fastsattEtterSkjønn(sykepengegrunnlag: Sykepengegrunnlag, resultat: List<ArbeidsgiverInntektsopplysning>): Sykepengegrunnlag {
-            return sykepengegrunnlag.kopierSykepengegrunnlag(resultat, sykepengegrunnlag.deaktiverteArbeidsforhold, FastsattEtterSkjønn)
-        }
-        override fun medUtbetalingsopplysninger(sykepengegrunnlag: Sykepengegrunnlag, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-            return sykepengegrunnlag.arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, sykepengegrunnlag.`6G`, sykepengegrunnlag.skjæringstidspunkt, dato, økonomi, regler, subsumsjonObserver)
-        }
-    }
-    internal interface AvviksprosentBeregnetObserver {
-        fun avviksprosentBeregnet(event: PersonObserver.AvviksprosentBeregnetEvent) {}
-    }
 }
 

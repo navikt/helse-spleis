@@ -168,12 +168,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             vedtaksperiodeIndeks = 0,
             skjæringstidspunkt = 1.januar,
             orgnummer = a1,
-            inntekter = sammenligningsgrunnlag(
-                1.januar, listOf(
-                    TestMessageFactory.InntekterForSammenligningsgrunnlagFraLøsning.Inntekt(INNTEKT, a1),
-                    TestMessageFactory.InntekterForSammenligningsgrunnlagFraLøsning.Inntekt(INNTEKT, a2),
-                )
-            ),
             arbeidsforhold = listOf(
                 TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
                 TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)

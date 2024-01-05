@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -61,12 +60,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
             grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
         )
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, 15000.månedlig.repeat(12)),
-                    sammenligningsgrunnlag(a2, 1.januar, 16000.månedlig.repeat(12))
-                )
-            ),
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntekter,
                 arbeidsforhold = emptyList()
@@ -87,12 +81,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         håndterVilkårsgrunnlag(
-            2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(a1, 24.februar, 17000.månedlig.repeat(12)),
-                    sammenligningsgrunnlag(a2, 24.februar, 16000.månedlig.repeat(12))
-                )
-            ),
+            2.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     grunnlag(a1, 24.februar, 17000.månedlig.repeat(3)),
@@ -127,12 +116,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
             grunnlag(a2, 1.januar, 16000.månedlig.repeat(3))
         )
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, 15000.månedlig.repeat(12)),
-                    sammenligningsgrunnlag(a2, 1.januar, 16000.månedlig.repeat(12))
-                )
-            ),
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntekter,
                 arbeidsforhold = emptyList()

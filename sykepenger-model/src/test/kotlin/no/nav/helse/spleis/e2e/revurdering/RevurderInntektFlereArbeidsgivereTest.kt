@@ -2,16 +2,12 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -30,12 +26,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -255,12 +249,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         (a1 og a2) { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 {
             håndterVilkårsgrunnlag(
-                1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                    inntekter = listOf(
-                        sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
-                        sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)),
-                    )
-                ),
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
@@ -381,12 +370,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 {
             håndterVilkårsgrunnlag(
-                1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                    inntekter = listOf(
-                        sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
-                        sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)),
-                    )
-                ),
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
@@ -411,53 +395,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        }
-    }
-
-    @Test
-    fun `revurderer forlengelse`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
-        (a1 og a2).nyeVedtak(1.januar til 31.januar)
-        (a1 og a2).forlengVedtak(1.februar til 28.februar)
-        nullstillTilstandsendringer()
-        a1 {
-            håndterOverstyrInntekt(1.januar, 32000.månedlig)
-            assertVarsel(RV_IV_2)
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 32000.månedlig), OverstyrtArbeidsgiveropplysning(a2, 20000.månedlig)))
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-        a1 {
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-        }
-        a2 {
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
-            assertTilstander(
-                2.vedtaksperiode,
-                AVSLUTTET,
-                AVVENTER_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         }
     }
 
@@ -585,11 +522,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
-                1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                    inntekter = listOf(
-                        sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12))
-                    )
-                ),
+                1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, 1.januar, INNTEKT.repeat(3))
@@ -609,12 +542,8 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
 
         (inspiser(personInspektør).vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)?.inspektør ?: Assertions.fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
             val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
-            val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag.inspektør
-
             assertEquals(300000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
             assertEquals(300000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
-            assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
-            assertEquals(19, vilkårsgrunnlag.sykepengegrunnlag.inspektør.avviksprosent)
             assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
                 assertEquals(25000.månedlig, it.inntektsopplysning.inspektør.beløp)

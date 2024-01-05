@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.etterlevelse.Inntektsubsumsjon
 import no.nav.helse.isWithinRangeOf
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -61,16 +60,6 @@ class Skatteopplysning(
         result = 31 * result + tidsstempel.hashCode()
         return result
     }
-
-    internal fun skatteopplysningerSomSkalBrukesIAvviksprosentBeregnetEvent() =
-        PersonObserver.AvviksprosentBeregnetEvent.Sammenligningsgrunnlag.Skatteopplysning(
-            beløp = beløp.reflection { _, månedlig, _, _ -> månedlig },
-            måned = måned,
-            type = type.somStreng(),
-            fordel = fordel,
-            beskrivelse = beskrivelse
-        )
-
 
     companion object {
         fun sisteMåneder(dato: LocalDate, antallMåneder: Int, inntektsopplysninger: List<Skatteopplysning>) =

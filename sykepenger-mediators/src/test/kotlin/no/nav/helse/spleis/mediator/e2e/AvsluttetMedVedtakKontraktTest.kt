@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -52,8 +51,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
               "fastsatt": "EtterHovedregel",
               "omregnetÅrsinntekt": 372000.0,
-              "innrapportertÅrsinntekt": 372000.0,
-              "avviksprosent": 0.0,
               "6G": 561804.0,
               "tags": [],
               "arbeidsgivere": [
@@ -69,7 +66,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
     }
     @Test
-    fun `vedtak med utbetaling hvor sykepengegrunnlaget er fastsatt ved skjønn`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `vedtak med utbetaling hvor sykepengegrunnlaget er fastsatt ved skjønn`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         val søknadId = sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
@@ -105,9 +102,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
                 "fastsatt": "EtterSkjønn",
                 "omregnetÅrsinntekt": 540000.0,
-                "innrapportertÅrsinntekt": 372000.0,
                 "skjønnsfastsatt": 570000.0,
-                "avviksprosent": 45.16,
                 "6G": 561804.0,
                 "tags": [
                   "6GBegrenset"
@@ -201,8 +196,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "sykepengegrunnlagsfakta": {
               "fastsatt": "EtterHovedregel",
               "omregnetÅrsinntekt": 372000.0,
-              "innrapportertÅrsinntekt": 372000.0,
-              "avviksprosent": 0.0,
               "6G": 561804.0,
               "tags": [],
               "arbeidsgivere": [

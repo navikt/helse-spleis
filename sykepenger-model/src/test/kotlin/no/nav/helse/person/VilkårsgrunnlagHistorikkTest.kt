@@ -10,7 +10,6 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
@@ -244,7 +243,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -269,7 +267,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -293,7 +290,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -305,7 +301,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -342,7 +337,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -354,7 +348,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -378,7 +371,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -403,7 +395,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -429,7 +420,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -445,7 +435,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -471,7 +460,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -507,7 +495,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             aktørId = "AKTØR_ID",
             personidentifikator = fødselsnummer,
             orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold

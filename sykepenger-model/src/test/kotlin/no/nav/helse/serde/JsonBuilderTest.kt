@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
@@ -61,7 +60,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -498,12 +496,6 @@ class JsonBuilderTest {
             håndter(
                 vilkårsgrunnlag(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    inntektsvurdering = inntektperioderForSammenligningsgrunnlag {
-                        1.januar(2017) til 1.desember(2017) inntekter {
-                            orgnummer inntekt 31000.månedlig
-                            "654321987" inntekt 32000.månedlig
-                        }
-                    },
                     inntektsvurderingForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
                         1.oktober(2017) til 1.desember(2017) inntekter {
                             orgnummer inntekt 31000.månedlig
@@ -571,11 +563,6 @@ class JsonBuilderTest {
     private fun vilkårsgrunnlag(
         vedtaksperiodeId: String,
         skjæringstidspunkt: LocalDate = 1.januar,
-        inntektsvurdering: List<ArbeidsgiverInntekt> = inntektperioderForSammenligningsgrunnlag {
-            1.januar(2017) til 1.desember(2017) inntekter {
-                orgnummer inntekt 31000.månedlig
-            }
-        },
         inntektsvurderingForSykepengegrunnlag: List<ArbeidsgiverInntekt> = inntektperioderForSykepengegrunnlag {
             1.oktober(2017) til 1.desember(2017) inntekter {
                 orgnummer inntekt 31000.månedlig
@@ -589,7 +576,6 @@ class JsonBuilderTest {
         aktørId = aktørId,
         personidentifikator = fnr,
         orgnummer = orgnummer,
-        inntektsvurdering = Inntektsvurdering(inntektsvurdering),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
         inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektsvurderingForSykepengegrunnlag, arbeidsforhold = emptyList()),
         arbeidsforhold = arbeidsforhold

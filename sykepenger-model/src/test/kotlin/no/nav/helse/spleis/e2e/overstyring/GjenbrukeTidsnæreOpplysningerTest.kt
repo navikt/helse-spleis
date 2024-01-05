@@ -2,9 +2,7 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
@@ -12,7 +10,6 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -37,7 +34,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
@@ -45,7 +41,6 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
@@ -148,14 +143,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
     @Test
     fun `endrer skjæringstidspunkt på sykefraværstilfelle etter - endrer ikke dato for inntekter`() {
-        val inntektsvurdering = Inntektsvurdering(
-            inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            })
-
         a1 {
             håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent), Arbeid(1.januar, 9.januar))
             håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent))
@@ -165,7 +152,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(10.januar til 25.januar))
 
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = inntektsvurdering)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -183,7 +170,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         a2 {
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = inntektsvurdering)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
         }
@@ -755,7 +742,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         }
     }
     @Test
-    fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `gjenbruker saksbehandlerinntekt som overstyrer annen saksbehandler`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             val inntektsmelding = håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -779,7 +766,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig, "overstyring", null, listOf(Triple(1.januar, null, INNTEKT)))), meldingsreferanseId = andreOverstyring)
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertVarsel(RV_IV_2)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 500.daglig)))
 
             håndterYtelser(1.vedtaksperiode)
@@ -816,7 +802,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
     }
 
     @Test
-    fun `gjenbruker grunnlaget for skjønnsmessig fastsettelse`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `gjenbruker grunnlaget for skjønnsmessig fastsettelse`() {
         a1 {
             val beregnetInntektIM = INNTEKT * 2
             val inntektSkatt = INNTEKT
@@ -850,7 +836,6 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
 
             håndterVilkårsgrunnlag(2.vedtaksperiode, inntektSkatt)
-            assertVarsel(RV_IV_2, 2.vedtaksperiode.filter())
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterSkjønnsmessigFastsettelse(1.februar, listOf(OverstyrtArbeidsgiveropplysning(a1, beregnetInntektIM)))
 

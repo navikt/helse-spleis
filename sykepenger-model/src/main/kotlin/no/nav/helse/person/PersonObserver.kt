@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
@@ -617,28 +616,15 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         data class FastsattIInfotrygd(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta() {
             override val fastsatt = Fastsatt.IInfotrygd
         }
-        data class FastsattEtterHovedregel(
+        data class FastsattISpeil(
             override val omregnetÅrsinntekt: Double,
-            val innrapportertÅrsinntekt: Double,
-            val avviksprosent: Double,
             val `6G`: Double,
             val tags: Set<Tag>,
             val arbeidsgivere: List<Arbeidsgiver>
         ) : Sykepengegrunnlagsfakta() {
-            override val fastsatt = Fastsatt.EtterHovedregel
-            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double)
-        }
-        data class FastsattEtterSkjønn(
-            override val omregnetÅrsinntekt: Double,
-            val innrapportertÅrsinntekt: Double,
-            val skjønnsfastsatt: Double,
-            val avviksprosent: Double,
-            val `6G`: Double,
-            val tags: Set<Tag>,
-            val arbeidsgivere: List<Arbeidsgiver>
-        ) : Sykepengegrunnlagsfakta() {
-            override val fastsatt = Fastsatt.EtterSkjønn
-            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val skjønnsfastsatt: Double)
+            val skjønnsfastsatt: Double? = arbeidsgivere.mapNotNull { it.skjønnsfastsatt }.takeIf(List<*>::isNotEmpty)?.sum()
+            override val fastsatt = if (skjønnsfastsatt == null) Fastsatt.EtterHovedregel else Fastsatt.EtterSkjønn
+            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val skjønnsfastsatt: Double?)
         }
     }
 
@@ -674,69 +660,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val organisasjonsnummer: String
     )
 
-    data class AvviksprosentBeregnetEvent(
-        val beregningsgrunnlagTotalbeløp: Double,
-        val sammenligningsgrunnlagTotalbeløp: Double,
-        val avviksprosent: Double,
-        val skjæringstidspunkt: LocalDate,
-        val vurderingstidspunkt: LocalDateTime,
-        val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
-        val sammenligningsgrunnlag: List<Sammenligningsgrunnlag>,
-        val vilkårsgrunnlagId: UUID
-    ) {
-
-        fun toJsonMap(): Map<String, Any> =
-            mapOf(
-                "beregningsgrunnlagTotalbeløp" to beregningsgrunnlagTotalbeløp,
-                "sammenligningsgrunnlagTotalbeløp" to sammenligningsgrunnlagTotalbeløp,
-                "avviksprosent" to avviksprosent,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "vurderingstidspunkt" to vurderingstidspunkt,
-                "omregnedeÅrsinntekter" to omregnedeÅrsinntekter.map { it.toJsonMap() },
-                "sammenligningsgrunnlag" to sammenligningsgrunnlag.map { it.toJsonMap() },
-                "vilkårsgrunnlagId" to vilkårsgrunnlagId
-            )
-
-        data class OmregnetÅrsinntekt(
-            val orgnummer: String,
-            val beløp: Double
-        ) {
-            fun toJsonMap(): Map<String, Any> =
-                mapOf(
-                    "orgnummer" to orgnummer,
-                    "beløp" to beløp
-                )
-        }
-
-        data class Sammenligningsgrunnlag(
-            val orgnummer: String,
-            val skatteopplysninger: List<Skatteopplysning>
-        ) {
-            fun toJsonMap() =
-                mapOf(
-                    "orgnummer" to orgnummer,
-                    "skatteopplysninger" to skatteopplysninger.map { it.toJsonMap() }
-                )
-
-            data class Skatteopplysning(
-                val beløp: Double,
-                val måned: YearMonth,
-                val type: String,
-                val fordel: String,
-                val beskrivelse: String
-            ) {
-                fun toJsonMap() =
-                    mapOf(
-                        "beløp" to beløp,
-                        "måned" to måned,
-                        "type" to type,
-                        "fordel" to fordel,
-                        "beskrivelse" to beskrivelse
-                    )
-            }
-        }
-    }
-
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {}
     fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
@@ -759,8 +682,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(event: VedtakFattetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
-    fun avviksprosentBeregnet(event: AvviksprosentBeregnetEvent) {}
-
     fun nyVedtaksperiodeUtbetaling(
         personidentifikator: Personidentifikator,
         aktørId: String,

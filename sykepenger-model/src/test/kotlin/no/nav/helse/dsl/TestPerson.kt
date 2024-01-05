@@ -9,13 +9,11 @@ import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
@@ -39,7 +37,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsforho
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
-import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
@@ -57,7 +54,6 @@ import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
@@ -264,26 +260,18 @@ internal class TestPerson(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             inntekt: Inntekt = INNTEKT,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            inntektsvurdering: Inntektsvurdering? = null,
             inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
             arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
             orgnummer: String = "aa"
         ) {
-            if (Toggle.AvviksvurderingFlyttet.enabled) behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
-            else behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
+            behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
             arbeidsgiverHendelsefabrikk.lagVilkårsgrunnlag(
                 vedtaksperiodeId,
                 inspektør.skjæringstidspunkt(vedtaksperiodeId),
                 medlemskapstatus,
                 arbeidsforhold ?: arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },
-                inntektsvurdering ?: lagStandardSammenligningsgrunnlag(
-                    this.orgnummer,
-                    inntekt,
-                    inspektør.skjæringstidspunkt(vedtaksperiodeId)
-                ),
                 inntektsvurderingForSykepengegrunnlag ?: lagStandardSykepengegrunnlag(this.orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId))
-            )
-                .håndter(Person::håndter)
+            ).håndter(Person::håndter)
         }
 
         internal fun håndterYtelser(
@@ -418,21 +406,6 @@ internal class TestPerson(
     }
 }
 
-internal fun lagStandardSammenligningsgrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
-    lagStandardSammenligningsgrunnlag(listOf(orgnummer to inntekt), skjæringstidspunkt)
-
-internal fun lagStandardSammenligningsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>>, skjæringstidspunkt: LocalDate) =
-    Inntektsvurdering(
-        inntekter = inntektperioderForSammenligningsgrunnlag {
-            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
-                arbeidsgivere.forEach { (orgnummer, inntekt) -> orgnummer inntekt inntekt }
-            }
-        }
-    )
-
-internal fun List<String>.lagStandardSammenligningsgrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
-    lagStandardSammenligningsgrunnlag(map { it to inntekt }, skjæringstidspunkt)
-
 internal fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
     lagStandardSykepengegrunnlag(listOf(orgnummer to inntekt), skjæringstidspunkt)
 internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Inntekt>>, skjæringstidspunkt: LocalDate, arbeidsforhold: List<InntektForSykepengegrunnlag.Arbeidsforhold> = emptyList()) =
@@ -500,12 +473,11 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     arbeidsgiverperiode: List<Periode> = emptyList(),
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag),
-    sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag),
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
 ): UUID {
     val vedtaksperiode = nyPeriode(fom til tom, grad)
     håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, inntektsdato, refusjon)
-    håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, Medlemskapsvurdering.Medlemskapstatus.Ja, sammenligningsgrunnlag, sykepengegrunnlagSkatt, arbeidsforhold)
+    håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, Medlemskapsvurdering.Medlemskapstatus.Ja, sykepengegrunnlagSkatt, arbeidsforhold)
     håndterYtelser(vedtaksperiode)
     håndterSimulering(vedtaksperiode)
     return vedtaksperiode
@@ -520,10 +492,9 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-    sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag),
-    sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag)
+    sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag)
 ) {
-    val vedtaksperiode = tilGodkjenning(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag)
+    val vedtaksperiode = tilGodkjenning(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
     håndterUtbetalt(status)
 }

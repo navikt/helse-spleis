@@ -169,6 +169,7 @@ enum class Varselkode(
 
     // IV: Inntektsvurdering
     RV_IV_1("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", avviklet = true),
+    @Deprecated("Denne skal ikke være i bruk i Spleis mer, brukes av spinnvill")
     RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", funksjonellFeilTekst = "Har mer enn 25 % avvik"),
     RV_IV_3("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene"),
     RV_IV_4("Finnes inntekter fra flere virksomheter siste tre måneder", avviklet = true),

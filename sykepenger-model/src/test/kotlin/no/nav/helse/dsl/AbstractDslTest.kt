@@ -8,7 +8,6 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -120,7 +119,6 @@ internal abstract class AbstractDslTest {
     protected fun List<String>.nyeVedtak(
         periode: Periode, grad: Prosentdel = 100.prosent, inntekt: Inntekt = 20000.månedlig,
         sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(map { it to inntekt }, periode.start),
-        sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(map { it to inntekt }, periode.start),
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = map { orgnr -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null, Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT) }
     ) {
         forEach {
@@ -133,7 +131,7 @@ internal abstract class AbstractDslTest {
             håndterInntektsmelding(listOf(periode.start til periode.start.plusDays(15)), beregnetInntekt = inntekt)
         }}
         (first()){
-            håndterVilkårsgrunnlag(observatør.sisteVedtaksperiodeId(orgnummer), inntektsvurdering = sammenligningsgrunnlag, inntektsvurderingForSykepengegrunnlag = sykepengegrunnlagSkatt, arbeidsforhold = arbeidsforhold)
+            håndterVilkårsgrunnlag(observatør.sisteVedtaksperiodeId(orgnummer), inntektsvurderingForSykepengegrunnlag = sykepengegrunnlagSkatt, arbeidsforhold = arbeidsforhold)
             håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterSimulering(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
@@ -247,11 +245,10 @@ internal abstract class AbstractDslTest {
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        inntektsvurdering: Inntektsvurdering? = null,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null
     ) =
-        this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurdering, inntektsvurderingForSykepengegrunnlag, arbeidsforhold) }
+        this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold) }
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<Periode> = emptyList(),
@@ -308,10 +305,9 @@ internal abstract class AbstractDslTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag),
-        sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(this, beregnetInntekt, førsteFraværsdag)
+        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag) }
+        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
 
     protected fun String.tilGodkjenning(
         fom: LocalDate,
@@ -323,10 +319,9 @@ internal abstract class AbstractDslTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag),
-        sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(this, beregnetInntekt, førsteFraværsdag)
+        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag) }
+        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
 
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
@@ -371,12 +366,11 @@ internal abstract class AbstractDslTest {
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        inntektsvurdering: Inntektsvurdering? = null,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurdering, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
+        bareÈnArbeidsgiver(a1).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<Periode> = emptyList(),
@@ -453,10 +447,9 @@ internal abstract class AbstractDslTest {
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
-        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, beregnetInntekt, førsteFraværsdag),
-        sammenligningsgrunnlag: Inntektsvurdering = lagStandardSammenligningsgrunnlag(a1, beregnetInntekt, førsteFraværsdag)
+        sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, beregnetInntekt, førsteFraværsdag)
     ) =
-        bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt, sammenligningsgrunnlag)
+        bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
 
     protected fun serializeForSpeil() = testperson.serializeForSpeil()
     protected fun serialize(pretty: Boolean = false) = testperson.serialize(pretty)

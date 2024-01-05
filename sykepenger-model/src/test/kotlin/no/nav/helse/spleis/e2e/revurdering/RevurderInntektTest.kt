@@ -7,7 +7,6 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -57,7 +56,6 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -120,7 +118,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         val vilkårgrunnlagsinspektør = person.inspektør.vilkårsgrunnlagHistorikk.inspektør
         val grunnlagsdataInspektør = vilkårgrunnlagsinspektør.grunnlagsdata(0).inspektør
         assertEquals(2, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
-        assertEquals(3, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.avviksprosent)
 
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
         val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
@@ -286,57 +283,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         assertEquals(3, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
     }
-    @Test
-    fun `revurder inntekt avvik over 25 prosent reduksjon`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyrInntekt(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
-        assertTilstander(
-            0,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING
-        )
-
-        assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertEquals(2, inspektør.utbetalinger.size)
-    }
-
-    @Test
-    fun `revurder inntekt avvik over 25 prosent økning`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyrInntekt(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
-        assertTilstander(
-            0,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING
-        )
-
-        assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertEquals(2, inspektør.utbetalinger.size)
-    }
 
     @Test
     fun `revurder inntekt ny inntekt under en halv G`() {
@@ -367,7 +313,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(-15741, utbetalingTilRevurdering.inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
-        assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
     }
 
@@ -452,11 +397,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(12)),
-                )
-            ),
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
@@ -487,11 +428,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(3)))
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(12)),
-                )
-            ),
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode)

@@ -2,12 +2,10 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -23,7 +21,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -52,7 +49,6 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellFeriedag
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.assertNotNull
@@ -265,11 +261,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(12)),
-                )
-            ),
+            1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
         håndterYtelser(1.vedtaksperiode)
@@ -417,44 +409,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurder inntekt avvik over 25 prosent reduksjon`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        nullstillTilstandsendringer()
-        håndterOverstyrInntekt(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING
-        )
-
-        assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertEquals(2, inspektør.utbetalinger.size)
-    }
-
-    @Test
-    fun `revurder inntekt avvik over 25 prosent økning`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        nullstillTilstandsendringer()
-
-        håndterOverstyrInntekt(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING
-        )
-
-        assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertEquals(2, inspektør.utbetalinger.size)
-    }
-
-    @Test
     fun `revurder inntekt til under krav til minste sykepengegrunnlag`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         nullstillTilstandsendringer()
@@ -474,13 +428,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertDiff(-15741)
 
-        assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
         assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
     }
 
     @Test
-    fun `revurder inntekt til under krav til minste sykepengegrunnlag slik at utbetaling opphører, og så revurder igjen til over krav til minste sykepengegrunnlag`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `revurder inntekt til under krav til minste sykepengegrunnlag slik at utbetaling opphører, og så revurder igjen til over krav til minste sykepengegrunnlag`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = 5000.månedlig)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
@@ -502,7 +455,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertDiff(-2541)
 
-        assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
         assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
         assertFalse(inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.utbetalingstidslinje.harUtbetalingsdager())
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)

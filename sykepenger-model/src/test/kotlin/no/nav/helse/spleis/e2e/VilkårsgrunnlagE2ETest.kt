@@ -6,7 +6,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -24,26 +23,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.inntekt.Sykepengegrunnlag.FastsattEtterHovedregel
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
-
-    @Test
-    fun `Sykepengegrunnlag faststt etter hovedregel`() {
-        nyttVedtak(1.januar, 31.januar)
-        assertEquals(FastsattEtterHovedregel, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.tilstand)
-    }
 
     @Test
     fun `skjæringstidspunkt måneden før inntektsmelding`() {
@@ -55,14 +40,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2,)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a2,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt INNTEKT
-                        a2 inntekt INNTEKT
-                    }
-                }
-            ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     ArbeidsgiverInntekt(a1, listOf(
@@ -116,74 +93,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT/2
-                }
-            }
-        ))
-
-        assertFunksjonellFeil(Varselkode.RV_IV_2, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `ingen sammenligningsgrunlag fører til error om 25% avvik`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
-
-        assertFunksjonellFeil(Varselkode.RV_IV_2, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `Forkaster etterfølgende perioder dersom vilkårsprøving feilet pga avvik i inntekt på første periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar))
-        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar))
-        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
-
-        val arbeidsgiverperioder = listOf(
-            1.januar til 16.januar
-        )
-        håndterInntektsmelding(arbeidsgiverperioder, førsteFraværsdag = 1.januar,)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT * 2
-                }
-            }
-        ))
-
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INFOTRYGDHISTORIKK,
-            AVVENTER_INNTEKTSMELDING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            TIL_INFOTRYGD
-        )
-    }
-
-    @Test
     fun `Forkaster ikke etterfølgende perioder dersom vilkårsprøving feiler pga minimum inntekt på første periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
@@ -199,13 +108,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(1000.månedlig, null, emptyList()),
         )
 
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt 1000
-                }
-            }
-        ))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
@@ -225,48 +128,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             START,
             AVVENTER_BLOKKERENDE_PERIODE
         )
-    }
-
-    @Test
-    fun `25 % avvik i inntekt lager error`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar))
-        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT * 2 // 25 % avvik vs inntekt i inntektsmeldingen
-                }
-            }
-        ))
-        assertFunksjonellFeil(Varselkode.RV_IV_2)
-    }
-
-    @Test
-    fun `gjenbruker ikke vilkårsprøving når førstegangsbehandlingen kastes ut - med kort agp-periode som påvirker skjæringstidspunktet`() {
-        val inntektFraIT = INNTEKT/2
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT/2
-                }
-            }
-        ))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, inntektFraIT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 17.januar, inntektFraIT, true)
-        ))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(3.vedtaksperiode)
-        assertNull(vilkårsgrunnlag)
     }
     
     @Test

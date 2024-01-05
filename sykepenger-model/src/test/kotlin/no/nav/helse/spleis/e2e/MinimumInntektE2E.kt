@@ -6,7 +6,6 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -35,11 +34,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(1.januar til 31.januar, a1)
             håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, skjæringstidspunkt, inntekt.repeat(12))
-                    )
-                ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
@@ -69,11 +63,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(22.januar til 28.februar, a1)
             håndterInntektsmelding(listOf(22.januar til 6.februar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, skjæringstidspunkt, inntekt.repeat(12))
-                    )
-                ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
@@ -111,11 +100,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(1.februar til 28.februar, a1)
             håndterInntektsmelding(listOf(1.februar til 16.februar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, skjæringstidspunkt, inntekt.repeat(12))
-                    )
-                ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))
@@ -145,11 +129,6 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             nyPeriode(15.januar til 28.februar, a1)
             håndterInntektsmelding(listOf(15.januar til 30.januar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, skjæringstidspunkt, inntekt.repeat(12))
-                    )
-                ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = listOf(
                         grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3))

@@ -10,6 +10,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.AnsattPeriode
+import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 
@@ -20,7 +21,6 @@ class Vilkårsgrunnlag(
     aktørId: String,
     personidentifikator: Personidentifikator,
     orgnummer: String,
-    private val inntektsvurdering: Inntektsvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     private val arbeidsforhold: List<Arbeidsforhold>
@@ -55,8 +55,7 @@ class Vilkårsgrunnlag(
                 ansattPerioder = ansattPerioder.map { it.somAnsattPeriode() }
             )
         }
-        val sammenligningsgrunnlag = inntektsvurdering.sammenligningsgrunnlag(skjæringstidspunkt, meldingsreferanseId(), subsumsjonObserver)
-        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, sammenligningsgrunnlag, meldingsreferanseId(), subsumsjonObserver)
+        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, Sammenligningsgrunnlag(emptyList()), meldingsreferanseId(), subsumsjonObserver)
     }
 
     internal fun valider(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {

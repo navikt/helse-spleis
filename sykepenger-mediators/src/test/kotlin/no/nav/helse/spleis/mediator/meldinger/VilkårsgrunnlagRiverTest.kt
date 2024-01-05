@@ -38,15 +38,14 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                 vedtaksperiodeId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
                 tilstand = TilstandType.START,
-                inntekter = emptyList(),
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
                     måned = YearMonth.of(2017, 12),
                     inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, ORGNUMMER)),
                     arbeidsforhold = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Arbeidsforhold(ORGNUMMER, "frilanserOppdragstakerHonorarPersonerMm"))
                 )),
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT))
+                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)),
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
             )
         )
     }
@@ -58,15 +57,14 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                 vedtaksperiodeId = UUID.randomUUID(),
                 skjæringstidspunkt = 1.januar,
                 tilstand = TilstandType.START,
-                inntekter = emptyList(),
                 inntekterForSykepengegrunnlag = listOf(
                     TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning(
                     måned = YearMonth.of(2017, 12),
                     inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, "987654322")),
                     arbeidsforhold = emptyList()
                 )),
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT))
+                arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)),
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
             )
         )
     }

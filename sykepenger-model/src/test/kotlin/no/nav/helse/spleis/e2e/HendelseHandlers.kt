@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -62,7 +61,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilOverstyrt
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning.Companion.tilSkjønnsmessigFastsatt
 import no.nav.helse.testhelpers.Inntektperioder
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -96,13 +94,7 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
     return id
 }
 
-internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, beregnetInntekt: Inntekt = 20000.månedlig, inntekterBlock: Inntektperioder.() -> Unit = {
-    fom.minusYears(1) til fom.minusMonths(1) inntekter {
-        organisasjonsnummere.forEach {
-            it inntekt beregnetInntekt
-        }
-    }
-}) {
+internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, beregnetInntekt: Inntekt = 20000.månedlig) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnummere.forEach { nyPeriode(fom til tom, it) }
     organisasjonsnummere.forEach {
@@ -118,10 +110,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = vedtaksperiode,
             inntekt = beregnetInntekt,
-            orgnummer = organisasjonsnummer,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                inntekterBlock()
-            })
+            orgnummer = organisasjonsnummer
         )
         håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterSimulering(vedtaksperiode, orgnummer = organisasjonsnummer)
@@ -132,16 +121,11 @@ internal fun AbstractEndToEndTest.nyeVedtak(
     fom: LocalDate,
     tom: LocalDate,
     vararg organisasjonsnummere: String,
-    inntekt: Inntekt = 20000.månedlig,
-    inntekterBlock: Inntektperioder.() -> Unit = {
-        organisasjonsnummere.forEach {
-            lagInntektperioder(it, fom, inntekt)
-        }
-    }
+    inntekt: Inntekt = 20000.månedlig
 ) {
     val vedtaksperiode = observatør.sisteVedtaksperiode()
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    tilGodkjenning(fom, tom, *organisasjonsnummere, inntekterBlock = inntekterBlock, beregnetInntekt = inntekt)
+    tilGodkjenning(fom, tom, *organisasjonsnummere, beregnetInntekt = inntekt)
     val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
 
     første.let { organisasjonsnummer ->
@@ -160,12 +144,7 @@ internal fun AbstractEndToEndTest.nyeVedtak(
 internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
     fom: LocalDate,
     tom: LocalDate,
-    vararg organisasjonsnummere: String,
-    inntekterBlock: Inntektperioder.() -> Unit = {
-        organisasjonsnummere.forEach {
-            lagInntektperioder(it, fom, 20000.månedlig)
-        }
-    }
+    vararg organisasjonsnummere: String
 ) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnummere.forEach {
@@ -188,10 +167,7 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
     organisasjonsnummere.first().let { organisasjonsnummer ->
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = vedtaksperiode,
-            orgnummer = organisasjonsnummer,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                inntekterBlock()
-            })
+            orgnummer = organisasjonsnummer
         )
         håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterSimulering(vedtaksperiode, orgnummer = organisasjonsnummer)
@@ -284,7 +260,7 @@ internal fun AbstractEndToEndTest.tilSimulering(
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
-    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
+    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
 }
 
 internal fun AbstractEndToEndTest.tilYtelser(
@@ -296,7 +272,6 @@ internal fun AbstractEndToEndTest.tilYtelser(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
         inntekter = inntektperioderForSykepengegrunnlag {
             fom.minusMonths(3) til fom.minusMonths(1) inntekter {
@@ -324,9 +299,6 @@ internal fun AbstractEndToEndTest.tilYtelser(
         inntekt = beregnetInntekt,
         fnr = fnr,
         orgnummer = orgnummer,
-        inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag(inntekterBlock)
-        ),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag
     )
     håndterYtelser(id, orgnummer = orgnummer, fnr = fnr)
@@ -391,27 +363,6 @@ internal fun AbstractEndToEndTest.forlengPeriode(
     nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
 }
 
-internal fun AbstractEndToEndTest.håndterSøknadMedValidering(
-    vedtaksperiodeIdInnhenter: IdInnhenter,
-    vararg perioder: Søknadsperiode,
-    andreInntektskilder: Boolean = false,
-    sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-) {
-    assertIkkeEtterspurt(
-        Søknad::class, Behovtype.InntekterForSammenligningsgrunnlag, vedtaksperiodeIdInnhenter,
-        AbstractPersonTest.ORGNUMMER
-    )
-    håndterSøknad(
-        *perioder,
-        andreInntektskilder = andreInntektskilder,
-        sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
-        orgnummer = orgnummer,
-        fnr = fnr
-    )
-}
-
 internal fun AbstractEndToEndTest.håndterSøknad(
     vararg perioder: Søknadsperiode,
     andreInntektskilder: Boolean = false,
@@ -468,32 +419,6 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
         håndterInntektsmeldingReplayUtført(vedtaksperiodeId, orgnummer)
         observatør.kvitterInntektsmeldingReplay(vedtaksperiodeId)
     }
-}
-
-internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
-    vedtaksperiodeIdInnhenter: IdInnhenter,
-    arbeidsgiverperioder: List<Periode>,
-    førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-    inntektsdato: LocalDate? = null,
-    beregnetInntekt: Inntekt = INNTEKT,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    harOpphørAvNaturalytelser: Boolean = false,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
-): UUID {
-    assertIkkeEtterspurt(Inntektsmelding::class, Behovtype.InntekterForSammenligningsgrunnlag, vedtaksperiodeIdInnhenter, orgnummer)
-    return håndterInntektsmelding(
-        arbeidsgiverperioder,
-        førsteFraværsdag,
-        inntektsdato = inntektsdato,
-        beregnetInntekt = beregnetInntekt,
-        refusjon,
-        orgnummer = orgnummer,
-        harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-        fnr = fnr,
-        avsendersystem = avsendersystem
-    )
 }
 
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
@@ -562,14 +487,6 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     inntekt: Inntekt = INNTEKT,
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
-        inntekter = inntektperioderForSammenligningsgrunnlag {
-            val skjæringstidspunkt = inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)
-            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
-                orgnummer inntekt inntekt
-            }
-        }
-    ),
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
         inntekter = listOf(
             ArbeidsgiverInntekt(orgnummer, (0..2).map {
@@ -590,7 +507,6 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     fun assertEtterspurt(behovtype: Behovtype) =
         assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeIdInnhenter, orgnummer)
 
-    assertEtterspurt(Behovtype.InntekterForSammenligningsgrunnlag)
     assertEtterspurt(Behovtype.InntekterForSykepengegrunnlag)
     assertEtterspurt(Behovtype.ArbeidsforholdV2)
     assertEtterspurt(Behovtype.Medlemskap)
@@ -600,7 +516,6 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         medlemskapstatus = medlemskapstatus,
         orgnummer = orgnummer,
         arbeidsforhold = arbeidsforhold,
-        inntektsvurdering = inntektsvurdering,
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         fnr = fnr
     ).håndter(Person::håndter)

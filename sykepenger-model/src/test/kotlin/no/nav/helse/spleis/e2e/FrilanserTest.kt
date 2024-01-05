@@ -2,21 +2,16 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.helse.assertForventetFeil
-import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
-import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag.Arbeidsforhold
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -31,7 +26,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -56,15 +50,7 @@ internal class FrilanserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT), 1.januar, listOf(
                     Arbeidsforhold(a2, listOf(InntektForSykepengegrunnlag.MånedligArbeidsforhold(november(2017), true)))
-                )),
-                inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt INNTEKT
-                    }
-                    1.november(2017).somPeriode() feriepenger {
-                        a2 inntekt 6000.månedlig
-                    }
-                })
+                ))
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -134,7 +120,6 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
-                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to 1000.månedlig), 1.januar),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to 1000.månedlig), 1.januar),
                 arbeidsforhold = arbeidsforhold
             )
@@ -165,7 +150,6 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
-                inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to 10000.månedlig, a2 to 100.månedlig), 1.januar),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 10000.månedlig, a2 to 100.månedlig), 1.januar),
                 arbeidsforhold = arbeidsforhold
             )
@@ -181,7 +165,7 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
             håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(a1 to INNTEKT, a2 to 1000.månedlig), 1.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)

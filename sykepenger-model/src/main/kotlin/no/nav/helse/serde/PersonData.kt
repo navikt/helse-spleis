@@ -311,15 +311,8 @@ internal data class PersonData(
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             private val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
             private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
-            private val vurdertInfotrygd: Boolean,
-            private val tilstand: TilstandData
+            private val vurdertInfotrygd: Boolean
         ) {
-            enum class TilstandData {
-                FASTSATT_ETTER_HOVEDREGEL,
-                AVVENTER_FASTSETTELSE_ETTER_SKJØNN,
-                FASTSATT_ETTER_SKJØNN
-            }
-
             internal fun parseSykepengegrunnlag(
                 builder: VilkårsgrunnlaghistorikkBuilder,
                 alder: Alder,
@@ -331,12 +324,7 @@ internal data class PersonData(
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(builder),
                 vurdertInfotrygd = vurdertInfotrygd,
-                `6G` = grunnbeløp?.årlig,
-                tilstand = when (tilstand) {
-                    TilstandData.FASTSATT_ETTER_HOVEDREGEL -> Sykepengegrunnlag.FastsattEtterHovedregel
-                    TilstandData.AVVENTER_FASTSETTELSE_ETTER_SKJØNN -> Sykepengegrunnlag.AvventerFastsettelseEtterSkjønn
-                    TilstandData.FASTSATT_ETTER_SKJØNN -> Sykepengegrunnlag.FastsattEtterSkjønn
-                }
+                `6G` = grunnbeløp?.årlig
             )
 
             internal fun parseSykepengegrunnlagInfotrygd(
@@ -350,8 +338,7 @@ internal data class PersonData(
                 sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(builder),
                 vurdertInfotrygd = vurdertInfotrygd,
-                `6G` = grunnbeløp?.årlig,
-                tilstand = Sykepengegrunnlag.FastsattEtterHovedregel
+                `6G` = grunnbeløp?.årlig
             )
         }
 

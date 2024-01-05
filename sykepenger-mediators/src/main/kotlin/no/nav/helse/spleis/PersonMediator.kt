@@ -385,32 +385,21 @@ internal class PersonMediator(
             event.utbetalingId?.let { this["utbetalingId"] = it }
             event.sykepengegrunnlagsfakta?.let {
                 this["sykepengegrunnlagsfakta"] = when (it) {
-                    is PersonObserver.VedtakFattetEvent.FastsattEtterHovedregel -> mapOf(
+                    is PersonObserver.VedtakFattetEvent.FastsattISpeil -> mutableMapOf(
                         "fastsatt" to it.fastsatt,
                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
-                        "avviksprosent" to it.avviksprosent,
                         "6G" to it.`6G`,
                         "tags" to it.tags,
-                        "arbeidsgivere" to it.arbeidsgivere.map { arbeidsgiver -> mapOf(
-                            "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt
-                        )}
-                    )
-                    is PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn -> mapOf(
-                        "fastsatt" to it.fastsatt,
-                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
-                        "skjønnsfastsatt" to it.skjønnsfastsatt,
-                        "avviksprosent" to it.avviksprosent,
-                        "6G" to it.`6G`,
-                        "tags" to it.tags,
-                        "arbeidsgivere" to it.arbeidsgivere.map { arbeidsgiver -> mapOf(
-                            "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
-                            "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt
-                        )}
-                    )
+                        "arbeidsgivere" to it.arbeidsgivere.map { arbeidsgiver ->
+                            val skjønnsfastsatt = if (arbeidsgiver.skjønnsfastsatt != null) mapOf("skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt) else emptyMap()
+                            mapOf(
+                                "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                                "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt
+                            ) + skjønnsfastsatt
+                        }
+                    ).apply {
+                        compute("skjønnsfastsatt") { _, _ -> it.skjønnsfastsatt }
+                    }
                     is PersonObserver.VedtakFattetEvent.FastsattIInfotrygd -> mapOf(
                         "fastsatt" to it.fastsatt,
                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt
@@ -461,10 +450,6 @@ internal class PersonMediator(
 
     override fun arbeidsgiveropplysningerKorrigert(event: PersonObserver.ArbeidsgiveropplysningerKorrigertEvent) {
         queueMessage(JsonMessage.newMessage("arbeidsgiveropplysninger_korrigert", event.toJsonMap()))
-    }
-
-    override fun avviksprosentBeregnet(event: PersonObserver.AvviksprosentBeregnetEvent) {
-        queueMessage(JsonMessage.newMessage("avviksprosent_beregnet_event", event.toJsonMap()))
     }
 
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {

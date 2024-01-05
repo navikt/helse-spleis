@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -80,7 +79,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `replay av IM medfører ikke at allerede revurdert skjæringstidspunkt revurderes på nytt`() = Toggle.AltAvTjuefemprosentAvvikssaker.enable {
+    fun `replay av IM medfører ikke at allerede revurdert skjæringstidspunkt revurderes på nytt`() {
         nyttVedtak(1.mars, 31.mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT + 500.daglig,)
 

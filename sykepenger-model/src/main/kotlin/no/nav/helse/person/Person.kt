@@ -14,13 +14,13 @@ import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.Grunnbeløpsregulering
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
-import no.nav.helse.hendelser.Grunnbeløpsregulering
-import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -561,11 +561,6 @@ class Person private constructor(
         observers.forEach { it.overstyringIgangsatt(event) }
     }
 
-    internal fun avviksprosentBeregnet(event: PersonObserver.AvviksprosentBeregnetEvent) {
-        if (Toggle.AvviksvurderingFlyttet.enabled) return
-        observers.forEach { it.avviksprosentBeregnet(event) }
-    }
-
     internal fun emitOverlappendeInfotrygdperiodeEtterInfotrygdendring(
         vedtaksperiodeId: UUID,
         vedtaksperiode: Periode,
@@ -675,7 +670,6 @@ class Person private constructor(
     ): Sykepengegrunnlag {
         skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), hendelse) } // oppretter evt. nye arbeidsgivere
         return Sykepengegrunnlag.opprett(
-            this,
             alder,
             arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.dsl.TestPerson
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
@@ -131,7 +130,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         return VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = Sykepengegrunnlag.opprett(
-                person = TestPerson(object:PersonObserver{}).person,
                 ALDER, listOf(
                     ArbeidsgiverInntektsopplysning(
                         "orgnr",

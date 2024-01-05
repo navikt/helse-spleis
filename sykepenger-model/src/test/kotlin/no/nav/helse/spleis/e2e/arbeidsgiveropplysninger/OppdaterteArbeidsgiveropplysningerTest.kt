@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -158,10 +157,6 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar, a1)
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
-            inntektsvurdering = lagStandardSammenligningsgrunnlag(listOf(
-                a1 to INNTEKT,
-                a2 to INNTEKT
-            ), 1.januar),
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
                 a1 to INNTEKT,
                 a2 to INNTEKT

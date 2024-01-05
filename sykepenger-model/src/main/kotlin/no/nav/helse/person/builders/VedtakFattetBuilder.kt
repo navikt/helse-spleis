@@ -6,9 +6,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattEtterHovedregel
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattEtterSkjønn
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattIInfotrygd
+import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattISpeil
+import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattISpeil.Arbeidsgiver
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfakta
 import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning
@@ -29,24 +29,25 @@ internal class VedtakFattetBuilder(
     private var sykepengegrunnlag =  Inntekt.INGEN
     private var beregningsgrunnlag = Inntekt.INGEN
     private var begrensning: Begrensning? = null
-    private var omregnetÅrsinntektPerArbeidsgiverÅrlig = emptyMap<String, Double>()
     private var vedtakFattetTidspunkt = LocalDateTime.now()
-    private var utbetalingId: UUID? = null
+    private lateinit var utbetalingId: UUID
 
     internal fun utbetalingId(id: UUID) = apply { this.utbetalingId = id }
     internal fun utbetalingVurdert(tidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = tidspunkt }
     internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
     internal fun beregningsgrunnlag(beregningsgrunnlag: Inntekt) = apply { this.beregningsgrunnlag = beregningsgrunnlag }
     internal fun begrensning(begrensning: Begrensning) = apply { this.begrensning = begrensning }
-    internal fun omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiverÅrlig: Map<String, Double>) = apply { this.omregnetÅrsinntektPerArbeidsgiverÅrlig = omregnetÅrsinntektPerArbeidsgiverÅrlig }
     internal fun ingenNyArbeidsgiverperiode() = apply { tags.add(Tag.IngenNyArbeidsgiverperiode) }
     internal fun sykepengergrunnlagErUnder2G() = apply { tags.add(Tag.SykepengegrunnlagUnder2G) }
 
-    private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
+    private lateinit var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }
 
     internal fun result(): PersonObserver.VedtakFattetEvent {
-        check((utbetalingId == null) || (sykepengegrunnlagsfakta != null)) { "Må ha sykepengegrunnlagsfakta dersom utbetalingsId er satt" }
+        val omregnetÅrsinntektPerArbeidsgiverÅrlig = when (val f = sykepengegrunnlagsfakta) {
+            is FastsattISpeil -> f.arbeidsgivere.associate { it.arbeidsgiver to (it.skjønnsfastsatt ?: it.omregnetÅrsinntekt) }
+            else -> emptyMap()
+        }
         return PersonObserver.VedtakFattetEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -80,37 +81,22 @@ internal class VedtakFattetBuilder(
     internal class FastsattIInfotrygdBuilder(private val omregnetÅrsinntekt: Inntekt) : SykepengegrunnlagsfaktaBuilder() {
         override fun build() = FastsattIInfotrygd(omregnetÅrsinntekt.årlig)
     }
-    sealed class FastsattISpleisBuilder(
-        protected val omregnetÅrsinntekt: Inntekt,
-        protected val avviksprosent: Avviksprosent,
-        protected val `6G`: Inntekt,
+    internal class FastsattISpleisBuilder(
+        private val omregnetÅrsinntekt: Inntekt,
+        private val `6G`: Inntekt,
         begrensning: Begrensning
     ) : SykepengegrunnlagsfaktaBuilder() {
-        protected val tags: Set<Tag> = begrensning.takeIf { it == ER_6G_BEGRENSET }?.let { setOf(Tag.`6GBegrenset`) } ?: emptySet()
-        protected lateinit var innrapportertÅrsinntekt: Inntekt
+        private val tags: Set<Tag> = begrensning.takeIf { it == ER_6G_BEGRENSET }?.let { setOf(Tag.`6GBegrenset`) } ?: emptySet()
+        private lateinit var innrapportertÅrsinntekt: Inntekt
         internal fun innrapportertÅrsinntekt(innrapportertÅrsinntekt: Inntekt) = apply { this.innrapportertÅrsinntekt = innrapportertÅrsinntekt }
-        protected val Avviksprosent.avrundet get() = rundTilToDesimaler()
-    }
-    internal class FastsattEtterHovedregelBuilder(omregnetÅrsinntekt: Inntekt, avviksprosent: Avviksprosent, `6G`: Inntekt, begrensning: Begrensning) : FastsattISpleisBuilder(omregnetÅrsinntekt, avviksprosent, `6G`, begrensning) {
-        private val arbeidsgivere = mutableListOf<FastsattEtterHovedregel.Arbeidsgiver>()
-        internal fun arbeidsgiver(arbeidsgiver: String, omregnetÅrsinntekt: Inntekt) = apply { arbeidsgivere.add(FastsattEtterHovedregel.Arbeidsgiver(arbeidsgiver, omregnetÅrsinntekt.årlig)) }
-        override fun build() = FastsattEtterHovedregel(
+        private val Avviksprosent.avrundet get() = rundTilToDesimaler()
+
+        private val arbeidsgivere = mutableListOf<Arbeidsgiver>()
+        internal fun arbeidsgiver(arbeidsgiver: String, omregnetÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?) = apply {
+            arbeidsgivere.add(Arbeidsgiver(arbeidsgiver, omregnetÅrsinntekt.årlig, skjønnsfastsatt?.årlig))
+        }
+        override fun build() = FastsattISpeil(
             omregnetÅrsinntekt = omregnetÅrsinntekt.årlig,
-            innrapportertÅrsinntekt = innrapportertÅrsinntekt.årlig,
-            avviksprosent = avviksprosent.avrundet,
-            `6G`= `6G`.årlig,
-            tags = tags,
-            arbeidsgivere = arbeidsgivere.toList()
-        )
-    }
-    internal class FastsattEtterSkjønnBuilder(omregnetÅrsinntekt: Inntekt, avviksprosent: Avviksprosent, `6G`: Inntekt, begrensning: Begrensning, private val skjønnsfastsatt: Inntekt) : FastsattISpleisBuilder(omregnetÅrsinntekt, avviksprosent, `6G`, begrensning) {
-        private val arbeidsgivere = mutableListOf<FastsattEtterSkjønn.Arbeidsgiver>()
-        internal fun arbeidsgiver(arbeidsgiver: String, omregnetÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt) = apply { arbeidsgivere.add(FastsattEtterSkjønn.Arbeidsgiver(arbeidsgiver, omregnetÅrsinntekt.årlig, skjønnsfastsatt.årlig)) }
-        override fun build() = FastsattEtterSkjønn(
-            omregnetÅrsinntekt = omregnetÅrsinntekt.årlig,
-            skjønnsfastsatt = skjønnsfastsatt.årlig,
-            innrapportertÅrsinntekt = innrapportertÅrsinntekt.årlig,
-            avviksprosent = avviksprosent.avrundet,
             `6G`= `6G`.årlig,
             tags = tags,
             arbeidsgivere = arbeidsgivere.toList()

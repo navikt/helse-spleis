@@ -2,14 +2,11 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -21,19 +18,14 @@ import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
 import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -43,13 +35,10 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.inntektsmelding
-import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.sykmelding
 import no.nav.helse.spleis.e2e.søknad
 import no.nav.helse.spleis.e2e.utbetalingshistorikkEtterInfotrygdEndring
 import no.nav.helse.spleis.e2e.ytelser
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -80,20 +69,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             skjæringstidspunkt = 1.januar,
             orgnummer = a1,
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 15000
-                }
-                1.januar(2017) til 1.juni(2017) inntekter {
-                    a2 inntekt 5000
-                    a3 inntekt 3000
-                    a4 inntekt 2000
-                }
-                1.juli(2017) til 1.desember(2017) inntekter {
-                    a3 inntekt 7500
-                    a4 inntekt 2500
-                }
-            },
             inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
                     a1 inntekt 15000
@@ -115,65 +90,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertInntektForDato(null, 1.januar, inspektør = a2Inspektør)
         assertInntektForDato(4750.månedlig, 1.januar, inspektør = a3Inspektør)
         assertInntektForDato(2250.månedlig, 1.januar, inspektør = a4Inspektør)
-
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(a1Inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!)
-        assertEquals(300000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
-
-    }
-
-    @Test
-    fun `Sammenligningsgrunnlag når det finnes inntekter fra flere arbeidsgivere`() {
-        val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
-            1.oktober(2017) til 1.desember(2017) inntekter {
-                a1 inntekt 15000
-                a3 inntekt 7500
-                a4 inntekt 2500
-            }
-        }
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a4, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-        )
-        nyPeriode(1.januar til 31.januar, a1, INNTEKT)
-
-        val inntekterForSammenligningsgrunnlag = inntektperioderForSammenligningsgrunnlag {
-            1.januar(2017) til 1.desember(2017) inntekter {
-                a1 inntekt 15000
-            }
-            1.januar(2017) til 1.juni(2017) inntekter {
-                a2 inntekt 5000
-                a3 inntekt 3000
-                a4 inntekt 2000
-            }
-            1.juli(2017) til 1.desember(2017) inntekter {
-                a3 inntekt 7500
-                a4 inntekt 2500
-            }
-        }
-        val uuid = UUID.randomUUID()
-
-        val vilkårsgrunnlag = vilkårsgrunnlag(
-            1.vedtaksperiode,
-            skjæringstidspunkt = 1.januar,
-            orgnummer = a1,
-            inntekter = inntekterForSammenligningsgrunnlag,
-            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
-            arbeidsforhold = arbeidsforhold,
-            meldingsreferanseId = uuid
-        )
-        vilkårsgrunnlag.valider(
-            Sykepengegrunnlag(
-                this.person,
-                1.januar.alder,
-                emptyList(),
-                1.januar,
-                Sammenligningsgrunnlag(inntekterForSammenligningsgrunnlag.map { it.tilSammenligningsgrunnlag(uuid) }),
-                NullObserver
-            ),
-            NullObserver
-        )
-        assertEquals(300000.årlig, vilkårsgrunnlag.grunnlagsdata().inspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
     }
 
     @Test
@@ -195,11 +111,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             skjæringstidspunkt = 1.januar,
             orgnummer = a1,
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 24000
-                }
-            },
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
@@ -231,20 +142,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             skjæringstidspunkt = 1.januar,
             orgnummer = a1,
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt 24000
-                    a2 inntekt 20000
-                }
-            },
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
         val grunnlagsdataInspektør = person.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "fant ikke vilkårsgrunnlag" }
         assertEquals(552000.årlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(528000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag.inspektør.sammenligningsgrunnlag)
-
     }
 
     @Test
@@ -256,14 +159,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1,)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2,)
 
-        val inntektsvurdering = Inntektsvurdering(
-            listOf(
-                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12)),
-                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
-            )
-        )
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = inntektsvurdering)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
@@ -333,7 +229,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         meldingsreferanseId: UUID = UUID.randomUUID(),
-        inntekter: List<ArbeidsgiverInntekt>,
         inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>
 
     ): Vilkårsgrunnlag {
@@ -344,9 +239,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             aktørId = AKTØRID,
             personidentifikator = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = inntekter
-            ),
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList()

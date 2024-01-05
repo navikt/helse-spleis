@@ -28,12 +28,10 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
-import no.nav.helse.hendelser.utbetaling.avvist
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
-import no.nav.helse.person.Vedtaksperiode.Companion.HAR_AVVENTENDE_GODKJENNING
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
@@ -43,7 +41,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjen
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.trengerFastsettelseEtterSkjønn
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -497,17 +494,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
         utbetalingsavgjørelse.kontekst(this)
-        utbetalingsavgjørelse.validerSkjønnsmessigFastsettelse()
         utbetalinger.forEach { it.håndter(utbetalingsavgjørelse) }
         håndter(utbetalingsavgjørelse, Vedtaksperiode::håndter)
-    }
-
-    private fun Utbetalingsavgjørelse.validerSkjønnsmessigFastsettelse() {
-        val trengerFastsettelseEtterSkjønn = vedtaksperioder.filter(HAR_AVVENTENDE_GODKJENNING).trengerFastsettelseEtterSkjønn().isNotEmpty()
-        if (!trengerFastsettelseEtterSkjønn) return
-        if (avvist) return
-        // i dette tilfellet må det enten skjønnsfastsettes først eller så må utbetalingen annulleres
-        throw IllegalStateException("Sykepengegrunnlaget må skjønnsfastsettes før utbetalingen eventuelt godkjennes, dette må ryddes opp i!")
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {

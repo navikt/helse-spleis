@@ -6,7 +6,6 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -33,11 +32,8 @@ import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.lagInntektperioder
-import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -136,69 +132,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdering av inntekt flere AG`() {
-        nyeVedtak(1.januar, 31.januar, AG1, AG2) {
-            lagInntektperioder(fom = 1.januar, inntekt = 19000.månedlig, orgnummer = AG1)
-            lagInntektperioder(fom = 1.januar, inntekt = 21000.månedlig, orgnummer = AG2)
-        }
-
-        håndterOverstyrInntekt(inntekt = 18000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = AG1)
-
-        val førsteGenerasjon = requireNotNull(vilkårsgrunnlag().values.first()) as SpleisVilkårsgrunnlag
-        assertSpleisVilkårsprøving(
-            vilkårsgrunnlag = førsteGenerasjon,
-            omregnetÅrsinntekt = 480000.0,
-            beregningsgrunnlag = 480000.0,
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 480000.0,
-            oppfyllerKravOmMedlemskap = true,
-        )
-
-        assertEquals(2, førsteGenerasjon.inntekter.size)
-        val inntektAg1 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG1 }
-        assertInntekt(
-            inntektAg1,
-            orgnummer = AG1,
-            omregnetÅrsinntekt = 240000.0,
-            inntektskilde = Inntektkilde.Inntektsmelding,
-            omregnetÅrsinntektMånedsbeløp = 20000.0
-        )
-
-        val inntektAg2 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG2 }
-        assertInntekt(
-            inntektAg2,
-            orgnummer = AG2,
-            omregnetÅrsinntekt = 240000.0,
-            inntektskilde = Inntektkilde.Inntektsmelding,
-            omregnetÅrsinntektMånedsbeløp = 20000.0
-        )
-
-        val andreGenerasjon = requireNotNull(vilkårsgrunnlag().values.last()) as SpleisVilkårsgrunnlag
-
-        assertEquals(2, andreGenerasjon.inntekter.size)
-        val inntekt2Ag1 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG1 }
-        val inntekt2Ag2 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG2 }
-        assertEquals(inntektAg2, inntekt2Ag2)
-
-        assertEquals(2, vilkårsgrunnlag().values.size)
-        assertSpleisVilkårsprøving(
-            vilkårsgrunnlag = andreGenerasjon,
-            omregnetÅrsinntekt = 456000.0,
-            beregningsgrunnlag = 456000.0,
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 456000.0,
-            oppfyllerKravOmMedlemskap = true,
-        )
-        assertInntekt(
-            inntekt2Ag1,
-            orgnummer = AG1,
-            omregnetÅrsinntekt = 216000.0,
-            inntektskilde = Inntektkilde.Saksbehandler,
-            omregnetÅrsinntektMånedsbeløp = 18000.0
-        )
-    }
-
-    @Test
     fun `flere skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar)
 
@@ -260,12 +193,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(AG1, finnSkjæringstidspunkt(AG1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
-                    sammenligningsgrunnlag(AG2, finnSkjæringstidspunkt(AG1, 1.vedtaksperiode), 32000.månedlig.repeat(12))
-                )
-            ),
             orgnummer = AG1,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold

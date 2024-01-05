@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -233,7 +232,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         skjæringstidspunkt: LocalDate,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
-        inntektsvurdering: Inntektsvurdering,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
@@ -243,7 +241,6 @@ internal class ArbeidsgiverHendelsefabrikk(
             aktørId = aktørId,
             personidentifikator = personidentifikator,
             orgnummer = organisasjonsnummer,
-            inntektsvurdering = inntektsvurdering,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
             arbeidsforhold = arbeidsforhold

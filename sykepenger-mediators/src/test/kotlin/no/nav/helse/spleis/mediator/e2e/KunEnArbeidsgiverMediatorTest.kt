@@ -7,8 +7,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -17,7 +15,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRepository
