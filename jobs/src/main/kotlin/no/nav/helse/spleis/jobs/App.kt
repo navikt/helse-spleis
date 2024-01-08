@@ -7,14 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.google.api.client.json.Json
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.Properties
 import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -27,11 +25,7 @@ import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.serialize
 import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
-import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.config.SslConfigs
-import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -201,8 +195,7 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
                 try {
                     MDC.put("aktørId", aktørId)
                     val node = objectMapper.readTree(data)
-                    val aktuelleVilkårsgrunnlag = finnAktuelleAvviksvurderinger(node)
-                    val vurderinger = hentAvviksvurderinger(node, aktuelleVilkårsgrunnlag)
+                    val vurderinger = hentAvviksvurderinger(node)
                     if (vurderinger.isEmpty()) return@let
                     val fødselsnummer = fødselsnummerSomString(fnr)
                     val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
@@ -235,39 +228,11 @@ private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId:
 
 private fun fødselsnummerSomString(fnr: Long) = fnr.toString().let { if (it.length == 11) it else "0$it" }
 
-private fun finnAktuelleAvviksvurderinger(node: JsonNode): Set<UUID> {
-    return node
-        .path("arbeidsgivere")
-        .fold(emptySet<UUID>()) { aktuelle, arbeidsgiver ->
-            arbeidsgiver
-                .path("vedtaksperioder")
-                .fold(aktuelle) { aktuelle, vedtaksperiode ->
-                    vedtaksperiode
-                        .path("generasjoner")
-                        .fold(aktuelle) { aktuelle, generasjon ->
-                            generasjon
-                                .path("endringer")
-                                .fold(aktuelle) { aktuelle, endring ->
-                                    endring
-                                        .path("vilkårsgrunnlagId")
-                                        .takeIf(JsonNode::isTextual)
-                                        ?.let {
-                                            aktuelle.plus(UUID.fromString(it.asText()))
-                                        } ?: aktuelle
-                                }
-                        }
-                }
-        }
-}
-
-private fun hentAvviksvurderinger(node: JsonNode, aktuelleVilkårsgrunnlag: Set<UUID>): List<AvviksvurderingDto> {
+private fun hentAvviksvurderinger(node: JsonNode): List<AvviksvurderingDto> {
     return node.path("vilkårsgrunnlagHistorikk")
         .flatMap { innslag ->
             val opprettet = LocalDateTime.parse(innslag.path("opprettet").asText())
             innslag.path("vilkårsgrunnlag")
-                .filter { vilkårsgrunnlag ->
-                    UUID.fromString(vilkårsgrunnlag.path("vilkårsgrunnlagId").asText()) in aktuelleVilkårsgrunnlag
-                }
                 .mapNotNull { vilkårsgrunnlag ->
                     val type = vilkårsgrunnlag.path("type").asText()
                     when (type) {
