@@ -332,6 +332,7 @@ private fun omregnetÅrsinntekt(node: JsonNode, opplysning: JsonNode): Double {
     val månedsbeløp = opplysning.path("skatteopplysninger")
         .takeIf(JsonNode::isArray)
         ?.sumOf { skatt -> skatt.path("beløp").asDouble() }
+        ?.coerceAtLeast(0.0)
         ?.div(3)
         ?: opplysning.path("beløp").asDouble()
     return månedsbeløp * 12
