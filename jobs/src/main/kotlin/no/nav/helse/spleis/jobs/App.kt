@@ -289,11 +289,10 @@ private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode,
     return try {
         val vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
         val beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble()
-        val avviksprosentSomBrøk = when {
-            sammenligningsgrunnlagTotalbeløp == 0.0 -> 1.0
+        val avviksprosentSomBrøk = when (sammenligningsgrunnlagTotalbeløp) {
+            0.0 -> 1.0
             else -> (sammenligningsgrunnlagTotalbeløp - beregningsgrunnlagTotalbeløp).absoluteValue / sammenligningsgrunnlagTotalbeløp
         }
-        sikkerlogg.info("avviksprosent fra json er $avviksprosentSomBrøk for skjæringstidspunkt=$skjæringstidspunkt med vilkårsgrunnlagId=$vilkårsgrunnlagId")
         AvviksvurderingDto(
             beregningsgrunnlagTotalbeløp = beregningsgrunnlagTotalbeløp,
             sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlagTotalbeløp,
