@@ -582,7 +582,7 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
                 personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(),
-                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id), // TODO: denne kan slettes når spesialsaker ikke trengs automatiseres mer (eneste avhengighet er sporbar)
+                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id), // TODO: denne kan slettes når spesialsaker ikke trengs automatiseres mer (eneste avhengighet er sporbar).
                 ident = ident
             )
         )
@@ -624,7 +624,7 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
                 personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(),
-                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id), // TODO: denne kan slettes når spesialsaker ikke trengs automatiseres mer (eneste avhengighet er sporbar)
+                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id), // TODO: denne kan slettes når spesialsaker ikke trengs automatiseres mer (eneste avhengighet er sporbar).
                 ident = ident,
                 korrelasjonsId = korrelasjonsId
             )
