@@ -65,7 +65,7 @@ spec:
           application: sparkel-arena
           access: readwrite
         - team: tbd
-          application: sparkel-dkif
+          application: sparkel-egenansatt
           access: readwrite
         - team: tbd
           application: sparkel-gosys
