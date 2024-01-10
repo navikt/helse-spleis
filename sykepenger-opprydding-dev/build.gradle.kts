@@ -7,10 +7,6 @@ plugins {
 
 val mainClass = "no.nav.helse.opprydding.AppKt"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
