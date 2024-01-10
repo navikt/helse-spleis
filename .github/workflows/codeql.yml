@@ -35,7 +35,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17.x'
-          cache: 'gradle'
 
       - name: Build
         run: ./gradlew clean build -x test
