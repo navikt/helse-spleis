@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.core.JsonParseException
+import com.github.navikt.tbd_libs.azure.AzureTokenProvider
 import io.ktor.http.ContentType
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.Application
@@ -26,7 +27,7 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 
-internal fun Application.spannerApi(dataSource: DataSource, spurteDuClient: SpurteDuClient?, azureClient: AzureClient?) {
+internal fun Application.spannerApi(dataSource: DataSource, spurteDuClient: SpurteDuClient?, azureClient: AzureTokenProvider?) {
     val hendelseDao = HendelseDao(dataSource)
     val personDao = PersonDao(dataSource)
 
@@ -88,13 +89,13 @@ internal fun Application.sporingApi(dataSource: DataSource) {
     }
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao, spurteDuClient: SpurteDuClient? = null, azureClient: AzureClient? = null): Long {
+private fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao, spurteDuClient: SpurteDuClient? = null, azureClient: AzureTokenProvider? = null): Long {
     val maskertId = call.parameters["maskertId"]
     val (fnr, aktorid) = call.identFraSpurteDu(spurteDuClient, azureClient, maskertId) ?: call.identFraRequest()
     return fnr(personDao, fnr, aktorid) ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
 }
 
-private suspend fun ApplicationCall.identFraSpurteDu(spurteDuClient: SpurteDuClient?, azureClient: AzureClient?, maskertId: String?): Pair<Long?, Long?>? {
+private fun ApplicationCall.identFraSpurteDu(spurteDuClient: SpurteDuClient?, azureClient: AzureTokenProvider?, maskertId: String?): Pair<Long?, Long?>? {
     if (spurteDuClient == null || azureClient == null || maskertId == null) return null
     val id = try {
         UUID.fromString(maskertId)
@@ -102,8 +103,8 @@ private suspend fun ApplicationCall.identFraSpurteDu(spurteDuClient: SpurteDuCli
         return null
     }
     val token = bearerToken ?: return null
-    val obo = azureClient.veksleTilOnBehalfOf(token, "api://${System.getenv("NAIS_CLUSTER_NAME")}.tbd.spurtedu/.default")
-    val tekstinnhold = spurteDuClient.utveksleSpurteDu(obo, id.toString()) ?: return null
+    val obo = azureClient.onBehalfOfToken("api://${System.getenv("NAIS_CLUSTER_NAME")}.tbd.spurtedu/.default", token)
+    val tekstinnhold = spurteDuClient.utveksleSpurteDu(obo.token, id.toString()) ?: return null
     return try {
         val node = objectMapper.readTree(tekstinnhold)
         val ident = node.path("ident").asLong()

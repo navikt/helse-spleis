@@ -4,6 +4,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
+val tbdLibsVersion = "2024.01.09-20.20-d52bae29"
 val micrometerRegistryPrometheusVersion = "1.11.4"
 val ktorVersion = "2.3.4"
 val wireMockVersion = "2.35.0"
@@ -16,7 +17,7 @@ val mainClass = "no.nav.helse.spleis.AppKt"
 
 dependencies {
     implementation(project(":sykepenger-model"))
-
+    implementation("com.github.navikt.tbd-libs:azure-token-client-default:$tbdLibsVersion")
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")

@@ -4,16 +4,14 @@ import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import com.github.navikt.tbd_libs.azure.createAzureTokenClientFromEnvironment
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTPrincipal
-import io.ktor.server.engine.*
+import io.ktor.server.engine.ApplicationEngineEnvironmentBuilder
+import io.ktor.server.engine.connector
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
-import no.nav.helse.spleis.AzureClient
 import no.nav.helse.spleis.SpurteDuClient
 import no.nav.helse.spleis.objectMapper
 
@@ -27,14 +25,7 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
         configurationUrl = env.getValue("AZURE_APP_WELL_KNOWN_URL")
     )
 
-    private val httpClient = HttpClient(CIO)
-    internal val azureClient = AzureClient(
-        httpClient = httpClient,
-        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-        clientSecret = env.getValue("AZURE_APP_CLIENT_SECRET"),
-        objectMapper = objectMapper
-    )
+    internal val azureClient = createAzureTokenClientFromEnvironment(env)
     internal val spurteDuClient = SpurteDuClient(objectMapper)
 
     // Håndter on-prem og gcp database tilkobling forskjellig
