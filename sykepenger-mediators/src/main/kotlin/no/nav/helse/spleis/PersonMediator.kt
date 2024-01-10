@@ -164,12 +164,12 @@ internal class PersonMediator(
         )))
     }
 
-    override fun vedtaksperiodeAnnullert(event: PersonObserver.VedtaksperiodeAnnullertEvent) {
+    override fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         queueMessage(JsonMessage.newMessage("vedtaksperiode_annullert", mapOf(
-            "fom" to event.fom,
-            "tom" to event.tom,
-            "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "organisasjonsnummer" to event.organisasjonsnummer,
+            "fom" to vedtaksperiodeAnnullertEvent.fom,
+            "tom" to vedtaksperiodeAnnullertEvent.tom,
+            "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
+            "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.organisasjonsnummer,
         )))
     }
 

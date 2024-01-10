@@ -11,6 +11,7 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.engine.*
 import java.io.InputStream
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 import no.nav.helse.spleis.AzureClient
 import no.nav.helse.spleis.SpurteDuClient
@@ -67,7 +68,7 @@ internal class AzureAdAppConfig(private val clientId: String, configurationUrl: 
             this.jwksUri = it["jwks_uri"].textValue()
         }
 
-        jwkProvider = JwkProviderBuilder(URL(this.jwksUri)).build()
+        jwkProvider = JwkProviderBuilder(URI(this.jwksUri).toURL()).build()
     }
 
     fun configureVerification(configuration: JWTAuthenticationProvider.Config) {
@@ -83,7 +84,7 @@ internal class AzureAdAppConfig(private val clientId: String, configurationUrl: 
         return jacksonObjectMapper().readTree(responseBody)
     }
 
-    private fun String.fetchUrl() = with(URL(this).openConnection() as HttpURLConnection) {
+    private fun String.fetchUrl() = with(URI(this).toURL().openConnection() as HttpURLConnection) {
         requestMethod = "GET"
         val stream: InputStream? = if (responseCode < 300) this.inputStream else this.errorStream
         responseCode to stream?.bufferedReader()?.readText()

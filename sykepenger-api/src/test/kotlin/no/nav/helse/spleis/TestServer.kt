@@ -4,6 +4,7 @@ import io.ktor.http.HttpMethod
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.ServerSocket
+import java.net.URI
 import java.net.URL
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spleis.testhelpers.ApiTestServer
@@ -22,7 +23,7 @@ fun String.handleRequest(
     path: String,
     builder: HttpURLConnection.() -> Unit = {}
 ): HttpURLConnection {
-    val url = URL("$this$path")
+    val url = URI("$this$path").toURL()
     val con = url.openConnection() as HttpURLConnection
     con.requestMethod = method.value
 

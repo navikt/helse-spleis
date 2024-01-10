@@ -10,7 +10,8 @@ jobs:
     - uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '17.x'
+        java-version: '21.x'
+        cache: 'gradle'
     - name: test and build
       run: ./gradlew test build
     - name: build docker image

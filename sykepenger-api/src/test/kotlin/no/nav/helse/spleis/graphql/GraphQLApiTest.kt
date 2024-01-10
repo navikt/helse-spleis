@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.graphql
 
 import io.ktor.http.HttpStatusCode
+import java.net.URI
 import java.net.URL
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
@@ -436,7 +437,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
     @Test
     fun `Det Spesialist faktisk henter`() {
-        val query = URL("https://raw.githubusercontent.com/navikt/helse-spesialist/master/spesialist-api/src/main/resources/graphql/hentSnapshot.graphql").readText()
+        val query = URI("https://raw.githubusercontent.com/navikt/helse-spesialist/master/spesialist-api/src/main/resources/graphql/hentSnapshot.graphql").toURL().readText()
         @Language("JSON")
         val requestBody = """
             {

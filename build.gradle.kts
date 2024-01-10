@@ -1,9 +1,10 @@
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.22"
 }
 
 val junitJupiterVersion = "5.10.0"
-val jvmTargetVersion = "17"
+val jvmTargetVersion = 21
+val gradleVersjon = "8.5"
 
 allprojects {
     group = "no.nav.helse"
@@ -32,22 +33,19 @@ allprojects {
          dependencyResolutionManagement i settings.gradle.kts
      */
     dependencies {
-        testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+        testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
 
     tasks {
-        compileKotlin {
-            kotlinOptions.jvmTarget = jvmTargetVersion
-        }
-
-        compileTestKotlin {
-            kotlinOptions.jvmTarget = jvmTargetVersion
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(jvmTargetVersion)
+            }
         }
 
         withType<Wrapper> {
-            gradleVersion = "8.3"
+            gradleVersion = gradleVersjon
         }
         withType<Jar> {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE

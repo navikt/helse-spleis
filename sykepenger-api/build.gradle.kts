@@ -8,7 +8,7 @@ val micrometerRegistryPrometheusVersion = "1.11.4"
 val ktorVersion = "2.3.4"
 val wireMockVersion = "2.35.0"
 val awaitilityVersion = "4.2.0"
-val mockVersion = "1.13.4"
+val mockVersion = "1.13.9"
 val kGraphQLVersion = "0.19.0"
 val jsonassertVersion = "1.5.1"
 

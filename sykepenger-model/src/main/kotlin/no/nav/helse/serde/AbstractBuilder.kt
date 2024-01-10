@@ -6,7 +6,7 @@ import no.nav.helse.serde.api.BuilderState
 
 internal abstract class AbstractBuilder private constructor(
     private val stack: MutableList<PersonVisitor>
-) : PersonVisitor by DelegatedPersonVisitor(stack::first) {
+) : PersonVisitor by DelegatedPersonVisitor({ stack.first() }) {
 
     internal constructor() : this(mutableListOf())
 

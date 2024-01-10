@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/baseimages/temurin:17
+FROM gcr.io/distroless/java21-debian12:nonroot
 
 ENV JAVA_OPTS='-XX:MaxRAMPercentage=90'
 

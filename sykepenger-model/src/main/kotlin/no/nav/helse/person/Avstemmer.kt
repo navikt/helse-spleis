@@ -13,7 +13,7 @@ internal class Avstemmer(person: Person) {
     private val arbeidsgivere = mutableListOf<Map<String, Any>>()
 
     init {
-        person.accept(DelegatedPersonVisitor(tilstander::first))
+        person.accept(DelegatedPersonVisitor { tilstander.first() })
     }
 
     fun toMap(): Map<String, Any> = mapOf(
