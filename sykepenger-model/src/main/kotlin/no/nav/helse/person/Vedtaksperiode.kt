@@ -1168,7 +1168,7 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    internal object Start : Vedtaksperiodetilstand {
+    internal data object Start : Vedtaksperiodetilstand {
         override val type = START
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
             HJELP.utenBegrunnelse
@@ -1197,7 +1197,7 @@ internal class Vedtaksperiode private constructor(
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
     }
 
-    internal object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
+    internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
         override val type = AVVENTER_INFOTRYGDHISTORIKK
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse, vedtaksperiode)
@@ -1255,7 +1255,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerRevurdering : Vedtaksperiodetilstand {
+    internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1357,7 +1357,7 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, AvventerHistorikkRevurdering)
     }
 
-    internal object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
+    internal data object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1405,7 +1405,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerVilkårsprøvingRevurdering : Vedtaksperiodetilstand {
+    internal data object AvventerVilkårsprøvingRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1431,7 +1431,7 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    internal object AvventerInntektsmelding : Vedtaksperiodetilstand {
+    internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING
         override fun makstid(
             tilstandsendringstidspunkt: LocalDateTime,
@@ -1549,7 +1549,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
+    internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             vedtaksperiode.generasjoner.forkastUtbetaling(hendelse)
@@ -1676,7 +1676,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerVilkårsprøving : Vedtaksperiodetilstand {
+    internal data object AvventerVilkårsprøving : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1712,7 +1712,7 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    internal object AvventerHistorikk : Vedtaksperiodetilstand {
+    internal data object AvventerHistorikk : Vedtaksperiodetilstand {
         override val type = AVVENTER_HISTORIKK
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1782,7 +1782,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerSimulering : Vedtaksperiodetilstand {
+    internal data object AvventerSimulering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SIMULERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1828,7 +1828,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerSimuleringRevurdering : Vedtaksperiodetilstand {
+    internal data object AvventerSimuleringRevurdering : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_SIMULERING_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1867,7 +1867,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerGodkjenning : Vedtaksperiodetilstand {
+    internal data object AvventerGodkjenning : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1937,7 +1937,7 @@ internal class Vedtaksperiode private constructor(
 
     }
 
-    internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
+    internal data object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -2002,7 +2002,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object TilUtbetaling : Vedtaksperiodetilstand {
+    internal data object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {}
@@ -2036,7 +2036,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
+    internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         override val type = AVSLUTTET_UTEN_UTBETALING
 
         override val erFerdigBehandlet = true
@@ -2159,7 +2159,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object Avsluttet : Vedtaksperiodetilstand {
+    internal data object Avsluttet : Vedtaksperiodetilstand {
         override val type = AVSLUTTET
 
         override val erFerdigBehandlet = true
@@ -2217,7 +2217,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object RevurderingFeilet : Vedtaksperiodetilstand {
+    internal data object RevurderingFeilet : Vedtaksperiodetilstand {
         override val type: TilstandType = REVURDERING_FEILET
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -2249,7 +2249,7 @@ internal class Vedtaksperiode private constructor(
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
     }
 
-    internal object TilInfotrygd : Vedtaksperiodetilstand {
+    internal data object TilInfotrygd : Vedtaksperiodetilstand {
         override val type = TIL_INFOTRYGD
         override val erFerdigBehandlet = true
 
