@@ -11,7 +11,7 @@ dependencyResolutionManagement {
             version("kotliquery", "1.9.0")
             version("cloudsql", "1.7.2")
             version("flyway", "9.7.0")
-            version("logback", "1.4.11")
+            version("logback", "1.4.14")
             version("logstash", "7.4")
             version("jackson", "2.15.2")
 
