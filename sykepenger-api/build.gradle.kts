@@ -5,9 +5,9 @@ plugins {
 }
 
 val tbdLibsVersion = "2024.01.09-20.20-d52bae29"
-val micrometerRegistryPrometheusVersion = "1.11.4"
-val ktorVersion = "2.3.4"
-val wireMockVersion = "2.35.0"
+val micrometerRegistryPrometheusVersion = "1.12.2"
+val ktorVersion = "2.3.7"
+val wireMockVersion = "3.3.1"
 val awaitilityVersion = "4.2.0"
 val mockVersion = "1.13.9"
 val kGraphQLVersion = "0.19.0"
@@ -46,7 +46,7 @@ dependencies {
     }
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
-    testImplementation("com.github.tomakehurst:wiremock-jre8:$wireMockVersion") {
+    testImplementation("org.wiremock:wiremock:3.3.1") {
         exclude(group = "junit")
     }
     testImplementation("io.mockk:mockk:$mockVersion")
