@@ -20,19 +20,9 @@ env:
   ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  set_version:
-    name: set image name
-    runs-on: ubuntu-latest
-    steps:
-      - name: create docker tag
-        run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
-    outputs:
-      tag: ${{ env.TAG }}
-
   build:
     name: build docker image
     runs-on: ubuntu-latest-16-cores
-    needs: set_version
     permissions:
       id-token: write
     steps:
@@ -50,7 +40,6 @@ jobs:
         with:
           team: tbd
           image_suffix: spleis
-          tag: ${{ needs.set_version.outputs.tag }}
           docker_context: sykepenger-mediators
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
