@@ -4,16 +4,16 @@ include("jobs", "sykepenger-api", "sykepenger-model", "sykepenger-mediators", "s
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("testcontainers", "1.19.0")
-            version("rapids-and-rivers", "2023093008351696055717.ffdec6aede3d")
-            version("postgres", "42.6.0")
-            version("hikari", "5.0.1")
+            version("testcontainers", "1.19.3")
+            version("rapids-and-rivers", "2024010209171704183456.6d035b91ffb4")
+            version("postgres", "42.7.1")
+            version("hikari", "5.1.0")
             version("kotliquery", "1.9.0")
-            version("cloudsql", "1.7.2")
-            version("flyway", "9.7.0")
+            version("cloudsql", "1.15.1")
+            version("flyway", "10.5.0")
             version("logback", "1.4.14")
             version("logstash", "7.4")
-            version("jackson", "2.15.2")
+            version("jackson", "2.16.1")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
 
@@ -28,10 +28,12 @@ dependencyResolutionManagement {
             library("kotliquery", "com.github.seratch", "kotliquery").versionRef("kotliquery")
 
             library("cloudsql", "com.google.cloud.sql", "postgres-socket-factory").versionRef("cloudsql")
-            library("flyway", "org.flywaydb", "flyway-core").versionRef("flyway")
+            library("flyway-core", "org.flywaydb", "flyway-core").versionRef("flyway")
+            library("flyway-postgres", "org.flywaydb", "flyway-database-postgresql").versionRef("flyway")
 
             library("testcontainers", "org.testcontainers", "postgresql").versionRef("testcontainers")
 
+            bundle("flyway", listOf("flyway-core", "flyway-postgres"))
             bundle("database", listOf("postgresql", "hikari", "kotliquery"))
 
             bundle("jackson", listOf("jackson-kotlin", "jackson-datatype"))

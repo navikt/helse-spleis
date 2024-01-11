@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":sykepenger-model"))
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
-    implementation(libs.flyway)
+    implementation(libs.bundles.flyway)
 
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")

@@ -14,7 +14,7 @@ dependencies {
     implementation(project(":sykepenger-utbetaling"))
 
     testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
-    testImplementation(libs.flyway)
+    testImplementation(libs.bundles.flyway)
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
     }
