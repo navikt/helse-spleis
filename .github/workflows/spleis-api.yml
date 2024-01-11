@@ -24,7 +24,7 @@ jobs:
       - name: create docker tag
         run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
     outputs:
-      image: ghcr.io/${{ github.repository }}/spleis-api:${{ env.TAG }}
+      tag: ${{ env.TAG }}
 
   build:
     name: build docker image
@@ -42,15 +42,21 @@ jobs:
       - name: test and build
         run: ./gradlew :sykepenger-api:test :sykepenger-api:build
       - name: build docker image
-        run: docker build -f Dockerfile sykepenger-api --pull -t ${{ needs.set_version.outputs.image }}
-      - name: push docker image
-        run: |
-          docker login ghcr.io --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }}
-          docker push ${{ needs.set_version.outputs.image }}
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: tbd
+          image_suffix: api
+          tag: ${{ needs.set_version.outputs.tag }}
+          docker_context: sykepenger-api
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
 
   deployDev:
     name: deploy to dev
-    needs: [set_version, build]
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -59,11 +65,11 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/dev-api.yml
-          IMAGE: ${{ needs.set_version.outputs.image }}
+          IMAGE: ${{ needs.build.outputs.image }}
 
   deployProd:
     name: deploy to prod
-    needs: [set_version, build]
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -72,4 +78,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: deploy/prod-api.yml
-          IMAGE: ${{ needs.set_version.outputs.image }}
+          IMAGE: ${{ needs.build.outputs.image }}
