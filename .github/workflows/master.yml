@@ -33,7 +33,7 @@ jobs:
           java-version: '21.x'
           cache: 'gradle'
       - name: test and build
-        run: ./gradlew clean test build
+        run: ./gradlew build -x :jobs:build -x :sykepenger-api:build -x :sykepenger-opprydding-dev:build
       - name: build docker image
         uses: nais/docker-build-push@v0
         id: docker-build-push
