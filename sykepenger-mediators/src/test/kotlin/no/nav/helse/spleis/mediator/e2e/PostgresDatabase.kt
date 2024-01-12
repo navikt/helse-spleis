@@ -9,7 +9,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 
 object PostgresContainer {
     val instance by lazy {
-        PostgreSQLContainer<Nothing>("postgres:14").apply {
+        PostgreSQLContainer<Nothing>("postgres:15").apply {
             withCreateContainerCmdModifier { command -> command.withName("spleis-mediators") }
             withReuse(true)
             withLabel("app-navn", "spleis-mediators")

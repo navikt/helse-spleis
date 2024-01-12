@@ -8,7 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 
 internal class DB {
     companion object {
-        internal val instance = PostgreSQLContainer<Nothing>("postgres:14").apply {
+        internal val instance = PostgreSQLContainer<Nothing>("postgres:15").apply {
             withCreateContainerCmdModifier { command -> command.withName("spleis-api") }
             withReuse(true)
             withLabel("app-navn", "spleis-api")

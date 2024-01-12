@@ -10,7 +10,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 internal abstract class DBTest {
     protected lateinit var dataSource: DataSource
     companion object {
-        private val psqlContainer = PostgreSQLContainer<Nothing>("postgres:14").apply {
+        private val psqlContainer = PostgreSQLContainer<Nothing>("postgres:15").apply {
             withCreateContainerCmdModifier { command -> command.withName("spleis-opprydding-dev") }
             withReuse(true)
             withLabel("app-navn", "spleis-opprydding-dev")
