@@ -265,3 +265,6 @@ spec:
         - team: tbd
           application: spedisjon-opprydding-dev
           access: readwrite
+        - team: tbd
+          application: sparkel-tilbakedatert
+          access: readwrite
