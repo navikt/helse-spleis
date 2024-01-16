@@ -40,7 +40,7 @@ private val log = LoggerFactory.getLogger("no.nav.helse.spleis.gc.App")
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
 @ExperimentalTime
-fun main(args: Array<String>) {
+fun main(cliArgs: Array<String>) {
     Thread.setDefaultUncaughtExceptionHandler { thread, err ->
         log.error(
             "Uncaught exception in thread ${thread.name}: {}",
@@ -49,6 +49,7 @@ fun main(args: Array<String>) {
         )
     }
 
+    val args = cliArgs.takeIf(Array<*>::isNotEmpty)?.toList() ?: System.getenv("RUNTIME_OPTS").split(" ")
     if (args.isEmpty()) return log.error("Provide a task name as CLI argument")
 
     when (val task = args[0].trim().lowercase()) {
