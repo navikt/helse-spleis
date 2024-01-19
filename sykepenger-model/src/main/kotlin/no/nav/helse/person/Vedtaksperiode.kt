@@ -612,14 +612,14 @@ internal class Vedtaksperiode private constructor(
     private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, håndterLås: (() -> Unit) -> Unit = { it() }) {
         dager.valider(periode)
         if (dager.harFunksjonelleFeilEllerVerre()) return
+        val korrigertInntektsmeldingId = generasjoner.sisteInntektsmeldingId()
         val opprinneligAgp = finnArbeidsgiverperiode()
         if (dager.erKorrigeringForGammel(opprinneligAgp)) {
             inntektsmeldingHåndtert(dager)
-            return
         }
-
-        val korrigertInntektsmeldingId = generasjoner.sisteInntektsmeldingId()
-        håndterLås { håndterDager(dager) }
+        else {
+            håndterLås { håndterDager(dager) }
+        }
         val nyAgp = finnArbeidsgiverperiode()
         if (opprinneligAgp != null && !opprinneligAgp.klinLik(nyAgp)) {
             dager.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}")

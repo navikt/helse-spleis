@@ -224,20 +224,9 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         val inntektsmeldingId = håndterInntektsmelding(listOf(10.februar til 26.februar))
         assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-
-        assertForventetFeil(
-            forklaring = "Nå er det uklart hvorvidt vi håndterer denne inntektsmeldingen eller ei. Vi legger på varsel og sender inntektsmelding_håndtert men blir stående i Avsluttet. Burde gått i revurdering",
-            nå = {
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-                assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
-                assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
-            },
-            ønsket = {
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
-                assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
-            }
-        )
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
     }
 
     @Test
