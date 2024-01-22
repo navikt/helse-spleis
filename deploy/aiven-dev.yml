@@ -268,3 +268,6 @@ spec:
         - team: tbd
           application: sparkel-tilbakedatert
           access: readwrite
+        - team: tbd
+          application: spekemat
+          access: readwrite
