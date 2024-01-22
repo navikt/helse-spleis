@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import org.slf4j.LoggerFactory
 
-internal class V285LoggeRareAnnulleringer: JsonMigration(version = 285) {
+internal class V285LoggeRareAnnulleringer(private val forkast: Set<String> = setOf("ec293bc9-73ce-4c5f-b7a8-18451f5f623c")): JsonMigration(version = 285) {
     override val description = "Logger rare utbetalinger"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -21,7 +21,7 @@ internal class V285LoggeRareAnnulleringer: JsonMigration(version = 285) {
                     val nåværendeStatus = rarAnnullering.path("status").asText()
                     val oppdatert = LocalDateTime.parse(rarAnnullering.path("oppdatert").asText())
                     sikkerLogg.warn("Annullering $id i Status $nåværendeStatus ser ikke ut til å være overført til Oppdrag (sist oppdatert $oppdatert). AktørId $aktørId, Organisasjonsnummer $organisasjonsnummer")
-                    if (id == testkanin) {
+                    if (id in forkast) {
                         sikkerLogg.info("Setter status på $id til ")
                         rarAnnullering as ObjectNode
                         rarAnnullering.put("status","FORKASTET")
@@ -32,6 +32,5 @@ internal class V285LoggeRareAnnulleringer: JsonMigration(version = 285) {
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val testkanin = "ec293bc9-73ce-4c5f-b7a8-18451f5f623c"
     }
 }
