@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -45,7 +46,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         generasjoner.forEach { it.addObserver(observatør) }
     }
 
-    internal fun accept(visitor: GenerasjonerVisistor) {
+    internal fun accept(visitor: GenerasjonerVisitor) {
         visitor.preVisitGenerasjoner(generasjoner)
         generasjoner.forEach { generasjon ->
             generasjon.accept(visitor)
@@ -149,8 +150,11 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         check(generasjoner.last().tillaterNyGenerasjon(generasjon)) {
             "siste generasjon ${generasjoner.last()} tillater ikke opprettelse av ny generasjon $generasjon"
         }
-        observatører.forEach { generasjon.addObserver(it) }
+        observatører.forEach {
+            generasjon.addObserver(it)
+        }
         this.generasjoner.add(generasjon)
+        generasjon.nyGenerasjon()
     }
 
     fun klarForUtbetaling(): Boolean {
@@ -193,22 +197,25 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     }
 
     internal fun trengerArbeidsgiverperiode() = generasjoner.dokumentsporing.sisteInntektsmeldingId() == null
+    internal fun førsteGenerasjonOpprettet() {
+        generasjoner.single().nyGenerasjon()
+    }
 
     internal class Generasjonkilde private constructor(
-        private val meldingsreferanseId: UUID,
-        private val innsendt: LocalDateTime,
-        private val registert: LocalDateTime,
-        private val avsender: String
+        val meldingsreferanseId: UUID,
+        val innsendt: LocalDateTime,
+        val registert: LocalDateTime,
+        val avsender: Avsender
     ) {
-        constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId(), hendelse.innsendt(), hendelse.registrert(), hendelse.avsender().toString())
+        constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId(), hendelse.innsendt(), hendelse.registrert(), hendelse.avsender())
 
-        internal fun accept(visitor: GenerasjonerVisistor) {
+        internal fun accept(visitor: GenerasjonerVisitor) {
             visitor.preVisitGenerasjonkilde(meldingsreferanseId, innsendt, registert, avsender)
         }
     }
 
 
-    internal class Generasjon constructor(
+    internal class Generasjon(
         private val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
@@ -237,7 +244,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
 
         override fun toString() = "$periode - $tilstand"
 
-        fun accept(visitor: GenerasjonerVisistor) {
+        fun accept(visitor: GenerasjonerVisitor) {
             visitor.preVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
             endringer.forEach { it.accept(visitor) }
             kilde?.accept(visitor)
@@ -280,7 +287,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
                 return this.dokumentsporing == other.dokumentsporing
             }
 
-            internal fun accept(visitor: GenerasjonerVisistor) {
+            internal fun accept(visitor: GenerasjonerVisitor) {
                 visitor.preVisitGenerasjonendring(id, tidsstempel, sykmeldingsperiode, periode, grunnlagsdata, utbetaling, dokumentsporing, sykdomstidslinje)
                 grunnlagsdata?.accept(visitor)
                 utbetaling?.accept(visitor)
@@ -488,6 +495,15 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         }
         private fun avsluttetUtenVedtak(hendelse: IAktivitetslogg) {
             observatører.forEach { it.avsluttetUtenVedtak(hendelse, id, avsluttet!!, periode, dokumentsporing.ider()) }
+        }
+
+        internal fun nyGenerasjon() {
+            val type = when(tilstand) {
+                Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
+                Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring
+                else -> PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling
+            }
+            observatører.forEach { it.nyGenerasjon(id, kilde!!.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
         }
 
         /*

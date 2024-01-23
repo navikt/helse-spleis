@@ -12,6 +12,7 @@ import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
@@ -180,6 +181,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         kontekst(søknad)
         person.vedtaksperiodeOpprettet(id, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
+        generasjoner.førsteGenerasjonOpprettet()
     }
 
     init {
@@ -870,6 +872,26 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag.build(builder)
         person.vedtakFattet(builder.result())
         person.gjenopptaBehandling(hendelse)
+    }
+
+    override fun nyGenerasjon(
+        id: UUID,
+        meldingsreferanseId: UUID,
+        innsendt: LocalDateTime,
+        registert: LocalDateTime,
+        avsender: Avsender,
+        type: PersonObserver.GenerasjonOpprettetEvent.Type
+    ) {
+        val nyGenerasjon = PersonObserver.GenerasjonOpprettetEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = this.id,
+            generasjonId = id,
+            type = type,
+            kilde = PersonObserver.GenerasjonOpprettetEvent.Kilde(meldingsreferanseId, innsendt, registert, avsender)
+        )
+        person.nyGenerasjon(nyGenerasjon)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {

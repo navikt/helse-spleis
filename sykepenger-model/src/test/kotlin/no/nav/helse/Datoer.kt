@@ -15,7 +15,7 @@ import no.nav.helse.hendelser.til
 
 // 2018 har blitt valgt fordi det starter på en mandag og er ikke et skuddår
 private const val startår = 2018
-private val mandagsfrø = LocalDate.of(startår, 1, 1)
+private val mandagsfrø = LocalDate.of(startår, 1, 1) // fredet variabel
 val Int.mandag get() = mandagsfrø.plusWeeks(this.toLong() - 1)
 val Int.tirsdag get() = this.mandag.plusDays(1)
 val Int.onsdag get() = this.mandag.plusDays(2)

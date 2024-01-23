@@ -6,6 +6,7 @@ import java.time.Year
 import java.util.UUID
 import no.nav.helse.AlderVisitor
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
@@ -315,13 +316,13 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
     fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
 }
 
-internal interface GenerasjonerVisistor : GenerasjonVisistor {
+internal interface GenerasjonerVisitor : GenerasjonVisitor {
 
     fun preVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {}
     fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {}
 }
 
-internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor, SykdomstidslinjeVisitor {
+internal interface GenerasjonVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor, SykdomstidslinjeVisitor {
     fun preVisitGenerasjon(
         id: UUID,
         tidsstempel: LocalDateTime,
@@ -355,7 +356,7 @@ internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHisto
         meldingsreferanseId: UUID,
         innsendt: LocalDateTime,
         registrert: LocalDateTime,
-        avsender: String
+        avsender: Avsender
     ) {}
     fun postVisitGenerasjon(
         id: UUID,
@@ -368,7 +369,7 @@ internal interface GenerasjonVisistor : UtbetalingVisitor, VilkårsgrunnlagHisto
     ) {}
 }
 
-internal interface VedtaksperiodeVisitor : GenerasjonerVisistor, UtbetalingsdagVisitor {
+internal interface VedtaksperiodeVisitor : GenerasjonerVisitor, UtbetalingsdagVisitor {
     fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,

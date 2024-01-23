@@ -553,6 +553,10 @@ class Person private constructor(
         observers.forEach { it.vedtakFattet(vedtakFattetEvent) }
     }
 
+    internal fun nyGenerasjon(nyGenerasjon: PersonObserver.GenerasjonOpprettetEvent) {
+        observers.forEach { it.nyGenerasjon(nyGenerasjon) }
+    }
+
     internal fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
         observers.forEach { it.avsluttetUtenVedtak(event) }
     }

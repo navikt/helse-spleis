@@ -3,6 +3,7 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Generasjoner
@@ -53,7 +54,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
            val meldingsreferanseId: UUID,
            val innsendt: LocalDateTime,
            val registert: LocalDateTime,
-           val avsender: String
+           val avsender: Avsender
         )
     }
 
@@ -117,7 +118,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         meldingsreferanseId: UUID,
         innsendt: LocalDateTime,
         registrert: LocalDateTime,
-        avsender: String
+        avsender: Avsender
     ) {
         val sisteGenerasjon = this.generasjoner.last()
         this.generasjoner[this.generasjoner.lastIndex] = sisteGenerasjon.copy(

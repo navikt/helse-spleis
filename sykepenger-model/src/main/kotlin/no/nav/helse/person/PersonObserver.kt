@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.SimuleringResultat
@@ -579,6 +580,28 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val avsluttetTidspunkt: LocalDateTime
     )
 
+    data class GenerasjonOpprettetEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val generasjonId: UUID,
+        val type: Type,
+        val kilde: Kilde
+    ) {
+        enum class Type {
+            Førstegangsbehandling,
+            Omgjøring,
+            Revurdering
+        }
+        data class Kilde(
+            private val meldingsreferanseId: UUID,
+            private val innsendt: LocalDateTime,
+            private val registert: LocalDateTime,
+            private val avsender: Avsender
+        )
+    }
+
     data class VedtakFattetEvent(
         val fødselsnummer: String,
         val aktørId: String,
@@ -681,6 +704,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
     fun vedtakFattet(event: VedtakFattetEvent) {}
+
+    fun nyGenerasjon(event: GenerasjonOpprettetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
     fun nyVedtaksperiodeUtbetaling(
         personidentifikator: Personidentifikator,
