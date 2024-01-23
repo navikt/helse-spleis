@@ -219,6 +219,21 @@ internal class PersonMediator(
         )))
     }
 
+    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
+        queueMessage(JsonMessage.newMessage("generasjon_opprettet", mutableMapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "generasjonId" to event.generasjonId,
+            "type" to event.type,
+            "kilde" to mapOf(
+                "meldingsreferanseId" to event.kilde.meldingsreferanseId,
+                "innsendt" to event.kilde.innsendt,
+                "registrert" to event.kilde.registert,
+                "avsender" to event.kilde.avsender
+            )
+        )))
+    }
+
     override fun utbetalingEndret(event: PersonObserver.UtbetalingEndretEvent) {
         queueMessage(JsonMessage.newMessage("utbetaling_endret", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
