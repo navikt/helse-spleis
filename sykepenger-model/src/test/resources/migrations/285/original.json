@@ -554,15 +554,29 @@
           "id": "52fc8116-1757-45bc-8ca1-d333b33d3496",
           "status": "GODKJENT_UTEN_UTBETALING",
           "type": "ANNULLERING",
-          "overføringstidspunkt": null,
-          "oppdatert": "2022-10-13T14:20:20.204188"
+          "oppdatert": "2022-10-13T14:20:20.204188",
+          "personOppdrag": {
+            "linjer": [{ "fom": "2018-01-01", "tom": "2018-12-31"}],
+            "status": null
+          },
+          "arbeidsgiverOppdrag": {
+            "linjer": [],
+            "status": null
+          }
         },
         {
           "id": "a3e2aaf8-fc6b-4b43-aeeb-16f60f5a24f8",
           "status": "GODKJENT_UTEN_UTBETALING",
           "type": "ANNULLERING",
-          "overføringstidspunkt": null,
-          "oppdatert": "2022-10-13T14:20:20.204188"
+          "oppdatert": "2022-10-13T14:20:20.204188",
+          "personOppdrag": {
+            "linjer": [],
+            "status": null
+          },
+          "arbeidsgiverOppdrag": {
+            "linjer": [],
+            "status": null
+          }
         }
       ],
       "organisasjonsnummer": "987654321"
