@@ -23,19 +23,26 @@ internal class V285LoggeRareAnnulleringer(
                 }.filterValues { it.isNotEmpty() }
                 .keys
 
+            val annullerteKorrelasjonsIder = arbeidsgiver.path("utbetalinger")
+                .groupBy { it.path("korrelasjonsId").asText() }
+                .mapValues { (_, utbetalinger) ->
+                    utbetalinger.filter { it.akseptertAnnullering }
+                }.filterValues { it.isNotEmpty() }
+                .keys
 
             arbeidsgiver.path("utbetalinger")
                 .asSequence()
                 .filter { it.path("type").asText() == "ANNULLERING" }
-                .filter { it.path("status").asText() != "FORKASTET" }
+                .filterNot { it.path("status").asText() == "FORKASTET" }
                 .filter { LocalDateTime.parse(it.path("oppdatert").asText()).year < 2024 }
                 .filter { it.path("arbeidsgiverOppdrag").oppdragManglerOverføring || it.path("personOppdrag").oppdragManglerOverføring }
                 .filter { it.path("korrelasjonsId").asText() in utbetalteKorrelasjonsIder }
+                .filterNot { it.path("korrelasjonsId").asText() in annullerteKorrelasjonsIder }
                 .forEach { manglerOverføring ->
                     val id = manglerOverføring.path("id").asText()
                     val nåværendeStatus = manglerOverføring.path("status").asText()
                     val oppdatert = LocalDateTime.parse(manglerOverføring.path("oppdatert").asText())
-                    sikkerLogg.warn("Annullering $id i Status $nåværendeStatus ser ikke ut til å være overført til Oppdrag (sist oppdatert $oppdatert). AktørId $aktørId, Organisasjonsnummer $organisasjonsnummer (Versjon3)")
+                    sikkerLogg.warn("Annullering $id i Status $nåværendeStatus ser ikke ut til å være overført til Oppdrag (sist oppdatert $oppdatert). AktørId $aktørId, Organisasjonsnummer $organisasjonsnummer (Versjon4)")
                     if (id in forkast) {
                         sikkerLogg.info("Setter status på Utbetaling $id til FORKASTET og setter nytt oppdatert-tidspunkt")
                         manglerOverføring as ObjectNode
@@ -49,8 +56,23 @@ internal class V285LoggeRareAnnulleringer(
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val JsonNode.oppdragManglerOverføring get(): Boolean {
-            path("linjer").takeUnless { it.isEmpty } ?: return false
+            if (path("linjer").isEmpty) return false
+            if (path("endringskode").asText() == "UEND") return false
             return path("status").isNull
+        }
+
+        private val JsonNode.akseptertAnnullering get(): Boolean {
+            if (path("type").asText() != "ANNULLERING") return false
+            if (path("status").asText() != "ANNULLERT") return false
+            val arbeidsgiverOppdrag = path("arbeidsgiverOppdrag")
+            val personOppdrag = path("personOppdrag")
+            return arbeidsgiverOppdrag.akseptertOppdrag && personOppdrag.akseptertOppdrag
+        }
+
+        private val JsonNode.akseptertOppdrag get(): Boolean {
+            if (path("linjer").isEmpty) return true
+            if (path("endringskode").asText() == "UEND") return true
+            return path("status").asText() == "AKSEPTERT"
         }
     }
 }
