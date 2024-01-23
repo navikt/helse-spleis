@@ -269,5 +269,5 @@ spec:
           application: sparkel-tilbakedatert
           access: readwrite
         - team: tbd
-          application: spekemat
+          application: spekemat-slakter
           access: readwrite
