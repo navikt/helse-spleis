@@ -30,6 +30,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val utbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
     val vedtakFattetEventer = mutableMapOf<UUID, MutableList<PersonObserver.VedtakFattetEvent>>()
+    val generasjonOpprettetEventer = mutableListOf<PersonObserver.GenerasjonOpprettetEvent>()
     val avsluttetUtenVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetUtenVedtakEvent>>()
     val sykefraværstilfelleeventyr = mutableListOf<List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>>()
     val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
@@ -106,6 +107,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
         vedtakFattetEvent[event.vedtaksperiodeId] = event
         vedtakFattetEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
+    }
+
+    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
+        generasjonOpprettetEventer.add(event)
     }
 
     override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {

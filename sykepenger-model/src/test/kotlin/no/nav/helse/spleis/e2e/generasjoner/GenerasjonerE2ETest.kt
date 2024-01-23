@@ -8,6 +8,7 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
@@ -47,7 +48,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
                 assertEquals(1, generasjoner.single().endringer.size)
-                assertEquals(Generasjonkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = opprettet, avsender = "SYKMELDT"), generasjoner.single().kilde)
+                assertEquals(Generasjonkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = opprettet, avsender = Avsender.SYKMELDT), generasjoner.single().kilde)
             }
         }
     }
@@ -61,7 +62,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, opprettet = opprettet, mottatt = mottatt)
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
-                assertEquals(Generasjonkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = opprettet, avsender = "ARBEIDSGIVER"), generasjoner.last().kilde)
+                assertEquals(Generasjonkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = opprettet, avsender = Avsender.ARBEIDSGIVER), generasjoner.last().kilde)
             }
         }
     }
@@ -84,7 +85,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
         val korrigerendeImA1 = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         val mottatt = opprettet.minusHours(2)
-        val forventetKilde = Generasjonkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = opprettet, avsender = "ARBEIDSGIVER")
+        val forventetKilde = Generasjonkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = opprettet, avsender = Avsender.ARBEIDSGIVER)
 
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, opprettet = opprettet, mottatt = mottatt, id = korrigerendeImA1)
@@ -105,7 +106,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             }
             inspektør(2.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
-                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
             }
         }
     }
@@ -117,7 +118,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
-                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
             }
         }
     }
@@ -128,8 +129,8 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             håndterAnnullering(inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
             inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
-                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
-                assertEquals("SAKSBEHANDLER", generasjoner.last().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
+                assertEquals(Avsender.SAKSBEHANDLER, generasjoner.last().kilde?.avsender)
             }
         }
     }
@@ -141,8 +142,8 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, reberegning = true)
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
-                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
-                assertEquals("SYSTEM", generasjoner.last().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
+                assertEquals(Avsender.SYSTEM, generasjoner.last().kilde?.avsender)
             }
         }
     }
@@ -155,9 +156,9 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar, 100.prosent, INNTEKT)), id = id)
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
-                assertEquals("SYKMELDT", generasjoner.first().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
                 generasjoner.last().let {
-                    assertEquals("SYSTEM", it.kilde?.avsender)
+                    assertEquals(Avsender.SYSTEM, it.kilde?.avsender)
                     assertEquals(id, it.kilde?.meldingsreferanseId)
                 }
             }
