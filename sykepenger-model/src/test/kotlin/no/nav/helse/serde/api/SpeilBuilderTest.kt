@@ -308,12 +308,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `korrigert inntektsmelding i Avsluttet, velger opprinnelig refusjon`() {
+    fun `korrigert inntektsmelding i Avsluttet, velger opprinnelig refusjon for eldste generasjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
         )
+        håndterYtelser(1.vedtaksperiode)
 
         val speil = speilApi()
         val generasjoner = speil.arbeidsgivere.first().generasjoner
@@ -327,7 +328,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         }
         generasjoner.first().also { nyesteGenerasjon ->
             assertEquals(1, nyesteGenerasjon.perioder.size)
-            val vilkårsgrunnlagId = (nyesteGenerasjon.perioder.first() as UberegnetVilkårsprøvdPeriode).vilkårsgrunnlagId
+            val vilkårsgrunnlagId = (nyesteGenerasjon.perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
             val vilkårsgrunnlag = speil.vilkårsgrunnlag[vilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
             assertEquals(20000.månedlig, vilkårsgrunnlag!!.arbeidsgiverrefusjoner.single().refusjonsopplysninger.single().beløp.månedlig)
         }

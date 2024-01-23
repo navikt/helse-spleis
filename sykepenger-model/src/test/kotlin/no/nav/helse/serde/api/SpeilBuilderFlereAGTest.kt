@@ -618,6 +618,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
+        håndterYtelser(1.vedtaksperiode)
 
         val speilJson = serializePersonForSpeil(person)
         val vilkårsgrunnlag = speilJson.vilkårsgrunnlag
@@ -626,9 +627,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val arbeidsgiverA1 = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a1 }
         assertEquals(1, arbeidsgiverA1?.generasjoner?.size)
         assertEquals(1, arbeidsgiverA1?.generasjoner?.single()?.perioder?.size)
-        val uberegnetVilkårsprøvdPeriode = arbeidsgiverA1?.generasjoner?.single()?.perioder?.single()
-        assertInstanceOf(UberegnetVilkårsprøvdPeriode::class.java, uberegnetVilkårsprøvdPeriode)
-        assertEquals(vilkårsgrunnlag.entries.single().key, (uberegnetVilkårsprøvdPeriode as? UberegnetVilkårsprøvdPeriode)?.vilkårsgrunnlagId)
+        val beregnetPeriode = arbeidsgiverA1?.generasjoner?.single()?.perioder?.single()
+        assertInstanceOf(BeregnetPeriode::class.java, beregnetPeriode)
 
         val arbeidsgiverA2 = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a2 }
         assertEquals(0, arbeidsgiverA2?.generasjoner?.size)

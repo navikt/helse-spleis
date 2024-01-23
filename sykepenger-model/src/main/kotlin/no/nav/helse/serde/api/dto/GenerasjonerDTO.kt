@@ -172,15 +172,6 @@ data class UberegnetPeriode(
         generasjoner.uberegnetPeriode(this)
     }
 
-    override fun registrerBruk(
-        vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
-        organisasjonsnummer: String
-    ): SpeilTidslinjeperiode {
-        val vilkårsgrunnlagId = vilkårsgrunnlaghistorikk.potensiellUBeregnetVilkårsprøvdPeriode(skjæringstidspunkt) ?: return this
-        vilkårsgrunnlaghistorikk.leggIBøtta(vilkårsgrunnlagId)
-        return UberegnetVilkårsprøvdPeriode(this, vilkårsgrunnlagId, periodetype)
-    }
-
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
         return this.copy(periodetype = periodetype)
     }

@@ -130,6 +130,11 @@ class SpeilGenerasjoner {
                 if (periode > revurderingen) return generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(revurderingen))
                 generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
             }
+
+            override fun uberegnetPeriode(generasjoner: SpeilGenerasjoner, periode: UberegnetPeriode) {
+                if (periode > revurderingen) return generasjoner.leggTilNyPeriode(periode, RevurdertGenerasjon(revurderingen))
+                generasjoner.leggTilNyRadOgPeriode(periode, EndringITidligerePeriodeGenerasjon())
+            }
         }
     }
 }

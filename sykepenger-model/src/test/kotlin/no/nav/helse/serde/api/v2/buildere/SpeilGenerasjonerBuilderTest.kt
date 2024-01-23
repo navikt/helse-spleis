@@ -144,14 +144,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(3, size)
-                uberegnetVilkårsprøvdPeriode(0) fra 23.januar til 31.januar medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) fra 23.januar til 31.januar medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) fra 17.januar til 22.januar avType REVURDERING medTilstand TilGodkjenning
-                uberegnetVilkårsprøvdPeriode(2) fra 1.januar til 16.januar medTilstand IngenUtbetaling
+                uberegnetPeriode(2) fra 1.januar til 16.januar medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) fra 17.januar til 22.januar avType UTBETALING medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(1) fra 1.januar til 16.januar medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra 1.januar til 16.januar medTilstand IngenUtbetaling
             }
         }
     }
@@ -212,21 +212,21 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) avType REVURDERING fra 21.august til 1.september medTilstand ForberederGodkjenning
-                uberegnetVilkårsprøvdPeriode(1) fra 24.juli til 20.august medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra 24.juli til 20.august medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) avType REVURDERING fra 21.august til 1.september medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(1) fra 24.juli til 20.august medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra 24.juli til 20.august medTilstand IngenUtbetaling
             }
             2.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(1) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) medTilstand IngenUtbetaling
             }
             3.generasjon {
                 assertEquals(1, size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand IngenUtbetaling
+                uberegnetPeriode(0) medTilstand IngenUtbetaling
             }
         }
     }
@@ -275,8 +275,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(4, size)
             0.generasjon {
                 assertEquals(3, size)
-                uberegnetVilkårsprøvdPeriode(0) fra 1.mars til 31.mars medTilstand UtbetaltVenterPåAnnenPeriode
-                uberegnetVilkårsprøvdPeriode(1) fra 1.februar til 28.februar medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) fra 1.mars til 31.mars medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(1) fra 1.februar til 28.februar medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(2) avType REVURDERING fra 1.januar til 31.januar medTilstand TilGodkjenning
             }
             1.generasjon {
@@ -322,8 +322,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(4, size)
             0.generasjon {
                 assertEquals(3, size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
-                uberegnetVilkårsprøvdPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(2) medTilstand TilGodkjenning
             }
             1.generasjon {
@@ -380,7 +380,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra 1.februar til 28.februar medTilstand UtbetaltVenterPåAnnenPeriode medPeriodetype FORLENGELSE
+                uberegnetPeriode(0) fra 1.februar til 28.februar medTilstand UtbetaltVenterPåAnnenPeriode medPeriodetype FORLENGELSE
                 beregnetPeriode(1) fra 1.januar til 31.januar medTilstand TilGodkjenning medPeriodetype FØRSTEGANGSBEHANDLING
             }
             1.generasjon {
@@ -657,7 +657,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
             }
             1.generasjon {
@@ -681,7 +681,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
             }
             1.generasjon {
@@ -710,7 +710,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
             }
             1.generasjon {
@@ -984,7 +984,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Ubetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
-                uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
             }
         }
     }
@@ -1011,12 +1011,12 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Ubetalt avType REVURDERING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
-                uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
             }
         }
     }
@@ -1031,7 +1031,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
             }
         }
@@ -1102,7 +1102,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(1, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
+                uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
         }
@@ -1122,7 +1122,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medTilstand ForberederGodkjenning
+                uberegnetPeriode(0) fra (1.februar til 28.februar) medTilstand ForberederGodkjenning
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medTilstand Utbetalt
             }
             1.generasjon {
@@ -1146,7 +1146,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
             }
             1.generasjon {
@@ -1230,7 +1230,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         generasjoner {
             0.generasjon {
-                uberegnetVilkårsprøvdPeriode(0) medTilstand  UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand  UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1).assertAldersvilkår(true, 25)
                 // Revurdering av tidligere periode medfører at alle perioder berørt av revurderingen deler den samme utbetalingen, og derfor ender opp med samme
                 // gjenstående dager, forbrukte dager og maksdato. Kan muligens skrives om i modellen slik at disse tallene kan fiskes ut fra utbetalingen gitt en
@@ -1333,8 +1333,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
-                uberegnetVilkårsprøvdPeriode(1) medTilstand ForberederGodkjenning
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(1) medTilstand ForberederGodkjenning
             }
         }
 
@@ -1342,7 +1342,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand ForberederGodkjenning
             }
         }
@@ -1351,7 +1351,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand TilGodkjenning
             }
         }
@@ -1360,7 +1360,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand TilUtbetaling
             }
         }
@@ -1369,7 +1369,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand ForberederGodkjenning
+                uberegnetPeriode(0) medTilstand ForberederGodkjenning
                 beregnetPeriode(1) medTilstand Utbetalt
             }
         }
@@ -1478,7 +1478,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) er IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
             }
             1.generasjon {
@@ -1522,7 +1522,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand TilGodkjenning
             }
             1.generasjon {
@@ -1534,7 +1534,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
             }
             1.generasjon {
@@ -1579,14 +1579,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner(a1) {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand ForberederGodkjenning
             }
         }
         generasjoner(a2) {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
             }
         }
@@ -1596,14 +1596,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner(a1) {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand TilGodkjenning
             }
         }
         generasjoner(a2) {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
             }
         }
@@ -1616,14 +1616,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         generasjoner(a1) {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand Utbetalt
             }
         }
         generasjoner(a2) {
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand TilGodkjenning
             }
         }
@@ -1969,8 +1969,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
-                uberegnetVilkårsprøvdPeriode(1) medTilstand ForberederGodkjenning
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(1) medTilstand ForberederGodkjenning
             }
             1.generasjon {
                 assertEquals(2, perioder.size)
@@ -1985,7 +1985,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand ForberederGodkjenning
             }
             1.generasjon {
@@ -2022,14 +2022,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(3, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
                 beregnetPeriode(1) avType UTBETALING medTilstand TilGodkjenning
-                uberegnetVilkårsprøvdPeriode(2) medTilstand IngenUtbetaling
+                uberegnetPeriode(2) medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand IngenUtbetaling
-                uberegnetVilkårsprøvdPeriode(1) medTilstand IngenUtbetaling
+                uberegnetPeriode(0) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) medTilstand IngenUtbetaling
             }
         }
 
@@ -2105,7 +2105,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) medTilstand ForberederGodkjenning
             }
             1.generasjon {
@@ -2128,7 +2128,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.mars til 31.mars) medTilstand UtbetaltVenterPåAnnenPeriode
+                uberegnetPeriode(0) fra (1.mars til 31.mars) medTilstand UtbetaltVenterPåAnnenPeriode
                 beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medTilstand TilGodkjenning
             }
             1.generasjon {
@@ -2179,18 +2179,18 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.mars til 31.mars) medTilstand ForberederGodkjenning
+                uberegnetPeriode(0) fra (1.mars til 31.mars) medTilstand ForberederGodkjenning
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 20.januar) medTilstand Utbetalt
             }
             1.generasjon {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(1) fra (4.januar til 20.januar) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (4.januar til 20.januar) medTilstand IngenUtbetaling
             }
             2.generasjon {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(1) fra (4.januar til 20.januar) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (4.januar til 20.januar) medTilstand IngenUtbetaling
             }
         }
     }
@@ -2254,7 +2254,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             1.generasjon {
                 assertEquals(2, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(1) fra (5.januar til 19.januar) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (5.januar til 19.januar) medTilstand IngenUtbetaling
             }
         }
     }
@@ -2271,7 +2271,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, perioder.size)
-                uberegnetVilkårsprøvdPeriode(0) fra (1.mars til 31.mars) medTilstand ForberederGodkjenning
+                uberegnetPeriode(0) fra (1.mars til 31.mars) medTilstand ForberederGodkjenning
                 uberegnetPeriode(1) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
             1.generasjon {
@@ -2296,13 +2296,13 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 assertEquals(3, perioder.size)
                 beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 31.januar) medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+                uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(3, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
                 beregnetPeriode(1) fra (16.januar til 31.januar) medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
+                uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
             2.generasjon {
                 assertEquals(1, perioder.size)
@@ -2388,7 +2388,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             1.generasjon {
                 assertEquals(3, perioder.size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.mars til 31.mars) medTilstand Utbetalt
-                uberegnetVilkårsprøvdPeriode(1) fra (1.februar til 28.februar) medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra (1.februar til 28.februar) medTilstand IngenUtbetaling
                 beregnetPeriode(2) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
             }
         }
@@ -2488,11 +2488,6 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             return periode
         }
 
-        fun SpeilGenerasjonDTO.uberegnetVilkårsprøvdPeriode(index: Int): UberegnetVilkårsprøvdPeriode {
-            val periode = this.perioder[index]
-            require(periode is UberegnetVilkårsprøvdPeriode) { "Perioden ${periode::class.simpleName} er ikke en uberegnet vilkårsprøvd periode!" }
-            return periode
-        }
 
         infix fun <T : SpeilTidslinjeperiode> T.medAntallDager(antall: Int): T {
             assertEquals(antall, sammenslåttTidslinje.size)
