@@ -552,9 +552,10 @@
         },
         {
           "id": "52fc8116-1757-45bc-8ca1-d333b33d3496",
+          "korrelasjonsId": "45763d0d-363a-4076-bcff-78ab26d49bf8",
           "status": "FORKASTET",
           "type": "ANNULLERING",
-          "oppdatert": "2024-01-23T08:15:00.000010",
+          "oppdatert": "2024-01-23T08:15:00.204957",
           "personOppdrag": {
             "linjer": [{ "fom": "2018-01-01", "tom": "2018-12-31"}],
             "status": null
@@ -565,7 +566,14 @@
           }
         },
         {
+          "id": "69e318df-521b-484d-a7d9-ea47db76684e",
+          "korrelasjonsId": "45763d0d-363a-4076-bcff-78ab26d49bf8",
+          "status": "UTBETALT",
+          "type": "UTBETALING"
+        },
+        {
           "id": "a3e2aaf8-fc6b-4b43-aeeb-16f60f5a24f8",
+          "korrelasjonsId": "7a8925f9-6fce-4789-b688-2e686433d98b",
           "status": "GODKJENT_UTEN_UTBETALING",
           "type": "ANNULLERING",
           "oppdatert": "2022-10-13T14:20:20.204188",

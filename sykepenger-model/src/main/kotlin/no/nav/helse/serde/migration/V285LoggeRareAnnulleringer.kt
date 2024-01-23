@@ -16,16 +16,26 @@ internal class V285LoggeRareAnnulleringer(
 
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val organisasjonsnummer = arbeidsgiver.path("organisasjonsnummer").asText()
+            val utbetalteKorrelasjonsIder = arbeidsgiver.path("utbetalinger")
+                .groupBy { it.path("korrelasjonsId").asText() }
+                .mapValues { (_, utbetalinger) ->
+                    utbetalinger.filter { it.path("type").asText() == "UTBETALING" && it.path("status").asText() == "UTBETALT" }
+                }.filterValues { it.isNotEmpty() }
+                .keys
+
+
             arbeidsgiver.path("utbetalinger")
+                .asSequence()
                 .filter { it.path("type").asText() == "ANNULLERING" }
                 .filter { it.path("status").asText() != "FORKASTET" }
                 .filter { LocalDateTime.parse(it.path("oppdatert").asText()).year < 2024 }
                 .filter { it.path("arbeidsgiverOppdrag").oppdragManglerOverføring || it.path("personOppdrag").oppdragManglerOverføring }
+                .filter { it.path("korrelasjonsId").asText() in utbetalteKorrelasjonsIder }
                 .forEach { manglerOverføring ->
                     val id = manglerOverføring.path("id").asText()
                     val nåværendeStatus = manglerOverføring.path("status").asText()
                     val oppdatert = LocalDateTime.parse(manglerOverføring.path("oppdatert").asText())
-                    sikkerLogg.warn("Annullering $id i Status $nåværendeStatus ser ikke ut til å være overført til Oppdrag (sist oppdatert $oppdatert). AktørId $aktørId, Organisasjonsnummer $organisasjonsnummer (Versjon2)")
+                    sikkerLogg.warn("Annullering $id i Status $nåværendeStatus ser ikke ut til å være overført til Oppdrag (sist oppdatert $oppdatert). AktørId $aktørId, Organisasjonsnummer $organisasjonsnummer (Versjon3)")
                     if (id in forkast) {
                         sikkerLogg.info("Setter status på Utbetaling $id til FORKASTET og setter nytt oppdatert-tidspunkt")
                         manglerOverføring as ObjectNode
