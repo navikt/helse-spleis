@@ -400,6 +400,8 @@ class Person private constructor(
             arbeidsgiver.sykefraværsfortelling(acc)
         }.varsleObservers(observers)
 
+        // TODO
+
         håndterGjenoppta(påminnelse)
     }
 
