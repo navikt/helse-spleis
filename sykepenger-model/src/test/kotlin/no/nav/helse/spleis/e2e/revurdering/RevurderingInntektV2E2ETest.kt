@@ -651,13 +651,13 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
-        assertEquals(1, observatør.vedtakFattetEvent.size)
-        assertNull(observatør.vedtakFattetEvent[2.vedtaksperiode.id(ORGNUMMER)])
+        assertEquals(1, observatør.avsluttetMedVedtakEvent.size)
+        assertNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
-        assertEquals(2, observatør.vedtakFattetEvent.size)
-        assertNotNull(observatør.vedtakFattetEvent[2.vedtaksperiode.id(ORGNUMMER)])
+        assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
+        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
     }
 
     @Test

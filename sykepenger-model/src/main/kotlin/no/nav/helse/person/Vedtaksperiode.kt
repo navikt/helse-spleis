@@ -870,7 +870,7 @@ internal class Vedtaksperiode private constructor(
         builder.utbetalingId(utbetalingId)
         builder.utbetalingVurdert(vedtakFattetTidspunkt)
         vilkårsgrunnlag.build(builder)
-        person.vedtakFattet(builder.result())
+        person.avsluttetMedVedtak(builder.result())
         person.gjenopptaBehandling(hendelse)
     }
 

@@ -28,8 +28,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
     val utbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
-    val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
-    val vedtakFattetEventer = mutableMapOf<UUID, MutableList<PersonObserver.VedtakFattetEvent>>()
+    val avsluttetMedVedtakEvent = mutableMapOf<UUID, PersonObserver.AvsluttetMedVedtakEvent>()
+    val avsluttetMedVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetMedVedtakEvent>>()
     val generasjonOpprettetEventer = mutableListOf<PersonObserver.GenerasjonOpprettetEvent>()
     val avsluttetUtenVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetUtenVedtakEvent>>()
     val sykefraværstilfelleeventyr = mutableListOf<List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>>()
@@ -104,9 +104,9 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         utbetaltEndretEventer.add(event)
     }
 
-    override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
-        vedtakFattetEvent[event.vedtaksperiodeId] = event
-        vedtakFattetEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
+    override fun avsluttetMedVedtak(event: PersonObserver.AvsluttetMedVedtakEvent) {
+        avsluttetMedVedtakEvent[event.vedtaksperiodeId] = event
+        avsluttetMedVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
     }
 
     override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {

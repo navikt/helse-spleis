@@ -6,11 +6,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattIInfotrygd
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattISpeil
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.FastsattISpeil.Arbeidsgiver
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Sykepengegrunnlagsfakta
-import no.nav.helse.person.PersonObserver.VedtakFattetEvent.Tag
+import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.FastsattIInfotrygd
+import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil
+import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil.Arbeidsgiver
+import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.Sykepengegrunnlagsfakta
+import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.Tag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.økonomi.Avviksprosent
@@ -43,12 +43,12 @@ internal class VedtakFattetBuilder(
     private lateinit var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }
 
-    internal fun result(): PersonObserver.VedtakFattetEvent {
+    internal fun result(): PersonObserver.AvsluttetMedVedtakEvent {
         val omregnetÅrsinntektPerArbeidsgiverÅrlig = when (val f = sykepengegrunnlagsfakta) {
             is FastsattISpeil -> f.arbeidsgivere.associate { it.arbeidsgiver to (it.skjønnsfastsatt ?: it.omregnetÅrsinntekt) }
             else -> emptyMap()
         }
-        return PersonObserver.VedtakFattetEvent(
+        return PersonObserver.AvsluttetMedVedtakEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,

@@ -549,16 +549,16 @@ class Person private constructor(
         observers.forEach { it.utbetalingEndret(event) }
     }
 
-    internal fun vedtakFattet(vedtakFattetEvent: PersonObserver.VedtakFattetEvent) {
-        observers.forEach { it.vedtakFattet(vedtakFattetEvent) }
+    internal fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
+        observers.forEach { it.avsluttetUtenVedtak(event) }
+    }
+
+    internal fun avsluttetMedVedtak(avsluttetMedVedtakEvent: PersonObserver.AvsluttetMedVedtakEvent) {
+        observers.forEach { it.avsluttetMedVedtak(avsluttetMedVedtakEvent) }
     }
 
     internal fun nyGenerasjon(nyGenerasjon: PersonObserver.GenerasjonOpprettetEvent) {
         observers.forEach { it.nyGenerasjon(nyGenerasjon) }
-    }
-
-    internal fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
-        observers.forEach { it.avsluttetUtenVedtak(event) }
     }
 
     internal fun emitOverstyringIgangsattEvent(event: PersonObserver.OverstyringIgangsatt) {

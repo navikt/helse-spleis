@@ -444,7 +444,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
         assertTilstander(4.vedtaksperiode, AVVENTER_REVURDERING)
 
-        assertNotNull(observatør.vedtakFattetEvent[4.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[4.vedtaksperiode.id(ORGNUMMER)])
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode)
@@ -476,7 +476,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
 
-        assertNotNull(observatør.vedtakFattetEvent[2.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode.id(ORGNUMMER)])
     }
 
     @Test
@@ -615,7 +615,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertNotNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }
 
     @Test
@@ -634,7 +634,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertNotNull(observatør.vedtakFattetEvent[1.vedtaksperiode.id(ORGNUMMER)])
+        assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode.id(ORGNUMMER)])
     }
 
     @Test

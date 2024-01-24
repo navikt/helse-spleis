@@ -77,7 +77,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 assertTrue(utbetalingstidslinjeInspektør.avvistedatoer.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
             }
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertTag(1.vedtaksperiode, PersonObserver.VedtakFattetEvent.Tag.SykepengegrunnlagUnder2G)
+            assertTag(1.vedtaksperiode, PersonObserver.AvsluttetMedVedtakEvent.Tag.SykepengegrunnlagUnder2G)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         }
     }
@@ -85,7 +85,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
     @Test
     fun `tagger ikke normal inntekt`() {
         nyttVedtak(1.januar, 31.januar)
-        assertIkkeTag(1.vedtaksperiode, PersonObserver.VedtakFattetEvent.Tag.SykepengegrunnlagUnder2G)
+        assertIkkeTag(1.vedtaksperiode, PersonObserver.AvsluttetMedVedtakEvent.Tag.SykepengegrunnlagUnder2G)
     }
 
     @Test

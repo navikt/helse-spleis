@@ -482,13 +482,13 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-            assertEquals(1, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode).size)
-            assertEquals(1, observatør.vedtakFattetEventer.getValue(2.vedtaksperiode).size)
+            assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode).size)
+            assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(2.vedtaksperiode).size)
 
             håndterSøknad(Sykdom(1.april, 16.april, 100.prosent))
 
-            assertEquals(1, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode).size)
-            assertEquals(1, observatør.vedtakFattetEventer.getValue(2.vedtaksperiode).size)
+            assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode).size)
+            assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(2.vedtaksperiode).size)
 
             assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
@@ -496,8 +496,8 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
             håndterUtbetalt()
 
-            assertEquals(2, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode).size)
-            assertEquals(1, observatør.vedtakFattetEventer.getValue(2.vedtaksperiode).size)
+            assertEquals(2, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode).size)
+            assertEquals(1, observatør.avsluttetMedVedtakEventer.getValue(2.vedtaksperiode).size)
 
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -507,8 +507,8 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            assertEquals(3, observatør.vedtakFattetEventer.getValue(1.vedtaksperiode).size)
-            assertEquals(2, observatør.vedtakFattetEventer.getValue(2.vedtaksperiode).size)
+            assertEquals(3, observatør.avsluttetMedVedtakEventer.getValue(1.vedtaksperiode).size)
+            assertEquals(2, observatør.avsluttetMedVedtakEventer.getValue(2.vedtaksperiode).size)
 
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)

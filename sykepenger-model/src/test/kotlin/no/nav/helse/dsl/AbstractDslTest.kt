@@ -159,12 +159,12 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand)
     }
 
-    protected fun assertTag(id: UUID, tag: PersonObserver.VedtakFattetEvent.Tag) {
-        assertTrue(observatør.vedtakFattetEvent[id]!!.tags.contains(tag), "Forventet at ${observatør.vedtakFattetEvent[id]!!.tags} inneholdt $tag")
+    protected fun assertTag(id: UUID, tag: PersonObserver.AvsluttetMedVedtakEvent.Tag) {
+        assertTrue(observatør.avsluttetMedVedtakEvent[id]!!.tags.contains(tag), "Forventet at ${observatør.avsluttetMedVedtakEvent[id]!!.tags} inneholdt $tag")
     }
 
-    protected fun assertIkkeTag(id: UUID, tag: PersonObserver.VedtakFattetEvent.Tag) {
-        assertFalse(observatør.vedtakFattetEvent[id]!!.tags.contains(tag), "Forventet at ${observatør.vedtakFattetEvent[id]!!.tags} ikke inneholdt $tag")
+    protected fun assertIkkeTag(id: UUID, tag: PersonObserver.AvsluttetMedVedtakEvent.Tag) {
+        assertFalse(observatør.avsluttetMedVedtakEvent[id]!!.tags.contains(tag), "Forventet at ${observatør.avsluttetMedVedtakEvent[id]!!.tags} ikke inneholdt $tag")
     }
 
     protected fun TestPerson.TestArbeidsgiver.assertUtbetalingsbeløp(

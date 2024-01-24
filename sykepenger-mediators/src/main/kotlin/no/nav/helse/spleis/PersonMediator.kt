@@ -381,7 +381,7 @@ internal class PersonMediator(
         )))
     }
 
-    override fun vedtakFattet(event: PersonObserver.VedtakFattetEvent) {
+    override fun avsluttetMedVedtak(event: PersonObserver.AvsluttetMedVedtakEvent) {
         queueMessage(JsonMessage.newMessage("avsluttet_med_vedtak", mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
@@ -400,7 +400,7 @@ internal class PersonMediator(
             event.utbetalingId?.let { this["utbetalingId"] = it }
             event.sykepengegrunnlagsfakta?.let {
                 this["sykepengegrunnlagsfakta"] = when (it) {
-                    is PersonObserver.VedtakFattetEvent.FastsattISpeil -> mutableMapOf(
+                    is PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil -> mutableMapOf(
                         "fastsatt" to it.fastsatt,
                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
                         "6G" to it.`6G`,
@@ -415,7 +415,7 @@ internal class PersonMediator(
                     ).apply {
                         compute("skjønnsfastsatt") { _, _ -> it.skjønnsfastsatt }
                     }
-                    is PersonObserver.VedtakFattetEvent.FastsattIInfotrygd -> mapOf(
+                    is PersonObserver.AvsluttetMedVedtakEvent.FastsattIInfotrygd -> mapOf(
                         "fastsatt" to it.fastsatt,
                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt
                     )

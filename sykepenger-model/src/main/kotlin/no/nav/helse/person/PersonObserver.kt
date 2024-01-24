@@ -602,7 +602,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         )
     }
 
-    data class VedtakFattetEvent(
+    data class AvsluttetMedVedtakEvent(
         val fødselsnummer: String,
         val aktørId: String,
         val organisasjonsnummer: String,
@@ -703,7 +703,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avstemt(result: Map<String, Any>) {}
-    fun vedtakFattet(event: VedtakFattetEvent) {}
+    fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
 
     fun nyGenerasjon(event: GenerasjonOpprettetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
