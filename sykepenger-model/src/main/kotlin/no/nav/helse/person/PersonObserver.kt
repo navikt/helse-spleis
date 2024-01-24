@@ -595,10 +595,10 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             Revurdering
         }
         data class Kilde(
-            private val meldingsreferanseId: UUID,
-            private val innsendt: LocalDateTime,
-            private val registert: LocalDateTime,
-            private val avsender: Avsender
+            val meldingsreferanseId: UUID,
+            val innsendt: LocalDateTime,
+            val registert: LocalDateTime,
+            val avsender: Avsender
         )
     }
 

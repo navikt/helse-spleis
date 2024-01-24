@@ -28,7 +28,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
         val id = sendNyPåminnelse()
-        assertEquals(15, testRapid.inspektør.antall())
+        assertEquals(16, testRapid.inspektør.antall())
         val melding = testRapid.inspektør.meldinger("vedtaksperiode_ikke_funnet").single()
         assertEquals("vedtaksperiode_ikke_funnet", melding.path("@event_name").asText())
         assertEquals("$id", melding.path("vedtaksperiodeId").asText())
