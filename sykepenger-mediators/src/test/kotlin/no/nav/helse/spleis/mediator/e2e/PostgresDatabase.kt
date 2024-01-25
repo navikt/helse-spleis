@@ -5,6 +5,9 @@ import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeUnit
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import org.flywaydb.core.Flyway
 import org.testcontainers.containers.PostgreSQLContainer
 
@@ -103,8 +106,9 @@ class SpleisDataSource(
 
     fun cleanUp() {
         println("Rydder opp og forbereder gjenbruk i $dbnavn")
-        flyway.clean()
-        flyway.migrate()
+        sessionOf(migrationDataSource).use {
+            it.run(queryOf("truncate table melding, person cascade;").asExecute)
+        }
     }
     fun teardown(dropDatabase: (String) -> Unit) {
         migrationDataSource.close()
