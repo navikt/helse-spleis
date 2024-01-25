@@ -279,8 +279,7 @@ internal class Arbeidsgiver private constructor(
     private fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
         if (!trengerRefusjonsopplysninger(skjæringstidspunkt, periode)) return true
         val arbeidsgiverperiode = arbeidsgiverperiode(periode) ?: return false
-        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
-        val refusjonsopplysninger = when (vilkårsgrunnlag) {
+        val refusjonsopplysninger = when (val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             null -> refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
             else -> vilkårsgrunnlag.refusjonsopplysninger(organisasjonsnummer)
         }
