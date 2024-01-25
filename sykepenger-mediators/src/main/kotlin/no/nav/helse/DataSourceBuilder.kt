@@ -32,6 +32,9 @@ internal class DataSourceBuilder(env: Map<String, String>) {
             .dataSource(dataSource)
             .lockRetryCount(-1)
             .load()
+            .also {
+                it.repair()
+            }
             .migrate()
         logger.info("Migrering ferdig!")
     }
