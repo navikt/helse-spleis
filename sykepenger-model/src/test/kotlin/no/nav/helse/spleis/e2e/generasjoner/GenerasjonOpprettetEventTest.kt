@@ -38,7 +38,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
                     kilde = PersonObserver.GenerasjonOpprettetEvent.Kilde(
                         meldingsreferanseId = søknadId,
                         innsendt = innsendt,
-                        registert = opprettet,
+                        registert = innsendt,
                         avsender = Avsender.SYKMELDT
                     )
                 )

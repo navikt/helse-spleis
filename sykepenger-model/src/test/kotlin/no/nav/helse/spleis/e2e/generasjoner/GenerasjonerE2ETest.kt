@@ -48,7 +48,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
                 assertEquals(1, generasjoner.single().endringer.size)
-                assertEquals(Generasjonkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = opprettet, avsender = Avsender.SYKMELDT), generasjoner.single().kilde)
+                assertEquals(Generasjonkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = innsendt, avsender = Avsender.SYKMELDT), generasjoner.single().kilde)
             }
         }
     }

@@ -107,7 +107,7 @@ class Søknad(
     override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 
     override fun innsendt() = sendtTilNAVEllerArbeidsgiver
-    override fun registrert() = opprettet
+    override fun registrert() = sendtTilNAVEllerArbeidsgiver // dette tidsstempelet tilsvarer @opprettet fra spedisjon
     override fun avsender() = SYKMELDT
 
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
