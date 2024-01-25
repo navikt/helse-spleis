@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.februar
@@ -53,22 +52,19 @@ import no.nav.helse.spleis.mediator.TestMessageFactory.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
-import no.nav.helse.spleis.mediator.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal abstract class AbstractEndToEndMediatorTest() {
     internal companion object {
         internal const val UNG_PERSON_FNR_2018 = "12029240045"
@@ -79,19 +75,21 @@ internal abstract class AbstractEndToEndMediatorTest() {
     }
 
     protected val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
-    protected val testRapid = TestRapid()
-    private lateinit var dataSource: DataSource
+    protected lateinit var testRapid: TestRapid
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var messageMediator: MessageMediator
 
-    @BeforeAll
-    internal fun setupAll() {
-        dataSource = migratedDb
+    private lateinit var dataSource: SpleisDataSource
 
+    @BeforeEach
+    fun setupDatabase() {
+        dataSource = PostgresContainer.nyTilkobling()
+
+        testRapid = TestRapid()
         hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
-            hendelseRepository = HendelseRepository(dataSource),
-            personDao = PersonDao(dataSource, STØTTER_IDENTBYTTE = true),
+            hendelseRepository = HendelseRepository(dataSource.ds),
+            personDao = PersonDao(dataSource.ds, STØTTER_IDENTBYTTE = true),
             versjonAvKode = "test-versjon",
             støtterIdentbytte = true
         )
@@ -99,20 +97,24 @@ internal abstract class AbstractEndToEndMediatorTest() {
         messageMediator = MessageMediator(
             rapidsConnection = testRapid,
             hendelseMediator = hendelseMediator,
-            hendelseRepository = HendelseRepository(dataSource)
+            hendelseRepository = HendelseRepository(dataSource.ds)
         )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        PostgresContainer.droppTilkobling(dataSource)
     }
 
     @BeforeEach
     internal fun setupEach() {
-        resetDatabase()
         testRapid.reset()
     }
 
-    protected fun antallPersoner() = sessionOf(dataSource).use {
+    protected fun antallPersoner() = sessionOf(dataSource.ds).use {
         it.run(queryOf("SELECT COUNT(1) FROM person").map { it.long(1) }.asSingle) ?: 0
     }
-    protected fun antallPersonalias(fnr: String? = null) = sessionOf(dataSource).use {
+    protected fun antallPersonalias(fnr: String? = null) = sessionOf(dataSource.ds).use {
         it.run(queryOf("SELECT COUNT(1) FROM person_alias ${fnr?.let { "WHERE fnr=${fnr.toLong()}" } ?: "" }").map { it.long(1) }.asSingle) ?: 0
     }
 

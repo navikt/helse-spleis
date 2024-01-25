@@ -2,35 +2,31 @@ package no.nav.helse.spleis.mediator.db
 
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.sql.DataSource
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.mediator.e2e.SpleisDataSource.migratedDb
-import no.nav.helse.spleis.mediator.e2e.resetDatabase
+import no.nav.helse.spleis.mediator.e2e.PostgresContainer
+import no.nav.helse.spleis.mediator.e2e.SpleisDataSource
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
 private val fnr = "01011012345".somPersonidentifikator()
-// primært for å slutte å ha teite sql-feil
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class HendelseRepositoryTest {
-    private lateinit var dataSource: DataSource
+    private lateinit var dataSource: SpleisDataSource
 
-    @BeforeAll
-    internal fun setupAll() {
-        dataSource = migratedDb
-    }
     @BeforeEach
-    internal fun setupEach() {
-        resetDatabase()
+    internal fun setup() {
+        dataSource = PostgresContainer.nyTilkobling()
+    }
+    @AfterEach
+    internal fun tearDown() {
+        PostgresContainer.droppTilkobling(dataSource)
     }
 
     @Test
@@ -42,7 +38,7 @@ internal class HendelseRepositoryTest {
     }
 
     private fun lagre(hendeleMessage: HendelseMessage): Pair<UUID, String> {
-        val repo = HendelseRepository(dataSource)
+        val repo = HendelseRepository(dataSource.ds)
         val ingenHendelser = repo.hentAlleHendelser(fnr)
         assertEquals(0, ingenHendelser.size)
         repo.lagreMelding(hendeleMessage)
