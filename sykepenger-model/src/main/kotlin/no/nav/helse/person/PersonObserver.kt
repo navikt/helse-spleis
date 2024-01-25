@@ -580,6 +580,14 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val avsluttetTidspunkt: LocalDateTime
     )
 
+    data class GenerasjonLukketEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val generasjonId: UUID
+    )
+
     data class GenerasjonOpprettetEvent(
         val fødselsnummer: String,
         val aktørId: String,
@@ -705,6 +713,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun avstemt(result: Map<String, Any>) {}
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
 
+    fun generasjonLukket(event: GenerasjonLukketEvent) {}
     fun nyGenerasjon(event: GenerasjonOpprettetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
     fun nyVedtaksperiodeUtbetaling(

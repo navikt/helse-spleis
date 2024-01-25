@@ -874,6 +874,16 @@ internal class Vedtaksperiode private constructor(
         person.gjenopptaBehandling(hendelse)
     }
 
+    override fun generasjonLukket(generasjonId: UUID) {
+        person.generasjonLukket(PersonObserver.GenerasjonLukketEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = id,
+            generasjonId = generasjonId
+        ))
+    }
+
     override fun nyGenerasjon(
         id: UUID,
         meldingsreferanseId: UUID,

@@ -490,10 +490,14 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             return Utbetaling.kanForkastes(utbetalingen, arbeidsgiverUtbetalinger)
         }
 
+        private fun generasjonLukket() {
+            observatører.forEach { it.generasjonLukket(id) }
+        }
         private fun vedtakIverksatt(hendelse: IAktivitetslogg) {
             observatører.forEach { it.vedtakIverksatt(hendelse, id, avsluttet!!, periode, dokumentsporing.ider(), utbetaling()!!.id, vedtakFattet!!) }
         }
         private fun avsluttetUtenVedtak(hendelse: IAktivitetslogg) {
+            observatører.forEach { it.generasjonLukket(id) }
             observatører.forEach { it.avsluttetUtenVedtak(hendelse, id, avsluttet!!, periode, dokumentsporing.ider()) }
         }
 
@@ -659,6 +663,7 @@ enum class Periodetilstand {
                     generasjon.tilstand(BeregnetRevurdering, hendelse)
                 }
                 override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                    // TODO: ugyldig operasjon? kaste exception? ingen modelltester trigger denne
                     generasjon.tilstand(AvsluttetUtenVedtakRevurdering, hendelse)
                 }
             }
@@ -704,6 +709,7 @@ enum class Periodetilstand {
 
                 override fun vedtakFattet(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
                     generasjon.vedtakFattet = utbetalingsavgjørelse.avgjørelsestidspunkt
+                    generasjon.generasjonLukket()
                     generasjon.tilstand(if (generasjon.gjeldende.utbetaling?.erAvsluttet() == true) VedtakIverksatt else VedtakFattet, utbetalingsavgjørelse)
                 }
             }

@@ -368,6 +368,14 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("vedtaksperiode_forkastet", event.toJsonMap()))
     }
 
+    override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
+        queueMessage(JsonMessage.newMessage("generasjon_lukket", mapOf(
+            "organisasjonsnummer" to event.organisasjonsnummer,
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "generasjonId" to event.generasjonId
+        )))
+    }
+
     override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {
         queueMessage(JsonMessage.newMessage("avsluttet_uten_vedtak", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,

@@ -24,6 +24,7 @@ internal interface GenerasjonObserver {
         utbetalingId: UUID,
         vedtakFattetTidspunkt: LocalDateTime
     )
+    fun generasjonLukket(generasjonId: UUID)
 
     fun nyGenerasjon(
         id: UUID,
