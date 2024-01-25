@@ -1,1 +1,0 @@
-ALTER TABLE person ADD CONSTRAINT person_fnr_fk FOREIGN KEY (fnr) REFERENCES unike_person (fnr) ON DELETE RESTRICT;

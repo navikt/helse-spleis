@@ -1,1 +1,0 @@
-ALTER TABLE person ADD COLUMN rullet_tilbake TIMESTAMP DEFAULT NULL;
