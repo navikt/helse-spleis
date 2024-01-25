@@ -14,6 +14,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsmelding(
@@ -117,5 +118,20 @@ internal class Inntektsmelding(
             hendelse.varsel(RV_IV_7)
         }
         inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel))
+    }
+
+    companion object {
+        internal fun List<Inntektsmelding>.loggSprøeInntekterMigrertInnFraIT(
+            infotrygdhistorikk: Infotrygdhistorikk,
+            organisasjonsnummer: String
+        ) {
+            forEach { inntektsmelding ->
+                val kandidat =
+                    inntektsmelding.tidsstempel.year < 2022 && inntektsmelding.tidsstempel.second == 0 && inntektsmelding.tidsstempel.nano == 0 // såpass spesifikt tidsstempl at det lukter migrering
+                if (kandidat) {
+                    infotrygdhistorikk.loggSprøeInntektMigrertInnFraIT(inntektsmelding.dato, inntektsmelding.beløp, inntektsmelding.hendelseId, organisasjonsnummer)
+                }
+            }
+        }
     }
 }

@@ -46,6 +46,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
+import no.nav.helse.person.Arbeidsgiver.Companion.loggSprøeInntekterMigrertInnFraIT
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.førsteFraværsdager
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
@@ -399,6 +400,8 @@ class Person private constructor(
         arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
             arbeidsgiver.sykefraværsfortelling(acc)
         }.varsleObservers(observers)
+
+        arbeidsgivere.loggSprøeInntekterMigrertInnFraIT(infotrygdhistorikk)
 
         håndterGjenoppta(påminnelse)
     }

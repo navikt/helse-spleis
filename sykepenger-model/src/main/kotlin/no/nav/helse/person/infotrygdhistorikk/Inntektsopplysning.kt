@@ -2,8 +2,12 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.serde.migration.V238KobleSaksbehandlerinntekterTilDenOverstyrte
 import no.nav.helse.økonomi.Inntekt
+import org.slf4j.LoggerFactory
 
 class Inntektsopplysning private constructor(
     private val orgnummer: String,
@@ -34,6 +38,26 @@ class Inntektsopplysning private constructor(
     }
 
     internal companion object {
+
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+
+        internal fun List<Inntektsopplysning>.loggSprøeInntektMigrertInnFraIT(
+            dato: LocalDate,
+            beløp: Inntekt,
+            hendelseId: UUID,
+            organisasjonsnummer: String
+        ) {
+            forEach { inntektsopplysning ->
+                val treff = dato == inntektsopplysning.sykepengerFom && beløp == inntektsopplysning.inntekt && organisasjonsnummer == inntektsopplysning.orgnummer
+                if (treff) {
+                    sikkerlogg.info("Fant inntekt med {} og {} som er migert inn i inntektshistorikken fra IT",
+                        StructuredArguments.keyValue("hendelseId", hendelseId),
+                        StructuredArguments.keyValue("tidsstempel", dato)
+                    )
+                }
+            }
+        }
+
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
             inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.hashCode() }))
 

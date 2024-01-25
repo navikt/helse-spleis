@@ -11,16 +11,17 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.loggSprøeInntektMigrertInnFraIT
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 
 class InfotrygdhistorikkElement private constructor(
     private val id: UUID,
@@ -74,6 +75,17 @@ class InfotrygdhistorikkElement private constructor(
             arbeidskategorikoder = arbeidskategorikoder,
             oppdatert = oppdatert
         )
+
+        internal fun List<InfotrygdhistorikkElement>.loggSprøeInntektMigrertInnFraIT(
+            dato: LocalDate,
+            beløp: Inntekt,
+            hendelseId: UUID,
+            organisasjonsnummer: String
+        ) {
+            forEach { element ->
+                element.inntekter.loggSprøeInntektMigrertInnFraIT(dato, beløp, hendelseId, organisasjonsnummer)
+            }
+        }
     }
 
     internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
