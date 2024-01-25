@@ -599,6 +599,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     ) {
         enum class Type {
             Førstegangsbehandling,
+            TilInfotrygd,
             Omgjøring,
             Revurdering
         }

@@ -8,6 +8,7 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.PersonObserver
@@ -71,6 +72,20 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
             val andreEvent = generasjonOpprettetEventer.last()
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling, førsteEvent.type)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring, andreEvent.type)
+        }
+    }
+
+    @Test
+    fun `til infotrygd`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterAnnullering(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            val generasjonOpprettetEventer = observatør.generasjonOpprettetEventer
+            assertEquals(2, generasjonOpprettetEventer.size)
+            val førsteEvent = generasjonOpprettetEventer.first()
+            val andreEvent = generasjonOpprettetEventer.last()
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling, førsteEvent.type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, andreEvent.type)
         }
     }
 }

@@ -505,6 +505,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             val type = when(tilstand) {
                 Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
                 Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring
+                Tilstand.TilInfotrygd -> PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd
                 else -> PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling
             }
             observatører.forEach { it.nyGenerasjon(id, kilde!!.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
