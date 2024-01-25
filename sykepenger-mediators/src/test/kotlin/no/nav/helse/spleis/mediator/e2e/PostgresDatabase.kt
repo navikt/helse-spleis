@@ -3,12 +3,14 @@ package no.nav.helse.spleis.mediator.e2e
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
-import kotliquery.queryOf
-import kotliquery.sessionOf
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.TimeUnit
 import org.flywaydb.core.Flyway
 import org.testcontainers.containers.PostgreSQLContainer
 
 object PostgresContainer {
+    private val MAX_POOL_SIZE = maxOf(1, System.getProperty("junit.jupiter.execution.parallel.config.fixed.parallelism")?.toInt() ?: 0)
+
     private val instance by lazy {
         PostgreSQLContainer<Nothing>("postgres:15").apply {
             withCreateContainerCmdModifier { command -> command.withName("spleis-mediators") }
@@ -19,8 +21,18 @@ object PostgresContainer {
     }
 
     private val systemtilkobling by lazy { instance.createConnection("") }
+    private val tilgjengeligeTilkoblinger by lazy {
+        ArrayBlockingQueue(MAX_POOL_SIZE, false, opprettTilkoblinger())
+    }
 
-    fun nyTilkobling(dbnavn: String = "spleis_${kotlin.random.Random.nextInt(from = 0, until = 999999)}"): SpleisDataSource {
+    fun nyTilkobling(): SpleisDataSource {
+        return tilgjengeligeTilkoblinger.poll(20, TimeUnit.SECONDS) ?: throw RuntimeException("Ventet i 20 sekunder uten å få en ledig database")
+    }
+
+    private fun opprettTilkoblinger() =
+        (1..MAX_POOL_SIZE).map { opprettTilkobling("spleis_$it") }
+
+    private fun opprettTilkobling(dbnavn: String): SpleisDataSource {
         opprettDatabase(dbnavn)
         instance.withDatabaseName(dbnavn)
         return SpleisDataSource(dbnavn, HikariConfig().apply {
@@ -36,9 +48,17 @@ object PostgresContainer {
     }
 
     fun droppTilkobling(spleisDataSource: SpleisDataSource) {
-        spleisDataSource.teardown { dbnavn ->
-            println("Dropper databasen $dbnavn")
-            systemtilkobling.createStatement().execute("drop database $dbnavn")
+        println("Tilgjengeliggjør datbasen igjen")
+        spleisDataSource.cleanUp()
+        tilgjengeligeTilkoblinger.offer(spleisDataSource)
+    }
+
+    fun ryddOpp() {
+        tilgjengeligeTilkoblinger.forEach {
+            it.teardown { dbnavn ->
+                println("Dropper databasen $dbnavn")
+                systemtilkobling.createStatement().execute("drop database $dbnavn")
+            }
         }
     }
 }
@@ -56,6 +76,7 @@ class SpleisDataSource(
         Flyway.configure()
             .dataSource(migrationDataSource)
             .validateMigrationNaming(true)
+            .cleanDisabled(false)
             .load()
     }
 
@@ -78,10 +99,15 @@ class SpleisDataSource(
     private fun migrate() {
         println("Migrerer dbnavn=$dbnavn")
         flyway.migrate()
-        migrationDataSource.close()
     }
 
+    fun cleanUp() {
+        println("Rydder opp og forbereder gjenbruk i $dbnavn")
+        flyway.clean()
+        flyway.migrate()
+    }
     fun teardown(dropDatabase: (String) -> Unit) {
+        migrationDataSource.close()
         dataSource.close()
         dropDatabase(dbnavn)
     }
