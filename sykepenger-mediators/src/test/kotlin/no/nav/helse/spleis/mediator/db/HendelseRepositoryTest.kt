@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.mediator.db
 
+import com.github.navikt.tbd_libs.test_support.TestDataSource
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.mediator.e2e.PostgresContainer
-import no.nav.helse.spleis.mediator.e2e.SpleisDataSource
+import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import org.intellij.lang.annotations.Language
@@ -18,15 +18,15 @@ import org.junit.jupiter.api.Test
 
 private val fnr = "01011012345".somPersonidentifikator()
 internal class HendelseRepositoryTest {
-    private lateinit var dataSource: SpleisDataSource
+    private lateinit var dataSource: TestDataSource
 
     @BeforeEach
     internal fun setup() {
-        dataSource = PostgresContainer.nyTilkobling()
+        dataSource = databaseContainer.nyTilkobling()
     }
     @AfterEach
     internal fun tearDown() {
-        PostgresContainer.droppTilkobling(dataSource)
+        databaseContainer.droppTilkobling(dataSource)
     }
 
     @Test

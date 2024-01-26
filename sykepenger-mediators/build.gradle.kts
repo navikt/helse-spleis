@@ -6,6 +6,7 @@ plugins {
 
 val mainClass = "no.nav.helse.AppKt"
 
+val tbdLibsVersion = "2024.01.26-10.10-af0ac44d"
 val innteksmeldingKontraktVersion = "2023.06.20-08-54-d1c6c"
 val syfokafkaVersion = "2023.12.05-10.16-3ffa06f7"
 val mockkVersion = "1.13.9"
@@ -21,6 +22,7 @@ dependencies {
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
     }
+    testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
     testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
     testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:$innteksmeldingKontraktVersion")
     testImplementation("no.nav.helse.flex:sykepengesoknad-kafka:$syfokafkaVersion")

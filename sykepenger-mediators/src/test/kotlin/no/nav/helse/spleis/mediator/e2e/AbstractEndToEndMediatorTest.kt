@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import com.github.navikt.tbd_libs.test_support.TestDataSource
 import com.zaxxer.hikari.HikariConfig
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -52,6 +53,7 @@ import no.nav.helse.spleis.mediator.TestMessageFactory.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
+import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -78,12 +80,11 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected lateinit var testRapid: TestRapid
     private lateinit var hendelseMediator: HendelseMediator
     private lateinit var messageMediator: MessageMediator
-
-    private lateinit var dataSource: SpleisDataSource
+    private lateinit var dataSource: TestDataSource
 
     @BeforeEach
     fun setupDatabase() {
-        dataSource = PostgresContainer.nyTilkobling()
+        dataSource = databaseContainer.nyTilkobling()
 
         testRapid = TestRapid()
         hendelseMediator = HendelseMediator(
@@ -103,7 +104,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
 
     @AfterEach
     fun tearDown() {
-        PostgresContainer.droppTilkobling(dataSource)
+        databaseContainer.droppTilkobling(dataSource)
     }
 
     @BeforeEach
