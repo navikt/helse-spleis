@@ -1669,49 +1669,49 @@ internal class Vedtaksperiode private constructor(
             }
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse)
         }
-        private object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
+        private data object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
             override fun venteårsak() = SØKNAD fordi HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
             }
         }
-        private object ForventerIkkeInntekt: Tilstand {
+        private data object ForventerIkkeInntekt: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
             }
         }
-        private object ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag: Tilstand {
+        private data object ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.funksjonellFeil(RV_SV_2)
                 vedtaksperiode.forkast(hendelse)
             }
         }
-        private object ManglerNødvendigInntektForVilkårsprøving: Tilstand {
+        private data object ManglerNødvendigInntektForVilkårsprøving: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
                 vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
             }
         }
-        private object ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere: Tilstand {
+        private data object ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere: Tilstand {
             override fun venteårsak() = INNTEKTSMELDING fordi MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet")
             }
         }
-        private object TrengerInntektsmelding: Tilstand {
+        private data object TrengerInntektsmelding: Tilstand {
             override fun venteårsak() = INNTEKTSMELDING fordi MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver")
             }
         }
 
-        private object KlarForVilkårsprøving: Tilstand {
+        private data object KlarForVilkårsprøving: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
             }
         }
 
-        private object KlarForBeregning: Tilstand {
+        private data object KlarForBeregning: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
             }
