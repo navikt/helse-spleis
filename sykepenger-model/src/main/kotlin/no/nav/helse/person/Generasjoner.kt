@@ -202,7 +202,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         generasjoner.single().nyGenerasjon()
     }
 
-    internal class Generasjonkilde private constructor(
+    internal class Generasjonkilde(
         val meldingsreferanseId: UUID,
         val innsendt: LocalDateTime,
         val registert: LocalDateTime,
@@ -222,7 +222,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         private val endringer: MutableList<Endring>,
         private var vedtakFattet: LocalDateTime?,
         private var avsluttet: LocalDateTime?,
-        private val kilde: Generasjonkilde? = null
+        private val kilde: Generasjonkilde
     ) {
         private val gjeldende get() = endringer.last()
         private val periode: Periode get() = gjeldende.periode
@@ -248,7 +248,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         fun accept(visitor: GenerasjonerVisitor) {
             visitor.preVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
             endringer.forEach { it.accept(visitor) }
-            kilde?.accept(visitor)
+            kilde.accept(visitor)
             visitor.postVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
         }
 
@@ -509,7 +509,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
                 Tilstand.TilInfotrygd -> PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd
                 else -> PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling
             }
-            observatører.forEach { it.nyGenerasjon(id, kilde!!.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
+            observatører.forEach { it.nyGenerasjon(id, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
         }
 
         internal fun forkastetGenerasjon() {

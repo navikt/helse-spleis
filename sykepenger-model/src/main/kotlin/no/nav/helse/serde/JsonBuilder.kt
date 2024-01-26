@@ -8,6 +8,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
@@ -1631,6 +1632,14 @@ internal class JsonBuilder : AbstractBuilder() {
                     "tilstand" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
                     "fom" to periode.start,
                     "tom" to periode.endInclusive,
+                    "kilde" to kilde?.let {
+                        mapOf(
+                            "meldingsreferanseId" to it.meldingsreferanseId,
+                            "innsendt" to it.innsendt,
+                            "registrert" to it.registert,
+                            "avsender" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData.tilEnum(it.avsender)
+                        )
+                    },
                     "vedtakFattet" to vedtakFattet,
                     "avsluttet" to avsluttet,
                     "endringer" to endringer

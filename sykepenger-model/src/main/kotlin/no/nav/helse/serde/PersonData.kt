@@ -9,6 +9,7 @@ import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
@@ -858,6 +859,7 @@ internal data class PersonData(
                 private val tilstand: TilstandData,
                 private val vedtakFattet: LocalDateTime?,
                 private val avsluttet: LocalDateTime?,
+                private val kilde: KildeData?,
                 private val endringer: List<EndringData>
             ) {
                 internal enum class TilstandData {
@@ -882,12 +884,53 @@ internal data class PersonData(
                         fun tilEnum(tilstand: Generasjoner.Generasjon.Tilstand) = mapping.entries.single { (_, obj) -> obj == tilstand }.key
                     }
                 }
+                internal enum class AvsenderData {
+                    SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;
+                    fun tilModellobjekt() = mapping.getValue(this)
+
+                    companion object {
+                        private val mapping = mapOf(
+                            SYKMELDT to Avsender.SYKMELDT,
+                            ARBEIDSGIVER to Avsender.ARBEIDSGIVER,
+                            SAKSBEHANDLER to Avsender.SAKSBEHANDLER,
+                            SYSTEM to Avsender.SYSTEM
+                        )
+                        fun tilEnum(avsender: Avsender) = mapping.entries.single { (_, obj) -> obj == avsender }.key
+                    }
+                }
+
+                internal data class KildeData(
+                    val meldingsreferanseId: UUID,
+                    val innsendt: LocalDateTime,
+                    val registrert: LocalDateTime,
+                    val avsender: AvsenderData
+                ) {
+                    fun tilModellObjekt() = Generasjoner.Generasjonkilde(
+                        meldingsreferanseId = meldingsreferanseId,
+                        innsendt = innsendt,
+                        registert = registrert,
+                        avsender = avsender.tilModellobjekt()
+                    )
+
+                    companion object {
+                        private val UKJENT_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
+                        // TODO: om en måneds tid fra denne commiten vil alle generasjoner i spleis ha blitt migrert automatisk pga. nattlig avstemming
+                        fun ukjentKilde(generasjonOpprettet: LocalDateTime) = Generasjoner.Generasjonkilde(
+                            meldingsreferanseId = UKJENT_UUID,
+                            innsendt = generasjonOpprettet,
+                            registert = generasjonOpprettet,
+                            avsender = Avsender.SYSTEM
+                        )
+                    }
+                }
+
                 internal fun tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner.Generasjon(
                     id = id,
                     tilstand = tilstand.tilModellobjekt(),
                     endringer = endringer.map { it.tilModellobjekt(grunnlagoppslag, utbetalinger) }.toMutableList(),
                     vedtakFattet = vedtakFattet,
-                    avsluttet = avsluttet
+                    avsluttet = avsluttet,
+                    kilde = kilde?.tilModellObjekt() ?: KildeData.ukjentKilde(endringer.first().tidsstempel)
                 )
                 companion object {
                     fun List<GenerasjonData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
@@ -896,7 +939,7 @@ internal data class PersonData(
 
                 data class EndringData(
                     private val id: UUID,
-                    private val tidsstempel: LocalDateTime,
+                    val tidsstempel: LocalDateTime,
                     private val sykmeldingsperiodeFom: LocalDate,
                     private val sykmeldingsperiodeTom: LocalDate,
                     private val fom: LocalDate,
