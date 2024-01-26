@@ -965,6 +965,21 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "kilde",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "opprettet",
           "description" : null,
           "args" : [ ],
@@ -3634,6 +3649,21 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "kilde",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "opprettet",
           "description" : null,
           "args" : [ ],
@@ -3837,6 +3867,21 @@
             "ofType" : {
               "kind" : "ENUM",
               "name" : "GraphQLInntektstype",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "kilde",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
               "ofType" : null
             }
           },
@@ -4252,6 +4297,21 @@
             "ofType" : {
               "kind" : "ENUM",
               "name" : "GraphQLInntektstype",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "kilde",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
               "ofType" : null
             }
           },
