@@ -120,10 +120,10 @@ internal class SpeilGenerasjonerBuilder(
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde?
+        kilde: Generasjoner.Generasjonkilde
     ) {
-        if (tilstand.uberegnet) return this.tilstand.besøkUberegnetPeriode(this, periode, tidsstempel, avsluttet)
-        this.tilstand.besøkBeregnetPeriode(this, periode, tidsstempel, vedtakFattet, avsluttet)
+        if (tilstand.uberegnet) return this.tilstand.besøkUberegnetPeriode(this, periode, id, kilde.meldingsreferanseId, tidsstempel, avsluttet)
+        this.tilstand.besøkBeregnetPeriode(this, periode, id, kilde.meldingsreferanseId, tidsstempel, vedtakFattet, avsluttet)
     }
 
     override fun postVisitGenerasjon(
@@ -133,7 +133,7 @@ internal class SpeilGenerasjonerBuilder(
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde?
+        kilde: Generasjoner.Generasjonkilde
     ) {
         if (tilstand.uberegnet) return this.tilstand.forlatUberegnetPeriode(this)
         this.tilstand.forlatBeregnetPeriode(this)
@@ -331,6 +331,8 @@ internal class SpeilGenerasjonerBuilder(
         fun besøkUberegnetPeriode(
             builder: SpeilGenerasjonerBuilder,
             periode: Periode,
+            generasjonId: UUID,
+            kilde: UUID,
             generasjonOpprettet: LocalDateTime,
             avsluttet: LocalDateTime?
         ) {
@@ -342,6 +344,8 @@ internal class SpeilGenerasjonerBuilder(
         fun besøkBeregnetPeriode(
             builder: SpeilGenerasjonerBuilder,
             periode: Periode,
+            generasjonId: UUID,
+            kilde: UUID,
             generasjonOpprettet: LocalDateTime,
             vedtakFattet: LocalDateTime?,
             avsluttet: LocalDateTime?
@@ -415,10 +419,12 @@ internal class SpeilGenerasjonerBuilder(
             override fun besøkUberegnetPeriode(
                 builder: SpeilGenerasjonerBuilder,
                 periode: Periode,
+                generasjonId: UUID,
+                kilde: UUID,
                 generasjonOpprettet: LocalDateTime,
                 avsluttet: LocalDateTime?
             ) {
-                vedtaksperiodebuilder?.nyUberegnetPeriode(periode, generasjonOpprettet, avsluttet)?.also {
+                vedtaksperiodebuilder?.nyUberegnetPeriode(periode, generasjonId, kilde, generasjonOpprettet, avsluttet)?.also {
                     this.uberegnetPeriodeBuilder = it
                 }
             }
@@ -433,11 +439,13 @@ internal class SpeilGenerasjonerBuilder(
             override fun besøkBeregnetPeriode(
                 builder: SpeilGenerasjonerBuilder,
                 periode: Periode,
+                generasjonId: UUID,
+                kilde: UUID,
                 generasjonOpprettet: LocalDateTime,
                 vedtakFattet: LocalDateTime?,
                 avsluttet: LocalDateTime?
             ) {
-                vedtaksperiodebuilder?.nyBeregnetPeriode(periode, generasjonOpprettet)?.also {
+                vedtaksperiodebuilder?.nyBeregnetPeriode(periode, generasjonId, kilde, generasjonOpprettet)?.also {
                     this.beregnetPeriodeBuilder = it
                 }
             }
@@ -534,6 +542,8 @@ internal class SpeilGenerasjonerBuilder(
             override fun besøkUberegnetPeriode(
                 builder: SpeilGenerasjonerBuilder,
                 periode: Periode,
+                generasjonId: UUID,
+                kilde: UUID,
                 generasjonOpprettet: LocalDateTime,
                 avsluttet: LocalDateTime?
             ) {}
@@ -563,8 +573,10 @@ internal class SpeilGenerasjonerBuilder(
             private var forrigeBeregnetPeriode: BeregnetPeriode? = null
 
             internal fun nyBeregnetPeriode(ny: BeregnetPeriode) { forrigeBeregnetPeriode = ny }
-            internal fun nyBeregnetPeriode(periode: Periode, generasjonOpprettet: LocalDateTime) = BeregnetPeriode.Builder(
+            internal fun nyBeregnetPeriode(periode: Periode, generasjonId: UUID, kilde: UUID, generasjonOpprettet: LocalDateTime) = BeregnetPeriode.Builder(
                 vedtaksperiodeId,
+                generasjonId,
+                kilde,
                 tilstand,
                 opprettet,
                 oppdatert,
@@ -573,7 +585,8 @@ internal class SpeilGenerasjonerBuilder(
                 forrigeBeregnetPeriode,
                 generasjonOpprettet
             )
-            internal fun nyUberegnetPeriode(periode: Periode, generasjonOpprettet: LocalDateTime, avsluttet: LocalDateTime?) = UberegnetPeriode.Builder(vedtaksperiodeId, skjæringstidspunkt, tilstand, generasjonOpprettet, avsluttet, opprettet, oppdatert, periode, hendelser)
+            internal fun nyUberegnetPeriode(periode: Periode, generasjonId: UUID, kilde: UUID, generasjonOpprettet: LocalDateTime, avsluttet: LocalDateTime?) =
+                UberegnetPeriode.Builder(vedtaksperiodeId, generasjonId, kilde, skjæringstidspunkt, tilstand, generasjonOpprettet, avsluttet, opprettet, oppdatert, periode, hendelser)
         }
     }
 }

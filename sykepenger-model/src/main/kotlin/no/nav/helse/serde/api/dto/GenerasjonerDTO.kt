@@ -20,7 +20,8 @@ import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
 
 data class SpeilGenerasjonDTO(
     val id: UUID, // Runtime
-    val perioder: List<SpeilTidslinjeperiode>
+    val perioder: List<SpeilTidslinjeperiode>,
+    val kildeTilGenerasjon: UUID
 ) {
     val size = perioder.size
 }
@@ -58,6 +59,8 @@ enum class Tidslinjeperiodetype {
 
 abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val vedtaksperiodeId: UUID
+    abstract val generasjonId: UUID
+    abstract val kilde: UUID
     abstract val fom: LocalDate
     abstract val tom: LocalDate
     abstract val sammenslåttTidslinje: List<SammenslåttDag>
@@ -107,6 +110,8 @@ private fun LocalDate.format() = format(formatter)
 
 data class UberegnetVilkårsprøvdPeriode(
     override val vedtaksperiodeId: UUID,
+    override val generasjonId: UUID,
+    override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val sammenslåttTidslinje: List<SammenslåttDag>,
@@ -125,6 +130,8 @@ data class UberegnetVilkårsprøvdPeriode(
     internal constructor(uberegnetPeriode: UberegnetPeriode, vilkårsgrunnlagId: UUID, tidslinjeperiodetype: Tidslinjeperiodetype) :
             this(
                 vedtaksperiodeId = uberegnetPeriode.vedtaksperiodeId,
+                generasjonId = uberegnetPeriode.generasjonId,
+                kilde = uberegnetPeriode.kilde,
                 fom = uberegnetPeriode.fom,
                 tom = uberegnetPeriode.tom,
                 sammenslåttTidslinje = uberegnetPeriode.sammenslåttTidslinje,
@@ -151,6 +158,8 @@ data class UberegnetVilkårsprøvdPeriode(
 
 data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
+    override val generasjonId: UUID,
+    override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val sammenslåttTidslinje: List<SammenslåttDag>,
@@ -188,6 +197,8 @@ data class UberegnetPeriode(
 
     internal class Builder(
         private val vedtaksperiodeId: UUID,
+        private val generasjonId: UUID,
+        private val kilde: UUID,
         private val skjæringstidspunkt: LocalDate,
         private val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         private val generasjonOpprettet: LocalDateTime,
@@ -202,6 +213,8 @@ data class UberegnetPeriode(
         internal fun build(): UberegnetPeriode {
             return UberegnetPeriode(
                 vedtaksperiodeId = vedtaksperiodeId,
+                generasjonId = generasjonId,
+                kilde = kilde,
                 fom = periode.start,
                 tom = periode.endInclusive,
                 sammenslåttTidslinje = sykdomstidslinje.merge(emptyList()),
@@ -239,6 +252,8 @@ data class UberegnetPeriode(
 // Dekker datagrunnlaget vi trenger for å populere både pølsen og _hele_ saksbildet
 data class BeregnetPeriode(
     override val vedtaksperiodeId: UUID,
+    override val generasjonId: UUID,
+    override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val sammenslåttTidslinje: List<SammenslåttDag>,
@@ -299,6 +314,8 @@ data class BeregnetPeriode(
         val annulleringen = annulleringer.firstOrNull { it.annullerer(this.utbetaling.korrelasjonsId) } ?: return null
         return AnnullertPeriode(
             vedtaksperiodeId = vedtaksperiodeId,
+            generasjonId = generasjonId,
+            kilde = kilde,
             fom = fom,
             tom = tom,
             opprettet = opprettet,
@@ -364,6 +381,8 @@ data class BeregnetPeriode(
      */
     internal class Builder(
         private val vedtaksperiodeId: UUID,
+        private val generasjonId: UUID,
+        private val kilde: UUID,
         private val periodetilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
@@ -412,6 +431,8 @@ data class BeregnetPeriode(
             )
             return BeregnetPeriode(
                 vedtaksperiodeId = vedtaksperiodeId,
+                generasjonId = generasjonId,
+                kilde = kilde,
                 beregningId = utbetalingId,
                 fom = periode.start,
                 tom = periode.endInclusive,
@@ -569,6 +590,8 @@ data class BeregnetPeriode(
 
 data class AnnullertPeriode(
     override val vedtaksperiodeId: UUID,
+    override val generasjonId: UUID,
+    override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val opprettet: LocalDateTime,
@@ -604,6 +627,8 @@ data class AnnullertPeriode(
     fun somBeregnetPeriode(): BeregnetPeriode {
         return BeregnetPeriode(
             vedtaksperiodeId = vedtaksperiodeId,
+            generasjonId = generasjonId,
+            kilde = kilde,
             fom = fom,
             tom = tom,
             sammenslåttTidslinje = sammenslåttTidslinje,

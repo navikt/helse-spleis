@@ -8,7 +8,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
@@ -1593,7 +1592,7 @@ internal class JsonBuilder : AbstractBuilder() {
             periode: Periode,
             vedtakFattet: LocalDateTime?,
             avsluttet: LocalDateTime?,
-            kilde: Generasjoner.Generasjonkilde?
+            kilde: Generasjoner.Generasjonkilde
         ) {
             pushState(GenerasjonState(generasjoner))
         }
@@ -1624,7 +1623,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 periode: Periode,
                 vedtakFattet: LocalDateTime?,
                 avsluttet: LocalDateTime?,
-                kilde: Generasjoner.Generasjonkilde?
+                kilde: Generasjoner.Generasjonkilde
             ) {
                 generasjoner.add(mapOf(
                     "id" to id,

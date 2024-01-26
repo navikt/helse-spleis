@@ -835,6 +835,21 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "kildeTilGenerasjon",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "perioder",
           "description" : null,
           "args" : [ ],
@@ -891,6 +906,21 @@
             "ofType" : {
               "kind" : "SCALAR",
               "name" : "LocalDate",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "generasjonId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
               "ofType" : null
             }
           },
@@ -3551,6 +3581,21 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "generasjonId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "hendelser",
           "description" : null,
           "args" : [ ],
@@ -3739,6 +3784,21 @@
             "ofType" : {
               "kind" : "SCALAR",
               "name" : "LocalDate",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "generasjonId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
               "ofType" : null
             }
           },
@@ -4130,6 +4190,21 @@
             "kind" : "SCALAR",
             "name" : "Int",
             "ofType" : null
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
+          "name" : "generasjonId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
           },
           "isDeprecated" : false,
           "deprecationReason" : null

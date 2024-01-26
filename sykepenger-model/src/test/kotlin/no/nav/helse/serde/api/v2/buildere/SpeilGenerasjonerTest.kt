@@ -297,6 +297,8 @@ internal class SpeilGenerasjonerTest {
     )
     private fun uberegnetPeriode(periode: Periode) = UberegnetPeriode(
         vedtaksperiodeId = UUID.randomUUID(),
+        generasjonId = UUID.randomUUID(),
+        kilde = UUID.randomUUID(),
         fom = periode.start,
         tom = periode.endInclusive,
         sammenslåttTidslinje = emptyList(),
@@ -312,6 +314,8 @@ internal class SpeilGenerasjonerTest {
     )
     private fun beregnetPeriode(periode: Periode, utbetaling: Utbetaling, vedtaksperiodeId: UUID = UUID.randomUUID(), vilkårsgrunnlagId: UUID = UUID.randomUUID(), forrigeGenerasjon: BeregnetPeriode? = null) = BeregnetPeriode(
         vedtaksperiodeId = vedtaksperiodeId,
+        generasjonId = UUID.randomUUID(),
+        kilde = UUID.randomUUID(),
         fom = periode.start,
         tom = periode.endInclusive,
         sammenslåttTidslinje = emptyList(),
@@ -340,6 +344,8 @@ internal class SpeilGenerasjonerTest {
 
     fun annullertPeriode(periode: Periode, utbetaling: Utbetaling, vedtaksperiodeId: UUID = UUID.randomUUID()) = AnnullertPeriode(
         vedtaksperiodeId = vedtaksperiodeId,
+        generasjonId = UUID.randomUUID(),
+        kilde = UUID.randomUUID(),
         fom = periode.start,
         tom = periode.endInclusive,
         opprettet = LocalDateTime.now(),

@@ -5,7 +5,8 @@ import java.util.*
 
 data class GraphQLGenerasjon(
     val id: UUID,
-    val perioder: List<GraphQLTidslinjeperiode>
+    val perioder: List<GraphQLTidslinjeperiode>,
+    val kildeTilGenerasjon: UUID
 )
 
 data class GraphQLGhostPeriode(

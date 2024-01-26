@@ -311,6 +311,8 @@ private fun mapInntektstype(kilde: UtbetalingInntektskilde) = when (kilde) {
 internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List<HendelseDTO>) =
     when (periode) {
         is BeregnetPeriode -> GraphQLBeregnetPeriode(
+            generasjonId = periode.generasjonId,
+            kilde = periode.kilde,
             fom = periode.fom,
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
@@ -331,6 +333,8 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
         )
         is UberegnetVilkårsprøvdPeriode -> GraphQLUberegnetVilkarsprovdPeriode(
+            generasjonId = periode.generasjonId,
+            kilde = periode.kilde,
             fom = periode.fom,
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
@@ -345,6 +349,8 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
             vilkarsgrunnlagId = periode.vilkårsgrunnlagId
         )
         else -> GraphQLUberegnetPeriode(
+            generasjonId = periode.generasjonId,
+            kilde = periode.kilde,
             fom = periode.fom,
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },

@@ -46,7 +46,8 @@ private fun mapTilDto(person: PersonDTO, hendelser: List<HendelseDTO>) =
                 generasjoner = arbeidsgiver.generasjoner.map { generasjon ->
                     GraphQLGenerasjon(
                         id = generasjon.id,
-                        perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode, hendelser) }
+                        perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode, hendelser) },
+                        kildeTilGenerasjon = generasjon.kildeTilGenerasjon
                     )
                 },
                 ghostPerioder = arbeidsgiver.ghostPerioder.map { periode ->

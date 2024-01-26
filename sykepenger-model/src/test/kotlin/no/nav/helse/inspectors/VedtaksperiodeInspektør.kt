@@ -82,7 +82,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde?
+        kilde: Generasjoner.Generasjonkilde
     ) {
         this.generasjoner.add(Generasjon(
             id = id,

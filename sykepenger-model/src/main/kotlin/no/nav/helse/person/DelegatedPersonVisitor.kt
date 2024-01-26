@@ -1036,7 +1036,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde?
+        kilde: Generasjoner.Generasjonkilde
     ) {
         delegatee.preVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
     }
@@ -1089,7 +1089,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde?
+        kilde: Generasjoner.Generasjonkilde
     ) {
         delegatee.postVisitGenerasjon(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
     }

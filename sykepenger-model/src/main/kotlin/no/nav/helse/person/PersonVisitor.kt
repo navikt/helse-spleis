@@ -330,7 +330,7 @@ internal interface GenerasjonVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde?
+        kilde: Generasjoner.Generasjonkilde
     ) {}
     fun preVisitGenerasjonendring(
         id: UUID,
@@ -365,7 +365,7 @@ internal interface GenerasjonVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde?
+        kilde: Generasjoner.Generasjonkilde
     ) {}
 }
 

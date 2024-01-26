@@ -169,6 +169,8 @@ data class GraphQLDag(
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
 interface GraphQLTidslinjeperiode {
+    val generasjonId: UUID
+    val kilde: UUID
     val fom: LocalDate
     val tom: LocalDate
     val tidslinje: List<GraphQLDag>
@@ -183,6 +185,8 @@ interface GraphQLTidslinjeperiode {
 }
 
 data class GraphQLUberegnetPeriode(
+    override val generasjonId: UUID,
+    override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,
@@ -197,6 +201,8 @@ data class GraphQLUberegnetPeriode(
     ) : GraphQLTidslinjeperiode
 
 data class GraphQLUberegnetVilkarsprovdPeriode(
+    override val generasjonId: UUID,
+    override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,
@@ -230,6 +236,8 @@ data class GraphQLPeriodevilkar(
 }
 
 data class GraphQLBeregnetPeriode(
+    override val generasjonId: UUID,
+    override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,

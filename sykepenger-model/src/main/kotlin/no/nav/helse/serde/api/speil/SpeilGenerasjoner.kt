@@ -6,11 +6,11 @@ import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.utledPeriodetyper
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 
 class SpeilGenerasjoner {
+    private var kildeTilGenerasjon: UUID? = null
     private val nåværendeGenerasjon = mutableListOf<SpeilTidslinjeperiode>()
     private val generasjoner = mutableListOf<SpeilGenerasjonDTO>()
     private var tilstand: Byggetilstand = Byggetilstand.Initiell
@@ -42,19 +42,21 @@ class SpeilGenerasjoner {
 
     private fun byggGenerasjon(periodene: List<SpeilTidslinjeperiode>) {
         if (periodene.isEmpty()) return
-        generasjoner.add(0, SpeilGenerasjonDTO(UUID.randomUUID(), periodene.utledPeriodetyper()))
+        generasjoner.add(0, SpeilGenerasjonDTO(UUID.randomUUID(), periodene.utledPeriodetyper(), kildeTilGenerasjon!!))
     }
 
-    private fun leggTilNyRad() {
+    private fun leggTilNyRad(kilde: SpeilTidslinjeperiode) {
         byggGenerasjon(nåværendeGenerasjon.filterNot { it.venter() })
+        kildeTilGenerasjon = kilde.generasjonId
     }
 
     private fun leggTilNyRadOgPeriode(periode: SpeilTidslinjeperiode, nesteTilstand: Byggetilstand) {
-        leggTilNyRad()
+        leggTilNyRad(periode)
         leggTilNyPeriode(periode, nesteTilstand)
     }
 
     private fun leggTilNyPeriode(periode: SpeilTidslinjeperiode, nesteTilstand: Byggetilstand? = null) {
+        if (kildeTilGenerasjon == null) kildeTilGenerasjon = periode.generasjonId
         val index = nåværendeGenerasjon.indexOfFirst { other -> periode.erSammeVedtaksperiode(other) }
         if (index >= 0) nåværendeGenerasjon[index] = periode
         else nåværendeGenerasjon.add(periode)
