@@ -32,6 +32,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val avsluttetMedVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetMedVedtakEvent>>()
     val generasjonOpprettetEventer = mutableListOf<PersonObserver.GenerasjonOpprettetEvent>()
     val generasjonLukketEventer = mutableListOf<PersonObserver.GenerasjonLukketEvent>()
+    val generasjonForkastetEventer = mutableListOf<PersonObserver.GenerasjonForkastetEvent>()
     val avsluttetUtenVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetUtenVedtakEvent>>()
     val sykefraværstilfelleeventyr = mutableListOf<List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>>()
     val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
@@ -116,6 +117,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
         generasjonLukketEventer.add(event)
+    }
+
+    override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
+        generasjonForkastetEventer.add(event)
     }
 
     override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {

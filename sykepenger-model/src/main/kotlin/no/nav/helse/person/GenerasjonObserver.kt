@@ -25,6 +25,7 @@ internal interface GenerasjonObserver {
         vedtakFattetTidspunkt: LocalDateTime
     )
     fun generasjonLukket(generasjonId: UUID)
+    fun generasjonForkastet(generasjonId: UUID)
 
     fun nyGenerasjon(
         id: UUID,

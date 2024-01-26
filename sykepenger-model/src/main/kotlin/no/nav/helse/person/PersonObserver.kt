@@ -588,6 +588,14 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val generasjonId: UUID
     )
 
+    data class GenerasjonForkastetEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val generasjonId: UUID
+    )
+
     data class GenerasjonOpprettetEvent(
         val fødselsnummer: String,
         val aktørId: String,
@@ -715,6 +723,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
 
     fun generasjonLukket(event: GenerasjonLukketEvent) {}
+    fun generasjonForkastet(event: GenerasjonForkastetEvent) {}
     fun nyGenerasjon(event: GenerasjonOpprettetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
     fun nyVedtaksperiodeUtbetaling(

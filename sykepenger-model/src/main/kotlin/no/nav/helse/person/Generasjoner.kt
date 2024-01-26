@@ -122,6 +122,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
 
     internal fun forkast(hendelse: Hendelse) {
         leggTilNyGenerasjon(generasjoner.last().forkastVedtaksperiode(hendelse))
+        generasjoner.last().forkastetGenerasjon()
     }
     internal fun forkastUtbetaling(hendelse: IAktivitetslogg) {
         generasjoner.last().forkastUtbetaling(hendelse)
@@ -509,6 +510,10 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
                 else -> PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling
             }
             observatører.forEach { it.nyGenerasjon(id, kilde!!.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
+        }
+
+        internal fun forkastetGenerasjon() {
+            observatører.forEach { it.generasjonForkastet(id) }
         }
 
         /*

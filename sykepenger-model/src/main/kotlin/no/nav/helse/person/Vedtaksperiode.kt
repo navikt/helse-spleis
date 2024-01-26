@@ -884,6 +884,16 @@ internal class Vedtaksperiode private constructor(
         ))
     }
 
+    override fun generasjonForkastet(generasjonId: UUID) {
+        person.generasjonForkastet(PersonObserver.GenerasjonForkastetEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = id,
+            generasjonId = generasjonId
+        ))
+    }
+
     override fun nyGenerasjon(
         id: UUID,
         meldingsreferanseId: UUID,

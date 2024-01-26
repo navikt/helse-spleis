@@ -69,8 +69,37 @@ internal class GenerasjonerMediatorTest : AbstractEndToEndMediatorTest() {
         verifiserGenerasjonLukketKontrakt(generasjonLukket)
     }
 
+    @Test
+    fun `vedtak annuleres`() {
+        nyttVedtak(1.januar, 31.januar)
+        val fagsystemId = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText()
+        sendAnnullering(fagsystemId)
+
+        val generasjonOpprettet = testRapid.inspektør.meldinger("generasjon_opprettet")
+        val førsteGenerasjonOpprettetIndeks = testRapid.inspektør.indeksFor(generasjonOpprettet.first())
+        val sisteGenerasjonOpprettetIndeks = testRapid.inspektør.indeksFor(generasjonOpprettet.last())
+        val generasjonLukket = testRapid.inspektør.meldinger("generasjon_lukket").single()
+        val generasjonLukketIndeks = testRapid.inspektør.indeksFor(generasjonLukket)
+        val generasjonForkastet = testRapid.inspektør.meldinger("generasjon_forkastet").single()
+        val generasjonForkastetIndeks = testRapid.inspektør.indeksFor(generasjonForkastet)
+
+        assertEquals(2, generasjonOpprettet.size) { "forventer to generasjoner" }
+        assertTrue(førsteGenerasjonOpprettetIndeks < generasjonLukketIndeks) { "generasjon_opprettet må sendes først" }
+        assertTrue(sisteGenerasjonOpprettetIndeks > generasjonLukketIndeks) { "det skal ikke sendes  generasjon_lukket for forkastede generasjoner" }
+        assertTrue(sisteGenerasjonOpprettetIndeks < generasjonForkastetIndeks) { "generasjon_forkastet må sendes etter generasjon_opprettet" }
+        verifiserGenerasjonForkastetKontrakt(generasjonForkastet)
+    }
+
     private fun verifiserGenerasjonLukketKontrakt(generasjonLukket: JsonNode) {
         assertEquals("generasjon_lukket", generasjonLukket.path("@event_name").asText())
+        assertTrue(generasjonLukket.path("fødselsnummer").isTextual)
+        assertTrue(generasjonLukket.path("organisasjonsnummer").isTextual)
+        assertTrue(generasjonLukket.path("vedtaksperiodeId").isTextual)
+        assertTrue(generasjonLukket.path("generasjonId").isTextual)
+    }
+
+    private fun verifiserGenerasjonForkastetKontrakt(generasjonLukket: JsonNode) {
+        assertEquals("generasjon_forkastet", generasjonLukket.path("@event_name").asText())
         assertTrue(generasjonLukket.path("fødselsnummer").isTextual)
         assertTrue(generasjonLukket.path("organisasjonsnummer").isTextual)
         assertTrue(generasjonLukket.path("vedtaksperiodeId").isTextual)
