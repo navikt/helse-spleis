@@ -53,14 +53,9 @@ spec:
     inbound:
       rules:
         - application: spesialist
-          namespace: tbd
-          cluster: dev-gcp
         - application: spanner
-          namespace: tbd
-          cluster: dev-gcp
         - application: sporing
-          namespace: tbd
-          cluster: dev-gcp
+        - application: spekemat
     outbound:
       rules:
         - application: spurtedu
