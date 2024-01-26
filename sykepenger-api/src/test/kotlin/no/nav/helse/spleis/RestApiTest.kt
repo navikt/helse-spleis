@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.test_support.TestDataSource
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -28,7 +29,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.config.AzureAdAppConfig
-import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -50,7 +50,7 @@ internal class RestApiTest {
         private val MELDINGSREFERANSE = UUID.randomUUID()
         private const val AKTØRID = "42"
     }
-    private lateinit var dataSource: DataSource
+    private lateinit var dataSource: TestDataSource
 
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
     private lateinit var jwtStub: JwtStub
@@ -61,6 +61,8 @@ internal class RestApiTest {
 
     @BeforeAll
     internal fun `start embedded environment`() {
+        dataSource = databaseContainer.nyTilkobling()
+
         //Stub ID provider (for authentication of REST endpoints)
         wireMockServer.start()
         await("vent på WireMockServer har startet")
@@ -87,11 +89,7 @@ internal class RestApiTest {
             ),
             null,
             null,
-            DataSourceConfiguration(
-                jdbcUrl = DB.instance.jdbcUrl,
-                databaseUsername = DB.instance.username,
-                databasePassword = DB.instance.password
-            ),
+            { dataSource.ds },
             teller
         )
 
@@ -100,6 +98,8 @@ internal class RestApiTest {
 
     @AfterAll
     internal fun `stop embedded environment`() {
+        databaseContainer.droppTilkobling(dataSource)
+
         CollectorRegistry.defaultRegistry.clear()
         app.stop(1000L, 1000L)
         wireMockServer.stop()
@@ -107,8 +107,7 @@ internal class RestApiTest {
 
     @BeforeEach
     internal fun setup() {
-        DB.clean()
-        dataSource = DB.migrate()
+        dataSource.cleanUp()
 
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
@@ -143,8 +142,8 @@ internal class RestApiTest {
         val person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
         person.håndter(sykmelding)
         person.håndter(inntektsmelding)
-        dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
-        dataSource.lagreHendelse(MELDINGSREFERANSE)
+        dataSource.ds.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
+        dataSource.ds.lagreHendelse(MELDINGSREFERANSE)
 
         teller.set(0)
     }

@@ -4,7 +4,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
-val tbdLibsVersion = "2024.01.09-20.20-d52bae29"
+val tbdLibsVersion = "2024.01.26-10.10-af0ac44d"
 val micrometerRegistryPrometheusVersion = "1.12.2"
 val ktorVersion = "2.3.7"
 val wireMockVersion = "3.3.1"
@@ -52,6 +52,8 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 
+    testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
+
     testImplementation("com.apurebase:kgraphql:$kGraphQLVersion")
     testImplementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
 }
@@ -75,6 +77,13 @@ tasks {
             }
         }
         finalizedBy(":sykepenger-api:remove_spleis_api_db_container")
+    }
+
+    withType<Test> {
+        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+        systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+        systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
+        systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "4")
     }
 }
 

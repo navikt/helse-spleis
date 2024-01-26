@@ -24,14 +24,10 @@ import kotlinx.coroutines.delay
 import java.io.CharArrayWriter
 import java.util.concurrent.atomic.AtomicInteger
 
-internal fun Application.nais(teller: AtomicInteger) {
+internal fun Application.nais(teller: AtomicInteger, collectorRegistry: CollectorRegistry) {
     val applicationlog = log
     install(MicrometerMetrics) {
-        registry = PrometheusMeterRegistry(
-            PrometheusConfig.DEFAULT,
-            CollectorRegistry.defaultRegistry,
-            Clock.SYSTEM
-        )
+        registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM)
         meterBinders = listOf(
             ClassLoaderMetrics(),
             JvmMemoryMetrics(),

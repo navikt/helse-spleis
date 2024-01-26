@@ -10,6 +10,7 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.response.ApplicationSendPipeline
 import io.ktor.util.*
+import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -17,19 +18,19 @@ import org.slf4j.Logger
 
 private val ignoredPaths = listOf("/metrics", "/isalive", "/isready")
 
-internal fun Application.requestResponseTracing(logger: Logger) {
+internal fun Application.requestResponseTracing(logger: Logger, registry: CollectorRegistry) {
     val httpRequestCounter = Counter.build(
         "http_requests_total",
         "Counts the http requests"
     )
         .labelNames("method", "code")
-        .register()
+        .register(registry)
 
     val httpRequestDuration = Histogram.build(
         "http_request_duration_seconds",
         "Distribution of http request duration"
     )
-        .register()
+        .register(registry)
 
     intercept(ApplicationCallPipeline.Monitoring) {
         try {

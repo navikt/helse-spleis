@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.testhelpers
 
+import com.github.navikt.tbd_libs.test_support.TestDataSource
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -17,19 +18,17 @@ import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
-import no.nav.helse.spleis.DB
 import no.nav.helse.spleis.Issuer
 import no.nav.helse.spleis.JwtStub
 import no.nav.helse.spleis.config.AzureAdAppConfig
-import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.createApp
 import no.nav.helse.spleis.dao.HendelseDao
+import no.nav.helse.spleis.databaseContainer
 import no.nav.helse.spleis.handleRequest
 import no.nav.helse.spleis.nais
 import no.nav.helse.spleis.randomPort
@@ -40,7 +39,7 @@ import org.junit.jupiter.api.Assertions
 
 internal class ApiTestServer(private val port: Int = randomPort()) {
 
-    private lateinit var dataSource: DataSource
+    private val dataSource: TestDataSource = databaseContainer.nyTilkobling()
 
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
     private lateinit var jwtStub: JwtStub
@@ -50,9 +49,8 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
     private val teller = AtomicInteger()
 
     internal fun clean() {
-        DB.clean()
-        dataSource = DB.migrate()
         teller.set(0)
+        dataSource.cleanUp()
     }
 
     internal fun tearDown() {
@@ -63,7 +61,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
 
     internal fun start() {
         mockkStatic("no.nav.helse.spleis.NaisKt")
-        every { any<Application>().nais(any()) } returns Unit
+        every { any<Application>().nais(any(), any()) } returns Unit
 
         //Stub ID provider (for authentication of REST endpoints)
         wireMockServer.start()
@@ -89,11 +87,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
             ),
             null,
             null,
-            DataSourceConfiguration(
-                jdbcUrl = DB.instance.jdbcUrl,
-                databaseUsername = DB.instance.username,
-                databasePassword = DB.instance.password
-            ),
+            { dataSource.ds },
             teller
         )
 
@@ -127,7 +121,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
 
     internal fun lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.serialize()
-        sessionOf(dataSource, returnGeneratedKey = true).use {
+        sessionOf(dataSource.ds, returnGeneratedKey = true).use {
             val personId = it.run(queryOf("INSERT INTO person (fnr, aktor_id, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
                 fødselsnummer.toLong(), aktørId.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
             it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
@@ -142,7 +136,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
         data: String = "{}"
     ) {
-        sessionOf(dataSource).use {
+        sessionOf(dataSource.ds).use {
             it.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",

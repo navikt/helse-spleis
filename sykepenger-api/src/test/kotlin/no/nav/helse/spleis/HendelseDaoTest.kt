@@ -1,34 +1,32 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.test_support.TestDataSource
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spleis.dao.HendelseDao
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 
-@TestInstance(Lifecycle.PER_CLASS)
 internal class HendelseDaoTest {
 
     private val UNG_PERSON_FNR = "12029240045"
     private val meldingsReferanse = UUID.randomUUID()
-    private lateinit var dataSource: DataSource
+    private lateinit var dataSource: TestDataSource
 
-    @BeforeAll
-    fun setupDB() {
-        dataSource = DB.migrate()
-    }
     @BeforeEach
     internal fun setup() {
-        DB.clean()
-        dataSource = DB.migrate()
-        dataSource.lagreHendelse(meldingsReferanse)
+        dataSource = databaseContainer.nyTilkobling()
+        dataSource.ds.lagreHendelse(meldingsReferanse)
+    }
+
+    @AfterEach
+    fun teardown() {
+        databaseContainer.droppTilkobling(dataSource)
     }
 
     private fun DataSource.lagreHendelse(
@@ -52,21 +50,21 @@ internal class HendelseDaoTest {
 
     @Test
     fun `hentAlleHendelser sql er valid`() {
-        val dao = HendelseDao(dataSource)
+        val dao = HendelseDao(dataSource.ds)
         val events = dao.hentAlleHendelser(UNG_PERSON_FNR.toLong())
         Assertions.assertEquals(1, events.size)
     }
 
     @Test
     fun `hentHendelser sql er valid`() {
-        val dao = HendelseDao(dataSource)
+        val dao = HendelseDao(dataSource.ds)
         val ingenEvents = dao.hentHendelser(UNG_PERSON_FNR.toLong())
         Assertions.assertEquals(1, ingenEvents.size)
     }
 
     @Test
     fun `hentHendelse sql er valid`() {
-        val dao = HendelseDao(dataSource)
+        val dao = HendelseDao(dataSource.ds)
         val event = dao.hentHendelse(meldingsReferanse)
         Assertions.assertNotNull(event)
     }

@@ -17,8 +17,11 @@ import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.path
+import io.prometheus.client.Collector
+import io.prometheus.client.CollectorRegistry
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
+import javax.sql.DataSource
 import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
@@ -45,11 +48,11 @@ fun main() {
 
     val config = ApplicationConfiguration()
     val teller = AtomicInteger(0)
-    val app = createApp(config.ktorConfig, config.azureConfig, config.azureClient, config.spurteDuClient, config.dataSourceConfiguration, teller)
+    val app = createApp(config.ktorConfig, config.azureConfig, config.azureClient, config.spurteDuClient, config.dataSourceConfiguration::getDataSource, teller)
     app.start(wait = true)
 }
 
-internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, azureClient: AzureTokenProvider?, spurteDuClient: SpurteDuClient?, dataSourceConfiguration: DataSourceConfiguration, teller: AtomicInteger) =
+internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, azureClient: AzureTokenProvider?, spurteDuClient: SpurteDuClient?, dataSourceProvider: () -> DataSource, teller: AtomicInteger, collectorRegistry: CollectorRegistry = CollectorRegistry()) =
     embeddedServer(
         factory = Netty,
         environment = applicationEngineEnvironment {
@@ -70,10 +73,10 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, az
                 }
                 preStopHook(teller)
                 install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-                requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"))
-                nais(teller)
+                requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), collectorRegistry)
+                nais(teller, collectorRegistry)
                 azureAdAppAuthentication(azureConfig)
-                val dataSource = dataSourceConfiguration.getDataSource()
+                val dataSource = dataSourceProvider()
                 spannerApi(dataSource, spurteDuClient, azureClient)
                 sporingApi(dataSource)
                 installGraphQLApi(dataSource)
