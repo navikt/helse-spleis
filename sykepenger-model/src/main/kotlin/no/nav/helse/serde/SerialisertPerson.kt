@@ -294,6 +294,7 @@ import no.nav.helse.serde.migration.V9FjernerGamleSykdomstidslinjer
 import no.nav.helse.serde.migration.migrate
 
 class SerialisertPerson(val json: String) {
+    // Teit kommentar
     internal companion object {
         private val migrations = listOf(
             V1EndreKunArbeidsgiverSykedagEnum(),
