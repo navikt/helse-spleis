@@ -150,10 +150,6 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.loggSprøeInntekterMigrertInnFraIT(infotrygdhistorikk: Infotrygdhistorikk) {
-            forEach { arbeidsgiver -> arbeidsgiver.loggSprøeInntekterMigrertInnFraIT(infotrygdhistorikk)  }
-        }
-
         private val List<Arbeidsgiver>.alleVedtaksperioder get() = flatMap { it.vedtaksperioder }
 
         internal fun List<Arbeidsgiver>.håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag) =
@@ -261,10 +257,6 @@ internal class Arbeidsgiver private constructor(
         ) {
             arbeidsgivere.flatMap { it.søppelbøtte(hendelse, filter) }.forEach { it.buildAndEmit() }
         }
-    }
-
-    private fun loggSprøeInntekterMigrertInnFraIT(infotrygdhistorikk: Infotrygdhistorikk) {
-        inntektshistorikk.loggSprøeInntekterMigrertInnFraIT(infotrygdhistorikk, organisasjonsnummer)
     }
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
