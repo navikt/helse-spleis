@@ -864,7 +864,7 @@ internal class Vedtaksperiode private constructor(
         vedtakFattetTidspunkt: LocalDateTime
     ) {
         val vilkårsgrunnlag = checkNotNull(vilkårsgrunnlag) { "Særdeles besynderlig at vi ikke har vilkårsgrunnlag nå som vedtaket iverksettes!" }
-        val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id, periode, hendelseIder(), skjæringstidspunkt)
+        val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id, generasjonId, periode, hendelseIder(), skjæringstidspunkt)
         val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
         this.finnArbeidsgiverperiode()?.tags(this.periode, builder, harPeriodeRettFør)
         builder.utbetalingId(utbetalingId)

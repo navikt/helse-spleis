@@ -401,6 +401,7 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("avsluttet_med_vedtak", mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "generasjonId" to event.generasjonId,
             "fom" to event.periode.start,
             "tom" to event.periode.endInclusive,
             "hendelser" to event.hendelseIder,
