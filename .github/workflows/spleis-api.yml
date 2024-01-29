@@ -31,6 +31,8 @@ jobs:
           cache: 'gradle'
       - name: test and build
         run: ./gradlew :sykepenger-api:test :sykepenger-api:build
+      - name: verifiser gyldig modell-jar
+        run: unzip sykepenger-api/build/libs/sykepenger-model.jar -d /tmp/sykepenger-model
       - name: build docker image
         uses: nais/docker-build-push@v0
         id: docker-build-push
