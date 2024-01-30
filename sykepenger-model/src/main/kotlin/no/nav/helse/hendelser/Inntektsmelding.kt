@@ -93,10 +93,11 @@ class Inntektsmelding(
         info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonObserver: SubsumsjonObserver): Pair<LocalDate, Boolean> {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonObserver: SubsumsjonObserver): LocalDate {
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
-        return beregnetInntektsdato to inntektshistorikk.leggTil(Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt))
+        inntektshistorikk.leggTil(Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt))
+        return beregnetInntektsdato
     }
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
@@ -184,6 +185,6 @@ class Inntektsmelding(
     private fun håndtertNå(dager: DagerFraInntektsmelding) = håndtertInntekt || dager.noenDagerHåndtert()
     private fun håndtertTidligere(vedtaksperioder: List<Vedtaksperiode>) = vedtaksperioder.any { meldingsreferanseId() in it.hendelseIder() }
     internal fun jurist(jurist: MaskinellJurist) = jurist.medInntektsmelding(this.meldingsreferanseId())
-    internal fun skalIkkeLagreInntekt(sykdomstidslinjeperiode: Periode?) =
+    internal fun skalIkkeOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?) =
         sykdomstidslinjeperiode != null && beregnetInntektsdato !in sykdomstidslinjeperiode && inntektsdato == null
 }

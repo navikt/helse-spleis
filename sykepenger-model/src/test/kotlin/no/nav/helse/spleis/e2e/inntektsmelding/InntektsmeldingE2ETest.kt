@@ -55,6 +55,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -1578,6 +1579,31 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE
         )
+    }
+
+    @Test
+    fun `ny inntektsmelding med nye refusjonsopplysninger før forlengelse`() {
+        val im1 = UUID.randomUUID()
+        nyttVedtak(1.januar, 31.januar, inntektsmeldingId = im1)
+        val im2 = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar, refusjon = Refusjon(INGEN, null))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        val refusjon = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.refusjonsopplysninger
+        assertForventetFeil(forklaring = "im2 hensyntas ikke",
+            nå = {
+                assertEquals(
+                    listOf(
+                        Refusjonsopplysning(im1, 1.januar, null, INNTEKT),
+                    ), refusjon.inspektør.refusjonsopplysninger
+                )
+            },
+            ønsket = {
+                assertEquals(
+                    listOf(
+                        Refusjonsopplysning(im1, 1.januar, 31.januar, INNTEKT),
+                        Refusjonsopplysning(im2, 1.februar, null, INGEN)
+                    ), refusjon.inspektør.refusjonsopplysninger
+                )
+            })
     }
 
     @Test
