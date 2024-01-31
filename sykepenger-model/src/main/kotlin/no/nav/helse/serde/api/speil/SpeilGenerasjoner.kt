@@ -47,7 +47,7 @@ class SpeilGenerasjoner {
 
     private fun leggTilNyRad(kilde: SpeilTidslinjeperiode) {
         byggGenerasjon(nåværendeGenerasjon.filterNot { it.venter() })
-        kildeTilGenerasjon = kilde.generasjonId
+        kildeTilGenerasjon = kilde.kilde
     }
 
     private fun leggTilNyRadOgPeriode(periode: SpeilTidslinjeperiode, nesteTilstand: Byggetilstand) {
@@ -56,7 +56,7 @@ class SpeilGenerasjoner {
     }
 
     private fun leggTilNyPeriode(periode: SpeilTidslinjeperiode, nesteTilstand: Byggetilstand? = null) {
-        if (kildeTilGenerasjon == null) kildeTilGenerasjon = periode.generasjonId
+        if (kildeTilGenerasjon == null) kildeTilGenerasjon = periode.kilde
         val index = nåværendeGenerasjon.indexOfFirst { other -> periode.erSammeVedtaksperiode(other) }
         if (index >= 0) nåværendeGenerasjon[index] = periode
         else nåværendeGenerasjon.add(periode)
