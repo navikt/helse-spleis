@@ -6,6 +6,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -17,6 +18,8 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.lørdag
+import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.Dokumentsporing
@@ -30,6 +33,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
@@ -48,6 +52,8 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertInfo
+import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -68,6 +74,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -76,10 +83,52 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import kotlin.reflect.KClass
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `blir syk fra ghost man har vært syk fra tidligere, og inntektsmeldingen kommer først`() {
+        nyeVedtak(1.januar(2017), 31.januar(2017), a1, a2)
+
+        håndterSøknad(Sykdom(1.januar, fredag den 26.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterVilkårsgrunnlag(2.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            ), orgnummer = a1
+        )
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        assertInfoSomFølgeAv("Lagrer ikke inntekt på skjæringstidspunkt fordi inntektdato er oppgitt til å være utenfor den perioden arbeidsgiver har sykdom for") {
+            håndterInntektsmelding(listOf(mandag den 29.januar til 13.februar), orgnummer = a2)
+        }
+        // IM replayes, og ettersom 27. og 28 blir friskedager pga. IM beregnes skjæringstidspunktet til 29.januar. Når A1 sin søknad kommer dekker den "hullet" med sykdom slik at skjæringstidspunktet blir 1.januar
+        assertInfoSomFølgeAv("Fant ikke vilkårsgrunnlag på skjæringstidspunkt 2018-01-29") {
+            håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a2)
+        }
+
+        assertEquals(29.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
+        håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a1)
+        assertEquals(1.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
+
+        val ghostRefusjonsopplysinger = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == a2 }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger
+        assertEquals(emptyList<Refusjonsopplysning>(), ghostRefusjonsopplysinger)
+
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertEquals(
+            "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt 2018-01-01 for utbetalingsdag 2018-02-14",
+            assertThrows<IllegalStateException> { håndterYtelser(3.vedtaksperiode, orgnummer = a1) }.message
+        )
+    }
 
     @Test
     fun `Ghost som sender IM hvor de opplyser om ikke fravær - men blir syk fra ghost etterpå allikevel`() {
@@ -1189,5 +1238,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold
         )
+    }
+
+    private fun assertInfoSomFølgeAv(forventetInfo: String, block: () -> Unit) {
+        assertIngenInfo(forventetInfo)
+        block()
+        assertInfo(forventetInfo)
     }
 }

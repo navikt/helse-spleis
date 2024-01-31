@@ -738,7 +738,7 @@ class Person private constructor(
         inntektsmelding: Inntektsmelding,
         subsumsjonObserver: SubsumsjonObserver
     ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return inntektsmelding.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
         val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, subsumsjonObserver) ?: return)
         nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
         igangsettOverstyring(eventyr)
