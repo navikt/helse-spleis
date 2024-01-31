@@ -148,6 +148,12 @@ class Refusjonsopplysning(
             return Refusjonsopplysninger(validerteRefusjonsopplysninger.mergeInnNyeOpplysninger(other.validerteRefusjonsopplysninger))
         }
 
+        internal fun gjenoppliv(nyttSkjæringstidspunkt: LocalDate): Refusjonsopplysninger {
+            val gammelSnute = validerteRefusjonsopplysninger.firstOrNull { it.dekker(nyttSkjæringstidspunkt) } ?: validerteRefusjonsopplysninger.firstOrNull() ?: return this
+            val nySnute = Refusjonsopplysning(gammelSnute.meldingsreferanseId, nyttSkjæringstidspunkt, null, gammelSnute.beløp)
+            return nySnute.refusjonsopplysninger.merge(this)
+        }
+
         override fun equals(other: Any?): Boolean {
             if (other !is Refusjonsopplysninger) return false
             return validerteRefusjonsopplysninger == other.validerteRefusjonsopplysninger

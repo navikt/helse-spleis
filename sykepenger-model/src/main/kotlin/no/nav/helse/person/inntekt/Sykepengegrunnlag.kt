@@ -19,7 +19,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.SykepengegrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -262,7 +261,7 @@ internal class Sykepengegrunnlag private constructor(
             return null
         }
 
-        val gjenopplivetArbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger.takeUnless { it.isEmpty() } ?: arbeidsgiverInntektsopplysninger.map { it.gjenoppliv(skjæringstidspunkt) }
+        val gjenopplivetArbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger.takeUnless { it.isEmpty() } ?: arbeidsgiverInntektsopplysninger.map { it.gjenoppliv(this.skjæringstidspunkt, skjæringstidspunkt) }
 
         if (gjenopplivetArbeidsgiverInntektsopplysninger.isEmpty()) {
             hendelse.info("Kan ikke gjenopplive sykepengegrunnlag uten inntektsopplysninger.")

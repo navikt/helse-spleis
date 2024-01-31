@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -429,6 +430,15 @@ internal class ArbeidsgiverHendelsefabrikk(
             opprettet = LocalDateTime.now()
         )
 
+    internal fun lagGjenopplivVilkårsgrunnlag(skjæringstidspunkt: LocalDate?, vilkårsgrunnlagId: UUID) =
+        GjenopplivVilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = personidentifikator.toString(),
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            nyttSkjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiveropplysninger = emptyMap()
+        )
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
         ForkastSykmeldingsperioder(
             meldingsreferanseId = UUID.randomUUID(),

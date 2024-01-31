@@ -25,6 +25,8 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         private set
     internal lateinit var inntektsopplysning: Inntektsopplysning
         private set
+    internal lateinit var gjelder: Periode
+        private set
 
     internal lateinit var refusjonsopplysninger: Refusjonsopplysninger
         private set
@@ -41,6 +43,7 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         gjelder: Periode
     ) {
         this.orgnummer = orgnummer
+        this.gjelder = gjelder
     }
 
     override fun preVisitSaksbehandler(

@@ -1557,7 +1557,7 @@ internal class Vedtaksperiode private constructor(
                 påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
             }
             if (påminnelse.skalReberegnes()) {
-                return vedtaksperiode.trengerInntektsmeldingReplay()
+                return vurderOmKanGåVidere(vedtaksperiode, påminnelse)
             }
             vedtaksperiode.trengerArbeidsgiveropplysninger(påminnelse)
         }

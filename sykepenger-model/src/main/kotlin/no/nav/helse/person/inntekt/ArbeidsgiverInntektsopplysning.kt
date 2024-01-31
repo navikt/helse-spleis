@@ -119,7 +119,11 @@ class ArbeidsgiverInntektsopplysning(
         return Sykdomstidslinje.ghostdager(gjelder.start til sisteDag)
     }
 
-    internal fun gjenoppliv(skjæringstidspunkt: LocalDate) = ArbeidsgiverInntektsopplysning(orgnummer, gjelder.oppdaterFom(skjæringstidspunkt), inntektsopplysning, refusjonsopplysninger)
+    internal fun gjenoppliv(forrigeSkjæringstidspunkt: LocalDate, nyttSkjæringstidspunkt: LocalDate): ArbeidsgiverInntektsopplysning {
+        if (forrigeSkjæringstidspunkt == nyttSkjæringstidspunkt) return this // Intet nytt fra vestfronten
+        if (nyttSkjæringstidspunkt > gjelder.endInclusive) return this // Unngår å havne i problemer med ugyldige perioder
+        return ArbeidsgiverInntektsopplysning(orgnummer, nyttSkjæringstidspunkt til gjelder.endInclusive, inntektsopplysning, refusjonsopplysninger.gjenoppliv(nyttSkjæringstidspunkt))
+    }
 
     internal companion object {
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet() = map { it.inntektsopplysning }.validerSkjønnsmessigAltEllerIntet()
