@@ -24,12 +24,6 @@ internal class GjenopplivVilkårsgrunnlagRiver(
         )
         message.require("vilkårsgrunnlagId") { UUID.fromString(it.asText()) }
         message.interestedIn("nyttSkjæringstidspunkt", JsonNode::asLocalDate)
-        message.interestedIn("arbeidsgivere") {
-            message.requireArray("arbeidsgivere") {
-                require("organisasjonsnummer") { it.isTextual }
-                require("månedligInntekt") { it.isNumber }
-            }
-        }
     }
 
     override fun createMessage(packet: JsonMessage) = GjenopplivVilkårsgrunnlagMessage(packet)
