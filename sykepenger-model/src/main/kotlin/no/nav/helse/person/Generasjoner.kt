@@ -747,6 +747,7 @@ enum class Periodetilstand {
                     generasjon.tilstand(UberegnetRevurdering, hendelse)
                 }
                 override fun vedtakAvvist(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
+                    generasjon.generasjonLukket()
                     generasjon.tilstand(RevurdertVedtakAvvist, utbetalingsavgjørelse)
                 }
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon? {
