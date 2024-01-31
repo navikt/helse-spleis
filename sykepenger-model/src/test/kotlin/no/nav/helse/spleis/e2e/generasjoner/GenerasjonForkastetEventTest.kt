@@ -21,7 +21,7 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
         a1 {
             tilGodkjenning(1.januar, 31.januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
-            val generasjonOpprettetEvent = observatør.generasjonForkastetEventer.single()
+            val generasjonForkastetEvent = observatør.generasjonForkastetEventer.single()
             val sisteGenerasjon = inspektørForkastet(1.vedtaksperiode).generasjoner.single()
             val forventetGenerasjonId = sisteGenerasjon.id
             val forventetGenerasjonEvent = PersonObserver.GenerasjonForkastetEvent(
@@ -33,7 +33,7 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
-            assertEquals(forventetGenerasjonEvent, generasjonOpprettetEvent)
+            assertEquals(forventetGenerasjonEvent, generasjonForkastetEvent)
         }
     }
 
@@ -42,7 +42,7 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             håndterAnmodningOmForkasting(1.vedtaksperiode)
-            val generasjonOpprettetEvent = observatør.generasjonForkastetEventer.single()
+            val generasjonForkastetEvent = observatør.generasjonForkastetEventer.single()
             val sisteGenerasjon = inspektørForkastet(1.vedtaksperiode).generasjoner.last()
             val forventetGenerasjonId = sisteGenerasjon.id
             val forventetGenerasjonEvent = PersonObserver.GenerasjonForkastetEvent(
@@ -54,16 +54,16 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
-            assertEquals(forventetGenerasjonEvent, generasjonOpprettetEvent)
+            assertEquals(forventetGenerasjonEvent, generasjonForkastetEvent)
         }
     }
 
     @Test
-    fun `revurdert generasjon forkastes`() {
+    fun `annullering oppretter ny generasjon som forkastes`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-            val generasjonOpprettetEvent = observatør.generasjonForkastetEventer.single()
+            val generasjonForkastetEvent = observatør.generasjonForkastetEventer.single()
             val sisteGenerasjon = inspektørForkastet(1.vedtaksperiode).generasjoner.last()
             val forventetGenerasjonId = sisteGenerasjon.id
             val forventetGenerasjonEvent = PersonObserver.GenerasjonForkastetEvent(
@@ -75,7 +75,12 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
-            assertEquals(forventetGenerasjonEvent, generasjonOpprettetEvent)
+            assertEquals(forventetGenerasjonEvent, generasjonForkastetEvent)
+            val generasjonOpprettetEventer = observatør.generasjonOpprettetEventer
+            assertEquals(2, generasjonOpprettetEventer.size)
+            val sisteGenerasjonOpprettet = generasjonOpprettetEventer.last()
+            assertEquals(sisteGenerasjon.id, sisteGenerasjonOpprettet.generasjonId)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, sisteGenerasjonOpprettet.type)
         }
     }
 }
