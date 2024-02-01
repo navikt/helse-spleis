@@ -29,8 +29,10 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.TIL_INFOTRYGD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_IVERKSATT
+import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -138,6 +140,34 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 assertEquals(2, generasjoner.size)
                 assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
                 assertEquals(Avsender.SAKSBEHANDLER, generasjoner.last().kilde?.avsender)
+            }
+        }
+    }
+
+    @Test
+    fun `annullere en uberegnet revurdering`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+            håndterAnnullering(inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(TIL_INFOTRYGD, generasjoner.last().tilstand)
+            }
+        }
+    }
+
+    @Test
+    fun `annullere en beregnet revurdering`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterAnnullering(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).inspektør.tilstand)
+            inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(TIL_INFOTRYGD, generasjoner.last().tilstand)
             }
         }
     }

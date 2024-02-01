@@ -655,15 +655,8 @@ enum class Periodetilstand {
                 }
             }
             data object UberegnetRevurdering : Tilstand by (Uberegnet) {
-                override fun forkastVedtaksperiode(generasjon: Generasjon, hendelse: Hendelse): Generasjon {
-                    return generasjon.nyGenerasjonTilInfotrygd(hendelse)
-                }
-
                 override fun kanForkastes(generasjon: Generasjon, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
 
-                override fun tillaterNyGenerasjon(generasjon: Generasjon, other: Generasjon): Boolean {
-                    return other.tilstand == TilInfotrygd
-                }
                 override fun utbetaling(generasjon: Generasjon, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
                     generasjon.medUtbetaling(utbetaling, grunnlagsdata)
                     generasjon.tilstand(BeregnetRevurdering, hendelse)
@@ -733,14 +726,11 @@ enum class Periodetilstand {
                 }
             }
             data object BeregnetRevurdering : Tilstand by (Beregnet) {
-                override fun forkastVedtaksperiode(generasjon: Generasjon, hendelse: Hendelse): Generasjon {
+                override fun forkastVedtaksperiode(generasjon: Generasjon, hendelse: Hendelse): Generasjon? {
                     generasjon.gjeldende.forkastUtbetaling(hendelse)
-                    return generasjon.nyGenerasjonTilInfotrygd(hendelse)
+                    return super.forkastVedtaksperiode(generasjon, hendelse)
                 }
                 override fun kanForkastes(generasjon: Generasjon, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
-                override fun tillaterNyGenerasjon(generasjon: Generasjon, other: Generasjon): Boolean {
-                    return other.tilstand == TilInfotrygd
-                }
 
                 override fun utenUtbetaling(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.utenUtbetaling(hendelse)

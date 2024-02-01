@@ -1,0 +1,58 @@
+{
+  "arbeidsgivere": [
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "TIL_INFOTRYGD"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT"
+              },
+              {
+                "tilstand": "TIL_INFOTRYGD"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT"
+              },
+              {
+                "id": "nisse",
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på mandag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT"
+              },
+              {
+                "id": "fjomp",
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på onsdag"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 286
+}
