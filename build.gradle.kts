@@ -1,3 +1,5 @@
+import java.io.PrintStream
+
 plugins {
     kotlin("jvm") version "1.9.22"
 }
@@ -79,12 +81,16 @@ subprojects {
 // alle projekter referer til seg selv
 tasks.create("tegn_modul_graf") {
     doLast {
-        this.project.allprojects.forEach { it.listThings() }
+        val printer = System.out
+        printer.println("```mermaid\n")
+        printer.println("classDiagram\n")
+        this.project.allprojects.forEach { it.listThings(printer) }
+        printer.println("\n```")
     }
 
 
 }
-fun Project.listThings() {
+fun Project.listThings(printer: PrintStream) {
     val deps = mutableSetOf<String>()
     this.configurations.forEach { configuration ->
         if (configuration.dependencies.size > 0) {
@@ -96,7 +102,7 @@ fun Project.listThings() {
         }
     }
     if (deps.isNotEmpty()) {
-        deps.forEach { println("${this.name}-->$it") }
+        deps.forEach { printer.println("\t${this.name}-->$it") }
     }
 }
 
