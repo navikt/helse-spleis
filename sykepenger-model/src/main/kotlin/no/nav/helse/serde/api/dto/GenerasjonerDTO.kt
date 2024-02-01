@@ -195,6 +195,39 @@ data class UberegnetPeriode(
         )
     }
 
+    internal fun somAnnullering(annulleringen: AnnullertUtbetaling, sisteBeregnetPeriode: BeregnetPeriode): AnnullertPeriode {
+        return AnnullertPeriode(
+            vedtaksperiodeId = vedtaksperiodeId,
+            generasjonId = generasjonId,
+            kilde = kilde,
+            fom = fom,
+            tom = tom,
+            opprettet = opprettet,
+            // feltet gir ikke mening for annullert periode:
+            vilkår = BeregnetPeriode.Vilkår(
+                sykepengedager = BeregnetPeriode.Sykepengedager(fom, LocalDate.MAX, null, null, false),
+                alder = sisteBeregnetPeriode.periodevilkår.alder
+            ),
+            beregnet = annulleringen.annulleringstidspunkt,
+            oppdatert = oppdatert,
+            periodetilstand = annulleringen.periodetilstand,
+            hendelser = hendelser,
+            beregningId = sisteBeregnetPeriode.beregningId,
+            utbetaling = Utbetaling(
+                Utbetalingtype.ANNULLERING,
+                sisteBeregnetPeriode.utbetaling.korrelasjonsId,
+                annulleringen.utbetalingstatus,
+                0,
+                0,
+                sisteBeregnetPeriode.utbetaling.arbeidsgiverFagsystemId,
+                sisteBeregnetPeriode.utbetaling.personFagsystemId,
+                emptyMap(),
+                null,
+                annulleringen.id
+            )
+        )
+    }
+
     internal class Builder(
         private val vedtaksperiodeId: UUID,
         private val generasjonId: UUID,

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
@@ -11,10 +12,13 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.SykefraværstilfelleeventyrObserver
 import no.nav.helse.person.TilstandType
+import no.nav.helse.spekemat.Spekemat
 import org.junit.jupiter.api.fail
 
 internal class TestObservatør(person: Person? = null) : PersonObserver {
+    val spekemat = Spekemat()
     init {
+        if (Toggle.Spekemat.enabled) person?.addObserver(spekemat)
         person?.addObserver(this)
     }
     internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()

@@ -1,4 +1,5 @@
 val jsonassertVersion = "1.5.0"
+val spekematVersion = "2024.01.31-15.19-f496847a"
 
 dependencies {
     api(project(":sykepenger-primitiver"))
@@ -12,6 +13,8 @@ dependencies {
     }
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
+
+    testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
 }
 
 tasks {

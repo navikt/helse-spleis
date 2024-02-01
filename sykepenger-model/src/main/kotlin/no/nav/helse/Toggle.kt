@@ -123,4 +123,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     }
 
     object SendFeriepengeOppdrag : Toggle("SEND_FERIEPENGEOPPDRAG", false)
+    object Spekemat : Toggle("SPEKEMAT_ENABLED", false)
 }
