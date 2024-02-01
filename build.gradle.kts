@@ -73,3 +73,29 @@ subprojects {
         }
     }
 }
+
+// supersimpelt første-forsøk
+// må copy-pastes inn i Fase1.md
+// alle projekter referer til seg selv
+tasks.create("tegn_modul_graf") {
+    doLast {
+        this.project.allprojects.forEach { it.listThings() }
+    }
+
+
+}
+fun Project.listThings() {
+    println("")
+    val deps = mutableSetOf<String>()
+    this.configurations.forEach { configuration ->
+        if (configuration.dependencies.size > 0) {
+            configuration.dependencies.forEach { dependency ->
+                if (dependency.name.startsWith("sykepenger-")) {
+                    deps.add(dependency.name)
+                }
+            }
+        }
+    }
+    deps.forEach { println("${this.name}-->$it") }
+}
+

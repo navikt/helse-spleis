@@ -1,26 +1,27 @@
 ```mermaid
 classDiagram
 
-    api --> model
-    api --> primitiver
-    api --> etterlevelse
-    api --> utbetaling
-    api --> aktivitetslogg
-    etterlevelse --> primitiver
-    inntekt --> aktivitetslogg
-    inntekt --> primitiver
-    inntekt --> etterlevelse
-    mediators --> model
-    mediators --> utbetaling
-    mediators --> etterlevelse
-    mediators --> primitiver
-    mediators --> aktivitetslogg
-    model --> primitiver
-    model --> utbetaling
-    model --> aktivitetslogg
-    model --> etterlevelse
-    model --> inntekt
-    utbetaling --> primitiver
-    utbetaling --> aktivitetslogg
+    jobs-->sykepenger-model
+
+    sykepenger-api-->sykepenger-model
+    sykepenger-api-->sykepenger-mediators
+
+    sykepenger-etterlevelse-->sykepenger-etterlevelse-api
+
+    sykepenger-mediators-->sykepenger-model
+
+    sykepenger-model-->sykepenger-primitiver
+    sykepenger-model-->sykepenger-utbetaling
+    sykepenger-model-->sykepenger-aktivitetslogg
+    sykepenger-model-->sykepenger-etterlevelse
+
+    sykepenger-opprydding-dev-->sykepenger-utbetaling
+    sykepenger-opprydding-dev-->sykepenger-mediators
+
+    sykepenger-primitiver-->sykepenger-etterlevelse-api
+
+    sykepenger-utbetaling-->sykepenger-etterlevelse-api
+    sykepenger-utbetaling-->sykepenger-primitiver
+    sykepenger-utbetaling-->sykepenger-aktivitetslogg
 
 ```
