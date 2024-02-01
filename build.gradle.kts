@@ -85,17 +85,18 @@ tasks.create("tegn_modul_graf") {
 
 }
 fun Project.listThings() {
-    println("")
     val deps = mutableSetOf<String>()
     this.configurations.forEach { configuration ->
         if (configuration.dependencies.size > 0) {
             configuration.dependencies.forEach { dependency ->
-                if (dependency.name.startsWith("sykepenger-")) {
+                if (dependency.name.startsWith("sykepenger-") && dependency.name != this.name) {
                     deps.add(dependency.name)
                 }
             }
         }
     }
-    deps.forEach { println("${this.name}-->$it") }
+    if (deps.isNotEmpty()) {
+        deps.forEach { println("${this.name}-->$it") }
+    }
 }
 
