@@ -78,7 +78,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     fun `én arbeidsgiver blir to - forlenges kun av ny ag`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         nyPeriode(1.februar til 20.februar, a2)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2,)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
         assertNotNull(vilkårsgrunnlag)
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
@@ -92,7 +92,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
 
         assertFunksjonellFeil(RV_SV_2, 1.vedtaksperiode.filter(a2))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTrue(inspektør(a2).periodeErForkastet(1.vedtaksperiode))
     }
 
@@ -119,13 +119,26 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         }
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
-        assertEquals(2, overstyringerIgangsatt.size)
+        assertEquals(3, overstyringerIgangsatt.size)
 
         overstyringerIgangsatt.first().also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
                 årsak = "KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE",
                 skjæringstidspunkt = 1.januar,
                 periodeForEndring = 1.januar til 31.januar,
+                berørtePerioder = listOf(
+                    VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
+                    VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), 1.februar til 28.februar, 1.januar, "REVURDERING"),
+                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                )
+            ), event)
+        }
+
+        overstyringerIgangsatt[1].also { event ->
+            assertEquals(PersonObserver.OverstyringIgangsatt(
+                årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
+                skjæringstidspunkt = 1.januar,
+                periodeForEndring = 1.januar til 1.januar,
                 berørtePerioder = listOf(
                     VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
                     VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), 1.februar til 28.februar, 1.januar, "REVURDERING"),
@@ -147,7 +160,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), event)
         }
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)

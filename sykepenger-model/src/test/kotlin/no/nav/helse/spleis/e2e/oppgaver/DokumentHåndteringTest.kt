@@ -13,6 +13,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -526,8 +527,9 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             førsteFraværsdag = 1.januar,
             harOpphørAvNaturalytelser = true,
         )
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertFalse(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
+        assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
     }
 
     @Test

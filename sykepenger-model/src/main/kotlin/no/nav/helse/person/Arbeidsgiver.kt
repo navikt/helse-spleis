@@ -131,9 +131,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.igangsettOverstyring(revurdering: Revurderingseventyr) {
             forEach { arbeidsgiver ->
-                arbeidsgiver.vedtaksperioder.forEach { vedtaksperiode ->
-                    vedtaksperiode.igangsettOverstyring(revurdering)
-                }
+                arbeidsgiver.håndter(revurdering) { igangsettOverstyring(revurdering) }
             }
         }
 

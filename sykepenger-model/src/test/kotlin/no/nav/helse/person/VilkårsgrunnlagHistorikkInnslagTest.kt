@@ -169,7 +169,9 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun overstyrArbeidsforhold(
                 hendelse: OverstyrArbeidsforhold,
                 subsumsjonObserver: SubsumsjonObserver
-            ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
+            ): VilkårsgrunnlagHistorikk.Grunnlagsdata {
+                throw IllegalStateException()
+            }
 
             override fun kopierMed(
                 hendelse: IAktivitetslogg,

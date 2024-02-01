@@ -372,7 +372,7 @@ internal class SykepengegrunnlagTest {
         }.build())
         overstyring.leggTilInntekt(endretOpplysning)
 
-        assertNull(overstyring.resultat())
+        assertNotNull(overstyring.resultat())
     }
     @Test
     fun `overstyre inntekt og refusjon - endrer kun refusjon`() {
@@ -449,7 +449,7 @@ internal class SykepengegrunnlagTest {
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", 1.januar til LocalDate.MAX, a1EndretInntektsopplysning, a1EndretRefusjonsopplysninger)
         overstyring.leggTilInntekt(endretOpplysning)
 
-        assertNull(overstyring.resultat())
+        assertNotNull(overstyring.resultat())
     }
     @Test
     fun `overstyre inntekt og refusjon - forsøker å legge til ny arbeidsgiver`() {

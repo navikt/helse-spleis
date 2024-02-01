@@ -77,6 +77,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -110,10 +111,11 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        assertTrue(observatør.inntektsmeldingIkkeHåndtert.contains(innteksmeldingId))
+        assertTrue(observatør.inntektsmeldingHåndtert.any { it.first == innteksmeldingId })
+        assertFalse(observatør.inntektsmeldingIkkeHåndtert.contains(innteksmeldingId))
     }
 
     @Test

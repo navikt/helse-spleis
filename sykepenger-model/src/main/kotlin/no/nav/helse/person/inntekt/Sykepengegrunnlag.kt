@@ -245,10 +245,10 @@ internal class Sykepengegrunnlag private constructor(
         return hendelse.overstyr(this, subsumsjonObserver)
     }
 
-    internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+    internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
-        val resultat = builder.resultat() ?: return null
+        val resultat = builder.resultat()
         arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
@@ -268,10 +268,10 @@ internal class Sykepengegrunnlag private constructor(
         return kopierSykepengegrunnlag(gjenopplivetArbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt)
     }
 
-    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag? {
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, opptjening, subsumsjonObserver)
         hendelse.overstyr(builder)
-        val resultat = builder.resultat() ?: return null
+        val resultat = builder.resultat()
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonObserver)
     }
 
@@ -285,14 +285,10 @@ internal class Sykepengegrunnlag private constructor(
         person: Person,
         inntektsmelding: Inntektsmelding,
         subsumsjonObserver: SubsumsjonObserver
-    ): Sykepengegrunnlag? {
+    ): Sykepengegrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(arbeidsgiverInntektsopplysninger, null, subsumsjonObserver)
         inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder, skjæringstidspunkt)
         val resultat = builder.resultat()
-        if (resultat == null) {
-            inntektsmelding.info("Gjør ingen korrigering av sykepengegrunnlaget siden korrigert inntektsmelding er funksjonelt lik sykepengegrunnlaget.")
-            return null // ingen endring
-        }
         arbeidsgiverInntektsopplysninger
             .finn(inntektsmelding.organisasjonsnummer())
             ?.arbeidsgiveropplysningerKorrigert(person, inntektsmelding)
@@ -460,10 +456,8 @@ internal class Sykepengegrunnlag private constructor(
 
         internal fun ingenRefusjonsopplysninger(organisasjonsnummer: String) = opprinneligArbeidsgiverInntektsopplysninger.ingenRefusjonsopplysninger(organisasjonsnummer)
 
-        internal fun resultat(): List<ArbeidsgiverInntektsopplysning>? {
-            return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver).takeUnless { resultat ->
-                resultat == opprinneligArbeidsgiverInntektsopplysninger
-            }
+        internal fun resultat(): List<ArbeidsgiverInntektsopplysning> {
+            return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver)
         }
     }
 
@@ -471,7 +465,7 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger.leggTil(hendelseIder, organisasjonsnummer, block)
 
     internal fun inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
-        arbeidsgiverInntektsopplysninger.inntektsdata(skjæringstidspunkt, organisasjonsnummer,)
+        arbeidsgiverInntektsopplysninger.inntektsdata(skjæringstidspunkt, organisasjonsnummer)
 
     internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
         arbeidsgiverInntektsopplysninger.firstNotNullOfOrNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }

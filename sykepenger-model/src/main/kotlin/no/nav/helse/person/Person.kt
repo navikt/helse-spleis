@@ -738,7 +738,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return inntektsmelding.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
-        val (nyttGrunnlag, eventyr) = (grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, subsumsjonObserver) ?: return)
+        val (nyttGrunnlag, eventyr) = grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, subsumsjonObserver)
         nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
         igangsettOverstyring(eventyr)
     }
@@ -788,8 +788,7 @@ class Person private constructor(
         }
     }
 
-    private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
-        if (vilkårsgrunnlag == null) return
+    private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement) {
         hendelse.kontekst(vilkårsgrunnlag)
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }

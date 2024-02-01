@@ -136,7 +136,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             assertEquals(31.januar, oppdrag[0].inspektør.tom)
             assertEquals(2161, oppdrag[0].inspektør.beløp)
         }
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.also { vilkårsgrunnlag ->
             vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.let { arbeidsgiverInntektsopplysninger ->
                 assertEquals(1, arbeidsgiverInntektsopplysninger.size)
@@ -273,7 +273,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         repeat(10) { overstyr() }
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertEquals(12, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
     }
 
     @Test
@@ -379,7 +379,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertEquals(vilkårsgrunnlagHistorikkInnslagFørOverstyring + 1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
         assertEquals(a1ArbeidsgiverinntektsopplysningerFørOverstyring, inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a1))
         assertEquals(a2ArbeidsgiverinntektsopplysningerFørOverstyring, inspektør.arbeidsgiverInntektsopplysningISykepengegrunnlaget(1.januar, a2))

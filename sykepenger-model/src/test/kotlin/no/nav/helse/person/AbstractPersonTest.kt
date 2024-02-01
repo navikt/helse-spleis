@@ -52,24 +52,6 @@ internal abstract class AbstractPersonTest {
             jurist
         ).also { person ->
             person.håndter(
-                Inntektsmelding(
-                    meldingsreferanseId = UUID.randomUUID(),
-                    refusjon = Inntektsmelding.Refusjon(TestPerson.INNTEKT, null),
-                    orgnummer = ORGNUMMER,
-                    fødselsnummer = "",
-                    aktørId = "",
-                    førsteFraværsdag = null,
-                    inntektsdato = null,
-                    beregnetInntekt = TestPerson.INNTEKT,
-                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                    arbeidsforholdId = null,
-                    begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-                    harFlereInntektsmeldinger = false,
-                    avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
-                    mottatt = LocalDateTime.now()
-                )
-            )
-            person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
                     InfotrygdhistorikkElement.opprett(

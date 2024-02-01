@@ -22,6 +22,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -53,19 +54,17 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     @Test
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved helt lik korrigerende inntektsmelding`() {
         nyttVedtak(1.januar, 31.januar)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-
-        assertIngenVarsel(RV_IM_4)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertVarsel(RV_IM_4)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
     fun `Avsluttet vedtaksperiode skal ikke få varsel ved korrigerende inntektsmelding med endring i agp`() {
         nyttVedtak(1.januar, 31.januar)
-
-        håndterInntektsmelding(listOf(2.januar til 17.januar),)
-
+        håndterInntektsmelding(listOf(2.januar til 17.januar))
         assertVarsel(RV_IM_24)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
     }
 
     @Test

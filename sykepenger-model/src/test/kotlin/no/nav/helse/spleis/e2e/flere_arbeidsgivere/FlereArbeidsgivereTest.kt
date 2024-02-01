@@ -169,25 +169,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             nyPeriode(20.januar til 31.januar)
         }
 
-        assertForventetFeil(
-            forklaring = "a2 blir strukket tilbake som følge av replay, men a1 blir ikke forhindret fra å gå fremover",
-            nå = {
-                a1 {
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-                }
-                a2 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-                }
-            },
-            ønsket = {
-                a1 {
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                }
-                a2 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-                }
-            }
-        )
+        a1 {
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        }
     }
 
     @Test

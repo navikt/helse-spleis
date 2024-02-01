@@ -68,7 +68,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
         }
     }
@@ -93,7 +93,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                 id = inntektsmeldingId,
                 arbeidsgiverperioder = arbeidsgiverperiode,
             )
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
         }
     }

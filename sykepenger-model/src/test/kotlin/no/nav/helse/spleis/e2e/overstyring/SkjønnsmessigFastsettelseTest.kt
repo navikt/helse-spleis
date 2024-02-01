@@ -189,7 +189,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
     }
 
     @Test
@@ -201,10 +201,10 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             nullstillTilstandsendringer()
             val im = håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             val inntektsopplysning = inspektør.inntektsopplysningISykepengegrunnlaget(1.januar)
             assertTrue(inntektsopplysning is SkjønnsmessigFastsatt)
-            assertNotEquals(im, inntektsopplysning.omregnetÅrsinntekt().inspektør.hendelseId)
+            assertEquals(im, inntektsopplysning.omregnetÅrsinntekt().inspektør.hendelseId)
             assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }

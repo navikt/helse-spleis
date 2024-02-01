@@ -14,6 +14,7 @@ import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDIN
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -247,7 +248,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender ikke ut spisset event ved korrigerende inntektsmelding som ikke fører til endring`() {
+    fun `Sender ut spisset event ved korrigerende inntektsmelding som ikke fører til endring`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -272,7 +273,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
                 )
             )
         )
-        assertTrue(observatør.arbeidsgiveropplysningerKorrigert.isEmpty())
+        assertFalse(observatør.arbeidsgiveropplysningerKorrigert.isEmpty())
     }
 
     @Test

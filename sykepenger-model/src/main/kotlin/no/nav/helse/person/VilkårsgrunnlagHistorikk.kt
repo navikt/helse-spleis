@@ -22,7 +22,6 @@ import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -236,23 +235,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement?, Revurderingseventyr> {
+        internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement, Revurderingseventyr> {
             val sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsgiveropplysninger(person, hendelse, opptjening, subsumsjonObserver)
-            if (sykepengegrunnlag == null) hendelse.info("Endringene hensyntas ikke fordi de er funksjonelt lik sykepengegrunnlaget.")
-            val endringsdato = sykepengegrunnlag?.finnEndringsdato(this.sykepengegrunnlag)
-            val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, endringsdato ?: skjæringstidspunkt)
-            return sykepengegrunnlag?.let {
-                kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver)
-            } to eventyr
+            val endringsdato = sykepengegrunnlag.finnEndringsdato(this.sykepengegrunnlag)
+            val eventyr = Revurderingseventyr.arbeidsgiveropplysninger(hendelse, skjæringstidspunkt, endringsdato)
+            return kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver) to eventyr
         }
-        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement?, Revurderingseventyr> {
+        internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, subsumsjonObserver: SubsumsjonObserver): Pair<VilkårsgrunnlagElement, Revurderingseventyr> {
             val sykepengegrunnlag = sykepengegrunnlag.skjønnsmessigFastsettelse(hendelse, opptjening, subsumsjonObserver)
-            if (sykepengegrunnlag == null) hendelse.info("Endringene hensyntas ikke fordi de er funksjonelt lik sykepengegrunnlaget.")
-            val endringsdato = sykepengegrunnlag?.finnEndringsdato(this.sykepengegrunnlag)
-            val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endringsdato ?: skjæringstidspunkt)
-            return sykepengegrunnlag?.let {
-                kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver)
-            } to eventyr
+            val endringsdato = sykepengegrunnlag.finnEndringsdato(this.sykepengegrunnlag)
+            val eventyr = Revurderingseventyr.skjønnsmessigFastsettelse(hendelse, skjæringstidspunkt, endringsdato)
+            return kopierMed(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver) to eventyr
         }
         protected abstract fun kopierMed(
             hendelse: IAktivitetslogg,
@@ -265,7 +258,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         abstract fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
             subsumsjonObserver: SubsumsjonObserver
-        ): VilkårsgrunnlagElement?
+        ): VilkårsgrunnlagElement
 
         internal fun grunnbeløpsregulering(
             hendelse: Grunnbeløpsregulering,
@@ -284,12 +277,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             person: Person,
             inntektsmelding: Inntektsmelding,
             subsumsjonObserver: SubsumsjonObserver
-        ): Pair<VilkårsgrunnlagElement, Revurderingseventyr>?  {
+        ): Pair<VilkårsgrunnlagElement, Revurderingseventyr>  {
             val sykepengegrunnlag = sykepengegrunnlag.nyeArbeidsgiverInntektsopplysninger(
                 person,
                 inntektsmelding,
                 subsumsjonObserver
-            ) ?: return null
+            )
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.sykepengegrunnlag)
             val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, endringsdato)
             return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, NullObserver) to eventyr
@@ -522,9 +515,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
             subsumsjonObserver: SubsumsjonObserver
-        ): Grunnlagsdata? {
-            hendelse.funksjonellFeil(RV_VV_11)
-            return null
+        ): Grunnlagsdata {
+            throw IllegalStateException("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.")
         }
 
 

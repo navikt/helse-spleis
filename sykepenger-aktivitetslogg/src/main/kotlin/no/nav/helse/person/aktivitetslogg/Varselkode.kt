@@ -151,7 +151,7 @@ enum class Varselkode(
     RV_VV_8("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."),
     RV_VV_9("Bruker er fortsatt syk 26 uker etter maksdato"),
     RV_VV_10("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler."),
-    RV_VV_11("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring."),
+    RV_VV_11("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.", avviklet = true),
     RV_VV_12("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag"),
     RV_VV_13("26 uker siden forrige utbetaling av sykepenger, vurder om vilkårene for sykepenger er oppfylt", avviklet = true),
     RV_VV_14("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.", avviklet = true),
