@@ -61,8 +61,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
-            mottatt = mottatt,
-            opprettet = opprettet
+            mottatt = mottatt
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

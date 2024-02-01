@@ -240,7 +240,17 @@ internal abstract class AbstractDslTest {
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         id: UUID = UUID.randomUUID()
     ) =
-        this { håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, inntektsdato, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id) }
+        this { håndterInntektsmelding(
+            arbeidsgiverperioder,
+            beregnetInntekt,
+            førsteFraværsdag,
+            inntektsdato,
+            refusjon,
+            harOpphørAvNaturalytelser,
+            arbeidsforholdId,
+            begrunnelseForReduksjonEllerIkkeUtbetalt,
+            id
+        ) }
     protected fun String.håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,

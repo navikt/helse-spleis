@@ -57,12 +57,15 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
     fun `korrigerende inntektsmelding`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
-            val opprettet = LocalDateTime.now()
-            val mottatt = opprettet.minusHours(2)
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, opprettet = opprettet, mottatt = mottatt)
+            val mottatt = LocalDateTime.now()
+            val inntektsmeldingId = håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT * 1.1,
+                mottatt = mottatt
+            )
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
-                assertEquals(Generasjonkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = opprettet, avsender = Avsender.ARBEIDSGIVER), generasjoner.last().kilde)
+                assertEquals(Generasjonkilde(meldingsreferanseId = inntektsmeldingId, innsendt = mottatt, registert = mottatt, avsender = Avsender.ARBEIDSGIVER), generasjoner.last().kilde)
             }
         }
     }
@@ -83,12 +86,16 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
         }
 
         val korrigerendeImA1 = UUID.randomUUID()
-        val opprettet = LocalDateTime.now()
-        val mottatt = opprettet.minusHours(2)
-        val forventetKilde = Generasjonkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = opprettet, avsender = Avsender.ARBEIDSGIVER)
+        val mottatt = LocalDateTime.now()
+        val forventetKilde = Generasjonkilde(meldingsreferanseId = korrigerendeImA1, innsendt = mottatt, registert = mottatt, avsender = Avsender.ARBEIDSGIVER)
 
         a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1, opprettet = opprettet, mottatt = mottatt, id = korrigerendeImA1)
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT * 1.1,
+                id = korrigerendeImA1,
+                mottatt = mottatt
+            )
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
                 assertEquals(forventetKilde, generasjoner.last().kilde)

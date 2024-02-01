@@ -147,8 +147,7 @@ abstract class AbstractObservableTest {
         harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
         harFlereInntektsmeldinger = harFlereInntektsmeldinger,
         avsendersystem = avsendersystem,
-        mottatt = LocalDateTime.now(),
-        opprettet = LocalDateTime.now()
+        mottatt = LocalDateTime.now()
     )
 
     protected fun vilkårsgrunnlag(

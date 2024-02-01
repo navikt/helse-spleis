@@ -141,8 +141,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
         harFlereInntektsmeldinger: Boolean = false,
         avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
-        mottatt: LocalDateTime = LocalDateTime.now(),
-        opprettet: LocalDateTime = LocalDateTime.now()
+        mottatt: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
@@ -161,7 +160,6 @@ internal class ArbeidsgiverHendelsefabrikk(
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = avsendersystem,
                 mottatt = mottatt,
-                opprettet = opprettet,
                 aktivitetslogg = aktivitetslogg
             )
         }

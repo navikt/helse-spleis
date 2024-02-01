@@ -222,8 +222,7 @@ internal class TestPerson(
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID(),
             orgnummer: String = "",
-            mottatt: LocalDateTime = LocalDateTime.now(),
-            opprettet: LocalDateTime = LocalDateTime.now()
+            mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
             arbeidsgiverHendelsefabrikk.lagInntektsmelding(
                 arbeidsgiverperioder,
@@ -235,8 +234,7 @@ internal class TestPerson(
                 arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt,
                 id,
-                mottatt = mottatt,
-                opprettet = opprettet
+                mottatt = mottatt
             ).håndter(Person::håndter)
             return id
         }

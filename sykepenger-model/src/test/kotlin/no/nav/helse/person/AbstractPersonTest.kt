@@ -66,8 +66,7 @@ internal abstract class AbstractPersonTest {
                     begrunnelseForReduksjonEllerIkkeUtbetalt = null,
                     harFlereInntektsmeldinger = false,
                     avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
-                    mottatt = LocalDateTime.now(),
-                    opprettet = LocalDateTime.now()
+                    mottatt = LocalDateTime.now()
                 )
             )
             person.håndter(
