@@ -133,7 +133,7 @@ internal class SpeilGenerasjonerBuilder(
         avsluttet: LocalDateTime?,
         kilde: Generasjoner.Generasjonkilde
     ) {
-        if (tilstand.uberegnet) return this.tilstand.besøkUberegnetPeriode(this, periode, id, kilde.meldingsreferanseId, tidsstempel, avsluttet)
+        if (tilstand.uberegnet) return this.tilstand.besøkUberegnetPeriode(this, periode, id, kilde.meldingsreferanseId, tidsstempel, avsluttet, tilstand == Generasjoner.Generasjon.Tilstand.TilInfotrygd)
         this.tilstand.besøkBeregnetPeriode(this, periode, id, kilde.meldingsreferanseId, tidsstempel, vedtakFattet, avsluttet)
     }
 
@@ -345,7 +345,8 @@ internal class SpeilGenerasjonerBuilder(
             generasjonId: UUID,
             kilde: UUID,
             generasjonOpprettet: LocalDateTime,
-            avsluttet: LocalDateTime?
+            avsluttet: LocalDateTime?,
+            forkastet: Boolean
         ) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
@@ -433,9 +434,10 @@ internal class SpeilGenerasjonerBuilder(
                 generasjonId: UUID,
                 kilde: UUID,
                 generasjonOpprettet: LocalDateTime,
-                avsluttet: LocalDateTime?
+                avsluttet: LocalDateTime?,
+                forkastet: Boolean
             ) {
-                vedtaksperiodebuilder?.nyUberegnetPeriode(periode, generasjonId, kilde, generasjonOpprettet, avsluttet)?.also {
+                vedtaksperiodebuilder?.nyUberegnetPeriode(periode, generasjonId, kilde, generasjonOpprettet, avsluttet, forkastet)?.also {
                     this.uberegnetPeriodeBuilder = it
                 }
             }
@@ -566,10 +568,11 @@ internal class SpeilGenerasjonerBuilder(
                 generasjonId: UUID,
                 kilde: UUID,
                 generasjonOpprettet: LocalDateTime,
-                avsluttet: LocalDateTime?
+                avsluttet: LocalDateTime?,
+                forkastet: Boolean
             ) {
                 if (Toggle.Spekemat.disabled) return
-                super.besøkUberegnetPeriode(builder, periode, generasjonId, kilde, generasjonOpprettet, avsluttet)
+                super.besøkUberegnetPeriode(builder, periode, generasjonId, kilde, generasjonOpprettet, avsluttet, forkastet)
             }
 
             override fun forlatUberegnetPeriode(builder: SpeilGenerasjonerBuilder) {
@@ -592,7 +595,9 @@ internal class SpeilGenerasjonerBuilder(
             }
 
             private fun forlatVedtaksperiodeSpekemat(builder: SpeilGenerasjonerBuilder) {
-                if (perioder.isEmpty()) return
+                // en forkastet periode bestående av én generasjon har ikke blitt
+                // avsluttet tidligere, ellers ville den hatt minst to generasjoner.
+                if (perioder.size <= 1) return perioder.clear()
 
                 // omgjør siste uberegnede periode som en BeregnetPeriode/AnnullertPeriode,
                 // med utgangspunkt i siste beregnede perioden før den uberegnede
@@ -632,8 +637,8 @@ internal class SpeilGenerasjonerBuilder(
                 forrigeBeregnetPeriode,
                 generasjonOpprettet
             )
-            internal fun nyUberegnetPeriode(periode: Periode, generasjonId: UUID, kilde: UUID, generasjonOpprettet: LocalDateTime, avsluttet: LocalDateTime?) =
-                UberegnetPeriode.Builder(vedtaksperiodeId, generasjonId, kilde, skjæringstidspunkt, tilstand, generasjonOpprettet, avsluttet, opprettet, oppdatert, periode, hendelser)
+            internal fun nyUberegnetPeriode(periode: Periode, generasjonId: UUID, kilde: UUID, generasjonOpprettet: LocalDateTime, avsluttet: LocalDateTime?, forkastet: Boolean) =
+                UberegnetPeriode.Builder(vedtaksperiodeId, generasjonId, kilde, skjæringstidspunkt, tilstand, generasjonOpprettet, forkastet, avsluttet, opprettet, oppdatert, periode, hendelser)
         }
     }
 }

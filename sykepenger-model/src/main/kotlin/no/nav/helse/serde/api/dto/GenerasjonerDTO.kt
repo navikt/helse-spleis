@@ -16,6 +16,7 @@ import no.nav.helse.serde.api.speil.SpeilGenerasjoner
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.merge
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
 import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
 
 data class SpeilGenerasjonDTO(
@@ -235,6 +236,7 @@ data class UberegnetPeriode(
         private val skjæringstidspunkt: LocalDate,
         private val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
         private val generasjonOpprettet: LocalDateTime,
+        private val forkastet: Boolean,
         private val generasjonAvsluttet: LocalDateTime?,
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
@@ -259,7 +261,7 @@ data class UberegnetPeriode(
                 oppdatert = oppdatert,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
-                periodetilstand = generasjonAvsluttet?.let { IngenUtbetaling } ?: when (tilstand) {
+                periodetilstand = generasjonAvsluttet?.let { if (forkastet) Annullert else IngenUtbetaling } ?: when (tilstand) {
                     is Vedtaksperiode.AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode
                     is Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
 
