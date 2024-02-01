@@ -1,4 +1,4 @@
-import java.io.PrintStream
+import java.io.PrintWriter
 
 plugins {
     kotlin("jvm") version "1.9.22"
@@ -76,21 +76,35 @@ subprojects {
     }
 }
 
-// supersimpelt første-forsøk
-// må copy-pastes inn i Fase1.md
-// alle projekter referer til seg selv
+/**
+ * kjør gjerne denne slik:
+ *
+ *  ./gradlew tegn_modul_graf -Putputt=EnGrad.md
+ *
+ * så får du en fin graf under /doc/EnGrad.md
+ */
 tasks.create("tegn_modul_graf") {
     doLast {
-        val printer = System.out
+        val printer: PrintWriter = hentPrinter()
         printer.println("```mermaid\n")
         printer.println("classDiagram\n")
-        this.project.allprojects.forEach { it.listThings(printer) }
+        this.project.allprojects.forEach { it.listUtModulAvhengigheter(printer) }
         printer.println("\n```")
+        printer.flush()
+        printer.close()
     }
-
-
 }
-fun Project.listThings(printer: PrintStream) {
+
+fun hentPrinter() = if (ext.properties["utputt"] != null) {
+    val paff = "${project.rootDir.absolutePath}/doc/${ext.properties["utputt"]}"
+    val fail = File(paff)
+    if (!fail.exists()) {
+        fail.createNewFile()
+    }
+    fail.printWriter()
+} else PrintWriter(System.out, true)
+
+fun Project.listUtModulAvhengigheter(printer: PrintWriter) {
     val deps = mutableSetOf<String>()
     this.configurations.forEach { configuration ->
         if (configuration.dependencies.size > 0) {
