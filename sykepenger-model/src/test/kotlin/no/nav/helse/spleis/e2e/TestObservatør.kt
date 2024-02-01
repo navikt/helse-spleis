@@ -18,7 +18,7 @@ import org.junit.jupiter.api.fail
 internal class TestObservatør(person: Person? = null) : PersonObserver {
     val spekemat = Spekemat()
     init {
-        if (Toggle.Spekemat.enabled) person?.addObserver(spekemat)
+        person?.addObserver(spekemat)
         person?.addObserver(this)
     }
     internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.EnableToggle
+import no.nav.helse.EnableSpekemat
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
 import no.nav.helse.april
@@ -125,7 +125,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-// @EnableToggle(Toggle.Spekemat::class)
+// @EnableSpekemat
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test

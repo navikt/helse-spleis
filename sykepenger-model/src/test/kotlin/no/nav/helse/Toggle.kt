@@ -12,38 +12,29 @@ import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-@ExtendWith(EnableToggleInterceptor::class)
-internal annotation class EnableToggle(vararg val toggle: KClass<out Toggle>)
+@ExtendWith(EnableFeriepengerInterceptor::class)
+internal annotation class EnableFeriepenger
 
-private class EnableToggleInterceptor: InvocationInterceptor {
+private class EnableFeriepengerInterceptor: InvocationInterceptor {
     override fun interceptTestMethod(
         invocation: InvocationInterceptor.Invocation<Void>,
         invocationContext: ReflectiveInvocationContext<Method>,
         extensionContext: ExtensionContext
     ) {
-        AnnotationSupport.findAnnotation(extensionContext.testClass, EnableToggle::class.java).ifPresentOrElse({ annotation ->
-            annotation.toggle.mapNotNull { it.objectInstance }.enable { invocation.proceed() }
-        }) {
-            invocation.proceed()
-        }
+        Toggle.SendFeriepengeOppdrag.enable { invocation.proceed() }
     }
 }
-
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-@ExtendWith(DisableToggleInterceptor::class)
-internal annotation class DisableToggle(vararg val toggle: KClass<out Toggle>)
+@ExtendWith(EnableSpekematInterceptor::class)
+internal annotation class EnableSpekemat
 
-private class DisableToggleInterceptor: InvocationInterceptor {
+private class EnableSpekematInterceptor: InvocationInterceptor {
     override fun interceptTestMethod(
         invocation: InvocationInterceptor.Invocation<Void>,
         invocationContext: ReflectiveInvocationContext<Method>,
         extensionContext: ExtensionContext
     ) {
-        AnnotationSupport.findAnnotation(extensionContext.testClass, DisableToggle::class.java).ifPresentOrElse({ annotation ->
-            annotation.toggle.mapNotNull { it.objectInstance }.disable { invocation.proceed() }
-        }) {
-            invocation.proceed()
-        }
+        Toggle.Spekemat.enable { invocation.proceed() }
     }
 }

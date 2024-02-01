@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import java.time.Year
-import no.nav.helse.EnableToggle
+import no.nav.helse.EnableFeriepenger
 import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -49,7 +49,7 @@ import org.junit.jupiter.api.parallel.Isolated
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
-@EnableToggle(Toggle.SendFeriepengeOppdrag::class)
+@EnableFeriepenger
 @Isolated
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     private companion object {

@@ -15,6 +15,7 @@ class Spekemat : PersonObserver {
         else emptyList()
 
     override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
+        if (Toggle.Spekemat.disabled) return
         hendelser.add(event)
         arbeidsgivere.getOrPut(event.organisasjonsnummer) { Pølsefabrikk() }
             .nyPølse(Pølse(
@@ -26,12 +27,14 @@ class Spekemat : PersonObserver {
     }
 
     override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
+        if (Toggle.Spekemat.disabled) return
         hendelser.add(event)
         arbeidsgivere.getValue(event.organisasjonsnummer)
             .oppdaterPølse(event.vedtaksperiodeId, event.generasjonId, Pølsestatus.LUKKET)
     }
 
     override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
+        if (Toggle.Spekemat.disabled) return
         hendelser.add(event)
         arbeidsgivere.getValue(event.organisasjonsnummer)
             .oppdaterPølse(event.vedtaksperiodeId, event.generasjonId, Pølsestatus.FORKASTET)
