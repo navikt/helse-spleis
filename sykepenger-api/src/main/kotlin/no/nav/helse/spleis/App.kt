@@ -17,15 +17,14 @@ import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.path
-import io.prometheus.client.Collector
 import io.prometheus.client.CollectorRegistry
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
-import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
+import no.nav.helse.spleis.dao.HendelseDao
+import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.Api.installGraphQLApi
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -47,12 +46,16 @@ fun main() {
     }
 
     val config = ApplicationConfiguration()
-    val teller = AtomicInteger(0)
-    val app = createApp(config.ktorConfig, config.azureConfig, config.azureClient, config.spurteDuClient, config.dataSourceConfiguration::getDataSource, teller)
+    val dataSource by lazy {
+        // viktig å cache resultatet fra getDataSource() fordi den gir en -ny- tilkobling hver gang.
+        // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
+        config.dataSourceConfiguration.getDataSource()
+    }
+    val app = createApp(config.ktorConfig, config.azureConfig, config.azureClient, config.spurteDuClient, { dataSource })
     app.start(wait = true)
 }
 
-internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, azureClient: AzureTokenProvider?, spurteDuClient: SpurteDuClient?, dataSourceProvider: () -> DataSource, teller: AtomicInteger, collectorRegistry: CollectorRegistry = CollectorRegistry()) =
+internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, azureClient: AzureTokenProvider?, spurteDuClient: SpurteDuClient?, dataSourceProvider: () -> DataSource, collectorRegistry: CollectorRegistry = CollectorRegistry()) =
     embeddedServer(
         factory = Netty,
         environment = applicationEngineEnvironment {
@@ -71,15 +74,17 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, az
                     disableDefaultColors()
                     filter { call -> call.request.path().startsWith("/api/") }
                 }
-                preStopHook(teller)
                 install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
                 requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), collectorRegistry)
-                nais(teller, collectorRegistry)
+                nais(collectorRegistry)
                 azureAdAppAuthentication(azureConfig)
-                val dataSource = dataSourceProvider()
-                spannerApi(dataSource, spurteDuClient, azureClient)
-                sporingApi(dataSource)
-                installGraphQLApi(dataSource)
+
+                val hendelseDao = HendelseDao(dataSourceProvider)
+                val personDao = PersonDao(dataSourceProvider)
+
+                spannerApi(hendelseDao, personDao, spurteDuClient, azureClient)
+                sporingApi(hendelseDao, personDao)
+                installGraphQLApi(hendelseDao, personDao)
             }
         },
         configure = {

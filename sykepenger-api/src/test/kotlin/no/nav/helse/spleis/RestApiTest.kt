@@ -14,7 +14,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
-import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -34,6 +33,7 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -57,12 +57,9 @@ internal class RestApiTest {
 
     private lateinit var app: ApplicationEngine
     private lateinit var appBaseUrl: String
-    private val teller = AtomicInteger()
 
     @BeforeAll
     internal fun `start embedded environment`() {
-        dataSource = databaseContainer.nyTilkobling()
-
         //Stub ID provider (for authentication of REST endpoints)
         wireMockServer.start()
         await("vent på WireMockServer har startet")
@@ -89,8 +86,7 @@ internal class RestApiTest {
             ),
             null,
             null,
-            { dataSource.ds },
-            teller
+            { dataSource.ds }
         )
 
         app.start(wait = false)
@@ -98,8 +94,6 @@ internal class RestApiTest {
 
     @AfterAll
     internal fun `stop embedded environment`() {
-        databaseContainer.droppTilkobling(dataSource)
-
         CollectorRegistry.defaultRegistry.clear()
         app.stop(1000L, 1000L)
         wireMockServer.stop()
@@ -107,7 +101,7 @@ internal class RestApiTest {
 
     @BeforeEach
     internal fun setup() {
-        dataSource.cleanUp()
+        dataSource = databaseContainer.nyTilkobling()
 
         val fom = LocalDate.of(2018, 9, 10)
         val tom = fom.plusDays(16)
@@ -143,8 +137,11 @@ internal class RestApiTest {
         person.håndter(inntektsmelding)
         dataSource.ds.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
         dataSource.ds.lagreHendelse(MELDINGSREFERANSE)
+    }
 
-        teller.set(0)
+    @AfterEach
+    fun teardown() {
+        databaseContainer.droppTilkobling(dataSource)
     }
 
     private fun DataSource.lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {

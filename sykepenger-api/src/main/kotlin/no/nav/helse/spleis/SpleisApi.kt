@@ -18,7 +18,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
-import javax.sql.DataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.etterlevelse.MaskinellJurist
@@ -27,10 +26,7 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 
-internal fun Application.spannerApi(dataSource: DataSource, spurteDuClient: SpurteDuClient?, azureClient: AzureTokenProvider?) {
-    val hendelseDao = HendelseDao(dataSource)
-    val personDao = PersonDao(dataSource)
-
+internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao, spurteDuClient: SpurteDuClient?, azureClient: AzureTokenProvider?) {
     routing {
         authenticate {
             get("/api/person-json/{maskertId?}") {
@@ -66,10 +62,7 @@ internal fun Application.spannerApi(dataSource: DataSource, spurteDuClient: Spur
     }
 }
 
-internal fun Application.sporingApi(dataSource: DataSource) {
-    val hendelseDao = HendelseDao(dataSource)
-    val personDao = PersonDao(dataSource)
-
+internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonDao) {
     routing {
         authenticate {
             get("/api/vedtaksperioder") {
