@@ -61,7 +61,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
 
     internal fun start() {
         mockkStatic("no.nav.helse.spleis.NaisKt")
-        every { any<Application>().nais(any(), any()) } returns Unit
+        every { any<Application>().nais(any()) } returns Unit
 
         //Stub ID provider (for authentication of REST endpoints)
         wireMockServer.start()
@@ -87,8 +87,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
             ),
             null,
             null,
-            { dataSource.ds },
-            teller
+            { dataSource.ds }
         )
 
         app.start(wait = false)

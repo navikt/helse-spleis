@@ -14,7 +14,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit.SECONDS
-import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -57,7 +56,6 @@ internal class RestApiTest {
 
     private lateinit var app: ApplicationEngine
     private lateinit var appBaseUrl: String
-    private val teller = AtomicInteger()
 
     @BeforeAll
     internal fun `start embedded environment`() {
@@ -89,8 +87,7 @@ internal class RestApiTest {
             ),
             null,
             null,
-            { dataSource.ds },
-            teller
+            { dataSource.ds }
         )
 
         app.start(wait = false)
@@ -143,8 +140,6 @@ internal class RestApiTest {
         person.håndter(inntektsmelding)
         dataSource.ds.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
         dataSource.ds.lagreHendelse(MELDINGSREFERANSE)
-
-        teller.set(0)
     }
 
     private fun DataSource.lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {

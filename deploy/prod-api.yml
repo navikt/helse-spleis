@@ -17,7 +17,6 @@ spec:
   readiness:
     path: /isready
     initialDelay: 5
-  preStopHookPath: /stop
   resources:
     limits:
       memory: 5Gi
