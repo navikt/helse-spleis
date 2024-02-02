@@ -45,6 +45,7 @@ dependencies {
         exclude("com.fasterxml.jackson.core")
     }
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("org.wiremock:wiremock:3.3.1") {
         exclude(group = "junit")

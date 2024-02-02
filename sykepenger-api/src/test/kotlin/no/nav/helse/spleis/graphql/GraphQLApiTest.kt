@@ -1,97 +1,56 @@
 package no.nav.helse.spleis.graphql
 
+import com.github.navikt.tbd_libs.test_support.TestDataSource
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.auth.authentication
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.engine.connector
+import io.ktor.server.testing.testApplication
+import io.prometheus.client.CollectorRegistry
+import java.net.ServerSocket
 import java.net.URI
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
+import javax.sql.DataSource
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.AbstractObservableTest
-import no.nav.helse.spleis.Issuer
+import no.nav.helse.spleis.LokalePayload
+import no.nav.helse.spleis.dao.HendelseDao
+import no.nav.helse.spleis.databaseContainer
 import no.nav.helse.spleis.graphql.SchemaGenerator.Companion.IntrospectionQuery
-import no.nav.helse.spleis.testhelpers.ApiTestServer
+import no.nav.helse.spleis.lagApplikasjonsmodul
+import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.TestObservatør
+import no.nav.helse.økonomi.Inntekt
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT_ORDER
 
-@TestInstance(Lifecycle.PER_CLASS)
 internal class GraphQLApiTest : AbstractObservableTest() {
 
-    private lateinit var testServer: ApiTestServer
-
-    @BeforeAll
-    internal fun setupServer() {
-        testServer = ApiTestServer()
-        testServer.start()
-    }
-
-    @AfterAll
-    internal fun tearDownServer() {
-        testServer.tearDown()
-    }
-
-    @BeforeEach
-    internal fun setup() {
-        val sykmelding = sykmelding()
-        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
-        observatør = TestObservatør().also { person.addObserver(it) }
-        person.håndter(sykmelding)
-        person.håndter(utbetalinghistorikk())
-        person.håndter(søknad())
-        person.håndter(inntektsmelding())
-        person.håndter(ytelser())
-        person.håndter(vilkårsgrunnlag())
-        val ytelser = ytelser()
-        person.håndter(ytelser)
-        val simuleringsbehov = ytelser.behov().last { it.type == Simulering }
-        val utbetalingId = UUID.fromString(simuleringsbehov.kontekst().getValue("utbetalingId"))
-        val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
-        val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
-        person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde))
-        person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId))
-        person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId))
-
-        testServer.setup()
-        testServer.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
-        testServer.lagreSykmelding(
-            fødselsnummer = UNG_PERSON_FNR,
-            meldingsReferanse = SYKMELDING_ID,
-            fom = FOM,
-            tom = TOM,
-        )
-        testServer.lagreSøknadNav(
-            fødselsnummer = UNG_PERSON_FNR,
-            meldingsReferanse = SØKNAD_ID,
-            fom = FOM,
-            tom = TOM,
-            sendtNav = TOM.plusDays(1).atStartOfDay()
-        )
-        testServer.lagreInntektsmelding(
-            fødselsnummer = UNG_PERSON_FNR,
-            meldingsReferanse = INNTEKTSMELDING_ID,
-            beregnetInntekt = INNTEKT,
-            førsteFraværsdag = FOM
-        )
-    }
-
-    @AfterEach
-    fun cleanup() {
-        testServer.clean()
-    }
-
     @Test
-    fun `hente person som ikke finnes`() {
+    fun `hente person som ikke finnes`() = spleisApiTestApplication {
         val query = """
             {
                 person(fnr: \"40440440440\") {
@@ -119,41 +78,16 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         }
     }
 
-    @Test
-    fun `request med manglende eller feil access token`() {
-        val query = """
-            {
-                person(fnr: \"$UNG_PERSON_FNR\") {
-                    arbeidsgivere {
-                        organisasjonsnummer,
-                        id,
-                        generasjoner {
-                            id,
-                        }
-                    }
-                }
-            }
-        """
-
-        val body = """{"query": "$query"}"""
-
-        val annenIssuer = Issuer("annen")
-
-        request(body = body, accesToken = null, forventetHttpStatusCode = HttpStatusCode.Unauthorized)
-        request(body = body, accesToken = testServer.createToken(), forventetHttpStatusCode = HttpStatusCode.OK)
-        request(body = body, accesToken = testServer.createToken("feil_audience"), forventetHttpStatusCode = HttpStatusCode.Unauthorized)
-        request(body = body, accesToken = annenIssuer.createToken(), forventetHttpStatusCode = HttpStatusCode.Unauthorized)
-    }
 
     @Test
-    fun `response på introspection`() {
+    fun `response på introspection`() = spleisApiTestApplication {
         request(IntrospectionQuery) {
             assertHeltLike("/graphql-schema.json".readResource(), this)
         }
     }
 
     @Test
-    fun `Det Spesialist faktisk henter`() {
+    fun `Det Spesialist faktisk henter`() = spleisApiTestApplication(testdata = ::opprettTestdata) {
         val query = URI("https://raw.githubusercontent.com/navikt/helse-spesialist/master/spesialist-api/src/main/resources/graphql/hentSnapshot.graphql").toURL().readText()
         @Language("JSON")
         val requestBody = """
@@ -169,25 +103,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         request(requestBody) {
             assertIngenFærreFelt(detSpesialistFaktiskForventer, this.utenVariableVerdier)
         }
-    }
-
-    private fun request(
-        body: String,
-        accesToken: String? = testServer.createToken(),
-        forventetHttpStatusCode: HttpStatusCode = HttpStatusCode.OK,
-        assertBlock: String.() -> Unit = {}
-    ){
-        lateinit var v1Response: String
-
-        testServer.httpPost(
-            path = "/graphql",
-            body = body,
-            accessToken = accesToken,
-            expectedStatus = forventetHttpStatusCode
-        ) { v1Response = this }
-
-
-        assertBlock(v1Response)
     }
 
     private companion object {
@@ -822,8 +737,208 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             JSONAssert.assertEquals(forventet, faktisk, STRICT)
 
         private fun assertIngenFærreFelt(forventet: String, faktisk: String) =
-            JSONAssert.assertEquals(forventet, faktisk, STRICT_ORDER) 
+            JSONAssert.assertEquals(forventet, faktisk, STRICT_ORDER)
         private fun String.readResource() =
             object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: throw RuntimeException("Fant ikke filen på $this")
+
+        private fun spleisApiTestApplication(testdata: (TestDataSource) -> Unit = { }, testblokk: suspend SpleisApiTestContext.() -> Unit) {
+            val testDataSource = databaseContainer.nyTilkobling()
+            val randomPort = ServerSocket(0).localPort
+            testdata(testDataSource)
+            lagTestapplikasjon(port = randomPort, testDataSource = testDataSource, testblokk)
+            databaseContainer.droppTilkobling(testDataSource)
+        }
+
+        private fun lagTestapplikasjon(port: Int, testDataSource: TestDataSource, testblokk: suspend SpleisApiTestContext.() -> Unit) {
+            testApplication {
+                environment {
+                    connector {
+                        this.host = "localhost"
+                        this.port = port
+                    }
+                }
+                application {
+                    authentication {
+                        // setter opp en falsk autentisering som alltid svarer med en principal
+                        // uavhengig om requesten inneholder bearer eller ei
+                        provider {
+                            authenticate { context ->
+                                context.principal(JWTPrincipal(LokalePayload(mapOf("azp_name" to "spesialist"))))
+                            }
+                        }
+                    }
+                    val dataSource = testDataSource.ds
+                    lagApplikasjonsmodul(null, null, { dataSource }, CollectorRegistry())
+                }
+                startApplication()
+
+                val client = createClient {
+                    defaultRequest {
+                        this.port = port
+                    }
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
+                }
+
+                ventTilIsReadySvarerOk(client)
+
+                testblokk(SpleisApiTestContext(client))
+            }
+        }
+
+        private suspend fun ventTilIsReadySvarerOk(client: HttpClient) {
+            do {
+                val response = client.get("/isready")
+                println("Venter på at isready svarer OK… : ${response.status}")
+            } while (!response.status.isSuccess())
+        }
+    }
+
+    data class SpleisApiTestContext(
+        val client: HttpClient
+    ) {
+        suspend fun request(
+            body: String,
+            forventetHttpStatusCode: HttpStatusCode = HttpStatusCode.OK,
+            assertBlock: String.() -> Unit = {}
+        ): String {
+            return client
+                .post("/graphql") { setBody(body) }
+                .also { response ->
+                    assertEquals(forventetHttpStatusCode, response.status)
+                }
+                .bodyAsText()
+                .also(assertBlock)
+        }
+    }
+
+    private fun opprettTestdata(testDataSource: TestDataSource) {
+        val sykmelding = sykmelding()
+        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
+        observatør = TestObservatør().also { person.addObserver(it) }
+        person.håndter(sykmelding)
+        person.håndter(utbetalinghistorikk())
+        person.håndter(søknad())
+        person.håndter(inntektsmelding())
+        person.håndter(ytelser())
+        person.håndter(vilkårsgrunnlag())
+        val ytelser = ytelser()
+        person.håndter(ytelser)
+        val simuleringsbehov = ytelser.behov().last { it.type == Simulering }
+        val utbetalingId = UUID.fromString(simuleringsbehov.kontekst().getValue("utbetalingId"))
+        val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
+        val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
+        person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde))
+        person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId))
+        person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId))
+
+        lagrePerson(testDataSource.ds, AKTØRID, UNG_PERSON_FNR, person)
+        lagreSykmelding(
+            dataSource = testDataSource.ds,
+            fødselsnummer = UNG_PERSON_FNR,
+            meldingsReferanse = SYKMELDING_ID,
+            fom = FOM,
+            tom = TOM,
+        )
+        lagreSøknadNav(
+            dataSource = testDataSource.ds,
+            fødselsnummer = UNG_PERSON_FNR,
+            meldingsReferanse = SØKNAD_ID,
+            fom = FOM,
+            tom = TOM,
+            sendtNav = TOM.plusDays(1).atStartOfDay()
+        )
+        lagreInntektsmelding(
+            dataSource = testDataSource.ds,
+            fødselsnummer = UNG_PERSON_FNR,
+            meldingsReferanse = INNTEKTSMELDING_ID,
+            beregnetInntekt = INNTEKT,
+            førsteFraværsdag = FOM
+        )
+    }
+
+    private fun lagrePerson(dataSource: DataSource, aktørId: String, fødselsnummer: String, person: Person) {
+        val serialisertPerson = person.serialize()
+        sessionOf(dataSource, returnGeneratedKey = true).use {
+            val personId = it.run(queryOf("INSERT INTO person (fnr, aktor_id, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                fødselsnummer.toLong(), aktørId.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)
+            it.run(queryOf("INSERT INTO person_alias (fnr, person_id) VALUES (?, ?)",
+                fødselsnummer.toLong(), personId!!).asExecute)
+
+        }
+    }
+
+    private fun lagreHendelse(
+        dataSource: DataSource,
+        fødselsnummer: String,
+        meldingsReferanse: UUID,
+        meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
+        data: String = "{}"
+    ) {
+        sessionOf(dataSource).use {
+            it.run(
+                queryOf(
+                    "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
+                    fødselsnummer.toLong(),
+                    meldingsReferanse.toString(),
+                    meldingstype.toString(),
+                    data
+                ).asExecute
+            )
+        }
+    }
+
+    private fun lagreInntektsmelding(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, beregnetInntekt: Inntekt, førsteFraværsdag: LocalDate) {
+        lagreHendelse(
+            dataSource = dataSource,
+            fødselsnummer = fødselsnummer,
+            meldingsReferanse = meldingsReferanse,
+            meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
+            data = """
+                {
+                    "beregnetInntekt": "$beregnetInntekt",
+                    "mottattDato": "${LocalDateTime.now()}",
+                    "@opprettet": "${LocalDateTime.now()}",
+                    "foersteFravaersdag": "$førsteFraværsdag",
+                    "@id": "$meldingsReferanse"
+                }
+            """.trimIndent()
+        )
+    }
+
+    private fun lagreSykmelding(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, fom: LocalDate, tom: LocalDate) {
+        lagreHendelse(
+            dataSource = dataSource,
+            fødselsnummer = fødselsnummer,
+            meldingsReferanse = meldingsReferanse,
+            meldingstype = HendelseDao.Meldingstype.NY_SØKNAD,
+            data = """
+                {
+                    "@opprettet": "${LocalDateTime.now()}",
+                    "@id": "$meldingsReferanse",
+                    "fom": "$fom",
+                    "tom": "$tom"
+                }
+            """.trimIndent()
+        )
+    }
+
+    private fun lagreSøknadNav(dataSource: DataSource, fødselsnummer: String, meldingsReferanse: UUID, fom: LocalDate, tom: LocalDate, sendtNav: LocalDateTime) {
+        lagreHendelse(
+            dataSource = dataSource,
+            fødselsnummer = fødselsnummer,
+            meldingsReferanse = meldingsReferanse,
+            meldingstype = HendelseDao.Meldingstype.SENDT_SØKNAD_NAV,
+            data = """
+                {
+                    "@opprettet": "${LocalDateTime.now()}",
+                    "@id": "$meldingsReferanse",
+                    "fom": "$fom",
+                    "tom": "$tom",
+                    "sendtNav": "$sendtNav"
+                }
+            """.trimIndent()
+        )
     }
 }

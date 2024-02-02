@@ -12,6 +12,7 @@ import io.ktor.server.engine.connector
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
+import java.time.Duration
 import no.nav.helse.spleis.SpurteDuClient
 import no.nav.helse.spleis.objectMapper
 
@@ -22,7 +23,8 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
 
     internal val azureConfig = AzureAdAppConfig(
         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-        configurationUrl = env.getValue("AZURE_APP_WELL_KNOWN_URL")
+        issuer = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
+        jwkProvider = JwkProviderBuilder(URI(env.getValue("AZURE_OPENID_CONFIG_JWKS_URI")).toURL()).build(),
     )
 
     internal val azureClient = createAzureTokenClientFromEnvironment(env)
@@ -48,20 +50,11 @@ internal class KtorConfig(private val httpPort: Int = 8080) {
     }
 }
 
-internal class AzureAdAppConfig(private val clientId: String, configurationUrl: String) {
-    private val issuer: String
+internal class AzureAdAppConfig(
+    private val clientId: String,
+    private val issuer: String,
     private val jwkProvider: JwkProvider
-    private val jwksUri: String
-
-    init {
-        configurationUrl.getJson().also {
-            this.issuer = it["issuer"].textValue()
-            this.jwksUri = it["jwks_uri"].textValue()
-        }
-
-        jwkProvider = JwkProviderBuilder(URI(this.jwksUri).toURL()).build()
-    }
-
+) {
     fun configureVerification(configuration: JWTAuthenticationProvider.Config) {
         configuration.verifier(jwkProvider, issuer) {
             withAudience(clientId)
@@ -77,6 +70,8 @@ internal class AzureAdAppConfig(private val clientId: String, configurationUrl: 
 
     private fun String.fetchUrl() = with(URI(this).toURL().openConnection() as HttpURLConnection) {
         requestMethod = "GET"
+        connectTimeout = Duration.ofSeconds(5).toMillis().toInt()
+        readTimeout = Duration.ofSeconds(5).toMillis().toInt()
         val stream: InputStream? = if (responseCode < 300) this.inputStream else this.errorStream
         responseCode to stream?.bufferedReader()?.readText()
     }

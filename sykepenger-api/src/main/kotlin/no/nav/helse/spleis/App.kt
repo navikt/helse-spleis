@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.azure.AzureTokenProvider
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.embeddedServer
@@ -62,29 +63,8 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, az
             ktorConfig.configure(this)
             log = logg
             module {
-                install(CallId) {
-                    header("callId")
-                    verify { it.isNotEmpty() }
-                    generate { UUID.randomUUID().toString() }
-                }
-                install(CallLogging) {
-                    logger = LoggerFactory.getLogger("no.nav.helse.spleis.api.CallLogging")
-                    level = Level.INFO
-                    callIdMdc("callId")
-                    disableDefaultColors()
-                    filter { call -> call.request.path().startsWith("/api/") }
-                }
-                install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-                requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), collectorRegistry)
-                nais(collectorRegistry)
                 azureAdAppAuthentication(azureConfig)
-
-                val hendelseDao = HendelseDao(dataSourceProvider)
-                val personDao = PersonDao(dataSourceProvider)
-
-                spannerApi(hendelseDao, personDao, spurteDuClient, azureClient)
-                sporingApi(hendelseDao, personDao)
-                installGraphQLApi(hendelseDao, personDao)
+                lagApplikasjonsmodul(azureClient, spurteDuClient, dataSourceProvider, collectorRegistry)
             }
         },
         configure = {
@@ -92,3 +72,32 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, az
         }
     )
 
+internal fun Application.lagApplikasjonsmodul(
+    azureClient: AzureTokenProvider?,
+    spurteDuClient: SpurteDuClient?,
+    dataSourceProvider: () -> DataSource,
+    collectorRegistry: CollectorRegistry
+) {
+    install(CallId) {
+        header("callId")
+        verify { it.isNotEmpty() }
+        generate { UUID.randomUUID().toString() }
+    }
+    install(CallLogging) {
+        logger = LoggerFactory.getLogger("no.nav.helse.spleis.api.CallLogging")
+        level = Level.INFO
+        callIdMdc("callId")
+        disableDefaultColors()
+        filter { call -> call.request.path().startsWith("/api/") }
+    }
+    install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+    requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), collectorRegistry)
+    nais(collectorRegistry)
+
+    val hendelseDao = HendelseDao(dataSourceProvider)
+    val personDao = PersonDao(dataSourceProvider)
+
+    spannerApi(hendelseDao, personDao, spurteDuClient, azureClient)
+    sporingApi(hendelseDao, personDao)
+    installGraphQLApi(hendelseDao, personDao)
+}

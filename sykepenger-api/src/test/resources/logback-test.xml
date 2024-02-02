@@ -28,6 +28,7 @@
     <logger name="io.netty" level="WARN" />
     <logger name="org.testcontainers" level="WARN" />
     <logger name="com.github.dockerjava" level="WARN" />
+    <logger name="io.ktor.server.auth" level="TRACE" />
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
