@@ -17,7 +17,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.person.Person
@@ -39,18 +38,20 @@ import org.junit.jupiter.api.Assertions
 
 internal class ApiTestServer(private val port: Int = randomPort()) {
 
-    private val dataSource: TestDataSource = databaseContainer.nyTilkobling()
+    private lateinit var dataSource: TestDataSource
 
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort())
     private lateinit var jwtStub: JwtStub
 
     private lateinit var app: ApplicationEngine
     private lateinit var appBaseUrl: String
-    private val teller = AtomicInteger()
+
+    internal fun setup() {
+        dataSource = databaseContainer.nyTilkobling()
+    }
 
     internal fun clean() {
-        teller.set(0)
-        dataSource.cleanUp()
+        databaseContainer.droppTilkobling(dataSource)
     }
 
     internal fun tearDown() {

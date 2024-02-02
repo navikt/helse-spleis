@@ -12,10 +12,10 @@ import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.objectMapper
 import org.intellij.lang.annotations.Language
 
-internal class HendelseDao(private val dataSource: DataSource) {
+internal class HendelseDao(private val dataSource: () -> DataSource) {
 
     fun hentHendelse(meldingsReferanse: UUID): String? {
-        return sessionOf(dataSource).use { session ->
+        return sessionOf(dataSource()).use { session ->
             session.run(
                 queryOf(
                     "SELECT data FROM melding WHERE melding_id = ?",
@@ -39,7 +39,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
                 'INNTEKTSMELDING'
             )
         """
-        return sessionOf(dataSource).use { session ->
+        return sessionOf(dataSource()).use { session ->
             session.run(queryOf(statement, fødselsnummer).map { row ->
                 Meldingstype.valueOf(row.string("melding_type")) to row.string("data")
             }.asList)
@@ -128,7 +128,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     }
 
     fun hentAlleHendelser(fødselsnummer: Long): Map<UUID, Pair<Navn, Json>> {
-        return sessionOf(dataSource).use { session ->
+        return sessionOf(dataSource()).use { session ->
             session.run(
                 queryOf(
                     "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (${Meldingstype.values().joinToString { "?" }})",

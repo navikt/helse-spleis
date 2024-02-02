@@ -50,21 +50,21 @@ internal class HendelseDaoTest {
 
     @Test
     fun `hentAlleHendelser sql er valid`() {
-        val dao = HendelseDao(dataSource.ds)
+        val dao = HendelseDao(dataSource::ds)
         val events = dao.hentAlleHendelser(UNG_PERSON_FNR.toLong())
         Assertions.assertEquals(1, events.size)
     }
 
     @Test
     fun `hentHendelser sql er valid`() {
-        val dao = HendelseDao(dataSource.ds)
+        val dao = HendelseDao(dataSource::ds)
         val ingenEvents = dao.hentHendelser(UNG_PERSON_FNR.toLong())
         Assertions.assertEquals(1, ingenEvents.size)
     }
 
     @Test
     fun `hentHendelse sql er valid`() {
-        val dao = HendelseDao(dataSource.ds)
+        val dao = HendelseDao(dataSource::ds)
         val event = dao.hentHendelse(meldingsReferanse)
         Assertions.assertNotNull(event)
     }
