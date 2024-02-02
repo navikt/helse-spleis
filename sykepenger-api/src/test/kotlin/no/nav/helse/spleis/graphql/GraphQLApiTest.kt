@@ -2,6 +2,7 @@ package no.nav.helse.spleis.graphql
 
 import io.ktor.http.HttpStatusCode
 import java.net.URI
+import java.net.URL
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
@@ -11,11 +12,12 @@ import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.Issuer
 import no.nav.helse.spleis.graphql.SchemaGenerator.Companion.IntrospectionQuery
+import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.ApiTestServer
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -62,7 +64,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId))
         person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId))
 
-        testServer.setup()
+        testServer.clean()
         testServer.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)
         testServer.lagreSykmelding(
             fødselsnummer = UNG_PERSON_FNR,
@@ -83,11 +85,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             beregnetInntekt = INNTEKT,
             førsteFraværsdag = FOM
         )
-    }
-
-    @AfterEach
-    fun cleanup() {
-        testServer.clean()
     }
 
     @Test

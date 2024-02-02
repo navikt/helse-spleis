@@ -15,6 +15,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import javax.sql.DataSource
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
@@ -55,7 +56,10 @@ internal object Api {
         ))
     }
 
-    internal fun Application.installGraphQLApi(hendelseDao: HendelseDao, personDao: PersonDao) {
+    internal fun Application.installGraphQLApi(dataSource: DataSource) {
+        val personDao = PersonDao(dataSource)
+        val hendelseDao = HendelseDao(dataSource)
+
         routing {
             authenticate(optional = true) {
                 post("/graphql{...}") {

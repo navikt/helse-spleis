@@ -6,21 +6,21 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.serde.SerialisertPerson
 
-internal class PersonDao(private val dataSource: () -> DataSource) {
+internal class PersonDao(private val dataSource: DataSource) {
     fun hentPersonFraFnr(fødselsnummer: Long) =
         hentPerson(queryOf("SELECT data FROM person WHERE id = (SELECT person_id FROM person_alias WHERE fnr=:fnr);", mapOf(
             "fnr" to fødselsnummer
         )))
 
     fun hentFødselsnummer(aktørId: Long) =
-        sessionOf(dataSource()).use { session ->
+        sessionOf(dataSource).use { session ->
             session.run(queryOf("SELECT fnr FROM person WHERE aktor_id = ?;", aktørId).map {
                 it.long("fnr")
             }.asList)
         }.singleOrNullOrThrow()
 
     private fun hentPerson(query: Query) =
-        sessionOf(dataSource())
+        sessionOf(dataSource)
             .use { session ->
                 session.run(query.map { SerialisertPerson(it.string("data")) }.asList)
             }

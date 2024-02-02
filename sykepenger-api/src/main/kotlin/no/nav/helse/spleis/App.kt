@@ -23,8 +23,6 @@ import javax.sql.DataSource
 import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.KtorConfig
-import no.nav.helse.spleis.dao.HendelseDao
-import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.Api.installGraphQLApi
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -73,13 +71,10 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, az
                 requestResponseTracing(LoggerFactory.getLogger("no.nav.helse.spleis.api.Tracing"), collectorRegistry)
                 nais(collectorRegistry)
                 azureAdAppAuthentication(azureConfig)
-
-                val hendelseDao = HendelseDao(dataSourceProvider)
-                val personDao = PersonDao(dataSourceProvider)
-
-                spannerApi(hendelseDao, personDao, spurteDuClient, azureClient)
-                sporingApi(hendelseDao, personDao)
-                installGraphQLApi(hendelseDao, personDao)
+                val dataSource = dataSourceProvider()
+                spannerApi(dataSource, spurteDuClient, azureClient)
+                sporingApi(dataSource)
+                installGraphQLApi(dataSource)
             }
         },
         configure = {
