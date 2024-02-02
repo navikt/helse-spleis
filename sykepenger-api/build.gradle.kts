@@ -4,7 +4,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
-val tbdLibsVersion = "2024.01.26-10.10-af0ac44d"
+val tbdLibsVersion = "2024.02.02-20.07-81f4fa76"
 val micrometerRegistryPrometheusVersion = "1.12.2"
 val ktorVersion = "2.3.7"
 val wireMockVersion = "3.3.1"
