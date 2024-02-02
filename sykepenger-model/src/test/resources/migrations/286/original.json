@@ -6,7 +6,13 @@
           "vedtaksperiode": {
             "generasjoner": [
               {
-                "tilstand": "TIL_INFOTRYGD"
+                "tilstand": "TIL_INFOTRYGD",
+                "kilde": {
+                  "meldingsreferanseId": "ec06caba-09c0-4291-a336-2753a101ea07",
+                  "innsendt": "i fjor",
+                  "registert": "i fjor",
+                  "avsender": "SYSTEM"
+                }
               }
             ]
           }
@@ -15,7 +21,8 @@
           "vedtaksperiode": {
             "generasjoner": [
               {
-                "tilstand": "VEDTAK_IVERKSATT"
+                "tilstand": "VEDTAK_IVERKSATT",
+                "tidsstempel": "i dag"
               },
               {
                 "tilstand": "TIL_INFOTRYGD"

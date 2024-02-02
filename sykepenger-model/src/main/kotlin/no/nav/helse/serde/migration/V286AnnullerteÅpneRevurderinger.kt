@@ -15,11 +15,28 @@ internal class V286AnnullerteÅpneRevurderinger: JsonMigration(version = 286) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val organisasjonsnummer = arbeidsgiver.path("organisasjonsnummer").asText()
 
-            arbeidsgiver.path("forkastede").forEach { migrerVedtaksperiode(aktørId, organisasjonsnummer, it.path("vedtaksperiode")) }
+            arbeidsgiver.path("vedtaksperioder").forEach { migrerVedtaksperiode(aktørId, organisasjonsnummer, it) }
+            arbeidsgiver.path("forkastede").forEach { migrerForkastetVedtaksperiode(aktørId, organisasjonsnummer, it.path("vedtaksperiode")) }
         }
     }
 
     private fun migrerVedtaksperiode(aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
+        vedtaksperiode.path("generasjoner")
+            .filterNot { it.hasNonNull("kilde") }
+            .forEach {
+                val generasjon = it as ObjectNode
+                val tidsstempel = generasjon.path("tidsstempel").asText()
+                generasjon.withObject("kilde").apply {
+                    put("meldingsreferanseId", "00000000-0000-0000-0000-000000000000")
+                    put("innsendt", tidsstempel)
+                    put("registrert", tidsstempel)
+                    put("avsender", "SYSTEM")
+                }
+            }
+    }
+    private fun migrerForkastetVedtaksperiode(aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
+        migrerVedtaksperiode(aktørId, orgnr, vedtaksperiode)
+
         val generasjonerNode = vedtaksperiode.path("generasjoner") as ArrayNode
         val generasjoner = generasjonerNode.toList()
         if (generasjoner.size < 2) return

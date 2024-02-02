@@ -386,7 +386,7 @@ internal data class PersonData(
             data class InntektsopplysningData(
                 private val id: UUID,
                 private val dato: LocalDate,
-                private val hendelseId: UUID?,
+                private val hendelseId: UUID,
                 private val beløp: Double?,
                 private val kilde: String,
                 private val forklaring: String?,
@@ -395,12 +395,6 @@ internal data class PersonData(
                 private val overstyrtInntektId: UUID?,
                 private val skatteopplysninger: List<SkatteopplysningData>?
             ) {
-                private companion object {
-                    private val IKKE_MIGRERT_HENDELSE_ID = UUID.fromString("00000000-0000-0000-0000-000000000000")
-                }
-
-                private val ekteHendelseId = hendelseId ?: IKKE_MIGRERT_HENDELSE_ID // TODO: migrere json slik at alle inntektsopplysninger har hendelseId (det er bare IKKE_RAPPORTERT)
-
                 data class SubsumsjonData(
                     private val paragraf: String,
                     private val ledd: Int?,
@@ -427,7 +421,7 @@ internal data class PersonData(
                     Saksbehandler(
                         id = id,
                         dato = dato,
-                        hendelseId = ekteHendelseId,
+                        hendelseId = hendelseId,
                         beløp = requireNotNull(beløp).månedlig,
                         forklaring = forklaring,
                         subsumsjon = subsumsjon?.tilModellobjekt(),
@@ -438,28 +432,28 @@ internal data class PersonData(
                     SkjønnsmessigFastsatt(
                         id = id,
                         dato = dato,
-                        hendelseId = ekteHendelseId,
+                        hendelseId = hendelseId,
                         beløp = requireNotNull(beløp).månedlig,
                         overstyrtInntekt = builder.hentInntekt(requireNotNull(overstyrtInntektId)),
                         tidsstempel = tidsstempel
                     )
                 private fun somIkkeRapportert() = IkkeRapportert(
                     id = id,
-                    hendelseId = ekteHendelseId,
+                    hendelseId = hendelseId,
                     dato = dato,
                     tidsstempel = tidsstempel
                 )
                 private fun somInntektsmelding() = Inntektsmelding(
                     id = id,
                     dato = dato,
-                    hendelseId = ekteHendelseId,
+                    hendelseId = hendelseId,
                     beløp = requireNotNull(beløp).månedlig,
                     tidsstempel = tidsstempel
                 )
                 private fun somInfotrygd() = Infotrygd(
                     id = id,
                     dato = dato,
-                    hendelseId = ekteHendelseId,
+                    hendelseId = hendelseId,
                     beløp = requireNotNull(beløp).månedlig,
                     tidsstempel = tidsstempel
                 )
@@ -471,7 +465,7 @@ internal data class PersonData(
                     },
                     ansattPerioder = emptyList(),
                     tidsstempel = tidsstempel,
-                    hendelseId = ekteHendelseId
+                    hendelseId = hendelseId
                 )
             }
         }
@@ -859,7 +853,7 @@ internal data class PersonData(
                 private val tilstand: TilstandData,
                 private val vedtakFattet: LocalDateTime?,
                 private val avsluttet: LocalDateTime?,
-                private val kilde: KildeData?,
+                private val kilde: KildeData,
                 private val endringer: List<EndringData>
             ) {
                 internal enum class TilstandData {
@@ -911,17 +905,6 @@ internal data class PersonData(
                         registert = registrert,
                         avsender = avsender.tilModellobjekt()
                     )
-
-                    companion object {
-                        private val UKJENT_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
-                        // TODO: om en måneds tid fra denne commiten vil alle generasjoner i spleis ha blitt migrert automatisk pga. nattlig avstemming
-                        fun ukjentKilde(generasjonOpprettet: LocalDateTime) = Generasjoner.Generasjonkilde(
-                            meldingsreferanseId = UKJENT_UUID,
-                            innsendt = generasjonOpprettet,
-                            registert = generasjonOpprettet,
-                            avsender = Avsender.SYSTEM
-                        )
-                    }
                 }
 
                 internal fun tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner.Generasjon(
@@ -930,7 +913,7 @@ internal data class PersonData(
                     endringer = endringer.map { it.tilModellobjekt(grunnlagoppslag, utbetalinger) }.toMutableList(),
                     vedtakFattet = vedtakFattet,
                     avsluttet = avsluttet,
-                    kilde = kilde?.tilModellObjekt() ?: KildeData.ukjentKilde(endringer.first().tidsstempel)
+                    kilde = kilde.tilModellObjekt()
                 )
                 companion object {
                     fun List<GenerasjonData>.tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =

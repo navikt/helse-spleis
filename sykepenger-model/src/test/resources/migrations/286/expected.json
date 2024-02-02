@@ -6,7 +6,13 @@
           "vedtaksperiode": {
             "generasjoner": [
               {
-                "tilstand": "TIL_INFOTRYGD"
+                "tilstand": "TIL_INFOTRYGD",
+                "kilde": {
+                  "meldingsreferanseId": "ec06caba-09c0-4291-a336-2753a101ea07",
+                  "innsendt": "i fjor",
+                  "registert": "i fjor",
+                  "avsender": "SYSTEM"
+                }
               }
             ]
           }
@@ -15,10 +21,23 @@
           "vedtaksperiode": {
             "generasjoner": [
               {
-                "tilstand": "VEDTAK_IVERKSATT"
+                "tilstand": "VEDTAK_IVERKSATT",
+                "tidsstempel": "i dag",
+                "kilde": {
+                  "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
+                  "innsendt": "i dag",
+                  "registrert": "i dag",
+                  "avsender": "SYSTEM"
+                }
               },
               {
-                "tilstand": "TIL_INFOTRYGD"
+                "tilstand": "TIL_INFOTRYGD",
+                "kilde": {
+                  "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
+                  "innsendt": "",
+                  "registrert": "",
+                  "avsender": "SYSTEM"
+                }
               }
             ]
           }
@@ -27,12 +46,24 @@
           "vedtaksperiode": {
             "generasjoner": [
               {
-                "tilstand": "VEDTAK_IVERKSATT"
+                "tilstand": "VEDTAK_IVERKSATT",
+                "kilde": {
+                  "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
+                  "innsendt": "",
+                  "registrert": "",
+                  "avsender": "SYSTEM"
+                }
               },
               {
                 "id": "nisse",
                 "tilstand": "TIL_INFOTRYGD",
-                "avsluttet": "på mandag"
+                "avsluttet": "på mandag",
+                "kilde": {
+                  "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
+                  "innsendt": "",
+                  "registrert": "",
+                  "avsender": "SYSTEM"
+                }
               }
             ]
           }
@@ -41,12 +72,24 @@
           "vedtaksperiode": {
             "generasjoner": [
               {
-                "tilstand": "VEDTAK_IVERKSATT"
+                "tilstand": "VEDTAK_IVERKSATT",
+                "kilde": {
+                  "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
+                  "innsendt": "",
+                  "registrert": "",
+                  "avsender": "SYSTEM"
+                }
               },
               {
                 "id": "fjomp",
                 "tilstand": "TIL_INFOTRYGD",
-                "avsluttet": "på onsdag"
+                "avsluttet": "på onsdag",
+                "kilde": {
+                  "meldingsreferanseId": "00000000-0000-0000-0000-000000000000",
+                  "innsendt": "",
+                  "registrert": "",
+                  "avsender": "SYSTEM"
+                }
               }
             ]
           }
