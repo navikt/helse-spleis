@@ -2346,7 +2346,7 @@ internal class Vedtaksperiode private constructor(
             it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
         }
 
-        internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
+        private val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
 
         private val VILKÅRSPRØVD_PÅ = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt && vedtaksperiode.vilkårsgrunnlag?.erArbeidsgiverRelevant(vedtaksperiode.organisasjonsnummer) == true }
