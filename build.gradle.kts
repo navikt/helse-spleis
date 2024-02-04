@@ -6,7 +6,7 @@ plugins {
 
 val junitJupiterVersion = "5.10.1"
 val jvmTargetVersion = 21
-val gradleVersjon = "8.5"
+val gradleVersjon = "8.6"
 
 allprojects {
     group = "no.nav.helse"
