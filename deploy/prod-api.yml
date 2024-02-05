@@ -46,6 +46,7 @@ spec:
         groups:
           - id: "611669fa-de5c-4dc2-a0e8-6041a019992a" # speil-brukere
           - id: "f787f900-6697-440d-a086-d5bb56e26a9c" # tbd
+          - id: "c0227409-2085-4eb2-b487-c4ba270986a3" # nais-tbd
           - id: "382f42f4-f46b-40c1-849b-38d6b5a1f639" # sykepenger-spanner
   accessPolicy:
     inbound:

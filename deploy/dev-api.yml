@@ -47,6 +47,7 @@ spec:
         groups:
           - id: "611669fa-de5c-4dc2-a0e8-6041a019992a" # speil-brukere
           - id: "f787f900-6697-440d-a086-d5bb56e26a9c" # tbd
+          - id: "c0227409-2085-4eb2-b487-c4ba270986a3" # nais-tbd
           - id: "317665ad-1402-458e-b8e6-9cb50afc1252" # speil-brukere-dev
   accessPolicy:
     inbound:
