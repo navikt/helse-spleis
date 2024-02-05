@@ -30,36 +30,35 @@ dependencies {
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 }
 
-tasks {
-    val copyJars = create("copy-jars") {
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
-            }
+val copyJars = tasks.create("copy-jars") {
+    doLast {
+        configurations.runtimeClasspath.get().forEach {
+            val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
+            if (!file.exists())
+                it.copyTo(file)
         }
     }
-    get("build").finalizedBy(copyJars)
+}
 
-    withType<Jar> {
-        archiveBaseName.set("app")
+tasks.get("build").finalizedBy(copyJars)
 
-        manifest {
-            attributes["Main-Class"] = mainClass
-            attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                it.name
-            }
+tasks.withType<Jar> {
+    archiveBaseName.set("app")
+
+    manifest {
+        attributes["Main-Class"] = mainClass
+        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
+            it.name
         }
-        finalizedBy(":sykepenger-mediators:remove_spleis_mediators_db_container")
     }
+    finalizedBy(":sykepenger-mediators:remove_spleis_mediators_db_container")
+}
 
-    withType<Test> {
+tasks.withType<Test> {
         systemProperty("junit.jupiter.execution.parallel.enabled", "true")
         systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
         systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
         systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "8")
-    }
 }
 
 tasks.create("remove_spleis_mediators_db_container", DockerRemoveContainer::class) {
