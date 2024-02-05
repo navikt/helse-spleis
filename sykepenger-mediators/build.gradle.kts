@@ -31,6 +31,17 @@ dependencies {
 }
 
 tasks {
+    val copyJars = create("copy-jars") {
+        doLast {
+            configurations.runtimeClasspath.get().forEach {
+                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
+                if (!file.exists())
+                    it.copyTo(file)
+            }
+        }
+    }
+    get("build").finalizedBy(copyJars)
+
     withType<Jar> {
         archiveBaseName.set("app")
 
@@ -38,14 +49,6 @@ tasks {
             attributes["Main-Class"] = mainClass
             attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
                 it.name
-            }
-        }
-
-        doLast {
-            configurations.runtimeClasspath.get().forEach {
-                val file = File("${layout.buildDirectory.get()}/libs/${it.name}")
-                if (!file.exists())
-                    it.copyTo(file)
             }
         }
         finalizedBy(":sykepenger-mediators:remove_spleis_mediators_db_container")
