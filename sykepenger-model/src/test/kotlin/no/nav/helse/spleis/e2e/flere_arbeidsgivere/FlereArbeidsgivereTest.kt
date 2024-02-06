@@ -20,7 +20,9 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
@@ -75,6 +77,87 @@ import org.junit.jupiter.api.assertThrows
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `tre arbeidsgivere med flere perioder som overlapper`() {
+        a1 {
+            nyPeriode(1.januar til 31.januar)
+        }
+        a2 {
+            nyPeriode(1.januar til 31.januar)
+        }
+        a3 {
+            nyPeriode(2.januar til 20.januar)
+            nyPeriode(21.januar til 31.januar)
+        }
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a3 { håndterInntektsmelding(listOf(2.januar til 17.januar)) }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a3 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 { assertEquals(1, inspektør.utbetalinger.size) }
+        a2 { assertEquals(1, inspektør.utbetalinger.size) }
+        a3 { assertEquals(1, inspektør.utbetalinger.size) }
+    }
+
+    @Test
+    fun `tre arbeidsgivere med flere perioder som overlapper - første periode hos a3 skal i auu`() {
+        a1 {
+            nyPeriode(1.januar til 31.januar)
+        }
+        a2 {
+            nyPeriode(1.januar til 31.januar)
+        }
+        a3 {
+            nyPeriode(2.januar til 18.januar)
+            nyPeriode(19.januar til 31.januar)
+        }
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a3 { håndterInntektsmelding(listOf(2.januar til 17.januar)) }
+        a3 {
+            håndterSøknad(Sykdom(2.januar, 18.januar, 100.prosent), Ferie(18.januar, 18.januar))
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a3 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 { assertEquals(1, inspektør.utbetalinger.size) }
+        a2 { assertEquals(1, inspektør.utbetalinger.size) }
+        a3 { assertEquals(1, inspektør.utbetalinger.size) }
+    }
 
     @Test
     fun `mangler refusjonsopplysninger etter at skjæringstidspunktet flyttes`() {
