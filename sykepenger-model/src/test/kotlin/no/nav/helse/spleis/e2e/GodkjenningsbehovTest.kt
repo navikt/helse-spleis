@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -57,12 +56,9 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
-        assertForventetFeil(
-            forklaring = "VilkårsgrunnlagId hentes fra historikken, ikke det som ligger i generasjonen",
-            nå = { assertEquals(vilkårsgrunnlagId2, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode)) },
-            ønsket = { assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode)) }
-        )
+        assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode))
     }
+
     @Test
     fun `sender med feil vilkårsgrunnlagId i første godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden mens den står i avventer simulering`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -83,11 +79,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
 
-        assertForventetFeil(
-            forklaring = "VilkårsgrunnlagId hentes fra historikken, ikke det som ligger i generasjonen",
-            nå = { assertEquals(vilkårsgrunnlagId2, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode)) },
-            ønsket = { assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode)) }
-        )
+        assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode))
     }
 
     @Test

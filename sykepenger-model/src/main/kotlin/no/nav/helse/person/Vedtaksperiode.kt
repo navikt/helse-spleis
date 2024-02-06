@@ -950,12 +950,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt))
         val erForlengelse = erForlengelse()
         val builder = GodkjenningsbehovBuilder(erForlengelse, arbeidsgiver.kanForkastes(this))
-        builder.periode(periode.start, periode.endInclusive)
         builder.orgnummereMedRelevanteArbeidsforhold(person.relevanteArbeidsgivere(skjæringstidspunkt).toSet())
-        vilkårsgrunnlag.byggGodkjenningsbehov(builder)
         generasjoner.godkjenning(hendelse, builder)
     }
 
