@@ -81,6 +81,9 @@ class ArbeidsgiverInntektsopplysning(
         return this
     }
 
+    private fun refusjonsbeløp(dato: LocalDate, hendelse: IAktivitetslogg) =
+        inntektsopplysning.refusjonsbeløp(dato, hendelse, refusjonsopplysninger)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ArbeidsgiverInntektsopplysning) return false
@@ -240,11 +243,11 @@ class ArbeidsgiverInntektsopplysning(
                 Arbeidsgiverne i sykepengegrunlaget er ${map { it.orgnummer }}"""
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+        internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver, hendelse: IAktivitetslogg): Økonomi {
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer, dato)
             val inntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt(dato)
             val beregningsgrunnlag = arbeidsgiverInntektsopplysning.beregningsgrunnlag(skjæringstidspunkt)
-            val refusjonsbeløp = checkNotNull(arbeidsgiverInntektsopplysning.refusjonsopplysninger.refusjonsbeløpOrNull(dato)) {
+            val refusjonsbeløp = checkNotNull(arbeidsgiverInntektsopplysning.refusjonsbeløp(dato, hendelse)) {
                 "Har ingen refusjonsopplysninger på vilkårsgrunnlag med skjæringstidspunkt $skjæringstidspunkt for utbetalingsdag $dato"
             }
             return økonomi.inntekt(

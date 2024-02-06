@@ -101,6 +101,7 @@ enum class Varselkode(
     // RE: Refusjon
     RV_RE_1("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", avviklet = true),
     RV_RE_2("Mangler refusjonsopplysninger", avviklet = true),
+    RV_RE_3("En kul refusjonsaktig error med ghost ogsånn"),
 
     // IT: Infotrygd
     RV_IT_1("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig", funksjonellFeilTekst = "Det er utbetalt en nyere periode i Infotrygd"),

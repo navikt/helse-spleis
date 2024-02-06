@@ -4,10 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_3
 import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 internal class SkattSykepengegrunnlag private constructor(
     id: UUID,
@@ -122,6 +126,11 @@ internal class SkattSykepengegrunnlag private constructor(
     override fun erSamme(other: Inntektsopplysning): Boolean {
         return other is SkattSykepengegrunnlag && this.dato == other.dato && this.inntektsopplysninger == other.inntektsopplysninger
     }
+
+    override fun refusjonsbeløp(dag: LocalDate, hendelse: IAktivitetslogg, refusjonsopplysninger: Refusjonsopplysninger) =
+        refusjonsopplysninger.refusjonsbeløpOrNull(dag) ?: (INGEN.also {
+            hendelse.varsel(RV_RE_3)
+        })
 
     internal operator fun plus(other: SkattSykepengegrunnlag?): SkattSykepengegrunnlag {
         if (other == null) return this

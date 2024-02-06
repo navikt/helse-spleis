@@ -302,8 +302,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             dato: LocalDate,
             økonomi: Økonomi,
             regler: ArbeidsgiverRegler,
-            subsumsjonObserver: SubsumsjonObserver
-        ) = sykepengegrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
+            subsumsjonObserver: SubsumsjonObserver,
+            hendelse: IAktivitetslogg
+        ) = sykepengegrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver, hendelse)
 
         private fun utenInntekt(økonomi: Økonomi): Økonomi {
             return sykepengegrunnlag.utenInntekt(økonomi)
@@ -393,7 +394,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     hendelse.varsel(RV_IV_8)
                     return utenInntekt(elementer, dato, økonomi)
                 }
-                return vilkårsgrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver)
+                return vilkårsgrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonObserver, hendelse)
             }
 
             private fun utenInntekt(

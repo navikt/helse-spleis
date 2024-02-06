@@ -14,6 +14,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.hendelser.Inntektsmelding as InntektsmeldingHendelse
 
@@ -69,6 +70,8 @@ abstract class Inntektsopplysning protected constructor(
     internal open fun overstyrer(gammel: SkjønnsmessigFastsatt): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre skjønnsmessig fastsatt-inntekt")
     }
+    internal open fun refusjonsbeløp(dag: LocalDate, hendelse: IAktivitetslogg, refusjonsopplysninger: Refusjonsopplysninger): Inntekt? =
+        refusjonsopplysninger.refusjonsbeløpOrNull(dag)
 
     final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)
 
@@ -102,7 +105,7 @@ abstract class Inntektsopplysning protected constructor(
         arbeidsgiver: Arbeidsgiver,
         hendelse: IAktivitetslogg,
         oppholdsperiodeMellom: Periode?,
-        refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
+        refusjonsopplysninger: Refusjonsopplysninger,
         orgnummer: String,
         beløp: Inntekt? = null
     ) {}
