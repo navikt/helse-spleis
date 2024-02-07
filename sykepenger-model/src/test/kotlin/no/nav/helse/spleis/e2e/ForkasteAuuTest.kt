@@ -1,19 +1,24 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -195,6 +200,29 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
+    fun `Forkastet AUU skal forkaste sine forlengelser`() {
+        a1 {
+            nyPeriode(2.januar til 16.januar)
+            nyPeriode(17.januar til 31.januar)
+
+            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)))
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+
+            assertForventetFeil(
+                forklaring = "Skal forkaste forlengelsen, ikke flytte skjøringstidspunktet",
+                nå = {
+                    assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+                    assertEquals(1.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
+                },
+                ønsket = {
+                    assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
+                }
+            )
+
         }
     }
 }
