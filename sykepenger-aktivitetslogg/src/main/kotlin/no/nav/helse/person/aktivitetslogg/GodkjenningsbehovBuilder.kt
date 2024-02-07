@@ -3,12 +3,12 @@ package no.nav.helse.person.aktivitetslogg
 import java.time.LocalDate
 import java.util.UUID
 
-class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val kanAvvises: Boolean) {
+class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val kanAvvises: Boolean, periode: ClosedRange<LocalDate>) {
     private val tags: MutableSet<String> = mutableSetOf()
     private lateinit var skjæringstidspunkt: LocalDate
     private lateinit var vilkårsgrunnlagId: UUID
-    private lateinit var periodeFom: LocalDate
-    private lateinit var periodeTom: LocalDate
+    private val periodeFom: LocalDate = periode.start
+    private val periodeTom: LocalDate = periode.endInclusive
     private lateinit var periodetype: UtbetalingPeriodetype
     private val førstegangsbehandling = !erForlengelse
     private lateinit var utbetalingtype: String
@@ -29,10 +29,6 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
         this.vilkårsgrunnlagId = vilkårsgrunnlagId
     }
 
-    fun periode(fom: LocalDate, tom: LocalDate) = apply {
-        this.periodeFom = fom
-        this.periodeTom = tom
-    }
     fun erInfotrygd(erInfotrygd: Boolean) = apply {
         this.periodetype = when (erForlengelse) {
             true -> when (erInfotrygd) {

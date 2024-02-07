@@ -99,8 +99,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
 
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
 
-    internal fun godkjenning(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
-        generasjoner.last().godkjenning(hendelse, builder)
+    internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean) {
+        generasjoner.last().godkjenning(hendelse, erForlengelse, kanForkastes)
     }
 
     internal fun nyUtbetaling(
@@ -342,10 +342,10 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
                 utbetaling?.forkast(hendelse)
             }
 
-            fun godkjenning(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+            fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
-                builder.periode(periode.start, periode.endInclusive)
+                val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode)
                 grunnlagsdata.byggGodkjenningsbehov(builder)
                 utbetaling.godkjenning(hendelse, builder)
             }
@@ -524,8 +524,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             observatører.forEach { it.generasjonForkastet(id) }
         }
 
-        internal fun godkjenning(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
-            gjeldende.godkjenning(hendelse, builder)
+        internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean) {
+            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes)
         }
 
         /*

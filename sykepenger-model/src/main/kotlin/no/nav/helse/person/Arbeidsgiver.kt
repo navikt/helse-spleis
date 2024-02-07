@@ -33,7 +33,6 @@ import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDeta
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
-import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
@@ -122,12 +121,6 @@ internal class Arbeidsgiver private constructor(
             val alleVedtaksperioder = flatMap { it.vedtaksperioder }
             alleVedtaksperioder.auuGruppering(auu, infotrygdhistorikk)?.forkast(hendelse, alleVedtaksperioder)
         }
-
-        internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
-           filter { arbeidsgiver ->
-               vilkårsgrunnlag?.erArbeidsgiverRelevant(arbeidsgiver.organisasjonsnummer) == true
-                       || arbeidsgiver.vedtaksperioder.nåværendeVedtaksperiode(KLAR_TIL_BEHANDLING) != null
-           }.map { it.organisasjonsnummer }
 
         internal fun List<Arbeidsgiver>.igangsettOverstyring(revurdering: Revurderingseventyr) {
             forEach { arbeidsgiver ->

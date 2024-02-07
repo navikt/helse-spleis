@@ -55,7 +55,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
-import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
@@ -728,9 +727,6 @@ class Person private constructor(
             it.søknadHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
     }
-
-    internal fun relevanteArbeidsgivere(skjæringstidspunkt: LocalDate) =
-        arbeidsgivere.relevanteArbeidsgivere(vilkårsgrunnlagFor(skjæringstidspunkt))
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         skjæringstidspunkt: LocalDate,

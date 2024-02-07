@@ -295,6 +295,7 @@ class ArbeidsgiverInntektsopplysning(
         ) = single { it.gjelder(organisasjonsnummer) }.inntektsopplysning.leggTil(generasjoner, block)
 
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(builder: GodkjenningsbehovBuilder) {
+            builder.orgnummereMedRelevanteArbeidsforhold(this.map { it.orgnummer }.toSet())
             this.forEach{it.inntektsopplysning.omregnetÅrsinntekt(builder, it.orgnummer)}
         }
     }

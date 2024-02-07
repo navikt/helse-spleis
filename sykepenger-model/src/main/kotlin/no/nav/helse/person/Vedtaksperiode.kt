@@ -90,7 +90,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -950,10 +949,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        val erForlengelse = erForlengelse()
-        val builder = GodkjenningsbehovBuilder(erForlengelse, arbeidsgiver.kanForkastes(this))
-        builder.orgnummereMedRelevanteArbeidsforhold(person.relevanteArbeidsgivere(skjæringstidspunkt).toSet())
-        generasjoner.godkjenning(hendelse, builder)
+        generasjoner.godkjenning(hendelse, erForlengelse(), arbeidsgiver.kanForkastes(this))
     }
 
     internal fun gjenopptaBehandling(hendelse: Hendelse, arbeidsgivere: Iterable<Arbeidsgiver>) {
