@@ -131,7 +131,7 @@ abstract class AbstractObservableTest {
         arbeidsforholdId: String? = null,
         fnr: String = UNG_PERSON_FNR,
         harFlereInntektsmeldinger: Boolean = false,
-        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
+        avsendersystem: Inntektsmelding.Avsendersystem? = null
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,

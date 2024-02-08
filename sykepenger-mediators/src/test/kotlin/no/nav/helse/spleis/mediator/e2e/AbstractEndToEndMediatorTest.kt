@@ -345,7 +345,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = ORGNUMMER,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsenderSystem: AvsenderSystem? = AvsenderSystem("NAV_NO", "1.0")
+        avsenderSystem: AvsenderSystem? = null
     ): Pair<UUID, String> {
         return meldingsfabrikk.lagInnteksmelding(
             arbeidsgiverperiode,
