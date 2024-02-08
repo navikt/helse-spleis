@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -12,6 +13,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -253,24 +255,10 @@ internal class InntektsmeldingMatchingTest {
     }
 
     private companion object {
+        private val fabrikk = ArbeidsgiverHendelsefabrikk("42", "11".somPersonidentifikator(), "a1")
         private fun inntektsmelding(
             førsteFraværsdag: LocalDate?,
             vararg arbeidsgiverperiode: Periode
-        ) = Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null),
-            orgnummer = "12345678",
-            fødselsnummer = "12345678910",
-            aktørId = "1",
-            førsteFraværsdag = førsteFraværsdag,
-            inntektsdato = null,
-            beregnetInntekt = 31000.månedlig,
-            arbeidsgiverperioder = arbeidsgiverperiode.toList(),
-            arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            harFlereInntektsmeldinger = false,
-            avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
-            mottatt = LocalDateTime.now(),
-        ).dager()
+        ) = fabrikk.lagInntektsmelding(arbeidsgiverperiode.toList(), førsteFraværsdag = førsteFraværsdag, beregnetInntekt = 400.månedlig).dager()
     }
 }

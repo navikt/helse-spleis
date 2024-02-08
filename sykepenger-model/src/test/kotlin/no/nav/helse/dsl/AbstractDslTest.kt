@@ -233,7 +233,6 @@ internal abstract class AbstractDslTest {
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-        inntektsdato: LocalDate? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
@@ -241,6 +240,27 @@ internal abstract class AbstractDslTest {
         id: UUID = UUID.randomUUID()
     ) =
         this { håndterInntektsmelding(
+            arbeidsgiverperioder,
+            beregnetInntekt,
+            førsteFraværsdag,
+            refusjon,
+            harOpphørAvNaturalytelser,
+            arbeidsforholdId,
+            begrunnelseForReduksjonEllerIkkeUtbetalt,
+            id
+        ) }
+    protected fun String.håndterInntektsmeldingPortal(
+        arbeidsgiverperioder: List<Periode>,
+        beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        inntektsdato: LocalDate,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        harOpphørAvNaturalytelser: Boolean = false,
+        arbeidsforholdId: String? = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        id: UUID = UUID.randomUUID()
+    ) =
+        this { håndterInntektsmeldingPortal(
             arbeidsgiverperioder,
             beregnetInntekt,
             førsteFraværsdag,
@@ -310,28 +330,26 @@ internal abstract class AbstractDslTest {
         tom: LocalDate,
         grad: Prosentdel = 100.prosent,
         førsteFraværsdag: LocalDate = fom,
-        inntektsdato: LocalDate? = null,
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
         sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
+        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
 
     protected fun String.tilGodkjenning(
         fom: LocalDate,
         tom: LocalDate,
         grad: Prosentdel = 100.prosent,
         førsteFraværsdag: LocalDate = fom,
-        inntektsdato: LocalDate? = null,
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
         sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(this, beregnetInntekt, førsteFraværsdag)
     ) =
-        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
+        this { tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt) }
 
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
@@ -362,7 +380,6 @@ internal abstract class AbstractDslTest {
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-        inntektsdato: LocalDate? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
@@ -370,7 +387,20 @@ internal abstract class AbstractDslTest {
         id: UUID = UUID.randomUUID(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, inntektsdato, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+        bareÈnArbeidsgiver(a1).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+protected fun håndterInntektsmeldingPortal(
+        arbeidsgiverperioder: List<Periode>,
+        beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        inntektsdato: LocalDate,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        harOpphørAvNaturalytelser: Boolean = false,
+        arbeidsforholdId: String? = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        id: UUID = UUID.randomUUID(),
+        orgnummer: String = a1
+    ) =
+        bareÈnArbeidsgiver(a1).håndterInntektsmeldingPortal(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, inntektsdato, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
 
     internal fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
@@ -452,14 +482,13 @@ internal abstract class AbstractDslTest {
         tom: LocalDate,
         grad: Prosentdel = 100.prosent,
         førsteFraværsdag: LocalDate = fom,
-        inntektsdato: LocalDate? = null,
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
         status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
         sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(a1, beregnetInntekt, førsteFraværsdag)
     ) =
-        bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
+        bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
 
     protected fun serializeForSpeil() = testperson.serializeForSpeil()
     protected fun serialize(pretty: Boolean = false) = testperson.serialize(pretty)

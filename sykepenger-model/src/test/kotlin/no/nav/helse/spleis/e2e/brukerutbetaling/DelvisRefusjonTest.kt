@@ -669,11 +669,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     fun `Første utbetalte dag er før første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(
-            listOf(),
-            førsteFraværsdag = 17.januar,
-            avsendersystem = Inntektsmelding.Avsendersystem.ALTINN,
-        )
+        val inntektsmeldingId = håndterInntektsmelding(listOf(), førsteFraværsdag = 17.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

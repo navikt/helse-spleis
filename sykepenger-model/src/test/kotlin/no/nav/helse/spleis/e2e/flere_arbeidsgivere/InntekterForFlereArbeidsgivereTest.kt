@@ -6,7 +6,6 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -14,7 +13,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -27,6 +25,7 @@ import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -34,7 +33,6 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.inntektsmelding
 import no.nav.helse.spleis.e2e.sykmelding
 import no.nav.helse.spleis.e2e.søknad
 import no.nav.helse.spleis.e2e.utbetalingshistorikkEtterInfotrygdEndring
@@ -212,14 +210,13 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             Sykdom(periode.start, periode.endInclusive, 100.prosent),
             orgnummer = orgnummer
         ).håndter(Person::håndter)
-        inntektsmelding(
-            UUID.randomUUID(),
+        håndterInntektsmeldingPortal(
             arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             beregnetInntekt = inntekt,
+            inntektsdato = periode.start,
             førsteFraværsdag = periode.start,
-            orgnummer = orgnummer,
-            avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
-        ).håndter(Person::håndter)
+            orgnummer = orgnummer
+        )
     }
 
     private fun vilkårsgrunnlag(

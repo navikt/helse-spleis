@@ -38,7 +38,7 @@ class Inntektsmelding(
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     harOpphørAvNaturalytelser: Boolean = false,
     harFlereInntektsmeldinger: Boolean,
-    avsendersystem: Avsendersystem?,
+    private val avsendersystem: Avsendersystem?,
     private val mottatt: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(
@@ -66,6 +66,11 @@ class Inntektsmelding(
     }
 
     init {
+        val ingenInntektsdatoUtenomPortal = inntektsdato == null && avsendersystem != Avsendersystem.NAV_NO
+        val inntektsdatoKunHvisPortal = inntektsdato != null && avsendersystem == Avsendersystem.NAV_NO
+        check(ingenInntektsdatoUtenomPortal || inntektsdatoKunHvisPortal) {
+            "Om avsendersystem er NAV_NO må inntektsdato være satt og motsatt! inntektsdato=$inntektsdato, avsendersystem=$avsendersystem"
+        }
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
     }
 

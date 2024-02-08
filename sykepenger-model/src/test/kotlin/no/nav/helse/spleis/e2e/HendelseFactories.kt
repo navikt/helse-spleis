@@ -170,7 +170,6 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     arbeidsgiverperioder: List<Periode>,
     beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-    inntektsdato: LocalDate? = null,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     harOpphørAvNaturalytelser: Boolean = false,
@@ -178,22 +177,54 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
-    harFlereInntektsmeldinger: Boolean = false,
-    avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
+    harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
         ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagInntektsmelding(
             id = id,
             refusjon = refusjon,
             førsteFraværsdag = førsteFraværsdag,
-            inntektsdato = inntektsdato,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-            avsendersystem = avsendersystem
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+        )
+    }
+    inntektsmeldinger[id] = LocalDateTime.now() to inntektsmeldinggenerator
+    inntekter[id] = beregnetInntekt
+    EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
+    return inntektsmeldinggenerator().apply { hendelselogg = this }
+}
+
+internal fun AbstractEndToEndTest.inntektsmeldingPortal(
+    id: UUID = UUID.randomUUID(),
+    arbeidsgiverperioder: List<Periode>,
+    beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
+    inntektsdato: LocalDate,
+    førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    harOpphørAvNaturalytelser: Boolean = false,
+    arbeidsforholdId: String? = null,
+    fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+    fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
+    harFlereInntektsmeldinger: Boolean = false
+): Inntektsmelding {
+    val inntektsmeldinggenerator = {
+        ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagPortalinntektsmelding(
+            id = id,
+            refusjon = refusjon,
+            inntektsdato = inntektsdato,
+            førsteFraværsdag = førsteFraværsdag,
+            beregnetInntekt = beregnetInntekt,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            arbeidsforholdId = arbeidsforholdId,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger
         )
     }
     inntektsmeldinger[id] = LocalDateTime.now() to inntektsmeldinggenerator

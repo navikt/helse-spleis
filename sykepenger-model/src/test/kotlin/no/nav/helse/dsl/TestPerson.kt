@@ -215,7 +215,6 @@ internal class TestPerson(
             arbeidsgiverperioder: List<Periode>,
             beregnetInntekt: Inntekt = INNTEKT,
             førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
-            inntektsdato: LocalDate? = null,
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
             harOpphørAvNaturalytelser: Boolean = false,
             arbeidsforholdId: String? = null,
@@ -225,6 +224,33 @@ internal class TestPerson(
             mottatt: LocalDateTime = LocalDateTime.now()
         ): UUID {
             arbeidsgiverHendelsefabrikk.lagInntektsmelding(
+                arbeidsgiverperioder,
+                beregnetInntekt,
+                førsteFraværsdag,
+                refusjon,
+                harOpphørAvNaturalytelser,
+                arbeidsforholdId,
+                begrunnelseForReduksjonEllerIkkeUtbetalt,
+                id,
+                mottatt = mottatt
+            ).håndter(Person::håndter)
+            return id
+        }
+
+        internal fun håndterInntektsmeldingPortal(
+            arbeidsgiverperioder: List<Periode>,
+            beregnetInntekt: Inntekt = INNTEKT,
+            førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+            inntektsdato: LocalDate,
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+            harOpphørAvNaturalytelser: Boolean = false,
+            arbeidsforholdId: String? = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+            id: UUID = UUID.randomUUID(),
+            orgnummer: String = "",
+            mottatt: LocalDateTime = LocalDateTime.now()
+        ): UUID {
+            arbeidsgiverHendelsefabrikk.lagPortalinntektsmelding(
                 arbeidsgiverperioder,
                 beregnetInntekt,
                 førsteFraværsdag,
@@ -470,7 +496,6 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     tom: LocalDate,
     grad: Prosentdel = 100.prosent,
     førsteFraværsdag: LocalDate = fom,
-    inntektsdato: LocalDate? = null,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
@@ -479,7 +504,7 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
 ): UUID {
     val vedtaksperiode = nyPeriode(fom til tom, grad)
-    håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, inntektsdato, refusjon)
+    håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
     håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, Medlemskapsvurdering.Medlemskapstatus.Ja, sykepengegrunnlagSkatt, arbeidsforhold)
     håndterYtelser(vedtaksperiode)
     håndterSimulering(vedtaksperiode)
@@ -490,14 +515,13 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     tom: LocalDate,
     grad: Prosentdel = 100.prosent,
     førsteFraværsdag: LocalDate = fom,
-    inntektsdato: LocalDate? = null,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag)
 ) {
-    val vedtaksperiode = tilGodkjenning(fom, tom, grad, førsteFraværsdag, inntektsdato, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
+    val vedtaksperiode = tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
     håndterUtbetalt(status)
 }

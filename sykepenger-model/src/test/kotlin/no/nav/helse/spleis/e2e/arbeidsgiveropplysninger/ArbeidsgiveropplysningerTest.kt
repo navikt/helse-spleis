@@ -45,6 +45,7 @@ import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -871,7 +872,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             Sykdom(20.januar, 31.januar, 100.prosent),
             egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(19.januar, 19.januar))
         )
-        håndterInntektsmelding(emptyList(), avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO, førsteFraværsdag = 20.januar)
+        håndterInntektsmeldingPortal(emptyList(), inntektsdato = 20.januar, førsteFraværsdag = 20.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
@@ -961,13 +962,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         nyPeriode(ag2Periode.start til ag2Periode.endInclusive, a2)
 
         val inntektsdato = sykefraværHosArbeidsgiver.values.minOf { it.start }
-        håndterInntektsmelding(
+        håndterInntektsmeldingPortal(
             listOf(ag1Periode.start til ag1Periode.start.plusDays(15)),
             beregnetInntekt = inntekt,
             inntektsdato = inntektsdato,
             orgnummer = a1,
         )
-        håndterInntektsmelding(
+        håndterInntektsmeldingPortal(
             listOf(ag2Periode.start til ag2Periode.start.plusDays(15)),
             beregnetInntekt = inntekt,
             inntektsdato = inntektsdato,

@@ -412,8 +412,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.juni til 16.juni),
             førsteFraværsdag = 1.august,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-            avsendersystem = Inntektsmelding.Avsendersystem.ALTINN,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -433,8 +432,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.juni til 5.juni, 8.juni til 18.juni),
             førsteFraværsdag = 1.august,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-            avsendersystem = Inntektsmelding.Avsendersystem.ALTINN,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering"
         )
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)

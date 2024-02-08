@@ -77,6 +77,7 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterPåminnelse
@@ -209,8 +210,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(17.januar til 30.januar, 31.januar til 2.februar),
             førsteFraværsdag = 3.februar,
-            beregnetInntekt = im2Inntekt,
-            avsendersystem = Inntektsmelding.Avsendersystem.ALTINN,
+            beregnetInntekt = im2Inntekt
         )
         assertEquals(17.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
         // Nå replayes IM1:
@@ -574,7 +574,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `dersom spleis regner arbeidsgiverperioden ulik fra arbeidsgiver lages warning - im først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 15.januar)), avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
+        håndterInntektsmelding(listOf(Periode(1.januar, 15.januar)))
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
 
@@ -582,7 +582,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `dersom spleis regner arbeidsgiverperioden ulik fra arbeidsgiver lages warning - søknad først`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(2.januar, 15.januar)), avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
+        håndterInntektsmelding(listOf(Periode(2.januar, 15.januar)))
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
 
@@ -590,7 +590,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `vi sammenligner arbeidsgiverperiodeinformasjon også dersom inntektsmelding har oppgitt en senere første fraværsdag`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.februar, avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.februar)
         assertIngenFunksjonelleFeil()
         assertEquals(1.januar til 28.februar, inspektør.periode(1.vedtaksperiode))
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -763,8 +763,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         nyPeriode(10.april til 30.april)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 10.april,
-            avsendersystem = Inntektsmelding.Avsendersystem.ALTINN,
+            førsteFraværsdag = 10.april
         )
         assertNotNull(inspektør.vilkårsgrunnlag(5.januar))
         assertNull(inspektør.vilkårsgrunnlag(1.januar))
@@ -2019,8 +2018,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(6.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(20.januar til 4.februar),
-            førsteFraværsdag = 6.februar,
-            avsendersystem = Inntektsmelding.Avsendersystem.ALTINN,
+            førsteFraværsdag = 6.februar
         )
         assertEquals(20.januar til 28.februar, inspektør.periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -2187,7 +2185,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             beregnetInntekt = INNTEKT,
             orgnummer = a1,
         )
-        håndterInntektsmelding(
+        håndterInntektsmeldingPortal(
             listOf(1.februar til 16.februar),
             førsteFraværsdag = 1.februar,
             inntektsdato = 25.januar,

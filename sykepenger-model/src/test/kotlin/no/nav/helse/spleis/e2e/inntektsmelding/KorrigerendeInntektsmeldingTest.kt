@@ -324,7 +324,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         nyttVedtak(10.januar, 31.januar)
         val agpFør = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)
-        håndterInntektsmelding(listOf(12.januar til 28.januar), avsendersystem = Inntektsmelding.Avsendersystem.ALTINN,)
+        håndterInntektsmelding(listOf(12.januar til 28.januar))
         val agpEtter = inspektør.arbeidsgiver.arbeidsgiverperiode(10.januar til 31.januar)
 
         assertEquals(Arbeidsgiverperiode(listOf(1.januar til 5.januar, 10.januar til 26.januar)), agpFør)

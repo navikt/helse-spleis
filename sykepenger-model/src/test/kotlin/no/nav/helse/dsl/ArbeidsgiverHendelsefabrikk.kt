@@ -132,7 +132,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
-        inntektsdato: LocalDate? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
@@ -140,7 +139,44 @@ internal class ArbeidsgiverHendelsefabrikk(
         id: UUID = UUID.randomUUID(),
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
         harFlereInntektsmeldinger: Boolean = false,
-        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
+        mottatt: LocalDateTime = LocalDateTime.now()
+    ): Inntektsmelding {
+        val inntektsmeldinggenerator = {
+            Inntektsmelding(
+                meldingsreferanseId = id,
+                refusjon = refusjon,
+                orgnummer = organisasjonsnummer,
+                fødselsnummer = personidentifikator.toString(),
+                aktørId = aktørId,
+                førsteFraværsdag = førsteFraværsdag,
+                inntektsdato = null,
+                beregnetInntekt = beregnetInntekt,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                arbeidsforholdId = arbeidsforholdId,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+                harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+                avsendersystem = Inntektsmelding.Avsendersystem.LPS,
+                mottatt = mottatt,
+                aktivitetslogg = aktivitetslogg
+            )
+        }
+        inntektsmeldinger[id] = inntektsmeldinggenerator
+        return inntektsmeldinggenerator()
+    }
+
+    internal fun lagPortalinntektsmelding(
+        arbeidsgiverperioder: List<Periode>,
+        beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
+        inntektsdato: LocalDate,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        harOpphørAvNaturalytelser: Boolean = false,
+        arbeidsforholdId: String? = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        id: UUID = UUID.randomUUID(),
+        aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
+        harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
@@ -158,7 +194,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = avsendersystem,
+                avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
                 mottatt = mottatt,
                 aktivitetslogg = aktivitetslogg
             )

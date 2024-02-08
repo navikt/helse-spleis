@@ -467,7 +467,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `uenige om arbeidsgiverperiode`() {
-        inntektsmelding(listOf(2.januar til 17.januar), avsendersystem = Inntektsmelding.Avsendersystem.ALTINN)
+        inntektsmelding(listOf(2.januar til 17.januar))
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertVarsel(RV_IM_3)
@@ -475,7 +475,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `uenige om arbeidsgiverperiode med NAV_NO som avsendersystem gir varsel`() {
-        inntektsmelding(listOf(2.januar til 17.januar), avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO)
+        inntektsmeldingPortal(listOf(2.januar til 17.januar), inntektsdato = 2.januar)
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertVarsel(RV_IM_3)
@@ -483,7 +483,7 @@ internal class InntektsmeldingTest {
 
     @Test
     fun `tom arbeidsgiverperiode med NAV_NO som avsendersystem gir ikke varsel`() {
-        inntektsmelding(emptyList(), avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO)
+        inntektsmeldingPortal(emptyList(), inntektsdato = 1.januar)
         dager.vurdertTilOgMed(17.januar)
         dager.validerArbeidsgiverperiode(1.januar til 17.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply { kjentDag(17.januar) })
         aktivitetslogg.assertIngenVarsel(RV_IM_3)
@@ -497,8 +497,7 @@ internal class InntektsmeldingTest {
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
         arbeidsforholdId: String? = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsendersystem: Inntektsmelding.Avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ) {
         aktivitetslogg = Aktivitetslogg()
         inntektsmelding = hendelsefabrikk.lagInntektsmelding(
@@ -509,7 +508,31 @@ internal class InntektsmeldingTest {
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             aktivitetslogg = aktivitetslogg,
-            avsendersystem = avsendersystem
+        )
+        dager = inntektsmelding.dager()
+    }
+
+    private fun inntektsmeldingPortal(
+        arbeidsgiverperioder: List<Periode>,
+        refusjonBeløp: Inntekt = 1000.månedlig,
+        beregnetInntekt: Inntekt = 1000.månedlig,
+        inntektsdato: LocalDate,
+        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
+        refusjonOpphørsdato: LocalDate? = null,
+        endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
+        arbeidsforholdId: String? = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
+    ) {
+        aktivitetslogg = Aktivitetslogg()
+        inntektsmelding = hendelsefabrikk.lagPortalinntektsmelding(
+            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
+            førsteFraværsdag = førsteFraværsdag,
+            inntektsdato = inntektsdato,
+            beregnetInntekt = beregnetInntekt,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            arbeidsforholdId = arbeidsforholdId,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            aktivitetslogg = aktivitetslogg,
         )
         dager = inntektsmelding.dager()
     }
