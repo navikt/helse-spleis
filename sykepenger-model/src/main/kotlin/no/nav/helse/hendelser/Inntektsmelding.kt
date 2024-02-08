@@ -89,7 +89,10 @@ class Inntektsmelding(
     private var håndtertInntekt = false
     private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)
 
-    internal fun aktuellForReplay(sammenhengendePeriode: Periode) = Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
+    internal fun aktuellForReplay(sammenhengendePeriode: Periode): Boolean {
+        if (avsendersystem == Avsendersystem.NAV_NO) return false
+        return Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
+    }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
         if (alternativInntektsdato == this.beregnetInntektsdato) return

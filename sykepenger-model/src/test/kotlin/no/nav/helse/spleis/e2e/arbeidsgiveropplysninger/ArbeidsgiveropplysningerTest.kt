@@ -29,6 +29,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
@@ -74,6 +75,28 @@ import org.junit.jupiter.api.Test
 internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     private val INNTEKT_FLERE_AG = 20000.månedlig
+
+    @Test
+    fun `replayer ikke portalinnsendt inntektsmelding`() {
+        håndterInntektsmeldingPortal(listOf(1.januar til 5.januar, 10.januar til 20.januar), inntektsdato = 10.januar)
+        håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
+
+        assertForventetFeil(
+            forklaring = "inntektsmeldingen blir ikke replayet, men fordi inntekt og refusjon håndteres på arbeidsgivernivå så vil" +
+                    "vedtaksperioden tilsynelatende ha det den trenger. " +
+                    "TODO: Portalinnsendte inntektsmeldinger burde ikke blitt håndtert utenfor vedtaksperioden som ba om opplysningene",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+                assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                assertEquals(10.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+            }
+        )
+    }
 
     @Test
     fun `sender ut event TrengerArbeidsgiveropplysninger når vi ankommer AvventerInntektsmelding`() {
