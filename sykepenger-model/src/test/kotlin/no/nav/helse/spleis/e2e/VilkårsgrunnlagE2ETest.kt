@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -23,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -144,6 +146,23 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertVilkårsgrunnlagFraSpleisFor(1.januar)
         håndterAnnullerUtbetaling()
         assertIngenVilkårsgrunnlagFraSpleis()
+    }
+
+    @Test
+    fun `nytt og eneste arbeidsforhold på skjæringstidspunkt`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)))
+        assertVarsel(Varselkode.RV_VV_1)
+        assertForventetFeil(
+            forklaring = "Arbeidsgier finnes i aareg, men inngår ikke i opptjening",
+            nå = {
+                assertVarsel(Varselkode.RV_VV_1)
+            },
+            ønsket = {
+                assertIngenVarsel(Varselkode.RV_VV_1)
+            }
+        )
     }
 
     @Test
