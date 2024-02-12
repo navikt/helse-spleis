@@ -111,6 +111,7 @@ import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
+
     @Test
     fun `korrigerer arbeidsgiverperiode etter utbetalt`() {
         nyttVedtak(1.januar, 25.januar)
@@ -1581,36 +1582,23 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ny inntektsmelding med nye refusjonsopplysninger før forlengelse`() {
+    fun `inntektsmelding med første fraværsdag utenfor sykdom - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
         val im1 = UUID.randomUUID()
         nyttVedtak(1.januar, 31.januar, inntektsmeldingId = im1)
         val im2 = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar, refusjon = Refusjon(INGEN, null))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        val refusjon = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single().inspektør.refusjonsopplysninger
-        assertForventetFeil(forklaring = "im2 hensyntas ikke",
-            nå = {
-                assertEquals(
-                    listOf(
-                        Refusjonsopplysning(im1, 1.januar, null, INNTEKT),
-                    ), refusjon.inspektør.refusjonsopplysninger
-                )
-            },
-            ønsket = {
-                assertEquals(
-                    listOf(
-                        Refusjonsopplysning(im1, 1.januar, 31.januar, INNTEKT),
-                        Refusjonsopplysning(im2, 1.februar, null, INGEN)
-                    ), refusjon.inspektør.refusjonsopplysninger
-                )
-            })
+        assertFalse(im2 in observatør.inntektsmeldingHåndtert.map(Pair<UUID,*>::first))
+        assertTrue(im2 in observatør.inntektsmeldingIkkeHåndtert)
     }
 
     @Test
     fun `første fraværsdato i inntektsmelding er utenfor perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), 27.januar)
+        val im = håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), 27.januar)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertFalse(im in observatør.inntektsmeldingHåndtert.map(Pair<UUID,*>::first))
+        assertTrue(im in observatør.inntektsmeldingIkkeHåndtert)
     }
 
     @Test
