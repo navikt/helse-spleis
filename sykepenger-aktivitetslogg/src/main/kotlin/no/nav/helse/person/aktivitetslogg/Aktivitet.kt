@@ -7,11 +7,11 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 sealed class Aktivitet(
-    protected val id: UUID,
+    val id: UUID,
     private val alvorlighetsgrad: Int,
     protected val label: Char,
-    private var melding: String,
-    private val tidsstempel: String,
+    var melding: String,
+    val tidsstempel: String,
     val kontekster: List<SpesifikkKontekst>
 ) : Comparable<Aktivitet> {
     private companion object {
@@ -35,8 +35,6 @@ sealed class Aktivitet(
         return kontekster.joinToString(separator = "") { " (${it.melding()})" }
     }
 
-    internal abstract fun accept(visitor: AktivitetsloggVisitor)
-
     internal open fun notify(observer: AktivitetsloggObserver) {
         observer.aktivitet(id, label, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
     }
@@ -45,8 +43,8 @@ sealed class Aktivitet(
     class Info private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
-        private val melding: String,
-        private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        melding: String,
+        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
     ) : Aktivitet(id, 0, 'I', melding, tidsstempel, kontekster) {
         companion object {
             internal fun filter(aktiviteter: List<Aktivitet>): List<Info> {
@@ -59,17 +57,14 @@ sealed class Aktivitet(
                 Info(UUID.randomUUID(), kontekster, melding)
         }
 
-        override fun accept(visitor: AktivitetsloggVisitor) {
-            visitor.visitInfo(id, kontekster, this, melding, tidsstempel)
-        }
     }
 
     class Varsel private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
-        private val kode: Varselkode? = null,
-        private val melding: String,
-        private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        val kode: Varselkode? = null,
+        melding: String,
+        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
     ) : Aktivitet(id, 25, 'W', melding, tidsstempel, kontekster) {
         companion object {
             internal fun filter(aktiviteter: List<Aktivitet>): List<Varsel> {
@@ -82,10 +77,6 @@ sealed class Aktivitet(
                 Varsel(UUID.randomUUID(), kontekster, kode, melding = melding)
         }
 
-        override fun accept(visitor: AktivitetsloggVisitor) {
-            visitor.visitVarsel(id, kontekster, this, kode, melding, tidsstempel)
-        }
-
         override fun notify(observer: AktivitetsloggObserver) {
             observer.varsel(id, label, kode, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
         }
@@ -95,9 +86,9 @@ sealed class Aktivitet(
         id: UUID,
         val type: Behovtype,
         kontekster: List<SpesifikkKontekst>,
-        private val melding: String,
-        private val detaljer: Map<String, Any?> = emptyMap(),
-        private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        melding: String,
+        val detaljer: Map<String, Any?> = emptyMap(),
+        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
     ) : Aktivitet(id, 50, 'N', melding, tidsstempel, kontekster) {
         companion object {
             internal fun filter(aktiviteter: List<Aktivitet>): List<Behov> {
@@ -229,10 +220,6 @@ sealed class Aktivitet(
 
         fun detaljer() = detaljer
 
-        override fun accept(visitor: AktivitetsloggVisitor) {
-            visitor.visitBehov(id, kontekster, this, type, melding, detaljer, tidsstempel)
-        }
-
         enum class Behovtype {
             Sykepengehistorikk,
             SykepengehistorikkForFeriepenger,
@@ -259,8 +246,8 @@ sealed class Aktivitet(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
         private val kode: Varselkode,
-        private val melding: String,
-        private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        melding: String,
+        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
     ) : Aktivitet(id, 75, 'E', melding, tidsstempel, kontekster) {
         companion object {
             internal fun filter(aktiviteter: List<Aktivitet>): List<FunksjonellFeil> {
@@ -268,10 +255,6 @@ sealed class Aktivitet(
             }
             internal fun opprett(kontekster: List<SpesifikkKontekst>, kode: Varselkode, melding: String) =
                 FunksjonellFeil(UUID.randomUUID(), kontekster, kode, melding)
-        }
-
-        override fun accept(visitor: AktivitetsloggVisitor) {
-            visitor.visitFunksjonellFeil(id, kontekster, this, melding, tidsstempel)
         }
 
         override fun notify(observer: AktivitetsloggObserver) {
@@ -282,8 +265,8 @@ sealed class Aktivitet(
     class LogiskFeil private constructor(
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
-        private val melding: String,
-        private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
+        melding: String,
+        tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
     ) : Aktivitet(id, 100, 'S', melding, tidsstempel, kontekster) {
         companion object {
             internal fun filter(aktiviteter: List<Aktivitet>): List<LogiskFeil> {
@@ -296,8 +279,5 @@ sealed class Aktivitet(
                 LogiskFeil(UUID.randomUUID(), kontekster, melding)
         }
 
-        override fun accept(visitor: AktivitetsloggVisitor) {
-            visitor.visitLogiskFeil(id, kontekster, this, melding, tidsstempel)
-        }
     }
 }

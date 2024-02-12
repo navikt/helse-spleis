@@ -14,7 +14,15 @@ class Aktivitetslogg(
 
     fun accept(visitor: AktivitetsloggVisitor) {
         visitor.preVisitAktivitetslogg(this)
-        aktiviteter.forEach { it.accept(visitor) }
+        aktiviteter.forEach {
+            when(it) {
+                is Behov -> visitor.visitBehov(it)
+                is Aktivitet.FunksjonellFeil -> visitor.visitFunksjonellFeil(it)
+                is Aktivitet.Info -> visitor.visitInfo(it)
+                is Aktivitet.LogiskFeil -> visitor.visitLogiskFeil(it)
+                is Aktivitet.Varsel -> visitor.visitVarsel(it)
+            }
+        }
         visitor.postVisitAktivitetslogg(this)
     }
 

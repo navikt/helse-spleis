@@ -265,9 +265,9 @@ internal fun Aktivitetslogg.assertLogiskFeil(severe: String, vararg filtre: Akti
 internal fun Aktivitetslogg.collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val info = mutableListOf<String>()
     this.accept(object : AktivitetsloggVisitor {
-        override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Info, melding: String, tidsstempel: String) {
-            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                info.add(melding)
+        override fun visitInfo(aktivitet: Aktivitet.Info) {
+            if (filtre.all { filter -> aktivitet.kontekster.any { filter.filtrer(it) } }) {
+                info.add(aktivitet.melding)
             }
         }
     })
@@ -277,9 +277,9 @@ internal fun Aktivitetslogg.collectInfo(vararg filtre: AktivitetsloggFilter): Mu
 internal fun Aktivitetslogg.collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val warnings = mutableListOf<String>()
     this.accept(object : AktivitetsloggVisitor {
-        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
-            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                warnings.add("$kode melding")
+        override fun visitVarsel(aktivitet: Aktivitet.Varsel) {
+            if (filtre.all { filter -> aktivitet.kontekster.any { filter.filtrer(it) } }) {
+                warnings.add("${aktivitet.kode} melding")
             }
         }
     })
@@ -288,9 +288,9 @@ internal fun Aktivitetslogg.collectVarsler(vararg filtre: AktivitetsloggFilter):
 internal fun Aktivitetslogg.collectVarselkoder(vararg filtre: AktivitetsloggFilter): List<Varselkode> {
     val varselkoder = mutableListOf<Varselkode>()
     accept(object : AktivitetsloggVisitor {
-        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
-            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } } && kode != null) {
-                varselkoder.add(kode)
+        override fun visitVarsel(aktivitet: Aktivitet.Varsel) {
+            if (filtre.all { filter -> aktivitet.kontekster.any { filter.filtrer(it) } } && aktivitet.kode != null) {
+                varselkoder.add(aktivitet.kode!!)
             }
         }
     })
@@ -300,9 +300,9 @@ internal fun Aktivitetslogg.collectVarselkoder(vararg filtre: AktivitetsloggFilt
 internal fun Aktivitetslogg.collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val errors = mutableListOf<String>()
     accept(object : AktivitetsloggVisitor {
-        override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
-            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                errors.add(melding)
+        override fun visitFunksjonellFeil(aktivitet: Aktivitet.FunksjonellFeil) {
+            if (filtre.all { filter -> aktivitet.kontekster.any { filter.filtrer(it) } }) {
+                errors.add(aktivitet.melding)
             }
         }
     })
@@ -312,9 +312,9 @@ internal fun Aktivitetslogg.collectFunksjonelleFeil(vararg filtre: Aktivitetslog
 internal fun Aktivitetslogg.collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val severes = mutableListOf<String>()
     accept(object : AktivitetsloggVisitor {
-        override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
-            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                severes.add(melding)
+        override fun visitLogiskFeil(aktivitet: Aktivitet.LogiskFeil) {
+            if (filtre.all { filter -> aktivitet.kontekster.any { filter.filtrer(it) } }) {
+                severes.add(aktivitet.melding)
             }
         }
     })

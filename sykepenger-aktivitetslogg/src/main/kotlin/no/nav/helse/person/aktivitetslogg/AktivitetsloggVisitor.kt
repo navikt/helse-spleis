@@ -1,56 +1,16 @@
 package no.nav.helse.person.aktivitetslogg
 
-import java.util.UUID
-
 interface AktivitetsloggVisitor {
     fun preVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
-    fun visitInfo(
-        id: UUID,
-        kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitet.Info,
-        melding: String,
-        tidsstempel: String
-    ) {
-    }
+    fun visitInfo(aktivitet: Aktivitet.Info) {}
 
-    fun visitVarsel(
-        id: UUID,
-        kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitet.Varsel,
-        kode: Varselkode?,
-        melding: String,
-        tidsstempel: String
-    ) {
-    }
+    fun visitVarsel(aktivitet: Aktivitet.Varsel) {}
 
-    fun visitBehov(
-        id: UUID,
-        kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitet.Behov,
-        type: Aktivitet.Behov.Behovtype,
-        melding: String,
-        detaljer: Map<String, Any?>,
-        tidsstempel: String
-    ) {
-    }
+    fun visitBehov(aktivitet: Aktivitet.Behov) {}
 
-    fun visitFunksjonellFeil(
-        id: UUID,
-        kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitet.FunksjonellFeil,
-        melding: String,
-        tidsstempel: String
-    ) {
-    }
+    fun visitFunksjonellFeil(aktivitet: Aktivitet.FunksjonellFeil) {}
 
-    fun visitLogiskFeil(
-        id: UUID,
-        kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitet.LogiskFeil,
-        melding: String,
-        tidsstempel: String
-    ) {
-    }
+    fun visitLogiskFeil(aktivitet: Aktivitet.LogiskFeil) {}
 
     fun postVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
 }

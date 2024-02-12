@@ -14,7 +14,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
-import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
@@ -1118,15 +1117,10 @@ internal class UtbetalingslinjeForskjellTest {
         }
 
         override fun visitVarsel(
-            id: UUID,
-            kontekster: List<SpesifikkKontekst>,
-            aktivitet: Aktivitet.Varsel,
-            kode: Varselkode?,
-            melding: String,
-            tidsstempel: String
+            aktivitet: Aktivitet.Varsel
         ) {
-            if (kode == null) return
-            varsler.add(kode)
+            if (aktivitet.kode == null) return
+            varsler.add(aktivitet.kode!!)
         }
 
         fun assertVarsel(varselkode: Varselkode) {
