@@ -52,7 +52,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
         check(event.berørtePerioder.isNotEmpty()) { "Forventet ikke en igangsatt overstyring uten berørte perioder." }
         if (event.årsak == "KORRIGERT_INNTEKTSMELDING") IM.korrigertInntekt()
-        if (event.årsak == "ARBEIDSGIVERPERIODE") IM.korrigertArbeidsgiverperiode()
     }
 
     private fun PersonObserver.VedtaksperiodeVenterEvent.revurderingFeilet() = gjeldendeTilstander[venterPå.vedtaksperiodeId] == REVURDERING_FEILET
@@ -101,7 +100,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         fun ikkeHåndtert() { signaler.add(Signal.IKKE_HÅNDTERT) }
         fun førSøknad() { signaler.add(Signal.FØR_SØKNAD) }
         fun korrigertInntekt() { signaler.add(Signal.KORRIGERT_INNTEKT) }
-        fun korrigertArbeidsgiverperiode() { signaler.add(Signal.KORRIGERT_ARBEIDSGIVERPERIODE) }
         fun behandlingUtført() = signaler.clear()
 
         fun bekreftEntydighåndtering() {
@@ -122,7 +120,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             IKKE_HÅNDTERT,
             FØR_SØKNAD,
             KORRIGERT_INNTEKT,
-            KORRIGERT_ARBEIDSGIVERPERIODE
         }
     }
 }

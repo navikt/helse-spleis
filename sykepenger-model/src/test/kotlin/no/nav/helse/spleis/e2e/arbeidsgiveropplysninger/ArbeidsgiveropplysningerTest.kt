@@ -128,13 +128,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
-        assertEquals(2, observatør.inntektsmeldingHåndtert.size)
+        assertEquals(1, observatør.inntektsmeldingHåndtert.size)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a2 })
 
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2,)
 
-        assertEquals(5, observatør.inntektsmeldingHåndtert.size)
+        assertEquals(2, observatør.inntektsmeldingHåndtert.size)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a1 })
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.organisasjonsnummer == a2 })
     }

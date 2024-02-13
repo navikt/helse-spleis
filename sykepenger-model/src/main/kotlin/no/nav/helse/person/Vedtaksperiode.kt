@@ -218,7 +218,7 @@ internal class Vedtaksperiode private constructor(
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
     }
-
+    internal fun håndtertTidligere(dokumentsporing: Dokumentsporing) = generasjoner.dokumentHåndtert(dokumentsporing)
     internal fun hendelseIder() = generasjoner.dokumentsporing()
 
     internal fun håndter(sykmelding: Sykmelding) {
@@ -266,7 +266,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun inntektsmeldingHåndtert(dager: DagerFraInntektsmelding): Boolean {
         if (!dager.leggTil(generasjoner)) return true
-        person.emitInntektsmeldingHåndtert(dager.meldingsreferanseId(), id, organisasjonsnummer)
         return false
     }
 
@@ -325,7 +324,6 @@ internal class Vedtaksperiode private constructor(
         val hendelse = dager.bitAvInntektsmelding(periode)
         if (hendelse != null) {
             oppdaterHistorikk(hendelse)
-            person.emitInntektsmeldingHåndtert(dager.meldingsreferanseId(), id, organisasjonsnummer)
         }
         dager.validerArbeidsgiverperiode(periode, finnArbeidsgiverperiode())
     }

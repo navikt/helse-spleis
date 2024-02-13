@@ -44,21 +44,14 @@ internal class SpreOppgaverKontraktTest : AbstractEndToEndMediatorTest() {
         val vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(0)
 
         val meldinger = testRapid.inspektør.meldinger("inntektsmelding_håndtert")
-        assertEquals(2, meldinger.size)
+        assertEquals(1, meldinger.size)
         meldinger[0].also { inntektsmeldingHåndtertEvent ->
-            // håndtert dagene fra im
-            assertEquals(inntektsmeldingId.toString(), inntektsmeldingHåndtertEvent["inntektsmeldingId"].asText())
-            assertEquals(vedtaksperiodeId.toString(), inntektsmeldingHåndtertEvent["vedtaksperiodeId"].asText())
-            assertNotNull(inntektsmeldingHåndtertEvent["@opprettet"].asLocalDateTime())
-        }
-        meldinger[1].also { inntektsmeldingHåndtertEvent ->
             // håndtert inntekten fra im
             assertEquals(inntektsmeldingId.toString(), inntektsmeldingHåndtertEvent["inntektsmeldingId"].asText())
             assertEquals(vedtaksperiodeId.toString(), inntektsmeldingHåndtertEvent["vedtaksperiodeId"].asText())
             assertNotNull(inntektsmeldingHåndtertEvent["@opprettet"].asLocalDateTime())
         }
     }
-
 
     private fun assertInntektsmeldingFørSøknad(melding: JsonNode) {
         assertTrue(melding.path("inntektsmeldingId").asText().isNotEmpty())

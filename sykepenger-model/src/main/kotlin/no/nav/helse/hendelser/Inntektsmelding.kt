@@ -88,7 +88,7 @@ class Inntektsmelding(
     )
     private var håndtertInntekt = false
     private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)
-
+    private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId())
     internal fun aktuellForReplay(sammenhengendePeriode: Periode): Boolean {
         if (avsendersystem == Avsendersystem.NAV_NO) return false
         return Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
@@ -113,7 +113,7 @@ class Inntektsmelding(
 
     internal fun leggTil(generasjoner: Generasjoner): Boolean {
         håndtertInntekt = true
-        return generasjoner.oppdaterDokumentsporing(Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId()))
+        return generasjoner.oppdaterDokumentsporing(dokumentsporing)
     }
 
 
@@ -180,7 +180,7 @@ class Inntektsmelding(
     }
 
     internal fun ikkeHåndert(person: Person, vedtaksperioder: List<Vedtaksperiode>, sykmeldingsperioder: Sykmeldingsperioder, dager: DagerFraInntektsmelding) {
-        if (håndtertNå(dager) || håndtertTidligere(vedtaksperioder)) return
+        if (håndtertNå() || håndtertTidligere(vedtaksperioder)) return
         info("Inntektsmelding ikke håndtert")
         val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager)
         if (overlappendeSykmeldingsperioder.isNotEmpty()) {
@@ -189,8 +189,8 @@ class Inntektsmelding(
         }
         person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
     }
-    private fun håndtertNå(dager: DagerFraInntektsmelding) = håndtertInntekt || dager.noenDagerHåndtert()
-    private fun håndtertTidligere(vedtaksperioder: List<Vedtaksperiode>) = vedtaksperioder.any { meldingsreferanseId() in it.hendelseIder() }
+    private fun håndtertNå() = håndtertInntekt
+    private fun håndtertTidligere(vedtaksperioder: List<Vedtaksperiode>) = vedtaksperioder.any { it.håndtertTidligere(dokumentsporing) }
     internal fun jurist(jurist: MaskinellJurist) = jurist.medInntektsmelding(this.meldingsreferanseId())
     internal fun skalIkkeOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?) =
         sykdomstidslinjeperiode != null && beregnetInntektsdato !in sykdomstidslinjeperiode && inntektsdato == null
