@@ -32,8 +32,6 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         Flyway.configure()
             .dataSource(dataSource)
             .lockRetryCount(-1)
-            .baselineVersion(MigrationVersion.fromVersion("01"))
-            .baselineOnMigrate(true)
             .load()
             .migrate()
         logger.info("Migrering ferdig!")
