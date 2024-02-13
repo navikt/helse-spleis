@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.MigrationVersion
 import org.slf4j.LoggerFactory
 
 // Understands how to create a data source from environment variables
@@ -31,6 +32,8 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         Flyway.configure()
             .dataSource(dataSource)
             .lockRetryCount(-1)
+            .baselineVersion(MigrationVersion.fromVersion("01"))
+            .baselineOnMigrate(true)
             .load()
             .migrate()
         logger.info("Migrering ferdig!")
