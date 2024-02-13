@@ -202,6 +202,7 @@ class Person private constructor(
     }
 
     fun håndter(gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag) {
+        gjenopplivVilkårsgrunnlag.valider(arbeidsgivere.map { it.organisasjonsnummer() })
         gjenopplivVilkårsgrunnlag.gjenoppliv(vilkårsgrunnlagHistorikk)
         gjenopptaBehandling(gjenopplivVilkårsgrunnlag)
         håndterGjenoppta(gjenopplivVilkårsgrunnlag)

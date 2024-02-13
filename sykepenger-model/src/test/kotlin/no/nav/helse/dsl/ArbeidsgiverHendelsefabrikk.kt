@@ -470,9 +470,9 @@ internal class ArbeidsgiverHendelsefabrikk(
             aktørId = aktørId,
             fødselsnummer = personidentifikator.toString(),
             vilkårsgrunnlagId = vilkårsgrunnlagId,
-            nyttSkjæringstidspunkt = skjæringstidspunkt
+            nyttSkjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiveropplysninger = emptyMap()
         )
-
     internal fun lagHåndterForkastSykmeldingsperioder(periode: Periode) =
         ForkastSykmeldingsperioder(
             meldingsreferanseId = UUID.randomUUID(),
