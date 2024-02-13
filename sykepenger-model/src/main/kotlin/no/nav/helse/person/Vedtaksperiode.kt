@@ -154,6 +154,7 @@ internal class Vedtaksperiode private constructor(
     private val jurist get() = generasjoner.jurist(arbeidsgiverjurist, id)
     private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
+    private val hendelseIder get() = generasjoner.dokumentsporing()
 
     internal constructor(
         søknad: Søknad,
@@ -218,8 +219,6 @@ internal class Vedtaksperiode private constructor(
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Vedtaksperiode", mapOf("vedtaksperiodeId" to id.toString()))
     }
-    internal fun håndtertTidligere(dokumentsporing: Dokumentsporing) = generasjoner.dokumentHåndtert(dokumentsporing)
-    internal fun hendelseIder() = generasjoner.dokumentsporing()
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.trimLeft(periode.endInclusive)
@@ -478,7 +477,7 @@ internal class Vedtaksperiode private constructor(
                     organisasjonsnummer = organisasjonsnummer,
                     vedtaksperiodeId = id,
                     gjeldendeTilstand = gjeldendeTilstand,
-                    hendelser = hendelseIder(),
+                    hendelser = hendelseIder,
                     fom = periode.start,
                     tom = periode.endInclusive,
                     forlengerPeriode = person.nåværendeVedtaksperioder { (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
@@ -821,7 +820,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             gjeldendeTilstand = tilstand.type,
             forrigeTilstand = previousState.type,
-            hendelser = hendelseIder(),
+            hendelser = hendelseIder,
             makstid = person.makstid(this, LocalDateTime.now()),
             fom = periode.start,
             tom = periode.endInclusive
@@ -844,7 +843,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             generasjonId = generasjonId,
             periode = periode,
-            hendelseIder = hendelseIder(),
+            hendelseIder = hendelseIder,
             skjæringstidspunkt = skjæringstidspunkt,
             avsluttetTidspunkt = tidsstempel
         ))
@@ -861,7 +860,7 @@ internal class Vedtaksperiode private constructor(
         vedtakFattetTidspunkt: LocalDateTime
     ) {
         val vilkårsgrunnlag = checkNotNull(vilkårsgrunnlag) { "Særdeles besynderlig at vi ikke har vilkårsgrunnlag nå som vedtaket iverksettes!" }
-        val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id, generasjonId, periode, hendelseIder(), skjæringstidspunkt)
+        val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id, generasjonId, periode, hendelseIder, skjæringstidspunkt)
         val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
         this.finnArbeidsgiverperiode()?.tags(this.periode, builder, harPeriodeRettFør)
         builder.utbetalingId(utbetalingId)
@@ -995,7 +994,7 @@ internal class Vedtaksperiode private constructor(
             ventetSiden = oppdatert,
             venterTil = venterTil(venterPå)
         )
-        builder.hendelseIder(hendelseIder())
+        builder.hendelseIder(hendelseIder)
         emitVedtaksperiodeVenter(builder.build())
     }
 

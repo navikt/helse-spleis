@@ -344,8 +344,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
         beregnetInntekt: Double = INNTEKT,
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = ORGNUMMER,
-        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsenderSystem: AvsenderSystem? = null
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ): Pair<UUID, String> {
         return meldingsfabrikk.lagInnteksmelding(
             arbeidsgiverperiode,
@@ -355,7 +354,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
             opphørsdatoForRefusjon,
             orgnummer,
             begrunnelseForReduksjonEllerIkkeUtbetalt,
-            avsenderSystem
+            AvsenderSystem("LPS", "V1.0.0")
         ).let { (id, message) ->
             testRapid.sendTestMessage(message)
             id.toUUID() to message

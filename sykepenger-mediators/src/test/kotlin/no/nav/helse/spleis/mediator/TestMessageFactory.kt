@@ -440,7 +440,7 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         orgnummer: String = organisasjonsnummer,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        avsenderSystem: AvsenderSystem? = null
+        avsenderSystem: AvsenderSystem = AvsenderSystem("LPS", "V1.0")
     ) = nyHendelse(
         "inntektsmelding", lagInntektsmelding(
             arbeidsgiverperiode,

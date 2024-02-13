@@ -180,7 +180,7 @@ class Inntektsmelding(
     }
 
     internal fun ikkeHåndert(person: Person, vedtaksperioder: List<Vedtaksperiode>, sykmeldingsperioder: Sykmeldingsperioder, dager: DagerFraInntektsmelding) {
-        if (håndtertNå() || håndtertTidligere(vedtaksperioder)) return
+        if (håndtertNå()) return
         info("Inntektsmelding ikke håndtert")
         val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager)
         if (overlappendeSykmeldingsperioder.isNotEmpty()) {
@@ -190,7 +190,6 @@ class Inntektsmelding(
         person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
     }
     private fun håndtertNå() = håndtertInntekt
-    private fun håndtertTidligere(vedtaksperioder: List<Vedtaksperiode>) = vedtaksperioder.any { it.håndtertTidligere(dokumentsporing) }
     internal fun jurist(jurist: MaskinellJurist) = jurist.medInntektsmelding(this.meldingsreferanseId())
     internal fun skalIkkeOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?) =
         sykdomstidslinjeperiode != null && beregnetInntektsdato !in sykdomstidslinjeperiode && inntektsdato == null
