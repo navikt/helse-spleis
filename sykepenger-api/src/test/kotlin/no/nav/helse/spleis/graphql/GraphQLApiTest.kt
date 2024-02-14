@@ -16,6 +16,7 @@ import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.engine.connector
 import io.ktor.server.testing.testApplication
+import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
 import java.net.ServerSocket
 import java.net.URI
@@ -33,6 +34,7 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.LokalePayload
+import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.databaseContainer
 import no.nav.helse.spleis.graphql.SchemaGenerator.Companion.IntrospectionQuery
@@ -750,6 +752,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         }
 
         private fun lagTestapplikasjon(port: Int, testDataSource: TestDataSource, testblokk: suspend SpleisApiTestContext.() -> Unit) {
+            val spekematClient = mockk<SpekematClient>()
             testApplication {
                 environment {
                     connector {
@@ -768,7 +771,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         }
                     }
                     val dataSource = testDataSource.ds
-                    lagApplikasjonsmodul(null, null, { dataSource }, CollectorRegistry())
+                    lagApplikasjonsmodul(spekematClient, null, null, { dataSource }, CollectorRegistry())
                 }
                 startApplication()
 

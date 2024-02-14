@@ -13,6 +13,7 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URI
 import java.time.Duration
+import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.SpurteDuClient
 import no.nav.helse.spleis.objectMapper
 
@@ -29,6 +30,11 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
 
     internal val azureClient = createAzureTokenClientFromEnvironment(env)
     internal val spurteDuClient = SpurteDuClient(objectMapper)
+    internal val spekematClient = SpekematClient(
+        tokenProvider = azureClient,
+        objectMapper = objectMapper,
+        scope = env.getValue("SPEKEMAT_SCOPE")
+    )
 
     // Håndter on-prem og gcp database tilkobling forskjellig
     internal val dataSourceConfiguration = DataSourceConfiguration(

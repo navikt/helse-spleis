@@ -52,11 +52,11 @@ fun main() {
         // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
         config.dataSourceConfiguration.getDataSource()
     }
-    val app = createApp(config.ktorConfig, config.azureConfig, config.azureClient, config.spurteDuClient, { dataSource })
+    val app = createApp(config.ktorConfig, config.azureConfig, config.spekematClient, config.azureClient, config.spurteDuClient, { dataSource })
     app.start(wait = true)
 }
 
-internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, azureClient: AzureTokenProvider?, spurteDuClient: SpurteDuClient?, dataSourceProvider: () -> DataSource, collectorRegistry: CollectorRegistry = CollectorRegistry()) =
+internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, spekematClient: SpekematClient, azureClient: AzureTokenProvider?, spurteDuClient: SpurteDuClient?, dataSourceProvider: () -> DataSource, collectorRegistry: CollectorRegistry = CollectorRegistry()) =
     embeddedServer(
         factory = Netty,
         environment = applicationEngineEnvironment {
@@ -64,7 +64,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, az
             log = logg
             module {
                 azureAdAppAuthentication(azureConfig)
-                lagApplikasjonsmodul(azureClient, spurteDuClient, dataSourceProvider, collectorRegistry)
+                lagApplikasjonsmodul(spekematClient, azureClient, spurteDuClient, dataSourceProvider, collectorRegistry)
             }
         },
         configure = {
@@ -73,6 +73,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, az
     )
 
 internal fun Application.lagApplikasjonsmodul(
+    spekematClient: SpekematClient,
     azureClient: AzureTokenProvider?,
     spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
@@ -99,5 +100,5 @@ internal fun Application.lagApplikasjonsmodul(
 
     spannerApi(hendelseDao, personDao, spurteDuClient, azureClient)
     sporingApi(hendelseDao, personDao)
-    installGraphQLApi(hendelseDao, personDao)
+    installGraphQLApi(spekematClient, hendelseDao, personDao)
 }

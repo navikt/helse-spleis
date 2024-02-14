@@ -70,4 +70,6 @@ spec:
     value: "spleis2"
   - name: NyRevurdering
     value: "false"
+  - name: SPEKEMAT_SCOPE
+    value: "api://prod-gcp.tbd.spekemat/.default"
 

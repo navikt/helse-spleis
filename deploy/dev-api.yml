@@ -71,4 +71,6 @@ spec:
     value: "helse-spleis"
   - name: DATABASE_DATABASE
     value: "spleis"
+  - name: SPEKEMAT_SCOPE
+    value: "api://dev-gcp.tbd.spekemat/.default"
 

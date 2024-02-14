@@ -14,6 +14,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
+import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
 import java.net.ServerSocket
 import java.util.concurrent.ArrayBlockingQueue
@@ -94,8 +95,9 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         private val randomPort = ServerSocket(0).use { it.localPort }
         private lateinit var testDataSource: TestDataSource
         private val registry = CollectorRegistry()
+        private val spekematClient = mockk<SpekematClient>()
         private val app =
-            createApp(KtorConfig(httpPort = randomPort), azureConfig, null, null, { testDataSource.ds }, registry)
+            createApp(KtorConfig(httpPort = randomPort), azureConfig, spekematClient, null, null, { testDataSource.ds }, registry)
         private val client = lagHttpklient(randomPort)
         private val testContext = BlackboxTestContext(client, issuer)
 

@@ -1,19 +1,25 @@
 package no.nav.helse.spleis.graphql
 
 import io.prometheus.client.Histogram
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.api.dto.PersonDTO
+import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dto.HendelseDTO
-import no.nav.helse.spleis.dto.håndterPerson
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
+import no.nav.helse.spleis.logg
+import org.slf4j.LoggerFactory
+import kotlin.math.log
 
+private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 private object ApiMetrikker {
     private val responstid = Histogram
         .build("person_snapshot_api", "Metrikker for henting av speil-snapshot")
@@ -27,10 +33,20 @@ private object ApiMetrikker {
     fun målByggSnapshot(block: () -> PersonDTO): PersonDTO = responstid.labels("bygg_snapshot").time(block)
 }
 
-internal fun personResolver(personDao: PersonDao, hendelseDao: HendelseDao): (fnr: String) -> GraphQLPerson? = { fnr ->
-    ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
+internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String): GraphQLPerson? {
+    return ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
+        val spekemat = try {
+            spekematClient.hentSpekemat(fnr, callId).takeUnless { it.pakker.isEmpty() }
+        } catch (err: Exception) {
+            sikkerlogg.info("klarte ikke hente data fra spekemat: ${err.message}", err)
+            null
+        }
+        "Bruker ${if (spekemat == null) "spleis" else "spekemat"} for å lage pølsevisning".also {
+            logg.info(it)
+            sikkerlogg.info(it, kv("fødselsnummer", fnr))
+        }
         ApiMetrikker.målDeserialisering { serialisertPerson.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
-            .let { ApiMetrikker.målByggSnapshot { håndterPerson(it) } }
+            .let { ApiMetrikker.målByggSnapshot { serializePersonForSpeil(it, spekemat) } }
             .let { person -> mapTilDto(person, hendelseDao.hentHendelser(fnr.toLong())) }
     }
 }

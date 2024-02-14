@@ -15,7 +15,9 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
@@ -55,14 +57,15 @@ internal object Api {
         ))
     }
 
-    internal fun Application.installGraphQLApi(hendelseDao: HendelseDao, personDao: PersonDao) {
+    internal fun Application.installGraphQLApi(spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao) {
         routing {
             authenticate(optional = true) {
                 post("/graphql{...}") {
                     val fødselsnummer = call.receiveText().fnr ?: return@post call.respondText(schema, Json)
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
-                        val person = personResolver(personDao, hendelseDao)(fødselsnummer)
+                        val callId = call.callId ?: UUID.randomUUID().toString()
+                        val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, callId)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                     } catch (err: Exception) {
                         logger.error("callId=${call.callId} Kunne ikke lage JSON for Spesialist, sjekk tjenestekall-indeksen!")
