@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.EnableSpekemat
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
 import no.nav.helse.april
@@ -53,7 +54,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
-import no.nav.helse.serde.api.SpeilBuilder
 import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Inntekt
@@ -72,7 +72,6 @@ import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
-import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.utledPeriodetyper
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType.FORELDET_SYKEDAG
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
@@ -89,14 +88,9 @@ import no.nav.helse.serde.api.dto.Utbetalingtype.ANNULLERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.UTBETALING
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
-import no.nav.helse.serde.api.serializePersonForSpeil
-import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
-import no.nav.helse.serde.api.speil.builders.PersonBuilder
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder
 import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.spekemat.fabrikk.PølseDto
-import no.nav.helse.spekemat.fabrikk.PølseradDto
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -135,9 +129,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-// @EnableSpekemat
+@EnableSpekemat
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
-
 
     @Test
     fun `omgjøre kort periode får referanse til inntektsmeldingen som inneholder inntekten som er lagt til grunn`() {
@@ -566,8 +559,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 }
             }, arbeidsforhold = emptyList()),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                Arbeidsforhold(a1, EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
             ),
             orgnummer = a1
         )
@@ -605,7 +598,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 emptyList()
             ),
             arbeidsforhold = listOf(
-                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a1, EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
                 Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
             )
         )
@@ -806,7 +799,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
             2.generasjon {
@@ -851,13 +844,13 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
 
             2.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
 
@@ -1003,7 +996,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
                 beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
             1.generasjon {
@@ -1039,13 +1032,13 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand IngenUtbetaling
-                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
                 beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
             1.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
                 beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
             2.generasjon {
@@ -2520,7 +2513,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
                 uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
         }
@@ -2534,13 +2527,13 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.april til 10.april) medTilstand TilGodkjenning
-                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
                 uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 10.april) medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.mars til 31.mars) medTilstand Utbetalt
                 uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
         }
@@ -2581,7 +2574,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.mars til 31.mars) medTilstand Utbetalt
                 uberegnetPeriode(1) fra (1.februar til 28.februar) medTilstand IngenUtbetaling
-                beregnetPeriode(2) er Utbetalingstatus.GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
+                beregnetPeriode(2) er GodkjentUtenUtbetaling avType UTBETALING fra (1.januar til 31.januar) medTilstand IngenUtbetaling
             }
         }
     }
@@ -2614,7 +2607,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(1, size)
             0.generasjon {
                 assertEquals(1, size)
-                beregnetPeriode(0) er Utbetalingstatus.Ubetalt medTilstand ForberederGodkjenning
+                beregnetPeriode(0) er Ubetalt medTilstand ForberederGodkjenning
             }
         }
     }
@@ -2659,17 +2652,12 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     private class Arbeidsgivergenerasjoner(
         private val orgnummer: String,
         private val vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>,
-        private val generasjoner: List<SpeilGenerasjonDTO>,
-        private val spekematgenerasjoner: Spekematgenerasjoner
+        private val generasjoner: List<SpeilGenerasjonDTO>
     ) {
-        val size = if (Toggle.Spekemat.enabled) spekematgenerasjoner.size else generasjoner.size
+        val size = generasjoner.size
 
         fun Int.generasjon(assertBlock: SpeilGenerasjonDTO.() -> Unit) {
             require(this >= 0) { "Kan ikke være et negativt tall!" }
-            if (Toggle.Spekemat.enabled) {
-                spekematgenerasjoner.apply { this@generasjon.generasjon(assertBlock) }
-                return
-            }
             generasjoner[this].run(assertBlock)
         }
 
@@ -2765,89 +2753,17 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     private fun generasjoner(organisasjonsnummer: String = ORGNUMMER, block: Arbeidsgivergenerasjoner.() -> Unit = {}) {
+        val spekemat = observatør.spekemat.resultat(organisasjonsnummer)
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
         val generasjonerBuilder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),
-            vilkårsgrunnlagHistorikkBuilderResult
+            vilkårsgrunnlagHistorikkBuilderResult,
+            spekemat
         )
         val generasjoner = generasjonerBuilder.build()
         val vilkårsgrunnlag = vilkårsgrunnlagHistorikkBuilderResult.toDTO()
-        val spekemat = observatør.spekemat.resultat(organisasjonsnummer).fjernUnødvendigeRader()
-        val spekematgenerasjoner = Spekematgenerasjoner(vilkårsgrunnlagHistorikkBuilderResult, organisasjonsnummer, spekemat, generasjonerBuilder.buildTidslinjeperioder())
-        Arbeidsgivergenerasjoner(organisasjonsnummer, vilkårsgrunnlag, generasjoner, spekematgenerasjoner).apply(block)
-    }
-
-    private fun List<PølseradDto>.fjernUnødvendigeRader(): List<PølseradDto> {
-        // rader hvor alle pølser er kopiert fra forrige rad - eller blir kopiert til neste rad - kan i praksis fjernes
-        // det betyr at vi bare behøver vurdere pølsepakker med minst tre rader siden den vi skal vurdere én rad mot to andre
-        if (size <= 2) return this
-        val pølseFinnesIRad = { rad: PølseradDto, pølse: PølseDto ->
-            rad.pølser.any { it.generasjonId == pølse.generasjonId }
-        }
-
-        val iterator = this.asReversed().iterator()
-        var forrige = iterator.next()
-        // første rad bevares uansett
-        val result = mutableListOf(forrige)
-        var nåværende = iterator.next()
-        var radnummer = 2
-        while (iterator.hasNext()) {
-            val neste = iterator.next()
-
-            if (nåværende.pølser.all { pølse ->
-                pølseFinnesIRad(forrige, pølse) || pølseFinnesIRad(neste, pølse)
-            }) {
-                // raden er unyttig
-                println("unyttige rad $radnummer fra bunnen!! $nåværende er unyttig")
-            } else {
-                result.add(0, nåværende)
-            }
-
-            radnummer += 1
-            forrige = nåværende
-            nåværende = neste
-        }
-
-        // siste/øverste rad bevares uansett
-        result.add(0, nåværende)
-        return result
-    }
-
-    private class Spekematgenerasjoner private constructor(
-        private val rader: List<Spekematrad>
-    ) {
-        val size = rader.size
-
-        constructor(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, orgnr: String, rader: List<PølseradDto>, generasjoner: List<SpeilTidslinjeperiode>) : this(rader
-            .map { rad ->
-                Spekematrad(
-                    rad = rad,
-                    perioder = rad.pølser
-                        .mapNotNull { pølse -> generasjoner.firstOrNull { it.generasjonId == pølse.generasjonId } }
-                        .utledPeriodetyper()
-                        .map { it.registrerBruk(vilkårsgrunnlaghistorikk, orgnr) }
-                )
-            }
-            .filterNot { rad -> rad.size == 0 }
-        )
-
-        fun Int.generasjon(blokk: SpeilGenerasjonDTO.() -> Unit) {
-            rader[this].somSpeilGenerasjon.apply(blokk)
-        }
-    }
-
-    private class Spekematrad(
-        private val rad: PølseradDto,
-        private val perioder: List<SpeilTidslinjeperiode>
-    ) {
-        val size = perioder.size
-
-        val somSpeilGenerasjon = SpeilGenerasjonDTO(
-            id = UUID.randomUUID(),
-            perioder = perioder,
-            kildeTilGenerasjon = rad.kildeTilRad
-        )
+        Arbeidsgivergenerasjoner(organisasjonsnummer, vilkårsgrunnlag, generasjoner).apply(block)
     }
 }

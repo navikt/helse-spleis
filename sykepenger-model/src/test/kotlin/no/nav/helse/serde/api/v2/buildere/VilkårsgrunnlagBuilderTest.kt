@@ -53,7 +53,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             organisasjonsnummer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),
-            vilkårsgrunnlagHistorikkBuilderResult
+            vilkårsgrunnlagHistorikkBuilderResult,
+            observatør.spekemat.resultat(organisasjonsnummer)
         ).build()
         return vilkårsgrunnlagHistorikkBuilderResult.toDTO()
     }

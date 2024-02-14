@@ -18,6 +18,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.dto.AnnullertUtbetaling
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
@@ -25,8 +26,10 @@ import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.sorterEtterHendelse
+import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.utledPeriodetyper
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.speil.SpeilGenerasjoner
+import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.fjernUnødvendigeRader
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.AktivePerioder
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.ForkastedePerioder
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.Initiell
@@ -49,7 +52,8 @@ internal class SpeilGenerasjonerBuilder(
     private val organisasjonsnummer: String,
     private val alder: Alder,
     arbeidsgiver: Arbeidsgiver,
-    private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
+    private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
+    private val pølsepakke: SpekematDTO.PølsepakkeDTO?
 ) : ArbeidsgiverVisitor {
     private var tilstand: Byggetilstand = Initiell
 
@@ -64,14 +68,39 @@ internal class SpeilGenerasjonerBuilder(
         arbeidsgiver.accept(this)
     }
 
-    internal fun buildTidslinjeperioder(): List<SpeilTidslinjeperiode> {
+    internal fun build(): List<SpeilGenerasjonDTO> {
+        if (pølsepakke == null) return buildSpleis()
+        return buildSpekemat()
+    }
+
+    private fun buildSpekemat(): List<SpeilGenerasjonDTO> {
+        val generasjoner = buildTidslinjeperioder()
+        return pølsepakke!!.rader
+            .fjernUnødvendigeRader()
+            .map { rad -> mapRadTilSpeilGenerasjon(rad, generasjoner) }
+            .filterNot { rad -> rad.size == 0 } // fjerner tomme rader
+    }
+
+    private fun buildTidslinjeperioder(): List<SpeilTidslinjeperiode> {
         val annullertePerioder = annullertePerioder.mapNotNull { (uberegnet, beregnet) ->
             val annulleringen = annulleringer.firstOrNull { it.annullerer(beregnet.utbetaling.korrelasjonsId) }
             annulleringen?.let { uberegnet.somAnnullering(it, beregnet) }
         }
         return allePerioder.filterNot { periode -> annullertePerioder.any { it.generasjonId == periode.generasjonId } } + annullertePerioder
     }
-    internal fun build(): List<SpeilGenerasjonDTO> {
+
+    private fun mapRadTilSpeilGenerasjon(rad: SpekematDTO.PølsepakkeDTO.PølseradDTO, generasjoner: List<SpeilTidslinjeperiode>): SpeilGenerasjonDTO {
+        val perioder = rad.pølser.mapNotNull { pølse -> generasjoner.firstOrNull { it.generasjonId == pølse.generasjonId } }
+        return SpeilGenerasjonDTO(
+            id = UUID.randomUUID(),
+            kildeTilGenerasjon = rad.kildeTilRad,
+            perioder = perioder
+                .map { it.registrerBruk(vilkårsgrunnlaghistorikk, organisasjonsnummer) }
+                .utledPeriodetyper()
+        )
+    }
+
+    private fun buildSpleis(): List<SpeilGenerasjonDTO> {
         val perioder = aktivePerioder + forkastedePerioder.flatMap { tidligere ->
             val siste = tidligere.last()
             val annullering = siste.somAnnullering(annulleringer)

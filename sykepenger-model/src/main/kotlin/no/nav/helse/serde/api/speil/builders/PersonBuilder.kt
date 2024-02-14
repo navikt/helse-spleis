@@ -11,11 +11,13 @@ import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.Alder
+import no.nav.helse.serde.api.SpekematDTO
 
 internal class  PersonBuilder(
     builder: AbstractBuilder,
     private val personidentifikator: Personidentifikator,
     private val aktørId: String,
+    private val pølsepakke: SpekematDTO?,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val versjon: Int
 ) : BuilderState(builder) {
@@ -52,7 +54,7 @@ internal class  PersonBuilder(
         id: UUID,
         organisasjonsnummer: String
     ) {
-        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer)
+        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer, pølsepakke?.pakker?.singleOrNull { it.yrkesaktivitetidentifikator == organisasjonsnummer })
         arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
     }

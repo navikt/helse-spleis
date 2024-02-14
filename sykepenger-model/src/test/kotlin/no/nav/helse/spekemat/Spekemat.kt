@@ -2,8 +2,13 @@ package no.nav.helse.spekemat
 
 import no.nav.helse.Toggle
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO
+import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO
+import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO
+import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO
 import no.nav.helse.spekemat.fabrikk.Pølse
 import no.nav.helse.spekemat.fabrikk.Pølsefabrikk
+import no.nav.helse.spekemat.fabrikk.PølseradDto
 import no.nav.helse.spekemat.fabrikk.Pølsestatus
 
 class Spekemat : PersonObserver {
@@ -11,8 +16,29 @@ class Spekemat : PersonObserver {
     private val arbeidsgivere = mutableMapOf<String, Pølsefabrikk>()
 
     fun resultat(orgnr: String) =
-        if (Toggle.Spekemat.enabled) arbeidsgivere.getValue(orgnr).pakke()
-        else emptyList()
+        if (Toggle.Spekemat.enabled) arbeidsgivere.getValue(orgnr).pakke().mapTilPølsepakkeDTO(orgnr) else null
+
+    private fun List<PølseradDto>.mapTilPølsepakkeDTO(orgnr: String) =
+        PølsepakkeDTO(
+            yrkesaktivitetidentifikator = orgnr,
+            rader = map { rad ->
+                PølseradDTO(
+                    kildeTilRad = rad.kildeTilRad,
+                    pølser = rad.pølser.map { pølseDto ->
+                        PølseDTO(
+                            vedtaksperiodeId = pølseDto.vedtaksperiodeId,
+                            generasjonId = pølseDto.generasjonId,
+                            kilde = pølseDto.kilde,
+                            status = when (pølseDto.status) {
+                                Pølsestatus.ÅPEN -> PølsestatusDTO.ÅPEN
+                                Pølsestatus.LUKKET -> PølsestatusDTO.LUKKET
+                                Pølsestatus.FORKASTET -> PølsestatusDTO.FORKASTET
+                            }
+                        )
+                    }
+                )
+            }
+        )
 
     override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
         if (Toggle.Spekemat.disabled) return
