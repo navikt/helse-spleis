@@ -2,6 +2,7 @@ package no.nav.helse.spekemat
 
 import no.nav.helse.Toggle
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO
@@ -15,6 +16,9 @@ class Spekemat : PersonObserver {
     private val hendelser = mutableListOf<Any>()
     private val arbeidsgivere = mutableMapOf<String, Pølsefabrikk>()
 
+    fun resultat() = SpekematDTO(
+        pakker = arbeidsgivere.mapNotNull { resultat(it.key) }
+    )
     fun resultat(orgnr: String) =
         if (Toggle.Spekemat.enabled) arbeidsgivere.getValue(orgnr).pakke().mapTilPølsepakkeDTO(orgnr) else null
 

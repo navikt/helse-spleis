@@ -58,4 +58,4 @@ internal class EtterspurtBehov(
 internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =
     inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)
 
-internal fun AbstractEndToEndTest.speilApi() = serializePersonForSpeil(person)
+internal fun AbstractEndToEndTest.speilApi() = serializePersonForSpeil(person, observatør.spekemat.resultat())

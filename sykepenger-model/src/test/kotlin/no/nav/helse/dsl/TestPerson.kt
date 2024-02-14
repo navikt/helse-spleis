@@ -50,6 +50,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.serialize
@@ -145,8 +146,8 @@ internal class TestPerson(
         return testblokk(this)
     }
 
-    fun serializeForSpeil(): PersonDTO {
-        return serializePersonForSpeil(person)
+    fun serializeForSpeil(spekematDTO: SpekematDTO): PersonDTO {
+        return serializePersonForSpeil(person, spekematDTO)
     }
     fun serialize(pretty: Boolean = false): SerialisertPerson {
         return person.serialize(pretty)
