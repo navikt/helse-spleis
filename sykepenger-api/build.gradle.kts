@@ -4,7 +4,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
-val tbdLibsVersion = "2024.02.07-10.06-41e436f8"
+val tbdLibsVersion = "2024.02.09-10.44-24d5802f"
 val micrometerRegistryPrometheusVersion = "1.12.2"
 val ktorVersion = "2.3.7"
 val wireMockVersion = "3.3.1"
@@ -53,6 +53,7 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 
+    testImplementation("com.github.navikt.tbd-libs:mock-http-client:$tbdLibsVersion")
     testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
 
     testImplementation("com.apurebase:kgraphql:$kGraphQLVersion")
