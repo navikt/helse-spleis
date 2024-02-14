@@ -52,17 +52,13 @@ spec:
     inbound:
       rules:
         - application: spesialist
-          namespace: tbd
-          cluster: prod-gcp
         - application: spanner
-          namespace: tbd
-          cluster: prod-gcp
         - application: sporing
-          namespace: tbd
-          cluster: prod-gcp
+        - application: spekemat
     outbound:
       rules:
         - application: spurtedu
+        - application: spekemat
   secureLogs:
     enabled: true
   envFrom:

@@ -59,6 +59,7 @@ spec:
     outbound:
       rules:
         - application: spurtedu
+        - application: spekemat
   secureLogs:
     enabled: true
   envFrom:
