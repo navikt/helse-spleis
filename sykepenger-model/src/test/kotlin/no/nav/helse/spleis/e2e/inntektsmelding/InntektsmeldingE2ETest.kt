@@ -337,6 +337,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `inntektsmelding i det blå`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        håndterInntektsmelding(listOf(1.oktober til 16.oktober), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+    }
+
+    @Test
     fun `Skal ikke bruke inntekt fra gammel inntektsmelding`() {
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar))
         nyPeriode(1.april til 30.april)

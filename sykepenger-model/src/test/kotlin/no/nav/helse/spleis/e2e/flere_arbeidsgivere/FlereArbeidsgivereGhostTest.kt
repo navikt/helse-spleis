@@ -83,6 +83,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -143,7 +144,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertInfoSomFølgeAv("Lagrer ikke inntekt på skjæringstidspunkt fordi inntektdato er oppgitt til å være utenfor den perioden arbeidsgiver har sykdom for") {
+        assertInfoSomFølgeAv("Inntektsmelding oppdaterer ikke vilkårsgrunnlag") {
             håndterInntektsmelding(listOf(mandag den 29.januar til 13.februar), orgnummer = a2)
         }
         // IM replayes, og ettersom 27. og 28 blir friskedager pga. IM beregnes skjæringstidspunktet til 29.januar. Når A1 sin søknad kommer dekker den "hullet" med sykdom slik at skjæringstidspunktet blir 1.januar
@@ -190,19 +191,21 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = ghost,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer",
         )
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
         val ghostInntektEtterIm = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
-        assertTrue(ghostInntektEtterIm is InntektsmeldingInntekt)
+        assertFalse(ghostInntektEtterIm is InntektsmeldingInntekt)
+        assertTrue(ghostInntektEtterIm is SkattSykepengegrunnlag)
 
         // Så kjem søknaden på ghosten læll
         val ghostSøknad = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ghost)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = ghost)
+        val ghostInntektEtterImNå = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ghost) }.inspektør.inntektsopplysning
+        assertTrue(ghostInntektEtterImNå is InntektsmeldingInntekt)
+        assertFalse(ghostInntektEtterImNå is SkattSykepengegrunnlag)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = ghost)
         håndterSimulering(1.vedtaksperiode, orgnummer = ghost)
@@ -210,27 +213,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = ghost)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, ghost)
 
-
-        assertForventetFeil(
-            forklaring = """
-                Perioden på A1 som går i AvventerRevurdering kaller på gjennoppta behandling før periode på Ghost i AvventerIM får replayet
-                IM. Da ender vi opp med å gå videre uten å ha referanser til inntektsmelding som er brukt, og får ikke validert inneholdet i IM
-            """,
-            nå = {
-                assertIngenVarsler(1.vedtaksperiode.filter(ghost))
-                assertEquals(listOf(Dokumentsporing.søknad(ghostSøknad)), inspektør(ghost).hendelser(1.vedtaksperiode))
-            },
-            ønsket = {
-                assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
-                assertEquals(listOf(Dokumentsporing.søknad(ghostSøknad), Dokumentsporing.inntektsmeldingDager(ghostIM), Dokumentsporing.inntektsmeldingInntekt(ghostIM)), inspektør(ghost).hendelser(1.vedtaksperiode))
-            }
-        )
+        assertVarsel(RV_IM_8, 1.vedtaksperiode.filter(ghost))
+        assertEquals(listOf(Dokumentsporing.søknad(ghostSøknad), Dokumentsporing.inntektsmeldingDager(ghostIM), Dokumentsporing.inntektsmeldingInntekt(ghostIM)), inspektør(ghost).hendelser(1.vedtaksperiode))
     }
 
     @Test

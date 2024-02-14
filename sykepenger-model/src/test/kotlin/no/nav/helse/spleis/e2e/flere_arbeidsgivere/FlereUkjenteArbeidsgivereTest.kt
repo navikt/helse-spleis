@@ -92,7 +92,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
 
         assertFunksjonellFeil(RV_SV_2, 1.vedtaksperiode.filter(a2))
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTrue(inspektør(a2).periodeErForkastet(1.vedtaksperiode))
     }
 
@@ -119,26 +119,13 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         }
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
-        assertEquals(3, overstyringerIgangsatt.size)
+        assertEquals(2, overstyringerIgangsatt.size)
 
         overstyringerIgangsatt.first().also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
                 årsak = "KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE",
                 skjæringstidspunkt = 1.januar,
                 periodeForEndring = 1.januar til 31.januar,
-                berørtePerioder = listOf(
-                    VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), 1.februar til 28.februar, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
-                )
-            ), event)
-        }
-
-        overstyringerIgangsatt[1].also { event ->
-            assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
-                skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.januar til 1.januar,
                 berørtePerioder = listOf(
                     VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
                     VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), 1.februar til 28.februar, 1.januar, "REVURDERING"),
@@ -160,7 +147,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), event)
         }
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)
@@ -310,8 +297,6 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING, orgnummer = a1
         )
@@ -361,8 +346,6 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,

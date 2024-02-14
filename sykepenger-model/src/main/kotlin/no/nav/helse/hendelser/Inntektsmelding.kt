@@ -191,6 +191,14 @@ class Inntektsmelding(
     }
     private fun håndtertNå() = håndtertInntekt
     internal fun jurist(jurist: MaskinellJurist) = jurist.medInntektsmelding(this.meldingsreferanseId())
-    internal fun skalIkkeOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?) =
-        sykdomstidslinjeperiode != null && beregnetInntektsdato !in sykdomstidslinjeperiode && inntektsdato == null
+
+    internal fun skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?): Boolean {
+        if (forventerInntektsmelding()) return true
+        if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
+        return beregnetInntektsdato in sykdomstidslinjeperiode
+    }
+
+    private fun forventerInntektsmelding(): Boolean {
+        return inntektsdato != null // inntektmelding fra portal, vi har bedt om IM og forventer IM
+    }
 }
