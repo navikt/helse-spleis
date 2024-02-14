@@ -72,4 +72,6 @@ spec:
     value: "false"
   - name: SPEKEMAT_SCOPE
     value: "api://prod-gcp.tbd.spekemat/.default"
+  - name: SPEKEMAT_ENABLED
+    value: "true"
 

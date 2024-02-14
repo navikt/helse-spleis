@@ -57,7 +57,7 @@ internal object Api {
         ))
     }
 
-    internal fun Application.installGraphQLApi(spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao) {
+    internal fun Application.installGraphQLApi(spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao, spekematToggle: Boolean) {
         routing {
             authenticate(optional = true) {
                 post("/graphql{...}") {
@@ -65,7 +65,7 @@ internal object Api {
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
                         val callId = call.callId ?: UUID.randomUUID().toString()
-                        val spekematEnabled = call.request.queryParameters.contains("spekematEnabled")
+                        val spekematEnabled = call.request.queryParameters["spekematEnabled"]?.toBoolean() ?: spekematToggle
                         val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, callId, spekematEnabled)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                     } catch (err: Exception) {
