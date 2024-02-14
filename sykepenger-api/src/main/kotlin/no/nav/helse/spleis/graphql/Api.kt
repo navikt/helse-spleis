@@ -65,7 +65,8 @@ internal object Api {
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
                         val callId = call.callId ?: UUID.randomUUID().toString()
-                        val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, callId)
+                        val spekematEnabled = call.request.queryParameters.contains("spekematEnabled")
+                        val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, callId, spekematEnabled)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                     } catch (err: Exception) {
                         logger.error("callId=${call.callId} Kunne ikke lage JSON for Spesialist, sjekk tjenestekall-indeksen!")

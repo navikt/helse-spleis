@@ -17,7 +17,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
 import no.nav.helse.spleis.logg
 import org.slf4j.LoggerFactory
-import kotlin.math.log
 
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 private object ApiMetrikker {
@@ -33,12 +32,16 @@ private object ApiMetrikker {
     fun målByggSnapshot(block: () -> PersonDTO): PersonDTO = responstid.labels("bygg_snapshot").time(block)
 }
 
-internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String): GraphQLPerson? {
+internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String, spekematEnabled: Boolean): GraphQLPerson? {
     return ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
-        val spekemat = try {
-            spekematClient.hentSpekemat(fnr, callId).takeUnless { it.pakker.isEmpty() }
-        } catch (err: Exception) {
-            sikkerlogg.info("klarte ikke hente data fra spekemat: ${err.message}", err)
+        val spekemat = if (spekematEnabled) {
+            try {
+                spekematClient.hentSpekemat(fnr, callId).takeUnless { it.pakker.isEmpty() }
+            } catch (err: Exception) {
+                sikkerlogg.info("klarte ikke hente data fra spekemat: ${err.message}", err)
+                null
+            }
+        } else {
             null
         }
         "Bruker ${if (spekemat == null) "spleis" else "spekemat"} for å lage pølsevisning".also {
