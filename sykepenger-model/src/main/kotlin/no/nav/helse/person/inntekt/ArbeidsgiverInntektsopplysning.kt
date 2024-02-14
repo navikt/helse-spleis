@@ -1,14 +1,12 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
@@ -287,12 +285,6 @@ class ArbeidsgiverInntektsopplysning(
                 )
             }
         }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.leggTil(
-            generasjoner: Generasjoner,
-            organisasjonsnummer: String,
-            block: (inntektsmeldingId: UUID) -> Unit
-        ) = single { it.gjelder(organisasjonsnummer) }.inntektsopplysning.leggTil(generasjoner, block)
 
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(builder: GodkjenningsbehovBuilder) {
             builder.orgnummereMedRelevanteArbeidsforhold(this.map { it.orgnummer }.toSet())

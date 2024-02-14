@@ -8,7 +8,6 @@ import no.nav.helse.EnableSpekemat
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -199,7 +198,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(listOf(Dokumentsporing.søknad(søknad1), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingDager(inntektsmelding2)), inspektør.hendelser(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(25.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(listOf(Dokumentsporing.søknad(søknad2), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingInntekt(inntektsmelding1)), inspektør.hendelser(2.vedtaksperiode))
+        assertEquals(listOf(Dokumentsporing.søknad(søknad2), Dokumentsporing.inntektsmeldingDager(inntektsmelding1)), inspektør.hendelser(2.vedtaksperiode))
     }
 
     @Test

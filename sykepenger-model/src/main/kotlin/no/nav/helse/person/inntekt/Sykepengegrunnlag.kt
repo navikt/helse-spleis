@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.SykepengegrunnlagVisitor
@@ -37,7 +36,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inge
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntektsdata
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.leggTil
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
@@ -462,9 +460,6 @@ internal class Sykepengegrunnlag private constructor(
             return opprinneligArbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver)
         }
     }
-
-    internal fun leggTil(hendelseIder: Generasjoner, organisasjonsnummer: String, block: (inntektsmeldingId: UUID) -> Unit) =
-        arbeidsgiverInntektsopplysninger.leggTil(hendelseIder, organisasjonsnummer, block)
 
     internal fun inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.inntektsdata(skjæringstidspunkt, organisasjonsnummer)

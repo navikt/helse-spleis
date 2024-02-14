@@ -7,8 +7,6 @@ import java.util.UUID
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
@@ -93,11 +91,6 @@ internal class Inntektsmelding(
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {
         saksbehandlerOverstyring.arbeidsgiveropplysningerKorrigert(person, orgnummer, hendelseId)
-    }
-
-    override fun leggTil(generasjoner: Generasjoner, block: (inntektsmeldingId: UUID) -> Unit) {
-        if (!generasjoner.oppdaterDokumentsporing(Dokumentsporing.inntektsmeldingInntekt(hendelseId))) return
-        block(hendelseId)
     }
 
     internal fun kopierTidsnærOpplysning(

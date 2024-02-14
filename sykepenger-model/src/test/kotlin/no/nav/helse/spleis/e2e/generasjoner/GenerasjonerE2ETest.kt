@@ -239,7 +239,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
                 generasjoner[0].also { generasjon ->
-                    assertEquals(6, generasjon.endringer.size)
+                    assertEquals(5, generasjon.endringer.size)
                     assertEquals(PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.BEREGNET, generasjon.tilstand)
                 }
             }

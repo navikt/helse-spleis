@@ -637,9 +637,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         val sykepengegrunnlag = vilkårsgrunnlag.avklarSykepengegrunnlag(person, jurist)
-        sykepengegrunnlag.leggTil(generasjoner, organisasjonsnummer) { inntektsmeldingId ->
-            person.emitInntektsmeldingHåndtert(inntektsmeldingId, id, organisasjonsnummer)
-        }
         vilkårsgrunnlag.valider(sykepengegrunnlag, jurist)
         val grunnlagsdata = vilkårsgrunnlag.grunnlagsdata()
         grunnlagsdata.validerFørstegangsvurdering(vilkårsgrunnlag)
