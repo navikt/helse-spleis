@@ -90,7 +90,7 @@ class Inntektsmelding(
     private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)
     private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId())
     internal fun aktuellForReplay(sammenhengendePeriode: Periode): Boolean {
-        if (avsendersystem == Avsendersystem.NAV_NO) return false
+        if (erPortalinntektsmelding()) return false
         return Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
     }
 
@@ -193,12 +193,10 @@ class Inntektsmelding(
     internal fun jurist(jurist: MaskinellJurist) = jurist.medInntektsmelding(this.meldingsreferanseId())
 
     internal fun skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?): Boolean {
-        if (forventerInntektsmelding()) return true
+        if (erPortalinntektsmelding()) return true // inntektmelding fra portal, vi har bedt om IM og forventer IM
         if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
         return beregnetInntektsdato in sykdomstidslinjeperiode
     }
 
-    private fun forventerInntektsmelding(): Boolean {
-        return inntektsdato != null // inntektmelding fra portal, vi har bedt om IM og forventer IM
-    }
+    private fun erPortalinntektsmelding() = avsendersystem == Avsendersystem.NAV_NO
 }
