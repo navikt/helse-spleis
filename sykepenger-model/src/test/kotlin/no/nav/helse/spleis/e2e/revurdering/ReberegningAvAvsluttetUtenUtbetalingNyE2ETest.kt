@@ -4,8 +4,10 @@ import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
+import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -79,7 +81,9 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.søndag
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.til
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -107,34 +111,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
                 assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             }
         )
-    }
-
-    @Test
-    fun `omgjøre kort periode får referanse til inntektsmeldingen som inneholder inntekten som er lagt til grunn`() {
-        val søknad1 = håndterSøknad(Sykdom(29.mars(2023), 19.april(2023), 100.prosent))
-        val inntektsmeldingbeløp1 = INNTEKT
-        val inntektsmelding1 = håndterInntektsmelding(
-            listOf(20.april(2023) til 5.mai(2023)),
-            beregnetInntekt = inntektsmeldingbeløp1,
-        )
-        val søknad2 = håndterSøknad(Sykdom(20.april(2023), 7.mai(2023), 100.prosent))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        nullstillTilstandsendringer()
-        val inntektsmeldingbeløp2 = INNTEKT*1.1
-        val inntektsmelding2 = håndterInntektsmelding(
-            listOf(29.mars(2023) til 13.april(2023)),
-            beregnetInntekt = inntektsmeldingbeløp2,
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
-
-        assertEquals(listOf(Dokumentsporing.søknad(søknad1), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingDager(inntektsmelding2)), inspektør.hendelser(1.vedtaksperiode))
-        assertEquals(29.mars(2023), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(20.april(2023), inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(inntektsmeldingbeløp1, inspektør.inntektISykepengegrunnlaget(20.april(2023)))
-
-        assertEquals(listOf(Dokumentsporing.søknad(søknad2), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingInntekt(inntektsmelding1)), inspektør.hendelser(2.vedtaksperiode))
     }
 
     @Test

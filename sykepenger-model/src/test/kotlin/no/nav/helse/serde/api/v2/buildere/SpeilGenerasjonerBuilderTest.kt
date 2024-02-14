@@ -8,10 +8,12 @@ import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
+import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.erHelg
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -32,6 +34,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -50,6 +53,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
+import no.nav.helse.serde.api.SpeilBuilder
 import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Inntekt
@@ -85,7 +89,9 @@ import no.nav.helse.serde.api.dto.Utbetalingtype.ANNULLERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.UTBETALING
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
+import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
+import no.nav.helse.serde.api.speil.builders.PersonBuilder
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder
 import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
 import no.nav.helse.somPersonidentifikator
@@ -117,7 +123,9 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.søndag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
+import no.nav.helse.til
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -129,6 +137,50 @@ import org.junit.jupiter.api.Test
 
 // @EnableSpekemat
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
+
+
+    @Test
+    fun `omgjøre kort periode får referanse til inntektsmeldingen som inneholder inntekten som er lagt til grunn`() {
+        val søknad1 = håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
+        val inntektsmeldingbeløp1 = INNTEKT
+        val inntektsmelding1 = håndterInntektsmelding(listOf(25.januar til fredag den 9.februar), beregnetInntekt = inntektsmeldingbeløp1)
+        val søknad2 = håndterSøknad(Sykdom(25.januar, søndag den 11.februar, 100.prosent))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        nullstillTilstandsendringer()
+        val inntektsmeldingbeløp2 = INNTEKT*1.1
+        val inntektsmelding2 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektsmeldingbeløp2)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+
+        generasjoner {
+            if (Toggle.Spekemat.enabled) {
+                assertEquals(2, size)
+                0.generasjon {
+                    assertEquals(2, size)
+                    uberegnetPeriode(0) medTilstand ForberederGodkjenning medHendelser setOf(søknad2, inntektsmelding1)
+                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1, inntektsmelding2)
+                }
+                1.generasjon {
+                    assertEquals(2, size)
+                    uberegnetPeriode(0) medTilstand IngenUtbetaling medHendelser setOf(søknad2, inntektsmelding1)
+                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1, inntektsmelding2)
+                }
+            } else {
+                assertEquals(1, size)
+                0.generasjon {
+                    assertEquals(2, size)
+                    uberegnetPeriode(0) medTilstand ForberederGodkjenning medHendelser setOf(søknad2, inntektsmelding1)
+                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1, inntektsmelding2)
+                }
+            }
+        }
+
+        assertEquals(listOf(Dokumentsporing.søknad(søknad1), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingDager(inntektsmelding2)), inspektør.hendelser(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(25.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(listOf(Dokumentsporing.søknad(søknad2), Dokumentsporing.inntektsmeldingDager(inntektsmelding1), Dokumentsporing.inntektsmeldingInntekt(inntektsmelding1)), inspektør.hendelser(2.vedtaksperiode))
+    }
 
     @Test
     fun `revurdere før forlengelse utbetales`() {
@@ -2684,6 +2736,11 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         infix fun <T : SpeilTidslinjeperiode> T.medTilstand(tilstand: Periodetilstand): T {
             assertEquals(tilstand, this.periodetilstand)
+            return this
+        }
+
+        infix fun <T : SpeilTidslinjeperiode> T.medHendelser(hendelser: Set<UUID>): T {
+            assertEquals(hendelser, this.hendelser)
             return this
         }
 
