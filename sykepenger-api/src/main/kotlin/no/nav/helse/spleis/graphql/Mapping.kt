@@ -2,6 +2,7 @@ package no.nav.helse.spleis.graphql
 
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
@@ -310,28 +311,8 @@ private fun mapInntektstype(kilde: UtbetalingInntektskilde) = when (kilde) {
 
 internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List<HendelseDTO>) =
     when (periode) {
-        is BeregnetPeriode -> GraphQLBeregnetPeriode(
-            generasjonId = periode.generasjonId,
-            kilde = periode.kilde,
-            fom = periode.fom,
-            tom = periode.tom,
-            tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
-            periodetype = mapPeriodetype(periode.periodetype),
-            inntektstype = mapInntektstype(periode.inntektskilde),
-            erForkastet = periode.erForkastet,
-            opprettet = periode.beregnet,
-            vedtaksperiodeId = periode.vedtaksperiodeId,
-            beregningId = periode.beregningId,
-            gjenstaendeSykedager = periode.gjenståendeSykedager,
-            forbrukteSykedager = periode.forbrukteSykedager,
-            skjaeringstidspunkt = periode.skjæringstidspunkt,
-            maksdato = periode.maksdato,
-            utbetaling = mapUtbetaling(periode.utbetaling),
-            hendelser = periode.hendelser.tilHendelseDTO(hendelser),
-            periodevilkar = mapPeriodevilkår(periode.periodevilkår),
-            periodetilstand = mapTilstand(periode.periodetilstand),
-            vilkarsgrunnlagId = periode.vilkårsgrunnlagId
-        )
+        is AnnullertPeriode -> mapBeregnetPeriode(periode.somBeregnetPeriode(), hendelser)
+        is BeregnetPeriode -> mapBeregnetPeriode(periode, hendelser)
         is UberegnetVilkårsprøvdPeriode -> GraphQLUberegnetVilkarsprovdPeriode(
             generasjonId = periode.generasjonId,
             kilde = periode.kilde,
@@ -364,7 +345,29 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
             hendelser = periode.hendelser.tilHendelseDTO(hendelser)
         )
     }
-
+private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<HendelseDTO>) =
+    GraphQLBeregnetPeriode(
+        generasjonId = periode.generasjonId,
+        kilde = periode.kilde,
+        fom = periode.fom,
+        tom = periode.tom,
+        tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
+        periodetype = mapPeriodetype(periode.periodetype),
+        inntektstype = mapInntektstype(periode.inntektskilde),
+        erForkastet = periode.erForkastet,
+        opprettet = periode.beregnet,
+        vedtaksperiodeId = periode.vedtaksperiodeId,
+        beregningId = periode.beregningId,
+        gjenstaendeSykedager = periode.gjenståendeSykedager,
+        forbrukteSykedager = periode.forbrukteSykedager,
+        skjaeringstidspunkt = periode.skjæringstidspunkt,
+        maksdato = periode.maksdato,
+        utbetaling = mapUtbetaling(periode.utbetaling),
+        hendelser = periode.hendelser.tilHendelseDTO(hendelser),
+        periodevilkar = mapPeriodevilkår(periode.periodevilkår),
+        periodetilstand = mapTilstand(periode.periodetilstand),
+        vilkarsgrunnlagId = periode.vilkårsgrunnlagId
+    )
 private fun Set<UUID>.tilHendelseDTO(hendelser: List<HendelseDTO>): List<GraphQLHendelse> {
     return this
         .mapNotNull { dokumentId -> hendelser.firstOrNull { hendelseDTO -> hendelseDTO.id == dokumentId.toString() } }
