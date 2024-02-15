@@ -8,6 +8,7 @@ import no.nav.helse.EnableSpekemat
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -131,6 +132,40 @@ import org.junit.jupiter.api.Test
 
 @EnableSpekemat
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `forkastet auu`() {
+        val søknad = håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 20.januar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
+        generasjoner {
+            assertEquals(3, size)
+            0.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand Annullert
+            }
+            1.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
+            }
+            2.generasjon {
+                assertEquals(1, size)
+                assertForventetFeil(
+                    forklaring = "hendelsene er summen av alt, burde vært per generasjon",
+                    nå = {
+                        uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
+                    },
+                    ønsket = {
+                        uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
+                    }
+                )
+            }
+        }
+    }
 
     @Test
     fun `omgjøre kort periode får referanse til inntektsmeldingen som inneholder inntekten som er lagt til grunn`() {
