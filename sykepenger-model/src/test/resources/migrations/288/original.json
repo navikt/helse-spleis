@@ -1,0 +1,108 @@
+{
+  "arbeidsgivere": [
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "TIL_INFOTRYGD"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT",
+                "tidsstempel": "i dag"
+              },
+              {
+                "tilstand": "TIL_INFOTRYGD"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT"
+              },
+              {
+                "id": "nisse",
+                "tilstand": "UBEREGNET_REVURDERING"
+              },
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på mandag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT"
+              },
+              {
+                "id": "nisse1",
+                "tilstand": "UBEREGNET_REVURDERING"
+              },
+              {
+                "id": "nisse2",
+                "tilstand": "UBEREGNET_REVURDERING"
+              },
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på fredag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "UBEREGNET",
+                "endringer": [
+                  {
+                    "tidsstempel": "i kveld"
+                  }
+                ]
+              },
+              {
+                "id": "fjomp",
+                "tilstand": "UBEREGNET"
+              },
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på onsdag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "UBEREGNET",
+                "endringer": [
+                  {
+                    "tidsstempel": "i morgen"
+                  }
+                ]
+              },
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på sundag"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

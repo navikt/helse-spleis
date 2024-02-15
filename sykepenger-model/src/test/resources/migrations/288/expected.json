@@ -1,0 +1,98 @@
+{
+  "arbeidsgivere": [
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "TIL_INFOTRYGD"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT",
+                "tidsstempel": "i dag"
+              },
+              {
+                "tilstand": "TIL_INFOTRYGD"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT"
+              },
+              {
+                "id": "nisse",
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på mandag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "VEDTAK_IVERKSATT"
+              },
+              {
+                "id": "nisse1",
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på fredag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+                "endringer": [
+                  {
+                    "tidsstempel": "i kveld"
+                  }
+                ],
+                "avsluttet": "i kveld"
+              },
+              {
+                "id": "fjomp",
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på onsdag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+                "endringer": [
+                  {
+                    "tidsstempel": "i morgen"
+                  }
+                ],
+                "avsluttet": "i morgen"
+              },
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "på sundag"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 288
+}
