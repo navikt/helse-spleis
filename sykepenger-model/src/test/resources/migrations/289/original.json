@@ -1,0 +1,32 @@
+{
+  "arbeidsgivere": [
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "i dag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "endringer": [
+                  {
+                    "tidsstempel": "i dag"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

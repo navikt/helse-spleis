@@ -1,0 +1,34 @@
+{
+  "arbeidsgivere": [
+    {
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "i dag"
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "generasjoner": [
+              {
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "i dag",
+                "endringer": [
+                  {
+                    "tidsstempel": "i dag"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 289
+}

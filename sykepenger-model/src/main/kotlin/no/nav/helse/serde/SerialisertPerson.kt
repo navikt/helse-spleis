@@ -214,6 +214,7 @@ import no.nav.helse.serde.migration.V285LoggeRareAnnulleringer
 import no.nav.helse.serde.migration.V286AnnullerteÅpneRevurderinger
 import no.nav.helse.serde.migration.V287AnnullerteÅpneRevurderingerEnGangTil
 import no.nav.helse.serde.migration.V288FjerneOverflødigeUberegnedeRevurderinger
+import no.nav.helse.serde.migration.V289AvsluttetTidspunktForkastedeGenerasjoner
 import no.nav.helse.serde.migration.V28HendelsesIderPåVedtaksperiode
 import no.nav.helse.serde.migration.V29LeggerTilInntektsKildeType
 import no.nav.helse.serde.migration.V2Medlemskapstatus
@@ -586,7 +587,8 @@ class SerialisertPerson(val json: String) {
             V285LoggeRareAnnulleringer(),
             V286AnnullerteÅpneRevurderinger(),
             V287AnnullerteÅpneRevurderingerEnGangTil(),
-            V288FjerneOverflødigeUberegnedeRevurderinger()
+            V288FjerneOverflødigeUberegnedeRevurderinger(),
+            V289AvsluttetTidspunktForkastedeGenerasjoner()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
