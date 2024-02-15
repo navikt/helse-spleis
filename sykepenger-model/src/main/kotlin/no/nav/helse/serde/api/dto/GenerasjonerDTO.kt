@@ -7,7 +7,10 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
+import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
+import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
@@ -15,9 +18,6 @@ import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.SpeilGenerasjoner
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.merge
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
-import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
-import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
 
 data class SpeilGenerasjonDTO(
     val id: UUID, // Runtime
@@ -343,40 +343,6 @@ data class BeregnetPeriode(
                 ny.sammeGrunnlag(gammel)
             }
             .all { it }
-    }
-
-    internal fun somAnnullering(annulleringer: List<AnnullertUtbetaling>): AnnullertPeriode? {
-        val annulleringen = annulleringer.firstOrNull { it.annullerer(this.utbetaling.korrelasjonsId) } ?: return null
-        return AnnullertPeriode(
-            vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
-            kilde = kilde,
-            fom = fom,
-            tom = tom,
-            opprettet = opprettet,
-            // feltet gir ikke mening for annullert periode:
-            vilkår = Vilkår(
-                sykepengedager = Sykepengedager(fom, LocalDate.MAX, null, null, false),
-                alder = this.periodevilkår.alder
-            ),
-            beregnet = annulleringen.annulleringstidspunkt,
-            oppdatert = oppdatert,
-            periodetilstand = annulleringen.periodetilstand,
-            hendelser = hendelser,
-            beregningId = beregningId,
-            utbetaling = Utbetaling(
-                Utbetalingtype.ANNULLERING,
-                this.utbetaling.korrelasjonsId,
-                annulleringen.utbetalingstatus,
-                0,
-                0,
-                this.utbetaling.arbeidsgiverFagsystemId,
-                this.utbetaling.personFagsystemId,
-                emptyMap(),
-                null,
-                annulleringen.id
-            )
-        )
     }
 
     override fun toString(): String {
