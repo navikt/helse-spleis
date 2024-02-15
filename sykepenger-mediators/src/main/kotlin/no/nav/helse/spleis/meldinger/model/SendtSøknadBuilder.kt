@@ -42,7 +42,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         sendTilGosys = sendTilGosys,
         yrkesskade = yrkesskade,
         egenmeldinger = egenmeldinger,
-        opprettet = opprettet,
+        registrert = registrert,
         søknadstype = søknadstype
     )
 

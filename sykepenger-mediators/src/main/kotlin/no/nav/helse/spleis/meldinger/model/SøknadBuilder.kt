@@ -13,7 +13,7 @@ internal abstract class SøknadBuilder {
     protected lateinit var aktørId: String
     protected lateinit var fødselsdato: LocalDate
     protected lateinit var organisasjonsnummer: String
-    protected lateinit var opprettet: LocalDateTime
+    protected var registrert: LocalDateTime = LocalDateTime.now()
     protected lateinit var egenmeldinger: List<Søknad.Søknadsperiode.Arbeidsgiverdag>
     private lateinit var fom: LocalDate
     private lateinit var tom: LocalDate
@@ -28,7 +28,6 @@ internal abstract class SøknadBuilder {
     internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
-    internal fun opprettet(opprettet: LocalDateTime) = apply { this.opprettet = opprettet }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }
     internal fun tom(tom: LocalDate) = apply { this.tom = tom }
     internal fun sendt(tidspunkt: LocalDateTime) = apply { this.innsendt = tidspunkt }

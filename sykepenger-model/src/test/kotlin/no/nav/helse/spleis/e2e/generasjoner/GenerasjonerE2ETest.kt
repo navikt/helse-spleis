@@ -44,13 +44,13 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
     fun `ny periode har en generasjon`() {
         a1 {
             val søknadId = UUID.randomUUID()
-            val opprettet = LocalDateTime.now()
-            val innsendt = opprettet.minusHours(2)
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, opprettet = opprettet)
+            val registrert = LocalDateTime.now()
+            val innsendt = registrert.minusHours(2)
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
                 assertEquals(1, generasjoner.single().endringer.size)
-                assertEquals(Generasjonkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = innsendt, avsender = Avsender.SYKMELDT), generasjoner.single().kilde)
+                assertEquals(Generasjonkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = registrert, avsender = Avsender.SYKMELDT), generasjoner.single().kilde)
             }
         }
     }

@@ -37,7 +37,6 @@ internal abstract class SøknadMessage(
     private fun bygg() {
         builder.meldingsreferanseId(this.id)
             .fnr(fødselsnummer)
-            .opprettet(packet["opprettet"].asLocalDateTime())
             .aktørId(packet["aktorId"].asText())
             .fødselsdato(packet["fødselsdato"].asLocalDate())
             .sykmeldingSkrevet(sykmeldingSkrevet)

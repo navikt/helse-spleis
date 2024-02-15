@@ -138,8 +138,6 @@ class Inntektsmelding(
 
     override fun avsender() = ARBEIDSGIVER
 
-    override fun registrert() = mottatt // // dette tidsstempelet tilsvarer @opprettet fra spedisjon
-
     enum class Avsendersystem {
         NAV_NO,
         ALTINN,

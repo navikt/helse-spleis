@@ -93,7 +93,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
         egenmeldinger: List<Søknad.Søknadsperiode.Arbeidsgiverdag> = emptyList(),
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
-        opprettet: LocalDateTime = LocalDateTime.now()
+        registrert: LocalDateTime = LocalDateTime.now()
     ): Søknad {
         val innsendt = (sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive).let {
             when (it) {
@@ -122,7 +122,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
             søknadstype = søknadstype,
-            opprettet = opprettet
+            registrert = registrert
         ).apply {
             søknader.add(this)
         }

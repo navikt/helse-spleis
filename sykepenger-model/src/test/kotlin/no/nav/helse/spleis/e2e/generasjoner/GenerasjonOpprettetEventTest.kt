@@ -22,9 +22,9 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
     fun `event om opprettet generasjon`() {
         a1 {
             val søknadId = UUID.randomUUID()
-            val opprettet = LocalDateTime.now()
-            val innsendt = opprettet.minusHours(2)
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, opprettet = opprettet)
+            val registrert = LocalDateTime.now()
+            val innsendt = registrert.minusHours(2)
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
             val generasjonOpprettetEvent = observatør.generasjonOpprettetEventer.last()
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 val generasjonId = generasjoner.single().id
@@ -38,7 +38,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
                     kilde = PersonObserver.GenerasjonOpprettetEvent.Kilde(
                         meldingsreferanseId = søknadId,
                         innsendt = innsendt,
-                        registert = innsendt,
+                        registert = registrert,
                         avsender = Avsender.SYKMELDT
                     )
                 )
