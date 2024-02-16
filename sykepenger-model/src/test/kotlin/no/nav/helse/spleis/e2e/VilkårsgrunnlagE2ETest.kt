@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -154,15 +153,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)))
         assertVarsel(Varselkode.RV_VV_1)
-        assertForventetFeil(
-            forklaring = "Arbeidsgier finnes i aareg, men inngår ikke i opptjening",
-            nå = {
-                assertVarsel(Varselkode.RV_VV_1)
-            },
-            ønsket = {
-                assertIngenVarsel(Varselkode.RV_VV_1)
-            }
-        )
     }
 
     @Test

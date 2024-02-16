@@ -143,7 +143,7 @@ enum class Varselkode(
     RV_IT_38("En utbetaling i Infotrygd har medført at perioden nå vil utbetales"),
 
     // VV: Vilkårsvurdering
-    RV_VV_1("Arbeidsgiver er ikke registrert i Aa-registeret."),
+    RV_VV_1("Bruker har ikke registrert opptjening hos arbeidsgiver"),
     RV_VV_2("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"),
     RV_VV_3("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.", avviklet = true),
     RV_VV_4("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd"),
