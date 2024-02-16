@@ -23,7 +23,7 @@ internal class V289AvsluttetTidspunktForkastedeGenerasjoner: JsonMigration(versi
     private fun migrerVedtaksperiode(fnr: String, aktørId: String, orgnr: String, vedtaksperiode: JsonNode) {
         val generasjonerNode = vedtaksperiode.path("generasjoner") as ArrayNode
         val sisteGenerasjon = generasjonerNode.last() as ObjectNode
-        if (sisteGenerasjon.path("tilstand").asText() == "TIL_INFOTRYGD")
+        if (sisteGenerasjon.path("tilstand").asText() != "TIL_INFOTRYGD")
             return sikkerLogg.info("[V289] siste generasjon er ikke TIL_INFOTRYGD for ${vedtaksperiode.path("fom").asText()} - ${vedtaksperiode.path("tom").asText()} {}, {}, {}", kv("aktørId", aktørId), kv("orgnr", orgnr), kv("vedtaksperiodeId", vedtaksperiode.path("id").asText()), kv("fødselsnummer", fnr))
 
         if (sisteGenerasjon.hasNonNull("avsluttet")) return
