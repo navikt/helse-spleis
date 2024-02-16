@@ -271,3 +271,6 @@ spec:
         - team: tbd
           application: spekemat-slakter
           access: readwrite
+        - team: tbd
+          application: spill-av-im
+          access: readwrite
