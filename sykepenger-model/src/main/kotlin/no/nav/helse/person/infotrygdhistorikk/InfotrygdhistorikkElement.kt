@@ -3,7 +3,6 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
@@ -23,7 +22,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import org.slf4j.LoggerFactory
 
 class InfotrygdhistorikkElement private constructor(
     private val id: UUID,
@@ -43,8 +41,6 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
         fun opprett(
             oppdatert: LocalDateTime,
             hendelseId: UUID,
@@ -213,17 +209,6 @@ class InfotrygdhistorikkElement private constructor(
         return !perioder.any { utbetalingsperiode ->
             utbetalingsperiode.overlapperMed(periode)
         }
-    }
-
-    fun loggSistOppdatert(aktørId: String) {
-        val begynteÅLyttePåITEndringer = LocalDate.of(2022, 4, 1).atStartOfDay() // databasen i spennende på beina ca.
-        val førViBegynteÅLyttePåITEndringer = oppdatert < begynteÅLyttePåITEndringer
-        sikkerlogg.info("person med {} har oppdatert infotrygdhistorikk {}, det er før vi begynte å lytte på IT-endringer {}",
-            StructuredArguments.keyValue("aktørId", aktørId),
-            StructuredArguments.keyValue("oppdatert", oppdatert.toString()),
-            StructuredArguments.keyValue("førITEndringer", førViBegynteÅLyttePåITEndringer)
-        )
-
     }
 
 }

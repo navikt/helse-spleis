@@ -2,7 +2,6 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -19,7 +18,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import org.slf4j.LoggerFactory
 
 internal class Infotrygdhistorikk private constructor(
     private val elementer: MutableList<InfotrygdhistorikkElement>
@@ -29,7 +27,6 @@ internal class Infotrygdhistorikk private constructor(
     constructor() : this(mutableListOf())
 
     internal companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
             tidligsteDato.minusYears(4) til LocalDate.now()
 
@@ -167,12 +164,4 @@ internal class Infotrygdhistorikk private constructor(
     ) {
         elementer.loggSprøeInntektMigrertInnFraIT(dato, beløp, hendelseId, organisasjonsnummer)
     }
-
-    fun loggSistOppdatert(aktørId: String) {
-        if (!harHistorikk()) return sikkerlogg.info("person med {} har ikke infotrygdhistorikk i det hele tatt",
-            StructuredArguments.keyValue("aktørId", aktørId)
-        )
-        siste.loggSistOppdatert(aktørId)
-    }
-
 }
