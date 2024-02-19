@@ -395,12 +395,13 @@ class Person private constructor(
         påminnelse.kontekst(aktivitetslogg, this)
         påminnelse.info("Håndterer påminnelse for person")
 
-        val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
-        arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
-            arbeidsgiver.sykefraværsfortelling(acc)
-        }.varsleObservers(observers)
+//        val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
+//        arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
+//            arbeidsgiver.sykefraværsfortelling(acc)
+//        }.varsleObservers(observers)
 
         arbeidsgivere.loggSprøeInntekterMigrertInnFraIT(infotrygdhistorikk)
+        infotrygdhistorikk.loggSistOppdatert(aktørId)
 
         håndterGjenoppta(påminnelse)
     }
