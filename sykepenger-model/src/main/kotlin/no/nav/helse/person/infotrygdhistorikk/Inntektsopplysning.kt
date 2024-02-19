@@ -34,20 +34,6 @@ class Inntektsopplysning private constructor(
     }
 
     internal companion object {
-
-        internal fun List<Inntektsopplysning>.harSprøInntektIHistorikken(
-            dato: LocalDate,
-            beløp: Inntekt,
-            organisasjonsnummer: String
-        ): Boolean {
-            forEach { inntektsopplysning ->
-                val treff =
-                    dato == inntektsopplysning.sykepengerFom && beløp == inntektsopplysning.inntekt && organisasjonsnummer == inntektsopplysning.orgnummer
-                if (treff) return true
-            }
-            return false
-        }
-
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
             inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.hashCode() }))
 

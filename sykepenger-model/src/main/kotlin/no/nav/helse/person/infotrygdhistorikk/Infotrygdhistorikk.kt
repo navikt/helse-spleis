@@ -9,7 +9,6 @@ import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement.Companion.loggSprøeInntektMigrertInnFraIT
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -17,7 +16,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 
 internal class Infotrygdhistorikk private constructor(
     private val elementer: MutableList<InfotrygdhistorikkElement>
@@ -154,14 +152,5 @@ internal class Infotrygdhistorikk private constructor(
     fun ingenUtbetalingerMellom(organisasjonsnummer: String, periode: Periode): Boolean {
         if (!harHistorikk()) return true
         return siste.ingenUtbetalingerMellom(organisasjonsnummer, periode)
-    }
-
-    fun loggSprøeInntektMigrertInnFraIT(
-        dato: LocalDate,
-        beløp: Inntekt,
-        hendelseId: UUID,
-        organisasjonsnummer: String
-    ) {
-        elementer.loggSprøeInntektMigrertInnFraIT(dato, beløp, hendelseId, organisasjonsnummer)
     }
 }
