@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -22,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -224,5 +226,17 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+    }
+
+    @Test
+    fun `skal ikke legge på varsel om avslått dag pga foreldelse når perioden ikke har avslåttte dager fordi den er innenfor arbeidsgiverperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 3.mai)
+
+        assertForventetFeil(
+            forklaring = "Skal ikke legge på varsel om avslått dag pga foreldelse når perioden ikke har avslåttte dager fordi den er innenfor arbeidsgiverperioden",
+            nå = { assertVarsel(RV_SØ_2) },
+            ønsket = { assertIngenVarsel(RV_SØ_2) }
+        )
     }
 }
