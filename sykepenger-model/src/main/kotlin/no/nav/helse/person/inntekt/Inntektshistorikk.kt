@@ -3,7 +3,9 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsmelding.Companion.loggSprøeInntekterMigrertInnFraIT
 
 internal class Inntektshistorikk private constructor(private val historikk: MutableList<Inntektsmelding>) {
 
@@ -27,4 +29,8 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
     internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? =
         historikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag)
+
+    internal fun loggSprøeInntekterMigrertInnFraIT(infotrygdhistorikk: Infotrygdhistorikk, organisasjonsnummer: String) {
+        historikk.loggSprøeInntekterMigrertInnFraIT(infotrygdhistorikk, organisasjonsnummer)
+    }
 }

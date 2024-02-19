@@ -11,6 +11,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.harSprøInntektIHistorikken
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
@@ -20,6 +21,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
 
 class InfotrygdhistorikkElement private constructor(
     private val id: UUID,
@@ -73,6 +75,21 @@ class InfotrygdhistorikkElement private constructor(
             arbeidskategorikoder = arbeidskategorikoder,
             oppdatert = oppdatert
         )
+
+        internal fun List<InfotrygdhistorikkElement>.loggSprøeInntektMigrertInnFraIT(
+            dato: LocalDate,
+            beløp: Inntekt,
+            hendelseId: UUID,
+            organisasjonsnummer: String
+        ) {
+            val inntekter = flatMap { it.inntekter }
+            val kjent = inntekter.harSprøInntektIHistorikken(dato, beløp, organisasjonsnummer)
+            if (kjent) return // disse har tidligere blitt logget
+            sikkerlogg.info("Fant inntekt med {} og {} som er migert inn i inntektshistorikken, men kjenner ikke til den i infotrygdhistorikken",
+                StructuredArguments.keyValue("hendelseId", hendelseId),
+                StructuredArguments.keyValue("tidsstempel", dato.toString())
+            )
+        }
     }
 
     internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
