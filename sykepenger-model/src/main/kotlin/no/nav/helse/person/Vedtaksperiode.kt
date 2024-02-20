@@ -984,9 +984,10 @@ internal class Vedtaksperiode private constructor(
     private fun vedtaksperiodeVenter(venterPå: Vedtaksperiode) {
         val venteårsak = person.venteårsak(venterPå) ?: return
         val builder = VedtaksperiodeVenter.Builder()
-        builder.venterPå(venterPå.id, venterPå.organisasjonsnummer, venteårsak)
+        builder.venterPå(venterPå.id, venterPå.skjæringstidspunkt, venterPå.organisasjonsnummer, venteårsak)
         builder.venter(
             vedtaksperiodeId = id,
+            skjæringstidspunkt = skjæringstidspunkt,
             orgnummer = organisasjonsnummer,
             ventetSiden = oppdatert,
             venterTil = venterTil(venterPå)
@@ -2328,10 +2329,6 @@ internal class Vedtaksperiode private constructor(
 
         internal val HAR_AVVENTENDE_GODKJENNING: VedtaksperiodeFilter = {
             it.tilstand == AvventerGodkjenning || it.tilstand == AvventerGodkjenningRevurdering
-        }
-
-        internal val KLAR_TIL_BEHANDLING: VedtaksperiodeFilter = {
-            it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
         }
 
         private val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }

@@ -8,7 +8,6 @@ import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
@@ -36,17 +35,19 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             assertEquals(8, observatør.vedtaksperiodeVenter.size)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            val venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180)
+            val venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180)
             val forventetVedtaksperiode1 = PersonObserver.VedtaksperiodeVenterEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
                 aktørId = AKTØRID,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
+                skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                 hendelser = setOf(søknadIdJanuar),
-                ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
+                ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
                 venterTil = venterTil,
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
+                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                     organisasjonsnummer = a1,
                     venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "INNTEKTSMELDING",
@@ -59,11 +60,13 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 aktørId = AKTØRID,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 2.vedtaksperiode,
+                skjæringstidspunkt = inspektør(2.vedtaksperiode).skjæringstidspunkt,
                 hendelser = setOf(søknadIdMars, inntektsmeldingIdMars),
-                ventetSiden = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.oppdatert,
+                ventetSiden = inspektør(2.vedtaksperiode).oppdatert,
                 venterTil = venterTil,
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
+                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                     organisasjonsnummer = a1,
                     venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "INNTEKTSMELDING",
@@ -81,7 +84,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     }
 
     @Test
-    fun `HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE`(){
+    fun HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE(){
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         }
@@ -99,11 +102,13 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 aktørId = AKTØRID,
                 organisasjonsnummer = a2,
                 vedtaksperiodeId = 1.vedtaksperiode,
+                skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                 hendelser = setOf(søknadId, inntektsmeldingId),
-                ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
-                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(90),
+                ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
+                venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(90),
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
+                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                     organisasjonsnummer = a2,
                     venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "SØKNAD",
@@ -126,11 +131,13 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                 aktørId = AKTØRID,
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
+                skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                 hendelser = setOf(søknadId),
-                ventetSiden = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert,
-                venterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180),
+                ventetSiden = inspektør(1.vedtaksperiode).oppdatert,
+                venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180),
                 venterPå = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
                     vedtaksperiodeId = 1.vedtaksperiode,
+                    skjæringstidspunkt = inspektør(1.vedtaksperiode).skjæringstidspunkt,
                     organisasjonsnummer = a1,
                     venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "INNTEKTSMELDING",
@@ -162,7 +169,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-            val januarVenterTil = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.oppdatert.plusDays(180)
+            val januarVenterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180)
             val januarVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
             assertEquals(1.vedtaksperiode, januarVenter.venterPå.vedtaksperiodeId)
             assertEquals(januarVenterTil, januarVenter.venterTil)

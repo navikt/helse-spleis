@@ -49,6 +49,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
+        val skjæringstidspunkt: LocalDate,
         val hendelser: Set<UUID>,
         val ventetSiden: LocalDateTime,
         val venterTil: LocalDateTime,
@@ -56,6 +57,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     ) {
         data class VenterPå(
             val vedtaksperiodeId: UUID,
+            val skjæringstidspunkt: LocalDate,
             val organisasjonsnummer: String,
             val venteårsak: Venteårsak
         )

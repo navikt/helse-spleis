@@ -9,7 +9,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Revurderingseventyr
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeVenter
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 class Påminnelse(
@@ -51,15 +50,6 @@ class Påminnelse(
         if (!it) {
             info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
-    }
-
-    internal fun venter(builder: VedtaksperiodeVenter.Builder, makstid: (tilstandsendringstidspunkt: LocalDateTime) -> LocalDateTime) {
-        builder.venter(
-            UUID.fromString(vedtaksperiodeId),
-            organisasjonsnummer,
-            tilstandsendringstidspunkt,
-            makstid(tilstandsendringstidspunkt)
-        )
     }
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
