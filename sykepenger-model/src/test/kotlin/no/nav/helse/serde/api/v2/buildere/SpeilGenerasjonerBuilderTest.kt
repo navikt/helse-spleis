@@ -154,15 +154,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             }
             2.generasjon {
                 assertEquals(1, size)
-                assertForventetFeil(
-                    forklaring = "hendelsene er summen av alt, burde vært per generasjon",
-                    nå = {
-                        uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
-                    },
-                    ønsket = {
-                        uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
-                    }
-                )
+                uberegnetPeriode(0) fra 1.januar til 10.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
             }
         }
     }
@@ -192,14 +184,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 1.generasjon {
                     assertEquals(2, size)
                     uberegnetPeriode(0) medTilstand IngenUtbetaling medHendelser setOf(søknad2, inntektsmelding1)
-                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1, inntektsmelding2)
+                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1)
                 }
             } else {
                 assertEquals(1, size)
                 0.generasjon {
                     assertEquals(2, size)
                     uberegnetPeriode(0) medTilstand ForberederGodkjenning medHendelser setOf(søknad2, inntektsmelding1)
-                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1, inntektsmelding2)
+                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1)
                 }
             }
         }

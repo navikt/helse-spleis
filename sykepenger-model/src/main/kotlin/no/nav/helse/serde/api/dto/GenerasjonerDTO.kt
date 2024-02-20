@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
@@ -240,12 +242,11 @@ data class UberegnetPeriode(
         private val generasjonAvsluttet: LocalDateTime?,
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
-        private val periode: Periode,
-        private val hendelser: Set<UUID>
+        private val periode: Periode
     ) {
         private lateinit var sykdomstidslinje: List<Sykdomstidslinjedag>
 
-        internal fun build(): UberegnetPeriode {
+        internal fun build(dokumentsporinger: Set<Dokumentsporing>): UberegnetPeriode {
             return UberegnetPeriode(
                 vedtaksperiodeId = vedtaksperiodeId,
                 generasjonId = generasjonId,
@@ -260,7 +261,7 @@ data class UberegnetPeriode(
                 opprettet = opprettet,
                 oppdatert = oppdatert,
                 skjæringstidspunkt = skjæringstidspunkt,
-                hendelser = hendelser,
+                hendelser = dokumentsporinger.ider(),
                 periodetilstand = generasjonAvsluttet?.let { if (forkastet) Annullert else IngenUtbetaling } ?: when (tilstand) {
                     is Vedtaksperiode.AvventerRevurdering -> UtbetaltVenterPåAnnenPeriode
                     is Vedtaksperiode.AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
@@ -388,7 +389,6 @@ data class BeregnetPeriode(
         private val opprettet: LocalDateTime,
         private val oppdatert: LocalDateTime,
         private val periode: Periode,
-        private val hendelser: Set<UUID>,
         private val forrigeBeregnetPeriode: BeregnetPeriode?,
         private val generasjonOpprettet: LocalDateTime
     ) {
@@ -414,7 +414,7 @@ data class BeregnetPeriode(
         private lateinit var personFagsystemId: String
         private val oppdrag = mutableMapOf<String, SpeilOppdrag>()
 
-        fun build(alder: no.nav.helse.Alder): BeregnetPeriode? {
+        fun build(alder: no.nav.helse.Alder, dokumentsporinger: Set<Dokumentsporing>): BeregnetPeriode? {
             val utbetalingtype = this.utbetalingtype ?: return null
 
             val avgrensetUtbetalingstidslinje = utbetalingstidslinje.filter { it.dato in periode }
@@ -441,7 +441,7 @@ data class BeregnetPeriode(
                 periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // TODO: fikse,
                 inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // verdien av feltet brukes ikke i speil
                 skjæringstidspunkt = skjæringstidspunkt,
-                hendelser = hendelser,
+                hendelser = dokumentsporinger.ider(),
                 maksdato = maksdato,
                 generasjonOpprettet = generasjonOpprettet,
                 beregnet = beregnet,

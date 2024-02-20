@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
@@ -141,8 +140,7 @@ internal class SpeilGenerasjonerBuilder(
         skjæringstidspunkt: () -> LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {
-        val hendelser = hendelseIder.ider()
-        this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, skjæringstidspunkt(), tilstand, opprettet, oppdatert, periode, hendelser)
+        this.tilstand.besøkVedtaksperiode(this, vedtaksperiode, id, skjæringstidspunkt(), tilstand, opprettet, oppdatert)
     }
 
     private val Generasjoner.Generasjon.Tilstand.uberegnet get() = this in setOf(
@@ -164,6 +162,19 @@ internal class SpeilGenerasjonerBuilder(
     ) {
         if (tilstand.uberegnet) return this.tilstand.besøkUberegnetPeriode(this, periode, id, kilde.meldingsreferanseId, tidsstempel, avsluttet, tilstand == Generasjoner.Generasjon.Tilstand.TilInfotrygd)
         this.tilstand.besøkBeregnetPeriode(this, periode, id, kilde.meldingsreferanseId, tidsstempel, vedtakFattet, avsluttet)
+    }
+
+    override fun preVisitGenerasjonendring(
+        id: UUID,
+        tidsstempel: LocalDateTime,
+        sykmeldingsperiode: Periode,
+        periode: Periode,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        utbetaling: Utbetaling?,
+        dokumentsporing: Dokumentsporing,
+        sykdomstidslinje: Sykdomstidslinje
+    ) {
+        this.tilstand.dokumentsporing(dokumentsporing)
     }
 
     override fun postVisitGenerasjon(
@@ -362,9 +373,7 @@ internal class SpeilGenerasjonerBuilder(
             skjæringstidspunkt: LocalDate,
             tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
             opprettet: LocalDateTime,
-            oppdatert: LocalDateTime,
-            periode: Periode,
-            hendelser: Set<UUID>
+            oppdatert: LocalDateTime
         ) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
@@ -380,6 +389,9 @@ internal class SpeilGenerasjonerBuilder(
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
         fun forlatUberegnetPeriode(builder: SpeilGenerasjonerBuilder) {
+            throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
+        }
+        fun dokumentsporing(dokumentsporing: Dokumentsporing) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
         fun besøkBeregnetPeriode(
@@ -450,11 +462,9 @@ internal class SpeilGenerasjonerBuilder(
                 skjæringstidspunkt: LocalDate,
                 tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
                 opprettet: LocalDateTime,
-                oppdatert: LocalDateTime,
-                periode: Periode,
-                hendelser: Set<UUID>
+                oppdatert: LocalDateTime
             ) {
-                vedtaksperiodebuilder = TidslinjeperioderBuilder(vedtaksperiode, vedtaksperiodeId, skjæringstidspunkt, tilstand, opprettet, oppdatert, periode, hendelser)
+                vedtaksperiodebuilder = TidslinjeperioderBuilder(vedtaksperiode, vedtaksperiodeId, skjæringstidspunkt, tilstand, opprettet, oppdatert)
             }
 
             override fun besøkUberegnetPeriode(
@@ -472,7 +482,7 @@ internal class SpeilGenerasjonerBuilder(
             }
 
             override fun forlatUberegnetPeriode(builder: SpeilGenerasjonerBuilder) {
-                uberegnetPeriodeBuilder?.build()?.also {
+                uberegnetPeriodeBuilder?.build(vedtaksperiodebuilder?.dokumentsporinger?.toSet() ?: emptySet())?.also {
                     nyUberegnetPeriode(builder, it)
                 }
                 uberegnetPeriodeBuilder = null
@@ -492,8 +502,12 @@ internal class SpeilGenerasjonerBuilder(
                 }
             }
 
+            override fun dokumentsporing(dokumentsporing: Dokumentsporing) {
+                this.vedtaksperiodebuilder?.medDokumentsporing(dokumentsporing)
+            }
+
             override fun forlatBeregnetPeriode(builder: SpeilGenerasjonerBuilder) {
-                beregnetPeriodeBuilder?.build(builder.alder)?.also {
+                beregnetPeriodeBuilder?.build(builder.alder, vedtaksperiodebuilder?.dokumentsporinger?.toSet() ?: emptySet())?.also {
                     vedtaksperiodebuilder?.nyBeregnetPeriode(it)
                     nyBeregnetPeriode(builder, it)
                 }
@@ -631,12 +645,13 @@ internal class SpeilGenerasjonerBuilder(
             private val skjæringstidspunkt: LocalDate,
             private val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
             private val opprettet: LocalDateTime,
-            private val oppdatert: LocalDateTime,
-            private val periode: Periode,
-            private val hendelser: Set<UUID>
+            private val oppdatert: LocalDateTime
         ) {
             private var forrigeBeregnetPeriode: BeregnetPeriode? = null
-
+            internal val dokumentsporinger = mutableSetOf<Dokumentsporing>()
+            fun medDokumentsporing(dokumentsporing: Dokumentsporing) {
+                dokumentsporinger.add(dokumentsporing)
+            }
             internal fun nyBeregnetPeriode(ny: BeregnetPeriode) { forrigeBeregnetPeriode = ny }
             internal fun nyBeregnetPeriode(periode: Periode, generasjonId: UUID, kilde: UUID, generasjonOpprettet: LocalDateTime) = BeregnetPeriode.Builder(
                 vedtaksperiodeId,
@@ -646,12 +661,12 @@ internal class SpeilGenerasjonerBuilder(
                 opprettet,
                 oppdatert,
                 periode,
-                hendelser,
                 forrigeBeregnetPeriode,
                 generasjonOpprettet
             )
+
             internal fun nyUberegnetPeriode(periode: Periode, generasjonId: UUID, kilde: UUID, generasjonOpprettet: LocalDateTime, avsluttet: LocalDateTime?, forkastet: Boolean) =
-                UberegnetPeriode.Builder(vedtaksperiodeId, generasjonId, kilde, skjæringstidspunkt, tilstand, generasjonOpprettet, forkastet, avsluttet, opprettet, oppdatert, periode, hendelser)
+                UberegnetPeriode.Builder(vedtaksperiodeId, generasjonId, kilde, skjæringstidspunkt, tilstand, generasjonOpprettet, forkastet, avsluttet, opprettet, oppdatert, periode)
         }
     }
 }
