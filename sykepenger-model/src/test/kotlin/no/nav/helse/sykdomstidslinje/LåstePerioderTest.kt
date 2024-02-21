@@ -58,14 +58,25 @@ internal class LåstePerioderTest {
     }
 
     @Test
+    fun `kan ikke låse overlappende perioder`() {
+        val initial = (1.januar jobbTil 25.januar)
+            .lås(Periode(2.januar, 15.januar))
+        assertThrows<IllegalStateException> {
+            initial.lås(Periode(4.januar, 11.januar))
+        }
+    }
+
+    @Test
     fun `låse opp overlappende låste dagperioder`() {
-        val initial = (1.januar jobbTil 25.januar).lås(Periode(2.januar, 11.januar)).lås(Periode(4.januar, 15.januar))
+        val initial = (1.januar jobbTil 25.januar)
+            .lås(Periode(2.januar, 11.januar))
+            .lås(Periode(12.januar, 15.januar))
             .merge(1.januar ferieTil 25.januar)
 
         assertEquals(1 + 10, initial.filterIsInstance<ProblemDag>().size)
 
         val actual = initial.låsOpp(Periode(2.januar, 11.januar)).merge(1.januar ferieTil 25.januar)
-        assertEquals(3 + 10, actual.filterIsInstance<ProblemDag>().size)
+        assertEquals(21, actual.filterIsInstance<ProblemDag>().size)
     }
 
 }

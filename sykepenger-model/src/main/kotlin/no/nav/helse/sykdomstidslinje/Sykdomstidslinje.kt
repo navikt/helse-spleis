@@ -67,7 +67,15 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun merge(other: Sykdomstidslinje, beste: BesteStrategy = default): Sykdomstidslinje {
         val nyeDager = dager.toMutableMap()
-        other.dager.filter { it.key !in låstePerioder }.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
+        other.dager.entries
+            .partition { it.key in låstePerioder }
+            .also { (låsteDager, ulåsteDager) ->
+                /*check(låsteDager.isEmpty()) {
+                    "Det er gjort forsøk på å oppdatere ${låsteDager.size} låste dager: ${låsteDager.joinToString { it.key.toString() }}"
+                }*/
+                ulåsteDager.forEach { (dato, dag) -> nyeDager.merge(dato, dag, beste) }
+            }
+
         return Sykdomstidslinje(
             nyeDager.toSortedMap(),
             this.periode?.plus(other.periode) ?: other.periode,
@@ -105,9 +113,16 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun erLåst(periode: Periode) = låstePerioder.contains(periode)
 
+    internal fun bekreftErLåst(periode: Periode) {
+        check(låstePerioder.any { it == periode }) { "$periode er ikke låst" }
+    }
+    internal fun bekreftErÅpen(periode: Periode) {
+        check(låstePerioder.none { it.overlapperMed(periode) }) { "hele eller deler av $periode er låst" }
+    }
     internal fun lås(periode: Periode) = this.also {
         requireNotNull(this.periode)
         require(periode in this.periode) { "$periode er ikke i ${this.periode}" }
+        check(låstePerioder.none { it.overlapperMed(periode) }) { "$periode overlapper allerede med en låst periode" }
         låstePerioder.add(periode)
     }
 

@@ -58,7 +58,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
-            assertEquals(0, it.size)
+            assertEquals(1, it.size)
+            assertEquals(3.januar til 26.januar, it.first())
         }
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertIngenFunksjonelleFeil()

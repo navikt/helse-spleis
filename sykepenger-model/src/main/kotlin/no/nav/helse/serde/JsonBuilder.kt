@@ -1561,6 +1561,12 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: () -> LocalDate,
             hendelseIder: Set<Dokumentsporing>
         ) {
+            val avAvsluttetVedtaksperiode = tilstand in setOf(Vedtaksperiode.AvsluttetUtenUtbetaling, Vedtaksperiode.Avsluttet)
+            if (avAvsluttetVedtaksperiode) {
+                check(generasjoner.last().getValue("avsluttet") != null) {
+                    "vedtaksperiode $id er avsluttet, men siste generajon er det ikke"
+                }
+            }
             vedtaksperiodeMap.putAll(mutableMapOf(
                 "id" to id,
                 "fom" to periode.start, // serialiseres kun for spanner sin del
@@ -1631,7 +1637,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "tilstand" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
                     "fom" to periode.start,
                     "tom" to periode.endInclusive,
-                    "kilde" to kilde?.let {
+                    "kilde" to kilde.let {
                         mapOf(
                             "meldingsreferanseId" to it.meldingsreferanseId,
                             "innsendt" to it.innsendt,

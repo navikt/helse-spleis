@@ -805,6 +805,12 @@ internal class Arbeidsgiver private constructor(
         return SpesifikkKontekst("Arbeidsgiver", mapOf("organisasjonsnummer" to organisasjonsnummer))
     }
 
+    internal fun bekreftErLåst(periode: Periode) {
+        sykdomshistorikk.sykdomstidslinje().bekreftErLåst(periode)
+    }
+    internal fun bekreftErÅpen(periode: Periode) {
+        sykdomshistorikk.sykdomstidslinje().bekreftErÅpen(periode)
+    }
     internal fun lås(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }

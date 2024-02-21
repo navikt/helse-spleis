@@ -327,6 +327,20 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
     }
 
     @Test
+    fun `overstyr tidslinje i avsluttet uten utbetaling som ikke medfører omgjøring`() {
+        a1 {
+            håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Dagtype.Feriedag)))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[0].tilstand)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[1].tilstand)
+            }
+        }
+    }
+
+    @Test
     fun `periode hos ag2 blir innenfor agp mens ag1 har laget utbetaling`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
