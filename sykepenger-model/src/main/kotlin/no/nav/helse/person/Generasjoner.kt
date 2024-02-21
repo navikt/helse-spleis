@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
@@ -30,11 +31,16 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class Generasjoner(generasjoner: List<Generasjon>) {
-    internal constructor(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) : this(mutableListOf(Generasjon.nyGenerasjon(sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)))
+internal class Generasjoner private constructor(generasjoner: List<Generasjon>) {
+    constructor() : this(emptyList())
+
+    companion object {
+        fun ferdigGenerasjoner(generasjoner: List<Generasjon>) = Generasjoner(generasjoner)
+    }
 
     private val utbetalingene get() = generasjoner.mapNotNull(Generasjon::utbetaling)
     private val generasjoner = generasjoner.toMutableList()
@@ -43,8 +49,9 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     private val observatører = mutableListOf<GenerasjonObserver>()
 
     internal fun addObserver(observatør: GenerasjonObserver) {
-        observatører.add(observatør)
         generasjoner.forEach { it.addObserver(observatør) }
+        if (observatører.any { it === observatør }) return
+        observatører.add(observatør)
     }
 
     internal fun accept(visitor: GenerasjonerVisitor) {
@@ -135,7 +142,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     }
     fun avsluttUtenVedtak(hendelse: IAktivitetslogg) {
         check(generasjoner.last().utbetaling() == null) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
-        this.generasjoner.last().avslutt(hendelse)
+        this.generasjoner.last().avsluttUtenVedtak(hendelse)
     }
 
     internal fun sykmeldingsperiode() = this.generasjoner.first().sykmeldingsperiode()
@@ -152,11 +159,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         check(generasjoner.last().tillaterNyGenerasjon(generasjon)) {
             "siste generasjon ${generasjoner.last()} tillater ikke opprettelse av ny generasjon $generasjon"
         }
-        observatører.forEach {
-            generasjon.addObserver(it)
-        }
+        generasjon.bekreftHarObservatører()
         this.generasjoner.add(generasjon)
-        generasjon.nyGenerasjon()
     }
 
     fun klarForUtbetaling(): Boolean {
@@ -201,8 +205,9 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     }
 
     internal fun trengerArbeidsgiverperiode() = generasjoner.dokumentsporing.sisteInntektsmeldingId() == null
-    internal fun førsteGenerasjonOpprettet() {
-        generasjoner.single().nyGenerasjon()
+    internal fun førsteGenerasjonOpprettet(generasjonObserver: GenerasjonObserver, sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) {
+        val initiellGenerasjon = Generasjon.nyGenerasjon(generasjonObserver, sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)
+        generasjoner.add(initiellGenerasjon)
     }
 
     internal class Generasjonkilde(
@@ -219,21 +224,28 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     }
 
 
-    internal class Generasjon(
+    internal class Generasjon private constructor(
         private val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
         private var vedtakFattet: LocalDateTime?,
         private var avsluttet: LocalDateTime?,
-        private val kilde: Generasjonkilde
+        private val kilde: Generasjonkilde,
+        observatører: List<GenerasjonObserver>
     ) {
+        private val observatører = observatører.toMutableList()
         private val gjeldende get() = endringer.last()
         private val periode: Periode get() = gjeldende.periode
         private val tidsstempel = endringer.first().tidsstempel
         private val dokumentsporing get() = endringer.dokumentsporing
-        private val observatører = mutableListOf<GenerasjonObserver>()
 
-        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
+        constructor(observatører: List<GenerasjonObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
+            check(observatører.isNotEmpty()) {
+                "Må ha observatører registrert"
+            }
+            emitNyGenerasjonOpprettet()
+        }
+        constructor(arver: Generasjon, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde) : this(arver.observatører, tilstand, endringer, avsluttet, kilde)
 
         init {
             check(endringer.isNotEmpty()) {
@@ -241,8 +253,14 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             }
         }
 
+        fun bekreftHarObservatører() {
+            check(this.observatører.isNotEmpty()) {
+                "generasjonen har ikke observatører registrert! kodefeil ?!"
+            }
+        }
 
         internal fun addObserver(observatør: GenerasjonObserver) {
+            if (observatører.any { it === observatør }) return
             observatører.add(observatør)
         }
 
@@ -383,8 +401,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             tilstand.vedtakFattet(this, utbetalingsavgjørelse)
         }
 
-        internal fun avslutt(hendelse: IAktivitetslogg) {
-            tilstand.avslutt(this, hendelse)
+        internal fun avsluttUtenVedtak(hendelse: IAktivitetslogg) {
+            tilstand.avsluttUtenVedtak(this, hendelse)
         }
 
         internal fun forkastVedtaksperiode(hendelse: Hendelse): Generasjon? {
@@ -461,6 +479,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
 
         private fun nyGenerasjonMedEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, starttilstand: Tilstand = Tilstand.Uberegnet): Generasjon {
             return Generasjon(
+                arver = this,
                 tilstand = starttilstand,
                 endringer = listOf(håndtereEndring(arbeidsgiver, hendelse)),
                 avsluttet = null,
@@ -469,6 +488,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         }
         private fun sikreNyGenerasjon(starttilstand: Tilstand, hendelse: Hendelse): Generasjon {
             return Generasjon(
+                arver = this,
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling()),
                 avsluttet = null,
@@ -477,6 +497,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         }
 
         private fun nyGenerasjonTilInfotrygd(hendelse: Hendelse) = Generasjon(
+            arver = this,
             tilstand = Tilstand.TilInfotrygd,
             endringer = listOf(this.gjeldende.kopierUtenUtbetaling()),
             avsluttet = LocalDateTime.now(),
@@ -517,7 +538,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
             observatører.forEach { it.avsluttetUtenVedtak(hendelse, id, avsluttet!!, periode, dokumentsporing.ider()) }
         }
 
-        internal fun nyGenerasjon() {
+        private fun emitNyGenerasjonOpprettet() {
             val type = when(tilstand) {
                 Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
                 Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring
@@ -557,8 +578,12 @@ enum class Periodetilstand {
             val List<Generasjon>.sykmeldingsperiode get() = first().periode
             val List<Generasjon>.dokumentsporing get() = map { it.dokumentsporing }.reduce(Set<Dokumentsporing>::plus)
 
-            fun nyGenerasjon(sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, søknad: Søknad) =
+            fun ferdigGenerasjon(id: UUID, tilstand: Tilstand, endringer: MutableList<Endring>, vedtakFattet: LocalDateTime?, avsluttet: LocalDateTime?, kilde: Generasjonkilde) =
+                Generasjon(id, tilstand, endringer, vedtakFattet, avsluttet, kilde, emptyList())
+
+            fun nyGenerasjon(observatør: GenerasjonObserver, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, søknad: Søknad) =
                 Generasjon(
+                    observatører = listOf(observatør),
                     tilstand = Tilstand.Uberegnet,
                     endringer = listOf(
                         Endring(
@@ -611,8 +636,11 @@ enum class Periodetilstand {
             fun vedtakFattet(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
                 error("Kan ikke fatte vedtak for generasjon i $this")
             }
-            fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+            fun avsluttMedVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                 error("Kan ikke avslutte generasjon i $this")
+            }
+            fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                error("Kan ikke avslutte uten vedtak for generasjon i $this")
             }
             fun utenUtbetaling(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
@@ -657,7 +685,7 @@ enum class Periodetilstand {
                     generasjon.tilstand(Beregnet, hendelse)
                 }
 
-                override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                override fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.tilstand(AvsluttetUtenVedtak, hendelse)
                 }
             }
@@ -680,7 +708,7 @@ enum class Periodetilstand {
                     generasjon.medUtbetaling(utbetaling, grunnlagsdata)
                     generasjon.tilstand(BeregnetRevurdering, hendelse)
                 }
-                override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                override fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     // TODO: ugyldig operasjon? kaste exception? ingen modelltester trigger denne
                     generasjon.tilstand(AvsluttetUtenVedtakRevurdering, hendelse)
                 }
@@ -794,7 +822,7 @@ enum class Periodetilstand {
                 override fun håndterUtbetalinghendelse(generasjon: Generasjon, hendelse: UtbetalingHendelse): Boolean {
                     val utbetaling = checkNotNull(generasjon.gjeldende.utbetaling) { "forventer utbetaling" }
                     if (!utbetaling.gjelderFor(hendelse)) return false
-                    if (utbetaling.erAvsluttet()) avslutt(generasjon, hendelse)
+                    if (utbetaling.erAvsluttet()) avsluttMedVedtak(generasjon, hendelse)
                     return true
                 }
 
@@ -814,7 +842,7 @@ enum class Periodetilstand {
                     return false
                 }
 
-                override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                override fun avsluttMedVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.tilstand(VedtakIverksatt, hendelse)
                 }
             }
@@ -836,7 +864,9 @@ enum class Periodetilstand {
                     return true
                 }
 
-                override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
+                override fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                    // todo: denne er her så lenge Vedtaksperiode spammer 'avsluttUtenVedtak' i håndtering av overstyringer i AUU
+                }
 
                 override fun sikreNyGenerasjon(generasjon: Generasjon, hendelse: Hendelse): Generasjon {
                     return generasjon.sikreNyGenerasjon(UberegnetOmgjøring, hendelse)
@@ -849,8 +879,17 @@ enum class Periodetilstand {
                 override fun oppdaterDokumentsporing(generasjon: Generasjon, dokument: Dokumentsporing) =
                     generasjon.kopierMedDokument(dokument)
 
-                override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) =
-                    generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetOmgjøring)
+                override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon {
+                    val nyGenerasjon = generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetOmgjøring)
+                    if (kanLukkesUtenVedtak(arbeidsgiver, generasjon)) nyGenerasjon.avsluttUtenVedtak(hendelse)
+                    return nyGenerasjon
+                }
+
+                private fun kanLukkesUtenVedtak(arbeidsgiver: Arbeidsgiver, generasjon: Generasjon): Boolean {
+                    val arbeidsgiverperiode = arbeidsgiver.arbeidsgiverperiode(generasjon.periode) ?: return true
+                    val forventerInntekt = Arbeidsgiverperiode.forventerInntekt(arbeidsgiverperiode, generasjon.periode, generasjon.sykdomstidslinje(), NullObserver)
+                    return !forventerInntekt
+                }
             }
             data object AvsluttetUtenVedtakRevurdering : Tilstand by (AvsluttetUtenVedtak) {
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) =

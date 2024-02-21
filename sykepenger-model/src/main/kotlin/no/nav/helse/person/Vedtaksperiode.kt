@@ -148,7 +148,7 @@ internal class Vedtaksperiode private constructor(
     private val arbeidsgiverjurist: MaskinellJurist
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode>, GenerasjonObserver {
 
-    private val sykmeldingsperiode = generasjoner.sykmeldingsperiode()
+    private val sykmeldingsperiode get() = generasjoner.sykmeldingsperiode()
     private val periode get() = generasjoner.periode()
     private val sykdomstidslinje get() = generasjoner.sykdomstidslinje()
     private val jurist get() = generasjoner.jurist(arbeidsgiverjurist, id)
@@ -175,13 +175,15 @@ internal class Vedtaksperiode private constructor(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         tilstand = Start,
-        generasjoner = Generasjoner(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad),
+        generasjoner = Generasjoner(),
         opprettet = LocalDateTime.now(),
         arbeidsgiverjurist = jurist
     ) {
         kontekst(søknad)
-        person.vedtaksperiodeOpprettet(id, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
-        generasjoner.førsteGenerasjonOpprettet()
+        val sykdomstidslinjeperiode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette generasjon på tom sykdomstidslinje" }
+        val ss = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: sykdomstidslinjeperiode)
+        person.vedtaksperiodeOpprettet(id, organisasjonsnummer, sykdomstidslinjeperiode, ss, opprettet)
+        generasjoner.førsteGenerasjonOpprettet(this, sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad)
     }
 
     init {
@@ -395,6 +397,7 @@ internal class Vedtaksperiode private constructor(
         if (!overstyrSykepengegrunnlag.erRelevant(skjæringstidspunkt)) return false
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(organisasjonsnummer) != true) return false
         kontekst(overstyrSykepengegrunnlag)
+        // todo: dette behøver vi ikke gjøre da vi heller kan legge inn hendelser fra vilkårsgrunnlaget på perioden i SpeilBuilder
         alleVedtaksperioder.filter(VILKÅRSPRØVD_PÅ(skjæringstidspunkt)).forEach {
             it.generasjoner.oppdaterDokumentsporing(overstyrSykepengegrunnlag.dokumentsporing())
         }
