@@ -57,7 +57,6 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
 
     internal fun sykdomstidslinje() = generasjoner.last().sykdomstidslinje()
 
-    internal fun harUtbetaling() = siste != null && siste!!.gyldig()
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = generasjoner.any { it.erInFlight() }
     internal fun erAvsluttet() = generasjoner.last().erAvsluttet()
@@ -134,7 +133,8 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     fun vedtakFattet(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
         this.generasjoner.last().vedtakFattet(utbetalingsavgjørelse)
     }
-    fun avslutt(hendelse: IAktivitetslogg) {
+    fun avsluttUtenVedtak(hendelse: IAktivitetslogg) {
+        check(generasjoner.last().utbetaling() == null) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
         this.generasjoner.last().avslutt(hendelse)
     }
 
@@ -163,8 +163,10 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
         return generasjoner.last().klarForUtbetaling()
     }
 
-    fun harÅpenGenerasjon(): Boolean {
-        return generasjoner.last().harÅpenGenerasjon()
+    fun bekreftÅpenGenerasjon() {
+        check(generasjoner.last().harÅpenGenerasjon()) {
+            "forventer at vedtaksperioden er uberegnet når den går ut av Avsluttet/AvsluttetUtenUtbetaling"
+        }
     }
 
     internal fun jurist(jurist: MaskinellJurist, vedtaksperiodeId: UUID) =

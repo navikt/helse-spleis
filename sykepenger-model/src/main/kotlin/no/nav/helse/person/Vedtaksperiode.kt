@@ -2075,8 +2075,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode)
             vedtaksperiode.lås()
-            vedtaksperiode.generasjoner.avslutt(hendelse)
-            check(!vedtaksperiode.generasjoner.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
+            vedtaksperiode.generasjoner.avsluttUtenVedtak(hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
@@ -2090,7 +2089,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-            check(vedtaksperiode.generasjoner.harÅpenGenerasjon())
+            vedtaksperiode.generasjoner.bekreftÅpenGenerasjon()
             vedtaksperiode.låsOpp()
         }
 
@@ -2106,7 +2105,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) {
-                return vedtaksperiode.generasjoner.avslutt(revurdering)
+                return vedtaksperiode.generasjoner.avsluttUtenVedtak(revurdering)
             }
             vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
             revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
@@ -2218,9 +2217,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             vedtaksperiode.låsOpp()
-            check(vedtaksperiode.generasjoner.harÅpenGenerasjon()) {
-                "forventer at vedtaksperioden er uberegnet når den går ut av Avsluttet"
-            }
+            vedtaksperiode.generasjoner.bekreftÅpenGenerasjon()
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
