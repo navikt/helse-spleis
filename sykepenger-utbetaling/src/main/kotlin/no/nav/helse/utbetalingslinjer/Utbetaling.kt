@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.valider
 import no.nav.helse.hendelser.utbetaling.vurdering
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -161,9 +160,9 @@ class Utbetaling private constructor(
         tilstand.simuler(this, hendelse)
     }
 
-    fun godkjenning(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+    fun byggGodkjenningsbehov(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
         hendelse.kontekst(this)
-        tilstand.godkjenning(this, hendelse, builder)
+        tilstand.byggGodkjenningsbehov(this, hendelse, builder)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -533,7 +532,7 @@ class Utbetaling private constructor(
             aktivitetslogg.funksjonellFeil(RV_UT_12)
         }
 
-        fun godkjenning(
+        fun byggGodkjenningsbehov(
             utbetaling: Utbetaling,
             hendelse: IAktivitetslogg,
             builder: GodkjenningsbehovBuilder
@@ -576,14 +575,9 @@ class Utbetaling private constructor(
             utbetaling.personOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
         }
 
-        override fun godkjenning(utbetaling: Utbetaling, hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+        override fun byggGodkjenningsbehov(utbetaling: Utbetaling, hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
             builder.utbetalingtype(utbetaling.type.name)
             tags(builder, utbetaling)
-
-            Aktivitet.Behov.godkjenning(
-                aktivitetslogg = hendelse,
-                builder = builder
-            )
         }
 
         private fun tags(builder: GodkjenningsbehovBuilder, utbetaling: Utbetaling): GodkjenningsbehovBuilder {

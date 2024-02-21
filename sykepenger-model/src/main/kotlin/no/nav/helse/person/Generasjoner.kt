@@ -22,6 +22,7 @@ import no.nav.helse.person.Generasjoner.Generasjon.Companion.jurist
 import no.nav.helse.person.Generasjoner.Generasjon.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.Generasjoner.Generasjon.Endring.Companion.dokumentsporing
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -347,7 +348,11 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
                 val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode)
                 grunnlagsdata.byggGodkjenningsbehov(builder)
-                utbetaling.godkjenning(hendelse, builder)
+                utbetaling.byggGodkjenningsbehov(hendelse, builder)
+                Aktivitet.Behov.godkjenning(
+                    aktivitetslogg = hendelse,
+                    builder = builder
+                )
             }
         }
 
