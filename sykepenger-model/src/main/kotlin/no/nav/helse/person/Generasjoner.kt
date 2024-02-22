@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
@@ -31,7 +30,6 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -869,16 +867,10 @@ enum class Periodetilstand {
                 override fun oppdaterDokumentsporing(generasjon: Generasjon, dokument: Dokumentsporing) =
                     generasjon.kopierMedDokument(dokument)
 
-                override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon {
-                    val nyGenerasjon = generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetOmgjøring)
-                    if (kanLukkesUtenVedtak(arbeidsgiver, generasjon)) nyGenerasjon.avsluttUtenVedtak(hendelse)
-                    return nyGenerasjon
-                }
+                override fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
 
-                private fun kanLukkesUtenVedtak(arbeidsgiver: Arbeidsgiver, generasjon: Generasjon): Boolean {
-                    val arbeidsgiverperiode = arbeidsgiver.arbeidsgiverperiode(generasjon.periode) ?: return true
-                    val forventerInntekt = Arbeidsgiverperiode.forventerInntekt(arbeidsgiverperiode, generasjon.periode, generasjon.sykdomstidslinje(), NullObserver)
-                    return !forventerInntekt
+                override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon {
+                    return generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetOmgjøring)
                 }
             }
             data object VedtakIverksatt : Tilstand {
