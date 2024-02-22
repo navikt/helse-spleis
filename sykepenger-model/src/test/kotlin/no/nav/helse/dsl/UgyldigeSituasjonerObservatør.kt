@@ -10,7 +10,10 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.serde.PersonData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
 
@@ -109,6 +112,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     internal fun bekreftIngenUgyldigeSituasjoner() {
         bekreftIngenOverlappende()
+        bekreftAvsluttetUtenUtbetalingHarLukketGenerasjon()
         validerSykdomshistorikk()
         IM.bekreftEntydighåndtering()
     }
@@ -135,6 +139,18 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
                         "For Arbeidsgiver $orgnr overlapper Vedtaksperiode ${inspektør.id} (${inspektør.periode}) og Vedtaksperiode ${nåværende.id} (${nåværende.periode}) med hverandre!"
                     }
                     nåværende = inspektør
+                }
+            }
+    }
+
+    private fun bekreftAvsluttetUtenUtbetalingHarLukketGenerasjon() {
+        person.inspektør.vedtaksperioder()
+            .flatMap { (_, perioder) -> perioder }
+            .map { it.inspektør }
+            .filter { it.tilstand == Vedtaksperiode.AvsluttetUtenUtbetaling }
+            .all {
+                it.generasjoner.last().let { sisteGenerasjon ->
+                    sisteGenerasjon.avsluttet != null && sisteGenerasjon.tilstand == TilstandData.AVSLUTTET_UTEN_VEDTAK
                 }
             }
     }

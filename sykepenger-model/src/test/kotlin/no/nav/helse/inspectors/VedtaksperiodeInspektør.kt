@@ -24,6 +24,10 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
 
     internal lateinit var periode: Periode
         private set
+
+    internal lateinit var tilstand: Vedtaksperiode.Vedtaksperiodetilstand
+        private set
+
     internal lateinit var oppdatert: LocalDateTime
         private set
     internal lateinit var skjæringstidspunkt: LocalDate
@@ -73,6 +77,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         this.periode = periode
         this.oppdatert = oppdatert
         this.skjæringstidspunkt = skjæringstidspunkt()
+        this.tilstand = tilstand
     }
 
     override fun preVisitGenerasjon(
