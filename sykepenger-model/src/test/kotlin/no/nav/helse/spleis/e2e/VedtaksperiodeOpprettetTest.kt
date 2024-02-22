@@ -21,16 +21,7 @@ internal class VedtaksperiodeOpprettetTest : AbstractDslTest() {
         }
 
         assertEquals(2, observatør.vedtaksperiodeOpprettetEventer.size)
-        assertForventetFeil(
-            forklaring = "vedtaksperiode_opprettet sendes ut på et så tidlig tidspunkt at skjæringstidspunkt ikke er tilgjengelig",
-            nå = {
-                assertEquals(1.januar, observatør.vedtaksperiodeOpprettetEventer.first().skjæringstidspunkt)
-                assertEquals(1.januar, observatør.vedtaksperiodeOpprettetEventer.last().skjæringstidspunkt)
-            },
-            ønsket = {
-                assertEquals(1.januar, observatør.vedtaksperiodeOpprettetEventer.first().skjæringstidspunkt)
-                assertEquals(10.oktober, observatør.vedtaksperiodeOpprettetEventer.last().skjæringstidspunkt)
-            }
-        )
+        assertEquals(1.januar, observatør.vedtaksperiodeOpprettetEventer.first().skjæringstidspunkt)
+        assertEquals(10.oktober, observatør.vedtaksperiodeOpprettetEventer.last().skjæringstidspunkt)
     }
 }

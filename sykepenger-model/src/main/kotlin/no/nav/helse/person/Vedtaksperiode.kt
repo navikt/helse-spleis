@@ -180,7 +180,7 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiverjurist = jurist
     ) {
         kontekst(søknad)
-        person.vedtaksperiodeOpprettet(id, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
+        person.vedtaksperiodeOpprettet(id, organisasjonsnummer, periode, periode.start, opprettet)
         generasjoner.førsteGenerasjonOpprettet()
     }
 
