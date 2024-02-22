@@ -1,0 +1,36 @@
+package no.nav.helse.spleis.e2e
+
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.oktober
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+internal class VedtaksperiodeOpprettetTest : AbstractDslTest() {
+
+    @Test
+    fun `to førstegangsbehandlinger`() {
+        a1 {
+            nyPeriode(1.januar til 20.januar)
+        }
+        a2 {
+            nyPeriode(10.oktober til 21.oktober)
+        }
+
+        assertEquals(2, observatør.vedtaksperiodeOpprettetEventer.size)
+        assertForventetFeil(
+            forklaring = "vedtaksperiode_opprettet sendes ut på et så tidlig tidspunkt at skjæringstidspunkt ikke er tilgjengelig",
+            nå = {
+                assertEquals(1.januar, observatør.vedtaksperiodeOpprettetEventer.first().skjæringstidspunkt)
+                assertEquals(1.januar, observatør.vedtaksperiodeOpprettetEventer.last().skjæringstidspunkt)
+            },
+            ønsket = {
+                assertEquals(1.januar, observatør.vedtaksperiodeOpprettetEventer.first().skjæringstidspunkt)
+                assertEquals(10.oktober, observatør.vedtaksperiodeOpprettetEventer.last().skjæringstidspunkt)
+            }
+        )
+    }
+}
