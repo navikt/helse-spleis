@@ -100,7 +100,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             },
             "inntekt" : 47500.0,
             "begrensning" : "ER_6G_BEGRENSET",
-            "hendelser": ["$søknadId", "$inntektsmeldingId", "$skjønnsmessigFastsettelseId"],
+            "hendelser": ["$søknadId", "$inntektsmeldingId"],
             "sykepengegrunnlagsfakta": {
                 "fastsatt": "EtterSkjønn",
                 "omregnetÅrsinntekt": 540000.0,

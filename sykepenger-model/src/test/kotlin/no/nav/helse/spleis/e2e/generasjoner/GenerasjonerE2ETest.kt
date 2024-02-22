@@ -40,6 +40,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Generas
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_IVERKSATT
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -367,6 +368,24 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                     assertEquals(inntektsmeldingId, sisteGenerasjon.kilde.meldingsreferanseId)
                     assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteGenerasjon.endringer.single().dokumentsporing)
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `delvis overlappende søknad i uberegnet`() {
+        a1 {
+            val søknad1 = UUID.randomUUID()
+            val søknad2 = UUID.randomUUID()
+            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), søknadId = søknad1)
+            håndterSøknad(Sykdom(3.januar, 27.januar, 100.prosent), søknadId = søknad2)
+            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.generasjoner.single().also { generasjon ->
+                assertEquals(søknad1, generasjon.kilde.meldingsreferanseId)
+                assertEquals(Dokumentsporing.søknad(søknad1), generasjon.endringer.single().dokumentsporing)
+            }
+            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.generasjoner.single().also { generasjon ->
+                assertEquals(søknad2, generasjon.kilde.meldingsreferanseId)
+                assertEquals(Dokumentsporing.søknad(søknad2), generasjon.endringer.single().dokumentsporing)
             }
         }
     }
