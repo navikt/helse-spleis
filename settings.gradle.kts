@@ -9,7 +9,7 @@ dependencyResolutionManagement {
             version("postgres", "42.7.2")
             version("hikari", "5.1.0")
             version("kotliquery", "1.9.0")
-            version("cloudsql", "1.15.1")
+            version("cloudsql", "1.16.0")
             version("flyway", "10.5.0")
             version("logback", "1.4.14")
             version("logstash", "7.4")
