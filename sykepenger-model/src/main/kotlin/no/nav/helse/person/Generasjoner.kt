@@ -195,7 +195,12 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         generasjoner.last().håndterEndring(arbeidsgiver, hendelse)?.also {
             leggTilNyGenerasjon(it)
         }
+        // 🤯 <OBS! NB!> 🤯
+        // spesialist er -avhengig- av at sykefraværstilfelle går ut før generasjonen kan lukkes automatisk
+        // Meldingen kan dessuten ikke sendes ut før generasjonen er fysisk lagt til i listen (se leggTilNyGenerasjon(it) over),
+        // fordi når vedtaksperioden skal håndtere sykefraværstilfelle-signalet så avhenger den at generasjonen er på plass
         person.sykdomshistorikkEndret(hendelse)
+        // 🤯 </OBS! NB!> 🤯
     }
 
     fun erFattetVedtak(): Boolean {
