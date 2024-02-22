@@ -102,9 +102,11 @@ import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterInntektsmeldingPortal
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -131,6 +133,90 @@ import org.junit.jupiter.api.Test
 
 @EnableSpekemat
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `periodene viser til overstyring av sykepengegrunnlag i hendelser`() {
+        val søknadA1 = håndterSøknad(Sykdom(1.januar, 25.januar, 100.prosent), orgnummer = a1)
+        val søknadA2 = håndterSøknad(Sykdom(1.januar, 25.januar, 100.prosent), orgnummer = a2)
+        val imA1 = håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, inntektsdato = 1.januar, orgnummer = a1)
+        val imA2 = håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, inntektsdato = 1.januar, orgnummer = a2)
+
+        val søknadA1Forlengelse = håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent), orgnummer = a1)
+        val søknadA2Forlengelse = håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterVilkårsgrunnlag(orgnummer = a1)
+        håndterYtelser(orgnummer = a1)
+        håndterSimulering(orgnummer = a1)
+        håndterUtbetalingsgodkjenning(orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(orgnummer = a2)
+        håndterSimulering(orgnummer = a2)
+        håndterUtbetalingsgodkjenning(orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        val skjønnsfastsettelse = UUID.randomUUID()
+        håndterSkjønnsmessigFastsettelse(1.januar, listOf(
+            OverstyrtArbeidsgiveropplysning(a1, INNTEKT + 500.daglig),
+            OverstyrtArbeidsgiveropplysning(a2, INNTEKT - 500.daglig),
+        ), skjønnsfastsettelse)
+        håndterYtelser(orgnummer = a1)
+        håndterSimulering(orgnummer = a1)
+        håndterUtbetalingsgodkjenning(orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(orgnummer = a2)
+        håndterSimulering(orgnummer = a2)
+        håndterUtbetalingsgodkjenning(orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        generasjoner(a1) {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) medHendelser setOf(søknadA1Forlengelse, skjønnsfastsettelse)
+                beregnetPeriode(1) medHendelser setOf(søknadA1, imA1, skjønnsfastsettelse)
+            }
+            1.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) medHendelser setOf(søknadA1Forlengelse)
+                beregnetPeriode(1) medHendelser setOf(søknadA1, imA1)
+            }
+        }
+        generasjoner(a2) {
+            assertEquals(2, size)
+            0.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) medHendelser setOf(søknadA2Forlengelse, skjønnsfastsettelse)
+                beregnetPeriode(1) medHendelser setOf(søknadA2, imA2, skjønnsfastsettelse)
+            }
+            1.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) medHendelser setOf(søknadA2Forlengelse)
+                beregnetPeriode(1) medHendelser setOf(søknadA2, imA2)
+            }
+        }
+    }
 
     @Test
     fun `forkastet auu`() {
@@ -2393,10 +2479,11 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `omgjøre kort periode til at nav utbetaler`() {
-        nyPeriode(4.januar til 20.januar)
-        håndterInntektsmelding(listOf(4.januar til 19.januar))
+        val søknad = håndterSøknad(Sykdom(4.januar, 20.januar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(4.januar til 19.januar))
+        val overstyring = UUID.randomUUID()
+        håndterOverstyrTidslinje(4.januar.til(19.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) }, meldingsreferanseId = overstyring)
 
-        håndterOverstyrTidslinje(4.januar.til(19.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -2406,16 +2493,16 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(if (Toggle.Spekemat.enabled) 3 else 1, size)
             0.generasjon {
                 assertEquals(1, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 20.januar) medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 20.januar) medTilstand Utbetalt medHendelser setOf(søknad, im, overstyring)
             }
             if (Toggle.Spekemat.enabled) {
                 1.generasjon {
                     assertEquals(1, size)
-                    uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling
+                    uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
                 }
                 2.generasjon {
                     assertEquals(1, size)
-                    uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling
+                    uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
                 }
             }
         }

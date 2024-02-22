@@ -561,29 +561,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Alle perioder med aktuelt skjæringstidspunkt skal være stemplet med hendelseId`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-        val overstyrInntektHendelseId = UUID.randomUUID()
-        håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, meldingsreferanseId = overstyrInntektHendelseId)
-        assertHarHendelseIder(1.vedtaksperiode, overstyrInntektHendelseId)
-        assertHarHendelseIder(2.vedtaksperiode, overstyrInntektHendelseId)
-    }
-
-    @Test
-    fun `Kun perioder med aktuelt skjæringstidspunkt skal være stemplet med hendelseId`() {
-        nyttVedtak(1.januar, 31.januar)
-        nyttVedtak(1.mars, 31.mars)
-        forlengVedtak(1.april, 30.april)
-        val overstyrInntektHendelseId = UUID.randomUUID()
-        håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
-
-        assertHarIkkeHendelseIder(1.vedtaksperiode, overstyrInntektHendelseId)
-        assertHarHendelseIder(2.vedtaksperiode, overstyrInntektHendelseId)
-        assertHarHendelseIder(3.vedtaksperiode, overstyrInntektHendelseId)
-    }
-
-    @Test
     fun `revurdere inntekt slik at det blir brukerutbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
@@ -8,9 +9,12 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Dokumentsporing.Companion.ider
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
@@ -40,6 +44,7 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -94,59 +99,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Alle vedtaksperioder på skjæringstidspunktet skal få referanse til overstyring på tvers av arbeidsgivere`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
-        forlengVedtak(1.februar, 28.februar, a1, a2)
-
-        val januarA1DokumentIderFør = inspektør(a1).hendelseIder(1.vedtaksperiode)
-        val februarA1DokumentIderFør = inspektør(a1).hendelseIder(2.vedtaksperiode)
-        val januarA2DokumentIderFør = inspektør(a2).hendelseIder(1.vedtaksperiode)
-        val februarA2DokumentIderFør = inspektør(a2).hendelseIder(2.vedtaksperiode)
-
-        val overstyringId = håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-            OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = 21000.månedlig),
-            OverstyrtArbeidsgiveropplysning(orgnummer = a2, inntekt = 25500.månedlig)
-        ))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-
-        val januarA1DokumentIderEtter = inspektør(a1).hendelseIder(1.vedtaksperiode)
-        val februarA1DokumentIderEtter = inspektør(a1).hendelseIder(2.vedtaksperiode)
-        val januarA2DokumentIderEtter = inspektør(a2).hendelseIder(1.vedtaksperiode)
-        val februarA2DokumentIderEtter = inspektør(a2).hendelseIder(2.vedtaksperiode)
-
-        assertTrue(inspektør(a1).hendelser(1.vedtaksperiode).contains(Dokumentsporing.overstyrArbeidsgiveropplysninger(overstyringId)))
-
-        assertEquals(januarA1DokumentIderFør.plus(overstyringId), januarA1DokumentIderEtter)
-        assertEquals(februarA1DokumentIderFør.plus(overstyringId), februarA1DokumentIderEtter)
-
-        assertEquals(januarA2DokumentIderFør.plus(overstyringId), januarA2DokumentIderEtter)
-        assertEquals(februarA2DokumentIderFør.plus(overstyringId), februarA2DokumentIderEtter)
-    }
-
-    @Test
     fun `to helt like korrigerende inntektsmeldinger`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = INNTEKT)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1,)
@@ -163,77 +115,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         )
         assertEquals(listOf(korrigertInntektsmelding2), observatør.inntektsmeldingHåndtert.map { it.first })
         assertEquals(emptyList<UUID>(), observatør.inntektsmeldingIkkeHåndtert)
-    }
-
-    @Test
-    fun `inntektsmelding med korrigerende inntekt på én av to arbeidsgivere på ett av to skjæringstidspunkt`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
-        forlengVedtak(1.februar, 28.februar, a1, a2)
-        nyeVedtak(1.april, 30.april, a1, a2)
-
-        val januarA1DokumentIderFør = inspektør(a1).hendelseIder(1.vedtaksperiode)
-        val februarA1DokumentIderFør = inspektør(a1).hendelseIder(2.vedtaksperiode)
-        val aprilA1DokumentIderFør = inspektør(a1).hendelseIder(3.vedtaksperiode)
-        val januarA2DokumentIderFør = inspektør(a2).hendelseIder(1.vedtaksperiode)
-        val februarA2DokumentIderFør = inspektør(a2).hendelseIder(2.vedtaksperiode)
-        val aprilA2DokumentIderFør = inspektør(a2).hendelseIder(3.vedtaksperiode)
-
-        val a1KorrigertInntektsmelding = håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT * 1.1,
-            orgnummer = a1,
-        )
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        val skjønnsmessigFastsettelse = håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1), OverstyrtArbeidsgiveropplysning(a2, INNTEKT)))
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
-
-        håndterYtelser(3.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a2)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-
-        val januarA1DokumentIderEtter = inspektør(a1).hendelseIder(1.vedtaksperiode)
-        val februarA1DokumentIderEtter = inspektør(a1).hendelseIder(2.vedtaksperiode)
-        val aprilA1DokumentIderEtter = inspektør(a1).hendelseIder(3.vedtaksperiode)
-        val januarA2DokumentIderEtter = inspektør(a2).hendelseIder(1.vedtaksperiode)
-        val februarA2DokumentIderEtter = inspektør(a2).hendelseIder(2.vedtaksperiode)
-        val aprilA2DokumentIderEtter = inspektør(a2).hendelseIder(3.vedtaksperiode)
-
-        assertEquals(januarA2DokumentIderFør.plus(skjønnsmessigFastsettelse), januarA2DokumentIderEtter)
-        assertEquals(februarA2DokumentIderFør.plus(skjønnsmessigFastsettelse), februarA2DokumentIderEtter)
-        assertEquals(aprilA1DokumentIderFør, aprilA1DokumentIderEtter)
-        assertEquals(aprilA2DokumentIderFør, aprilA2DokumentIderEtter)
-
-        assertEquals(januarA1DokumentIderFør.plus(a1KorrigertInntektsmelding).plus(skjønnsmessigFastsettelse), januarA1DokumentIderEtter)
-        assertEquals(februarA1DokumentIderFør.plus(a1KorrigertInntektsmelding).plus(skjønnsmessigFastsettelse), februarA1DokumentIderEtter)
     }
 
     @Test

@@ -141,10 +141,8 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        private val List<Arbeidsgiver>.alleVedtaksperioder get() = flatMap { it.vedtaksperioder }
-
         internal fun List<Arbeidsgiver>.håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag) =
-            any { it.håndter(overstyrSykepengegrunnlag, alleVedtaksperioder) }
+            any { it.håndter(overstyrSykepengegrunnlag) }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -679,9 +677,9 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse, Vedtaksperiode::håndter)
     }
 
-    private fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag, alleVedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
+    private fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag): Boolean {
         overstyrSykepengegrunnlag.kontekst(this)
-        return énHarHåndtert(overstyrSykepengegrunnlag) { håndter(it, alleVedtaksperioder) }
+        return énHarHåndtert(overstyrSykepengegrunnlag) { håndter(it) }
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {

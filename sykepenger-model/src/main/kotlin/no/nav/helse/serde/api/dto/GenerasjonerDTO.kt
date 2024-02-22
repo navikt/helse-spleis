@@ -18,6 +18,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.SpeilGenerasjoner
+import no.nav.helse.serde.api.speil.builders.ISpleisGrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.merge
 
@@ -319,10 +320,9 @@ data class BeregnetPeriode(
     override fun venter(): Boolean = super.venter() && periodetilstand != Utbetalt
 
     override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
-        vilkårsgrunnlagId?.let {
-            vilkårsgrunnlaghistorikk.leggIBøtta(it)
-        } ?: return this
-        return this
+        val vilkårsgrunnlag = vilkårsgrunnlagId?.let { vilkårsgrunnlaghistorikk.leggIBøtta(it) } ?: return this
+        if (vilkårsgrunnlag !is ISpleisGrunnlag) return this
+        return this.copy(hendelser = this.hendelser + vilkårsgrunnlag.overstyringer)
     }
 
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {

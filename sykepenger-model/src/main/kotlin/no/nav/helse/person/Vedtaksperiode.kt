@@ -392,13 +392,10 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    internal fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag, alleVedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
+    internal fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag): Boolean {
         if (!overstyrSykepengegrunnlag.erRelevant(skjæringstidspunkt)) return false
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(organisasjonsnummer) != true) return false
         kontekst(overstyrSykepengegrunnlag)
-        alleVedtaksperioder.filter(VILKÅRSPRØVD_PÅ(skjæringstidspunkt)).forEach {
-            it.generasjoner.oppdaterDokumentsporing(overstyrSykepengegrunnlag.dokumentsporing())
-        }
         overstyrSykepengegrunnlag.vilkårsprøvEtterNyInformasjonFraSaksbehandler(person, jurist)
         return true
     }

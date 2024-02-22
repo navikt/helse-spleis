@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -549,19 +548,6 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
                 assertEquals(25000.månedlig, it.inntektsopplysning.inspektør.beløp)
                 assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
             }
-        }
-    }
-
-    @Test
-    fun `alle perioder for alle arbeidsgivere med aktuelt skjæringstidspunkt skal ha hendelseIden`() {
-        (a1 og a2).nyeVedtak(1.januar til 31.januar)
-        val hendelseId = UUID.randomUUID()
-        a1 {
-            håndterOverstyrInntekt(1.januar, 25000.månedlig, hendelseId)
-            assertHarHendelseIder(1.vedtaksperiode, hendelseId)
-        }
-        a2 {
-            assertHarHendelseIder(1.vedtaksperiode, hendelseId)
         }
     }
 

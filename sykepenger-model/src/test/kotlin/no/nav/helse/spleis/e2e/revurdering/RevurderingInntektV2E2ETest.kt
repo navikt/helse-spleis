@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -590,9 +591,18 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         val overstyrInntektHendelseId = UUID.randomUUID()
         håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
 
-        assertHarIkkeHendelseIder(1.vedtaksperiode, overstyrInntektHendelseId)
-        assertHarHendelseIder(2.vedtaksperiode, overstyrInntektHendelseId)
-        assertHarHendelseIder(3.vedtaksperiode, overstyrInntektHendelseId)
+        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.generasjoner.last().also { generasjon ->
+            assertNotEquals(overstyrInntektHendelseId, generasjon.kilde.meldingsreferanseId)
+            assertTrue(overstyrInntektHendelseId !in generasjon.endringer.map { it.dokumentsporing }.ider())
+        }
+        inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.generasjoner.last().also { generasjon ->
+            assertEquals(overstyrInntektHendelseId, generasjon.kilde.meldingsreferanseId)
+            assertTrue(overstyrInntektHendelseId !in generasjon.endringer.map { it.dokumentsporing }.ider())
+        }
+        inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.generasjoner.last().also { generasjon ->
+            assertEquals(overstyrInntektHendelseId, generasjon.kilde.meldingsreferanseId)
+            assertTrue(overstyrInntektHendelseId !in generasjon.endringer.map { it.dokumentsporing }.ider())
+        }
     }
 
     @Test

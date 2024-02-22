@@ -45,7 +45,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         val tilstand: PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData,
         val vedtakFattet: LocalDateTime?,
         val avsluttet: LocalDateTime?,
-        val kilde: Generasjonkilde?
+        val kilde: Generasjonkilde
     ) {
         data class Generasjonendring(
             val grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
@@ -96,7 +96,12 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
             tilstand = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
             vedtakFattet = vedtakFattet,
             avsluttet = avsluttet,
-            kilde = null
+            kilde = Generasjon.Generasjonkilde(
+                meldingsreferanseId = kilde.meldingsreferanseId,
+                innsendt = kilde.innsendt,
+                registert = kilde.registert,
+                avsender = kilde.avsender
+            )
         ))
     }
 
