@@ -64,7 +64,6 @@ internal class DagerFraInntektsmelding(
     private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
     private val arbeidsdager = mutableSetOf<LocalDate>()
-    private var dagerHåndtert = false
     private val arbeidsgiverperiode = arbeidsgiverperioder.periode()
     private val overlappsperiode = when {
         // første fraværsdag er oppgitt etter arbeidsgiverperioden
@@ -139,10 +138,6 @@ internal class DagerFraInntektsmelding(
     override fun innsendt() = mottatt
     override fun avsender() = ARBEIDSGIVER
 
-    internal fun leggTil(generasjoner: Generasjoner) : Boolean {
-        dagerHåndtert = true
-        return generasjoner.oppdaterDokumentsporing(dokumentsporing)
-    }
     internal fun alleredeHåndtert(generasjoner: Generasjoner) = generasjoner.dokumentHåndtert(dokumentsporing)
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
@@ -197,8 +192,11 @@ internal class DagerFraInntektsmelding(
         if (periode.start != vedtaksperiode.start) info("Perioden ble strukket tilbake fra ${vedtaksperiode.start} til ${periode.start} (${ChronoUnit.DAYS.between(periode.start, vedtaksperiode.start)} dager)")
         val sykdomstidslinje = samletSykdomstidslinje(periode)
         gjenståendeDager.removeAll(periode)
-        dagerHåndtert = true
         return BitAvInntektsmelding(meldingsreferanseId(), sykdomstidslinje, this, innsendt(), registrert(), navn())
+    }
+
+    internal fun tomBitAvInntektsmelding(): BitAvInntektsmelding {
+        return BitAvInntektsmelding(meldingsreferanseId(), Sykdomstidslinje(), this, innsendt(), registrert(), navn())
     }
 
     private fun samletSykdomstidslinje(periode: Periode) =
@@ -261,8 +259,6 @@ internal class DagerFraInntektsmelding(
         if (avsendersystem == Inntektsmelding.Avsendersystem.NAV_NO && arbeidsgiverperioder.isEmpty()) return
         beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode, this)
     }
-
-    internal fun noenDagerHåndtert() = dagerHåndtert
 
     fun overlappendeSykmeldingsperioder(sykmeldingsperioder: List<Periode>): List<Periode> {
         if (overlappsperiode == null) return emptyList()

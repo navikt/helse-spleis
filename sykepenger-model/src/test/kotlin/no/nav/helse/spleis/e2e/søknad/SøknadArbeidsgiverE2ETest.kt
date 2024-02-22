@@ -126,19 +126,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `delvis overlappende søknad i avsluttet uten utbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(8.august, 21.august))
-        håndterSøknad(Sykdom(8.august, 21.august, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(10.august, 31.august))
-        håndterSøknad(Sykdom(10.august, 31.august, 100.prosent))
-        assertEquals(8.august til 21.august, inspektør.periode(1.vedtaksperiode))
-        assertEquals(10.august til 31.august, inspektør.periode(2.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
-        assertFunksjonellFeil(`Mottatt søknad som delvis overlapper`, 1.vedtaksperiode.filter())
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-    }
-
-    @Test
     fun `avslutter søknad utenfor arbeidsgiverperioden dersom det kun er ferie`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar))
         håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent), Ferie(19.januar, 21.januar))

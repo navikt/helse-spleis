@@ -264,11 +264,6 @@ internal class Vedtaksperiode private constructor(
         return false
     }
 
-    private fun inntektsmeldingHåndtert(dager: DagerFraInntektsmelding): Boolean {
-        if (!dager.leggTil(generasjoner)) return true
-        return false
-    }
-
     private fun søknadHåndtert(søknad: Søknad) {
         person.emitSøknadHåndtert(søknad.meldingsreferanseId(), id, organisasjonsnummer)
     }
@@ -322,10 +317,18 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
         val hendelse = dager.bitAvInntektsmelding(periode)
-        if (hendelse != null) {
-            oppdaterHistorikk(hendelse)
-        }
+        håndterDager(hendelse)
         dager.validerArbeidsgiverperiode(periode, finnArbeidsgiverperiode())
+    }
+
+    private fun håndterDagerUtenEndring(dager: DagerFraInntektsmelding) {
+        val hendelse = dager.tomBitAvInntektsmelding()
+        håndterDager(hendelse)
+    }
+
+    private fun håndterDager(hendelse: DagerFraInntektsmelding.BitAvInntektsmelding?) {
+        if (hendelse == null) return
+        oppdaterHistorikk(hendelse)
     }
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -568,7 +571,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
         if (søknad.delvisOverlappende(periode)) {
-            generasjoner.oppdaterDokumentsporing(søknad.dokumentsporing())
             søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
             return forkast(søknad)
         }
@@ -595,7 +597,7 @@ internal class Vedtaksperiode private constructor(
         val korrigertInntektsmeldingId = generasjoner.sisteInntektsmeldingId()
         val opprinneligAgp = finnArbeidsgiverperiode()
         if (dager.erKorrigeringForGammel(opprinneligAgp)) {
-            inntektsmeldingHåndtert(dager)
+            håndterDagerUtenEndring(dager)
         } else {
             håndterDager(dager)
         }

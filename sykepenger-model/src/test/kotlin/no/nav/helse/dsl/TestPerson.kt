@@ -527,6 +527,20 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     håndterUtbetalt(status)
 }
 
+internal fun TestPerson.TestArbeidsgiver.forlengVedtak(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel = 100.prosent,
+    status: Oppdragstatus = Oppdragstatus.AKSEPTERT
+): UUID {
+    val vedtaksperiode = nyPeriode(fom til tom, grad)
+    håndterYtelser(vedtaksperiode)
+    håndterSimulering(vedtaksperiode)
+    håndterUtbetalingsgodkjenning(vedtaksperiode)
+    håndterUtbetalt(status)
+    return vedtaksperiode
+}
+
 internal fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent, søknadId : UUID = UUID.randomUUID()): UUID {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
     return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad), søknadId = søknadId) ?: fail { "Det ble ikke opprettet noen vedtaksperiode." }

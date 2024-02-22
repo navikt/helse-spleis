@@ -422,14 +422,6 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inntektsmelding med første fraværsdag utenfor sykdom - to tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars,)
-        assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
-        assertFalse(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
-    }
-    @Test
     fun `inntektsmelding med første fraværsdag utenfor sykdom - ett tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
         val im1 = UUID.randomUUID()
         nyttVedtak(1.januar, 31.januar, inntektsmeldingId = im1)

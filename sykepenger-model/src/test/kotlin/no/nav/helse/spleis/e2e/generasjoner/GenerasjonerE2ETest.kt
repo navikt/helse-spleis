@@ -3,14 +3,18 @@ package no.nav.helse.spleis.e2e.generasjoner
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.forlengVedtak
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -24,18 +28,24 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.TIL_INFOTRYGD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_IVERKSATT
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonerE2ETest : AbstractDslTest() {
@@ -115,7 +125,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             }
             inspektør(2.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
-                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
             }
         }
     }
@@ -127,7 +137,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(1, generasjoner.size)
-                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
             }
         }
     }
@@ -138,8 +148,8 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             håndterAnnullering(inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
             inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
-                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
-                assertEquals(Avsender.SAKSBEHANDLER, generasjoner.last().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
+                assertEquals(Avsender.SAKSBEHANDLER, generasjoner.last().kilde.avsender)
             }
         }
     }
@@ -179,8 +189,8 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, reberegning = true)
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
-                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
-                assertEquals(Avsender.SYSTEM, generasjoner.last().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
+                assertEquals(Avsender.SYSTEM, generasjoner.last().kilde.avsender)
             }
         }
     }
@@ -193,10 +203,10 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar, 100.prosent, INNTEKT)), id = id)
             inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
                 assertEquals(2, generasjoner.size)
-                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde?.avsender)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
                 generasjoner.last().let {
-                    assertEquals(Avsender.SYSTEM, it.kilde?.avsender)
-                    assertEquals(id, it.kilde?.meldingsreferanseId)
+                    assertEquals(Avsender.SYSTEM, it.kilde.avsender)
+                    assertEquals(id, it.kilde.meldingsreferanseId)
                 }
             }
         }
@@ -337,6 +347,46 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[0].tilstand)
                 assertEquals(AVSLUTTET_UTEN_VEDTAK, generasjoner[1].tilstand)
             }
+        }
+    }
+
+    @Test
+    fun `inntektsmelding med første fraværsdag utenfor sykdom - to tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            forlengVedtak(1.februar, 28.februar)
+            val inntektsmeldingId = håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
+            assertTrue(inntektsmeldingId in observatør.inntektsmeldingIkkeHåndtert)
+            assertFalse(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(1, generasjoner.size)
+            }
+            inspektør(2.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                generasjoner.last().also { sisteGenerasjon ->
+                    assertEquals(inntektsmeldingId, sisteGenerasjon.kilde.meldingsreferanseId)
+                    assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteGenerasjon.endringer.single().dokumentsporing)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `delvis overlappende søknad i avsluttet uten utbetaling`() {
+        a1 {
+            håndterSøknad(Sykdom(8.august, 21.august, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(10.august, 31.august))
+            val overlappende = UUID.randomUUID()
+            håndterSøknad(Sykdom(10.august, 31.august, 100.prosent), søknadId = overlappende)
+            assertEquals(8.august til 21.august, inspektør.periode(1.vedtaksperiode))
+            assertEquals(10.august til 31.august, inspektør.periode(2.vedtaksperiode))
+            assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.generasjoner.last().also { generasjon ->
+                assertEquals(overlappende, generasjon.kilde.meldingsreferanseId)
+                assertEquals(Dokumentsporing.søknad(overlappende), generasjon.endringer.single().dokumentsporing)
+            }
+            assertFunksjonellFeil(Varselkode.`Mottatt søknad som delvis overlapper`, 1.vedtaksperiode.filter())
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TilstandType.TIL_INFOTRYGD)
         }
     }
 

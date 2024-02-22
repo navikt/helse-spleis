@@ -870,13 +870,6 @@ enum class Periodetilstand {
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) =
                     generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetRevurdering)
 
-
-                override fun oppdaterDokumentsporing(generasjon: Generasjon, dokument: Dokumentsporing): Boolean {
-                    // oppdaterer ikke dokumentsporing på fattet vedtak;
-                    // det må komme en endring via håndterEndring istedenfor
-                    return false
-                }
-
                 override fun avsluttMedVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.tilstand(VedtakIverksatt, hendelse)
                 }
@@ -903,13 +896,6 @@ enum class Periodetilstand {
                     return generasjon.sikreNyGenerasjon(arbeidsgiver, UberegnetOmgjøring, hendelse)
                 }
 
-                // det deles ut dokumentsporinger til alle vedtaksperioder så snart én har håndtert hendelsen;
-                // det betyr også at det kommer til å bli sendt ut et overstyring igangsatt-event som vil
-                // opprette en ny Uberegnet periode for Vedtaksperioden.
-                // derfor legger vi den bare til i listen uten å gjøre noe mer spesielt
-                override fun oppdaterDokumentsporing(generasjon: Generasjon, dokument: Dokumentsporing) =
-                    generasjon.kopierMedDokument(dokument)
-
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon {
                     return generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetOmgjøring)
                 }
@@ -934,13 +920,6 @@ enum class Periodetilstand {
 
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) =
                     generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetRevurdering)
-
-                // det deles ut dokumentsporinger til alle vedtaksperioder så snart én har håndtert hendelsen;
-                // det betyr også at det kommer til å bli sendt ut et overstyring igangsatt-event som vil
-                // opprette en ny Uberegnet periode for Vedtaksperioden.
-                // derfor legger vi den bare til i listen uten å gjøre noe mer spesielt
-                override fun oppdaterDokumentsporing(generasjon: Generasjon, dokument: Dokumentsporing) =
-                    generasjon.kopierMedDokument(dokument)
             }
             data object TilInfotrygd : Tilstand {
                 override fun entering(generasjon: Generasjon, hendelse: IAktivitetslogg) {
