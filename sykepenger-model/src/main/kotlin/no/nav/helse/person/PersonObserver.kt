@@ -158,13 +158,13 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             )
     }
 
-    // TODO: skal førsteFraværsdager være med?
     data class TrengerPotensieltArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val skjæringstidspunkt: LocalDate,
         val sykmeldingsperioder: List<Periode>,
-        val egenmeldingsperioder: List<Periode>
+        val egenmeldingsperioder: List<Periode>,
+        val førsteFraværsdager: List<Map<String, Any>>
     ) {
         fun toJsonMap(): Map<String, Any> =
             mapOf(
@@ -182,7 +182,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
                         "fom" to it.start,
                         "tom" to it.endInclusive
                     )
-                }
+                },
+                "førsteFraværsdager" to førsteFraværsdager
             )
     }
 

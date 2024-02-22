@@ -146,71 +146,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             "sykmeldingsperioder",
             "egenmeldingsperioder",
             "aktørId",
-            "fødselsnummer"
+            "fødselsnummer",
+            "førsteFraværsdager"
         )
 
         JSONAssert.assertEquals(forventetResultatTrengerPotensieltArbeidsgiveropplysninger, faktiskResultat, JSONCompareMode.STRICT)
-    }
-
-    private fun forlengMedFebruar(a1: String) {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
-            orgnummer = a1
-        )
-        sendYtelser(0, orgnummer = a1)
-        sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0, orgnummer = a1)
-        sendUtbetaling()
-    }
-
-    private fun nyeVedtakForJanuar(a1: String, a2: String) {
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            orgnummer = a1
-        )
-
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
-            orgnummer = a2
-        )
-
-        sendInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)),
-            1.januar,
-            orgnummer = a1
-        )
-        sendInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)),
-            1.januar,
-            orgnummer = a2
-        )
-        sendVilkårsgrunnlag(
-            vedtaksperiodeIndeks = 0,
-            skjæringstidspunkt = 1.januar,
-            orgnummer = a1,
-            arbeidsforhold = listOf(
-                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            inntekterForSykepengegrunnlag = sykepengegrunnlag(
-                1.januar, listOf(
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
-                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a2),
-                )
-            )
-        )
-        sendYtelser(0, orgnummer = a1)
-        sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0, orgnummer = a1)
-        sendUtbetaling()
-
-        sendYtelser(0, orgnummer = a2)
-        sendSimulering(0, orgnummer = a2, status = SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0, orgnummer = a2)
-        sendUtbetaling()
     }
 
     @Test
@@ -405,6 +345,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
               "tom": "2018-01-01"
             }
           ],
+          "førsteFraværsdager": [
+            { 
+                "organisasjonsnummer": "987654321",
+                "førsteFraværsdag": "2018-01-01"
+            }
+          ],
           "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
@@ -555,6 +501,67 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "aktørId": "42",
           "fødselsnummer": "12029240045"
         }"""
+
+    private fun forlengMedFebruar(a1: String) {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100), orgnummer = a1)
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)),
+            orgnummer = a1
+        )
+        sendYtelser(0, orgnummer = a1)
+        sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0, orgnummer = a1)
+        sendUtbetaling()
+    }
+
+    private fun nyeVedtakForJanuar(a1: String, a2: String) {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            orgnummer = a1
+        )
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            orgnummer = a2
+        )
+
+        sendInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            1.januar,
+            orgnummer = a1
+        )
+        sendInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)),
+            1.januar,
+            orgnummer = a2
+        )
+        sendVilkårsgrunnlag(
+            vedtaksperiodeIndeks = 0,
+            skjæringstidspunkt = 1.januar,
+            orgnummer = a1,
+            arbeidsforhold = listOf(
+                TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            ),
+            inntekterForSykepengegrunnlag = sykepengegrunnlag(
+                1.januar, listOf(
+                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a1),
+                    TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, a2),
+                )
+            )
+        )
+        sendYtelser(0, orgnummer = a1)
+        sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0, orgnummer = a1)
+        sendUtbetaling()
+
+        sendYtelser(0, orgnummer = a2)
+        sendSimulering(0, orgnummer = a2, status = SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0, orgnummer = a2)
+        sendUtbetaling()
+    }
 
     private companion object {
         private fun JsonNode.json(vararg behold: String) = (this as ObjectNode).let { json ->

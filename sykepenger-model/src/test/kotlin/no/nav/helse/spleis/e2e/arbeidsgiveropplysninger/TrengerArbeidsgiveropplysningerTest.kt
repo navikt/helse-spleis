@@ -72,7 +72,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
-internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
+internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     private val INNTEKT_FLERE_AG = 20000.månedlig
 
@@ -107,7 +107,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `ber ikke om arbeidsgiveropplysninger på ghost når riktig inntektsmelding kommer`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
                     a1 to INNTEKT,

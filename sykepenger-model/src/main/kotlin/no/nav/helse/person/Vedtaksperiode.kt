@@ -715,13 +715,15 @@ internal class Vedtaksperiode private constructor(
             .map { it.sykdomstidslinje }
             .merge()
             .egenmeldingerFraSøknad()
+        val førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
 
         person.trengerPotensieltArbeidsgiveropplysninger(PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = id,
             skjæringstidspunkt = skjæringstidspunkt,
             sykmeldingsperioder = sykmeldingsperioder,
-            egenmeldingsperioder = egenmeldingsdagerFraSøknad
+            egenmeldingsperioder = egenmeldingsdagerFraSøknad,
+            førsteFraværsdager = førsteFraværsdager
         ))
     }
 
