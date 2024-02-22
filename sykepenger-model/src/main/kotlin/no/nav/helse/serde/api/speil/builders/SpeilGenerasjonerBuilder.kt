@@ -148,7 +148,6 @@ internal class SpeilGenerasjonerBuilder(
         Generasjoner.Generasjon.Tilstand.UberegnetOmgjøring,
         Generasjoner.Generasjon.Tilstand.UberegnetRevurdering,
         Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtak,
-        Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtakRevurdering,
         Generasjoner.Generasjon.Tilstand.TilInfotrygd
     )
     override fun preVisitGenerasjon(

@@ -857,7 +857,7 @@ internal data class PersonData(
                 private val endringer: List<EndringData>
             ) {
                 internal enum class TilstandData {
-                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING, VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, AVSLUTTET_UTEN_VEDTAK_REVURDERING, TIL_INFOTRYGD;
+                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING, VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, TIL_INFOTRYGD;
                     fun tilModellobjekt() = mapping.getValue(this)
 
                     companion object {
@@ -872,7 +872,6 @@ internal data class PersonData(
                             VEDTAK_IVERKSATT to Generasjoner.Generasjon.Tilstand.VedtakIverksatt,
                             REVURDERT_VEDTAK_AVVIST to Generasjoner.Generasjon.Tilstand.RevurdertVedtakAvvist,
                             AVSLUTTET_UTEN_VEDTAK to Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtak,
-                            AVSLUTTET_UTEN_VEDTAK_REVURDERING to Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtakRevurdering,
                             TIL_INFOTRYGD to Generasjoner.Generasjon.Tilstand.TilInfotrygd
                         )
                         fun tilEnum(tilstand: Generasjoner.Generasjon.Tilstand) = mapping.entries.single { (_, obj) -> obj == tilstand }.key

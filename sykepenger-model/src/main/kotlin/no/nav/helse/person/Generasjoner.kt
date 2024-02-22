@@ -881,14 +881,6 @@ enum class Periodetilstand {
                     return !forventerInntekt
                 }
             }
-            data object AvsluttetUtenVedtakRevurdering : Tilstand by (AvsluttetUtenVedtak) {
-                override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) =
-                    generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetRevurdering)
-
-                override fun sikreNyGenerasjon(generasjon: Generasjon, hendelse: Hendelse): Generasjon {
-                    return generasjon.sikreNyGenerasjon(UberegnetRevurdering, hendelse)
-                }
-            }
             data object VedtakIverksatt : Tilstand {
                 override fun entering(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.avsluttet = LocalDateTime.now()
