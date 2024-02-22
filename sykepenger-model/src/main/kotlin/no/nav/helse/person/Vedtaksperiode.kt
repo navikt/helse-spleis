@@ -148,14 +148,6 @@ internal class Vedtaksperiode private constructor(
     private val arbeidsgiverjurist: MaskinellJurist
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode>, GenerasjonObserver {
 
-    private val sykmeldingsperiode = generasjoner.sykmeldingsperiode()
-    private val periode get() = generasjoner.periode()
-    private val sykdomstidslinje get() = generasjoner.sykdomstidslinje()
-    private val jurist get() = generasjoner.jurist(arbeidsgiverjurist, id)
-    private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
-    private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
-    private val hendelseIder get() = generasjoner.dokumentsporing()
-
     internal constructor(
         søknad: Søknad,
         person: Person,
@@ -175,14 +167,23 @@ internal class Vedtaksperiode private constructor(
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,
         tilstand = Start,
-        generasjoner = Generasjoner(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad),
+        generasjoner = Generasjoner(),
         opprettet = LocalDateTime.now(),
         arbeidsgiverjurist = jurist
     ) {
         kontekst(søknad)
+        val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, organisasjonsnummer, periode, periode.start, opprettet)
-        generasjoner.førsteGenerasjonOpprettet()
+        generasjoner.initiellGenerasjon(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad)
     }
+
+    private val sykmeldingsperiode get() = generasjoner.sykmeldingsperiode()
+    private val periode get() = generasjoner.periode()
+    private val sykdomstidslinje get() = generasjoner.sykdomstidslinje()
+    private val jurist get() = generasjoner.jurist(arbeidsgiverjurist, id)
+    private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
+    private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
+    private val hendelseIder get() = generasjoner.dokumentsporing()
 
     init {
         generasjoner.addObserver(this)

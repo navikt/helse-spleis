@@ -4,6 +4,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.GenerasjonObserver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
@@ -18,8 +19,52 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     private val arbeidsgivere get() = arbeidsgivereMap.values
     private val IM = Inntektsmeldinger()
 
+    private val generasjonerOpprettetEventer = mutableListOf<PersonObserver.GenerasjonOpprettetEvent>()
+    private val generasjonerLukketEventer = mutableListOf<PersonObserver.GenerasjonLukketEvent>()
+    private val generasjonerForkastetEventer = mutableListOf<PersonObserver.GenerasjonForkastetEvent>()
+
     init {
         person.addObserver(this)
+    }
+
+    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
+        check(generasjonerOpprettetEventer.none { it.generasjonId == event.generasjonId }) {
+            "generasjon ${event.generasjonId} har allerede sendt ut opprettet event"
+        }
+        generasjonerOpprettetEventer.add(event)
+    }
+
+    override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
+        bekreftAtGenerasjonFinnes(event.generasjonId)
+        check(generasjonerLukketEventer.none { it.generasjonId == event.generasjonId }) {
+            "generasjon ${event.generasjonId} har allerede sendt ut lukket event"
+        }
+    }
+
+    override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
+        bekreftAtGenerasjonFinnes(event.generasjonId)
+        check(generasjonerForkastetEventer.none { it.generasjonId == event.generasjonId }) {
+            "generasjon ${event.generasjonId} har allerede sendt ut forkastet event"
+        }
+    }
+
+    private fun bekreftAtGenerasjonFinnes(generasjonId: UUID) {
+        val generasjonVarsletOmFør = { id: UUID ->
+            generasjonerOpprettetEventer.singleOrNull { it.generasjonId == id } != null
+        }
+        // gjelder tester som tar utgangspunkt i en serialisert personjson
+        val generasjonFinnesHosArbeidsgiver = { id: UUID ->
+            person.inspektør.vedtaksperioder().any { (_, perioder) ->
+                perioder.any { periode ->
+                    periode.inspektør.generasjoner.any { generasjon ->
+                        generasjon.id == generasjonId
+                    }
+                }
+            }
+        }
+        check(generasjonVarsletOmFør(generasjonId) || generasjonFinnesHosArbeidsgiver(generasjonId)) {
+            "generasjon $generasjonId forkastes uten at det er registrert et opprettet event"
+        }
     }
 
     override fun vedtaksperiodeEndret(

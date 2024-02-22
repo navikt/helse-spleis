@@ -34,7 +34,7 @@ import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Generasjoner private constructor(generasjoner: List<Generasjon>) {
-    internal constructor(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) : this(mutableListOf(Generasjon.nyGenerasjon(sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)))
+    internal constructor() : this(emptyList())
     companion object {
         // for PersonData
         fun ferdigGenerasjoner(generasjoner: List<Generasjon>) = Generasjoner(generasjoner)
@@ -44,6 +44,12 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
     private val siste get() = generasjoner.lastOrNull()?.utbetaling()
 
     private val observatører = mutableListOf<GenerasjonObserver>()
+
+    internal fun initiellGenerasjon(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) {
+        check(generasjoner.isEmpty())
+        val generasjon = Generasjon.nyGenerasjon(this.observatører, sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)
+        leggTilNyGenerasjon(generasjon)
+    }
 
     internal fun addObserver(observatør: GenerasjonObserver) {
         observatører.add(observatør)
@@ -152,14 +158,11 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
     private fun leggTilNyGenerasjon(generasjon: Generasjon?) {
         if (generasjon == null) return
-        check(generasjoner.last().tillaterNyGenerasjon(generasjon)) {
-            "siste generasjon ${generasjoner.last()} tillater ikke opprettelse av ny generasjon $generasjon"
-        }
-        observatører.forEach {
-            generasjon.addObserver(it)
-        }
+        if (generasjoner.isNotEmpty())
+            check(generasjoner.last().tillaterNyGenerasjon(generasjon)) {
+                "siste generasjon ${generasjoner.last()} tillater ikke opprettelse av ny generasjon $generasjon"
+            }
         this.generasjoner.add(generasjon)
-        generasjon.nyGenerasjon()
     }
 
     fun klarForUtbetaling(): Boolean {
@@ -204,9 +207,6 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
     }
 
     internal fun trengerArbeidsgiverperiode() = generasjoner.dokumentsporing.sisteInntektsmeldingId() == null
-    internal fun førsteGenerasjonOpprettet() {
-        generasjoner.single().nyGenerasjon()
-    }
 
     internal class Generasjonkilde(
         val meldingsreferanseId: UUID,
@@ -228,15 +228,21 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         private val endringer: MutableList<Endring>,
         private var vedtakFattet: LocalDateTime?,
         private var avsluttet: LocalDateTime?,
-        private val kilde: Generasjonkilde
+        private val kilde: Generasjonkilde,
+        observatører: List<GenerasjonObserver>
     ) {
+        private val observatører = observatører.toMutableList()
         private val gjeldende get() = endringer.last()
         private val periode: Periode get() = gjeldende.periode
         private val tidsstempel = endringer.first().tidsstempel
         private val dokumentsporing get() = endringer.dokumentsporing
-        private val observatører = mutableListOf<GenerasjonObserver>()
 
-        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
+        constructor(observatører: List<GenerasjonObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Generasjonkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
+            check(observatører.isNotEmpty()) {
+                "må ha minst én observatør for å registrere en generasjon"
+            }
+            emitNyGenerasjonOpprettet()
+        }
 
         init {
             check(endringer.isNotEmpty()) {
@@ -245,6 +251,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         }
 
         internal fun addObserver(observatør: GenerasjonObserver) {
+            check(observatører.none { it === observatør }) { "observatør finnes fra før" }
             observatører.add(observatør)
         }
 
@@ -463,6 +470,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
         private fun nyGenerasjonMedEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, starttilstand: Tilstand = Tilstand.Uberegnet): Generasjon {
             return Generasjon(
+                observatører = this.observatører,
                 tilstand = starttilstand,
                 endringer = listOf(håndtereEndring(arbeidsgiver, hendelse)),
                 avsluttet = null,
@@ -471,6 +479,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         }
         private fun sikreNyGenerasjon(starttilstand: Tilstand, hendelse: Hendelse): Generasjon {
             return Generasjon(
+                observatører = this.observatører,
                 tilstand = starttilstand,
                 endringer = listOf(endringer.last().kopierUtenUtbetaling()),
                 avsluttet = null,
@@ -479,6 +488,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         }
 
         private fun nyGenerasjonTilInfotrygd(hendelse: Hendelse) = Generasjon(
+            observatører = this.observatører,
             tilstand = Tilstand.TilInfotrygd,
             endringer = listOf(this.gjeldende.kopierUtenUtbetaling()),
             avsluttet = LocalDateTime.now(),
@@ -522,7 +532,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             observatører.forEach { it.avsluttetUtenVedtak(hendelse, id, avsluttet!!, periode, dokumentsporing.ider()) }
         }
 
-        internal fun nyGenerasjon() {
+        private fun emitNyGenerasjonOpprettet() {
             check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
             val type = when(tilstand) {
                 Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
@@ -564,8 +574,9 @@ enum class Periodetilstand {
             val List<Generasjon>.sykmeldingsperiode get() = first().periode
             val List<Generasjon>.dokumentsporing get() = map { it.dokumentsporing }.reduce(Set<Dokumentsporing>::plus)
 
-            fun nyGenerasjon(sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, søknad: Søknad) =
+            fun nyGenerasjon(observatører: List<GenerasjonObserver>, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, søknad: Søknad) =
                 Generasjon(
+                    observatører = observatører,
                     tilstand = Tilstand.Uberegnet,
                     endringer = listOf(
                         Endring(
@@ -582,7 +593,7 @@ enum class Periodetilstand {
                 )
             // for PersonData
             fun ferdigGenerasjon(id: UUID, tilstand: Tilstand, endringer: MutableList<Endring>, vedtakFattet: LocalDateTime?, avsluttet: LocalDateTime?, kilde: Generasjonkilde) =
-                Generasjon(id, tilstand, endringer, vedtakFattet, avsluttet, kilde)
+                Generasjon(id, tilstand, endringer, vedtakFattet, avsluttet, kilde, emptyList())
 
             fun List<Generasjon>.jurist(jurist: MaskinellJurist, vedtaksperiodeId: UUID) =
                 jurist.medVedtaksperiode(vedtaksperiodeId, dokumentsporing.tilSubsumsjonsformat(), sykmeldingsperiode)
