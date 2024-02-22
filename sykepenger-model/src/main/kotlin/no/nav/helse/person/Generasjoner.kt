@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
@@ -30,6 +31,7 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -192,7 +194,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         generasjoner.any { it.dokumentHåndtert(dokumentsporing) }
 
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
-        generasjoner.last().håndterEndring(arbeidsgiver, hendelse)?.also {
+        val nyGenerasjon = generasjoner.last().håndterEndring(arbeidsgiver, hendelse)?.also {
             leggTilNyGenerasjon(it)
         }
         // 🤯 <OBS! NB!> 🤯
@@ -201,6 +203,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         // fordi når vedtaksperioden skal håndtere sykefraværstilfelle-signalet så avhenger den at generasjonen er på plass
         person.sykdomshistorikkEndret(hendelse)
         // 🤯 </OBS! NB!> 🤯
+        nyGenerasjon?.vurderLukkeAutomatisk(arbeidsgiver, hendelse)
     }
 
     fun erFattetVedtak(): Boolean {
@@ -461,6 +464,10 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             return tilstand.håndterEndring(this, arbeidsgiver, hendelse)
         }
 
+        fun vurderLukkeAutomatisk(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
+            return tilstand.vurderLukkeAutomatisk(this, arbeidsgiver, hendelse)
+        }
+
         private fun håndtereEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Endring {
             val oppdatertPeriode = hendelse.oppdaterFom(endringer.last().periode)
             val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(oppdatertPeriode)
@@ -631,6 +638,7 @@ enum class Periodetilstand {
             fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
+            fun vurderLukkeAutomatisk(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {}
             fun vedtakAvvist(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
                 error("Kan ikke avvise vedtak for generasjon i $this")
             }
@@ -700,6 +708,17 @@ enum class Periodetilstand {
                     // TODO: her kunne vi sjekket om omgjøringen kommer til å skape problemer for andre;
                     // i så tilfelle kan vi ikke forkaste
                     return true
+                }
+
+                override fun vurderLukkeAutomatisk(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
+                    if (!kanLukkesUtenVedtak(arbeidsgiver, generasjon)) return
+                    generasjon.avsluttUtenVedtak(hendelse)
+                }
+
+                private fun kanLukkesUtenVedtak(arbeidsgiver: Arbeidsgiver, generasjon: Generasjon): Boolean {
+                    val arbeidsgiverperiode = arbeidsgiver.arbeidsgiverperiode(generasjon.periode) ?: return true
+                    val forventerInntekt = Arbeidsgiverperiode.forventerInntekt(arbeidsgiverperiode, generasjon.periode, generasjon.sykdomstidslinje(), NullObserver)
+                    return !forventerInntekt
                 }
             }
             data object UberegnetRevurdering : Tilstand by (Uberegnet) {
@@ -871,8 +890,6 @@ enum class Periodetilstand {
                 // derfor legger vi den bare til i listen uten å gjøre noe mer spesielt
                 override fun oppdaterDokumentsporing(generasjon: Generasjon, dokument: Dokumentsporing) =
                     generasjon.kopierMedDokument(dokument)
-
-                override fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
 
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Generasjon {
                     return generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetOmgjøring)

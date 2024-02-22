@@ -2127,9 +2127,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
-            if (!vedtaksperiode.forventerInntekt()) {
-                return vedtaksperiode.generasjoner.avsluttUtenVedtak(revurdering)
-            }
+            if (!vedtaksperiode.forventerInntekt()) return
             vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
             revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
             revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
