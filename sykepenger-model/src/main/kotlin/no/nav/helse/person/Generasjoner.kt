@@ -509,17 +509,21 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         }
 
         private fun generasjonLukket() {
+            check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
             observatører.forEach { it.generasjonLukket(id) }
         }
         private fun vedtakIverksatt(hendelse: IAktivitetslogg) {
+            check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
             observatører.forEach { it.vedtakIverksatt(hendelse, id, avsluttet!!, periode, dokumentsporing.ider(), utbetaling()!!.id, vedtakFattet!!) }
         }
         private fun avsluttetUtenVedtak(hendelse: IAktivitetslogg) {
+            check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
             observatører.forEach { it.generasjonLukket(id) }
             observatører.forEach { it.avsluttetUtenVedtak(hendelse, id, avsluttet!!, periode, dokumentsporing.ider()) }
         }
 
         internal fun nyGenerasjon() {
+            check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
             val type = when(tilstand) {
                 Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
                 Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring
@@ -530,6 +534,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         }
 
         internal fun forkastetGenerasjon() {
+            check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
             observatører.forEach { it.generasjonForkastet(id) }
         }
 
