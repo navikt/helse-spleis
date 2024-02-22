@@ -808,9 +808,14 @@ internal class Arbeidsgiver private constructor(
     internal fun lås(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
-
     internal fun låsOpp(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().låsOpp(periode)
+    }
+    internal fun bekreftErLåst(periode: Periode) {
+        sykdomshistorikk.sykdomstidslinje().bekreftErLåst(periode)
+    }
+    internal fun bekreftErÅpen(periode: Periode) {
+        sykdomshistorikk.sykdomstidslinje().bekreftErÅpen(periode)
     }
 
     private fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {

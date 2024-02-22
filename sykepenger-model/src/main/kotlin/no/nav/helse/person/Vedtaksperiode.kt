@@ -429,9 +429,6 @@ internal class Vedtaksperiode private constructor(
     private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg) =
         arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse)
 
-    private fun låsOpp() = arbeidsgiver.låsOpp(periode)
-    private fun lås() = arbeidsgiver.lås(periode)
-
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
         if (tilstand == Start) return true // For vedtaksperioder som forkates på "direkten"
         if (!generasjoner.kanForkastes(arbeidsgiverUtbetalinger)) return false
@@ -455,7 +452,7 @@ internal class Vedtaksperiode private constructor(
         if (!kanForkastes(utbetalinger)) return null
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        this.generasjoner.forkast(hendelse)
+        this.generasjoner.forkast(arbeidsgiver, hendelse)
         val arbeidsgiverperiodeHensyntarForkastede = finnArbeidsgiverperiodeHensyntarForkastede()
         val trengerArbeidsgiveropplysninger = arbeidsgiverperiodeHensyntarForkastede?.forventerOpplysninger(periode) ?: false
         val sykmeldingsperioder = sykmeldingsperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiodeHensyntarForkastede)
@@ -497,12 +494,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
         oppdaterHistorikk(hendelse)
-        igangsettOverstyringAvTidslinje(hendelse)
-    }
-    private fun revurderLåstTidslinje(hendelse: OverstyrTidslinje) {
-        låsOpp()
-        oppdaterHistorikk(hendelse)
-        lås()
         igangsettOverstyringAvTidslinje(hendelse)
     }
 
@@ -588,36 +579,28 @@ internal class Vedtaksperiode private constructor(
         håndterSøknad(søknad) { nesteTilstand }
     }
 
-    private fun håndterLåstOverlappendeSøknadRevurdering(søknad: Søknad) {
-        håndterOverlappendeSøknadRevurdering(søknad) {
-            låsOpp()
-            oppdaterHistorikk(søknad)
-            lås()
-        }
-    }
-    private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad, oppdaterHistorikkBlock: (SykdomstidslinjeHendelse) -> Unit = ::oppdaterHistorikk) {
+    private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
         if (søknad.delvisOverlappende(periode)) return søknad.funksjonellFeil(`Mottatt søknad som delvis overlapper`)
         if (søknad.sendtTilGosys()) return søknad.funksjonellFeil(RV_SØ_30)
         if (søknad.utenlandskSykmelding()) return søknad.funksjonellFeil(RV_SØ_29)
         else {
             søknad.valider(vilkårsgrunnlag, jurist)
             søknad.info("Søknad har trigget en revurdering")
-            oppdaterHistorikkBlock(søknad)
+            oppdaterHistorikk(søknad)
         }
 
         person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode))
     }
 
-    private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding, håndterLås: (() -> Unit) -> Unit = { it() }) {
+    private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding) {
         dager.valider(periode)
         if (dager.harFunksjonelleFeilEllerVerre()) return
         val korrigertInntektsmeldingId = generasjoner.sisteInntektsmeldingId()
         val opprinneligAgp = finnArbeidsgiverperiode()
         if (dager.erKorrigeringForGammel(opprinneligAgp)) {
             inntektsmeldingHåndtert(dager)
-        }
-        else {
-            håndterLås { håndterDager(dager) }
+        } else {
+            håndterDager(dager)
         }
         val nyAgp = finnArbeidsgiverperiode()
         if (opprinneligAgp != null && !opprinneligAgp.klinLik(nyAgp)) {
@@ -1215,7 +1198,7 @@ internal class Vedtaksperiode private constructor(
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
-            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(vedtaksperiode.arbeidsgiver, revurdering)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)
         }
 
@@ -1946,7 +1929,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsavgjørelse: Utbetalingsavgjørelse
         ) {
-            vedtaksperiode.generasjoner.vedtakFattet(utbetalingsavgjørelse)
+            vedtaksperiode.generasjoner.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse)
             if (vedtaksperiode.generasjoner.erAvvist()) {
                 return if (arbeidsgiver.kanForkastes(vedtaksperiode)) vedtaksperiode.forkast(utbetalingsavgjørelse)
                 else utbetalingsavgjørelse.varsel(RV_UT_24)
@@ -2025,7 +2008,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsavgjørelse: Utbetalingsavgjørelse
         ) {
-            vedtaksperiode.generasjoner.vedtakFattet(utbetalingsavgjørelse)
+            vedtaksperiode.generasjoner.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse)
             if (vedtaksperiode.generasjoner.erAvvist()) {
                 if (utbetalingsavgjørelse.automatisert) {
                     utbetalingsavgjørelse.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
@@ -2099,8 +2082,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             vedtaksperiode.trengerPotensieltArbeidsgiveropplysninger()
             loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode)
-            vedtaksperiode.lås()
-            vedtaksperiode.generasjoner.avsluttUtenVedtak(hendelse)
+            vedtaksperiode.generasjoner.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
@@ -2114,8 +2096,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-            vedtaksperiode.generasjoner.bekreftÅpenGenerasjon()
-            vedtaksperiode.låsOpp()
+            vedtaksperiode.generasjoner.bekreftÅpenGenerasjon(vedtaksperiode.arbeidsgiver)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
@@ -2130,7 +2111,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
-            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(vedtaksperiode.arbeidsgiver, revurdering)
             revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
             revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
             revurdering.info(RV_RV_1.varseltekst)
@@ -2143,19 +2124,14 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             søknad.info("Prøver å igangsette revurdering grunnet korrigerende søknad")
-            vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             dager.valider(vedtaksperiode.periode)
-            if (dager.harFunksjonelleFeilEllerVerre()) {
-                vedtaksperiode.forkast(dager)
-                return
-            }
+            if (dager.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager)
 
-            vedtaksperiode.låsOpp()
             vedtaksperiode.håndterDager(dager)
-            vedtaksperiode.lås()
 
             vedtaksperiode.person.igangsettOverstyring(
                 Revurderingseventyr.arbeidsgiverperiode(dager, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
@@ -2202,7 +2178,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.revurderLåstTidslinje(hendelse)
+            vedtaksperiode.revurderTidslinje(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
@@ -2217,47 +2193,39 @@ internal class Vedtaksperiode private constructor(
 
         override val erFerdigBehandlet = true
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-            vedtaksperiode.lås()
-            check(vedtaksperiode.generasjoner.erAvsluttet()) {
-                "forventer at utbetaling skal være avsluttet"
-            }
-            check(vedtaksperiode.generasjoner.erFattetVedtak()) {
-                "forventer at generasjonen skal ha fattet vedtak"
-            }
+            vedtaksperiode.generasjoner.bekreftAvsluttetGenerasjonMedVedtak(vedtaksperiode.arbeidsgiver)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
-        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
+        override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
+            HJELP.utenBegrunnelse
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager) {
-                vedtaksperiode.låsOpp()
-                it()
-                vedtaksperiode.lås()
-            }
+            vedtaksperiode.håndterKorrigerendeInntektsmelding(dager)
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {}
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-            vedtaksperiode.låsOpp()
-            vedtaksperiode.generasjoner.bekreftÅpenGenerasjon()
+            vedtaksperiode.generasjoner.bekreftÅpenGenerasjon(vedtaksperiode.arbeidsgiver)
         }
+
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
             vedtaksperiode.jurist.`fvl § 35 ledd 1`()
-            vedtaksperiode.generasjoner.sikreNyGenerasjon(revurdering)
+            vedtaksperiode.generasjoner.sikreNyGenerasjon(vedtaksperiode.arbeidsgiver, revurdering)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.revurderLåstTidslinje(hendelse)
+            vedtaksperiode.revurderTidslinje(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
-            vedtaksperiode.håndterLåstOverlappendeSøknadRevurdering(søknad)
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {

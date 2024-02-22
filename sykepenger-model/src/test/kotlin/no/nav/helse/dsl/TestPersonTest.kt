@@ -4,9 +4,19 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -135,7 +145,8 @@ internal class TestPersonTest : AbstractDslTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
-            assertEquals(0, it.size)
+            assertEquals(1, it.size)
+            assertEquals(3.januar til 26.januar, it.first())
         }
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertIngenFunksjonelleFeil()
@@ -163,7 +174,7 @@ internal class TestPersonTest : AbstractDslTest() {
         Assertions.assertTrue(1.vedtaksperiode in observatør.utbetalteVedtaksperioder)
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(1, it.size)
-            assertEquals(Periode(3.januar, 26.januar), it.first())
+            assertEquals(3.januar til 26.januar, it.first())
         }
     }
 }

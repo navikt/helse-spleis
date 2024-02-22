@@ -115,6 +115,13 @@ internal class Sykdomstidslinje private constructor(
         låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
 
+    internal fun bekreftErLåst(periode: Periode) {
+        check(låstePerioder.any { it == periode }) { "$periode er ikke låst" }
+    }
+    internal fun bekreftErÅpen(periode: Periode) {
+        check(låstePerioder.none { it.overlapperMed(periode) }) { "hele eller deler av $periode er låst" }
+    }
+
     override operator fun iterator() = object : Iterator<Dag> {
         private val periodeIterator = periode?.iterator()
         override fun hasNext() = periodeIterator?.hasNext() ?: false
