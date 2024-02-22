@@ -907,7 +907,7 @@ internal data class PersonData(
                     )
                 }
 
-                internal fun tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner.Generasjon(
+                internal fun tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner.Generasjon.ferdigGenerasjon(
                     id = id,
                     tilstand = tilstand.tilModellobjekt(),
                     endringer = endringer.map { it.tilModellobjekt(grunnlagoppslag, utbetalinger) }.toMutableList(),
@@ -963,7 +963,7 @@ internal data class PersonData(
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,
                     tilstand = parseTilstand(this.tilstand),
-                    generasjoner = Generasjoner(
+                    generasjoner = Generasjoner.ferdigGenerasjoner(
                         generasjoner = this.generasjoner.tilModellobjekt(grunnlagoppslag, utbetalinger)
                     ),
                     opprettet = opprettet,

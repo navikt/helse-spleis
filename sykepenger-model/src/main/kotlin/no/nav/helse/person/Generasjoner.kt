@@ -33,9 +33,12 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class Generasjoner(generasjoner: List<Generasjon>) {
+internal class Generasjoner private constructor(generasjoner: List<Generasjon>) {
     internal constructor(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) : this(mutableListOf(Generasjon.nyGenerasjon(sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)))
-
+    companion object {
+        // for PersonData
+        fun ferdigGenerasjoner(generasjoner: List<Generasjon>) = Generasjoner(generasjoner)
+    }
     private val utbetalingene get() = generasjoner.mapNotNull(Generasjon::utbetaling)
     private val generasjoner = generasjoner.toMutableList()
     private val siste get() = generasjoner.lastOrNull()?.utbetaling()
@@ -219,7 +222,7 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
     }
 
 
-    internal class Generasjon(
+    internal class Generasjon private constructor(
         private val id: UUID,
         private var tilstand: Tilstand,
         private val endringer: MutableList<Endring>,
@@ -240,7 +243,6 @@ internal class Generasjoner(generasjoner: List<Generasjon>) {
                 "Må ha endringer for at det skal være vits med en generasjon"
             }
         }
-
 
         internal fun addObserver(observatør: GenerasjonObserver) {
             observatører.add(observatør)
@@ -573,6 +575,9 @@ enum class Periodetilstand {
                     avsluttet = null,
                     kilde = Generasjonkilde(søknad)
                 )
+            // for PersonData
+            fun ferdigGenerasjon(id: UUID, tilstand: Tilstand, endringer: MutableList<Endring>, vedtakFattet: LocalDateTime?, avsluttet: LocalDateTime?, kilde: Generasjonkilde) =
+                Generasjon(id, tilstand, endringer, vedtakFattet, avsluttet, kilde)
 
             fun List<Generasjon>.jurist(jurist: MaskinellJurist, vedtaksperiodeId: UUID) =
                 jurist.medVedtaksperiode(vedtaksperiodeId, dokumentsporing.tilSubsumsjonsformat(), sykmeldingsperiode)
