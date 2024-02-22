@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
@@ -26,6 +25,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.ManglendeInntektsmeldingEvent>()
     val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeInntektsmeldingEvent>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerArbeidsgiveropplysningerEvent>()
+    val trengerPotensieltArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent>()
     val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent>()
     val arbeidsgiveropplysningerKorrigert = mutableListOf<PersonObserver.ArbeidsgiveropplysningerKorrigertEvent>()
     val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
@@ -158,6 +158,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         trengerArbeidsgiveropplysningerVedtaksperioder.add(event)
+    }
+
+    override fun trengerPotensieltArbeidsgiveropplysninger(event: PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent) {
+        trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.add(event)
     }
 
     override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {

@@ -158,6 +158,34 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
             )
     }
 
+    // TODO: skal førsteFraværsdager være med?
+    data class TrengerPotensieltArbeidsgiveropplysningerEvent(
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val skjæringstidspunkt: LocalDate,
+        val sykmeldingsperioder: List<Periode>,
+        val egenmeldingsperioder: List<Periode>
+    ) {
+        fun toJsonMap(): Map<String, Any> =
+            mapOf(
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "sykmeldingsperioder" to sykmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
+                    )
+                },
+                "egenmeldingsperioder" to egenmeldingsperioder.map {
+                    mapOf(
+                        "fom" to it.start,
+                        "tom" to it.endInclusive
+                    )
+                }
+            )
+    }
+
     class TrengerIkkeArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID
@@ -715,6 +743,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
+    fun trengerPotensieltArbeidsgiveropplysninger(event: TrengerPotensieltArbeidsgiveropplysningerEvent) {}
     fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}
     fun arbeidsgiveropplysningerKorrigert(event: ArbeidsgiveropplysningerKorrigertEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}

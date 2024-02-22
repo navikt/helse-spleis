@@ -704,6 +704,27 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    private fun trengerPotensieltArbeidsgiveropplysninger() {
+        val arbeidsgiverperiode = finnArbeidsgiverperiode()
+        val vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne = arbeidsgiver
+            .vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
+            .filter { it.sykmeldingsperiode.start <= periode().endInclusive }
+        val sykmeldingsperioder = vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne
+            .map { it.sykmeldingsperiode }
+        val egenmeldingsdagerFraSøknad = vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne
+            .map { it.sykdomstidslinje }
+            .merge()
+            .egenmeldingerFraSøknad()
+
+        person.trengerPotensieltArbeidsgiveropplysninger(PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = id,
+            skjæringstidspunkt = skjæringstidspunkt,
+            sykmeldingsperioder = sykmeldingsperioder,
+            egenmeldingsperioder = egenmeldingsdagerFraSøknad
+        ))
+    }
+
     private fun trengerIkkeArbeidsgiveropplysninger() {
         person.trengerIkkeArbeidsgiveropplysninger(
             PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent(
@@ -2074,6 +2095,7 @@ internal class Vedtaksperiode private constructor(
         override val erFerdigBehandlet = true
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
+            vedtaksperiode.trengerPotensieltArbeidsgiveropplysninger()
             loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode)
             vedtaksperiode.lås()
             vedtaksperiode.generasjoner.avsluttUtenVedtak(hendelse)
