@@ -144,7 +144,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
     }
     fun avsluttUtenVedtak(hendelse: IAktivitetslogg) {
         check(generasjoner.last().utbetaling() == null) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
-        this.generasjoner.last().avslutt(hendelse)
+        this.generasjoner.last().avsluttUtenVedtak(hendelse)
     }
 
     internal fun sykmeldingsperiode() = this.generasjoner.first().sykmeldingsperiode()
@@ -392,8 +392,8 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             tilstand.vedtakFattet(this, utbetalingsavgjørelse)
         }
 
-        internal fun avslutt(hendelse: IAktivitetslogg) {
-            tilstand.avslutt(this, hendelse)
+        internal fun avsluttUtenVedtak(hendelse: IAktivitetslogg) {
+            tilstand.avsluttUtenVedtak(this, hendelse)
         }
 
         internal fun forkastVedtaksperiode(hendelse: Hendelse): Generasjon? {
@@ -632,7 +632,10 @@ enum class Periodetilstand {
             fun vedtakFattet(generasjon: Generasjon, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
                 error("Kan ikke fatte vedtak for generasjon i $this")
             }
-            fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+            fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                error("Kan ikke avslutte uten vedtak for generasjon i $this")
+            }
+            fun avsluttMedVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                 error("Kan ikke avslutte generasjon i $this")
             }
             fun utenUtbetaling(generasjon: Generasjon, hendelse: IAktivitetslogg) {
@@ -678,7 +681,7 @@ enum class Periodetilstand {
                     generasjon.tilstand(Beregnet, hendelse)
                 }
 
-                override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                override fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.tilstand(AvsluttetUtenVedtak, hendelse)
                 }
             }
@@ -701,7 +704,7 @@ enum class Periodetilstand {
                     generasjon.medUtbetaling(utbetaling, grunnlagsdata)
                     generasjon.tilstand(BeregnetRevurdering, hendelse)
                 }
-                override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                override fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     // TODO: ugyldig operasjon? kaste exception? ingen modelltester trigger denne
                     generasjon.tilstand(AvsluttetUtenVedtakRevurdering, hendelse)
                 }
@@ -815,7 +818,7 @@ enum class Periodetilstand {
                 override fun håndterUtbetalinghendelse(generasjon: Generasjon, hendelse: UtbetalingHendelse): Boolean {
                     val utbetaling = checkNotNull(generasjon.gjeldende.utbetaling) { "forventer utbetaling" }
                     if (!utbetaling.gjelderFor(hendelse)) return false
-                    if (utbetaling.erAvsluttet()) avslutt(generasjon, hendelse)
+                    if (utbetaling.erAvsluttet()) avsluttMedVedtak(generasjon, hendelse)
                     return true
                 }
 
@@ -835,7 +838,7 @@ enum class Periodetilstand {
                     return false
                 }
 
-                override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {
+                override fun avsluttMedVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.tilstand(VedtakIverksatt, hendelse)
                 }
             }
@@ -857,7 +860,7 @@ enum class Periodetilstand {
                     return true
                 }
 
-                override fun avslutt(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
+                override fun avsluttUtenVedtak(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
 
                 override fun sikreNyGenerasjon(generasjon: Generasjon, hendelse: Hendelse): Generasjon {
                     return generasjon.sikreNyGenerasjon(UberegnetOmgjøring, hendelse)
