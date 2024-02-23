@@ -415,14 +415,14 @@ internal class Arbeidsgiver private constructor(
         håndter(anmodningOmForkasting, Vedtaksperiode::håndter)
     }
 
-    internal fun vurderOmSøknadKanHåndteres(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
+    internal fun vurderOmSøknadIkkeKanHåndteres(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         // sjekker først egen arbeidsgiver først
         return yrkesaktivitet.erYrkesaktivitetenIkkeStøttet(hendelse) || this.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode)
                 || arbeidsgivere.any { it !== this && it.harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse, vedtaksperiode) }
                 || ForkastetVedtaksperiode.harKortGapTilForkastet(forkastede, hendelse, vedtaksperiode)
     }
 
-    private fun harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode): Boolean {
+    private fun harForkastetVedtaksperiodeSomBlokkererBehandling(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode): Boolean {
         return ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse, vedtaksperiode)
                 || ForkastetVedtaksperiode.harOverlappendeForkastetPeriode(forkastede, vedtaksperiode, hendelse)
                 || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, hendelse)

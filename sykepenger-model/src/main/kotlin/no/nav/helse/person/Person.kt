@@ -854,5 +854,8 @@ class Person private constructor(
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
+
+    internal fun vurderOmSøknadIkkeKanHåndteres(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver) =
+        arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(hendelse, vedtaksperiode, arbeidsgivere)
 }
 

@@ -33,6 +33,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
@@ -429,6 +430,32 @@ internal class Vedtaksperiode private constructor(
 
     private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg) =
         arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse)
+
+    private fun forkastGammelPeriodeSomIkkeKanForkastes(hendelse: Hendelse): Boolean {
+        if (!gammelPeriodeSomKanForkastes(hendelse)) return false
+        hendelse.info("Forkaster perioden fordi perioden er gammel og ville ikke kunne blitt behandlet om den var sendt inn i dag")
+        person.søppelbøtte(hendelse, MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(this))
+        return true
+    }
+    private fun gammelPeriodeSomKanForkastes(hendelse: IAktivitetslogg): Boolean {
+        if (!erGammelPeriode()) return false
+        hendelse.info("Perioden anses å være gammel og potensielt noe vi ikke ønsker å behandle")
+        if (!arbeidsgiver.kanForkastes(this, hendelse)) return false
+        val villeBlittKastetUt = person.vurderOmSøknadIkkeKanHåndteres(hendelse, this, arbeidsgiver)
+        if (!villeBlittKastetUt) {
+            val forNærmeInfotrygdhistorikk = person.erBetaltInfotrygd(periode.oppdaterFom(periode.start.minusDays(MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD)))
+            if (!forNærmeInfotrygdhistorikk) {
+                hendelse.info("Perioden kan behandles ihht. dagens regler")
+                return false
+            }
+            hendelse.info("Perioden er nærmere enn $MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD dager fra en utbetalt periode i Infotrygd")
+        }
+        hendelse.info("Perioden ville ikke blitt behandlet med dagens regler.")
+        return true
+    }
+
+    private val ugunstigPeriodeForNyBehandling = LocalDate.of(2019, 1, 1) til LocalDate.of(2022, 12, 31)
+    private fun erGammelPeriode() = ugunstigPeriodeForNyBehandling.overlapperMed(periode)
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
         if (tilstand == Start) return true // For vedtaksperioder som forkates på "direkten"
@@ -1238,7 +1265,7 @@ internal class Vedtaksperiode private constructor(
             if (harSenereUtbetalinger || harSenereAUU) {
                 søknad.varsel(RV_OO_1)
             }
-            vedtaksperiode.arbeidsgiver.vurderOmSøknadKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
+            vedtaksperiode.arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
             vedtaksperiode.håndterSøknad(søknad) {
                 vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
@@ -1485,7 +1512,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
-
     }
 
     internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
@@ -1568,6 +1594,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.forkastGammelPeriodeSomIkkeKanForkastes(påminnelse)) return
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
                 påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
             }
@@ -2321,12 +2348,16 @@ internal class Vedtaksperiode private constructor(
 
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
-            // forkaster perioder som er før/overlapper med oppgitt periode, eller som er sammenhengende med
-            // perioden som overlapper (per skjæringstidpunkt!).
+            val medSammeAGP = MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(segSelv)
+            return fun (other: Vedtaksperiode): Boolean {
+                if (other.periode.start >= segSelv.periode.start) return true // Forkaster nyere perioder på tvers av arbeidsgivere
+                return medSammeAGP(other)
+            }
+        }
+        internal val MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
             val arbeidsgiverperiode = segSelv.finnArbeidsgiverperiode()
             return fun (other: Vedtaksperiode): Boolean {
-                if (other.periode.start >= segSelv.periode.start) return true // Forkaster nyere perioder på tvers av arbeidsgivere
                 if (arbeidsgiverperiode != null && other.arbeidsgiver === segSelv.arbeidsgiver && other.periode in arbeidsgiverperiode) return true // Forkaster samme arbeidsgiverperiode (kun for samme arbeidsgiver)
                 return other.skjæringstidspunkt == skjæringstidspunkt // Forkaster alt med samme skjæringstidspunkt på tvers av arbeidsgivere
             }
@@ -2518,7 +2549,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) =
+        internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
             forkastede
                 .filter { it.periode.start > vedtaksperiode.periode.endInclusive }
                 .onEach {
@@ -2528,7 +2559,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
-        internal fun harOverlappendeForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) =
+        internal fun harOverlappendeForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
             forkastede
                 .filter { it.periode.overlapperMed(vedtaksperiode.periode()) }
                 .onEach {
@@ -2545,22 +2576,22 @@ internal class Vedtaksperiode private constructor(
                 }
                 .isNotEmpty()
 
-        internal fun harKortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
+        internal fun harKortGapTilForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
             forkastede
                 .filter { other -> vedtaksperiode.påvirkerArbeidsgiverperioden(other) }
                 .onEach {
                     hendelse.funksjonellFeil(RV_SØ_28)
-                    hendelse.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
+                    hendelse.info("Søknad har et gap som er kortere enn 20 dager til en forkastet vedtaksperiode ${it.id}, vedtaksperiode periode: ${it.periode}")
                 }
                 .isNotEmpty()
 
-        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse, vedtaksperiode: Vedtaksperiode) =
+        internal fun forlengerForkastet(forkastede: List<Vedtaksperiode>, hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode) =
             forkastede
                 .filter { it.periode.erRettFør(vedtaksperiode.periode) }
                 .onEach {
                     val sammeArbeidsgiver = it.organisasjonsnummer == vedtaksperiode.organisasjonsnummer
                     hendelse.funksjonellFeil(if (sammeArbeidsgiver) RV_SØ_37 else RV_SØ_38)
-                    hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
+                    hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, vedtaksperiode periode: ${it.periode}")
                 }
                 .isNotEmpty()
 
