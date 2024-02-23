@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
@@ -8,6 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.spleis.e2e.*
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -179,9 +181,35 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
         nyPeriode(1.januar til 31.januar, orgnummer = a1)
         nyPeriode(2.januar til 2.januar, orgnummer = a2)
 
-        assertEquals(listOf(
-            mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar),
-            mapOf("organisasjonsnummer" to a2, "førsteFraværsdag" to 2.januar),
-        ), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last().førsteFraværsdager)
+        assertEquals(
+            listOf(
+                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar),
+                mapOf("organisasjonsnummer" to a2, "førsteFraværsdag" to 2.januar),
+            ), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last().førsteFraværsdager
+        )
     }
+
+    @Test
+    fun `Sender uten sykmeldingsperiode dersom det er søknad uten sykedager (og dermed uten arbeidsgiverperiode)`() {
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(1.januar, 16.januar)
+        )
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        val expectedPotensiellForespørsel = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
+            ORGNUMMER,
+            inspektør.vedtaksperiodeId(1.vedtaksperiode),
+            1.januar,
+            sykmeldingsperioder = listOf(), // ingen sykmeldingsperioder !
+            egenmeldingsperioder = listOf(),
+            førsteFraværsdager = listOf() // ingen første fraværsdager !
+        )
+        assertEquals(
+            expectedPotensiellForespørsel,
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last()
+        )
+    }
+
 }
