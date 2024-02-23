@@ -16,6 +16,7 @@ import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.engine.connector
 import io.ktor.server.testing.testApplication
+import io.mockk.every
 import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
 import java.net.ServerSocket
@@ -27,11 +28,18 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spekemat.fabrikk.Pølse
+import no.nav.helse.spekemat.fabrikk.Pølsefabrikk
+import no.nav.helse.spekemat.fabrikk.PølseradDto
+import no.nav.helse.spekemat.fabrikk.Pølsestatus
 import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.LokalePayload
 import no.nav.helse.spleis.SpekematClient
@@ -89,21 +97,32 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     @Test
-    fun `Det Spesialist faktisk henter`() = spleisApiTestApplication(testdata = ::opprettTestdata) {
-        val query = URI("https://raw.githubusercontent.com/navikt/helse-spesialist/master/spesialist-api/src/main/resources/graphql/hentSnapshot.graphql").toURL().readText()
-        @Language("JSON")
-        val requestBody = """
-            {
-                "query": "$query",
-                "variables": {
-                  "fnr": "$UNG_PERSON_FNR"
-                },
-                "operationName": "HentSnapshot"
-            }
-        """
+    fun `Det Spesialist faktisk henter`() {
+        val spekemat = Spekemat()
+        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
+        person.addObserver(spekemat)
 
-        request(requestBody) {
-            assertIngenFærreFelt(detSpesialistFaktiskForventer, this.utenVariableVerdier)
+        val spekematClient = mockk<SpekematClient>()
+        spleisApiTestApplication(spekematClient = spekematClient, testdata = opprettTestdata(person)) {
+            every { spekematClient.hentSpekemat(UNG_PERSON_FNR, any()) } returns spekemat.resultat()
+            val query =
+                URI("https://raw.githubusercontent.com/navikt/helse-spesialist/master/spesialist-api/src/main/resources/graphql/hentSnapshot.graphql").toURL()
+                    .readText()
+
+            @Language("JSON")
+            val requestBody = """
+                {
+                    "query": "$query",
+                    "variables": {
+                      "fnr": "$UNG_PERSON_FNR"
+                    },
+                    "operationName": "HentSnapshot"
+                }
+            """
+
+            request(requestBody) {
+                assertIngenFærreFelt(detSpesialistFaktiskForventer, this.utenVariableVerdier)
+            }
         }
     }
 
@@ -743,16 +762,15 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         private fun String.readResource() =
             object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: throw RuntimeException("Fant ikke filen på $this")
 
-        private fun spleisApiTestApplication(testdata: (TestDataSource) -> Unit = { }, testblokk: suspend SpleisApiTestContext.() -> Unit) {
+        private fun spleisApiTestApplication(spekematClient: SpekematClient = mockk<SpekematClient>(), testdata: (TestDataSource) -> Unit = { }, testblokk: suspend SpleisApiTestContext.() -> Unit) {
             val testDataSource = databaseContainer.nyTilkobling()
             val randomPort = ServerSocket(0).localPort
             testdata(testDataSource)
-            lagTestapplikasjon(port = randomPort, testDataSource = testDataSource, testblokk)
+            lagTestapplikasjon(spekematClient = spekematClient, port = randomPort, testDataSource = testDataSource, testblokk)
             databaseContainer.droppTilkobling(testDataSource)
         }
 
-        private fun lagTestapplikasjon(port: Int, testDataSource: TestDataSource, testblokk: suspend SpleisApiTestContext.() -> Unit) {
-            val spekematClient = mockk<SpekematClient>()
+        private fun lagTestapplikasjon(spekematClient: SpekematClient, port: Int, testDataSource: TestDataSource, testblokk: suspend SpleisApiTestContext.() -> Unit) {
             testApplication {
                 environment {
                     connector {
@@ -816,49 +834,49 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         }
     }
 
-    private fun opprettTestdata(testDataSource: TestDataSource) {
-        val sykmelding = sykmelding()
-        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
-        observatør = TestObservatør().also { person.addObserver(it) }
-        person.håndter(sykmelding)
-        person.håndter(utbetalinghistorikk())
-        person.håndter(søknad())
-        person.håndter(inntektsmelding())
-        person.håndter(ytelser())
-        person.håndter(vilkårsgrunnlag())
-        val ytelser = ytelser()
-        person.håndter(ytelser)
-        val simuleringsbehov = ytelser.behov().last { it.type == Simulering }
-        val utbetalingId = UUID.fromString(simuleringsbehov.kontekst().getValue("utbetalingId"))
-        val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
-        val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
-        person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde))
-        person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId))
-        person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId))
+    private fun opprettTestdata(person: Person): (TestDataSource) -> Unit {
+        return fun (testDataSource: TestDataSource) {
+            observatør = TestObservatør().also { person.addObserver(it) }
+            person.håndter(sykmelding())
+            person.håndter(utbetalinghistorikk())
+            person.håndter(søknad())
+            person.håndter(inntektsmelding())
+            person.håndter(ytelser())
+            person.håndter(vilkårsgrunnlag())
+            val ytelser = ytelser()
+            person.håndter(ytelser)
+            val simuleringsbehov = ytelser.behov().last { it.type == Simulering }
+            val utbetalingId = UUID.fromString(simuleringsbehov.kontekst().getValue("utbetalingId"))
+            val fagsystemId = simuleringsbehov.detaljer().getValue("fagsystemId") as String
+            val fagområde = simuleringsbehov.detaljer().getValue("fagområde") as String
+            person.håndter(simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde))
+            person.håndter(utbetalingsgodkjenning(utbetalingId = utbetalingId))
+            person.håndter(utbetaling(utbetalingId = utbetalingId, fagsystemId = fagsystemId))
 
-        lagrePerson(testDataSource.ds, AKTØRID, UNG_PERSON_FNR, person)
-        lagreSykmelding(
-            dataSource = testDataSource.ds,
-            fødselsnummer = UNG_PERSON_FNR,
-            meldingsReferanse = SYKMELDING_ID,
-            fom = FOM,
-            tom = TOM,
-        )
-        lagreSøknadNav(
-            dataSource = testDataSource.ds,
-            fødselsnummer = UNG_PERSON_FNR,
-            meldingsReferanse = SØKNAD_ID,
-            fom = FOM,
-            tom = TOM,
-            sendtNav = TOM.plusDays(1).atStartOfDay()
-        )
-        lagreInntektsmelding(
-            dataSource = testDataSource.ds,
-            fødselsnummer = UNG_PERSON_FNR,
-            meldingsReferanse = INNTEKTSMELDING_ID,
-            beregnetInntekt = INNTEKT,
-            førsteFraværsdag = FOM
-        )
+            lagrePerson(testDataSource.ds, AKTØRID, UNG_PERSON_FNR, person)
+            lagreSykmelding(
+                dataSource = testDataSource.ds,
+                fødselsnummer = UNG_PERSON_FNR,
+                meldingsReferanse = SYKMELDING_ID,
+                fom = FOM,
+                tom = TOM,
+            )
+            lagreSøknadNav(
+                dataSource = testDataSource.ds,
+                fødselsnummer = UNG_PERSON_FNR,
+                meldingsReferanse = SØKNAD_ID,
+                fom = FOM,
+                tom = TOM,
+                sendtNav = TOM.plusDays(1).atStartOfDay()
+            )
+            lagreInntektsmelding(
+                dataSource = testDataSource.ds,
+                fødselsnummer = UNG_PERSON_FNR,
+                meldingsReferanse = INNTEKTSMELDING_ID,
+                beregnetInntekt = INNTEKT,
+                førsteFraværsdag = FOM
+            )
+        }
     }
 
     private fun lagrePerson(dataSource: DataSource, aktørId: String, fødselsnummer: String, person: Person) {
@@ -943,5 +961,60 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 }
             """.trimIndent()
         )
+    }
+}
+
+private class Spekemat : PersonObserver {
+    private val hendelser = mutableListOf<Any>()
+    private val arbeidsgivere = mutableMapOf<String, Pølsefabrikk>()
+
+    fun resultat() = SpekematDTO(
+        pakker = arbeidsgivere.mapNotNull { resultat(it.key) }
+    )
+    fun resultat(orgnr: String) = arbeidsgivere.getValue(orgnr).pakke().mapTilPølsepakkeDTO(orgnr)
+
+    private fun List<PølseradDto>.mapTilPølsepakkeDTO(orgnr: String) =
+        SpekematDTO.PølsepakkeDTO(
+            yrkesaktivitetidentifikator = orgnr,
+            rader = map { rad ->
+                SpekematDTO.PølsepakkeDTO.PølseradDTO(
+                    kildeTilRad = rad.kildeTilRad,
+                    pølser = rad.pølser.map { pølseDto ->
+                        SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO(
+                            vedtaksperiodeId = pølseDto.vedtaksperiodeId,
+                            generasjonId = pølseDto.generasjonId,
+                            kilde = pølseDto.kilde,
+                            status = when (pølseDto.status) {
+                                Pølsestatus.ÅPEN -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.ÅPEN
+                                Pølsestatus.LUKKET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.LUKKET
+                                Pølsestatus.FORKASTET -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.FORKASTET
+                            }
+                        )
+                    }
+                )
+            }
+        )
+
+    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
+        hendelser.add(event)
+        arbeidsgivere.getOrPut(event.organisasjonsnummer) { Pølsefabrikk() }
+            .nyPølse(Pølse(
+                vedtaksperiodeId = event.vedtaksperiodeId,
+                generasjonId = event.generasjonId,
+                status = Pølsestatus.ÅPEN,
+                kilde = event.kilde.meldingsreferanseId
+            ))
+    }
+
+    override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
+        hendelser.add(event)
+        arbeidsgivere.getValue(event.organisasjonsnummer)
+            .oppdaterPølse(event.vedtaksperiodeId, event.generasjonId, Pølsestatus.LUKKET)
+    }
+
+    override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
+        hendelser.add(event)
+        arbeidsgivere.getValue(event.organisasjonsnummer)
+            .oppdaterPølse(event.vedtaksperiodeId, event.generasjonId, Pølsestatus.FORKASTET)
     }
 }
