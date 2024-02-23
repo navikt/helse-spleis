@@ -90,6 +90,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -275,7 +276,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting) {
-        if (!arbeidsgiver.kanForkastes(this)) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
+        if (!arbeidsgiver.kanForkastes(this, anmodningOmForkasting)) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
         anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
         forkast(anmodningOmForkasting)
     }
@@ -429,27 +430,46 @@ internal class Vedtaksperiode private constructor(
     private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg) =
         arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse)
 
-    internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
+    internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
         if (tilstand == Start) return true // For vedtaksperioder som forkates på "direkten"
-        if (!generasjoner.kanForkastes(arbeidsgiverUtbetalinger)) return false
+        if (!generasjoner.kanForkastes(arbeidsgiverUtbetalinger)) {
+            hendelse.info("[kanForkastes] Kan ikke forkastes fordi generasjoner nekter det")
+            return false
+        }
         val overlappendeUtbetalinger = arbeidsgiverUtbetalinger.filter { it.overlapperMed(periode) }
         val kanForkastes = Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)
-        if (kanForkastes) return true
+        if (kanForkastes) {
+            hendelse.info("[kanForkastes] Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
+            return true
+        }
+        hendelse.info("[kanForkastes] Kan i utgangspunktet ikke forkastes ettersom perioden har ${overlappendeUtbetalinger.size} overlappende utbetalinger")
         val overlappendeOppdrag = arbeidsgiverUtbetalinger.filter { it.overlapperMedUtbetaling(periode) }
-        if (!Utbetaling.kanForkastes(overlappendeOppdrag, arbeidsgiverUtbetalinger)) return false // forkaster ikke om perioden har utbetalinger
+        if (!Utbetaling.kanForkastes(overlappendeOppdrag, arbeidsgiverUtbetalinger)) {
+            hendelse.info("[kanForkastes] Kan ikke forkastes fordi perioden overlapper med utbetalte oppdrag (${overlappendeOppdrag.size} stk)")
+            return false
+        } // forkaster ikke om perioden har utbetalinger
+        hendelse.info("[kanForkastes] Kan i utgangspunktet ikke forkastes til tross for at perioden ikke overlapper med noen oppdrag. Siden perioden har ${overlappendeUtbetalinger.size} overlappende utbetalinger må vi anta at perioden kan påvirke beregningen av AGP på et vis.")
         // om perioden kun er auu, og er utbetalt i infotrygd, så er det greit
-        if (tilstand != AvsluttetUtenUtbetaling) return false
+        if (tilstand != AvsluttetUtenUtbetaling) {
+            hendelse.info("[kanForkastes] Kan ikke forkastes fordi perioden ikke er AUU")
+            return false
+        }
         // auuen overlapper ikke med et oppdrag, men overlapper med perioden til en aktiv utbetaling
         // I utgangspunktet må vi anta at auuen derfor påvirker utfallet av arbeidsgiverperiode-beregningen, og kan ikke forkastes
         // unntak er dersom perioden overlapper med en infotrygdutbetaling, eller dersom det foreligger en utbetaling i Infotrygd mellom
         // auuen og første oppdragslinje/vedtak
         val nesteVedtak = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(finnArbeidsgiverperiode()).firstOrNull { it.tilstand != AvsluttetUtenUtbetaling }
         val periodeSomKanVæreUtbetaltIInfotrygd = if (nesteVedtak == null) this.periode else this.periode.oppdaterTom(nesteVedtak.periode.start.forrigeDag)
-        return person.erBetaltInfotrygd(periodeSomKanVæreUtbetaltIInfotrygd)
+        if (!person.erBetaltInfotrygd(periodeSomKanVæreUtbetaltIInfotrygd)) {
+            hendelse.info("[kanForkastes] Kan ikke forkastes fordi $periodeSomKanVæreUtbetaltIInfotrygd dekkes ikke av en periode utbetalt i Infotrygd")
+            return false
+        }
+        hendelse.info("[kanForkastes] Kan etterkomme forkastingen av AUU")
+        return true
     }
 
     internal fun forkast(hendelse: Hendelse, utbetalinger: List<Utbetaling>): VedtaksperiodeForkastetEventBuilder? {
-        if (!kanForkastes(utbetalinger)) return null
+        if (!kanForkastes(utbetalinger, hendelse)) return null
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.generasjoner.forkast(arbeidsgiver, hendelse)
@@ -488,7 +508,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forkast(hendelse: Hendelse) {
-        if (!arbeidsgiver.kanForkastes(this)) return hendelse.info("Kan ikke etterkomme forkasting")
+        if (!arbeidsgiver.kanForkastes(this, hendelse)) return hendelse.info("Kan ikke etterkomme forkasting")
         person.søppelbøtte(hendelse, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 
@@ -949,7 +969,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        generasjoner.godkjenning(hendelse, erForlengelse(), arbeidsgiver.kanForkastes(this))
+        generasjoner.godkjenning(hendelse, erForlengelse(), arbeidsgiver.kanForkastes(this, hendelse))
     }
 
     internal fun gjenopptaBehandling(hendelse: Hendelse, arbeidsgivere: Iterable<Arbeidsgiver>) {
@@ -1092,7 +1112,7 @@ internal class Vedtaksperiode private constructor(
             FunksjonelleFeilTilVarsler.wrap(hendelse, block)
         }
         fun håndterFørstegangsbehandling(hendelse: Hendelse, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
-            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return block()
+            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, hendelse)) return block()
             // Om førstegangsbehandling ikke kan forkastes (typisk Out of Order/ omgjøring av AUU) så håndteres det som om det er en revurdering
             håndterRevurdering(hendelse, block)
         }
@@ -1140,7 +1160,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
-            val kanForkastes = vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)
+            val kanForkastes = vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, anmodningOmForkasting)
             if (kanForkastes) return anmodningOmForkasting.info("Avslår anmodning om forkasting i ${type.name} (kan forkastes)")
             anmodningOmForkasting.info("Avslår anmodning om forkasting i ${type.name} (kan ikke forkastes)")
         }
@@ -1930,7 +1950,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.generasjoner.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse)
             if (vedtaksperiode.generasjoner.erAvvist()) {
-                return if (arbeidsgiver.kanForkastes(vedtaksperiode)) vedtaksperiode.forkast(utbetalingsavgjørelse)
+                return if (arbeidsgiver.kanForkastes(vedtaksperiode, utbetalingsavgjørelse)) vedtaksperiode.forkast(utbetalingsavgjørelse)
                 else utbetalingsavgjørelse.varsel(RV_UT_24)
             }
             vedtaksperiode.tilstand(
@@ -2164,7 +2184,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun forkastPåGrunnAvInfotrygdendring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
             if (vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return false // Om vi har info kan vi sende den ut til Saksbehandler uansett
-            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode)) return false // Perioden kan ikke forkastes
+            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, hendelse)) return false // Perioden kan ikke forkastes
             return utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk) // Kan forkaste om alt er utbetalt i Infotrygd i sin helhet
         }
 
@@ -2399,7 +2419,7 @@ internal class Vedtaksperiode private constructor(
                 check(auuer.all { it.organisasjonsnummer == organisasjonsnummer }) { "Alle vedtaksperioder må høre til samme arbeidsgiver" }
             }
 
-            private val auuer = auuer.filter { it.arbeidsgiver.kanForkastes(it) }
+            private val auuer = auuer.filter { it.arbeidsgiver.kanForkastes(it, Aktivitetslogg()) }
             protected val førsteAuu = auuer.min()
             protected val sisteAuu = auuer.max()
             protected val perioder = auuer.map { it.periode }
@@ -2425,7 +2445,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse: IAktivitetslogg?,
                 alleVedtaksperioder: List<Vedtaksperiode>
             ): Boolean {
-                if (auuer.any { !it.arbeidsgiver.kanForkastes(it) }) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver") }
+                if (auuer.any { !it.arbeidsgiver.kanForkastes(it, Aktivitetslogg()) }) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, har overlappende utbetalte utbetalinger på samme arbeidsgiver") }
                 if (påvirkerForkastingArbeidsgiverperioden(alleVedtaksperioder)) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, påvirker arbeidsgiverperiode på samme arbeidsgiver") }
                 if (påvirkerForkastingSkjæringstidspunktPåPerson(hendelse, alleVedtaksperioder)) return false.also { hendelse?.info("Forkaste AUU: Kan ikke forkastes, påvirker skjæringstidspunkt på personen") }
                 return true
