@@ -969,7 +969,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        generasjoner.godkjenning(hendelse, erForlengelse(), arbeidsgiver.kanForkastes(this, hendelse))
+        generasjoner.godkjenning(hendelse, erForlengelse(), arbeidsgiver.kanForkastes(this, Aktivitetslogg()))
     }
 
     internal fun gjenopptaBehandling(hendelse: Hendelse, arbeidsgivere: Iterable<Arbeidsgiver>) {
