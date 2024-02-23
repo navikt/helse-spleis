@@ -45,7 +45,7 @@ internal fun Application.requestResponseTracing(logger: Logger, registry: Collec
                 proceed()
             }
         } catch (err: Throwable) {
-            logger.error("exception thrown during processing: ${err.message} callId=${call.callId}")
+            logger.error("feil i håndtering av request: ${err.message} callId=${call.callId}", err)
             throw err
         }
     }

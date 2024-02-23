@@ -34,16 +34,7 @@ private object ApiMetrikker {
 
 internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String, spekematEnabled: Boolean): GraphQLPerson? {
     return ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
-        val spekemat = if (spekematEnabled) {
-            try {
-                spekematClient.hentSpekemat(fnr, callId).takeUnless { it.pakker.isEmpty() }
-            } catch (err: Exception) {
-                sikkerlogg.info("klarte ikke hente data fra spekemat: ${err.message}", err)
-                null
-            }
-        } else {
-            null
-        }
+        val spekemat = if (spekematEnabled) spekematClient.hentSpekemat(fnr, callId) else null
         "Bruker ${if (spekemat == null) "spleis" else "spekemat"} for å lage pølsevisning".also {
             logg.info(it)
             sikkerlogg.info(it, kv("fødselsnummer", fnr))
