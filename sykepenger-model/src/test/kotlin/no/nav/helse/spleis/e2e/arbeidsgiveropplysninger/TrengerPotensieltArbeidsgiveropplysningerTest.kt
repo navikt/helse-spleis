@@ -34,7 +34,10 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 1.januar))
         )
 
-        assertEquals(expectedPotensiellForespørsel, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.single())
+        assertEquals(
+            expectedPotensiellForespørsel,
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.single()
+        )
     }
 
     @Test
@@ -67,7 +70,10 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 9.februar))
         )
 
-        assertEquals(expectedPotensiellForespørsel1, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[3])
+        assertEquals(
+            expectedPotensiellForespørsel1,
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[3]
+        )
 
         val expectedPotensiellForespørsel2 = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
             ORGNUMMER,
@@ -82,7 +88,10 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 7.februar))
         )
 
-        assertEquals(expectedPotensiellForespørsel2, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last())
+        assertEquals(
+            expectedPotensiellForespørsel2,
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last()
+        )
     }
 
     @Test
@@ -90,28 +99,40 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(5.januar, 16.januar))
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(5.januar, 16.januar, 100.prosent),
-            egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 4.januar)
-        ))
+            egenmeldinger = listOf(
+                Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 4.januar)
+            )
+        )
 
         // Langt gap fra forrige periode
         håndterSykmelding(Sykmeldingsperiode(5.mars, 8.mars))
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(5.mars, 8.mars, 100.prosent),
-            egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.mars, 2.mars)
-        ))
+            egenmeldinger = listOf(
+                Søknad.Søknadsperiode.Arbeidsgiverdag(1.mars, 2.mars)
+            )
+        )
 
         // Kort gap fra forrige periode
         håndterSykmelding(Sykmeldingsperiode(14.mars, 16.mars))
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(14.mars, 16.mars, 100.prosent),
-            egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(13.mars, 13.mars)
-        ))
+            egenmeldinger = listOf(
+                Søknad.Søknadsperiode.Arbeidsgiverdag(13.mars, 13.mars)
+            )
+        )
 
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         assertEquals(3, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.size)
 
-        assertEquals(listOf(1.januar til 4.januar), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[0].egenmeldingsperioder)
-        assertEquals(listOf(1.mars til 2.mars), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[1].egenmeldingsperioder)
+        assertEquals(
+            listOf(1.januar til 4.januar),
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[0].egenmeldingsperioder
+        )
+        assertEquals(
+            listOf(1.mars til 2.mars),
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[1].egenmeldingsperioder
+        )
 
         val expectedPotensiellForespørsel = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
             ORGNUMMER,
@@ -124,7 +145,10 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             egenmeldingsperioder = listOf(1.mars til 2.mars, 13.mars til 13.mars),
             førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 13.mars))
         )
-        assertEquals(expectedPotensiellForespørsel, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last())
+        assertEquals(
+            expectedPotensiellForespørsel,
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last()
+        )
     }
 
     @Test
@@ -132,15 +156,22 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(10.januar, 16.januar))
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(10.januar, 16.januar, 100.prosent),
-            egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(9.januar, 9.januar)
-        ))
+            egenmeldinger = listOf(
+                Søknad.Søknadsperiode.Arbeidsgiverdag(9.januar, 9.januar)
+            )
+        )
         håndterSykmelding(Sykmeldingsperiode(2.januar, 5.januar))
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(2.januar, 5.januar, 100.prosent),
-            egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)
-        ))
+            egenmeldinger = listOf(
+                Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)
+            )
+        )
 
-        assertEquals(listOf(1.januar til 1.januar), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last().egenmeldingsperioder)
+        assertEquals(
+            listOf(1.januar til 1.januar),
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last().egenmeldingsperioder
+        )
     }
 
     @Test
