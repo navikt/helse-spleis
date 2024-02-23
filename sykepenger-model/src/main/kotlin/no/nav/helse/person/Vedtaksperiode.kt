@@ -1112,7 +1112,7 @@ internal class Vedtaksperiode private constructor(
             FunksjonelleFeilTilVarsler.wrap(hendelse, block)
         }
         fun håndterFørstegangsbehandling(hendelse: Hendelse, vedtaksperiode: Vedtaksperiode, block: () -> Unit) {
-            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, hendelse)) return block()
+            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return block()
             // Om førstegangsbehandling ikke kan forkastes (typisk Out of Order/ omgjøring av AUU) så håndteres det som om det er en revurdering
             håndterRevurdering(hendelse, block)
         }
