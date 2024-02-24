@@ -525,6 +525,7 @@ internal class Vedtaksperiode private constructor(
                     hendelser = hendelseIder,
                     fom = periode.start,
                     tom = periode.endInclusive,
+                    behandletIInfotrygd = person.erBetaltInfotrygd(periode),
                     forlengerPeriode = person.nåværendeVedtaksperioder { (it.periode.overlapperMed(periode) || it.periode.erRettFør(periode)) }.isNotEmpty(),
                     harPeriodeInnenfor16Dager = person.nåværendeVedtaksperioder { påvirkerArbeidsgiverperioden(it) }.isNotEmpty(),
                     trengerArbeidsgiveropplysninger = trengerArbeidsgiveropplysninger,
