@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -190,7 +191,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
     }
 
     @Test
-    fun `Sender uten sykmeldingsperiode dersom det er søknad uten sykedager (og dermed uten arbeidsgiverperiode)`() {
+    fun `Skal sende med sykmeldingsperiode selv om det er søknad uten sykedager`() {
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent),
             Søknad.Søknadsperiode.Ferie(1.januar, 16.januar)
@@ -198,17 +199,27 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
+        val uønsketPotensiellForespørsel = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
+            ORGNUMMER,
+            inspektør.vedtaksperiodeId(1.vedtaksperiode),
+            1.januar,
+            sykmeldingsperioder = listOf(), // mangler sykmeldingsperiode
+            egenmeldingsperioder = listOf(),
+            førsteFraværsdager = listOf() // men ingen første fraværsdag
+        )
+
         val expectedPotensiellForespørsel = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
             ORGNUMMER,
             inspektør.vedtaksperiodeId(1.vedtaksperiode),
             1.januar,
-            sykmeldingsperioder = listOf(), // ingen sykmeldingsperioder !
+            sykmeldingsperioder = listOf(1.januar til 16.januar),
             egenmeldingsperioder = listOf(),
-            førsteFraværsdager = listOf() // ingen første fraværsdager !
+            førsteFraværsdager = listOf() // men ingen første fraværsdag
         )
-        assertEquals(
-            expectedPotensiellForespørsel,
-            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last()
+        assertForventetFeil(
+            "Når vi ikke får beregnet en arbeidsgiverperiode så defaulter vi til å ikke sende noen sykemeldingsperioder",
+            nå = { assertEquals(observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last(), uønsketPotensiellForespørsel) },
+            ønsket = { assertEquals(observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last(), expectedPotensiellForespørsel) }
         )
     }
 
