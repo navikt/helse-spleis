@@ -199,15 +199,6 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        val uønsketPotensiellForespørsel = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
-            ORGNUMMER,
-            inspektør.vedtaksperiodeId(1.vedtaksperiode),
-            1.januar,
-            sykmeldingsperioder = listOf(), // mangler sykmeldingsperiode
-            egenmeldingsperioder = listOf(),
-            førsteFraværsdager = listOf() // men ingen første fraværsdag
-        )
-
         val expectedPotensiellForespørsel = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
             ORGNUMMER,
             inspektør.vedtaksperiodeId(1.vedtaksperiode),
@@ -216,10 +207,10 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             egenmeldingsperioder = listOf(),
             førsteFraværsdager = listOf() // men ingen første fraværsdag
         )
-        assertForventetFeil(
-            "Når vi ikke får beregnet en arbeidsgiverperiode så defaulter vi til å ikke sende noen sykemeldingsperioder",
-            nå = { assertEquals(observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last(), uønsketPotensiellForespørsel) },
-            ønsket = { assertEquals(observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last(), expectedPotensiellForespørsel) }
+
+        assertEquals(
+            expectedPotensiellForespørsel,
+            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last()
         )
     }
 

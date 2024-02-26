@@ -751,7 +751,7 @@ internal class Vedtaksperiode private constructor(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = id,
             skjæringstidspunkt = skjæringstidspunkt,
-            sykmeldingsperioder = sykmeldingsperioder,
+            sykmeldingsperioder = if (arbeidsgiverperiode == null) listOf(sykmeldingsperiode) else sykmeldingsperioder,
             egenmeldingsperioder = egenmeldingsdagerFraSøknad,
             førsteFraværsdager = førsteFraværsdager
         ))
