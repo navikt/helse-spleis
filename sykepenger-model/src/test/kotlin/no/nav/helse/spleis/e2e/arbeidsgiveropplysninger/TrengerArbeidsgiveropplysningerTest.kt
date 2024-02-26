@@ -77,6 +77,22 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     private val INNTEKT_FLERE_AG = 20000.månedlig
 
     @Test
+    fun `første fraværsdag vi mottar i IM blir feil når det er ferie første dag i sykmeldingsperioden etter kort gap`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent), Ferie(12.februar, 12.februar))
+        observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().let { event ->
+            assertEquals(listOf(12.februar til 28.februar), event.sykmeldingsperioder)
+            assertEquals(13.februar, event.skjæringstidspunkt)
+            assertEquals(listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 13.februar)), event.førsteFraværsdager)
+            assertFalse(event.forespurteOpplysninger.any { it is PersonObserver.Arbeidsgiverperiode })
+        }
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        håndterInntektsmeldingPortal(emptyList(), førsteFraværsdag = 12.februar, inntektsdato = 13.februar)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+    }
+
+    @Test
     fun `replayer ikke portalinnsendt inntektsmelding`() {
         håndterInntektsmeldingPortal(listOf(1.januar til 5.januar, 10.januar til 20.januar), inntektsdato = 10.januar)
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
