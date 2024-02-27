@@ -1,6 +1,7 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
@@ -9,6 +10,7 @@ import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -109,12 +111,13 @@ internal class Infotrygdhistorikk private constructor(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
         builder: ArbeidsgiverperiodeMediator,
-        subsumsjonObserver: SubsumsjonObserver?
+        subsumsjonObserver: SubsumsjonObserver?,
+        hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonObserver)
         if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeBuilder)
-        siste.build(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder)
+        siste.build(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder, hendelseskilde)
     }
 
     internal fun buildUtbetalingstidslinje(
@@ -123,8 +126,9 @@ internal class Infotrygdhistorikk private constructor(
         builder: ArbeidsgiverperiodeMediator,
         subsumsjonObserver: SubsumsjonObserver
     ) {
-        val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder(organisasjonsnummer)) else builder
-        build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver)
+        val infotrygdkilde = SykdomshistorikkHendelse.Hendelseskilde("Infotrygdhistorikk", UUID.randomUUID(), LocalDateTime.now())
+        val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder(organisasjonsnummer), infotrygdkilde) else builder
+        build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver, infotrygdkilde)
     }
     internal fun utbetalingshistorikkEtterInfotrygdendring(
         vedtaksperiodeId: UUID,

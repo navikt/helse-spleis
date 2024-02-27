@@ -55,11 +55,13 @@ internal val Int.N
         INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal fun Int.S(melding: Melding) = Sykdomstidslinje.sykedager(
+internal fun Int.S(melding: Melding) = this.S(Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now()))
+
+internal fun Int.S(hendelseskilde: Hendelseskilde) = Sykdomstidslinje.sykedager(
     dagensDato,
     dagensDato.plusDays(this.toLong() - 1),
     100.prosent,
-    Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now())
+    hendelseskilde
 ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.U

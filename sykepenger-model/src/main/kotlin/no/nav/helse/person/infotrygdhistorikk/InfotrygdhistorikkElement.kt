@@ -75,20 +75,21 @@ class InfotrygdhistorikkElement private constructor(
         )
     }
 
-    internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
+    internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor, hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null) {
         val dekoratør = Infotrygddekoratør(teller, builder, perioder.utbetalingsperioder(organisasjonsnummer))
-        historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
+        historikkFor(organisasjonsnummer, sykdomstidslinje, hendelseskilde).accept(dekoratør)
     }
 
     internal fun betaltePerioder(orgnummer: String? = null): List<Periode> = perioder.utbetalingsperioder(orgnummer)
 
-    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null): Sykdomstidslinje {
         if (sykdomstidslinje.periode() == null) return sykdomstidslinje
         val ulåst = Sykdomstidslinje().merge(sykdomstidslinje, replace)
-        return sykdomstidslinje(orgnummer, ulåst)
+        return sykdomstidslinje(orgnummer, ulåst, hendelseskilde)
     }
 
-    internal fun sykdomstidslinje(orgnummer: String, sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje()): Sykdomstidslinje {
+    internal fun sykdomstidslinje(orgnummer: String, sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(), hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null): Sykdomstidslinje {
+        val kilde = hendelseskilde ?: this.kilde
         return perioder.fold(sykdomstidslinje) { result, periode ->
             periode.historikkFor(orgnummer, result, kilde)
         }
