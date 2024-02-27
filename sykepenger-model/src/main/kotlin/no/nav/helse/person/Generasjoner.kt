@@ -449,10 +449,6 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             return tilstand.utbetaling(this, vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
         }
 
-        fun utbetaling(utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
-            tilstand.utbetaling(this, utbetaling, grunnlagsdata, hendelse)
-        }
-
         private fun lagOmgjøring(
             vedtaksperiodeSomLagerUtbetaling: UUID,
             fødselsnummer: String,
@@ -770,9 +766,6 @@ enum class Periodetilstand {
                 utbetalingstidslinje: Utbetalingstidslinje
             ): Utbetalingstidslinje {
                 error("Støtter ikke å opprette utbetaling i $this")
-            }
-            fun utbetaling(generasjon: Generasjon, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
-                error("Støtter ikke å motta utbetaling i $this")
             }
 
             fun oppdaterDokumentsporing(generasjon: Generasjon, dokument: Dokumentsporing): Boolean {
