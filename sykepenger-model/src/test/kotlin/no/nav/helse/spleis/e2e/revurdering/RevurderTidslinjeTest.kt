@@ -1078,9 +1078,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(Endringskode.ENDR, oppdragInspektør.endringskode)
         assertEquals(1, oppdragInspektør.antallLinjer())
         revurdering.arbeidsgiverOppdrag.single().inspektør.also { linje ->
-            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
-            assertEquals(17.januar, linje.datoStatusFom)
-            assertEquals("OPPH", linje.statuskode)
+            assertEquals(Endringskode.ENDR, linje.endringskode)
+            assertEquals(17.januar til 19.januar, linje.fom til linje.tom)
+            assertEquals(null, linje.datoStatusFom)
+            assertEquals(null, linje.statuskode)
         }
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)

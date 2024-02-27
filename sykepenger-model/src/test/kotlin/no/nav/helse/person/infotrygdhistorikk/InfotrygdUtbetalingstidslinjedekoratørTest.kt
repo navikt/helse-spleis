@@ -67,9 +67,9 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
             ), beregningsperiode = 1.februar til 28.februar
         )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar til 28.februar, listOf(1.januar til 10.februar), infotrygdkilde)
-        val tidslinje = 31.S(infotrygdkilde) + 10.S(infotrygdkilde) + 18.S
+        val tidslinje = 31.S(infotrygdkilde) + 28.S
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
-        assertEquals(11.februar til 28.februar, builder.result().periode())
+        assertEquals(1.februar til 28.februar, builder.result().periode())
     }
 
     @Test
@@ -86,9 +86,9 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
             ), beregningsperiode = 1.januar til 31.januar
         )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.januar til 31.januar, listOf(20.januar til 28.februar), infotrygdkilde)
-        val tidslinje = 19.S + 12.S(infotrygdkilde) + 28.S(infotrygdkilde)
+        val tidslinje = 31.S + 28.S(infotrygdkilde)
         tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
-        assertEquals(1.januar til 19.januar, builder.result().periode())
+        assertEquals(1.januar til 31.januar, builder.result().periode())
     }
 
     @Test

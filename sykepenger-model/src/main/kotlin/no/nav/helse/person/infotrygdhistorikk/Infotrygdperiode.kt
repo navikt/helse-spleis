@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InfotrygdperiodeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
+import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -19,7 +20,7 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kilde: Hendelseskilde): Sykdomstidslinje {
         if (!gjelder(orgnummer)) return sykdomstidslinje
-        return sykdomstidslinje.merge(sykdomstidslinje(kilde), replace)
+        return sykdomstidslinje.merge(sykdomstidslinje(kilde), sammenhengendeSykdom)
     }
 
     internal fun overlapperMed(other: Periode) = periode.overlapperMed(other)

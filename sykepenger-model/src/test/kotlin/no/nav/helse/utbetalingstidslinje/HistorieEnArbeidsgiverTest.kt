@@ -148,7 +148,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         resetSeed(8.januar)
         addSykdomshistorikk(AG1, 5.S)
         val utbetalingstidslinje = beregn(AG1, 8.januar)
-        assertEquals(0, utbetalingstidslinje.size)
+        assertEquals(5, utbetalingstidslinje.size)
     }
 
     @Test
@@ -206,13 +206,13 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
     }
 
     @Test
-    fun `fjerner overlapp`() {
+    fun `fjerner ikke overlapp`() {
         historie(
             utbetaling(1.januar, 7.januar)
         )
         addSykdomshistorikk(AG1, sykedager(1.januar, 7.januar))
         val utbetalingstidslinje = beregn(AG1, 1.januar)
-        assertEquals(0, utbetalingstidslinje.size)
+        assertEquals(7, utbetalingstidslinje.size)
     }
 
     @Test

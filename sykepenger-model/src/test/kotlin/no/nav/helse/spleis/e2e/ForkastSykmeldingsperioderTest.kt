@@ -77,6 +77,7 @@ internal class ForkastSykmeldingsperioderTest: AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertVarsel(RV_IT_3)
         }
