@@ -80,7 +80,7 @@ class InfotrygdhistorikkElement private constructor(
         historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
     }
 
-    internal fun betaltePerioder(): List<Periode> = perioder.utbetalingsperioder()
+    internal fun betaltePerioder(orgnummer: String? = null): List<Periode> = perioder.utbetalingsperioder(orgnummer)
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         if (sykdomstidslinje.periode() == null) return sykdomstidslinje

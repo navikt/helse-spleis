@@ -123,7 +123,7 @@ internal class Infotrygdhistorikk private constructor(
         builder: ArbeidsgiverperiodeMediator,
         subsumsjonObserver: SubsumsjonObserver
     ) {
-        val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder()) else builder
+        val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder(organisasjonsnummer)) else builder
         build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver)
     }
     internal fun utbetalingshistorikkEtterInfotrygdendring(

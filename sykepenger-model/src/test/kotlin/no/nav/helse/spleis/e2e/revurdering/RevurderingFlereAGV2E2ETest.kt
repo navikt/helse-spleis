@@ -53,6 +53,7 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
@@ -550,11 +551,18 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         assertEquals(utbetaling1.korrelasjonsId, revurdering.korrelasjonsId)
         val oppdragInspektør = revurdering.arbeidsgiverOppdrag.inspektør
         assertEquals(Endringskode.ENDR, oppdragInspektør.endringskode)
-        assertEquals(1, oppdragInspektør.antallLinjer())
-        revurdering.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+        assertEquals(2, oppdragInspektør.antallLinjer())
+        revurdering.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+            assertEquals(Endringskode.ENDR, linje.endringskode)
             assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
             assertEquals(17.januar, linje.datoStatusFom)
             assertEquals("OPPH", linje.statuskode)
+        }
+        revurdering.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+            assertEquals(Endringskode.NY, linje.endringskode)
+            assertEquals(18.januar til 31.januar, linje.fom til linje.tom)
+            assertNull(linje.datoStatusFom)
+            assertNull(linje.statuskode)
         }
 
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
