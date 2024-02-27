@@ -626,7 +626,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
-        val generasjonId: UUID
+        val generasjonId: UUID,
+        val automatiskBehandling: Boolean
     )
 
     data class GenerasjonOpprettetEvent(

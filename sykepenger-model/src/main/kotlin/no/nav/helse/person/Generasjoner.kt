@@ -128,7 +128,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
     internal fun forkast(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse) {
         leggTilNyGenerasjon(generasjoner.last().forkastVedtaksperiode(arbeidsgiver, hendelse))
-        generasjoner.last().forkastetGenerasjon()
+        generasjoner.last().forkastetGenerasjon(hendelse)
     }
     internal fun forkastUtbetaling(hendelse: IAktivitetslogg) {
         generasjoner.last().forkastUtbetaling(hendelse)
@@ -656,9 +656,9 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             observatører.forEach { it.nyGenerasjon(id, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
         }
 
-        internal fun forkastetGenerasjon() {
+        internal fun forkastetGenerasjon(hendelse: Hendelse) {
             check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
-            observatører.forEach { it.generasjonForkastet(id) }
+            observatører.forEach { it.generasjonForkastet(id, hendelse) }
         }
 
         internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean) {

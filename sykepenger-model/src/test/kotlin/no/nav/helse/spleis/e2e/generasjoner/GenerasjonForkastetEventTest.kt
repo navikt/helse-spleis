@@ -29,7 +29,29 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
                 aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
-                generasjonId = forventetGenerasjonId
+                generasjonId = forventetGenerasjonId,
+                automatiskBehandling = true
+            )
+            assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+            assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
+            assertEquals(forventetGenerasjonEvent, generasjonForkastetEvent)
+        }
+    }
+    @Test
+    fun `uberegnet generasjon forkastes manuelt`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false, automatiskBehandling = false)
+            val generasjonForkastetEvent = observatør.generasjonForkastetEventer.single()
+            val sisteGenerasjon = inspektørForkastet(1.vedtaksperiode).generasjoner.single()
+            val forventetGenerasjonId = sisteGenerasjon.id
+            val forventetGenerasjonEvent = PersonObserver.GenerasjonForkastetEvent(
+                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+                aktørId = "42",
+                organisasjonsnummer = a1,
+                vedtaksperiodeId = 1.vedtaksperiode,
+                generasjonId = forventetGenerasjonId,
+                automatiskBehandling = false
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
@@ -50,7 +72,8 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
                 aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
-                generasjonId = forventetGenerasjonId
+                generasjonId = forventetGenerasjonId,
+                automatiskBehandling = true
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
@@ -71,7 +94,8 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
                 aktørId = "42",
                 organisasjonsnummer = a1,
                 vedtaksperiodeId = 1.vedtaksperiode,
-                generasjonId = forventetGenerasjonId
+                generasjonId = forventetGenerasjonId,
+                automatiskBehandling = false
             )
             assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)

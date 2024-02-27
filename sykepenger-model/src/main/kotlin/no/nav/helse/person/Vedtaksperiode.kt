@@ -37,6 +37,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
@@ -993,13 +994,15 @@ internal class Vedtaksperiode private constructor(
         ))
     }
 
-    override fun generasjonForkastet(generasjonId: UUID) {
+    override fun generasjonForkastet(generasjonId: UUID, hendelse: Hendelse) {
+        val automatiskBehandling = if (hendelse is AnnullerUtbetaling) false else !(hendelse is Utbetalingsgodkjenning && !hendelse.automatisert)
         person.generasjonForkastet(PersonObserver.GenerasjonForkastetEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = id,
-            generasjonId = generasjonId
+            generasjonId = generasjonId,
+            automatiskBehandling = automatiskBehandling
         ))
     }
 
