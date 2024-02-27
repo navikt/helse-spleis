@@ -119,16 +119,11 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         fødselsnummer: String,
         arbeidsgiver: Arbeidsgiver,
         grunnlagsdata: VilkårsgrunnlagElement,
-        periode: Periode,
         hendelse: IAktivitetslogg,
         maksimumSykepenger: Maksdatosituasjon,
         utbetalingstidslinje: Utbetalingstidslinje
     ): Utbetalingstidslinje {
-        val strategi = if (this.harAvsluttede()) Arbeidsgiver::lagRevurdering else Arbeidsgiver::lagUtbetaling
-        val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksimumSykepenger.maksdato, maksimumSykepenger.forbrukteDager, maksimumSykepenger.gjenståendeDager, periode)
-        denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
-        generasjoner.last().utbetaling(denNyeUtbetalingen, grunnlagsdata, hendelse)
-        return utbetalingstidslinje.subset(periode)
+        return generasjoner.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
     }
 
     internal fun forkast(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse) {
@@ -442,12 +437,104 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
         fun utbetaling() = gjeldende.utbetaling
 
+        fun utbetaling(
+            vedtaksperiodeSomLagerUtbetaling: UUID,
+            fødselsnummer: String,
+            arbeidsgiver: Arbeidsgiver,
+            grunnlagsdata: VilkårsgrunnlagElement,
+            hendelse: IAktivitetslogg,
+            maksimumSykepenger: Maksdatosituasjon,
+            utbetalingstidslinje: Utbetalingstidslinje
+        ): Utbetalingstidslinje {
+            return tilstand.utbetaling(this, vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
+        }
+
         fun utbetaling(utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
             tilstand.utbetaling(this, utbetaling, grunnlagsdata, hendelse)
         }
 
-        private fun medUtbetaling(utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement) {
-            nyEndring(gjeldende.kopierMedUtbetaling(utbetaling, grunnlagsdata))
+        private fun lagOmgjøring(
+            vedtaksperiodeSomLagerUtbetaling: UUID,
+            fødselsnummer: String,
+            arbeidsgiver: Arbeidsgiver,
+            grunnlagsdata: VilkårsgrunnlagElement,
+            hendelse: IAktivitetslogg,
+            maksimumSykepenger: Maksdatosituasjon,
+            utbetalingstidslinje: Utbetalingstidslinje
+        ): Utbetalingstidslinje {
+            val strategi = Arbeidsgiver::lagUtbetaling
+            return lagUtbetaling(
+                vedtaksperiodeSomLagerUtbetaling,
+                fødselsnummer,
+                arbeidsgiver,
+                grunnlagsdata,
+                hendelse,
+                maksimumSykepenger,
+                utbetalingstidslinje,
+                strategi,
+                Tilstand.BeregnetOmgjøring
+            )
+        }
+        private fun lagUtbetaling(
+            vedtaksperiodeSomLagerUtbetaling: UUID,
+            fødselsnummer: String,
+            arbeidsgiver: Arbeidsgiver,
+            grunnlagsdata: VilkårsgrunnlagElement,
+            hendelse: IAktivitetslogg,
+            maksimumSykepenger: Maksdatosituasjon,
+            utbetalingstidslinje: Utbetalingstidslinje
+        ): Utbetalingstidslinje {
+            val strategi = Arbeidsgiver::lagUtbetaling
+            return lagUtbetaling(
+                vedtaksperiodeSomLagerUtbetaling,
+                fødselsnummer,
+                arbeidsgiver,
+                grunnlagsdata,
+                hendelse,
+                maksimumSykepenger,
+                utbetalingstidslinje,
+                strategi,
+                Tilstand.Beregnet
+            )
+        }
+        private fun lagRevurdering(
+            vedtaksperiodeSomLagerUtbetaling: UUID,
+            fødselsnummer: String,
+            arbeidsgiver: Arbeidsgiver,
+            grunnlagsdata: VilkårsgrunnlagElement,
+            hendelse: IAktivitetslogg,
+            maksimumSykepenger: Maksdatosituasjon,
+            utbetalingstidslinje: Utbetalingstidslinje
+        ): Utbetalingstidslinje {
+            val strategi = Arbeidsgiver::lagRevurdering
+            return lagUtbetaling(
+                vedtaksperiodeSomLagerUtbetaling,
+                fødselsnummer,
+                arbeidsgiver,
+                grunnlagsdata,
+                hendelse,
+                maksimumSykepenger,
+                utbetalingstidslinje,
+                strategi,
+                Tilstand.BeregnetRevurdering
+            )
+        }
+        private fun lagUtbetaling(
+            vedtaksperiodeSomLagerUtbetaling: UUID,
+            fødselsnummer: String,
+            arbeidsgiver: Arbeidsgiver,
+            grunnlagsdata: VilkårsgrunnlagElement,
+            hendelse: IAktivitetslogg,
+            maksimumSykepenger: Maksdatosituasjon,
+            utbetalingstidslinje: Utbetalingstidslinje,
+            strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, fødselsnummer: String, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode) -> Utbetaling,
+            nyTilstand: Tilstand
+        ): Utbetalingstidslinje {
+            val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksimumSykepenger.maksdato, maksimumSykepenger.forbrukteDager, maksimumSykepenger.gjenståendeDager, periode)
+            denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
+            nyEndring(gjeldende.kopierMedUtbetaling(denNyeUtbetalingen, grunnlagsdata))
+            tilstand(nyTilstand, hendelse)
+            return utbetalingstidslinje.subset(periode)
         }
 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
@@ -480,19 +567,18 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         fun vurderLukkeAutomatisk(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
             return tilstand.vurderLukkeAutomatisk(this, arbeidsgiver, hendelse)
         }
-
         private fun håndtereEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Endring {
             val oppdatertPeriode = hendelse.oppdaterFom(endringer.last().periode)
             val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(oppdatertPeriode)
             return endringer.last().kopierMedEndring(oppdatertPeriode, hendelse.dokumentsporing(), sykdomstidslinje)
         }
+
         // oppdaterer seg selv med endringen
         private fun oppdaterMedEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
             val endring = håndtereEndring(arbeidsgiver, hendelse)
             if (endring == gjeldende) return
             nyEndring(endring)
         }
-
         private fun nyGenerasjonMedEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, starttilstand: Tilstand = Tilstand.Uberegnet): Generasjon {
             arbeidsgiver.låsOpp(periode)
             return Generasjon(
@@ -503,6 +589,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                 kilde = Generasjonkilde(hendelse)
             )
         }
+
         private fun sikreNyGenerasjon(arbeidsgiver: Arbeidsgiver, starttilstand: Tilstand, hendelse: Hendelse): Generasjon {
             arbeidsgiver.låsOpp(periode)
             return Generasjon(
@@ -547,7 +634,6 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             }
             return Utbetaling.kanForkastes(utbetalingen, arbeidsgiverUtbetalinger)
         }
-
         private fun generasjonLukket(arbeidsgiver: Arbeidsgiver, ) {
             arbeidsgiver.lås(periode)
             check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
@@ -557,6 +643,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
             observatører.forEach { it.vedtakIverksatt(hendelse, id, avsluttet!!, periode, dokumentsporing.ider(), utbetaling()!!.id, vedtakFattet!!) }
         }
+
         private fun avsluttetUtenVedtak(hendelse: IAktivitetslogg) {
             check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
             observatører.forEach { it.avsluttetUtenVedtak(hendelse, id, avsluttet!!, periode, dokumentsporing.ider()) }
@@ -672,6 +759,18 @@ enum class Periodetilstand {
             fun utenUtbetaling(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
             }
+            fun utbetaling(
+                generasjon: Generasjon,
+                vedtaksperiodeSomLagerUtbetaling: UUID,
+                fødselsnummer: String,
+                arbeidsgiver: Arbeidsgiver,
+                grunnlagsdata: VilkårsgrunnlagElement,
+                hendelse: IAktivitetslogg,
+                maksimumSykepenger: Maksdatosituasjon,
+                utbetalingstidslinje: Utbetalingstidslinje
+            ): Utbetalingstidslinje {
+                error("Støtter ikke å opprette utbetaling i $this")
+            }
             fun utbetaling(generasjon: Generasjon, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
                 error("Støtter ikke å motta utbetaling i $this")
             }
@@ -707,9 +806,17 @@ enum class Periodetilstand {
 
                 override fun utenUtbetaling(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
 
-                override fun utbetaling(generasjon: Generasjon, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
-                    generasjon.medUtbetaling(utbetaling, grunnlagsdata)
-                    generasjon.tilstand(Beregnet, hendelse)
+                override fun utbetaling(
+                    generasjon: Generasjon,
+                    vedtaksperiodeSomLagerUtbetaling: UUID,
+                    fødselsnummer: String,
+                    arbeidsgiver: Arbeidsgiver,
+                    grunnlagsdata: VilkårsgrunnlagElement,
+                    hendelse: IAktivitetslogg,
+                    maksimumSykepenger: Maksdatosituasjon,
+                    utbetalingstidslinje: Utbetalingstidslinje
+                ): Utbetalingstidslinje {
+                    return generasjon.lagUtbetaling(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
                 }
 
                 override fun avsluttUtenVedtak(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg) {
@@ -718,9 +825,17 @@ enum class Periodetilstand {
                 }
             }
             data object UberegnetOmgjøring : Tilstand by (Uberegnet) {
-                override fun utbetaling(generasjon: Generasjon, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
-                    generasjon.medUtbetaling(utbetaling, grunnlagsdata)
-                    generasjon.tilstand(BeregnetOmgjøring, hendelse)
+                override fun utbetaling(
+                    generasjon: Generasjon,
+                    vedtaksperiodeSomLagerUtbetaling: UUID,
+                    fødselsnummer: String,
+                    arbeidsgiver: Arbeidsgiver,
+                    grunnlagsdata: VilkårsgrunnlagElement,
+                    hendelse: IAktivitetslogg,
+                    maksimumSykepenger: Maksdatosituasjon,
+                    utbetalingstidslinje: Utbetalingstidslinje
+                ): Utbetalingstidslinje {
+                    return generasjon.lagOmgjøring(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
                 }
 
                 override fun kanForkastes(generasjon: Generasjon, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
@@ -743,9 +858,17 @@ enum class Periodetilstand {
             data object UberegnetRevurdering : Tilstand by (Uberegnet) {
                 override fun kanForkastes(generasjon: Generasjon, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
 
-                override fun utbetaling(generasjon: Generasjon, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
-                    generasjon.medUtbetaling(utbetaling, grunnlagsdata)
-                    generasjon.tilstand(BeregnetRevurdering, hendelse)
+                override fun utbetaling(
+                    generasjon: Generasjon,
+                    vedtaksperiodeSomLagerUtbetaling: UUID,
+                    fødselsnummer: String,
+                    arbeidsgiver: Arbeidsgiver,
+                    grunnlagsdata: VilkårsgrunnlagElement,
+                    hendelse: IAktivitetslogg,
+                    maksimumSykepenger: Maksdatosituasjon,
+                    utbetalingstidslinje: Utbetalingstidslinje
+                ): Utbetalingstidslinje {
+                    return generasjon.lagRevurdering(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
                 }
             }
             data object Beregnet : Tilstand {
@@ -767,13 +890,6 @@ enum class Periodetilstand {
                     generasjon.oppdaterMedEndring(arbeidsgiver, hendelse)
                     generasjon.tilstand(Uberegnet, hendelse)
                     return null
-                }
-
-                // TODO: denne overriden kan fjernes dersom utbetalingsperioder() i Vedtaksperiode hensyntar
-                // bergnede perioder
-                override fun utbetaling(generasjon: Generasjon, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg) {
-                    generasjon.gjeldende.forkastUtbetaling(hendelse)
-                    generasjon.medUtbetaling(utbetaling, grunnlagsdata)
                 }
 
                 override fun oppdaterDokumentsporing(generasjon: Generasjon, dokument: Dokumentsporing) =

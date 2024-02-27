@@ -1140,11 +1140,8 @@ internal class Vedtaksperiode private constructor(
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
-    private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksimumSykepenger: Maksdatosituasjon) {
-        val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
-            "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
-        }
-        generasjoner.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, grunnlagsdata, periode, hendelse, maksimumSykepenger, utbetalingstidslinje)
+    private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksimumSykepenger: Maksdatosituasjon, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) {
+        generasjoner.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, hendelse)
     }
 
@@ -1176,11 +1173,14 @@ internal class Vedtaksperiode private constructor(
         check(utbetalingsperioder.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
+        val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
+            "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
+        }
         try {
             val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = arbeidsgiverUtbetalinger.beregn(beregningsperiode, this.periode, hendelse, this.jurist)
             utbetalingsperioder.forEach { other ->
                 val utbetalingstidslinje = tidslinjerPerArbeidsgiver.getValue(other.arbeidsgiver)
-                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksimumSykepenger)
+                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksimumSykepenger, grunnlagsdata)
             }
             return maksimumSykepenger
         } catch (err: UtbetalingstidslinjeBuilderException) {
