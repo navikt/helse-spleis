@@ -277,15 +277,12 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(anmodningOmForkasting: AnmodningOmForkasting) {
         if (!anmodningOmForkasting.erRelevant(id)) return
         kontekst(anmodningOmForkasting)
+        if (anmodningOmForkasting.force) return forkast(anmodningOmForkasting)
         tilstand.håndter(this, anmodningOmForkasting)
     }
 
     private fun etterkomAnmodningOmForkasting(anmodningOmForkasting: AnmodningOmForkasting) {
-        if (!arbeidsgiver.kanForkastes(
-                this,
-                anmodningOmForkasting
-            )
-        ) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
+        if (!arbeidsgiver.kanForkastes(this, anmodningOmForkasting)) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
         anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
         forkast(anmodningOmForkasting)
     }
@@ -1486,6 +1483,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
+            vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
+        }
+
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
@@ -2435,10 +2436,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         private val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
-
-        private val VILKÅRSPRØVD_PÅ = { skjæringstidspunkt: LocalDate ->
-            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt && vedtaksperiode.vilkårsgrunnlag?.erArbeidsgiverRelevant(vedtaksperiode.organisasjonsnummer) == true }
-        }
 
         private val OVERLAPPER_MED = { other: Vedtaksperiode ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.periode.overlapperMed(other.periode) }

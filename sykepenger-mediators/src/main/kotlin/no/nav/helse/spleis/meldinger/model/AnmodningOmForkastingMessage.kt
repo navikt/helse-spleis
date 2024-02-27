@@ -13,13 +13,15 @@ internal class AnmodningOmForkastingMessage(packet: JsonMessage) : HendelseMessa
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
+    private val force = packet["force"].takeIf { it.isBoolean }?.asBoolean() ?: false
 
     private val anmodning = AnmodningOmForkasting(
         meldingsreferanseId = id,
         aktørId = aktørId,
         organisasjonsnummer = organisasjonsnummer,
         fødselsnummer = fødselsnummer,
-        vedtaksperiodeId = vedtaksperiodeId
+        vedtaksperiodeId = vedtaksperiodeId,
+        force = force
     )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

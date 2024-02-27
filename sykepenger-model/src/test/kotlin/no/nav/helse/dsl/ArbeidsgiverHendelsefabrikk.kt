@@ -482,13 +482,14 @@ internal class ArbeidsgiverHendelsefabrikk(
             periode = periode
         )
 
-    internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID) =
+    internal fun lagAnmodningOmForkasting(vedtaksperiodeId: UUID, force: Boolean = false) =
         AnmodningOmForkasting(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId
+            vedtaksperiodeId = vedtaksperiodeId,
+            force = force
         )
 
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =

@@ -7,7 +7,8 @@ class AnmodningOmForkasting(
     aktørId: String,
     fødselsnummer: String,
     organisasjonsnummer: String,
-    private val vedtaksperiodeId: UUID
+    private val vedtaksperiodeId: UUID,
+    internal val force: Boolean
 ): ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
     internal fun erRelevant(other: UUID) = other == vedtaksperiodeId
 }

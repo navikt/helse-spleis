@@ -20,6 +20,7 @@ internal open class AnmodningOmForkastingRiver(
             "aktørId"
         )
         message.require("vedtaksperiodeId") { UUID.fromString(it.asText()) }
+        message.interestedIn("force")
     }
 
     override fun createMessage(packet: JsonMessage) = AnmodningOmForkastingMessage(packet)
