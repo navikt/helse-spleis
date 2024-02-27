@@ -374,7 +374,8 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("generasjon_forkastet", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "generasjonId" to event.generasjonId
+            "generasjonId" to event.generasjonId,
+            "automatiskBehandling" to event.automatiskBehandling
         )))
     }
 

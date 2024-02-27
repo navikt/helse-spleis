@@ -1,11 +1,11 @@
 package no.nav.helse.hendelser.utbetaling
 
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.hendelser.ArbeidstakerHendelse
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.utbetalingslinjer.Utbetaling
 
 class AnnullerUtbetaling(
     meldingsreferanseId: UUID,
@@ -20,6 +20,8 @@ class AnnullerUtbetaling(
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
     fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
+
+    fun erAutomatisk() = this.saksbehandlerIdent == "Automatisk behandlet"
 
     fun vurdering() = Utbetaling.Vurdering(
         true,

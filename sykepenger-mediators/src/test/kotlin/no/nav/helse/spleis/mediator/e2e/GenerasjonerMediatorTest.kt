@@ -70,7 +70,7 @@ internal class GenerasjonerMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `vedtak annuleres`() {
+    fun `vedtak annulleres`() {
         nyttVedtak(1.januar, 31.januar)
         val fagsystemId = testRapid.inspektør.siste("utbetaling_utbetalt").path("arbeidsgiverOppdrag").path("fagsystemId").asText()
         sendAnnullering(fagsystemId)
@@ -85,7 +85,7 @@ internal class GenerasjonerMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertEquals(2, generasjonOpprettet.size) { "forventer to generasjoner" }
         assertTrue(førsteGenerasjonOpprettetIndeks < generasjonLukketIndeks) { "generasjon_opprettet må sendes først" }
-        assertTrue(sisteGenerasjonOpprettetIndeks > generasjonLukketIndeks) { "det skal ikke sendes  generasjon_lukket for forkastede generasjoner" }
+        assertTrue(sisteGenerasjonOpprettetIndeks > generasjonLukketIndeks) { "det skal ikke sendes generasjon_lukket for forkastede generasjoner" }
         assertTrue(sisteGenerasjonOpprettetIndeks < generasjonForkastetIndeks) { "generasjon_forkastet må sendes etter generasjon_opprettet" }
         verifiserGenerasjonForkastetKontrakt(generasjonForkastet)
     }
@@ -98,11 +98,12 @@ internal class GenerasjonerMediatorTest : AbstractEndToEndMediatorTest() {
         assertTrue(generasjonLukket.path("generasjonId").isTextual)
     }
 
-    private fun verifiserGenerasjonForkastetKontrakt(generasjonLukket: JsonNode) {
-        assertEquals("generasjon_forkastet", generasjonLukket.path("@event_name").asText())
-        assertTrue(generasjonLukket.path("fødselsnummer").isTextual)
-        assertTrue(generasjonLukket.path("organisasjonsnummer").isTextual)
-        assertTrue(generasjonLukket.path("vedtaksperiodeId").isTextual)
-        assertTrue(generasjonLukket.path("generasjonId").isTextual)
+    private fun verifiserGenerasjonForkastetKontrakt(generasjonForkastet: JsonNode) {
+        assertEquals("generasjon_forkastet", generasjonForkastet.path("@event_name").asText())
+        assertTrue(generasjonForkastet.path("fødselsnummer").isTextual)
+        assertTrue(generasjonForkastet.path("organisasjonsnummer").isTextual)
+        assertTrue(generasjonForkastet.path("vedtaksperiodeId").isTextual)
+        assertTrue(generasjonForkastet.path("generasjonId").isTextual)
+        assertTrue(generasjonForkastet.path("automatiskBehandling").isBoolean)
     }
 }

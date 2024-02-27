@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
@@ -25,7 +26,7 @@ internal interface GenerasjonObserver {
         vedtakFattetTidspunkt: LocalDateTime
     )
     fun generasjonLukket(generasjonId: UUID)
-    fun generasjonForkastet(generasjonId: UUID)
+    fun generasjonForkastet(generasjonId: UUID, hendelse: Hendelse)
 
     fun nyGenerasjon(
         id: UUID,
