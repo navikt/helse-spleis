@@ -34,7 +34,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
                     organisasjonsnummer = a1,
                     vedtaksperiodeId = 1.vedtaksperiode,
                     generasjonId = generasjonId,
-                    type = PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling,
+                    type = PersonObserver.GenerasjonOpprettetEvent.Type.Søknad,
                     kilde = PersonObserver.GenerasjonOpprettetEvent.Kilde(
                         meldingsreferanseId = søknadId,
                         innsendt = innsendt,
@@ -56,7 +56,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
             assertEquals(2, generasjonOpprettetEventer.size)
             val førsteEvent = generasjonOpprettetEventer.first()
             val andreEvent = generasjonOpprettetEventer.last()
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling, førsteEvent.type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, førsteEvent.type)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering, andreEvent.type)
         }
     }
@@ -70,7 +70,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
             assertEquals(2, generasjonOpprettetEventer.size)
             val førsteEvent = generasjonOpprettetEventer.first()
             val andreEvent = generasjonOpprettetEventer.last()
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling, førsteEvent.type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, førsteEvent.type)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring, andreEvent.type)
         }
     }
@@ -84,7 +84,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
             assertEquals(2, generasjonOpprettetEventer.size)
             val førsteEvent = generasjonOpprettetEventer.first()
             val andreEvent = generasjonOpprettetEventer.last()
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling, førsteEvent.type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, førsteEvent.type)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, andreEvent.type)
         }
     }

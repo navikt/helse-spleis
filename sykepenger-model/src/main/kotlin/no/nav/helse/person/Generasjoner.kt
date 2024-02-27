@@ -651,7 +651,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                 Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
                 Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring
                 Tilstand.TilInfotrygd -> PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd
-                else -> PersonObserver.GenerasjonOpprettetEvent.Type.Førstegangsbehandling
+                else -> PersonObserver.GenerasjonOpprettetEvent.Type.Søknad
             }
             observatører.forEach { it.nyGenerasjon(id, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
         }

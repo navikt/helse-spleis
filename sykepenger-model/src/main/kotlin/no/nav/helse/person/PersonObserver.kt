@@ -639,7 +639,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val kilde: Kilde
     ) {
         enum class Type {
-            Førstegangsbehandling,
+            Søknad,
             TilInfotrygd,
             Omgjøring,
             Revurdering
