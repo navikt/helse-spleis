@@ -5,6 +5,8 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -79,13 +81,14 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
     fun `til infotrygd`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
+            forlengVedtak(1.februar, 28.februar)
             håndterAnnullering(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
             val generasjonOpprettetEventer = observatør.generasjonOpprettetEventer
-            assertEquals(2, generasjonOpprettetEventer.size)
-            val førsteEvent = generasjonOpprettetEventer.first()
-            val andreEvent = generasjonOpprettetEventer.last()
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, førsteEvent.type)
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, andreEvent.type)
+            assertEquals(4, generasjonOpprettetEventer.size)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, generasjonOpprettetEventer[0].type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, generasjonOpprettetEventer[1].type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, generasjonOpprettetEventer[2].type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, generasjonOpprettetEventer[3].type)
         }
     }
 }

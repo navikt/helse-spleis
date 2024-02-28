@@ -25,6 +25,7 @@ internal interface GenerasjonObserver {
         utbetalingId: UUID,
         vedtakFattetTidspunkt: LocalDateTime
     )
+    fun vedtakAnnullert(hendelse: IAktivitetslogg, generasjonId: UUID)
     fun generasjonLukket(generasjonId: UUID)
     fun generasjonForkastet(generasjonId: UUID, hendelse: Hendelse)
 

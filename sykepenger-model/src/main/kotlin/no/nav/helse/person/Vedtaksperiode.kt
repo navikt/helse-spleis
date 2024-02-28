@@ -389,25 +389,9 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, hendelse)
     }
 
-    internal fun håndter(hendelse: AnnullerUtbetaling, annullering: Utbetaling) {
-        if (generasjoner.hørerIkkeSammenMed(annullering)) return
-
-        person
-            .vedtaksperioder { !it.generasjoner.hørerIkkeSammenMed(annullering) }
-            .onEach {
-                if (it.generasjoner.harAvsluttede()) {
-                    person.vedtaksperiodeAnnullert(
-                        PersonObserver.VedtaksperiodeAnnullertEvent(
-                            it.periode.start,
-                            it.periode.endInclusive,
-                            it.id,
-                            it.organisasjonsnummer
-                        )
-                    )
-                }
-            }
-
+    internal fun håndter(hendelse: AnnullerUtbetaling, vedtaksperioder: List<Vedtaksperiode>) {
         kontekst(hendelse)
+        if (!generasjoner.håndterAnnullering(arbeidsgiver, hendelse, vedtaksperioder.map { it.generasjoner })) return
         hendelse.info("Forkaster denne, og senere perioder, som følge av annullering.")
         forkast(hendelse)
     }
@@ -979,6 +963,10 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag.build(builder)
         person.avsluttetMedVedtak(builder.result())
         person.gjenopptaBehandling(hendelse)
+    }
+
+    override fun vedtakAnnullert(hendelse: IAktivitetslogg, generasjonId: UUID) {
+        person.vedtaksperiodeAnnullert(PersonObserver.VedtaksperiodeAnnullertEvent(periode.start, periode.endInclusive, id, organisasjonsnummer))
     }
 
     override fun generasjonLukket(generasjonId: UUID) {

@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
 
@@ -20,8 +21,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             nyttVedtak(1.januar, 31.januar)
             val fagsystemId = inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.fagsystemId()
             nyttVedtak(1.mars, 31.mars)
-            håndterAnnullering(fagsystemId)
-            assertFunksjonellFeil(Varselkode.RV_UT_15) // Kan ikke annullere: hendelsen er ikke relevant
+            assertThrows<IllegalStateException> { håndterAnnullering(fagsystemId) }
         }
     }
 

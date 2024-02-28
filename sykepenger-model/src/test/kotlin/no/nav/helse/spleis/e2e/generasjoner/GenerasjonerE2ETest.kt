@@ -41,7 +41,9 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.Generas
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_IVERKSATT
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -143,7 +145,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
         }
     }
     @Test
-    fun `Saksbehandler må annullere saken`() {
+    fun `annullere iverksatt vedtak`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             håndterAnnullering(inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
@@ -151,6 +153,79 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 assertEquals(2, generasjoner.size)
                 assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
                 assertEquals(Avsender.SAKSBEHANDLER, generasjoner.last().kilde.avsender)
+                generasjoner.last().also { sisteGenerasjon ->
+                    assertNotNull(sisteGenerasjon.avsluttet)
+                    assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
+                    assertEquals(1, sisteGenerasjon.endringer.size)
+                    sisteGenerasjon.endringer.single().also { endring ->
+                        assertNotNull(endring.utbetaling)
+                        assertNotNull(endring.grunnlagsdata)
+                        endring.utbetaling.inspektør.also { annulleringen ->
+                            assertEquals(Utbetalingtype.ANNULLERING, annulleringen.type)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    @Test
+    fun `annullere flere iverksatte vedtak`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            forlengVedtak(1.februar, 28.februar)
+            nyttVedtak(10.mars, 31.mars, arbeidsgiverperiode = listOf(10.mars til 25.mars))
+            håndterAnnullering(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            assertEquals(4, inspektør.utbetalinger.size)
+            inspektørForkastet(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
+                assertEquals(Avsender.SAKSBEHANDLER, generasjoner.last().kilde.avsender)
+                generasjoner.last().also { sisteGenerasjon ->
+                    assertNotNull(sisteGenerasjon.avsluttet)
+                    assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
+                    assertEquals(1, sisteGenerasjon.endringer.size)
+                    sisteGenerasjon.endringer.single().also { endring ->
+                        assertNotNull(endring.utbetaling)
+                        assertNotNull(endring.grunnlagsdata)
+                        endring.utbetaling.inspektør.also { annulleringen ->
+                            assertEquals(Utbetalingtype.ANNULLERING, annulleringen.type)
+                        }
+                    }
+                }
+            }
+            inspektørForkastet(2.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
+                assertEquals(Avsender.SAKSBEHANDLER, generasjoner.last().kilde.avsender)
+                generasjoner.last().also { sisteGenerasjon ->
+                    assertNotNull(sisteGenerasjon.avsluttet)
+                    assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
+                    assertEquals(1, sisteGenerasjon.endringer.size)
+                    sisteGenerasjon.endringer.single().also { endring ->
+                        assertNotNull(endring.utbetaling)
+                        assertNotNull(endring.grunnlagsdata)
+                        endring.utbetaling.inspektør.also { annulleringen ->
+                            assertEquals(Utbetalingtype.ANNULLERING, annulleringen.type)
+                        }
+                    }
+                }
+            }
+            inspektørForkastet(3.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(2, generasjoner.size)
+                assertEquals(Avsender.SYKMELDT, generasjoner.first().kilde.avsender)
+                assertEquals(Avsender.SAKSBEHANDLER, generasjoner.last().kilde.avsender)
+                generasjoner.last().also { sisteGenerasjon ->
+                    assertNotNull(sisteGenerasjon.avsluttet)
+                    assertEquals(TIL_INFOTRYGD, sisteGenerasjon.tilstand)
+                    assertEquals(1, sisteGenerasjon.endringer.size)
+                    sisteGenerasjon.endringer.single().also { endring ->
+                        assertNotNull(endring.utbetaling)
+                        assertNotNull(endring.grunnlagsdata)
+                        endring.utbetaling.inspektør.also { annulleringen ->
+                            assertEquals(Utbetalingtype.ANNULLERING, annulleringen.type)
+                        }
+                    }
+                }
             }
         }
     }

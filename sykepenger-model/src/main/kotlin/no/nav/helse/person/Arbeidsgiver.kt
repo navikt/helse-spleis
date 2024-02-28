@@ -45,6 +45,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -62,6 +63,7 @@ import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -512,15 +514,24 @@ internal class Arbeidsgiver private constructor(
         håndter(utbetaling, Vedtaksperiode::håndter)
     }
 
+    internal fun nyAnnullering(hendelse: AnnullerUtbetaling, utbetalingSomSkalAnnulleres: Utbetaling): Utbetaling? {
+        val aktiveUtbetalinger = utbetalinger.aktive()
+        val sisteUtbetalteForUtbetaling = checkNotNull(aktiveUtbetalinger.singleOrNull { it.hørerSammen(utbetalingSomSkalAnnulleres) }) {
+            "Det er gjort forsøk på å annullere en utbetaling som ikke lenger er aktiv"
+        }
+        val annullering = sisteUtbetalteForUtbetaling.annuller(hendelse) ?: return null
+        check(sisteUtbetalteForUtbetaling === aktiveUtbetalinger.last()) {
+            "Det er ikke tillatt å annullere annen utbetaling enn den som er siste aktive"
+        }
+        nyUtbetaling(hendelse, annullering)
+        annullering.håndter(hendelse)
+        return annullering
+    }
+
     internal fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         hendelse.info("Håndterer annullering")
-
-        val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse) ?: return
-        val annullering = sisteUtbetalte.annuller(hendelse) ?: return
-        nyUtbetaling(hendelse, annullering)
-        annullering.håndter(hendelse)
-        håndter(hendelse) { håndter(it, annullering) }
+        håndter(hendelse) { håndter(it, vedtaksperioder.toList()) }
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
