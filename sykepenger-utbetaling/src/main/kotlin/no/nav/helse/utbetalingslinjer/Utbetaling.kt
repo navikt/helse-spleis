@@ -19,9 +19,7 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_13
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_15
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_4
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
@@ -99,12 +97,12 @@ class Utbetaling private constructor(
         observers.add(observer)
     }
 
-    fun gyldig() = tilstand !in setOf(Ny, Forkastet)
+    private fun gyldig() = tilstand !in setOf(Ny, Forkastet)
     fun erUbetalt() = tilstand == Ubetalt
-    fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
+    private fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
-    fun erInFlight() = tilstand == Overført || annulleringer.any { it.tilstand == Overført }
+    private fun erInFlight() = tilstand == Overført || annulleringer.any { it.tilstand == Overført }
     fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     fun erAvvist() = tilstand == IkkeGodkjent
     private fun erAnnullering() = type == ANNULLERING
@@ -191,11 +189,7 @@ class Utbetaling private constructor(
     }
 
     fun annuller(hendelse: AnnullerUtbetaling): Utbetaling? {
-        if (!hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId())) {
-            hendelse.info("Kan ikke annullere: hendelsen er ikke relevant for ${arbeidsgiverOppdrag.fagsystemId()}.")
-            hendelse.funksjonellFeil(RV_UT_15)
-            return null
-        }
+        if (!hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return null
         return opphør(hendelse)
     }
 
@@ -298,12 +292,6 @@ class Utbetaling private constructor(
             return utbetalingen to annulleringer
         }
 
-        fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
-            return utbetalinger.aktive().lastOrNull() ?: run {
-                hendelse.funksjonellFeil(RV_UT_4)
-                return null
-            }
-        }
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
         fun List<Utbetaling>.aktive(periode: Periode) = this

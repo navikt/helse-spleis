@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
@@ -151,8 +152,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `Kan ikke annullere hvis noen vedtaksperioder er til utbetaling`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre())
+        assertThrows<IllegalStateException> { håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)) }
         assertIngenAnnulleringsbehov()
     }
 
@@ -313,11 +313,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.mars, 26.mars, 100.prosent, 3.mars)
 
         val fagsystemId = inspektør.fagsystemId(1.vedtaksperiode)
-        håndterAnnullerUtbetaling(fagsystemId = fagsystemId)
-
+        assertThrows<IllegalStateException> { håndterAnnullerUtbetaling(fagsystemId = fagsystemId) }
         assertEquals(0, observatør.annulleringer.size)
-
-        assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
