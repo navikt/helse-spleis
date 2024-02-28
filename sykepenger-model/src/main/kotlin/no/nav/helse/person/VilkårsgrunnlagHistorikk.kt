@@ -478,10 +478,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             hendelse: OverstyrArbeidsforhold,
             subsumsjonObserver: SubsumsjonObserver
         ) = kopierMed(
-            hendelse,
-            sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver),
-            opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver),
-            subsumsjonObserver,
+            hendelse = hendelse,
+            sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver),
+            opptjening = opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver),
+            subsumsjonObserver = subsumsjonObserver,
         )
 
 
@@ -515,10 +515,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
             subsumsjonObserver: SubsumsjonObserver
-        ): Grunnlagsdata {
-            throw IllegalStateException("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.")
-        }
-
+        ) = kopierMed(
+            hendelse = hendelse,
+            sykepengegrunnlag = sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver),
+            opptjening = null,
+            subsumsjonObserver = subsumsjonObserver
+        )
 
         override fun kopierMed(
             hendelse: IAktivitetslogg,
