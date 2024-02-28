@@ -381,10 +381,6 @@ class Utbetaling private constructor(
                 annulleringer.any { annullering -> annullering.hørerSammen(utbetaling) }
             }
         }
-        fun kanForkastes(vedtaksperiodeUtbetalingen: Utbetaling, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
-            val annulleringer = arbeidsgiverUtbetalinger.filter { it.erAnnullering() && it.tilstand != Forkastet }
-            return annulleringer.any { annullering -> annullering.hørerSammen(vedtaksperiodeUtbetalingen) }
-        }
     }
 
     fun accept(visitor: UtbetalingVisitor) {
@@ -459,9 +455,6 @@ class Utbetaling private constructor(
 
     fun overlapperMed(other: Periode): Boolean {
         return this.periode.overlapperMed(other)
-    }
-    fun overlapperMedUtbetaling(other: Periode): Boolean {
-        return listOf(arbeidsgiverOppdrag, personOppdrag).any { oppdrag -> oppdrag.any { linje -> linje.periode.overlapperMed(other) } }
     }
     fun overlapperMed(other: Utbetaling): Boolean {
         return this.periode.overlapperMed(other.periode)

@@ -45,7 +45,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -889,9 +888,6 @@ internal class Arbeidsgiver private constructor(
             neste += 1
         }
     }
-
-    internal fun kanForkastes(generasjoner: Generasjoner) =
-        generasjoner.kanForkastes(utbetalinger)
 
     internal fun kanForkastes(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
         vedtaksperiode.kanForkastes(utbetalinger, hendelse)

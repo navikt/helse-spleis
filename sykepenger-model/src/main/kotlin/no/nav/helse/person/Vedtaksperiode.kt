@@ -9,7 +9,6 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender
@@ -470,42 +469,11 @@ internal class Vedtaksperiode private constructor(
     private fun erGammelPeriode() = ugunstigPeriodeForNyBehandling.overlapperMed(periode)
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
-        if (tilstand == Start) return true // For vedtaksperioder som forkates på "direkten"
-        if (!generasjoner.kanForkastes(arbeidsgiverUtbetalinger)) {
+        if (!generasjoner.kanForkastes(hendelse, arbeidsgiverUtbetalinger)) {
             hendelse.info("[kanForkastes] Kan ikke forkastes fordi generasjoner nekter det")
             return false
         }
-        val overlappendeUtbetalinger = arbeidsgiverUtbetalinger.filter { it.overlapperMed(periode) }
-        val kanForkastes = Utbetaling.kanForkastes(overlappendeUtbetalinger, arbeidsgiverUtbetalinger)
-        if (kanForkastes) {
-            hendelse.info("[kanForkastes] Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
-            return true
-        }
-        hendelse.info("[kanForkastes] Kan i utgangspunktet ikke forkastes ettersom perioden har ${overlappendeUtbetalinger.size} overlappende utbetalinger")
-        val overlappendeOppdrag = arbeidsgiverUtbetalinger.filter { it.overlapperMedUtbetaling(periode) }
-        if (!Utbetaling.kanForkastes(overlappendeOppdrag, arbeidsgiverUtbetalinger)) {
-            hendelse.info("[kanForkastes] Kan ikke forkastes fordi perioden overlapper med utbetalte oppdrag (${overlappendeOppdrag.size} stk)")
-            return false
-        } // forkaster ikke om perioden har utbetalinger
-        hendelse.info("[kanForkastes] Kan i utgangspunktet ikke forkastes til tross for at perioden ikke overlapper med noen oppdrag. Siden perioden har ${overlappendeUtbetalinger.size} overlappende utbetalinger må vi anta at perioden kan påvirke beregningen av AGP på et vis.")
-        // om perioden kun er auu, og er utbetalt i infotrygd, så er det greit
-        if (tilstand != AvsluttetUtenUtbetaling) {
-            hendelse.info("[kanForkastes] Kan ikke forkastes fordi perioden ikke er AUU")
-            return false
-        }
-        // auuen overlapper ikke med et oppdrag, men overlapper med perioden til en aktiv utbetaling
-        // I utgangspunktet må vi anta at auuen derfor påvirker utfallet av arbeidsgiverperiode-beregningen, og kan ikke forkastes
-        // unntak er dersom perioden overlapper med en infotrygdutbetaling, eller dersom det foreligger en utbetaling i Infotrygd mellom
-        // auuen og første oppdragslinje/vedtak
-        val nesteVedtak = arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(finnArbeidsgiverperiode())
-            .firstOrNull { it.tilstand != AvsluttetUtenUtbetaling }
-        val periodeSomKanVæreUtbetaltIInfotrygd =
-            if (nesteVedtak == null) this.periode else this.periode.oppdaterTom(nesteVedtak.periode.start.forrigeDag)
-        if (!person.erBetaltInfotrygd(periodeSomKanVæreUtbetaltIInfotrygd)) {
-            hendelse.info("[kanForkastes] Kan ikke forkastes fordi $periodeSomKanVæreUtbetaltIInfotrygd dekkes ikke av en periode utbetalt i Infotrygd")
-            return false
-        }
-        hendelse.info("[kanForkastes] Kan etterkomme forkastingen av AUU")
+        hendelse.info("[kanForkastes] Kan forkastes fordi evt. overlappende utbetalinger er annullerte/forkastet")
         return true
     }
 
@@ -2347,7 +2315,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode.generasjoner)) return null
+            if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return null
             return HJELP.utenBegrunnelse
         }
 
@@ -2364,7 +2332,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: Hendelse
         ) {
-            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode.generasjoner)) return hendelse.info("Gjenopptar ikke revurdering feilet fordi perioden har tidligere avsluttede utbetalinger. Må behandles manuelt vha annullering.")
+            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return hendelse.info("Gjenopptar ikke revurdering feilet fordi perioden har tidligere avsluttede utbetalinger. Må behandles manuelt vha annullering.")
             hendelse.funksjonellFeil(RV_RV_2)
             vedtaksperiode.forkast(hendelse)
         }
