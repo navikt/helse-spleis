@@ -55,6 +55,23 @@ internal class GenerasjonLukketEventTest : AbstractDslTest() {
     }
 
     @Test
+    fun `generasjon lukkes når revurdert vedtak avvises`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            val generasjoner = inspektør(1.vedtaksperiode).generasjoner
+            assertEquals(2, observatør.generasjonLukketEventer.size)
+            assertEquals(2, generasjoner.size)
+            val sisteGenerasjon = generasjoner.last()
+            assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
+            assertEquals(REVURDERT_VEDTAK_AVVIST, sisteGenerasjon.tilstand)
+        }
+    }
+
+    @Test
     fun `generasjon lukkes når vedtak uten utbetaling fattes`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)

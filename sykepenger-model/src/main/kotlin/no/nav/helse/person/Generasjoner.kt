@@ -1005,6 +1005,11 @@ enum class Periodetilstand {
                 override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon {
                     return generasjon.nyGenerasjonTilInfotrygd(arbeidsgiver, hendelse)
                 }
+
+                override fun sikreNyGenerasjon(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon {
+                    return generasjon.sikreNyGenerasjon(arbeidsgiver, UberegnetRevurdering, hendelse)
+                }
+
                 override fun annuller(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Generasjon {
                     return generasjon.nyAnnullertGenerasjon(arbeidsgiver, hendelse, annullering, grunnlagsdata)
                 }

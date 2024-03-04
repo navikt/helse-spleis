@@ -31,12 +31,15 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.REVURDERT_VEDTAK_AVVIST
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.TIL_INFOTRYGD
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.UBEREGNET_REVURDERING
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_IVERKSATT
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -259,6 +262,25 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
     }
 
     @Test
+    fun `avvise en beregnet revurdering`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+            håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, reberegning = true)
+            assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetaling(1).inspektør.tilstand)
+            inspektør(1.vedtaksperiode).generasjoner.also { generasjoner ->
+                assertEquals(3, generasjoner.size)
+                assertEquals(VEDTAK_IVERKSATT, generasjoner[0].tilstand)
+                assertEquals(REVURDERT_VEDTAK_AVVIST, generasjoner[1].tilstand)
+                assertEquals(UBEREGNET_REVURDERING, generasjoner[2].tilstand)
+            }
+        }
+    }
+
+    @Test
     fun `Reberegner en periode`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
@@ -360,7 +382,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 generasjoner[1].also { generasjon ->
                     assertEquals(1, generasjon.endringer.size)
                     assertEquals(Dokumentsporing.søknad(søknad2), generasjon.endringer.last().dokumentsporing)
-                    assertEquals(PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.UBEREGNET_REVURDERING, generasjon.tilstand)
+                    assertEquals(UBEREGNET_REVURDERING, generasjon.tilstand)
                 }
             }
         }
@@ -381,7 +403,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 }
                 generasjoner[1].also { generasjon ->
                     assertEquals(1, generasjon.endringer.size)
-                    assertEquals(PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.UBEREGNET_REVURDERING, generasjon.tilstand)
+                    assertEquals(UBEREGNET_REVURDERING, generasjon.tilstand)
                 }
             }
             inspektør(2.vedtaksperiode).generasjoner.also { generasjoner ->
@@ -392,7 +414,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 }
                 generasjoner[1].also { generasjon ->
                     assertEquals(1, generasjon.endringer.size)
-                    assertEquals(PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.UBEREGNET_REVURDERING, generasjon.tilstand)
+                    assertEquals(UBEREGNET_REVURDERING, generasjon.tilstand)
                 }
             }
         }
