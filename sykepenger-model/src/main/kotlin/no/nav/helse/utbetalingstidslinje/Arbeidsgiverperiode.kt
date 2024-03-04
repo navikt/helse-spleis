@@ -199,6 +199,11 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return utbetalingsdagerIVedtaksperiode.all { infotrygdhistorikk.harUtbetaltI(it.somPeriode()) }
     }
 
+    internal fun ferieIInfotrygd(vedtaksperiode: Periode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
+        val utbetalingsdagerIVedtaksperiode = vedtaksperiode.filter { it.erUtbetalingsdag }
+        return utbetalingsdagerIVedtaksperiode.all { infotrygdhistorikk.harFerieI(it.somPeriode()) }
+    }
+
     internal fun sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         val periode = sykdomstidslinje.periode() ?: return Sykdomstidslinje()
         val sisteDagIArbeidsgiverperioden = perioder.lastOrNull()?.endInclusive ?: return Sykdomstidslinje()

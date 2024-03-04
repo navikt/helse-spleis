@@ -183,6 +183,9 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
+
+    internal fun harFerieI(periode: Periode) = perioder.filterIsInstance<Friperiode>().any { it.overlapperMed(periode) }
+
     internal fun villeBlittFiktiv(organisasjonsnummer: String, arbeidsgiverperiode: Arbeidsgiverperiode): Boolean {
         val perioder = perioder.utbetalingsperioder(organisasjonsnummer)
         return arbeidsgiverperiode.villeBlittFiktiv(perioder)

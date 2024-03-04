@@ -148,6 +148,11 @@ internal class Infotrygdhistorikk private constructor(
         return siste.harUtbetaltI(periode)
     }
 
+    internal fun harFerieI(periode: Periode): Boolean {
+        if (!harHistorikk()) return false
+        return siste.harFerieI(periode)
+    }
+
     fun villeBlittFiktiv(organisasjonsnummer: String, arbeidsgiverperiode: Arbeidsgiverperiode): Boolean {
         if (!harHistorikk()) return false
         return siste.villeBlittFiktiv(organisasjonsnummer, arbeidsgiverperiode)

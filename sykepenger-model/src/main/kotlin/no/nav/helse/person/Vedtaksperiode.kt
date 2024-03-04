@@ -79,6 +79,7 @@ import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
+import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -2173,6 +2174,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
+            if (vedtaksperiode.person.erFerieIInfotrygd(vedtaksperiode.periode, vedtaksperiode.finnArbeidsgiverperiode())) return HJELP fordi VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
             return HJELP fordi VIL_OMGJØRES
         }
 
