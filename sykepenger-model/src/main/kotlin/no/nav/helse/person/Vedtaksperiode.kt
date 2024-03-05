@@ -79,8 +79,11 @@ import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
+import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_GAMMEL_PERIODE_SOM_KAN_FORKASTES
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
+import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD_KAN_FORKASTES
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
+import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD_KAN_FORKASTES
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -2175,9 +2178,17 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
+            if (vedtaksperiode.gammelPeriodeSomKanForkastes(Aktivitetslogg()))  return HJELP fordi VIL_OMGJØRES_GAMMEL_PERIODE_SOM_KAN_FORKASTES
+            val kanForkastes = vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())
             val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode()
-            if (vedtaksperiode.person.erFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) return HJELP fordi VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
-            if (vedtaksperiode.person.førsteDagIAGPErFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) return HJELP fordi VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
+            if (vedtaksperiode.person.erFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) {
+                val hvorfor = if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
+                return HJELP fordi hvorfor
+            }
+            if (vedtaksperiode.person.førsteDagIAGPErFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) {
+                val hvorfor = if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
+                return HJELP fordi hvorfor
+            }
             return HJELP fordi VIL_OMGJØRES
         }
 
