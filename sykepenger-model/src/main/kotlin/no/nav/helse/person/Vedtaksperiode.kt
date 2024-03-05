@@ -2178,18 +2178,20 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
+            return HJELP fordi hvorforVenter(vedtaksperiode)
+        }
+
+        private fun hvorforVenter(vedtaksperiode: Vedtaksperiode): Venteårsak.Hvorfor {
             val kanForkastes = vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())
             val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode()
             if (vedtaksperiode.person.erFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) {
-                val hvorfor = if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
-                return HJELP fordi hvorfor
+                return if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
             }
             if (vedtaksperiode.person.førsteDagIAGPErFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) {
-                val hvorfor = if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
-                return HJELP fordi hvorfor
+                return if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
             }
-            if (vedtaksperiode.gammelPeriodeSomKanForkastes(Aktivitetslogg()))  return HJELP fordi VIL_OMGJØRES_GAMMEL_PERIODE_SOM_KAN_FORKASTES
-            return HJELP fordi VIL_OMGJØRES
+            if (vedtaksperiode.gammelPeriodeSomKanForkastes(Aktivitetslogg()))  return VIL_OMGJØRES_GAMMEL_PERIODE_SOM_KAN_FORKASTES
+            return VIL_OMGJØRES
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
@@ -2199,6 +2201,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
+            if (hvorforVenter(vedtaksperiode) != VIL_OMGJØRES) return
             vedtaksperiode.generasjoner.sikreNyGenerasjon(vedtaksperiode.arbeidsgiver, revurdering)
             revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
             revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
@@ -2232,6 +2235,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             if (!vedtaksperiode.forventerInntekt()) return
+            if (hvorforVenter(vedtaksperiode) != VIL_OMGJØRES) return
             håndterRevurdering(hendelse) {
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             }

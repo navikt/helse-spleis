@@ -196,16 +196,19 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     private val LocalDate.erUtbetalingsdag get() = utbetalingsdager.any { this in it }
     internal fun utbetaltIInfotrygd(vedtaksperiode: Periode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
         val utbetalingsdagerIVedtaksperiode = vedtaksperiode.filter { it.erUtbetalingsdag }
+        if (utbetalingsdagerIVedtaksperiode.isEmpty()) return false
         return utbetalingsdagerIVedtaksperiode.all { infotrygdhistorikk.harUtbetaltI(it.somPeriode()) }
     }
 
     internal fun ferieIInfotrygd(vedtaksperiode: Periode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
         val utbetalingsdagerIVedtaksperiode = vedtaksperiode.filter { it.erUtbetalingsdag }
+        if (utbetalingsdagerIVedtaksperiode.isEmpty()) return false
         return utbetalingsdagerIVedtaksperiode.all { infotrygdhistorikk.harFerieI(it.somPeriode()) }
     }
 
-    internal fun førsteDagIAGPErFerieIInfotrygd(vedtaksperiode: Periode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
-        return infotrygdhistorikk.harFerieI(perioder.first().first().somPeriode())
+    internal fun førsteDagIAGPErFerieIInfotrygd(infotrygdhistorikk: Infotrygdhistorikk): Boolean {
+        val førsteDagIAGP = perioder.firstOrNull()?.start ?: return false
+        return infotrygdhistorikk.harFerieI(førsteDagIAGP.somPeriode())
     }
 
     internal fun sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
