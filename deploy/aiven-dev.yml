@@ -274,3 +274,6 @@ spec:
         - team: tbd
           application: spill-av-im
           access: readwrite
+        - team: tbd
+          application: spotlight
+          access: readwrite
