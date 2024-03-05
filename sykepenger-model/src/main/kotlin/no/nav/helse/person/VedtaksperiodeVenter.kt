@@ -98,7 +98,8 @@ internal class Venteårsak private constructor(
         MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE,
         OVERSTYRING_IGANGSATT,
         VIL_OMGJØRES,
-        VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
+        VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD,
+        VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
     }
 
     internal companion object {

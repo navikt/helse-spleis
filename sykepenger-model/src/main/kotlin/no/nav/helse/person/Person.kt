@@ -854,6 +854,9 @@ class Person private constructor(
     internal fun erFerieIInfotrygd(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
         return arbeidsgiverperiode?.ferieIInfotrygd(periode, infotrygdhistorikk) == true
     }
+    internal fun førsteDagIAGPErFerieIInfotrygd(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
+        return arbeidsgiverperiode?.førsteDagIAGPErFerieIInfotrygd(periode, infotrygdhistorikk) == true
+    }
 
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
