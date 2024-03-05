@@ -7,6 +7,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.økonomi.Inntekt
@@ -56,7 +57,15 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("INGEN_UTBETALING"), vedtaksperiodeId = 2.vedtaksperiode.id(a1), periodeFom = 1.februar, periodeTom = 28.februar, periodeType = "FORLENGELSE", førstegangsbehandling = false)
+        assertGodkjenningsbehov(
+            tags = setOf("INGEN_UTBETALING"),
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1),
+            periodeFom = 1.februar,
+            periodeTom = 28.februar,
+            periodeType = "FORLENGELSE",
+            førstegangsbehandling = false,
+            generasjonId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.generasjoner.last().id
+        )
     }
 
     @Test
@@ -120,7 +129,8 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         førstegangsbehandling: Boolean = true,
         utbetalingstype: String = "UTBETALING",
         inntektskilde: String = "EN_ARBEIDSGIVER",
-        omregnedeÅrsinntekter: List<Map<String, Any>> = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.reflection { årlig, _, _, _ ->  årlig }))
+        omregnedeÅrsinntekter: List<Map<String, Any>> = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.reflection { årlig, _, _, _ ->  årlig })),
+        generasjonId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.generasjoner.last().id
     ) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         val actualSkjæringstidspunkt = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "skjæringstidspunkt")!!
@@ -133,7 +143,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         val actualOrgnummereMedRelevanteArbeidsforhold = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "orgnummereMedRelevanteArbeidsforhold")!!
         val actualKanAvises = hentFelt<Boolean>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "kanAvvises")!!
         val actualOmregnedeÅrsinntekter = hentFelt<List<Map<String, String>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "omregnedeÅrsinntekter")!!
-
+        val actualGenerasjonId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
 
         assertTrue(actualtags.containsAll(tags) )
         assertEquals(skjæringstidspunkt.toString(), actualSkjæringstidspunkt)
@@ -146,6 +156,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         assertEquals(orgnummere, actualOrgnummereMedRelevanteArbeidsforhold)
         assertEquals(kanAvvises, actualKanAvises)
         assertEquals(omregnedeÅrsinntekter, actualOmregnedeÅrsinntekter)
+        assertEquals(generasjonId.toString(), actualGenerasjonId)
     }
 
     private inline fun <reified T>hentFelt(vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1), feltNavn: String) = hendelselogg.etterspurtBehov<T>(

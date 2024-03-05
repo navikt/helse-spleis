@@ -237,6 +237,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertFalse(godkjenning.path("omregnedeÅrsinntekter").isEmpty)
         assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("beløp").isDouble)
+        assertTrue(godkjenning.path("behandlingId").asText().isNotEmpty())
     }
 
     private fun assertUtbetalingdetaljer(behov: JsonNode, erAnnullering: Boolean = false) {

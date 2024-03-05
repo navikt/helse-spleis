@@ -380,10 +380,10 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                 utbetaling?.forkast(hendelse)
             }
 
-            fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean) {
+            fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean, generasjonId: UUID) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
-                val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode)
+                val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode, generasjonId)
                 grunnlagsdata.byggGodkjenningsbehov(builder)
                 utbetaling.byggGodkjenningsbehov(hendelse, builder)
                 Aktivitet.Behov.godkjenning(
@@ -689,7 +689,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         }
 
         internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean) {
-            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes)
+            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, id)
         }
 
         fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, generasjoner: List<Generasjon>): Utbetaling? {

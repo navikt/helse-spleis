@@ -3,7 +3,7 @@ package no.nav.helse.person.aktivitetslogg
 import java.time.LocalDate
 import java.util.UUID
 
-class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val kanAvvises: Boolean, periode: ClosedRange<LocalDate>) {
+class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val kanAvvises: Boolean, periode: ClosedRange<LocalDate>, private val generasjonId: UUID) {
     private val tags: MutableSet<String> = mutableSetOf()
     private lateinit var skjæringstidspunkt: LocalDate
     private lateinit var vilkårsgrunnlagId: UUID
@@ -76,7 +76,8 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
         "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
         "tags" to tags,
         "kanAvvises" to kanAvvises,
-        "omregnedeÅrsinntekter" to omregnedeÅrsinntekter
+        "omregnedeÅrsinntekter" to omregnedeÅrsinntekter,
+        "behandlingId" to generasjonId.toString()
     )
 
 
