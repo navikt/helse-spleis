@@ -2178,7 +2178,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
-            if (vedtaksperiode.gammelPeriodeSomKanForkastes(Aktivitetslogg()))  return HJELP fordi VIL_OMGJØRES_GAMMEL_PERIODE_SOM_KAN_FORKASTES
             val kanForkastes = vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())
             val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode()
             if (vedtaksperiode.person.erFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) {
@@ -2189,6 +2188,7 @@ internal class Vedtaksperiode private constructor(
                 val hvorfor = if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
                 return HJELP fordi hvorfor
             }
+            if (vedtaksperiode.gammelPeriodeSomKanForkastes(Aktivitetslogg()))  return HJELP fordi VIL_OMGJØRES_GAMMEL_PERIODE_SOM_KAN_FORKASTES
             return HJELP fordi VIL_OMGJØRES
         }
 
