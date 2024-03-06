@@ -16,10 +16,9 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
     private lateinit var orgnummereMedRelevanteArbeidsforhold: Set<String>
     private val omregnedeÅrsinntekter: MutableList<Map<String, Any>> = mutableListOf()
 
-    fun tag6GBegrenset() = tags.add("6G_BEGRENSET")
     fun tagFlereArbeidsgivere(antall: Int) {
-        if( antall > 1) tags.add("FLERE_ARBEIDSGIVERE")
-        else tags.add("EN_ARBEIDSGIVER")
+        if( antall > 1) tags.add("FlereArbeidsgivere")
+        else tags.add("EnArbeidsgiver")
     }
     fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) = apply {
         this.skjæringstidspunkt = skjæringstidspunkt
@@ -51,13 +50,13 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
         this.orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
     }
     fun tagUtbetaling(arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int) {
-        if (arbeidsgiverNettoBeløp > 0) tags.add("ARBEIDSGIVERUTBETALING")
-        else if (arbeidsgiverNettoBeløp < 0) tags.add("NEGATIV_ARBEIDSGIVERUTBETALING")
+        if (arbeidsgiverNettoBeløp > 0) tags.add("Arbeidsgiverutbetaling")
+        else if (arbeidsgiverNettoBeløp < 0) tags.add("NegativArbeidsgiverutbetaling")
 
-        if (personNettoBeløp > 0) tags.add("PERSONUTBETALING")
-        else if (personNettoBeløp < 0) tags.add("NEGATIV_PERSONUTBETALING")
+        if (personNettoBeløp > 0) tags.add("Personutbetaling")
+        else if (personNettoBeløp < 0) tags.add("NegativPersonutbetaling")
 
-        if (arbeidsgiverNettoBeløp == 0 && personNettoBeløp == 0) tags.add("INGEN_UTBETALING")
+        if (arbeidsgiverNettoBeløp == 0 && personNettoBeløp == 0) tags.add("IngenUtbetaling")
     }
 
     fun omregnedeÅrsinntekter(orgnummer: String, omregnetÅrsinntekt: Double) = apply {

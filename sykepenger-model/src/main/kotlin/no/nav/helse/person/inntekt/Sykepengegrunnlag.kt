@@ -433,7 +433,6 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     internal fun byggGodkjenningsbehov(builder: GodkjenningsbehovBuilder) {
-        if (er6GBegrenset()) builder.tag6GBegrenset()
         builder.inntektskilde(inntektskilde())
         builder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
         arbeidsgiverInntektsopplysninger.omregnedeÅrsinntekter(builder)

@@ -12,7 +12,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -23,7 +22,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `arbeidsgiverutbetaling`() {
         tilGodkjenning(1.januar, 31.januar, a1)
-        assertGodkjenningsbehov(tags = setOf("ARBEIDSGIVERUTBETALING"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)))
+        assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)))
     }
 
     @Test
@@ -36,7 +35,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("PERSONUTBETALING"))
+        assertGodkjenningsbehov(tags = setOf("Personutbetaling"))
     }
 
     @Test
@@ -49,7 +48,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("ARBEIDSGIVERUTBETALING", "PERSONUTBETALING"))
+        assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "Personutbetaling"))
     }
 
     @Test
@@ -58,7 +57,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode)
         assertGodkjenningsbehov(
-            tags = setOf("INGEN_UTBETALING"),
+            tags = setOf("IngenUtbetaling"),
             vedtaksperiodeId = 2.vedtaksperiode.id(a1),
             periodeFom = 1.februar,
             periodeTom = 28.februar,
@@ -77,7 +76,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("NEGATIV_ARBEIDSGIVERUTBETALING", "PERSONUTBETALING"), kanAvvises = false, utbetalingstype = "REVURDERING")
+        assertGodkjenningsbehov(tags = setOf("NegativArbeidsgiverutbetaling", "Personutbetaling"), kanAvvises = false, utbetalingstype = "REVURDERING")
     }
 
     @Test
@@ -89,25 +88,14 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("NEGATIV_PERSONUTBETALING", "ARBEIDSGIVERUTBETALING"), kanAvvises = false, utbetalingstype = "REVURDERING")
-    }
-
-    @Test
-    fun `6G-begrenset`() {
-        tilGodkjenning(
-            1.januar,
-            31.januar,
-            a1,
-            beregnetInntekt = 50000.månedlig
-        )
-        assertGodkjenningsbehov(tags = setOf("ARBEIDSGIVERUTBETALING", "6G_BEGRENSET"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 600000.0)))
+        assertGodkjenningsbehov(tags = setOf("NegativPersonutbetaling", "Arbeidsgiverutbetaling"), kanAvvises = false, utbetalingstype = "REVURDERING")
     }
 
     @Test
     fun `flere arbeidsgivere`() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
         assertGodkjenningsbehov(
-            tags = setOf("ARBEIDSGIVERUTBETALING", "FLERE_ARBEIDSGIVERE"),
+            tags = setOf("Arbeidsgiverutbetaling", "FlereArbeidsgivere"),
             inntektskilde = "FLERE_ARBEIDSGIVERE",
             orgnummere = setOf(a1, a2),
             omregnedeÅrsinntekter = listOf(
