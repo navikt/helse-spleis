@@ -2024,7 +2024,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.forkastGammelPeriodeSomIkkeKanForkastes(påminnelse)) return
             påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
                 vedtaksperiode.person.igangsettOverstyring(it)
