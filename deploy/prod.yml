@@ -62,6 +62,6 @@ spec:
   - name: KAFKA_CONSUMER_GROUP_ID
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
-    value: none
+    value: EARLIEST
   - name: SEND_FERIEPENGEOPPDRAG
     value: "false"
