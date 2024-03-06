@@ -5,28 +5,30 @@ on:
     branches:
     - master
     paths:
-    - 'deploy/topic-avviksvurdering-migreringer-v2-dev.yml'
-    - 'deploy/topic-avviksvurdering-migreringer-v2-prod.yml'
+    - 'deploy/aiven-teknisk-topic-dev.yml'
+    - 'deploy/aiven-teknisk-topic-prod.yml'
 
 jobs:
   deployDev:
     name: apply dev-gcp
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: deploy/topic-avviksvurdering-migreringer-v2-dev.yml
+          RESOURCE: deploy/aiven-teknisk-topic-dev.yml
 
   deployProd:
     name: apply prod-gcp
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: deploy/topic-avviksvurdering-migreringer-v2-prod.yml
+          RESOURCE: deploy/aiven-teknisk-topic-prod.yml

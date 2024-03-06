@@ -1,0 +1,21 @@
+---
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+    name: teknisk.v1
+    namespace: tbd
+    labels:
+        team: tbd
+spec:
+    pool: nav-prod
+    config:  # optional; all fields are optional too; defaults shown
+        cleanupPolicy: delete  # delete, compact
+        minimumInSyncReplicas: 2
+        partitions: 24
+        replication: 3  # see min/max requirements
+        retentionBytes: -1  # -1 means unlimited
+        retentionHours: 24  # -1 means unlimited
+    acl:
+        - team: tbd
+          application: spleis
+          access: readwrite
