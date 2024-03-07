@@ -267,8 +267,6 @@ internal data class PersonData(
         private val skjæringstidspunkt: LocalDate,
         private val type: GrunnlagsdataType,
         private val sykepengegrunnlag: SykepengegrunnlagData,
-        private val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
-        private val avviksprosent: Double?,
         private val opptjening: OpptjeningData?,
         private val medlemskapstatus: JsonMedlemskapstatus?,
         private val vurdertOk: Boolean?,
@@ -654,18 +652,21 @@ internal data class PersonData(
             internal fun tilModellobjekt() = Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp.månedlig)
         }
 
+        data class PeriodeData(val fom: LocalDate, val tom: LocalDate) {
+            fun tilModellobjekt() = Periode(fom, tom)
+        }
         data class SykdomstidslinjeData(
             private val dager: List<DagData>,
-            private val periode: Periode?,
-            private val låstePerioder: MutableList<Periode>? = mutableListOf()
+            private val periode: PeriodeData?,
+            private val låstePerioder: List<PeriodeData>
         ) {
             private val dagerMap: Map<LocalDate, Dag> = DagData.parseDager(dager)
 
             internal fun createSykdomstidslinje(): Sykdomstidslinje =
                 Sykdomstidslinje.ferdigSykdomstidslinje(
                     dager = dagerMap,
-                    periode = periode,
-                    perioder = låstePerioder ?: mutableListOf()
+                    periode = periode?.tilModellobjekt(),
+                    perioder = låstePerioder.map { it.tilModellobjekt() }
                 )
 
             data class DagData(
@@ -1089,7 +1090,7 @@ internal data class PersonData(
         data class RefusjonData(
             private val meldingsreferanseId: UUID,
             private val førsteFraværsdag: LocalDate?,
-            private val arbeidsgiverperioder: List<Periode>,
+            private val arbeidsgiverperioder: List<PeriodeData>,
             private val beløp: Double?,
             private val sisteRefusjonsdag: LocalDate?,
             private val endringerIRefusjon: List<EndringIRefusjonData>,
@@ -1102,7 +1103,7 @@ internal data class PersonData(
                             Refusjonshistorikk.Refusjon(
                                 meldingsreferanseId = it.meldingsreferanseId,
                                 førsteFraværsdag = it.førsteFraværsdag,
-                                arbeidsgiverperioder = it.arbeidsgiverperioder,
+                                arbeidsgiverperioder = it.arbeidsgiverperioder.map { it.tilModellobjekt() },
                                 beløp = it.beløp?.månedlig,
                                 sisteRefusjonsdag = it.sisteRefusjonsdag,
                                 endringerIRefusjon = it.endringerIRefusjon.parseEndringerIRefusjon(),
@@ -1361,7 +1362,6 @@ internal data class PersonData(
             private val beregningsgrunnlag: Double,
             private val dekningsgrunnlag: Double,
             private val grunnbeløpgrense: Double?,
-            private val begrunnelse: BegrunnelseData?,
             private val begrunnelser: List<BegrunnelseData>?,
             private val grad: Double,
             private val totalGrad: Double,
