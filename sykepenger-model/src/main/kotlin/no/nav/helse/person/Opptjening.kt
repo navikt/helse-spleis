@@ -7,6 +7,9 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.dto.ArbeidsforholdDto
+import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
+import no.nav.helse.dto.OpptjeningDto
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
@@ -148,6 +151,11 @@ internal class Opptjening private constructor(
                 }
             }
 
+            internal fun dto() = ArbeidsforholdDto(
+                ansattFom = this.ansattFom,
+                ansattTom = this.ansattTom,
+                deaktivert = this.deaktivert
+            )
         }
 
         companion object {
@@ -167,6 +175,11 @@ internal class Opptjening private constructor(
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() =
                 flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
         }
+
+        internal fun dto() = ArbeidsgiverOpptjeningsgrunnlagDto(
+            orgnummer = this.orgnummer,
+            ansattPerioder = this.ansattPerioder.map { it.dto() }
+        )
     }
 
     companion object {
@@ -192,4 +205,9 @@ internal class Opptjening private constructor(
             return opptjening
         }
     }
+
+    internal fun dto() = OpptjeningDto(
+        arbeidsforhold = this.arbeidsforhold.map { it.dto() },
+        opptjeningsperiode = this.opptjeningsperiode.dto()
+    )
 }

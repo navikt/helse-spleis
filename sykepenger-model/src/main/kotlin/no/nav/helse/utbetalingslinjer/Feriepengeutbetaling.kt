@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.dto.FeriepengeDto
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -331,4 +332,17 @@ internal class Feriepengeutbetaling private constructor(
             )
         }
     }
+
+    internal fun dto() = FeriepengeDto(
+        feriepengeberegner = feriepengeberegner.dto(),
+        infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
+        infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
+        spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
+        spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
+        oppdrag = this.oppdrag.dto(),
+        personoppdrag = this.personoppdrag.dto(),
+        utbetalingId = this.utbetalingId,
+        sendTilOppdrag = this.sendTilOppdrag,
+        sendPersonoppdragTilOS = this.sendPersonoppdragTilOS
+    )
 }

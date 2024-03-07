@@ -28,6 +28,7 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
+import no.nav.helse.dto.ArbeidsgiverDto
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -951,4 +952,17 @@ internal class Arbeidsgiver private constructor(
             )
         }
     }
+
+    internal fun dto() = ArbeidsgiverDto(
+        id = id,
+        organisasjonsnummer = organisasjonsnummer,
+        inntektshistorikk = inntektshistorikk.dto(),
+        sykdomshistorikk = sykdomshistorikk.dto(),
+        sykmeldingsperioder = sykmeldingsperioder.dto(),
+        vedtaksperioder = vedtaksperioder.map { it.dto() },
+        forkastede = forkastede.map { it.dto() },
+        utbetalinger = utbetalinger.map { it.dto() },
+        feriepengeutbetalinger = feriepengeutbetalinger.map { it.dto() },
+        refusjonshistorikk = refusjonshistorikk.dto()
+    )
 }

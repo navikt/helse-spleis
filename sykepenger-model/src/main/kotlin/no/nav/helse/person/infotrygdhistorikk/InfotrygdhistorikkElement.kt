@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.dto.InfotrygdhistorikkelementDto
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -199,5 +200,16 @@ class InfotrygdhistorikkElement private constructor(
         }
     }
 
+    internal fun dto() = InfotrygdhistorikkelementDto(
+        id = this.id,
+        tidsstempel = this.tidsstempel,
+        hendelseId = this.hendelseId,
+        ferieperioder = this.perioder.filterIsInstance<Friperiode>().map { it.dto() },
+        arbeidsgiverutbetalingsperioder = this.perioder.filterIsInstance<ArbeidsgiverUtbetalingsperiode>().map { it.dto() },
+        personutbetalingsperioder = this.perioder.filterIsInstance<PersonUtbetalingsperiode>().map { it.dto() },
+        inntekter = this.inntekter.map { it.dto() },
+        arbeidskategorikoder = this.arbeidskategorikoder,
+        oppdatert = this.oppdatert
+    )
 }
 

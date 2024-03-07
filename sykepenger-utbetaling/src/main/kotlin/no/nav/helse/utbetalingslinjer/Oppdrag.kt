@@ -8,6 +8,10 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.dto.EndringskodeDto
+import no.nav.helse.dto.FagområdeDto
+import no.nav.helse.dto.OppdragDto
+import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -463,6 +467,35 @@ class Oppdrag private constructor(
             }
         }
     }
+
+    fun dto() = OppdragDto(
+        mottaker = mottaker,
+        fagområde = when (fagområde) {
+            Fagområde.SykepengerRefusjon -> FagområdeDto.SPREF
+            Fagområde.Sykepenger -> FagområdeDto.SP
+        },
+        linjer = linjer.map { it.dto() },
+        fagsystemId = fagsystemId,
+        endringskode = when (endringskode) {
+            Endringskode.NY -> EndringskodeDto.NY
+            Endringskode.UEND -> EndringskodeDto.UEND
+            Endringskode.ENDR -> EndringskodeDto.ENDR
+        },
+        nettoBeløp = nettoBeløp,
+        overføringstidspunkt = overføringstidspunkt,
+        avstemmingsnøkkel = avstemmingsnøkkel,
+        status = when (status) {
+            Oppdragstatus.OVERFØRT -> OppdragstatusDto.OVERFØRT
+            Oppdragstatus.AKSEPTERT -> OppdragstatusDto.AKSEPTERT
+            Oppdragstatus.AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
+            Oppdragstatus.AVVIST -> OppdragstatusDto.AVVIST
+            Oppdragstatus.FEIL -> OppdragstatusDto.FEIL
+            null -> null
+        },
+        tidsstempel = tidsstempel,
+        erSimulert = erSimulert,
+        simuleringsResultat = simuleringsResultat
+    )
 }
 
 enum class Oppdragstatus { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }

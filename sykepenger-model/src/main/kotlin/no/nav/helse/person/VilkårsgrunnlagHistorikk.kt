@@ -15,6 +15,12 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
+import no.nav.helse.dto.MedlemskapsvurderingDto
+import no.nav.helse.dto.OpptjeningDto
+import no.nav.helse.dto.SykepengegrunnlagDto
+import no.nav.helse.dto.VilkårsgrunnlagInnslagDto
+import no.nav.helse.dto.VilkårsgrunnlagDto
+import no.nav.helse.dto.VilkårsgrunnlaghistorikkDto
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.erAktivtSkjæringstidspunkt
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -197,6 +203,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 elementer: Map<LocalDate, VilkårsgrunnlagElement>
             ): Innslag = Innslag(id, opprettet, elementer.toMutableMap())
         }
+
+        internal fun dto() = VilkårsgrunnlagInnslagDto(
+            id = this.id,
+            opprettet = this.opprettet,
+            vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.value.dto() }
+        )
     }
 
     internal abstract class VilkårsgrunnlagElement(
@@ -418,6 +430,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     .maxByOrNull { it.skjæringstidspunkt }
             }
         }
+
+        internal fun dto(): VilkårsgrunnlagDto =
+            dto(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag.dto(), opptjening?.dto())
+        protected abstract fun dto(
+            vilkårsgrunnlagId: UUID,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: SykepengegrunnlagDto,
+            opptjening: OpptjeningDto?
+        ): VilkårsgrunnlagDto
     }
 
     internal class Grunnlagsdata(
@@ -504,6 +525,26 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
+
+        override fun dto(
+            vilkårsgrunnlagId: UUID,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: SykepengegrunnlagDto,
+            opptjening: OpptjeningDto?
+        ) = VilkårsgrunnlagDto.Spleis(
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            sykepengegrunnlag = sykepengegrunnlag,
+            opptjening = opptjening,
+            medlemskapstatus = when (medlemskapstatus) {
+                Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
+                Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingDto.Nei
+                Medlemskapsvurdering.Medlemskapstatus.VetIkke -> MedlemskapsvurderingDto.VetIkke
+                Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> MedlemskapsvurderingDto.UavklartMedBrukerspørsmål
+            },
+            vurdertOk = vurdertOk,
+            meldingsreferanseId = meldingsreferanseId
+        )
     }
 
     internal class InfotrygdVilkårsgrunnlag(
@@ -564,10 +605,21 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             result = 31 * result + sykepengegrunnlag.hashCode()
             return result
         }
+
+        override fun dto(
+            vilkårsgrunnlagId: UUID,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: SykepengegrunnlagDto,
+            opptjening: OpptjeningDto?
+        ) = VilkårsgrunnlagDto.Infotrygd(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening)
     }
 
     internal companion object {
         internal fun ferdigVilkårsgrunnlagHistorikk(innslag: List<Innslag>) =
             VilkårsgrunnlagHistorikk(innslag.toMutableList())
     }
+
+    fun dto() = VilkårsgrunnlaghistorikkDto(
+        historikk = this.historikk.map { it.dto() }
+    )
 }

@@ -37,6 +37,8 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.dto.VedtaksperiodeDto
+import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
@@ -2723,6 +2725,33 @@ internal class Vedtaksperiode private constructor(
                 ).maxOf { it.periode.endInclusive }
 
     }
+
+    internal fun dto() = VedtaksperiodeDto(
+        id = id,
+        tilstand = when (tilstand) {
+            Avsluttet -> VedtaksperiodetilstandDto.AVSLUTTET
+            AvsluttetUtenUtbetaling -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
+            AvventerBlokkerendePeriode -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
+            AvventerGodkjenning -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
+            AvventerGodkjenningRevurdering -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
+            AvventerHistorikk -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
+            AvventerHistorikkRevurdering -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING
+            AvventerInfotrygdHistorikk -> VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK
+            AvventerInntektsmelding -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING
+            AvventerRevurdering -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING
+            AvventerSimulering -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING
+            AvventerSimuleringRevurdering -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
+            AvventerVilkårsprøving -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
+            AvventerVilkårsprøvingRevurdering -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING
+            RevurderingFeilet -> VedtaksperiodetilstandDto.REVURDERING_FEILET
+            Start -> VedtaksperiodetilstandDto.START
+            TilInfotrygd -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
+            TilUtbetaling -> VedtaksperiodetilstandDto.TIL_UTBETALING
+        },
+        generasjoner = generasjoner.dto(),
+        opprettet = opprettet,
+        oppdatert = oppdatert
+    )
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

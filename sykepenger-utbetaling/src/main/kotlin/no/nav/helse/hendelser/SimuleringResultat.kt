@@ -5,7 +5,7 @@ import java.time.LocalDate
 /**
  * Legger på en kommentar for å trigge en mulig feil et sted i bygget vårt
  */
-class SimuleringResultat(
+data class SimuleringResultat(
     val totalbeløp: Int,
     val perioder: List<SimulertPeriode>
 ) {
@@ -50,19 +50,19 @@ class SimuleringResultat(
         }
     )
 
-    class SimulertPeriode(
+    data class SimulertPeriode(
         val periode: ClosedRange<LocalDate>,
         val utbetalinger: List<SimulertUtbetaling>
     )
 
-    class SimulertUtbetaling(
+    data class SimulertUtbetaling(
         val forfallsdato: LocalDate,
         val utbetalesTil: Mottaker,
         val feilkonto: Boolean,
         val detaljer: List<Detaljer>
     )
 
-    class Detaljer(
+    data class Detaljer(
         val periode: ClosedRange<LocalDate>,
         val konto: String,
         val beløp: Int,
@@ -74,18 +74,18 @@ class SimuleringResultat(
         val refunderesOrgnummer: String
     )
 
-    class Sats(
+    data class Sats(
         val sats: Double,
         val antall: Int,
         val type: String
     )
 
-    class Klassekode(
+    data class Klassekode(
         val kode: String,
         val beskrivelse: String
     )
 
-    class Mottaker(
+    data class Mottaker(
         val id: String,
         val navn: String
     )

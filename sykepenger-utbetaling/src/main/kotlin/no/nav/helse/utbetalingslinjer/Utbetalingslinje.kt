@@ -6,6 +6,10 @@ import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.til
+import no.nav.helse.dto.EndringskodeDto
+import no.nav.helse.dto.KlassekodeDto
+import no.nav.helse.dto.SatstypeDto
+import no.nav.helse.dto.UtbetalingslinjeDto
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
@@ -259,6 +263,33 @@ class Utbetalingslinje(
         "statuskode" to statuskode,
         "datoStatusFom" to datoStatusFom?.toString(),
         "klassekode" to klassekode.verdi
+    )
+
+    fun dto() = UtbetalingslinjeDto(
+        fom = this.fom,
+        tom = this.tom,
+        satstype = when {
+            satstype === Satstype.Daglig -> SatstypeDto.Daglig
+            satstype === Satstype.Engang -> SatstypeDto.Engang
+            else -> error("ukjent statype: $satstype")
+        },
+        beløp = this.beløp,
+        grad = this.grad,
+        refFagsystemId = this.refFagsystemId,
+        delytelseId = this.delytelseId,
+        refDelytelseId = this.refDelytelseId,
+        endringskode = when (endringskode) {
+            NY -> EndringskodeDto.NY
+            UEND -> EndringskodeDto.UEND
+            ENDR -> EndringskodeDto.ENDR
+        },
+        klassekode = when (klassekode) {
+            RefusjonIkkeOpplysningspliktig -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
+            Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig -> KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig
+            Klassekode.SykepengerArbeidstakerOrdinær -> KlassekodeDto.SykepengerArbeidstakerOrdinær
+            Klassekode.SykepengerArbeidstakerFeriepenger -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
+        },
+        datoStatusFom = this.datoStatusFom
     )
 }
 

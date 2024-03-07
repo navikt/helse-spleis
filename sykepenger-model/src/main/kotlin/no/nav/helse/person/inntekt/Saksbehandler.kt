@@ -9,6 +9,7 @@ import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.dto.InntektsopplysningDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
@@ -111,6 +112,18 @@ class Saksbehandler internal constructor(
         }
 
     }
+
+    override fun dto() =
+        InntektsopplysningDto.SaksbehandlerDto(
+            id = id,
+            hendelseId = hendelseId,
+            dato = dato,
+            beløp = beløp.dto(),
+            tidsstempel = tidsstempel,
+            forklaring = forklaring,
+            subsumsjon = subsumsjon?.dto(),
+            overstyrtInntekt = overstyrtInntekt?.dto()!!
+        )
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")

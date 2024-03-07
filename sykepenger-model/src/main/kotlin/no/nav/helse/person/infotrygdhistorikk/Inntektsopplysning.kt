@@ -2,6 +2,7 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.dto.InfotrygdInntektsopplysningDto
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
 
@@ -54,4 +55,13 @@ class Inntektsopplysning private constructor(
                 lagret = lagret
             )
     }
+
+    internal fun dto() = InfotrygdInntektsopplysningDto(
+        orgnummer = orgnummer,
+        sykepengerFom = sykepengerFom,
+        inntekt = inntekt.dto(),
+        refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
+        refusjonTom = refusjonTom,
+        lagret = lagret
+    )
 }

@@ -13,21 +13,22 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.math.BigDecimal
 import java.math.RoundingMode
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.økonomi.Prosentdel
 import org.junit.jupiter.api.Assertions
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 
-@JsonIgnoreProperties("jurist", "aktivitetslogg")
+@JsonIgnoreProperties("jurist", "aktivitetslogg", "observers")
 private class PersonMixin
 
 @JsonIgnoreProperties("person", "jurist")
@@ -57,8 +58,10 @@ private class SkattSykepengegrunnlagMixin
 @JsonIgnoreProperties("opptjeningsdager\$delegate")
 private class OpptjeningMixin
 
-@JsonIgnoreProperties()
+@JsonIgnoreProperties("alder")
 private class SykepengegrunnlagMixin
+@JsonIgnoreProperties("alder")
+private class FeriepengeberegnerMixIn
 
 internal class BigDecimalSerializer : JsonSerializer<BigDecimal>() {
     private companion object {
@@ -90,11 +93,18 @@ private val objectMapper = jacksonObjectMapper()
             Prosentdel::class.java to ProsentdelMixin::class.java,
             SkattSykepengegrunnlag::class.java to SkattSykepengegrunnlagMixin::class.java,
             Opptjening::class.java to OpptjeningMixin::class.java,
-            Sykepengegrunnlag::class.java to SykepengegrunnlagMixin::class.java
+            Sykepengegrunnlag::class.java to SykepengegrunnlagMixin::class.java,
+            Feriepengeberegner::class.java to FeriepengeberegnerMixIn::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
     .registerModule(JavaTimeModule())
+
+internal fun assertPersonEquals(expected: Person, actual: Person) {
+    val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)
+    val actualJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual)
+    JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT)
+}
 
 internal fun assertJsonEquals(expected: Any, actual: Any) {
     val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)

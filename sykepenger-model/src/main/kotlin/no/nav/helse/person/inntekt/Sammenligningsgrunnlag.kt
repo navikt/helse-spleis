@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import no.nav.helse.dto.SammenligningsgrunnlagDto
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattISpleisBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
@@ -31,4 +32,9 @@ internal class Sammenligningsgrunnlag(
     internal fun build(builder: FastsattISpleisBuilder) {
         builder.innrapportertÅrsinntekt(sammenligningsgrunnlag)
     }
+
+    internal fun dto() = SammenligningsgrunnlagDto(
+        sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
+        arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() }
+    )
 }

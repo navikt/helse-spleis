@@ -14,6 +14,12 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.avvist
+import no.nav.helse.dto.AvsenderDto
+import no.nav.helse.dto.GenerasjonEndringDto
+import no.nav.helse.dto.GenerasjonDto
+import no.nav.helse.dto.GenerasjonTilstandDto
+import no.nav.helse.dto.GenerasjonerDto
+import no.nav.helse.dto.GenerasjonkildeDto
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
@@ -247,6 +253,18 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         internal fun accept(visitor: GenerasjonerVisitor) {
             visitor.preVisitGenerasjonkilde(meldingsreferanseId, innsendt, registert, avsender)
         }
+
+        internal fun dto() = GenerasjonkildeDto(
+            meldingsreferanseId = this.meldingsreferanseId,
+            innsendt = this.innsendt,
+            registert = this.registert,
+            avsender = when (avsender) {
+                Avsender.SYKMELDT -> AvsenderDto.SYKMELDT
+                Avsender.ARBEIDSGIVER -> AvsenderDto.ARBEIDSGIVER
+                Avsender.SAKSBEHANDLER -> AvsenderDto.SAKSBEHANDLER
+                Avsender.SYSTEM -> AvsenderDto.SYSTEM
+            }
+        )
     }
 
 
@@ -395,6 +413,16 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                     builder = builder
                 )
             }
+            internal fun dto() = GenerasjonEndringDto(
+                id = this.id,
+                tidsstempel = this.tidsstempel,
+                sykmeldingsperiode = this.sykmeldingsperiode.dto(),
+                periode = this.periode.dto(),
+                vilkårsgrunnlagId = this.grunnlagsdata?.dto()?.vilkårsgrunnlagId,
+                utbetalingId = this.utbetaling?.dto()?.id,
+                dokumentsporing = this.dokumentsporing.dto(),
+                sykdomstidslinje = this.sykdomstidslinje.dto()
+            )
         }
 
         internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
@@ -1129,5 +1157,29 @@ enum class Periodetilstand {
                 }
             }
         }
+
+        internal fun dto() = GenerasjonDto(
+            id = this.id,
+            tilstand = when (tilstand) {
+                Tilstand.AnnullertPeriode -> GenerasjonTilstandDto.ANNULLERT_PERIODE
+                Tilstand.AvsluttetUtenVedtak -> GenerasjonTilstandDto.AVSLUTTET_UTEN_VEDTAK
+                Tilstand.Beregnet -> GenerasjonTilstandDto.BEREGNET
+                Tilstand.BeregnetOmgjøring -> GenerasjonTilstandDto.BEREGNET_OMGJØRING
+                Tilstand.BeregnetRevurdering -> GenerasjonTilstandDto.BEREGNET_REVURDERING
+                Tilstand.RevurdertVedtakAvvist -> GenerasjonTilstandDto.REVURDERT_VEDTAK_AVVIST
+                Tilstand.TilInfotrygd -> GenerasjonTilstandDto.TIL_INFOTRYGD
+                Tilstand.Uberegnet -> GenerasjonTilstandDto.UBEREGNET
+                Tilstand.UberegnetOmgjøring -> GenerasjonTilstandDto.UBEREGNET_OMGJØRING
+                Tilstand.UberegnetRevurdering -> GenerasjonTilstandDto.UBEREGNET_REVURDERING
+                Tilstand.VedtakFattet -> GenerasjonTilstandDto.VEDTAK_FATTET
+                Tilstand.VedtakIverksatt -> GenerasjonTilstandDto.VEDTAK_IVERKSATT
+            },
+            endringer = this.endringer.map { it.dto() },
+            vedtakFattet = this.vedtakFattet,
+            avsluttet = this.avsluttet,
+            kilde = this.kilde.dto()
+        )
     }
+
+    internal fun dto() = GenerasjonerDto(generasjoner = this.generasjoner.map { it.dto() })
 }

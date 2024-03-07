@@ -1,6 +1,7 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
+import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.person.InfotrygdperiodeVisitor
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -21,4 +22,6 @@ class Friperiode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {
     override fun accept(visitor: InfotrygdperiodeVisitor) {
         visitor.visitInfotrygdhistorikkFerieperiode(this, periode.start, periode.endInclusive)
     }
+
+    internal fun dto() = InfotrygdFerieperiodeDto(periode.dto())
 }

@@ -6,6 +6,8 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
+import no.nav.helse.dto.BegrunnelseDto
+import no.nav.helse.dto.UtbetalingstidslinjeDto
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNav
@@ -204,11 +206,36 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
             utbetalingsdager.add(dag)
         }
     }
+
+    fun dto() = UtbetalingstidslinjeDto(
+        dager = this.map { it.dto() }
+    )
 }
 
 sealed class Begrunnelse {
 
     open fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
+
+    fun dto() = when (this) {
+        AndreYtelserAap -> BegrunnelseDto.AndreYtelserAap
+        AndreYtelserDagpenger -> BegrunnelseDto.AndreYtelserDagpenger
+        AndreYtelserForeldrepenger -> BegrunnelseDto.AndreYtelserForeldrepenger
+        AndreYtelserOmsorgspenger -> BegrunnelseDto.AndreYtelserOmsorgspenger
+        AndreYtelserOpplaringspenger -> BegrunnelseDto.AndreYtelserOpplaringspenger
+        AndreYtelserPleiepenger -> BegrunnelseDto.AndreYtelserPleiepenger
+        AndreYtelserSvangerskapspenger -> BegrunnelseDto.AndreYtelserSvangerskapspenger
+        EgenmeldingUtenforArbeidsgiverperiode -> BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode
+        EtterDødsdato -> BegrunnelseDto.EtterDødsdato
+        ManglerMedlemskap -> BegrunnelseDto.ManglerMedlemskap
+        ManglerOpptjening -> BegrunnelseDto.ManglerOpptjening
+        MinimumInntekt -> BegrunnelseDto.MinimumInntekt
+        MinimumInntektOver67 -> BegrunnelseDto.MinimumInntektOver67
+        MinimumSykdomsgrad -> BegrunnelseDto.MinimumSykdomsgrad
+        NyVilkårsprøvingNødvendig -> BegrunnelseDto.NyVilkårsprøvingNødvendig
+        Over70 -> BegrunnelseDto.Over70
+        SykepengedagerOppbrukt -> BegrunnelseDto.SykepengedagerOppbrukt
+        SykepengedagerOppbruktOver67 -> BegrunnelseDto.SykepengedagerOppbruktOver67
+    }
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object SykepengedagerOppbruktOver67 : Begrunnelse()

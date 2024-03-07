@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
+import no.nav.helse.dto.SykmeldingsperioderDto
 
 internal class Sykmeldingsperioder(
     private var perioder: List<Periode> = listOf()
@@ -29,6 +30,8 @@ internal class Sykmeldingsperioder(
 
     internal fun overlappendePerioder(dager: DagerFraInntektsmelding) =
         dager.overlappendeSykmeldingsperioder(perioder)
+
+    internal fun dto() = SykmeldingsperioderDto(perioder = this.perioder.map { it.dto() })
 }
 
 internal interface SykmeldingsperioderVisitor {

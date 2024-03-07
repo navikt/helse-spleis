@@ -5,6 +5,7 @@ import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.til
+import no.nav.helse.dto.AlderDto
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -81,4 +82,6 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
         if (dødsdato == null) return tidslinjer
         return Utbetalingstidslinje.avvis(tidslinjer, listOf(dødsdato.nesteDag til LocalDate.MAX), listOf(Begrunnelse.EtterDødsdato))
     }
+
+    internal fun dto() = AlderDto(fødselsdato = fødselsdato, dødsdato = dødsdato)
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -86,14 +85,14 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
 internal data class PersonData(
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val fødselsdato: LocalDate,
-    private val arbeidsgivere: List<ArbeidsgiverData>,
-    private val opprettet: LocalDateTime,
-    private val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
-    private val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
-    private val dødsdato: LocalDate?
+    val aktørId: String,
+    val fødselsnummer: String,
+    val fødselsdato: LocalDate,
+    val arbeidsgivere: List<ArbeidsgiverData>,
+    val opprettet: LocalDateTime,
+    val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
+    val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
+    val dødsdato: LocalDate?
 ) {
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
     private val fnr by lazy { fødselsnummer.somPersonidentifikator() }
@@ -130,15 +129,15 @@ internal data class PersonData(
     }
 
     data class InfotrygdhistorikkElementData(
-        private val id: UUID,
-        private val tidsstempel: LocalDateTime,
-        private val hendelseId: UUID?,
-        private val ferieperioder: List<FerieperiodeData>,
-        private val arbeidsgiverutbetalingsperioder: List<ArbeidsgiverutbetalingsperiodeData>,
-        private val personutbetalingsperioder: List<PersonutbetalingsperiodeData>,
-        private val inntekter: List<InntektsopplysningData>,
-        private val arbeidskategorikoder: Map<String, LocalDate>,
-        private val oppdatert: LocalDateTime
+        val id: UUID,
+        val tidsstempel: LocalDateTime,
+        val hendelseId: UUID?,
+        val ferieperioder: List<FerieperiodeData>,
+        val arbeidsgiverutbetalingsperioder: List<ArbeidsgiverutbetalingsperiodeData>,
+        val personutbetalingsperioder: List<PersonutbetalingsperiodeData>,
+        val inntekter: List<InntektsopplysningData>,
+        val arbeidskategorikoder: Map<String, LocalDate>,
+        val oppdatert: LocalDateTime
     ) {
         internal companion object {
             fun List<InfotrygdhistorikkElementData>.tilModellObjekt() =
@@ -158,18 +157,18 @@ internal data class PersonData(
         )
 
         data class FerieperiodeData(
-            private val fom: LocalDate,
-            private val tom: LocalDate
+            val fom: LocalDate,
+            val tom: LocalDate
         ) {
             internal fun parsePeriode() = Friperiode(fom, tom)
         }
 
         data class PersonutbetalingsperiodeData(
-            private val orgnr: String,
-            private val fom: LocalDate,
-            private val tom: LocalDate,
-            private val grad: Double,
-            private val inntekt: Int
+            val orgnr: String,
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val grad: Double,
+            val inntekt: Int
         ) {
             internal fun parsePeriode() = PersonUtbetalingsperiode(
                 orgnr = orgnr,
@@ -181,11 +180,11 @@ internal data class PersonData(
         }
 
         data class ArbeidsgiverutbetalingsperiodeData(
-            private val orgnr: String,
-            private val fom: LocalDate,
-            private val tom: LocalDate,
-            private val grad: Double,
-            private val inntekt: Int
+            val orgnr: String,
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val grad: Double,
+            val inntekt: Int
         ) {
             internal fun parsePeriode() = ArbeidsgiverUtbetalingsperiode(
                 orgnr = orgnr,
@@ -197,12 +196,12 @@ internal data class PersonData(
         }
 
         data class InntektsopplysningData(
-            private val orgnr: String,
-            private val sykepengerFom: LocalDate,
-            private val inntekt: Double,
-            private val refusjonTilArbeidsgiver: Boolean,
-            private val refusjonTom: LocalDate?,
-            private val lagret: LocalDateTime?
+            val orgnr: String,
+            val sykepengerFom: LocalDate,
+            val inntekt: Double,
+            val refusjonTilArbeidsgiver: Boolean,
+            val refusjonTom: LocalDate?,
+            val lagret: LocalDateTime?
         ) {
             internal fun parseInntektsopplysning() = Inntektsopplysning.ferdigInntektsopplysning(
                 orgnummer = orgnr,
@@ -232,9 +231,9 @@ internal data class PersonData(
     }
 
     data class VilkårsgrunnlagInnslagData(
-        private val id: UUID,
-        private val opprettet: LocalDateTime,
-        private val vilkårsgrunnlag: List<VilkårsgrunnlagElementData>
+        val id: UUID,
+        val opprettet: LocalDateTime,
+        val vilkårsgrunnlag: List<VilkårsgrunnlagElementData>
     ) {
         private fun tilModellobjekt(builder: VilkårsgrunnlaghistorikkBuilder, alder: Alder) = id to VilkårsgrunnlagHistorikk.Innslag.gjenopprett(
             id = id,
@@ -264,14 +263,14 @@ internal data class PersonData(
     }
 
     data class VilkårsgrunnlagElementData(
-        private val skjæringstidspunkt: LocalDate,
-        private val type: GrunnlagsdataType,
-        private val sykepengegrunnlag: SykepengegrunnlagData,
-        private val opptjening: OpptjeningData?,
-        private val medlemskapstatus: JsonMedlemskapstatus?,
-        private val vurdertOk: Boolean?,
-        private val meldingsreferanseId: UUID?,
-        private val vilkårsgrunnlagId: UUID
+        val skjæringstidspunkt: LocalDate,
+        val type: GrunnlagsdataType,
+        val sykepengegrunnlag: SykepengegrunnlagData,
+        val opptjening: OpptjeningData?,
+        val medlemskapstatus: JsonMedlemskapstatus?,
+        val vurdertOk: Boolean?,
+        val meldingsreferanseId: UUID?,
+        val vilkårsgrunnlagId: UUID
     ) {
         internal fun parseDataForVilkårsvurdering(
             builder: VilkårsgrunnlaghistorikkBuilder,
@@ -306,11 +305,11 @@ internal data class PersonData(
         }
 
         data class SykepengegrunnlagData(
-            private val grunnbeløp: Double?,
-            private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
-            private val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
-            private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
-            private val vurdertInfotrygd: Boolean
+            val grunnbeløp: Double?,
+            val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
+            val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
+            val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
+            val vurdertInfotrygd: Boolean
         ) {
             internal fun parseSykepengegrunnlag(
                 builder: VilkårsgrunnlaghistorikkBuilder,
@@ -342,8 +341,8 @@ internal data class PersonData(
         }
 
         data class SammenligningsgrunnlagData(
-            private val sammenligningsgrunnlag: Double,
-            private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>,
+            val sammenligningsgrunnlag: Double,
+            val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>,
         ) {
 
             internal fun parseSammenligningsgrunnlag(): Sammenligningsgrunnlag = Sammenligningsgrunnlag(
@@ -353,11 +352,11 @@ internal data class PersonData(
         }
 
         data class ArbeidsgiverInntektsopplysningData(
-            private val orgnummer: String,
-            private val fom: LocalDate,
-            private val tom: LocalDate,
-            private val inntektsopplysning: InntektsopplysningData,
-            private val refusjonsopplysninger: List<ArbeidsgiverData.RefusjonsopplysningData>
+            val orgnummer: String,
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val inntektsopplysning: InntektsopplysningData,
+            val refusjonsopplysninger: List<ArbeidsgiverData.RefusjonsopplysningData>
         ) {
             companion object {
                 private fun List<ArbeidsgiverData.RefusjonsopplysningData>.tilModellobjekt() =
@@ -370,33 +369,33 @@ internal data class PersonData(
             }
 
             data class SkatteopplysningData(
-                private val hendelseId: UUID,
-                private val beløp: Double,
-                private val måned: YearMonth,
-                private val type: String,
-                private val fordel: String,
-                private val beskrivelse: String,
-                private val tidsstempel: LocalDateTime
+                val hendelseId: UUID,
+                val beløp: Double,
+                val måned: YearMonth,
+                val type: String,
+                val fordel: String,
+                val beskrivelse: String,
+                val tidsstempel: LocalDateTime
             ) {
                 internal fun tilModellobjekt() = Skatteopplysning(hendelseId, beløp.månedlig, måned, enumValueOf(type), fordel, beskrivelse, tidsstempel)
             }
 
             data class InntektsopplysningData(
-                private val id: UUID,
-                private val dato: LocalDate,
-                private val hendelseId: UUID,
-                private val beløp: Double?,
-                private val kilde: String,
-                private val forklaring: String?,
-                private val subsumsjon: SubsumsjonData?,
-                private val tidsstempel: LocalDateTime,
-                private val overstyrtInntektId: UUID?,
-                private val skatteopplysninger: List<SkatteopplysningData>?
+                val id: UUID,
+                val dato: LocalDate,
+                val hendelseId: UUID,
+                val beløp: Double?,
+                val kilde: String,
+                val forklaring: String?,
+                val subsumsjon: SubsumsjonData?,
+                val tidsstempel: LocalDateTime,
+                val overstyrtInntektId: UUID?,
+                val skatteopplysninger: List<SkatteopplysningData>?
             ) {
                 data class SubsumsjonData(
-                    private val paragraf: String,
-                    private val ledd: Int?,
-                    private val bokstav: String?
+                    val paragraf: String,
+                    val ledd: Int?,
+                    val bokstav: String?
                 ) {
                     internal fun tilModellobjekt() = Subsumsjon(paragraf, ledd, bokstav)
                 }
@@ -469,8 +468,8 @@ internal data class PersonData(
         }
 
         data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData(
-            private val orgnummer: String,
-            private val skatteopplysninger: List<SammenligningsgrunnlagInntektsopplysningData>
+            val orgnummer: String,
+            val skatteopplysninger: List<SammenligningsgrunnlagInntektsopplysningData>
         ) {
             companion object {
                 internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag> =
@@ -479,13 +478,13 @@ internal data class PersonData(
                     }
             }
             data class SammenligningsgrunnlagInntektsopplysningData(
-                private val hendelseId: UUID,
-                private val beløp: Double,
-                private val måned: YearMonth,
-                private val type: InntekttypeData,
-                private val fordel: String,
-                private val beskrivelse: String,
-                private val tidsstempel: LocalDateTime,
+                val hendelseId: UUID,
+                val beløp: Double,
+                val måned: YearMonth,
+                val type: InntekttypeData,
+                val fordel: String,
+                val beskrivelse: String,
+                val tidsstempel: LocalDateTime,
             ) {
                 internal enum class InntekttypeData {
                     LØNNSINNTEKT,
@@ -514,9 +513,9 @@ internal data class PersonData(
         }
 
         data class OpptjeningData(
-            private val opptjeningFom: LocalDate,
-            private val opptjeningTom: LocalDate,
-            private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagData>
+            val opptjeningFom: LocalDate,
+            val opptjeningTom: LocalDate,
+            val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagData>
         ) {
             fun tilOpptjening(skjæringstidspunkt: LocalDate) = Opptjening.gjenopprett(
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -525,8 +524,8 @@ internal data class PersonData(
             )
 
             data class ArbeidsgiverOpptjeningsgrunnlagData(
-                private val orgnummer: String,
-                private val ansattPerioder: List<ArbeidsforholdData>
+                val orgnummer: String,
+                val ansattPerioder: List<ArbeidsforholdData>
             ) {
                 data class ArbeidsforholdData(
                     val ansattFom: LocalDate,
@@ -551,24 +550,28 @@ internal data class PersonData(
     }
 
     data class ArbeidsgiverData(
-        private val organisasjonsnummer: String,
-        private val id: UUID,
-        private val inntektshistorikk: List<InntektsmeldingData> = listOf(),
-        private val sykdomshistorikk: List<SykdomshistorikkData>,
-        private val sykmeldingsperioder: List<SykmeldingsperiodeData>,
-        private val vedtaksperioder: List<VedtaksperiodeData>,
-        private val forkastede: List<ForkastetVedtaksperiodeData>,
-        private val utbetalinger: List<UtbetalingData>,
-        private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
-        private val refusjonshistorikk: List<RefusjonData>
+        val organisasjonsnummer: String,
+        val id: UUID,
+        val inntektshistorikk: List<InntektsmeldingData> = listOf(),
+        val sykdomshistorikk: List<SykdomshistorikkData>,
+        val sykmeldingsperioder: List<SykmeldingsperiodeData>,
+        val vedtaksperioder: List<VedtaksperiodeData>,
+        val forkastede: List<ForkastetVedtaksperiodeData>,
+        val utbetalinger: List<UtbetalingData>,
+        val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
+        val refusjonshistorikk: List<RefusjonData>
     ) {
-        private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
+        private val modelSykdomshistorikk by lazy { SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk) }
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
         private val forkastedeliste = mutableListOf<ForkastetVedtaksperiode>()
-        private val modelUtbetalinger = utbetalinger.fold(emptyList<Pair<UUID, Utbetaling>>()) { andreUtbetalinger, utbetalingen ->
-            andreUtbetalinger.plus(utbetalingen.id to utbetalingen.konverterTilUtbetaling(andreUtbetalinger))
-        }.map(Pair<*, Utbetaling>::second)
-        private val utbetalingMap = utbetalinger.zip(modelUtbetalinger) { data, utbetaling -> data.id to utbetaling }.toMap()
+        private val modelUtbetalinger by lazy {
+            utbetalinger.fold(emptyList<Pair<UUID, Utbetaling>>()) { andreUtbetalinger, utbetalingen ->
+                andreUtbetalinger.plus(utbetalingen.id to utbetalingen.konverterTilUtbetaling(andreUtbetalinger))
+            }.map(Pair<*, Utbetaling>::second)
+        }
+        private val utbetalingMap by lazy {
+            utbetalinger.zip(modelUtbetalinger) { data, utbetaling -> data.id to utbetaling }.toMap()
+        }
 
         internal fun konverterTilArbeidsgiver(
             person: Person,
@@ -627,11 +630,11 @@ internal data class PersonData(
         }
 
         data class InntektsmeldingData(
-            private val id: UUID,
-            private val dato: LocalDate,
-            private val hendelseId: UUID,
-            private val beløp: Double,
-            private val tidsstempel: LocalDateTime
+            val id: UUID,
+            val dato: LocalDate,
+            val hendelseId: UUID,
+            val beløp: Double,
+            val tidsstempel: LocalDateTime
         ) {
 
             internal fun tilModellobjekt() = Inntektsmelding(
@@ -644,10 +647,10 @@ internal data class PersonData(
         }
 
         data class RefusjonsopplysningData(
-            private val meldingsreferanseId: UUID,
-            private val fom: LocalDate,
-            private val tom: LocalDate?,
-            private val beløp: Double
+            val meldingsreferanseId: UUID,
+            val fom: LocalDate,
+            val tom: LocalDate?,
+            val beløp: Double
         ) {
             internal fun tilModellobjekt() = Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp.månedlig)
         }
@@ -656,9 +659,9 @@ internal data class PersonData(
             fun tilModellobjekt() = Periode(fom, tom)
         }
         data class SykdomstidslinjeData(
-            private val dager: List<DagData>,
-            private val periode: PeriodeData?,
-            private val låstePerioder: List<PeriodeData>
+            val dager: List<DagData>,
+            val periode: PeriodeData?,
+            val låstePerioder: List<PeriodeData>?
         ) {
             private val dagerMap: Map<LocalDate, Dag> = DagData.parseDager(dager)
 
@@ -666,19 +669,26 @@ internal data class PersonData(
                 Sykdomstidslinje.ferdigSykdomstidslinje(
                     dager = dagerMap,
                     periode = periode?.tilModellobjekt(),
-                    perioder = låstePerioder.map { it.tilModellobjekt() }
+                    perioder = låstePerioder?.map { it.tilModellobjekt() } ?: mutableListOf()
                 )
 
             data class DagData(
-                private val type: JsonDagType,
-                private val kilde: KildeData,
-                private val grad: Double,
-                private val other: KildeData?,
-                private val melding: String?
+                val type: JsonDagType,
+                val kilde: KildeData,
+                val grad: Double,
+                val other: KildeData?,
+                val melding: String?,
+                val fom: LocalDate?,
+                val tom: LocalDate?,
+                val dato: LocalDate?
             ) {
-                // Gjør så vi kan ha dato/fom og tom på samme nivå som resten av verdiene i dag
-                @JsonUnwrapped
-                private lateinit var datoer: DateRange
+                init {
+                    check (dato != null || (fom != null && tom != null)) {
+                        "enten må dato være satt eller så må både fom og tom være satt"
+                    }
+                }
+
+                private val datoer = if (dato != null) DateRange.Single(dato) else DateRange.Range(fom!!, tom!!)
 
                 internal companion object {
                     internal fun parseDager(dager: List<DagData>): Map<LocalDate, Dag> =
@@ -746,9 +756,9 @@ internal data class PersonData(
             }
 
             data class KildeData(
-                private val type: String,
-                private val id: UUID,
-                private val tidsstempel: LocalDateTime
+                val type: String,
+                val id: UUID,
+                val tidsstempel: LocalDateTime
             ) {
                 internal fun parseKilde() = Hendelseskilde(type, id, tidsstempel)
             }
@@ -759,18 +769,18 @@ internal data class PersonData(
         )
 
         data class FeriepengeutbetalingData(
-            private val infotrygdFeriepengebeløpPerson: Double,
-            private val infotrygdFeriepengebeløpArbeidsgiver: Double,
-            private val spleisFeriepengebeløpArbeidsgiver: Double,
-            private val spleisFeriepengebeløpPerson: Double,
-            private val oppdrag: OppdragData,
-            private val personoppdrag: OppdragData,
-            private val opptjeningsår: Year,
-            private val utbetalteDager: List<UtbetaltDagData>,
-            private val feriepengedager: List<UtbetaltDagData>,
-            private val utbetalingId: UUID,
-            private val sendTilOppdrag: Boolean,
-            private val sendPersonoppdragTilOS: Boolean,
+            val infotrygdFeriepengebeløpPerson: Double,
+            val infotrygdFeriepengebeløpArbeidsgiver: Double,
+            val spleisFeriepengebeløpArbeidsgiver: Double,
+            val spleisFeriepengebeløpPerson: Double,
+            val oppdrag: OppdragData,
+            val personoppdrag: OppdragData,
+            val opptjeningsår: Year,
+            val utbetalteDager: List<UtbetaltDagData>,
+            val feriepengedager: List<UtbetaltDagData>,
+            val utbetalingId: UUID,
+            val sendTilOppdrag: Boolean,
+            val sendPersonoppdragTilOS: Boolean,
         ) {
             internal fun createFeriepengeutbetaling(alder: Alder): Feriepengeutbetaling {
                 val feriepengeberegner = createFeriepengeberegner(alder)
@@ -797,10 +807,10 @@ internal data class PersonData(
             }
 
             data class UtbetaltDagData(
-                internal val type: String,
-                private val orgnummer: String,
-                private val dato: LocalDate,
-                private val beløp: Int,
+                val type: String,
+                val orgnummer: String,
+                val dato: LocalDate,
+                val beløp: Int,
             ) {
                 internal fun createUtbetaltDag() =
                     when (type) {
@@ -815,22 +825,22 @@ internal data class PersonData(
         }
 
         data class SykmeldingsperiodeData(
-            private val fom: LocalDate,
-            private val tom: LocalDate
+            val fom: LocalDate,
+            val tom: LocalDate
         ) {
             internal fun tilPeriode() = fom til tom
         }
 
         data class VedtaksperiodeData(
-            private val id: UUID,
-            private val tilstand: TilstandType,
-            private val generasjoner: List<GenerasjonData>,
-            private val opprettet: LocalDateTime,
-            private val oppdatert: LocalDateTime
+            val id: UUID,
+            val tilstand: TilstandType,
+            val generasjoner: List<GenerasjonData>,
+            val opprettet: LocalDateTime,
+            val oppdatert: LocalDateTime
         ) {
             data class DokumentsporingData(
-                private val dokumentId: UUID,
-                private val dokumenttype: DokumentTypeData
+                val dokumentId: UUID,
+                val dokumenttype: DokumentTypeData
             ) {
                 fun tilModellobjekt() = dokumenttype.tilModelltype(dokumentId)
             }
@@ -850,12 +860,12 @@ internal data class PersonData(
             }
 
             data class GenerasjonData(
-                private val id: UUID,
-                private val tilstand: TilstandData,
-                private val vedtakFattet: LocalDateTime?,
-                private val avsluttet: LocalDateTime?,
-                private val kilde: KildeData,
-                private val endringer: List<EndringData>
+                val id: UUID,
+                val tilstand: TilstandData,
+                val vedtakFattet: LocalDateTime?,
+                val avsluttet: LocalDateTime?,
+                val kilde: KildeData,
+                val endringer: List<EndringData>
             ) {
                 internal enum class TilstandData {
                     UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING, VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, TIL_INFOTRYGD;
@@ -921,16 +931,16 @@ internal data class PersonData(
                 }
 
                 data class EndringData(
-                    private val id: UUID,
+                    val id: UUID,
                     val tidsstempel: LocalDateTime,
-                    private val sykmeldingsperiodeFom: LocalDate,
-                    private val sykmeldingsperiodeTom: LocalDate,
-                    private val fom: LocalDate,
-                    private val tom: LocalDate,
-                    private val utbetalingId: UUID?,
-                    private val vilkårsgrunnlagId: UUID?,
-                    private val sykdomstidslinje: SykdomstidslinjeData,
-                    private val dokumentsporing: DokumentsporingData
+                    val sykmeldingsperiodeFom: LocalDate,
+                    val sykmeldingsperiodeTom: LocalDate,
+                    val fom: LocalDate,
+                    val tom: LocalDate,
+                    val utbetalingId: UUID?,
+                    val vilkårsgrunnlagId: UUID?,
+                    val sykdomstidslinje: SykdomstidslinjeData,
+                    val dokumentsporing: DokumentsporingData
                 ) {
                     fun tilModellobjekt(grunnlagoppslag: (UUID) -> VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetalinger: Map<UUID, Utbetaling>) =
                         Generasjoner.Generasjon.Endring(
@@ -994,8 +1004,8 @@ internal data class PersonData(
             }
 
             data class DataForSimuleringData(
-                private val totalbeløp: Int,
-                private val perioder: List<SimulertPeriode>
+                val totalbeløp: Int,
+                val perioder: List<SimulertPeriode>
             ) {
                 internal fun parseDataForSimulering() = SimuleringResultat(
                     totalbeløp = totalbeløp,
@@ -1003,9 +1013,9 @@ internal data class PersonData(
                 )
 
                 data class SimulertPeriode(
-                    private val fom: LocalDate,
-                    private val tom: LocalDate,
-                    private val utbetalinger: List<SimulertUtbetaling>
+                    val fom: LocalDate,
+                    val tom: LocalDate,
+                    val utbetalinger: List<SimulertUtbetaling>
                 ) {
 
                     internal fun parsePeriode(): SimuleringResultat.SimulertPeriode {
@@ -1017,10 +1027,10 @@ internal data class PersonData(
                 }
 
                 data class SimulertUtbetaling(
-                    private val forfallsdato: LocalDate,
-                    private val utbetalesTil: Mottaker,
-                    private val feilkonto: Boolean,
-                    private val detaljer: List<Detaljer>
+                    val forfallsdato: LocalDate,
+                    val utbetalesTil: Mottaker,
+                    val feilkonto: Boolean,
+                    val detaljer: List<Detaljer>
                 ) {
                     internal fun parseUtbetaling(): SimuleringResultat.SimulertUtbetaling {
                         return SimuleringResultat.SimulertUtbetaling(
@@ -1036,16 +1046,16 @@ internal data class PersonData(
                 }
 
                 data class Detaljer(
-                    private val fom: LocalDate,
-                    private val tom: LocalDate,
-                    private val konto: String,
-                    private val beløp: Int,
-                    private val klassekode: Klassekode,
-                    private val uføregrad: Int,
-                    private val utbetalingstype: String,
-                    private val tilbakeføring: Boolean,
-                    private val sats: Sats,
-                    private val refunderesOrgnummer: String
+                    val fom: LocalDate,
+                    val tom: LocalDate,
+                    val konto: String,
+                    val beløp: Int,
+                    val klassekode: Klassekode,
+                    val uføregrad: Int,
+                    val utbetalingstype: String,
+                    val tilbakeføring: Boolean,
+                    val sats: Sats,
+                    val refunderesOrgnummer: String
                 ) {
                     internal fun parseDetaljer(): SimuleringResultat.Detaljer {
                         return SimuleringResultat.Detaljer(
@@ -1088,13 +1098,13 @@ internal data class PersonData(
         }
 
         data class RefusjonData(
-            private val meldingsreferanseId: UUID,
-            private val førsteFraværsdag: LocalDate?,
-            private val arbeidsgiverperioder: List<PeriodeData>,
-            private val beløp: Double?,
-            private val sisteRefusjonsdag: LocalDate?,
-            private val endringerIRefusjon: List<EndringIRefusjonData>,
-            private val tidsstempel: LocalDateTime
+            val meldingsreferanseId: UUID,
+            val førsteFraværsdag: LocalDate?,
+            val arbeidsgiverperioder: List<PeriodeData>,
+            val beløp: Double?,
+            val sisteRefusjonsdag: LocalDate?,
+            val endringerIRefusjon: List<EndringIRefusjonData>,
+            val tidsstempel: LocalDateTime
         ) {
             internal companion object {
                 internal fun List<RefusjonData>.parseRefusjon() = Refusjonshistorikk().apply {
@@ -1115,8 +1125,8 @@ internal data class PersonData(
             }
 
             data class EndringIRefusjonData(
-                private val beløp: Double,
-                private val endringsdato: LocalDate
+                val beløp: Double,
+                val endringsdato: LocalDate
             ) {
                 internal companion object {
                     internal fun List<EndringIRefusjonData>.parseEndringerIRefusjon() = map {
@@ -1131,11 +1141,11 @@ internal data class PersonData(
     }
 
     data class SykdomshistorikkData(
-        private val tidsstempel: LocalDateTime,
-        private val id: UUID,
-        private val hendelseId: UUID?,
-        private val hendelseSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData,
-        private val beregnetSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData
+        val tidsstempel: LocalDateTime,
+        val id: UUID,
+        val hendelseId: UUID?,
+        val hendelseSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData,
+        val beregnetSykdomstidslinje: ArbeidsgiverData.SykdomstidslinjeData
     ) {
 
         internal companion object {
@@ -1156,24 +1166,24 @@ internal data class PersonData(
 
     data class UtbetalingData(
         val id: UUID,
-        private val korrelasjonsId: UUID,
-        private val fom: LocalDate,
-        private val tom: LocalDate,
-        private val annulleringer: List<UUID>?,
-        private val utbetalingstidslinje: UtbetalingstidslinjeData,
-        private val arbeidsgiverOppdrag: OppdragData,
-        private val personOppdrag: OppdragData,
-        private val tidsstempel: LocalDateTime,
-        private val type: String,
-        private val status: String,
-        private val maksdato: LocalDate,
-        private val forbrukteSykedager: Int?,
-        private val gjenståendeSykedager: Int?,
-        private val vurdering: VurderingData?,
-        private val overføringstidspunkt: LocalDateTime?,
-        private val avstemmingsnøkkel: Long?,
-        private val avsluttet: LocalDateTime?,
-        private val oppdatert: LocalDateTime
+        val korrelasjonsId: UUID,
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val annulleringer: List<UUID>?,
+        val utbetalingstidslinje: UtbetalingstidslinjeData,
+        val arbeidsgiverOppdrag: OppdragData,
+        val personOppdrag: OppdragData,
+        val tidsstempel: LocalDateTime,
+        val type: String,
+        val status: String,
+        val maksdato: LocalDate,
+        val forbrukteSykedager: Int?,
+        val gjenståendeSykedager: Int?,
+        val vurdering: VurderingData?,
+        val overføringstidspunkt: LocalDateTime?,
+        val avstemmingsnøkkel: Long?,
+        val avsluttet: LocalDateTime?,
+        val oppdatert: LocalDateTime
     ) {
 
         internal fun konverterTilUtbetaling(andreUtbetalinger: List<Pair<UUID, Utbetaling>>) = Utbetaling.ferdigUtbetaling(
@@ -1198,11 +1208,11 @@ internal data class PersonData(
         )
 
         data class VurderingData(
-            private val godkjent: Boolean,
-            private val ident: String,
-            private val epost: String,
-            private val tidspunkt: LocalDateTime,
-            private val automatiskBehandling: Boolean
+            val godkjent: Boolean,
+            val ident: String,
+            val epost: String,
+            val tidspunkt: LocalDateTime,
+            val automatiskBehandling: Boolean
         ) {
             internal fun konverterTilVurdering() = Utbetaling.ferdigVurdering(
                 godkjent = godkjent,
@@ -1215,18 +1225,18 @@ internal data class PersonData(
     }
 
     data class OppdragData(
-        private val mottaker: String,
-        private val fagområde: String,
-        private val linjer: List<UtbetalingslinjeData>,
-        private val fagsystemId: String,
-        private val endringskode: String,
-        private val tidsstempel: LocalDateTime,
-        private val nettoBeløp: Int,
-        private val avstemmingsnøkkel: Long?,
-        private val status: Oppdragstatus?,
-        private val overføringstidspunkt: LocalDateTime?,
-        private val erSimulert: Boolean,
-        private val simuleringsResultat: ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData?
+        val mottaker: String,
+        val fagområde: String,
+        val linjer: List<UtbetalingslinjeData>,
+        val fagsystemId: String,
+        val endringskode: String,
+        val tidsstempel: LocalDateTime,
+        val nettoBeløp: Int,
+        val avstemmingsnøkkel: Long?,
+        val status: Oppdragstatus?,
+        val overføringstidspunkt: LocalDateTime?,
+        val erSimulert: Boolean,
+        val simuleringsResultat: ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData?
     ) {
         internal fun konverterTilOppdrag(): Oppdrag = Oppdrag.ferdigOppdrag(
             mottaker = mottaker,
@@ -1245,17 +1255,17 @@ internal data class PersonData(
     }
 
     data class UtbetalingslinjeData(
-        private val fom: LocalDate,
-        private val tom: LocalDate,
-        private val satstype: String,
-        private val sats: Int,
-        private val grad: Int?,
-        private val refFagsystemId: String?,
-        private val delytelseId: Int,
-        private val refDelytelseId: Int?,
-        private val endringskode: String,
-        private val klassekode: String,
-        private val datoStatusFom: LocalDate?
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val satstype: String,
+        val sats: Int,
+        val grad: Int?,
+        val refFagsystemId: String?,
+        val delytelseId: Int,
+        val refDelytelseId: Int?,
+        val endringskode: String,
+        val klassekode: String,
+        val datoStatusFom: LocalDate?
     ) {
 
         internal fun konverterTilUtbetalingslinje(): Utbetalingslinje = Utbetalingslinje.ferdigUtbetalingslinje(
@@ -1357,18 +1367,21 @@ internal data class PersonData(
         }
 
         data class UtbetalingsdagData(
-            private val type: TypeData,
-            private val aktuellDagsinntekt: Double,
-            private val beregningsgrunnlag: Double,
-            private val dekningsgrunnlag: Double,
-            private val grunnbeløpgrense: Double?,
-            private val begrunnelser: List<BegrunnelseData>?,
-            private val grad: Double,
-            private val totalGrad: Double,
-            private val arbeidsgiverRefusjonsbeløp: Double,
-            private val arbeidsgiverbeløp: Double?,
-            private val personbeløp: Double?,
-            private val er6GBegrenset: Boolean?
+            val type: TypeData,
+            val aktuellDagsinntekt: Double,
+            val beregningsgrunnlag: Double,
+            val dekningsgrunnlag: Double,
+            val grunnbeløpgrense: Double?,
+            val begrunnelser: List<BegrunnelseData>?,
+            val grad: Double,
+            val totalGrad: Double,
+            val arbeidsgiverRefusjonsbeløp: Double,
+            val arbeidsgiverbeløp: Double?,
+            val personbeløp: Double?,
+            val er6GBegrenset: Boolean?,
+            val dato: LocalDate?,
+            val fom: LocalDate?,
+            val tom: LocalDate?
         ) {
             private val builder: Økonomi.Builder = Økonomi.Builder()
 
@@ -1393,9 +1406,7 @@ internal data class PersonData(
                     )
             }
 
-            // Gjør så vi kan ha dato/fom og tom på samme nivå som resten av verdiene i utbetalingsdata
-            @JsonUnwrapped
-            private lateinit var datoer: DateRange
+            private val datoer: DateRange = if (dato != null) DateRange.Single(dato) else DateRange.Range(fom!!, tom!!)
 
             private val økonomi get() = builder.build()
 

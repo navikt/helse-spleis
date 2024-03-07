@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.dto.InntektsopplysningDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -111,4 +112,13 @@ internal class Inntektsmelding(
         }
         inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel))
     }
+
+    override fun dto() =
+        InntektsopplysningDto.InntektsmeldingDto(
+            id = id,
+            hendelseId = hendelseId,
+            dato = dato,
+            beløp = beløp.dto(),
+            tidsstempel = tidsstempel
+        )
 }

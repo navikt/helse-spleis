@@ -3,6 +3,8 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.dto.InfotrygdArbeidsgiverutbetalingsperiodeDto
+import no.nav.helse.dto.InfotrygdPersonutbetalingsperiodeDto
 import no.nav.helse.person.InfotrygdperiodeVisitor
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -87,6 +89,13 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
     override fun accept(visitor: InfotrygdperiodeVisitor) {
         visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
     }
+
+    internal fun dto() = InfotrygdArbeidsgiverutbetalingsperiodeDto(
+        orgnr = orgnr,
+        periode = periode.dto(),
+        grad = grad.dto(),
+        inntekt = inntekt.dto()
+    )
 }
 
 class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
@@ -95,4 +104,11 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
     override fun accept(visitor: InfotrygdperiodeVisitor) {
         visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
     }
+
+    internal fun dto() = InfotrygdPersonutbetalingsperiodeDto(
+        orgnr = orgnr,
+        periode = periode.dto(),
+        grad = grad.dto(),
+        inntekt = inntekt.dto()
+    )
 }

@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
+import no.nav.helse.dto.SykepengegrunnlagDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -463,5 +464,13 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
         arbeidsgiverInntektsopplysninger.firstNotNullOfOrNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }
+
+    internal fun dto() = SykepengegrunnlagDto(
+        arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },
+        deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
+        vurdertInfotrygd = this.vurdertInfotrygd,
+        sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
+        `6G` = this.`6G`.dto()
+    )
 }
 

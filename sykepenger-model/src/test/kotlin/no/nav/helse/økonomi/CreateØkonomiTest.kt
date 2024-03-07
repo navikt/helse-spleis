@@ -119,7 +119,10 @@ internal class CreateØkonomiTest {
         arbeidsgiverRefusjonsbeløp,
         arbeidsgiverbeløp,
         personbeløp,
-        er6GBegrenset
+        er6GBegrenset,
+        dato = 1.januar,
+        fom = null,
+        tom = null
     )
 
     private fun sykdomstidslinjedag(grad: Double) = PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData(
@@ -127,7 +130,10 @@ internal class CreateØkonomiTest {
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
         grad,
         null,
-        null
+        null,
+        null,
+        null,
+        1.januar
     )
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
