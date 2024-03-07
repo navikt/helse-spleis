@@ -4,6 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.dto.AnsattPeriodeDto
+import no.nav.helse.dto.InntektsopplysningDto
 import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -134,6 +136,14 @@ internal class SkattSykepengegrunnlag private constructor(
             tidsstempel = this.tidsstempel
         )
     }
+    override fun dto() =
+        InntektsopplysningDto.SkattSykepengegrunnlagDto(
+            id = id,
+            hendelseId = hendelseId,
+            dato = dato,
+            tidsstempel = tidsstempel,
+            inntektsopplysninger = inntektsopplysninger.map { it.dto() },
+            ansattPerioder = ansattPerioder.map { it.dto() })
 }
 
 class AnsattPeriode(
@@ -151,4 +161,6 @@ class AnsattPeriode(
             .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
             .filter { it.gjelder(skjæringstidspunkt) }
     }
+
+    internal fun dto() = AnsattPeriodeDto(ansattFom, ansattTom)
 }

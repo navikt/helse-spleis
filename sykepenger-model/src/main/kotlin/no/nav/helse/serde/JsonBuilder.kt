@@ -1,6 +1,7 @@
 package no.nav.helse.serde
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -55,6 +56,9 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData
+import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.BegrunnelseData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -98,13 +102,26 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.ØkonomiBuilder
+import org.skyscreamer.jsonassert.JSONCompare
+import org.skyscreamer.jsonassert.JSONCompareMode
+import org.slf4j.LoggerFactory
 import kotlin.collections.set
 
+private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 fun Person.serialize(pretty: Boolean = false): SerialisertPerson {
+    val ny = tilSerialisertPerson(pretty)
     val jsonBuilder = JsonBuilder()
     this.accept(jsonBuilder)
-    return SerialisertPerson(if (pretty) jsonBuilder.toPretty() else jsonBuilder.toJson())
+    return SerialisertPerson(if (pretty) jsonBuilder.toPretty() else jsonBuilder.toJson()).also { gammel ->
+        // deserialiserer via personData for å fjerne felter som JsonBuilder putter på kun pga. spanner
+        val gammelJson = SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree<ObjectNode>(serdeObjectMapper.readValue<PersonData>(gammel.json))).toString()
+        val compareResult = JSONCompare.compareJSON(gammelJson, ny.json, JSONCompareMode.STRICT)
+        if (compareResult.failed()) {
+            sikkerLogg.error("Ny JSON gir ulikt resultat i forhold til dagens: {}", compareResult.message)
+        }
+    }
 }
+
 
 internal class JsonBuilder : AbstractBuilder() {
 
@@ -117,7 +134,7 @@ internal class JsonBuilder : AbstractBuilder() {
             jsonNode = it
         }
     }
-    
+
     internal fun toJson() = build().toString()
     internal fun toPretty() = build().toPrettyString()
     override fun toString() = toJson()
@@ -1626,7 +1643,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 generasjoner.add(mapOf(
                     "id" to id,
                     "tidsstempel" to tidsstempel,
-                    "tilstand" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
+                    "tilstand" to TilstandData.tilEnum(tilstand),
                     "fom" to periode.start,
                     "tom" to periode.endInclusive,
                     "kilde" to kilde.let {
@@ -1634,7 +1651,7 @@ internal class JsonBuilder : AbstractBuilder() {
                             "meldingsreferanseId" to it.meldingsreferanseId,
                             "innsendt" to it.innsendt,
                             "registrert" to it.registert,
-                            "avsender" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData.tilEnum(it.avsender)
+                            "avsender" to AvsenderData.tilEnum(it.avsender)
                         )
                     },
                     "vedtakFattet" to vedtakFattet,
@@ -1976,14 +1993,14 @@ internal class JsonBuilder : AbstractBuilder() {
         private val type: TypeData
     ) {
         private var økonomiBuilder: ØkonomiJsonBuilder? = null
-        private var begrunnelser: List<PersonData.UtbetalingstidslinjeData.BegrunnelseData>? = null
+        private var begrunnelser: List<BegrunnelseData>? = null
 
         fun økonomi(økonomi: Økonomi) = apply {
             this.økonomiBuilder = ØkonomiJsonBuilder().also { økonomi.builder(it) }
         }
 
         fun begrunnelser(begrunnelser: List<Begrunnelse>) = apply {
-            this.begrunnelser = begrunnelser.map { PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it) }
+            this.begrunnelser = begrunnelser.map { BegrunnelseData.fraBegrunnelse(it) }
         }
 
         fun build() = mutableMapOf<String, Any>().apply {

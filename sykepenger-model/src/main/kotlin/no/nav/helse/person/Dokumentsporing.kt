@@ -3,6 +3,8 @@ package no.nav.helse.person
 import java.util.Objects
 import java.util.UUID
 import no.nav.helse.etterlevelse.KontekstType
+import no.nav.helse.dto.DokumentsporingDto
+import no.nav.helse.dto.DokumenttypeDto
 
 class Dokumentsporing private constructor(private val id: UUID, private val dokumentType: DokumentType) {
 
@@ -49,5 +51,21 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
         return Objects.hash(id, dokumentType)
     }
     override fun toString() = "$dokumentType ($id)"
+
+    internal fun dto() = DokumentsporingDto(
+        id = this.id,
+        type = when (dokumentType) {
+            DokumentType.Sykmelding -> DokumenttypeDto.Sykmelding
+            DokumentType.Søknad -> DokumenttypeDto.Søknad
+            DokumentType.InntektsmeldingInntekt -> DokumenttypeDto.InntektsmeldingInntekt
+            DokumentType.InntektsmeldingDager -> DokumenttypeDto.InntektsmeldingDager
+            DokumentType.OverstyrTidslinje -> DokumenttypeDto.OverstyrTidslinje
+            DokumentType.OverstyrInntekt -> DokumenttypeDto.OverstyrInntekt
+            DokumentType.OverstyrRefusjon -> DokumenttypeDto.OverstyrRefusjon
+            DokumentType.OverstyrArbeidsgiveropplysninger -> DokumenttypeDto.OverstyrArbeidsgiveropplysninger
+            DokumentType.OverstyrArbeidsforhold -> DokumenttypeDto.OverstyrArbeidsforhold
+            DokumentType.SkjønnsmessigFastsettelse -> DokumenttypeDto.SkjønnsmessigFastsettelse
+        }
+    )
 }
 

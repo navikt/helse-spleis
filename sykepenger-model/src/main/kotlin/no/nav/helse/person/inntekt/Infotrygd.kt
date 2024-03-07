@@ -3,6 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.InntektsopplysningDto
 import no.nav.helse.økonomi.Inntekt
 
 internal class Infotrygd(
@@ -25,4 +26,7 @@ internal class Infotrygd(
         if (other !is Infotrygd) return false
         return this.dato == other.dato && this.beløp == other.beløp
     }
+
+    override fun dto() =
+        InntektsopplysningDto.InfotrygdDto(id, hendelseId, dato, beløp.dto(), tidsstempel)
 }

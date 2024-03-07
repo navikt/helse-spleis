@@ -12,6 +12,10 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.valider
 import no.nav.helse.hendelser.utbetaling.vurdering
+import no.nav.helse.dto.UtbetalingDto
+import no.nav.helse.dto.UtbetalingTilstandDto
+import no.nav.helse.dto.UtbetalingVurderingDto
+import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -471,7 +475,7 @@ class Utbetaling private constructor(
     }
     override fun toString() = "$type(${tilstand.status}) - $periode"
 
-    internal interface Tilstand {
+    internal sealed interface Tilstand {
         val status: Utbetalingstatus
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
 
@@ -754,8 +758,52 @@ class Utbetaling private constructor(
                 utbetaling.type == ANNULLERING -> Annullert
                 else -> GodkjentUtenUtbetaling
             }
+
+        fun dto() = UtbetalingVurderingDto(
+            godkjent = godkjent,
+            ident = ident,
+            epost = epost,
+            tidspunkt = tidspunkt,
+            automatiskBehandling = automatiskBehandling
+        )
     }
 
+    fun dto() = UtbetalingDto(
+        id = this.id,
+        korrelasjonsId = this.korrelasjonsId,
+        periode = this.periode.dto(),
+        utbetalingstidslinje = this.utbetalingstidslinje.dto(),
+        arbeidsgiverOppdrag = this.arbeidsgiverOppdrag.dto(),
+        personOppdrag = this.personOppdrag.dto(),
+        tidsstempel = this.tidsstempel,
+        tilstand = when (tilstand) {
+            Annullert -> UtbetalingTilstandDto.ANNULLERT
+            Forkastet -> UtbetalingTilstandDto.FORKASTET
+            Godkjent -> UtbetalingTilstandDto.GODKJENT
+            GodkjentUtenUtbetaling -> UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING
+            IkkeGodkjent -> UtbetalingTilstandDto.IKKE_GODKJENT
+            Ny -> UtbetalingTilstandDto.NY
+            Overført -> UtbetalingTilstandDto.OVERFØRT
+            Ubetalt -> UtbetalingTilstandDto.IKKE_UTBETALT
+            Utbetalt -> UtbetalingTilstandDto.UTBETALT
+        },
+        type = when (type) {
+            Utbetalingtype.UTBETALING -> UtbetalingtypeDto.UTBETALING
+            Utbetalingtype.ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
+            Utbetalingtype.ANNULLERING -> UtbetalingtypeDto.ANNULLERING
+            Utbetalingtype.REVURDERING -> UtbetalingtypeDto.REVURDERING
+            Utbetalingtype.FERIEPENGER -> UtbetalingtypeDto.FERIEPENGER
+        },
+        maksdato = this.maksdato,
+        forbrukteSykedager = this.forbrukteSykedager,
+        gjenståendeSykedager = this.gjenståendeSykedager,
+        annulleringer = this.annulleringer.mapNotNull { it.id },
+        vurdering = this.vurdering?.dto(),
+        overføringstidspunkt = overføringstidspunkt,
+        avstemmingsnøkkel = avstemmingsnøkkel,
+        avsluttet = avsluttet,
+        oppdatert = oppdatert
+    )
 }
 
 enum class Utbetalingstatus {

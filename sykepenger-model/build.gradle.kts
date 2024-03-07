@@ -12,8 +12,9 @@ dependencies {
         exclude("com.fasterxml.jackson.dataformat")
     }
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
-    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
-
+    // <midlertidig begrunnelse="sammenligner json mellom JsonBuilder og ny PersonDto. scope skal tilbake til testImplementation">
+    implementation("org.skyscreamer:jsonassert:$jsonassertVersion")
+    // </midlertidig>
     testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
 }
 

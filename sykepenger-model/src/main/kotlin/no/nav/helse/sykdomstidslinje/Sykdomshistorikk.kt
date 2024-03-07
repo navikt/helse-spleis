@@ -3,6 +3,8 @@ package no.nav.helse.sykdomstidslinje
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.dto.SykdomshistorikkElementDto
+import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
@@ -131,8 +133,19 @@ class Sykdomshistorikk private constructor(
             )
 
         }
+
+        internal fun dto() = SykdomshistorikkElementDto(
+            id = id,
+            hendelseId = hendelseId,
+            tidsstempel = tidsstempel,
+            hendelseSykdomstidslinje = hendelseSykdomstidslinje.dto(),
+            beregnetSykdomstidslinje = beregnetSykdomstidslinje.dto(),
+        )
     }
 
+    internal fun dto() = SykdomshistorikkDto(
+        elementer = elementer.map { it.dto() }
+    )
     internal companion object {
         internal fun ferdigSykdomshistorikk(historikk: List<Element>): Sykdomshistorikk =
             Sykdomshistorikk(historikk.toMutableList())

@@ -28,6 +28,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
+import no.nav.helse.dto.PersonDto
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
@@ -152,9 +153,8 @@ internal class TestPerson(
     fun serialize(pretty: Boolean = false): SerialisertPerson {
         return person.serialize(pretty)
     }
-
-    fun serialize(): SerialisertPerson {
-        return person.serialize()
+    fun dto(): PersonDto {
+        return person.dto()
     }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {

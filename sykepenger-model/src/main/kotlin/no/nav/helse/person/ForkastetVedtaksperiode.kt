@@ -1,11 +1,9 @@
 package no.nav.helse.person
 
-import java.util.UUID
-import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.dto.ForkastetVedtaksperiodeDto
 import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class ForkastetVedtaksperiode(
@@ -44,4 +42,6 @@ internal class ForkastetVedtaksperiode(
                 .filter { arbeidsgiverperiode.hørerTil(it.periode()) }
 
     }
+
+    internal fun dto() = ForkastetVedtaksperiodeDto(vedtaksperiode.dto())
 }

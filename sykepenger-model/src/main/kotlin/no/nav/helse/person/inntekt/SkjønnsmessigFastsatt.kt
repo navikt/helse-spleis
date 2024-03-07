@@ -3,8 +3,8 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.dto.InntektsopplysningDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
@@ -56,4 +56,13 @@ class SkjønnsmessigFastsatt internal constructor(
 
     override fun erSamme(other: Inntektsopplysning) =
         other is SkjønnsmessigFastsatt && this.dato == other.dato && this.beløp == other.beløp
+    override fun dto() =
+        InntektsopplysningDto.SkjønnsmessigFastsattDto(
+            id = id,
+            hendelseId = hendelseId,
+            dato = dato,
+            beløp = beløp.dto(),
+            tidsstempel = tidsstempel,
+            overstyrtInntekt = overstyrtInntekt?.dto()!!
+        )
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.dto.ØkonomiDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -354,6 +355,19 @@ class Økonomi private constructor(
             )
         }
     }
+
+    fun dto() = ØkonomiDto(
+        grad = grad.dto(),
+        totalGrad = totalGrad.dto(),
+        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp.dto(),
+        aktuellDagsinntekt = aktuellDagsinntekt.dto(),
+        beregningsgrunnlag = beregningsgrunnlag.dto(),
+        dekningsgrunnlag = dekningsgrunnlag.dto(),
+        grunnbeløpgrense = grunnbeløpgrense?.dto(),
+        arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
+        personbeløp = personbeløp?.dto(),
+        er6GBegrenset = er6GBegrenset
+    )
 }
 
 abstract class ØkonomiBuilder {

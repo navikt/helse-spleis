@@ -2,6 +2,9 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.erHelg
+import no.nav.helse.dto.SykdomstidslinjeDagDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto
+import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Økonomi
 
@@ -82,6 +85,8 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.UkjentDagDto(dato, kilde)
     }
 
     internal class Arbeidsdag(
@@ -91,6 +96,7 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsdagDto(dato, kilde)
     }
 
     internal class Arbeidsgiverdag(
@@ -100,6 +106,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato, kilde, økonomi.dto())
     }
 
     internal class Feriedag(
@@ -109,6 +116,7 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.FeriedagDto(dato, kilde)
     }
 
     internal class ArbeidIkkeGjenopptattDag(
@@ -116,6 +124,7 @@ internal sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto(dato, kilde)
     }
 
     internal class FriskHelgedag(
@@ -125,6 +134,8 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.FriskHelgedagDto(dato, kilde)
     }
 
     internal class ArbeidsgiverHelgedag(
@@ -134,6 +145,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto(dato, kilde, økonomi.dto())
     }
 
     internal class Sykedag(
@@ -143,6 +155,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagDto(dato, kilde, økonomi.dto())
     }
 
     internal class ForeldetSykedag(
@@ -152,6 +165,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ForeldetSykedagDto(dato, kilde, økonomi.dto())
     }
 
     internal class SykHelgedag(
@@ -161,6 +175,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykHelgedagDto(dato, kilde, økonomi.dto())
     }
 
     internal class SykedagNav(
@@ -169,6 +184,7 @@ internal sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagNavDto(dato, kilde, økonomi.dto())
     }
 
     internal class Permisjonsdag(
@@ -178,6 +194,7 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.PermisjonsdagDto(dato, kilde)
     }
 
     internal class ProblemDag(
@@ -191,6 +208,7 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde, other, melding)
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ProblemDagDto(dato, kilde, other.dto(), melding)
     }
 
     internal class AndreYtelser(
@@ -199,12 +217,28 @@ internal sealed class Dag(
         private val ytelse: AnnenYtelse,
     ) : Dag(dato, kilde) {
         enum class AnnenYtelse {
-            Foreldrepenger, AAP, Omsorgspenger, Pleiepenger, Svangerskapspenger, Opplæringspenger, Dagpenger
+            Foreldrepenger, AAP, Omsorgspenger, Pleiepenger, Svangerskapspenger, Opplæringspenger, Dagpenger;
+
+            fun dto() = when (this) {
+                Foreldrepenger -> YtelseDto.Foreldrepenger
+                AAP -> YtelseDto.AAP
+                Omsorgspenger -> YtelseDto.Omsorgspenger
+                Pleiepenger -> YtelseDto.Pleiepenger
+                Svangerskapspenger -> YtelseDto.Svangerskapspenger
+                Opplæringspenger -> YtelseDto.Opplæringspenger
+                Dagpenger -> YtelseDto.Dagpenger
+            }
         }
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde, ytelse)
+
+        override fun dto(dato: LocalDate, kilde: HendelseskildeDto) =
+            SykdomstidslinjeDagDto.AndreYtelserDto(dato, kilde, ytelse.dto())
     }
+
+    internal fun dto() = dto(dato, kilde.dto())
+    protected abstract fun dto(dato: LocalDate, kilde: HendelseskildeDto): SykdomstidslinjeDagDto
 }
 
 internal interface SykdomstidslinjeDagVisitor {
