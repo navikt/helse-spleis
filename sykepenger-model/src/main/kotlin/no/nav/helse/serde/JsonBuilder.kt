@@ -55,6 +55,9 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData
+import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.BegrunnelseData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -106,6 +109,7 @@ fun Person.serialize(pretty: Boolean = false): SerialisertPerson {
     return SerialisertPerson(if (pretty) jsonBuilder.toPretty() else jsonBuilder.toJson())
 }
 
+
 internal class JsonBuilder : AbstractBuilder() {
 
     private lateinit var personBuilder: PersonState
@@ -117,7 +121,7 @@ internal class JsonBuilder : AbstractBuilder() {
             jsonNode = it
         }
     }
-    
+
     internal fun toJson() = build().toString()
     internal fun toPretty() = build().toPrettyString()
     override fun toString() = toJson()
@@ -1628,15 +1632,15 @@ internal class JsonBuilder : AbstractBuilder() {
                 generasjoner.add(mapOf(
                     "id" to id,
                     "tidsstempel" to tidsstempel,
-                    "tilstand" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
+                    "tilstand" to TilstandData.tilEnum(tilstand),
                     "fom" to periode.start,
                     "tom" to periode.endInclusive,
-                    "kilde" to kilde?.let {
+                    "kilde" to kilde.let {
                         mapOf(
                             "meldingsreferanseId" to it.meldingsreferanseId,
                             "innsendt" to it.innsendt,
                             "registrert" to it.registert,
-                            "avsender" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData.tilEnum(it.avsender)
+                            "avsender" to AvsenderData.tilEnum(it.avsender)
                         )
                     },
                     "vedtakFattet" to vedtakFattet,
@@ -1978,14 +1982,14 @@ internal class JsonBuilder : AbstractBuilder() {
         private val type: TypeData
     ) {
         private var økonomiBuilder: ØkonomiJsonBuilder? = null
-        private var begrunnelser: List<PersonData.UtbetalingstidslinjeData.BegrunnelseData>? = null
+        private var begrunnelser: List<BegrunnelseData>? = null
 
         fun økonomi(økonomi: Økonomi) = apply {
             this.økonomiBuilder = ØkonomiJsonBuilder().also { økonomi.builder(it) }
         }
 
         fun begrunnelser(begrunnelser: List<Begrunnelse>) = apply {
-            this.begrunnelser = begrunnelser.map { PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it) }
+            this.begrunnelser = begrunnelser.map { BegrunnelseData.fraBegrunnelse(it) }
         }
 
         fun build() = mutableMapOf<String, Any>().apply {

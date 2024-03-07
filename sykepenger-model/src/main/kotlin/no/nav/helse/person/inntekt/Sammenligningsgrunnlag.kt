@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import no.nav.helse.memento.SammenligningsgrunnlagMemento
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattISpleisBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
@@ -31,4 +32,9 @@ internal class Sammenligningsgrunnlag(
     internal fun build(builder: FastsattISpleisBuilder) {
         builder.innrapportertÅrsinntekt(sammenligningsgrunnlag)
     }
+
+    internal fun memento() = SammenligningsgrunnlagMemento(
+        sammenligningsgrunnlag = this.sammenligningsgrunnlag.memento(),
+        arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.memento() }
+    )
 }

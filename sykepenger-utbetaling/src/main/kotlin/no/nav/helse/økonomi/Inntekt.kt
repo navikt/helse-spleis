@@ -2,6 +2,7 @@ package no.nav.helse.økonomi
 
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.memento.InntektMemento
 import no.nav.helse.memoize
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.roundToInt
@@ -92,6 +93,12 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     fun avviksprosent(other: Inntekt) = Avviksprosent.avvik(this.årlig, other.årlig)
 
+    fun memento() = InntektMemento(
+        årlig = this.årlig,
+        månedligDouble = tilMånedligDouble(),
+        dagligDouble = tilDagligDouble(),
+        dagligInt = tilDagligInt()
+    )
 }
 
 interface DekningsgradKilde {

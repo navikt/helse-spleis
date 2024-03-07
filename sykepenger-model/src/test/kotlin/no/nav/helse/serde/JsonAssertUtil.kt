@@ -13,10 +13,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.math.BigDecimal
 import java.math.RoundingMode
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Assertions
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 
-@JsonIgnoreProperties("jurist", "aktivitetslogg")
+@JsonIgnoreProperties("jurist", "aktivitetslogg", "observers")
 private class PersonMixin
 
 @JsonIgnoreProperties("person", "jurist")
@@ -57,7 +57,7 @@ private class SkattSykepengegrunnlagMixin
 @JsonIgnoreProperties("opptjeningsdager\$delegate")
 private class OpptjeningMixin
 
-@JsonIgnoreProperties()
+@JsonIgnoreProperties("alder")
 private class SykepengegrunnlagMixin
 
 internal class BigDecimalSerializer : JsonSerializer<BigDecimal>() {
@@ -95,6 +95,12 @@ private val objectMapper = jacksonObjectMapper()
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
     .registerModule(JavaTimeModule())
+
+internal fun assertPersonEquals(expected: Person, actual: Person) {
+    val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)
+    val actualJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual)
+    JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT)
+}
 
 internal fun assertJsonEquals(expected: Any, actual: Any) {
     val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)

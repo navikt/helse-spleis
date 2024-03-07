@@ -15,6 +15,12 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
+import no.nav.helse.memento.MedlemskapsvurderingMemento
+import no.nav.helse.memento.OpptjeningMemento
+import no.nav.helse.memento.SykepengegrunnlagMemento
+import no.nav.helse.memento.VilkårsgrunnlagInnslagMemento
+import no.nav.helse.memento.VilkårsgrunnlagMemento
+import no.nav.helse.memento.VilkårsgrunnlaghistorikkMemento
 import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.erAktivtSkjæringstidspunkt
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -197,6 +203,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 elementer: Map<LocalDate, VilkårsgrunnlagElement>
             ): Innslag = Innslag(id, opprettet, elementer.toMutableMap())
         }
+
+        internal fun memento() = VilkårsgrunnlagInnslagMemento(
+            id = this.id,
+            opprettet = this.opprettet,
+            vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.value.memento() }
+        )
     }
 
     internal abstract class VilkårsgrunnlagElement(
@@ -418,6 +430,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     .maxByOrNull { it.skjæringstidspunkt }
             }
         }
+
+        internal fun memento(): VilkårsgrunnlagMemento =
+            memento(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag.memento(), opptjening?.memento())
+        protected abstract fun memento(
+            vilkårsgrunnlagId: UUID,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: SykepengegrunnlagMemento,
+            opptjening: OpptjeningMemento?
+        ): VilkårsgrunnlagMemento
     }
 
     internal class Grunnlagsdata(
@@ -504,6 +525,26 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
+
+        override fun memento(
+            vilkårsgrunnlagId: UUID,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: SykepengegrunnlagMemento,
+            opptjening: OpptjeningMemento?
+        ) = VilkårsgrunnlagMemento.Spleis(
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            sykepengegrunnlag = sykepengegrunnlag,
+            opptjening = opptjening,
+            medlemskapstatus = when (medlemskapstatus) {
+                Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingMemento.Ja
+                Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingMemento.Nei
+                Medlemskapsvurdering.Medlemskapstatus.VetIkke -> MedlemskapsvurderingMemento.VetIkke
+                Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål -> MedlemskapsvurderingMemento.UavklartMedBrukerspørsmål
+            },
+            vurdertOk = vurdertOk,
+            meldingsreferanseId = meldingsreferanseId
+        )
     }
 
     internal class InfotrygdVilkårsgrunnlag(
@@ -564,10 +605,21 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             result = 31 * result + sykepengegrunnlag.hashCode()
             return result
         }
+
+        override fun memento(
+            vilkårsgrunnlagId: UUID,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: SykepengegrunnlagMemento,
+            opptjening: OpptjeningMemento?
+        ) = VilkårsgrunnlagMemento.Infotrygd(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening)
     }
 
     internal companion object {
         internal fun ferdigVilkårsgrunnlagHistorikk(innslag: List<Innslag>) =
             VilkårsgrunnlagHistorikk(innslag.toMutableList())
     }
+
+    fun memento() = VilkårsgrunnlaghistorikkMemento(
+        historikk = this.historikk.map { it.memento() }
+    )
 }

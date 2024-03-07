@@ -14,6 +14,12 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.avvist
+import no.nav.helse.memento.AvsenderMemento
+import no.nav.helse.memento.GenerasjonEndringMemento
+import no.nav.helse.memento.GenerasjonMemento
+import no.nav.helse.memento.GenerasjonTilstandMemento
+import no.nav.helse.memento.GenerasjonerMemento
+import no.nav.helse.memento.GenerasjonkildeMemento
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
@@ -247,6 +253,18 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         internal fun accept(visitor: GenerasjonerVisitor) {
             visitor.preVisitGenerasjonkilde(meldingsreferanseId, innsendt, registert, avsender)
         }
+
+        internal fun memento() = GenerasjonkildeMemento(
+            meldingsreferanseId = this.meldingsreferanseId,
+            innsendt = this.innsendt,
+            registert = this.registert,
+            avsender = when (avsender) {
+                Avsender.SYKMELDT -> AvsenderMemento.SYKMELDT
+                Avsender.ARBEIDSGIVER -> AvsenderMemento.ARBEIDSGIVER
+                Avsender.SAKSBEHANDLER -> AvsenderMemento.SAKSBEHANDLER
+                Avsender.SYSTEM -> AvsenderMemento.SYSTEM
+            }
+        )
     }
 
 
@@ -395,6 +413,16 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                     builder = builder
                 )
             }
+            internal fun memento() = GenerasjonEndringMemento(
+                id = this.id,
+                tidsstempel = this.tidsstempel,
+                sykmeldingsperiode = this.sykmeldingsperiode.memento(),
+                periode = this.periode.memento(),
+                vilkårsgrunnlagId = this.grunnlagsdata?.memento()?.vilkårsgrunnlagId,
+                utbetalingId = this.utbetaling?.memento()?.id,
+                dokumentsporing = this.dokumentsporing.memento(),
+                sykdomstidslinje = this.sykdomstidslinje.memento()
+            )
         }
 
         internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
@@ -1129,5 +1157,29 @@ enum class Periodetilstand {
                 }
             }
         }
+
+        internal fun memento() = GenerasjonMemento(
+            id = this.id,
+            tilstand = when (tilstand) {
+                Tilstand.AnnullertPeriode -> GenerasjonTilstandMemento.ANNULLERT_PERIODE
+                Tilstand.AvsluttetUtenVedtak -> GenerasjonTilstandMemento.AVSLUTTET_UTEN_VEDTAK
+                Tilstand.Beregnet -> GenerasjonTilstandMemento.BEREGNET
+                Tilstand.BeregnetOmgjøring -> GenerasjonTilstandMemento.BEREGNET_OMGJØRING
+                Tilstand.BeregnetRevurdering -> GenerasjonTilstandMemento.BEREGNET_REVURDERING
+                Tilstand.RevurdertVedtakAvvist -> GenerasjonTilstandMemento.REVURDERT_VEDTAK_AVVIST
+                Tilstand.TilInfotrygd -> GenerasjonTilstandMemento.TIL_INFOTRYGD
+                Tilstand.Uberegnet -> GenerasjonTilstandMemento.UBEREGNET
+                Tilstand.UberegnetOmgjøring -> GenerasjonTilstandMemento.UBEREGNET_OMGJØRING
+                Tilstand.UberegnetRevurdering -> GenerasjonTilstandMemento.UBEREGNET_REVURDERING
+                Tilstand.VedtakFattet -> GenerasjonTilstandMemento.VEDTAK_FATTET
+                Tilstand.VedtakIverksatt -> GenerasjonTilstandMemento.VEDTAK_IVERKSATT
+            },
+            endringer = this.endringer.map { it.memento() },
+            vedtakFattet = this.vedtakFattet,
+            avsluttet = this.avsluttet,
+            kilde = this.kilde.memento()
+        )
     }
+
+    internal fun memento() = GenerasjonerMemento(generasjoner = this.generasjoner.map { it.memento() })
 }

@@ -11,6 +11,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
+import no.nav.helse.memento.FeriepengeberegnerMemento
+import no.nav.helse.memento.UtbetaltDagMemento
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.FeriepengeutbetalingsperiodeVisitor
@@ -172,6 +174,7 @@ internal class Feriepengeberegner(
             override fun accept(visitor: FeriepengeutbetalingVisitor) {
                 visitor.visitInfotrygdPersonDag(this, orgnummer, dato, beløp)
             }
+            override fun memento() = UtbetaltDagMemento.InfotrygdPerson(orgnummer, dato, beløp)
         }
 
         internal class InfotrygdArbeidsgiver(
@@ -182,6 +185,7 @@ internal class Feriepengeberegner(
             override fun accept(visitor: FeriepengeutbetalingVisitor) {
                 visitor.visitInfotrygdArbeidsgiverDag(this, orgnummer, dato, beløp)
             }
+            override fun memento() = UtbetaltDagMemento.InfotrygdArbeidsgiver(orgnummer, dato, beløp)
         }
 
         internal class SpleisArbeidsgiver(
@@ -192,6 +196,7 @@ internal class Feriepengeberegner(
             override fun accept(visitor: FeriepengeutbetalingVisitor) {
                 visitor.visitSpleisArbeidsgiverDag(this, orgnummer, dato, beløp)
             }
+            override fun memento() = UtbetaltDagMemento.SpleisArbeidsgiver(orgnummer, dato, beløp)
         }
         internal class SpleisPerson(
             orgnummer: String,
@@ -201,7 +206,11 @@ internal class Feriepengeberegner(
             override fun accept(visitor: FeriepengeutbetalingVisitor) {
                 visitor.visitSpleisPersonDag(this, orgnummer, dato, beløp)
             }
+
+            override fun memento() = UtbetaltDagMemento.SpleisPerson(orgnummer, dato, beløp)
         }
+
+        abstract fun memento(): UtbetaltDagMemento
     }
 
     private class FinnUtbetalteDagerVisitor(
@@ -366,4 +375,9 @@ internal class Feriepengeberegner(
             }
         }
     }
+
+    internal fun memento() = FeriepengeberegnerMemento(
+        opptjeningsår = this.opptjeningsår,
+        utbetalteDager = this.utbetalteDager.map { it.memento() }
+    )
 }

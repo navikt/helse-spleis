@@ -6,6 +6,9 @@ import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.memento.EndringIRefusjonMemento
+import no.nav.helse.memento.RefusjonMemento
+import no.nav.helse.memento.RefusjonshistorikkMemento
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.RefusjonshistorikkVisitor
@@ -163,7 +166,23 @@ internal class Refusjonshistorikk {
             internal fun accept(visitor: RefusjonshistorikkVisitor) {
                 visitor.visitEndringIRefusjon(beløp, endringsdato)
             }
+
+            internal fun memento() = EndringIRefusjonMemento(beløp.memento(), endringsdato)
         }
+
+        internal fun memento() = RefusjonMemento(
+            meldingsreferanseId = meldingsreferanseId,
+            førsteFraværsdag = førsteFraværsdag,
+            arbeidsgiverperioder = arbeidsgiverperioder.map { it.memento() },
+            beløp = beløp?.memento(),
+            sisteRefusjonsdag = sisteRefusjonsdag,
+            endringerIRefusjon = endringerIRefusjon.map { it.memento() },
+            tidsstempel = tidsstempel
+        )
     }
+
+    internal fun memento() = RefusjonshistorikkMemento(
+        refusjoner = refusjoner.map { it.memento() }
+    )
 }
 

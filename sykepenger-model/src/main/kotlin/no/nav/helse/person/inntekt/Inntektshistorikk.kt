@@ -2,6 +2,7 @@ package no.nav.helse.person.inntekt
 
 
 import java.time.LocalDate
+import no.nav.helse.memento.InntektshistorikkMemento
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
 
@@ -27,4 +28,8 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
     internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, skattSykepengegrunnlag: SkattSykepengegrunnlag?): Inntektsopplysning? =
         historikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag)
+
+    internal fun memento() = InntektshistorikkMemento(
+        historikk = historikk.map { it.memento() }
+    )
 }

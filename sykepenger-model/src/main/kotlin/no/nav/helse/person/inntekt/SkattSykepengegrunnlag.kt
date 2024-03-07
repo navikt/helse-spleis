@@ -4,6 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.memento.AnsattPeriodeMemento
+import no.nav.helse.memento.InntektMemento
+import no.nav.helse.memento.InntektsopplysningMemento
 import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -134,6 +137,15 @@ internal class SkattSykepengegrunnlag private constructor(
             tidsstempel = this.tidsstempel
         )
     }
+    override fun memento() =
+        InntektsopplysningMemento.SkattSykepengegrunnlagMemento(
+            id = id,
+            hendelseId = hendelseId,
+            dato = dato,
+            beløp = beløp.memento(),
+            tidsstempel = tidsstempel,
+            inntektsopplysninger = inntektsopplysninger.map { it.memento() },
+            ansattPerioder = ansattPerioder.map { it.memento() })
 }
 
 class AnsattPeriode(
@@ -151,4 +163,6 @@ class AnsattPeriode(
             .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
             .filter { it.gjelder(skjæringstidspunkt) }
     }
+
+    internal fun memento() = AnsattPeriodeMemento(ansattFom, ansattTom)
 }

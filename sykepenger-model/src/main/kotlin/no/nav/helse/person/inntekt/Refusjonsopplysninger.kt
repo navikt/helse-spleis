@@ -9,6 +9,9 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
+import no.nav.helse.memento.RefusjonshistorikkMemento
+import no.nav.helse.memento.RefusjonsopplysningMemento
+import no.nav.helse.memento.RefusjonsopplysningerMemento
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
@@ -236,6 +239,16 @@ class Refusjonsopplysning(
 
             fun build() = Refusjonsopplysninger(emptyList<Refusjonsopplysning>().mergeInnNyeOpplysninger(sorterteRefusjonsopplysninger()))
         }
+
+        internal fun memento() = RefusjonsopplysningerMemento(
+            opplysninger = this.validerteRefusjonsopplysninger.map { it.memento() }
+        )
     }
 
+    internal fun memento() = RefusjonsopplysningMemento(
+        meldingsreferanseId = this.meldingsreferanseId,
+        fom = this.fom,
+        tom = this.tom,
+        beløp = this.beløp.memento()
+    )
 }

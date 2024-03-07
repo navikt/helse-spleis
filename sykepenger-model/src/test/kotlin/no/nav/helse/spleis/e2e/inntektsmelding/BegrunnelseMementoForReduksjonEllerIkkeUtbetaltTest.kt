@@ -10,7 +10,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
+internal class BegrunnelseMementoForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
 
     @Test
     fun `arbeidsgiverperioden strekker seg over to perioder og inntektsmelding kommer etter søknadene`() {

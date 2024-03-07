@@ -37,6 +37,8 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.memento.VedtaksperiodeMemento
+import no.nav.helse.memento.VedtaksperiodetilstandMemento
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
@@ -2719,6 +2721,33 @@ internal class Vedtaksperiode private constructor(
                 ).maxOf { it.periode.endInclusive }
 
     }
+
+    internal fun memento() = VedtaksperiodeMemento(
+        id = id,
+        tilstand = when (tilstand) {
+            Avsluttet -> VedtaksperiodetilstandMemento.AVSLUTTET
+            AvsluttetUtenUtbetaling -> VedtaksperiodetilstandMemento.AVSLUTTET_UTEN_UTBETALING
+            AvventerBlokkerendePeriode -> VedtaksperiodetilstandMemento.AVVENTER_BLOKKERENDE_PERIODE
+            AvventerGodkjenning -> VedtaksperiodetilstandMemento.AVVENTER_GODKJENNING
+            AvventerGodkjenningRevurdering -> VedtaksperiodetilstandMemento.AVVENTER_GODKJENNING_REVURDERING
+            AvventerHistorikk -> VedtaksperiodetilstandMemento.AVVENTER_HISTORIKK
+            AvventerHistorikkRevurdering -> VedtaksperiodetilstandMemento.AVVENTER_HISTORIKK_REVURDERING
+            AvventerInfotrygdHistorikk -> VedtaksperiodetilstandMemento.AVVENTER_INFOTRYGDHISTORIKK
+            AvventerInntektsmelding -> VedtaksperiodetilstandMemento.AVVENTER_INNTEKTSMELDING
+            AvventerRevurdering -> VedtaksperiodetilstandMemento.AVVENTER_REVURDERING
+            AvventerSimulering -> VedtaksperiodetilstandMemento.AVVENTER_SIMULERING
+            AvventerSimuleringRevurdering -> VedtaksperiodetilstandMemento.AVVENTER_SIMULERING_REVURDERING
+            AvventerVilkårsprøving -> VedtaksperiodetilstandMemento.AVVENTER_VILKÅRSPRØVING
+            AvventerVilkårsprøvingRevurdering -> VedtaksperiodetilstandMemento.AVVENTER_VILKÅRSPRØVING_REVURDERING
+            RevurderingFeilet -> VedtaksperiodetilstandMemento.REVURDERING_FEILET
+            Start -> VedtaksperiodetilstandMemento.START
+            TilInfotrygd -> VedtaksperiodetilstandMemento.TIL_INFOTRYGD
+            TilUtbetaling -> VedtaksperiodetilstandMemento.TIL_UTBETALING
+        },
+        generasjoner = generasjoner.memento(),
+        opprettet = opprettet,
+        oppdatert = oppdatert
+    )
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean

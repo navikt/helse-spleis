@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.memento.SykdomstidslinjeMemento
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse
@@ -437,6 +438,12 @@ internal class Sykdomstidslinje private constructor(
             perioder: List<Periode>
         ): Sykdomstidslinje = Sykdomstidslinje(dager.toSortedMap(), periode, perioder.map{it}.toMutableList())
     }
+
+    internal fun memento() = SykdomstidslinjeMemento(
+        dager = dager.map { (_, dag) -> dag.memento() },
+        periode = periode?.memento(),
+        låstePerioder = låstePerioder.map { it.memento() }
+    )
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =

@@ -21,6 +21,7 @@ import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.memento.PersonMemento
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.Frilans
 import no.nav.helse.person.Person
@@ -29,6 +30,9 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.serde.assertPersonEquals
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -37,6 +41,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -473,6 +478,15 @@ protected fun håndterInntektsmeldingPortal(
         assertTrue(inspektør.aktivitetslogg.harAktiviteter()) { inspektør.aktivitetslogg.toString() }
     }
 
+    protected fun assertGjenoppbygget(memento: PersonMemento) {
+        val serialisertPerson = memento.tilPersonData().tilSerialisertPerson()
+        val gjenoppbyggetPerson = serialisertPerson.deserialize(MaskinellJurist())
+        val nyttMemento = gjenoppbyggetPerson.memento()
+
+        assertEquals(memento, nyttMemento)
+        assertPersonEquals(testperson.person, gjenoppbyggetPerson)
+    }
+
     protected fun håndterDødsmelding(dødsdato: LocalDate) {
         testperson.håndterDødsmelding(dødsdato)
     }
@@ -492,6 +506,7 @@ protected fun håndterInntektsmeldingPortal(
 
     protected fun serializeForSpeil() = testperson.serializeForSpeil(observatør.spekemat.resultat())
     protected fun serialize(pretty: Boolean = false) = testperson.serialize(pretty)
+    protected fun memento() = testperson.memento()
 
     protected fun medFødselsdato(fødselsdato: LocalDate) {
         testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist)

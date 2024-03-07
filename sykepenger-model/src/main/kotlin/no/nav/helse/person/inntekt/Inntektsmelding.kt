@@ -6,6 +6,8 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.memento.InntektMemento
+import no.nav.helse.memento.InntektsopplysningMemento
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -111,4 +113,13 @@ internal class Inntektsmelding(
         }
         inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel))
     }
+
+    override fun memento() =
+        InntektsopplysningMemento.InntektsmeldingMemento(
+            id = id,
+            hendelseId = hendelseId,
+            dato = dato,
+            beløp = beløp.memento(),
+            tidsstempel = tidsstempel
+        )
 }

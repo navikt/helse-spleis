@@ -12,6 +12,9 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.memento.OpptjeningMemento
+import no.nav.helse.memento.SykepengegrunnlagMemento
+import no.nav.helse.memento.VilkårsgrunnlagMemento
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -180,6 +183,15 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 subsumsjonObserver: SubsumsjonObserver,
                 nyttSkjæringstidspunkt: LocalDate?
             ): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
+                throw IllegalStateException()
+            }
+
+            override fun memento(
+                vilkårsgrunnlagId: UUID,
+                skjæringstidspunkt: LocalDate,
+                sykepengegrunnlag: SykepengegrunnlagMemento,
+                opptjening: OpptjeningMemento?
+            ): VilkårsgrunnlagMemento {
                 throw IllegalStateException()
             }
         }

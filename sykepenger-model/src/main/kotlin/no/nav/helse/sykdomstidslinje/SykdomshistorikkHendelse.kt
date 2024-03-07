@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.memento.HendelseskildeMemento
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import kotlin.reflect.KClass
@@ -44,5 +45,6 @@ internal interface SykdomshistorikkHendelse : Hendelse {
         // todo: midlertidig fordi "Inntektsmelding" ikke er en SykdomshistorikkHendelse. Alle dager med kilde "Inntektsmelding" må migreres til "BitFraInntektsmelding"
         internal fun erAvType(meldingstype: String) = this.type == meldingstype
         internal fun toJson() = mapOf("type" to type, "id" to meldingsreferanseId, "tidsstempel" to tidsstempel)
+        internal fun memento() = HendelseskildeMemento(type, meldingsreferanseId, tidsstempel)
     }
 }
