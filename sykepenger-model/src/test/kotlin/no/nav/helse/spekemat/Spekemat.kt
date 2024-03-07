@@ -50,7 +50,6 @@ class Spekemat : PersonObserver {
         arbeidsgivere.getOrPut(event.organisasjonsnummer) { Pølsefabrikk() }
             .nyPølse(Pølse(
                 vedtaksperiodeId = event.vedtaksperiodeId,
-                generasjonId = event.generasjonId,
                 behandlingId = event.generasjonId,
                 status = Pølsestatus.ÅPEN,
                 kilde = event.kilde.meldingsreferanseId

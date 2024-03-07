@@ -1,5 +1,5 @@
 val jsonassertVersion = "1.5.0"
-val spekematVersion = "2024.03.07-12.03-d183235a"
+val spekematVersion = "2024.03.07-12.28-78550ee8"
 
 dependencies {
     api(project(":sykepenger-primitiver"))
