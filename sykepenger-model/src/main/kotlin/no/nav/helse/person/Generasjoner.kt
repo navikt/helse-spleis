@@ -389,7 +389,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                     PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, generasjonId, periode)
                 })
                 grunnlagsdata.byggGodkjenningsbehov(builder)
-                utbetaling.byggGodkjenningsbehov(hendelse, builder)
+                utbetaling.byggGodkjenningsbehov(hendelse, builder, periode)
                 Aktivitet.Behov.godkjenning(
                     aktivitetslogg = hendelse,
                     builder = builder

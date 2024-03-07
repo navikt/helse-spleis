@@ -13,6 +13,7 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -51,7 +52,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `arbeidsgiverutbetaling`() {
         tilGodkjenning(1.januar, 31.januar, a1)
-        assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)))
+        assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "NavDager"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)))
     }
 
     @Test
@@ -64,7 +65,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertGodkjenningsbehov(tags = setOf("Personutbetaling"))
+        assertGodkjenningsbehov(tags = setOf("Personutbetaling", "NavDager"))
     }
 
     @Test
@@ -140,6 +141,32 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             )
         )
+    }
+
+    @Test
+    fun `avviste dager`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INGEN,
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertGodkjenningsbehov(
+            tags = setOf("IngenUtbetaling", "AvvistDager"), omregnedeÅrsinntekter = listOf(
+                mapOf("organisasjonsnummer" to a1, "beløp" to 0.0)
+            )
+        )
+    }
+
+    @Test
+    fun `både navdager og avviste dager`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 100.prosent), Søknad.Søknadsperiode.Sykdom(21.januar, 31.januar, 10.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "NavDager", "AvvistDager")        )
     }
 
     private fun assertGodkjenningsbehov(

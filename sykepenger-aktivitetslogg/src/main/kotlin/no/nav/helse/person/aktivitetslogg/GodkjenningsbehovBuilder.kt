@@ -60,7 +60,7 @@ class GodkjenningsbehovBuilder(
     fun orgnummereMedRelevanteArbeidsforhold(orgnummereMedRelevanteArbeidsforhold: Set<String>) = apply {
         this.orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
     }
-    fun tagUtbetaling(arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int) {
+    fun tagUtbetalingMottaker(arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int) {
         if (arbeidsgiverNettoBeløp > 0) tags.add("Arbeidsgiverutbetaling")
         else if (arbeidsgiverNettoBeløp < 0) tags.add("NegativArbeidsgiverutbetaling")
 
@@ -68,6 +68,11 @@ class GodkjenningsbehovBuilder(
         else if (personNettoBeløp < 0) tags.add("NegativPersonutbetaling")
 
         if (arbeidsgiverNettoBeløp == 0 && personNettoBeløp == 0) tags.add("IngenUtbetaling")
+    }
+
+    fun tagUtbetalingDager(navDager: Boolean, avvistDager: Boolean) {
+        if (navDager) tags.add("NavDager")
+        if (avvistDager) tags.add("AvvistDager")
     }
 
     fun omregnedeÅrsinntekter(orgnummer: String, omregnetÅrsinntekt: Double) = apply {

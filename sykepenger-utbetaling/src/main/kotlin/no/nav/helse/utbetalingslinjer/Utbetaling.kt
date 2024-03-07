@@ -158,9 +158,9 @@ class Utbetaling private constructor(
         tilstand.simuler(this, hendelse)
     }
 
-    fun byggGodkjenningsbehov(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+    fun byggGodkjenningsbehov(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder, periode: Periode) {
         hendelse.kontekst(this)
-        tilstand.byggGodkjenningsbehov(this, hendelse, builder)
+        tilstand.byggGodkjenningsbehov(this, hendelse, builder, periode)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -516,7 +516,8 @@ class Utbetaling private constructor(
         fun byggGodkjenningsbehov(
             utbetaling: Utbetaling,
             hendelse: IAktivitetslogg,
-            builder: GodkjenningsbehovBuilder
+            builder: GodkjenningsbehovBuilder,
+            periode: Periode
         ) {
             hendelse.info("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
             hendelse.funksjonellFeil(RV_UT_13)
@@ -556,16 +557,29 @@ class Utbetaling private constructor(
             utbetaling.personOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
         }
 
-        override fun byggGodkjenningsbehov(utbetaling: Utbetaling, hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+        override fun byggGodkjenningsbehov(
+            utbetaling: Utbetaling,
+            hendelse: IAktivitetslogg,
+            builder: GodkjenningsbehovBuilder,
+            periode: Periode
+        ) {
             builder.utbetalingtype(utbetaling.type.name)
-            tags(builder, utbetaling)
+            utbetalingMottakerTags(builder, utbetaling)
+            utbetalingDagerTags(builder, utbetaling, periode)
         }
 
-        private fun tags(builder: GodkjenningsbehovBuilder, utbetaling: Utbetaling): GodkjenningsbehovBuilder {
+        private fun utbetalingMottakerTags(builder: GodkjenningsbehovBuilder, utbetaling: Utbetaling) {
             val arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag.nettoBeløp()
             val personNettoBeløp = utbetaling.personOppdrag.nettoBeløp()
-            builder.tagUtbetaling(arbeidsgiverNettoBeløp, personNettoBeløp)
-            return builder
+            builder.tagUtbetalingMottaker(arbeidsgiverNettoBeløp, personNettoBeløp)
+        }
+
+        private fun utbetalingDagerTags(builder: GodkjenningsbehovBuilder, utbetaling: Utbetaling, periode: Periode) {
+            val sykepengeperiode = utbetaling.utbetalingstidslinje.sykepengeperiode()
+            val avvistperiode = utbetaling.utbetalingstidslinje.avvistperiode()
+            val navDager = sykepengeperiode?.let { it in periode } ?: false
+            val avvistDager = avvistperiode?.let { it in periode } ?: false
+            builder.tagUtbetalingDager(navDager, avvistDager)
         }
     }
 

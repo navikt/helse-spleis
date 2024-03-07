@@ -126,8 +126,14 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
     fun periode() = Periode(førsteDato, sisteDato)
 
     fun sykepengeperiode(): Periode? {
-        val første = utbetalingsdager.firstOrNull { it is NavDag }?.dato ?: return null
+        val første = utbetalingsdager.firstOrNull { it is NavDag || it is NavHelgDag }?.dato ?: return null
         val siste = utbetalingsdager.last { it is NavDag }.dato
+        return første til siste
+    }
+
+    fun avvistperiode(): Periode? {
+        val første = utbetalingsdager.firstOrNull { it is AvvistDag }?.dato ?: return null
+        val siste = utbetalingsdager.last { it is AvvistDag }.dato
         return første til siste
     }
 
