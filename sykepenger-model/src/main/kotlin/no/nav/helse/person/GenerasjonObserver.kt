@@ -23,7 +23,8 @@ internal interface GenerasjonObserver {
         periode: Periode,
         dokumentsporing: Set<UUID>,
         utbetalingId: UUID,
-        vedtakFattetTidspunkt: LocalDateTime
+        vedtakFattetTidspunkt: LocalDateTime,
+        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
     )
     fun vedtakAnnullert(hendelse: IAktivitetslogg, generasjonId: UUID)
     fun generasjonLukket(generasjonId: UUID)

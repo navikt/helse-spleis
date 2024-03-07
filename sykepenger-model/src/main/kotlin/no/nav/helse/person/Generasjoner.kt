@@ -656,7 +656,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
         }
         private fun vedtakIverksatt(hendelse: IAktivitetslogg) {
             check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
-            observatører.forEach { it.vedtakIverksatt(hendelse, id, avsluttet!!, periode, dokumentsporing.ider(), utbetaling()!!.id, vedtakFattet!!) }
+            observatører.forEach { it.vedtakIverksatt(hendelse, id, avsluttet!!, periode, dokumentsporing.ider(), utbetaling()!!.id, vedtakFattet!!, gjeldende.grunnlagsdata!!) }
         }
 
         private fun avsluttetUtenVedtak(hendelse: IAktivitetslogg) {
