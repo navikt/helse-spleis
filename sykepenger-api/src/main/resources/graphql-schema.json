@@ -882,6 +882,21 @@
         "name" : "GraphQLTidslinjeperiode",
         "description" : "",
         "fields" : [ {
+          "name" : "behandlingId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "erForkastet",
           "description" : null,
           "args" : [ ],
@@ -3566,6 +3581,21 @@
         "name" : "GraphQLUberegnetPeriode",
         "description" : "",
         "fields" : [ {
+          "name" : "behandlingId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "erForkastet",
           "description" : null,
           "args" : [ ],
@@ -3790,6 +3820,21 @@
         "name" : "GraphQLUberegnetVilkarsprovdPeriode",
         "description" : "",
         "fields" : [ {
+          "name" : "behandlingId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "erForkastet",
           "description" : null,
           "args" : [ ],
@@ -4183,6 +4228,21 @@
         "name" : "GraphQLBeregnetPeriode",
         "description" : "",
         "fields" : [ {
+          "name" : "behandlingId",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "UUID",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "beregningId",
           "description" : null,
           "args" : [ ],

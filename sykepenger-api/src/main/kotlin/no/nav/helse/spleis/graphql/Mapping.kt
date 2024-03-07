@@ -315,6 +315,7 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
         is BeregnetPeriode -> mapBeregnetPeriode(periode, hendelser)
         is UberegnetVilkårsprøvdPeriode -> GraphQLUberegnetVilkarsprovdPeriode(
             generasjonId = periode.generasjonId,
+            behandlingId = periode.generasjonId,
             kilde = periode.kilde,
             fom = periode.fom,
             tom = periode.tom,
@@ -331,6 +332,7 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
         )
         else -> GraphQLUberegnetPeriode(
             generasjonId = periode.generasjonId,
+            behandlingId = periode.generasjonId,
             kilde = periode.kilde,
             fom = periode.fom,
             tom = periode.tom,
@@ -348,6 +350,7 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
 private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<HendelseDTO>) =
     GraphQLBeregnetPeriode(
         generasjonId = periode.generasjonId,
+        behandlingId = periode.generasjonId,
         kilde = periode.kilde,
         fom = periode.fom,
         tom = periode.tom,
