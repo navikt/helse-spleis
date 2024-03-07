@@ -27,6 +27,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.PeriodeMedSammeSkjæringstidspunkt
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -108,8 +109,9 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
 
-    internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean) {
-        generasjoner.last().godkjenning(hendelse, erForlengelse, kanForkastes)
+    internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, perioderMedSammeSkjæringstidspunkt: List<Pair<UUID, Generasjoner>>, kanForkastes: Boolean) {
+        val generasjonerMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map { it.first to it.second.generasjoner.last() }
+        generasjoner.last().godkjenning(hendelse, erForlengelse, generasjonerMedSammeSkjæringstidspunkt, kanForkastes)
     }
 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreGenerasjoner: List<Generasjoner>): Boolean {
@@ -380,10 +382,12 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                 utbetaling?.forkast(hendelse)
             }
 
-            fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean, generasjonId: UUID) {
+            fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean, generasjonId: UUID, perioderMedSammeSkjæringstidspunkt: List<Triple<UUID, UUID, Periode>>) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
-                val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode, generasjonId)
+                val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode, generasjonId, perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, generasjonId, periode) ->
+                    PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, generasjonId, periode)
+                })
                 grunnlagsdata.byggGodkjenningsbehov(builder)
                 utbetaling.byggGodkjenningsbehov(hendelse, builder)
                 Aktivitet.Behov.godkjenning(
@@ -688,8 +692,9 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             observatører.forEach { it.vedtakAnnullert(hendelse, id) }
         }
 
-        internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean) {
-            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, id)
+        internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, generasjonerMedSammeSkjæringstidspunkt: List<Pair<UUID, Generasjon>>, kanForkastes: Boolean) {
+            val perioderMedSammeSkjæringstidspunkt = generasjonerMedSammeSkjæringstidspunkt.map { Triple(it.first, it.second.id, it.second.periode) }
+            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, id, perioderMedSammeSkjæringstidspunkt)
         }
 
         fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, generasjoner: List<Generasjon>): Utbetaling? {

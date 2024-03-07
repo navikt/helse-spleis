@@ -3,7 +3,18 @@ package no.nav.helse.person.aktivitetslogg
 import java.time.LocalDate
 import java.util.UUID
 
-class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val kanAvvises: Boolean, periode: ClosedRange<LocalDate>, private val generasjonId: UUID) {
+class PeriodeMedSammeSkjæringstidspunkt(
+    val vedtaksperiodeId: UUID,
+    val behandlingId: UUID,
+    val periode: ClosedRange<LocalDate>
+)
+class GodkjenningsbehovBuilder(
+    private val erForlengelse: Boolean,
+    private val kanAvvises: Boolean,
+    periode: ClosedRange<LocalDate>,
+    private val generasjonId: UUID,
+    private val perioderMedSammeSkjæringstidspunkt: List<PeriodeMedSammeSkjæringstidspunkt>
+) {
     private val tags: MutableSet<String> = mutableSetOf()
     private lateinit var skjæringstidspunkt: LocalDate
     private lateinit var vilkårsgrunnlagId: UUID
@@ -76,7 +87,15 @@ class GodkjenningsbehovBuilder(private val erForlengelse: Boolean, private val k
         "tags" to tags,
         "kanAvvises" to kanAvvises,
         "omregnedeÅrsinntekter" to omregnedeÅrsinntekter,
-        "behandlingId" to generasjonId.toString()
+        "behandlingId" to generasjonId.toString(),
+        "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
+            mapOf(
+                "vedtaksperiodeId" to it.vedtaksperiodeId.toString(),
+                "behandlingId" to it.behandlingId.toString(),
+                "fom" to it.periode.start.toString(),
+                "tom" to it.periode.endInclusive.toString()
+            )
+        }
     )
 
 

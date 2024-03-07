@@ -238,6 +238,14 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("organisasjonsnummer").asText().isNotEmpty())
         assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("beløp").isDouble)
         assertTrue(godkjenning.path("behandlingId").asText().isNotEmpty())
+        assertTrue(godkjenning.path("perioderMedSammeSkjæringstidspunkt").isArray)
+        assertFalse(godkjenning.path("perioderMedSammeSkjæringstidspunkt").isEmpty)
+        godkjenning.path("perioderMedSammeSkjæringstidspunkt").path(0).also {
+            assertTrue(it.path("vedtaksperiodeId").asText().isNotEmpty())
+            assertTrue(it.path("behandlingId").asText().isNotEmpty())
+            assertDato(it.path("fom").asText())
+            assertDato(it.path("tom").asText())
+        }
     }
 
     private fun assertUtbetalingdetaljer(behov: JsonNode, erAnnullering: Boolean = false) {
