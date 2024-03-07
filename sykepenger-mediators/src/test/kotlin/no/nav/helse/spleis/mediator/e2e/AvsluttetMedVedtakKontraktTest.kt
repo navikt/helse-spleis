@@ -34,6 +34,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "vedtakFattetTidspunkt": "<timestamp>",
             "vedtaksperiodeId": "<uuid>",
             "generasjonId": "<uuid>",
+            "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
@@ -86,6 +87,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "vedtakFattetTidspunkt": "<timestamp>",
             "vedtaksperiodeId": "<uuid>",
             "generasjonId": "<uuid>",
+            "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
@@ -144,6 +146,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "hendelser": ["$søknadId"],
             "vedtaksperiodeId": "<uuid>",
             "generasjonId": "<uuid>",
+            "behandlingId": "<uuid>",
             "avsluttetTidspunkt": "<timestamp>"
         }
         """
@@ -181,6 +184,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "vedtakFattetTidspunkt": "<timestamp>",
             "vedtaksperiodeId": "<uuid>",
             "generasjonId": "<uuid>",
+            "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
