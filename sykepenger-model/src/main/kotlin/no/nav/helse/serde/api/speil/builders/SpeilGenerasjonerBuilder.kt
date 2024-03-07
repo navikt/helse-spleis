@@ -89,7 +89,7 @@ internal class SpeilGenerasjonerBuilder(
     }
 
     private fun mapRadTilSpeilGenerasjon(rad: SpekematDTO.PølsepakkeDTO.PølseradDTO, generasjoner: List<SpeilTidslinjeperiode>): SpeilGenerasjonDTO {
-        val perioder = rad.pølser.mapNotNull { pølse -> generasjoner.firstOrNull { it.generasjonId == pølse.generasjonId } }
+        val perioder = rad.pølser.mapNotNull { pølse -> generasjoner.firstOrNull { it.generasjonId == pølse.behandlingId } }
         return SpeilGenerasjonDTO(
             id = UUID.randomUUID(),
             kildeTilGenerasjon = rad.kildeTilRad,

@@ -54,7 +54,7 @@ class SpekematClient(
                                 pølser = rad.pølser.map { pølse ->
                                     SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO(
                                         vedtaksperiodeId = pølse.vedtaksperiodeId,
-                                        generasjonId = pølse.generasjonId,
+                                        behandlingId = pølse.behandlingId,
                                         kilde = pølse.kilde,
                                         status = when (pølse.status) {
                                             Pølsestatus.ÅPEN -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.ÅPEN
@@ -99,7 +99,7 @@ private data class PølseradDto(
 )
 private data class PølseDto(
     val vedtaksperiodeId: UUID,
-    val generasjonId: UUID,
+    val behandlingId: UUID,
     val status: Pølsestatus,
     // tingen som gjorde at generasjonen ble opprettet
     val kilde: UUID

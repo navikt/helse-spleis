@@ -28,7 +28,7 @@ data class SpekematDTO(
         ) {
             data class PølseDTO(
                 val vedtaksperiodeId: UUID,
-                val generasjonId: UUID,
+                val behandlingId: UUID,
                 val status: PølsestatusDTO,
                 // tingen som gjorde at generasjonen ble opprettet
                 val kilde: UUID

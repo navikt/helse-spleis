@@ -38,7 +38,7 @@ internal class ArbeidsgiverBuilder(
             // det betyr at vi bare behøver vurdere pølsepakker med minst tre rader siden den vi skal vurdere én rad mot to andre
             if (size <= 2) return this
             val pølseFinnesIRad = { rad: PølseradDTO, pølse: PølseDTO ->
-                rad.pølser.any { it.generasjonId == pølse.generasjonId }
+                rad.pølser.any { it.behandlingId == pølse.behandlingId }
             }
 
             val iterator = this.asReversed().iterator()

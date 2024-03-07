@@ -31,7 +31,7 @@ class Spekemat : PersonObserver {
                     pølser = rad.pølser.map { pølseDto ->
                         PølseDTO(
                             vedtaksperiodeId = pølseDto.vedtaksperiodeId,
-                            generasjonId = pølseDto.generasjonId,
+                            behandlingId = pølseDto.behandlingId,
                             kilde = pølseDto.kilde,
                             status = when (pølseDto.status) {
                                 Pølsestatus.ÅPEN -> PølsestatusDTO.ÅPEN
@@ -51,6 +51,7 @@ class Spekemat : PersonObserver {
             .nyPølse(Pølse(
                 vedtaksperiodeId = event.vedtaksperiodeId,
                 generasjonId = event.generasjonId,
+                behandlingId = event.generasjonId,
                 status = Pølsestatus.ÅPEN,
                 kilde = event.kilde.meldingsreferanseId
             ))

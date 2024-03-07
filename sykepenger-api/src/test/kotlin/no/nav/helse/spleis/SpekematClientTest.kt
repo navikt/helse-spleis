@@ -42,13 +42,13 @@ private const val responsFraSpekemat = """{
                     "pølser": [
                         {
                             "vedtaksperiodeId": "617fc6ad-345b-4afa-8e75-b5a6aca95b17",
-                            "generasjonId": "e874ce3b-ccf7-45ec-a0f5-ddd201e68a49",
+                            "behandlingId": "e874ce3b-ccf7-45ec-a0f5-ddd201e68a49",
                             "status": "ÅPEN",
                             "kilde": "3c3399e4-ce95-4425-9cf2-aba45afb0d16"
                         },
                         {
                             "vedtaksperiodeId": "2c144579-1377-41db-96cf-b611f5dfb697",
-                            "generasjonId": "f4f3738b-37da-4393-bb4a-3feeb7453e40",
+                            "behandlingId": "f4f3738b-37da-4393-bb4a-3feeb7453e40",
                             "status": "LUKKET",
                             "kilde": "d45d4dd0-c404-45be-a310-628e69e5295e"
                         }

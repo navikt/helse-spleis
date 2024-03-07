@@ -28,7 +28,6 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -982,7 +981,7 @@ private class Spekemat : PersonObserver {
                     pølser = rad.pølser.map { pølseDto ->
                         SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO(
                             vedtaksperiodeId = pølseDto.vedtaksperiodeId,
-                            generasjonId = pølseDto.generasjonId,
+                            behandlingId = pølseDto.generasjonId,
                             kilde = pølseDto.kilde,
                             status = when (pølseDto.status) {
                                 Pølsestatus.ÅPEN -> SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO.PølsestatusDTO.ÅPEN
@@ -1001,6 +1000,7 @@ private class Spekemat : PersonObserver {
             .nyPølse(Pølse(
                 vedtaksperiodeId = event.vedtaksperiodeId,
                 generasjonId = event.generasjonId,
+                behandlingId = event.generasjonId,
                 status = Pølsestatus.ÅPEN,
                 kilde = event.kilde.meldingsreferanseId
             ))
