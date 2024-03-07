@@ -356,10 +356,10 @@ internal class PersonMediator(
     }
 
     override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
-        queueMessage(JsonMessage.newMessage("generasjon_opprettet", mutableMapOf(
+        queueMessage(JsonMessage.newMessage("behandling_opprettet", mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "generasjonId" to event.generasjonId,
+            "behandlingId" to event.generasjonId,
             "type" to event.type,
             "kilde" to mapOf(
                 "meldingsreferanseId" to event.kilde.meldingsreferanseId,
@@ -371,19 +371,19 @@ internal class PersonMediator(
     }
 
     override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
-        queueMessage(JsonMessage.newMessage("generasjon_forkastet", mapOf(
+        queueMessage(JsonMessage.newMessage("behandling_forkastet", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "generasjonId" to event.generasjonId,
+            "behandlingId" to event.generasjonId,
             "automatiskBehandling" to event.automatiskBehandling
         )))
     }
 
     override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
-        queueMessage(JsonMessage.newMessage("generasjon_lukket", mapOf(
+        queueMessage(JsonMessage.newMessage("behandling_lukket", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "generasjonId" to event.generasjonId
+            "behandlingId" to event.generasjonId
         )))
     }
 
