@@ -37,7 +37,6 @@ import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import org.slf4j.LoggerFactory
 
 class Søknad(
     meldingsreferanseId: UUID,
@@ -56,7 +55,7 @@ class Søknad(
     private val arbeidUtenforNorge: Boolean,
     private val sendTilGosys: Boolean,
     private val yrkesskade: Boolean,
-    private val egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag>,
+    egenmeldinger: List<Søknadsperiode.Arbeidsgiverdag>,
     private val søknadstype: Søknadstype,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     private val registrert: LocalDateTime
@@ -68,7 +67,6 @@ class Søknad(
 
     internal companion object {
         internal const val tidslinjegrense = 40L
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     init {
@@ -187,7 +185,8 @@ class Søknad(
             private val tilbakedateringer = setOf(
                 "UGYLDIG_TILBAKEDATERING",
                 "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER",
-                "UNDER_BEHANDLING"
+                "UNDER_BEHANDLING",
+                "DELVIS_GODKJENT"
             )
         }
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
@@ -220,9 +219,6 @@ class Søknad(
         internal companion object {
             fun sykdomsperiode(liste: List<Søknadsperiode>) =
                 søknadsperiode(liste.filterIsInstance<Sykdom>())
-
-            fun egenmeldingsperiode(liste: List<Søknadsperiode>) =
-                søknadsperiode(liste.filterIsInstance<Arbeidsgiverdag>())
 
             fun List<Søknadsperiode>.inneholderDagerEtter(sisteSykdomsdato: LocalDate) =
                 any { it.periode.endInclusive > sisteSykdomsdato }

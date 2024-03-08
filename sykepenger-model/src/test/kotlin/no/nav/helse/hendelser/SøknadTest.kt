@@ -21,6 +21,7 @@ import no.nav.helse.mai
 import no.nav.helse.november
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg.AktivitetException
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_44
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -37,18 +38,18 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 internal class SøknadTest {
 
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
-        private val februar12 = 12.februar(1992)
         private val ungPersonFnr2018Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "12345",
             personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
             organisasjonsnummer = "987654321"
         )
-        private val EN_PERIODE = Periode(1.januar, 31.januar)
         private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
         private val november2 = 2.november(2000)
         private val fyller18År2NovemberHendelsefabrikk = ArbeidsgiverHendelsefabrikk(
@@ -258,11 +259,13 @@ internal class SøknadTest {
         assertFalse(søknad.harVarslerEllerVerre())
     }
 
-    @Test
-    fun `søknad med tilbakedateringmerknad får warning`() {
-        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Merknad("UGYLDIG_TILBAKEDATERING")))
+    @ParameterizedTest
+    @ValueSource(strings = ["UGYLDIG_TILBAKEDATERING", "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "UNDER_BEHANDLING", "DELVIS_GODKJENT"])
+    fun `søknad med tilbakedateringmerknad får warning`(merknad: String) {
+        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Merknad(merknad)))
         søknad.valider(null, MaskinellJurist())
         assertTrue(søknad.harVarslerEllerVerre())
+        aktivitetslogg.assertVarsel(RV_SØ_3)
     }
 
     @Test
