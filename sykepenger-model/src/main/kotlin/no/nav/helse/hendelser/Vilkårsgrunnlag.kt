@@ -73,7 +73,7 @@ class Vilkårsgrunnlag(
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             vurdertOk = sykepengegrunnlagOk && opptjeningvurderingOk && medlemskapsvurderingOk,
             meldingsreferanseId = meldingsreferanseId(),
-            vilkårsgrunnlagId = sykepengegrunnlag.ønsketVilkårsgrunnlagId
+            vilkårsgrunnlagId = UUID.randomUUID()
         )
         return this
     }

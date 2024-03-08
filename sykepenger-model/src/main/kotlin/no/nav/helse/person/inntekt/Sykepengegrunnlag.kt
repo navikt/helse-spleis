@@ -1,7 +1,6 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
@@ -72,7 +71,6 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger.validerSkjønnsmessigAltEllerIntet()
     }
 
-    internal val ønsketVilkårsgrunnlagId: UUID = UUID.randomUUID()
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
     // sum av alle inntekter foruten skjønnsmessig fastsatt beløp; da brukes inntekten den fastsatte
     private val omregnetÅrsinntekt = arbeidsgiverInntektsopplysninger.totalOmregnetÅrsinntekt(skjæringstidspunkt)

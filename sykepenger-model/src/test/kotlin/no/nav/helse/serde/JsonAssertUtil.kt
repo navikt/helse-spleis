@@ -55,7 +55,7 @@ private class SkattSykepengegrunnlagMixin
 @JsonIgnoreProperties("opptjeningsdager\$delegate")
 private class OpptjeningMixin
 
-@JsonIgnoreProperties("ønsketVilkårsgrunnlagId")
+@JsonIgnoreProperties()
 private class SykepengegrunnlagMixin
 
 internal class BigDecimalSerializer : JsonSerializer<BigDecimal>() {
