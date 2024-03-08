@@ -23,7 +23,6 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
-import org.junit.jupiter.api.Assertions
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 
@@ -97,12 +96,6 @@ private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
 
 internal fun assertPersonEquals(expected: Person, actual: Person) {
-    val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)
-    val actualJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual)
-    JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT)
-}
-
-internal fun assertJsonEquals(expected: Any, actual: Any) {
     val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)
     val actualJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual)
     JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT)
