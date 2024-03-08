@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.januar
 import no.nav.helse.mai
@@ -122,21 +121,6 @@ internal class SøknadTest {
     }
 
     @Test
-    fun `søknad med utdanning`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), Utdanning(5.januar, 10.januar))
-        assertTrue(søknad.valider(null, MaskinellJurist()).harVarslerEllerVerre())
-        assertEquals(10, søknad.sykdomstidslinje().count())
-    }
-
-    @Test
-    fun `søknad med utdanning før perioden`() {
-        søknad(Sykdom(5.januar, 10.januar, 100.prosent), Utdanning(1.januar, 10.januar))
-        assertTrue(søknad.valider(null, MaskinellJurist()).harVarslerEllerVerre())
-        assertEquals(5.januar til 10.januar, søknad.periode())
-        assertEquals(6, søknad.sykdomstidslinje().count())
-    }
-
-    @Test
     fun `søknad med permisjon`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(5.januar, 10.januar))
         assertFalse(søknad.valider(null, MaskinellJurist()).harFunksjonelleFeilEllerVerre())
@@ -186,11 +170,6 @@ internal class SøknadTest {
     @Test
     fun `ferie etter sykdomsvindu - ikke et realistisk scenario`() {
         assertThrows<AktivitetException> { søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 16.januar)) }
-    }
-
-    @Test
-    fun `utdanning ligger utenfor sykdomsvindu`() {
-        assertThrows<AktivitetException> { søknad(Sykdom(1.januar, 10.januar, 100.prosent), Utdanning(16.januar, 17.januar)) }
     }
 
     @Test

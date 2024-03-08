@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
@@ -63,10 +62,6 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     }
     override fun sendTilGosys(tilGosys: Boolean) = apply {
         sendTilGosys = tilGosys
-    }
-
-    override fun utdanning(fom: LocalDate, tom: LocalDate) = apply {
-        perioder.add(Utdanning(fom, tom))
     }
 
     override fun permisjon(fom: LocalDate, tom: LocalDate) = apply {

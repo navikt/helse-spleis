@@ -18,7 +18,7 @@ enum class Varselkode(
     RV_SØ_1("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger"),
     RV_SØ_2("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd"),
     RV_SØ_3("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling."),
-    RV_SØ_4("Utdanning oppgitt i perioden i søknaden."),
+    RV_SØ_4("Utdanning oppgitt i perioden i søknaden.", avviklet = true),
     RV_SØ_5("Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"),
     RV_SØ_6("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden", avviklet = true),
     RV_SØ_7("Søknaden inneholder Arbeidsdager utenfor sykdomsvindu"),

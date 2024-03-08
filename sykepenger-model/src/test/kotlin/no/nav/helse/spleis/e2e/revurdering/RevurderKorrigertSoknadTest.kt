@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -29,7 +28,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OS_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_10
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_13
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -410,32 +408,6 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
-    @Test
-    fun `Korrigerende søknad for periode i Avsluttet med utdanning gir varsel`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utdanning(20.januar, 31.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertVarsel(RV_SØ_4, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `Korrigerende søknad for periode i AvventerGodkjenningRevurdering med utdanning gir varsel`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utdanning(20.januar, 31.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertVarsel(RV_SØ_4, 1.vedtaksperiode.filter())
-    }
 
     @Test
     fun `Korrigert søknad med friskmelding for avsluttet periode`() {

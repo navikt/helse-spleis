@@ -37,7 +37,6 @@ internal abstract class SøknadBuilder {
     internal fun yrkesskade(yrkesskade: Boolean) = apply { this.yrkesskade = yrkesskade }
     internal fun fravær(type: String, fom: LocalDate, tom: LocalDate?) {
         when (type) {
-            "UTDANNING_FULLTID", "UTDANNING_DELTID" -> utdanning(fom, this.tom)
             "PERMISJON" -> permisjon(fom, tom!!)
             "FERIE" -> ferie(fom, tom!!)
             "UTLANDSOPPHOLD" -> utlandsopphold(fom, tom!!)
@@ -48,7 +47,6 @@ internal abstract class SøknadBuilder {
 
     internal abstract fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?): SøknadBuilder
 
-    internal open fun utdanning(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun permisjon(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun ferie(fom: LocalDate, tom: LocalDate) = apply {}
     internal open fun utlandsopphold(fom: LocalDate, tom: LocalDate) = apply {}

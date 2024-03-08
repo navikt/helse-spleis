@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -79,8 +78,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
             Sykdom(1.januar, 5.januar, 100.prosent),
             Arbeid(3.januar, 3.januar),
             Ferie(4.januar, 4.januar),
-            Permisjon(5.januar, 5.januar),
-            Utdanning(5.januar, 5.januar)
+            Permisjon(5.januar, 5.januar)
         ),
         sendtTilNAVEllerArbeidsgiver = 5.januar
     )

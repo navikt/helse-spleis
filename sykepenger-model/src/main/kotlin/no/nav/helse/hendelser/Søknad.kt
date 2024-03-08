@@ -286,13 +286,6 @@ class Søknad(
                 søknad.funksjonellFeil(RV_SØ_22)
         }
 
-        class Utdanning(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "utdanning") {
-            override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, kilde)
-
-            override fun valider(søknad: Søknad) = søknad.varsel(RV_SØ_4)
-        }
-
         class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "permisjon") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.permisjonsdager(periode.start, periode.endInclusive, kilde)
