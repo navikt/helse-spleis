@@ -361,6 +361,8 @@ internal class PersonMediator(
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "behandlingId" to event.generasjonId,
             "type" to event.type,
+            "fom" to event.fom,
+            "tom" to event.tom,
             "kilde" to mapOf(
                 "meldingsreferanseId" to event.kilde.meldingsreferanseId,
                 "innsendt" to event.kilde.innsendt,

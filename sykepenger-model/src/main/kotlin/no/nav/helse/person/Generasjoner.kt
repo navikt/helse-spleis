@@ -677,7 +677,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                 is Tilstand.AnnullertPeriode -> PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd
                 else -> PersonObserver.GenerasjonOpprettetEvent.Type.Søknad
             }
-            observatører.forEach { it.nyGenerasjon(id, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
+            observatører.forEach { it.nyGenerasjon(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
         }
 
         internal fun forkastetGenerasjon(hendelse: Hendelse) {

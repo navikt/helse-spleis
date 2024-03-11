@@ -636,6 +636,8 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val generasjonId: UUID,
+        val fom: LocalDate,
+        val tom: LocalDate,
         val type: Type,
         val kilde: Kilde
     ) {

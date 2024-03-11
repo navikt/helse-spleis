@@ -32,6 +32,7 @@ internal interface GenerasjonObserver {
 
     fun nyGenerasjon(
         id: UUID,
+        periode: Periode,
         meldingsreferanseId: UUID,
         innsendt: LocalDateTime,
         registert: LocalDateTime,

@@ -37,6 +37,8 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
                     vedtaksperiodeId = 1.vedtaksperiode,
                     generasjonId = generasjonId,
                     type = PersonObserver.GenerasjonOpprettetEvent.Type.Søknad,
+                    fom = 1.januar,
+                    tom = 20.januar,
                     kilde = PersonObserver.GenerasjonOpprettetEvent.Kilde(
                         meldingsreferanseId = søknadId,
                         innsendt = innsendt,

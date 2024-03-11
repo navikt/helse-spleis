@@ -1,10 +1,13 @@
 package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -30,6 +33,8 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTrue(behandlingOpprettetIndeks < behandlingLukketIndeks) { "behandling_opprettet må sendes først" }
         assertTrue(behandlingLukketIndeks < behandlingAvsluttetIndeks) { "behandling_lukket bør sendes før behandling avsluttes" }
+
+        verifiserBehandlingOpprettetKontrakt(behandlingOpprettet)
         verifiserBehandlingLukketKontrakt(behandlingLukket)
     }
 
@@ -90,6 +95,16 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         verifiserBehandlingForkastetKontrakt(behandlingForkastet)
     }
 
+    private fun verifiserBehandlingOpprettetKontrakt(behandlingLukket: JsonNode) {
+        assertEquals("behandling_opprettet", behandlingLukket.path("@event_name").asText())
+        assertTrue(behandlingLukket.path("fødselsnummer").isTextual)
+        assertTrue(behandlingLukket.path("organisasjonsnummer").isTextual)
+        assertTrue(behandlingLukket.path("vedtaksperiodeId").isTextual)
+        assertTrue(behandlingLukket.path("behandlingId").isTextual)
+        assertDato(behandlingLukket.path("fom").asText())
+        assertDato(behandlingLukket.path("tom").asText())
+    }
+
     private fun verifiserBehandlingLukketKontrakt(behandlingLukket: JsonNode) {
         assertEquals("behandling_lukket", behandlingLukket.path("@event_name").asText())
         assertTrue(behandlingLukket.path("fødselsnummer").isTextual)
@@ -105,5 +120,10 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         assertTrue(behandlingForkastet.path("vedtaksperiodeId").isTextual)
         assertTrue(behandlingForkastet.path("behandlingId").isTextual)
         assertTrue(behandlingForkastet.path("automatiskBehandling").isBoolean)
+    }
+
+    private fun assertDato(tekst: String) {
+        assertTrue(tekst.isNotEmpty())
+        assertDoesNotThrow { LocalDate.parse(tekst) }
     }
 }

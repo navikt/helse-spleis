@@ -971,6 +971,7 @@ internal class Vedtaksperiode private constructor(
 
     override fun nyGenerasjon(
         id: UUID,
+        periode: Periode,
         meldingsreferanseId: UUID,
         innsendt: LocalDateTime,
         registert: LocalDateTime,
@@ -983,6 +984,8 @@ internal class Vedtaksperiode private constructor(
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = this.id,
             generasjonId = id,
+            fom = periode.start,
+            tom = periode.endInclusive,
             type = type,
             kilde = PersonObserver.GenerasjonOpprettetEvent.Kilde(meldingsreferanseId, innsendt, registert, avsender)
         )
