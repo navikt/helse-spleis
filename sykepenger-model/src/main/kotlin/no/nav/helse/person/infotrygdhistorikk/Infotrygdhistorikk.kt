@@ -135,10 +135,11 @@ internal class Infotrygdhistorikk private constructor(
         vedtaksperiode: Periode,
         tilstand: String,
         organisasjonsnummer: String,
-        person: Person
+        person: Person,
+        historikkenBleOppdatert: Boolean
     ) {
         if (!harHistorikk()) return
-        siste.utbetalingshistorikkEtterInfotrygdendring(vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, person)
+        siste.utbetalingshistorikkEtterInfotrygdendring(vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, person, historikkenBleOppdatert)
     }
 
 

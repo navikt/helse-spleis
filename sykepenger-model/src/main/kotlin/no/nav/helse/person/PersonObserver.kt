@@ -558,6 +558,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val vedtaksperiodeTom: LocalDate,
         val vedtaksperiodetilstand: String,
         val infotrygdhistorikkHendelseId: String?,
+        val medførteEndringerIHistorikken: Boolean,
         val infotrygdperioder: List<Infotrygdperiode>
     ) {
         data class Infotrygdperiode(

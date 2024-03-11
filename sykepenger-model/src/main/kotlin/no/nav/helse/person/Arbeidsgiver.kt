@@ -136,9 +136,13 @@ internal class Arbeidsgiver private constructor(
         }
 
 
-        internal fun List<Arbeidsgiver>.håndterHistorikkFraInfotrygd(hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk) {
+        internal fun List<Arbeidsgiver>.håndterHistorikkFraInfotrygd(
+            hendelse: Hendelse,
+            infotrygdhistorikk: Infotrygdhistorikk,
+            historikkenBleOppdatert: Boolean
+        ) {
             forEach { arbeidsgiver ->
-                arbeidsgiver.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
+                arbeidsgiver.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk, historikkenBleOppdatert)
             }
         }
 
@@ -467,9 +471,13 @@ internal class Arbeidsgiver private constructor(
         håndter(inntektsmeldingReplayUtført) { håndter(inntektsmeldingReplayUtført) }
     }
 
-    internal fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk) {
+    internal fun håndterHistorikkFraInfotrygd(
+        hendelse: Hendelse,
+        infotrygdhistorikk: Infotrygdhistorikk,
+        historikkenBleOppdatert: Boolean
+    ) {
         hendelse.kontekst(this)
-        håndter(hendelse) { håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk) }
+        håndter(hendelse) { håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk, historikkenBleOppdatert) }
     }
 
     internal fun håndter(

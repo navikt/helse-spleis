@@ -173,12 +173,13 @@ class InfotrygdhistorikkElement private constructor(
         vedtaksperiode: Periode,
         tilstand: String,
         organisasjonsnummer: String,
-        person: Person
+        person: Person,
+        historikkenBleOppdatert: Boolean
     ) {
         val overlappendePerioder : List<Infotrygdperiode> = perioder.filter { it.overlapperMed(vedtaksperiode) }
         if (overlappendePerioder.isEmpty()) return
         person.emitOverlappendeInfotrygdperiodeEtterInfotrygdendring(
-            vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, overlappendePerioder, hendelseId
+            vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, overlappendePerioder, hendelseId, historikkenBleOppdatert
         )
     }
 

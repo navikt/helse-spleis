@@ -9,13 +9,10 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInfotrygdendring
@@ -59,16 +56,29 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
                 vedtaksperiodeTom = 31.januar,
                 vedtaksperiodetilstand = "AVVENTER_INNTEKTSMELDING",
                 infotrygdhistorikkHendelseId = meldingsreferanseId.toString(),
+                medførteEndringerIHistorikken = true,
                 infotrygdperioder = listOf(
                     Infotrygdperiode(
                         fom = 17.januar,
                         tom = 31.januar,
                         type = "ARBEIDSGIVERUTBETALING",
-                        orgnummer = ORGNUMMER
+                        orgnummer = ORGNUMMER,
                     )
                 )
             )
         assertEquals(forventet, event)
+    }
+
+    @Test
+    fun `utgående event om overlappende infotrygdperiode, men medførte ingen endringer i historikken`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInfotrygdendring()
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT))
+        var sisteEvent = observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.last()
+        assertEquals(true, sisteEvent.medførteEndringerIHistorikken)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT))
+        sisteEvent = observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.last()
+        assertEquals(false, sisteEvent.medførteEndringerIHistorikken)
     }
 
     @Test

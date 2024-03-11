@@ -261,17 +261,17 @@ class Person private constructor(
         utbetalingshistorikk.oppdaterHistorikk(it)
     }
 
-    private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Unit) {
+    private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
         val skjæringstidspunkterFørEndring = skjæringstidspunkter()
         hendelse.kontekst(aktivitetslogg, this)
-        oppdatertHistorikk(infotrygdhistorikk)
+        val historikkenBleOppdatert = oppdatertHistorikk(infotrygdhistorikk)
         val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
         if (!skjæringstidspunkterEtterEndring.containsAll(skjæringstidspunkterFørEndring)) {
             arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
                 arbeidsgiver.sykefraværsfortelling(acc)
             }.varsleObservers(observers)
         }
-        arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
+        arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk, historikkenBleOppdatert)
         håndterGjenoppta(hendelse)
     }
 
@@ -579,7 +579,8 @@ class Person private constructor(
         vedtaksperiodetilstand: String,
         organisasjonsnummer: String,
         overlappendeInfotrygdPerioder: List<Infotrygdperiode>,
-        hendelseId: UUID?
+        hendelseId: UUID?,
+        historikkenBleOppdatert: Boolean
     ) {
         val event = PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
             organisasjonsnummer = organisasjonsnummer,
@@ -588,6 +589,7 @@ class Person private constructor(
             vedtaksperiodeTom = vedtaksperiode.endInclusive,
             vedtaksperiodetilstand = vedtaksperiodetilstand,
             infotrygdhistorikkHendelseId = hendelseId.toString(),
+            medførteEndringerIHistorikken = historikkenBleOppdatert,
             infotrygdperioder = overlappendeInfotrygdPerioder.mapNotNull {
                 PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.InfotrygdperiodeBuilder(it).infotrygdperiode
             }
@@ -611,7 +613,11 @@ class Person private constructor(
     internal fun trengerHistorikkFraInfotrygd(hendelse: Hendelse, vedtaksperiode: Vedtaksperiode) {
         if (trengerHistorikkFraInfotrygd(hendelse)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
         hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
-        vedtaksperiode.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
+        vedtaksperiode.håndterHistorikkFraInfotrygd(
+            hendelse = hendelse,
+            infotrygdhistorikk = infotrygdhistorikk,
+            historikkenBleOppdatert = false
+        )
     }
 
     private fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg): Boolean {

@@ -181,6 +181,7 @@ internal class PersonMediator(
             "vedtaksperiodeTom" to event.vedtaksperiodeTom,
             "vedtaksperiodetilstand" to event.vedtaksperiodetilstand,
             "infotrygdhistorikkHendelseId" to (event.infotrygdhistorikkHendelseId ?: ""),
+            "medførteEndringerIHistorikken" to event.medførteEndringerIHistorikken,
             "infotrygdperioder" to event.infotrygdperioder.map {
                 mapOf(
                     "fom" to it.fom,

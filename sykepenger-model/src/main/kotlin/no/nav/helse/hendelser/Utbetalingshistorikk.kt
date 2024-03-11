@@ -18,10 +18,11 @@ class Utbetalingshistorikk(
     private val besvart: LocalDateTime
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
-    internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
+    internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk): Boolean {
         info("Oppdaterer Infotrygdhistorikk")
-        if (!historikk.oppdaterHistorikk(element)) return info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
+        if (!historikk.oppdaterHistorikk(element)) return false.also {  info("Oppfrisket Infotrygdhistorikk medførte ingen endringer") }
         info("Oppfrisket Infotrygdhistorikk ble lagret")
+        return true
     }
 
     override fun innsendt() = besvart
