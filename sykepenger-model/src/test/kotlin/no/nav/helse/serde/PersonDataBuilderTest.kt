@@ -25,9 +25,21 @@ import no.nav.helse.memento.ArbeidsgiverMemento
 import no.nav.helse.memento.AvsenderMemento
 import no.nav.helse.memento.DagMemento
 import no.nav.helse.memento.DokumenttypeMemento
+import no.nav.helse.memento.UtbetalingsdagMemento
 import no.nav.helse.memento.VedtaksperiodetilstandMemento
 import no.nav.helse.memento.VilkårsgrunnlaghistorikkMemento
 import no.nav.helse.oktober
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.FOR
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAP
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UKJ
+import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -99,6 +111,26 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         assertArbeidsgivere(memento.arbeidsgivere)
         assertVilkårsgrunnlaghistorikk(memento.vilkårsgrunnlagHistorikk)
         assertGjenoppbygget(memento)
+    }
+
+    @Test
+    fun `memento av utbetalingstidslinje`() {
+        val tidslinje = tidslinjeOf(
+            1.AP, 1.NAP, 1.NAV, 1.HELG, 1.ARB, 1.FRI, 1.FOR,
+            1.AVV(dekningsgrunnlag = 1000, begrunnelse = Begrunnelse.SykepengedagerOppbrukt),
+            1.AVV(dekningsgrunnlag = 500, begrunnelse = Begrunnelse.MinimumInntekt),
+            1.UKJ
+        )
+        val memento = tidslinje.memento()
+        assertEquals(10, memento.dager.size)
+        memento.dager[0].also { dag ->
+            assertEquals(1.januar, dag.dato)
+            assertEquals(0.0, dag.økonomi.grad.prosent)
+            assertEquals(0.0, dag.økonomi.totalGrad.prosent)
+            assertNull(dag.økonomi.arbeidsgiverbeløp)
+            assertNull(dag.økonomi.personbeløp)
+            assertInstanceOf(UtbetalingsdagMemento.ArbeidsgiverperiodeDagMemento::class.java, dag)
+        }
     }
 
     private fun assertArbeidsgivere(arbeidsgivere: List<ArbeidsgiverMemento>) {
