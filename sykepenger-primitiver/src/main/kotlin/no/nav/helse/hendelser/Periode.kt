@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
+import no.nav.helse.memento.PeriodeMemento
 import no.nav.helse.nesteDag
 
 // Understands beginning and end of a time interval
@@ -182,6 +183,8 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
 
     fun subset(periode: Periode) =
         Periode(start.coerceAtLeast(periode.start), endInclusive.coerceAtMost(periode.endInclusive))
+
+    fun memento() = PeriodeMemento(start, endInclusive)
 }
 
 operator fun List<Periode>.contains(dato: LocalDate) = this.any { dato in it }

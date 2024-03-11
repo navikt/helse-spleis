@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.memento.ArbeidsgiverInntektsopplysningMemento
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -291,4 +292,11 @@ class ArbeidsgiverInntektsopplysning(
             this.forEach{it.inntektsopplysning.omregnetÅrsinntekt(builder, it.orgnummer)}
         }
     }
+
+    internal fun memento() = ArbeidsgiverInntektsopplysningMemento(
+        orgnummer = this.orgnummer,
+        gjelder = this.gjelder.memento(),
+        inntektsopplysning = this.inntektsopplysning.memento(),
+        refusjonsopplysninger = this.refusjonsopplysninger.memento()
+    )
 }

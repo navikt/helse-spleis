@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import no.nav.helse.memento.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagMemento
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -37,4 +38,9 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
             return map { it.rapportertInntekt }.summer()
         }
     }
+
+    internal fun memento() = ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagMemento(
+        orgnummer = this.orgnummer,
+        inntektsopplysninger = this.inntektsopplysninger.map { it.memento() }
+    )
 }

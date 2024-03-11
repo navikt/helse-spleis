@@ -2,6 +2,9 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.erHelg
+import no.nav.helse.memento.DagMemento
+import no.nav.helse.memento.DagMemento.AndreYtelserMemento.YtelseMemento
+import no.nav.helse.memento.HendelseskildeMemento
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Økonomi
 
@@ -82,6 +85,8 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.UkjentDagMemento(dato, kilde)
     }
 
     internal class Arbeidsdag(
@@ -91,6 +96,7 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.ArbeidsdagMemento(dato, kilde)
     }
 
     internal class Arbeidsgiverdag(
@@ -100,6 +106,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.ArbeidsgiverdagMemento(dato, kilde, økonomi.memento())
     }
 
     internal class Feriedag(
@@ -109,6 +116,7 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.FeriedagMemento(dato, kilde)
     }
 
     internal class ArbeidIkkeGjenopptattDag(
@@ -116,6 +124,7 @@ internal sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.ArbeidIkkeGjenopptattDagMemento(dato, kilde)
     }
 
     internal class FriskHelgedag(
@@ -125,6 +134,8 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.FriskHelgedagMemento(dato, kilde)
     }
 
     internal class ArbeidsgiverHelgedag(
@@ -134,6 +145,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.ArbeidsgiverHelgedagMemento(dato, kilde, økonomi.memento())
     }
 
     internal class Sykedag(
@@ -143,6 +155,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.SykedagMemento(dato, kilde, økonomi.memento())
     }
 
     internal class ForeldetSykedag(
@@ -152,6 +165,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.ForeldetSykedagMemento(dato, kilde, økonomi.memento())
     }
 
     internal class SykHelgedag(
@@ -161,6 +175,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.SykHelgedagMemento(dato, kilde, økonomi.memento())
     }
 
     internal class SykedagNav(
@@ -169,6 +184,7 @@ internal sealed class Dag(
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.SykedagNavMemento(dato, kilde, økonomi.memento())
     }
 
     internal class Permisjonsdag(
@@ -178,6 +194,7 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.PermisjonsdagMemento(dato, kilde)
     }
 
     internal class ProblemDag(
@@ -191,6 +208,7 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde, other, melding)
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) = DagMemento.ProblemDagMemento(dato, kilde, other.memento(), melding)
     }
 
     internal class AndreYtelser(
@@ -199,12 +217,28 @@ internal sealed class Dag(
         private val ytelse: AnnenYtelse,
     ) : Dag(dato, kilde) {
         enum class AnnenYtelse {
-            Foreldrepenger, AAP, Omsorgspenger, Pleiepenger, Svangerskapspenger, Opplæringspenger, Dagpenger
+            Foreldrepenger, AAP, Omsorgspenger, Pleiepenger, Svangerskapspenger, Opplæringspenger, Dagpenger;
+
+            fun memento() = when (this) {
+                Foreldrepenger -> YtelseMemento.Foreldrepenger
+                AAP -> YtelseMemento.AAP
+                Omsorgspenger -> YtelseMemento.Omsorgspenger
+                Pleiepenger -> YtelseMemento.Pleiepenger
+                Svangerskapspenger -> YtelseMemento.Svangerskapspenger
+                Opplæringspenger -> YtelseMemento.Opplæringspenger
+                Dagpenger -> YtelseMemento.Dagpenger
+            }
         }
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde, ytelse)
+
+        override fun memento(dato: LocalDate, kilde: HendelseskildeMemento) =
+            DagMemento.AndreYtelserMemento(dato, kilde, ytelse.memento())
     }
+
+    internal fun memento() = memento(dato, kilde.memento())
+    protected abstract fun memento(dato: LocalDate, kilde: HendelseskildeMemento): DagMemento
 }
 
 internal interface SykdomstidslinjeDagVisitor {

@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.memento.InfotrygdhistorikkMemento
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
@@ -162,4 +163,8 @@ internal class Infotrygdhistorikk private constructor(
         if (!harHistorikk()) return true
         return siste.ingenUtbetalingerMellom(organisasjonsnummer, periode)
     }
+
+    internal fun memento() = InfotrygdhistorikkMemento(
+        elementer = this.elementer.map { it.memento() }
+    )
 }

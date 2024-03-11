@@ -6,6 +6,8 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.etterlevelse.Inntektsubsumsjon
 import no.nav.helse.isWithinRangeOf
+import no.nav.helse.memento.InntekttypeMemento
+import no.nav.helse.memento.SkatteopplysningMemento
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -89,4 +91,19 @@ class Skatteopplysning(
             )
         }
     }
+
+    internal fun memento() = SkatteopplysningMemento(
+        hendelseId = this.hendelseId,
+        beløp = this.beløp.memento(),
+        måned = this.måned,
+        type = when (this.type) {
+            Inntekttype.LØNNSINNTEKT -> InntekttypeMemento.LØNNSINNTEKT
+            Inntekttype.NÆRINGSINNTEKT -> InntekttypeMemento.NÆRINGSINNTEKT
+            Inntekttype.PENSJON_ELLER_TRYGD -> InntekttypeMemento.PENSJON_ELLER_TRYGD
+            Inntekttype.YTELSE_FRA_OFFENTLIGE -> InntekttypeMemento.YTELSE_FRA_OFFENTLIGE
+        },
+        fordel = this.fordel,
+        beskrivelse = this.beskrivelse,
+        tidsstempel = this.tidsstempel
+    )
 }

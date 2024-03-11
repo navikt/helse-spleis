@@ -3,6 +3,7 @@ package no.nav.helse.økonomi
 import java.math.BigDecimal
 import java.math.MathContext
 import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.memento.ProsentdelMemento
 import kotlin.math.roundToInt
 
 class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
@@ -63,4 +64,6 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
     fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
 
     internal fun erUnderGrensen() = this < GRENSE
+
+    fun memento() = ProsentdelMemento(prosent = toDouble())
 }

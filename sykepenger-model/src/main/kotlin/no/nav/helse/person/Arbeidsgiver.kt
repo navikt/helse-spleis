@@ -28,6 +28,8 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
+import no.nav.helse.memento.ArbeidsgiverMemento
+import no.nav.helse.memoized
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -943,4 +945,17 @@ internal class Arbeidsgiver private constructor(
             )
         }
     }
+
+    internal fun memento() = ArbeidsgiverMemento(
+        id = id,
+        organisasjonsnummer = organisasjonsnummer,
+        inntektshistorikk = inntektshistorikk.memento(),
+        sykdomshistorikk = sykdomshistorikk.memento(),
+        sykmeldingsperioder = sykmeldingsperioder.memento(),
+        vedtaksperioder = vedtaksperioder.map { it.memento() },
+        forkastede = forkastede.map { it.memento() },
+        utbetalinger = utbetalinger.map { it.memento() },
+        feriepengeutbetalinger = feriepengeutbetalinger.map { it.memento() },
+        refusjonshistorikk = refusjonshistorikk.memento()
+    )
 }

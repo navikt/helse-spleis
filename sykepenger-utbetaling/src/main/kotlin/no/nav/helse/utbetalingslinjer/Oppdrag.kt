@@ -8,6 +8,10 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.memento.EndringskodeMemento
+import no.nav.helse.memento.FagområdeMemento
+import no.nav.helse.memento.OppdragMemento
+import no.nav.helse.memento.OppdragstatusMemento
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -463,6 +467,35 @@ class Oppdrag private constructor(
             }
         }
     }
+
+    fun memento() = OppdragMemento(
+        mottaker = mottaker,
+        fagområde = when (fagområde) {
+            Fagområde.SykepengerRefusjon -> FagområdeMemento.SPREF
+            Fagområde.Sykepenger -> FagområdeMemento.SP
+        },
+        linjer = linjer.map { it.memento() },
+        fagsystemId = fagsystemId,
+        endringskode = when (endringskode) {
+            Endringskode.NY -> EndringskodeMemento.NY
+            Endringskode.UEND -> EndringskodeMemento.UEND
+            Endringskode.ENDR -> EndringskodeMemento.ENDR
+        },
+        nettoBeløp = nettoBeløp,
+        overføringstidspunkt = overføringstidspunkt,
+        avstemmingsnøkkel = avstemmingsnøkkel,
+        status = when (status) {
+            Oppdragstatus.OVERFØRT -> OppdragstatusMemento.OVERFØRT
+            Oppdragstatus.AKSEPTERT -> OppdragstatusMemento.AKSEPTERT
+            Oppdragstatus.AKSEPTERT_MED_FEIL -> OppdragstatusMemento.AKSEPTERT_MED_FEIL
+            Oppdragstatus.AVVIST -> OppdragstatusMemento.AVVIST
+            Oppdragstatus.FEIL -> OppdragstatusMemento.FEIL
+            null -> null
+        },
+        tidsstempel = tidsstempel,
+        erSimulert = erSimulert,
+        simuleringsResultat = simuleringsResultat
+    )
 }
 
 enum class Oppdragstatus { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }

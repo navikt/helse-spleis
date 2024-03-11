@@ -6,6 +6,8 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
+import no.nav.helse.memento.BegrunnelseMemento
+import no.nav.helse.memento.UtbetalingstidslinjeMemento
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNav
@@ -204,11 +206,36 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
             utbetalingsdager.add(dag)
         }
     }
+
+    fun memento() = UtbetalingstidslinjeMemento(
+        dager = this.map { it.memento() }
+    )
 }
 
 sealed class Begrunnelse {
 
     open fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
+
+    fun memento() = when (this) {
+        AndreYtelserAap -> BegrunnelseMemento.AndreYtelserAap
+        AndreYtelserDagpenger -> BegrunnelseMemento.AndreYtelserDagpenger
+        AndreYtelserForeldrepenger -> BegrunnelseMemento.AndreYtelserForeldrepenger
+        AndreYtelserOmsorgspenger -> BegrunnelseMemento.AndreYtelserOmsorgspenger
+        AndreYtelserOpplaringspenger -> BegrunnelseMemento.AndreYtelserOpplaringspenger
+        AndreYtelserPleiepenger -> BegrunnelseMemento.AndreYtelserPleiepenger
+        AndreYtelserSvangerskapspenger -> BegrunnelseMemento.AndreYtelserSvangerskapspenger
+        EgenmeldingUtenforArbeidsgiverperiode -> BegrunnelseMemento.EgenmeldingUtenforArbeidsgiverperiode
+        EtterDødsdato -> BegrunnelseMemento.EtterDødsdato
+        ManglerMedlemskap -> BegrunnelseMemento.ManglerMedlemskap
+        ManglerOpptjening -> BegrunnelseMemento.ManglerOpptjening
+        MinimumInntekt -> BegrunnelseMemento.MinimumInntekt
+        MinimumInntektOver67 -> BegrunnelseMemento.MinimumInntektOver67
+        MinimumSykdomsgrad -> BegrunnelseMemento.MinimumSykdomsgrad
+        NyVilkårsprøvingNødvendig -> BegrunnelseMemento.NyVilkårsprøvingNødvendig
+        Over70 -> BegrunnelseMemento.Over70
+        SykepengedagerOppbrukt -> BegrunnelseMemento.SykepengedagerOppbrukt
+        SykepengedagerOppbruktOver67 -> BegrunnelseMemento.SykepengedagerOppbruktOver67
+    }
 
     object SykepengedagerOppbrukt : Begrunnelse()
     object SykepengedagerOppbruktOver67 : Begrunnelse()

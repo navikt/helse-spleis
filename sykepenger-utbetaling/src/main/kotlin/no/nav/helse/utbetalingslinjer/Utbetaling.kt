@@ -12,6 +12,10 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.valider
 import no.nav.helse.hendelser.utbetaling.vurdering
+import no.nav.helse.memento.UtbetalingMemento
+import no.nav.helse.memento.UtbetalingTilstandMemento
+import no.nav.helse.memento.UtbetalingVurderingMemento
+import no.nav.helse.memento.UtbetalingtypeMemento
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -471,7 +475,7 @@ class Utbetaling private constructor(
     }
     override fun toString() = "$type(${tilstand.status}) - $periode"
 
-    internal interface Tilstand {
+    internal sealed interface Tilstand {
         val status: Utbetalingstatus
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
 
@@ -754,8 +758,52 @@ class Utbetaling private constructor(
                 utbetaling.type == ANNULLERING -> Annullert
                 else -> GodkjentUtenUtbetaling
             }
+
+        fun memento() = UtbetalingVurderingMemento(
+            godkjent = godkjent,
+            ident = ident,
+            epost = epost,
+            tidspunkt = tidspunkt,
+            automatiskBehandling = automatiskBehandling
+        )
     }
 
+    fun memento() = UtbetalingMemento(
+        id = this.id,
+        korrelasjonsId = this.korrelasjonsId,
+        periode = this.periode.memento(),
+        utbetalingstidslinje = this.utbetalingstidslinje.memento(),
+        arbeidsgiverOppdrag = this.arbeidsgiverOppdrag.memento(),
+        personOppdrag = this.personOppdrag.memento(),
+        tidsstempel = this.tidsstempel,
+        tilstand = when (tilstand) {
+            Annullert -> UtbetalingTilstandMemento.ANNULLERT
+            Forkastet -> UtbetalingTilstandMemento.FORKASTET
+            Godkjent -> UtbetalingTilstandMemento.GODKJENT
+            GodkjentUtenUtbetaling -> UtbetalingTilstandMemento.GODKJENT_UTEN_UTBETALING
+            IkkeGodkjent -> UtbetalingTilstandMemento.IKKE_GODKJENT
+            Ny -> UtbetalingTilstandMemento.NY
+            Overført -> UtbetalingTilstandMemento.OVERFØRT
+            Ubetalt -> UtbetalingTilstandMemento.IKKE_UTBETALT
+            Utbetalt -> UtbetalingTilstandMemento.UTBETALT
+        },
+        type = when (type) {
+            Utbetalingtype.UTBETALING -> UtbetalingtypeMemento.UTBETALING
+            Utbetalingtype.ETTERUTBETALING -> UtbetalingtypeMemento.ETTERUTBETALING
+            Utbetalingtype.ANNULLERING -> UtbetalingtypeMemento.ANNULLERING
+            Utbetalingtype.REVURDERING -> UtbetalingtypeMemento.REVURDERING
+            Utbetalingtype.FERIEPENGER -> UtbetalingtypeMemento.FERIEPENGER
+        },
+        maksdato = this.maksdato,
+        forbrukteSykedager = this.forbrukteSykedager,
+        gjenståendeSykedager = this.gjenståendeSykedager,
+        annulleringer = this.annulleringer.mapNotNull { it.id },
+        vurdering = this.vurdering?.memento(),
+        overføringstidspunkt = overføringstidspunkt,
+        avstemmingsnøkkel = avstemmingsnøkkel,
+        avsluttet = avsluttet,
+        oppdatert = oppdatert
+    )
 }
 
 enum class Utbetalingstatus {

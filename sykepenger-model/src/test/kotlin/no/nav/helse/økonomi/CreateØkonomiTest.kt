@@ -6,6 +6,7 @@ import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.serde.DateRange
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
@@ -128,7 +129,9 @@ internal class CreateØkonomiTest {
         grad,
         null,
         null
-    )
+    ).apply {
+        datoer = DateRange.Single(1.januar)
+    }
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
         lateinit var fangetØkonomi: Økonomi

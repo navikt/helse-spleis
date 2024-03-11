@@ -5,7 +5,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class BegrunnelseDTOTest {
+internal class BegrunnelseMementoDTOTest {
 
     @Test
     fun `likt innhold i enumene`() {

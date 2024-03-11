@@ -43,6 +43,7 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.memento.PersonMemento
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
@@ -861,5 +862,15 @@ class Person private constructor(
 
     internal fun vurderOmSøknadIkkeKanHåndteres(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver) =
         arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(hendelse, vedtaksperiode, arbeidsgivere)
+
+    fun memento() = PersonMemento(
+        aktørId = aktørId,
+        fødselsnummer = personidentifikator.toString(),
+        alder = alder.memento(),
+        arbeidsgivere = arbeidsgivere.map { it.memento() },
+        opprettet = opprettet,
+        infotrygdhistorikk = infotrygdhistorikk.memento(),
+        vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.memento()
+    )
 }
 

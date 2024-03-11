@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.memento.ØkonomiMemento
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -354,6 +355,19 @@ class Økonomi private constructor(
             )
         }
     }
+
+    fun memento() = ØkonomiMemento(
+        grad = grad.memento(),
+        totalGrad = totalGrad.memento(),
+        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp.memento(),
+        aktuellDagsinntekt = aktuellDagsinntekt.memento(),
+        beregningsgrunnlag = beregningsgrunnlag.memento(),
+        dekningsgrunnlag = dekningsgrunnlag.memento(),
+        grunnbeløpgrense = grunnbeløpgrense?.memento(),
+        arbeidsgiverbeløp = arbeidsgiverbeløp?.memento(),
+        personbeløp = personbeløp?.memento(),
+        er6GBegrenset = er6GBegrenset
+    )
 }
 
 abstract class ØkonomiBuilder {

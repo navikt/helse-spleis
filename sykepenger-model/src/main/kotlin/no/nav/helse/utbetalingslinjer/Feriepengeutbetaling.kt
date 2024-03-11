@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.memento.FeriepengeMemento
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -331,4 +332,17 @@ internal class Feriepengeutbetaling private constructor(
             )
         }
     }
+
+    internal fun memento() = FeriepengeMemento(
+        feriepengeberegner = feriepengeberegner.memento(),
+        infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
+        infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
+        spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
+        spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
+        oppdrag = this.oppdrag.memento(),
+        personoppdrag = this.personoppdrag.memento(),
+        utbetalingId = this.utbetalingId,
+        sendTilOppdrag = this.sendTilOppdrag,
+        sendPersonoppdragTilOS = this.sendPersonoppdragTilOS
+    )
 }
