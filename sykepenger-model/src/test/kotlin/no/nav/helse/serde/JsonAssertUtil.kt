@@ -24,6 +24,8 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
 import org.junit.jupiter.api.Assertions
+import org.skyscreamer.jsonassert.JSONAssert
+import org.skyscreamer.jsonassert.JSONCompareMode
 
 @JsonIgnoreProperties("jurist", "aktivitetslogg")
 private class PersonMixin
@@ -97,5 +99,5 @@ private val objectMapper = jacksonObjectMapper()
 internal fun assertJsonEquals(expected: Any, actual: Any) {
     val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)
     val actualJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual)
-    Assertions.assertEquals(expectedJson, actualJson)
+    JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.STRICT)
 }

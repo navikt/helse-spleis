@@ -1,14 +1,15 @@
 package no.nav.helse.serde.migration
 
-import no.nav.helse.readResource
-import no.nav.helse.serde.assertJsonEquals
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.januar
+import no.nav.helse.readResource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import org.skyscreamer.jsonassert.JSONAssert
+import org.skyscreamer.jsonassert.JSONCompareMode
 
 internal class V139EndreTommeInntektsopplysningerTilIkkeRapportertTest : MigrationTest(V139EndreTommeInntektsopplysningerTilIkkeRapportert()) {
     @Test
@@ -22,10 +23,7 @@ internal class V139EndreTommeInntektsopplysningerTilIkkeRapportertTest : Migrati
         val nyesteOriginaleArbeidsgiverInntekter = originalHistorikk[0]["vilkårsgrunnlag"][0]["sykepengegrunnlag"]["arbeidsgiverInntektsopplysninger"]
         val nyesteMigrerteArbeidsgiverInntekter = migrertHistorikk[0]["vilkårsgrunnlag"][0]["sykepengegrunnlag"]["arbeidsgiverInntektsopplysninger"]
 
-        assertJsonEquals(
-            nyesteOriginaleArbeidsgiverInntekter[0].toString(),
-            nyesteMigrerteArbeidsgiverInntekter[0].toString()
-        )
+        JSONAssert.assertEquals(nyesteOriginaleArbeidsgiverInntekter[0].toString(), nyesteMigrerteArbeidsgiverInntekter[0].toString(), JSONCompareMode.STRICT)
 
         val ikkeRapportertInntektsopplysning = nyesteMigrerteArbeidsgiverInntekter[1]["inntektsopplysning"]
         assertEquals("IKKE_RAPPORTERT", ikkeRapportertInntektsopplysning["kilde"].asText())
@@ -33,12 +31,8 @@ internal class V139EndreTommeInntektsopplysningerTilIkkeRapportertTest : Migrati
         assertDoesNotThrow { UUID.fromString(ikkeRapportertInntektsopplysning["id"].asText()) }
         assertDoesNotThrow { LocalDateTime.parse(ikkeRapportertInntektsopplysning["tidsstempel"].asText()) }
 
-        assertJsonEquals(
-            originalHistorikk[0]["vilkårsgrunnlag"][1],
-            migrertHistorikk[0]["vilkårsgrunnlag"][1]
-        )
-
-        assertJsonEquals(originalHistorikk[1].toString(), migrertHistorikk[1].toString())
+        JSONAssert.assertEquals(originalHistorikk[0]["vilkårsgrunnlag"][1].toString(), migrertHistorikk[0]["vilkårsgrunnlag"][1].toString(), JSONCompareMode.STRICT)
+        JSONAssert.assertEquals(originalHistorikk[1].toString(), migrertHistorikk[1].toString(), JSONCompareMode.STRICT)
     }
 
 }
