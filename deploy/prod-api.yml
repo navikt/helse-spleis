@@ -61,6 +61,10 @@ spec:
         - application: spekemat
   secureLogs:
     enabled: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   envFrom:
     - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
   env:

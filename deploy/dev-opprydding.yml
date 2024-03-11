@@ -41,6 +41,10 @@ spec:
     pool: nav-dev
   secureLogs:
     enabled: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   envFrom:
     - secret: google-sql-helse-spleis-spleis-spleis-opprydding-dev-fe3a79a6
   env:

@@ -54,6 +54,10 @@ spec:
             value: "350"
   secureLogs:
     enabled: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   env:
   - name: KAFKA_RAPID_TOPIC
     value: tbd.rapid.v1
