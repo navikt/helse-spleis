@@ -187,7 +187,6 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class ArbeidsgiverState(private val arbeidsgiverMap: MutableMap<String, Any?>) : BuilderState() {
-        private val refusjonOpphører = mutableListOf<LocalDate?>()
         private val feriepengeutbetalingListe = mutableListOf<Map<String, Any>>()
         private val vedtaksperiodeListe = mutableListOf<MutableMap<String, Any?>>()
         private val forkastedeVedtaksperiodeListe = mutableListOf<MutableMap<String, Any?>>()
@@ -279,7 +278,6 @@ internal class JsonBuilder : AbstractBuilder() {
         ) {
             arbeidsgiverMap["id"] = id
             arbeidsgiverMap["organisasjonsnummer"] = organisasjonsnummer
-            arbeidsgiverMap["refusjonOpphører"] = refusjonOpphører
             arbeidsgiverMap["feriepengeutbetalinger"] = feriepengeutbetalingListe.toList()
             popState()
         }
@@ -1631,7 +1629,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "tilstand" to PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
                     "fom" to periode.start,
                     "tom" to periode.endInclusive,
-                    "kilde" to kilde?.let {
+                    "kilde" to kilde.let {
                         mapOf(
                             "meldingsreferanseId" to it.meldingsreferanseId,
                             "innsendt" to it.innsendt,
