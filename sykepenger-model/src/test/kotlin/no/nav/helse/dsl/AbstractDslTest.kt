@@ -481,15 +481,15 @@ protected fun håndterInntektsmeldingPortal(
     protected fun assertGjenoppbygget(dto: PersonDto) {
         val serialisertPerson = dto.tilPersonData().tilSerialisertPerson()
         val gjenoppbyggetPersonViaPersonData = serialisertPerson.deserialize(MaskinellJurist())
-        // val gjenoppbyggetPersonViaPersonDto = Person.gjenopprett(MaskinellJurist(), dto)
+        val gjenoppbyggetPersonViaPersonDto = Person.gjenopprett(MaskinellJurist(), dto)
 
         val dtoFraPersonViaPersonData = gjenoppbyggetPersonViaPersonData.dto()
-        // val dtoFraPersonViaPersonDto = gjenoppbyggetPersonViaPersonDto.dto()
+        val dtoFraPersonViaPersonDto = gjenoppbyggetPersonViaPersonDto.dto()
 
         assertEquals(dto, dtoFraPersonViaPersonData)
-        //assertEquals(dto, dtoFraPersonViaPersonDto)
+        assertEquals(dto, dtoFraPersonViaPersonDto)
         assertPersonEquals(testperson.person, gjenoppbyggetPersonViaPersonData)
-        //assertPersonEquals(testperson.person, gjenoppbyggetPersonViaPersonDto)
+        assertPersonEquals(testperson.person, gjenoppbyggetPersonViaPersonDto)
     }
 
     protected fun håndterDødsmelding(dødsdato: LocalDate) {

@@ -128,20 +128,21 @@ class Person private constructor(
         internal fun gjenopprett(jurist: MaskinellJurist, dto: PersonDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
             val personJurist = jurist.medFødselsnummer(dto.fødselsnummer)
             val arbeidsgivere = mutableListOf<Arbeidsgiver>()
-            val grunnlagsdataMap = mapOf<UUID, VilkårsgrunnlagElement>()
+            val grunnlagsdataMap = mutableMapOf<UUID, VilkårsgrunnlagElement>()
+            val alder = Alder.gjenopprett(dto.alder)
             val person = Person(
                 aktørId = dto.aktørId,
                 personidentifikator = dto.fødselsnummer.somPersonidentifikator(),
-                alder = Alder.gjenopprett(dto.alder),
+                alder = alder,
                 arbeidsgivere = arbeidsgivere,
                 aktivitetslogg = Aktivitetslogg(),
                 opprettet = dto.opprettet,
                 infotrygdhistorikk = Infotrygdhistorikk.gjenopprett(dto.infotrygdhistorikk),
-                vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk.gjenopprett(dto.vilkårsgrunnlagHistorikk),
+                vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk.gjenopprett(alder, dto.vilkårsgrunnlagHistorikk, grunnlagsdataMap),
                 jurist = personJurist,
                 tidligereBehandlinger = tidligereBehandlinger
             )
-            arbeidsgivere.addAll(dto.arbeidsgivere.map { Arbeidsgiver.gjenopprett(person, dto.aktørId, dto.fødselsnummer, it, personJurist, grunnlagsdataMap) })
+            arbeidsgivere.addAll(dto.arbeidsgivere.map { Arbeidsgiver.gjenopprett(person, alder, dto.aktørId, dto.fødselsnummer, it, personJurist, grunnlagsdataMap) })
             return person
         }
     }

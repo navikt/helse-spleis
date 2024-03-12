@@ -125,7 +125,19 @@ class Saksbehandler internal constructor(
             overstyrtInntekt = overstyrtInntekt?.dto()!!
         )
 
-    private companion object {
+    internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
+        fun gjenopprett(dto: InntektsopplysningDto.SaksbehandlerDto, inntekter: Map<UUID, Inntektsopplysning>) =
+            Saksbehandler(
+                id = dto.id,
+                hendelseId = dto.hendelseId,
+                dato = dto.dato,
+                beløp = Inntekt.gjenopprett(dto.beløp),
+                tidsstempel = dto.tidsstempel,
+                forklaring = dto.forklaring,
+                subsumsjon = dto.subsumsjon?.let { Subsumsjon.gjenopprett(it) },
+                overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt.id)
+            )
     }
 }

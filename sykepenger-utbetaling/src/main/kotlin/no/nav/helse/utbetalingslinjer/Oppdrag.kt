@@ -94,7 +94,7 @@ class Oppdrag private constructor(
             aktivitetslogg.varsel(RV_UT_23)
         }
 
-        internal fun gjenopprett(dto: OppdragDto): Oppdrag {
+        fun gjenopprett(dto: OppdragDto): Oppdrag {
             return Oppdrag(
                 mottaker = dto.mottaker,
                 fagområde = when (dto.fagområde) {

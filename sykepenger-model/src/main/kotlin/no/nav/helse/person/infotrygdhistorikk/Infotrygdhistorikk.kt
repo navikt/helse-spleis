@@ -35,7 +35,9 @@ internal class Infotrygdhistorikk private constructor(
         internal fun ferdigInfotrygdhistorikk(elementer: List<InfotrygdhistorikkElement>) = Infotrygdhistorikk(elementer.map { it }.toMutableList())
 
         internal fun gjenopprett(dto: InfotrygdhistorikkDto): Infotrygdhistorikk {
-            return Infotrygdhistorikk()
+            return Infotrygdhistorikk(
+                elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
+            )
         }
     }
 

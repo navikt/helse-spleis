@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.InfotrygdhistorikkelementDto
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -76,6 +77,20 @@ class InfotrygdhistorikkElement private constructor(
             arbeidskategorikoder = arbeidskategorikoder,
             oppdatert = oppdatert
         )
+
+        internal fun gjenopprett(dto: InfotrygdhistorikkelementDto): InfotrygdhistorikkElement {
+            return InfotrygdhistorikkElement(
+                id = dto.id,
+                tidsstempel = dto.tidsstempel,
+                hendelseId = dto.hendelseId,
+                perioder = dto.arbeidsgiverutbetalingsperioder.map { ArbeidsgiverUtbetalingsperiode.gjenopprett(it) } +
+                    dto.personutbetalingsperioder.map { PersonUtbetalingsperiode.gjenopprett(it) } +
+                    dto.ferieperioder.map { Friperiode.gjenopprett(it) },
+                inntekter = dto.inntekter.map { Inntektsopplysning.gjenopprett(it) },
+                arbeidskategorikoder = dto.arbeidskategorikoder,
+                oppdatert = dto.oppdatert
+            )
+        }
     }
 
     internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor, hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null) {

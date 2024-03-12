@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.forrigeDag
@@ -16,7 +17,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
 import no.nav.helse.dto.MedlemskapsvurderingDto
-import no.nav.helse.dto.OpptjeningDto
 import no.nav.helse.dto.SykepengegrunnlagDto
 import no.nav.helse.dto.VilkårsgrunnlagInnslagDto
 import no.nav.helse.dto.VilkårsgrunnlagDto
@@ -29,6 +29,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_8
 import no.nav.helse.person.builders.VedtakFattetBuilder
+import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -202,6 +203,18 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 opprettet: LocalDateTime,
                 elementer: Map<LocalDate, VilkårsgrunnlagElement>
             ): Innslag = Innslag(id, opprettet, elementer.toMutableMap())
+
+            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnslagDto, inntekter: MutableMap<UUID, Inntektsopplysning>, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): Innslag {
+                return Innslag(
+                    id = dto.id,
+                    opprettet = dto.opprettet,
+                    vilkårsgrunnlag = dto.vilkårsgrunnlag.associate {
+                        it.skjæringstidspunkt to grunnlagsdata.getOrPut(it.vilkårsgrunnlagId) {
+                            VilkårsgrunnlagElement.gjenopprett(alder, it, inntekter)
+                        }
+                    }.toMutableMap()
+                )
+            }
         }
 
         internal fun dto() = VilkårsgrunnlagInnslagDto(
@@ -429,15 +442,21 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     .filter { it.skjæringstidspunkt <= dato }
                     .maxByOrNull { it.skjæringstidspunkt }
             }
+
+            internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagDto, inntekter: MutableMap<UUID, Inntektsopplysning>): VilkårsgrunnlagElement {
+                return when (dto) {
+                    is VilkårsgrunnlagDto.Infotrygd -> InfotrygdVilkårsgrunnlag.gjenopprett(alder, dto, inntekter)
+                    is VilkårsgrunnlagDto.Spleis -> Grunnlagsdata.gjenopprett(alder, dto, inntekter)
+                }
+            }
         }
 
         internal fun dto(): VilkårsgrunnlagDto =
-            dto(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag.dto(), opptjening?.dto())
+            dto(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag.dto())
         protected abstract fun dto(
             vilkårsgrunnlagId: UUID,
             skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: SykepengegrunnlagDto,
-            opptjening: OpptjeningDto?
+            sykepengegrunnlag: SykepengegrunnlagDto
         ): VilkårsgrunnlagDto
     }
 
@@ -529,13 +548,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun dto(
             vilkårsgrunnlagId: UUID,
             skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: SykepengegrunnlagDto,
-            opptjening: OpptjeningDto?
+            sykepengegrunnlag: SykepengegrunnlagDto
         ) = VilkårsgrunnlagDto.Spleis(
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag,
-            opptjening = opptjening,
+            opptjening = this.opptjening.dto(),
             medlemskapstatus = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapsvurderingDto.Ja
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> MedlemskapsvurderingDto.Nei
@@ -545,6 +563,25 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vurdertOk = vurdertOk,
             meldingsreferanseId = meldingsreferanseId
         )
+
+        internal companion object {
+            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagDto.Spleis, inntekter: MutableMap<UUID, Inntektsopplysning>): Grunnlagsdata {
+                return Grunnlagsdata(
+                    skjæringstidspunkt = dto.skjæringstidspunkt,
+                    sykepengegrunnlag = Sykepengegrunnlag.gjenopprett(alder, dto.skjæringstidspunkt, dto.sykepengegrunnlag, inntekter),
+                    opptjening = Opptjening.gjenopprett(dto.skjæringstidspunkt, dto.opptjening),
+                    vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
+                    medlemskapstatus = when (dto.medlemskapstatus) {
+                        MedlemskapsvurderingDto.Ja -> Medlemskapsvurdering.Medlemskapstatus.Ja
+                        MedlemskapsvurderingDto.Nei -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                        MedlemskapsvurderingDto.UavklartMedBrukerspørsmål -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
+                        MedlemskapsvurderingDto.VetIkke -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
+                    },
+                    vurdertOk = dto.vurdertOk,
+                    meldingsreferanseId = dto.meldingsreferanseId
+                )
+            }
+        }
     }
 
     internal class InfotrygdVilkårsgrunnlag(
@@ -609,17 +646,29 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun dto(
             vilkårsgrunnlagId: UUID,
             skjæringstidspunkt: LocalDate,
-            sykepengegrunnlag: SykepengegrunnlagDto,
-            opptjening: OpptjeningDto?
-        ) = VilkårsgrunnlagDto.Infotrygd(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag, opptjening)
+            sykepengegrunnlag: SykepengegrunnlagDto
+        ) = VilkårsgrunnlagDto.Infotrygd(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag)
+
+        internal companion object {
+            fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagDto.Infotrygd, inntekter: MutableMap<UUID, Inntektsopplysning>): InfotrygdVilkårsgrunnlag {
+                return InfotrygdVilkårsgrunnlag(
+                    skjæringstidspunkt = dto.skjæringstidspunkt,
+                    sykepengegrunnlag = Sykepengegrunnlag.gjenopprett(alder, dto.skjæringstidspunkt, dto.sykepengegrunnlag, inntekter),
+                    vilkårsgrunnlagId = dto.vilkårsgrunnlagId
+                )
+            }
+        }
     }
 
     internal companion object {
         internal fun ferdigVilkårsgrunnlagHistorikk(innslag: List<Innslag>) =
             VilkårsgrunnlagHistorikk(innslag.toMutableList())
 
-        internal fun gjenopprett(dto: VilkårsgrunnlaghistorikkDto): VilkårsgrunnlagHistorikk {
-            return VilkårsgrunnlagHistorikk()
+        internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlaghistorikkDto, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): VilkårsgrunnlagHistorikk {
+            val inntekter = mutableMapOf<UUID, Inntektsopplysning>()
+            return VilkårsgrunnlagHistorikk(
+                historikk = dto.historikk.map { Innslag.gjenopprett(alder, it, inntekter, grunnlagsdata) }.toMutableList()
+            )
         }
     }
 

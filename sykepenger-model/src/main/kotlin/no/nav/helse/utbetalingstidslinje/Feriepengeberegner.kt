@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.lang.IllegalStateException
+import java.lang.ProcessHandle.Info
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -52,6 +53,13 @@ internal class Feriepengeberegner(
     internal companion object {
         internal fun ferdigFeriepengeberegner(alder: Alder, opptjeningsår: Year, utbetalteDager: List<UtbetaltDag>): Feriepengeberegner =
             Feriepengeberegner(alder, opptjeningsår, utbetalteDager)
+
+        internal fun gjenopprett(alder: Alder, dto: FeriepengeberegnerDto) =
+            Feriepengeberegner(
+                alder = alder,
+                opptjeningsår = dto.opptjeningsår,
+                utbetalteDager = dto.utbetalteDager.map { UtbetaltDag.gjenopprett(it) }
+            )
 
         private const val ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET = 48
     }
@@ -162,6 +170,14 @@ internal class Feriepengeberegner(
             internal fun opptjeningsårFilter(opptjeningsår: Year): UtbetaltDagSelector = { Year.from(it.dato) == opptjeningsår }
             private infix fun (UtbetaltDagSelector).or(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) || other(it) }
             internal infix fun (UtbetaltDagSelector).and(other: UtbetaltDagSelector): UtbetaltDagSelector = { this(it) && other(it) }
+
+            internal fun gjenopprett(dto: UtbetaltDagDto) =
+                when (dto) {
+                    is UtbetaltDagDto.InfotrygdArbeidsgiver -> InfotrygdArbeidsgiver.gjenopprett(dto)
+                    is UtbetaltDagDto.InfotrygdPerson -> InfotrygdPerson.gjenopprett(dto)
+                    is UtbetaltDagDto.SpleisArbeidsgiver -> SpleisArbeidsgiver.gjenopprett(dto)
+                    is UtbetaltDagDto.SpleisPerson -> SpleisPerson.gjenopprett(dto)
+                }
         }
 
         internal abstract fun accept(visitor: FeriepengeutbetalingVisitor)
@@ -175,6 +191,16 @@ internal class Feriepengeberegner(
                 visitor.visitInfotrygdPersonDag(this, orgnummer, dato, beløp)
             }
             override fun dto() = UtbetaltDagDto.InfotrygdPerson(orgnummer, dato, beløp)
+
+            internal companion object {
+                internal fun gjenopprett(dto: UtbetaltDagDto.InfotrygdPerson): InfotrygdPerson {
+                    return InfotrygdPerson(
+                        orgnummer = dto.orgnummer,
+                        dato = dto.dato,
+                        beløp = dto.beløp
+                    )
+                }
+            }
         }
 
         internal class InfotrygdArbeidsgiver(
@@ -186,6 +212,16 @@ internal class Feriepengeberegner(
                 visitor.visitInfotrygdArbeidsgiverDag(this, orgnummer, dato, beløp)
             }
             override fun dto() = UtbetaltDagDto.InfotrygdArbeidsgiver(orgnummer, dato, beløp)
+
+            internal companion object {
+                internal fun gjenopprett(dto: UtbetaltDagDto.InfotrygdArbeidsgiver): InfotrygdArbeidsgiver {
+                    return InfotrygdArbeidsgiver(
+                        orgnummer = dto.orgnummer,
+                        dato = dto.dato,
+                        beløp = dto.beløp
+                    )
+                }
+            }
         }
 
         internal class SpleisArbeidsgiver(
@@ -197,6 +233,16 @@ internal class Feriepengeberegner(
                 visitor.visitSpleisArbeidsgiverDag(this, orgnummer, dato, beløp)
             }
             override fun dto() = UtbetaltDagDto.SpleisArbeidsgiver(orgnummer, dato, beløp)
+
+            internal companion object {
+                internal fun gjenopprett(dto: UtbetaltDagDto.SpleisArbeidsgiver): SpleisArbeidsgiver {
+                    return SpleisArbeidsgiver(
+                        orgnummer = dto.orgnummer,
+                        dato = dto.dato,
+                        beløp = dto.beløp
+                    )
+                }
+            }
         }
         internal class SpleisPerson(
             orgnummer: String,
@@ -208,6 +254,16 @@ internal class Feriepengeberegner(
             }
 
             override fun dto() = UtbetaltDagDto.SpleisPerson(orgnummer, dato, beløp)
+
+            internal companion object {
+                internal fun gjenopprett(dto: UtbetaltDagDto.SpleisPerson): SpleisPerson {
+                    return SpleisPerson(
+                        orgnummer = dto.orgnummer,
+                        dato = dto.dato,
+                        beløp = dto.beløp
+                    )
+                }
+            }
         }
 
         abstract fun dto(): UtbetaltDagDto

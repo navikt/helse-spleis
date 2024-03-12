@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
@@ -56,6 +57,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.gjenopprett
 import no.nav.helse.økonomi.Økonomi
 
 internal class Sykepengegrunnlag private constructor(
@@ -152,6 +154,18 @@ internal class Sykepengegrunnlag private constructor(
             `6G`: Inntekt? = null
         ): Sykepengegrunnlag {
             return Sykepengegrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag, `6G`)
+        }
+
+        fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: SykepengegrunnlagDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Sykepengegrunnlag {
+            return Sykepengegrunnlag(
+                alder = alder,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map { ArbeidsgiverInntektsopplysning.gjenopprett(it, inntekter) },
+                deaktiverteArbeidsforhold = dto.deaktiverteArbeidsforhold.map { ArbeidsgiverInntektsopplysning.gjenopprett(it, inntekter) },
+                vurdertInfotrygd = dto.vurdertInfotrygd,
+                sammenligningsgrunnlag = Sammenligningsgrunnlag.gjenopprett(dto.sammenligningsgrunnlag),
+                `6G` = Inntekt.gjenopprett(dto.`6G`)
+            )
         }
     }
 

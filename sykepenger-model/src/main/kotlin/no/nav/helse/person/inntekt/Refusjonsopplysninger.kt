@@ -102,6 +102,15 @@ class Refusjonsopplysning(
             // Beholder de delene som ikke dekkes av den nye opplysningen og legger til den nye opplysningen
             return flatMap { eksisterendeOpplysning -> eksisterendeOpplysning.trim(nyOpplysningBegrensetStart.periode) }.plus(nyOpplysningBegrensetStart)
         }
+
+        internal fun gjenopprett(dto: RefusjonsopplysningDto): Refusjonsopplysning {
+            return Refusjonsopplysning(
+                meldingsreferanseId = dto.meldingsreferanseId,
+                fom = dto.fom,
+                tom = dto.tom,
+                beløp = Inntekt.gjenopprett(dto.beløp)
+            )
+        }
     }
 
     class Refusjonsopplysninger private constructor(
@@ -224,6 +233,10 @@ class Refusjonsopplysning(
             private fun List<Refusjonsopplysning>.overlapper() = map { it.periode }.overlapper()
             internal fun List<Refusjonsopplysning>.gjennopprett() = Refusjonsopplysninger(this)
             internal val Refusjonsopplysning.refusjonsopplysninger get() = Refusjonsopplysninger(listOf(this))
+
+            internal fun gjenopprett(dto: RefusjonsopplysningerDto) = Refusjonsopplysninger(
+                refusjonsopplysninger = dto.opplysninger.map { Refusjonsopplysning.gjenopprett(it) }
+            )
         }
 
         class RefusjonsopplysningerBuilder {

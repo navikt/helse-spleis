@@ -189,8 +189,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun dto(
                 vilkårsgrunnlagId: UUID,
                 skjæringstidspunkt: LocalDate,
-                sykepengegrunnlag: SykepengegrunnlagDto,
-                opptjening: OpptjeningDto?
+                sykepengegrunnlag: SykepengegrunnlagDto
             ): VilkårsgrunnlagDto {
                 throw IllegalStateException()
             }

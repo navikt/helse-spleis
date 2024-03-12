@@ -15,8 +15,7 @@ data class PersonDto(
     val arbeidsgivere: List<ArbeidsgiverDto>,
     val infotrygdhistorikk: InfotrygdhistorikkDto,
     val vilkårsgrunnlagHistorikk: VilkårsgrunnlaghistorikkDto
-) {
-}
+)
 
 data class AlderDto(val fødselsdato: LocalDate, val dødsdato: LocalDate?)
 
@@ -224,13 +223,12 @@ sealed class VilkårsgrunnlagDto {
     abstract val vilkårsgrunnlagId: UUID
     abstract val skjæringstidspunkt: LocalDate
     abstract val sykepengegrunnlag: SykepengegrunnlagDto
-    abstract val opptjening: OpptjeningDto?
 
     data class Spleis(
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,
         override val sykepengegrunnlag: SykepengegrunnlagDto,
-        override val opptjening: OpptjeningDto?,
+        val opptjening: OpptjeningDto,
         val medlemskapstatus: MedlemskapsvurderingDto,
         val vurdertOk: Boolean,
         val meldingsreferanseId: UUID?
@@ -238,8 +236,7 @@ sealed class VilkårsgrunnlagDto {
     data class Infotrygd(
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,
-        override val sykepengegrunnlag: SykepengegrunnlagDto,
-        override val opptjening: OpptjeningDto?
+        override val sykepengegrunnlag: SykepengegrunnlagDto
     ) : VilkårsgrunnlagDto()
 }
 

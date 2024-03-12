@@ -32,4 +32,14 @@ internal class IkkeRapportert(
 
     override fun dto() =
         InntektsopplysningDto.IkkeRapportertDto(id, hendelseId, dato, tidsstempel)
+
+    internal companion object {
+        fun gjenopprett(dto: InntektsopplysningDto.IkkeRapportertDto) =
+            IkkeRapportert(
+                id = dto.id,
+                hendelseId = dto.hendelseId,
+                dato = dto.dato,
+                tidsstempel = dto.tidsstempel
+            )
+    }
 }

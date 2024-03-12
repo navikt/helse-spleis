@@ -37,6 +37,13 @@ internal class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
         internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>.sammenligningsgrunnlag(): Inntekt {
             return map { it.rapportertInntekt }.summer()
         }
+
+        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto): ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag {
+            return ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+                orgnummer = dto.orgnummer,
+                inntektsopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }
+            )
+        }
     }
 
     internal fun dto() = ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(

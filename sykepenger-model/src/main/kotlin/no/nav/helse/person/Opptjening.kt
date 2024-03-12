@@ -149,6 +149,14 @@ internal class Opptjening private constructor(
                         "tom" to it.ansattTom
                     )
                 }
+
+                internal fun gjenopprett(dto: ArbeidsforholdDto): Arbeidsforhold {
+                    return Arbeidsforhold(
+                        ansattFom = dto.ansattFom,
+                        ansattTom = dto.ansattTom,
+                        deaktivert = dto.deaktivert
+                    )
+                }
             }
 
             internal fun dto() = ArbeidsforholdDto(
@@ -174,6 +182,13 @@ internal class Opptjening private constructor(
                 mapNotNull { it.inngårIOpptjening(opptjeningsperiode) }
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() =
                 flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
+
+            internal fun gjenopprett(dto: ArbeidsgiverOpptjeningsgrunnlagDto): ArbeidsgiverOpptjeningsgrunnlag {
+                return ArbeidsgiverOpptjeningsgrunnlag(
+                    orgnummer = dto.orgnummer,
+                    ansattPerioder = dto.ansattPerioder.map { Arbeidsforhold.gjenopprett(it) }
+                )
+            }
         }
 
         internal fun dto() = ArbeidsgiverOpptjeningsgrunnlagDto(
@@ -187,6 +202,14 @@ internal class Opptjening private constructor(
 
         internal fun gjenopprett(skjæringstidspunkt: LocalDate, arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) =
             Opptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
+
+        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: OpptjeningDto): Opptjening {
+            return Opptjening(
+                skjæringstidspunkt = skjæringstidspunkt,
+                dto.arbeidsforhold.map { ArbeidsgiverOpptjeningsgrunnlag.gjenopprett(it) },
+                opptjeningsperiode = Periode.gjenopprett(dto.opptjeningsperiode)
+            )
+        }
 
 
         internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {

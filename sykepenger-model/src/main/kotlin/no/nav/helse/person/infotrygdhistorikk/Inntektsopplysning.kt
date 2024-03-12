@@ -54,6 +54,17 @@ class Inntektsopplysning private constructor(
                 refusjonTom = refusjonTom,
                 lagret = lagret
             )
+
+        internal fun gjenopprett(dto: InfotrygdInntektsopplysningDto): Inntektsopplysning {
+            return Inntektsopplysning(
+                orgnummer = dto.orgnummer,
+                sykepengerFom = dto.sykepengerFom,
+                inntekt = Inntekt.gjenopprett(dto.inntekt),
+                refusjonTom = dto.refusjonTom,
+                refusjonTilArbeidsgiver = dto.refusjonTilArbeidsgiver,
+                lagret = dto.lagret
+            )
+        }
     }
 
     internal fun dto() = InfotrygdInntektsopplysningDto(

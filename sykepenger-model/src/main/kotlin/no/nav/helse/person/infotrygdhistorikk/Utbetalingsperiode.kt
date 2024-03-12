@@ -17,6 +17,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.gjenopprett
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
@@ -106,6 +107,19 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
         grad = grad.dto(),
         inntekt = inntekt.dto()
     )
+
+    internal companion object {
+        internal fun gjenopprett(dto: InfotrygdArbeidsgiverutbetalingsperiodeDto): ArbeidsgiverUtbetalingsperiode {
+            val periode = Periode.gjenopprett(dto.periode)
+            return ArbeidsgiverUtbetalingsperiode(
+                orgnr = dto.orgnr,
+                fom = periode.start,
+                tom = periode.endInclusive,
+                grad = Prosentdel.gjenopprett(dto.grad),
+                inntekt = Inntekt.gjenopprett(dto.inntekt)
+            )
+        }
+    }
 }
 
 class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, grad: Prosentdel, inntekt: Inntekt) :
@@ -130,4 +144,17 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
         grad = grad.dto(),
         inntekt = inntekt.dto()
     )
+
+    internal companion object {
+        internal fun gjenopprett(dto: InfotrygdPersonutbetalingsperiodeDto): PersonUtbetalingsperiode {
+            val periode = Periode.gjenopprett(dto.periode)
+            return PersonUtbetalingsperiode(
+                orgnr = dto.orgnr,
+                fom = periode.start,
+                tom = periode.endInclusive,
+                grad = Prosentdel.gjenopprett(dto.grad),
+                inntekt = Inntekt.gjenopprett(dto.inntekt)
+            )
+        }
+    }
 }

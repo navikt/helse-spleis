@@ -139,6 +139,20 @@ abstract class Inntektsopplysning protected constructor(
         internal fun List<Inntektsopplysning>.validerSkjønnsmessigAltEllerIntet() {
             check(all { it is SkjønnsmessigFastsatt } || none { it is SkjønnsmessigFastsatt }) {"Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det"}
         }
+
+        internal fun gjenopprett(dto: InntektsopplysningDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Inntektsopplysning {
+            val inntektsopplysning = inntekter.getOrPut(dto.id) {
+                when (dto) {
+                    is InntektsopplysningDto.IkkeRapportertDto -> IkkeRapportert.gjenopprett(dto)
+                    is InntektsopplysningDto.InfotrygdDto -> Infotrygd.gjenopprett(dto)
+                    is InntektsopplysningDto.InntektsmeldingDto -> Inntektsmelding.gjenopprett(dto)
+                    is InntektsopplysningDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)
+                    is InntektsopplysningDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
+                    is InntektsopplysningDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsatt.gjenopprett(dto, inntekter)
+                }
+            }
+            return inntektsopplysning
+        }
     }
 
     internal abstract fun dto(): InntektsopplysningDto

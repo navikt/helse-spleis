@@ -349,7 +349,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                     return Endring(
                         id = dto.id,
                         tidsstempel = dto.tidsstempel,
-                        sykmeldingsperiode = Periode.gjenopprett(dto.periode),
+                        sykmeldingsperiode = Periode.gjenopprett(dto.sykmeldingsperiode),
                         periode = Periode.gjenopprett(dto.periode),
                         grunnlagsdata = dto.vilkårsgrunnlagId?.let { grunnlagsdata.getValue(it) },
                         utbetaling = dto.utbetalingId?.let { utbetalinger.getValue(it) },

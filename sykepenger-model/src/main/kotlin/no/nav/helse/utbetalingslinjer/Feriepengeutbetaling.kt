@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.Year
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -65,6 +66,21 @@ internal class Feriepengeutbetaling private constructor(
                 sendTilOppdrag = sendTilOppdrag,
                 sendPersonoppdragTilOS = sendPersonoppdragTilOS,
             )
+
+        internal fun gjenopprett(alder: Alder, dto: FeriepengeDto): Feriepengeutbetaling {
+            return Feriepengeutbetaling(
+                feriepengeberegner = Feriepengeberegner.gjenopprett(alder, dto.feriepengeberegner),
+                infotrygdFeriepengebeløpPerson = dto.infotrygdFeriepengebeløpPerson,
+                infotrygdFeriepengebeløpArbeidsgiver = dto.infotrygdFeriepengebeløpArbeidsgiver,
+                spleisFeriepengebeløpArbeidsgiver = dto.spleisFeriepengebeløpArbeidsgiver,
+                spleisFeriepengebeløpPerson = dto.spleisFeriepengebeløpPerson,
+                oppdrag = Oppdrag.gjenopprett(dto.oppdrag),
+                personoppdrag = Oppdrag.gjenopprett(dto.personoppdrag),
+                utbetalingId = dto.utbetalingId,
+                sendTilOppdrag = dto.sendTilOppdrag,
+                sendPersonoppdragTilOS = dto.sendPersonoppdragTilOS
+            )
+        }
     }
 
     internal fun accept(visitor: FeriepengeutbetalingVisitor) {

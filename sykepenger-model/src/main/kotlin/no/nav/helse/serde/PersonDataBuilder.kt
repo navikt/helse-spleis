@@ -687,7 +687,10 @@ private fun VilkårsgrunnlagDto.tilPersonData() = PersonData.VilkårsgrunnlagEle
         is VilkårsgrunnlagDto.Spleis -> PersonData.VilkårsgrunnlagElementData.GrunnlagsdataType.Vilkårsprøving
     },
     sykepengegrunnlag = this.sykepengegrunnlag.tilPersonData(),
-    opptjening = this.opptjening?.tilPersonData(),
+    opptjening = when (this) {
+        is VilkårsgrunnlagDto.Spleis -> this.opptjening.tilPersonData()
+        is VilkårsgrunnlagDto.Infotrygd -> null
+    },
     medlemskapstatus = when (this) {
         is VilkårsgrunnlagDto.Spleis -> when (this.medlemskapstatus) {
             MedlemskapsvurderingDto.Ja -> JsonMedlemskapstatus.JA

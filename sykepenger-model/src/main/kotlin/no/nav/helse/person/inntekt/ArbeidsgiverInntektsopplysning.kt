@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
@@ -290,6 +291,15 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(builder: GodkjenningsbehovBuilder) {
             builder.orgnummereMedRelevanteArbeidsforhold(this.map { it.orgnummer }.toSet())
             this.forEach{it.inntektsopplysning.omregnetÅrsinntekt(builder, it.orgnummer)}
+        }
+
+        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningDto, inntekter: MutableMap<UUID, Inntektsopplysning>): ArbeidsgiverInntektsopplysning {
+            return ArbeidsgiverInntektsopplysning(
+                orgnummer = dto.orgnummer,
+                gjelder = Periode.gjenopprett(dto.gjelder),
+                inntektsopplysning = Inntektsopplysning.gjenopprett(dto.inntektsopplysning, inntekter),
+                refusjonsopplysninger = Refusjonsopplysninger.gjenopprett(dto.refusjonsopplysninger)
+            )
         }
     }
 

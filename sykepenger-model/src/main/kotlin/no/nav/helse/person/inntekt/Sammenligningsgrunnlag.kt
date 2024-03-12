@@ -37,4 +37,14 @@ internal class Sammenligningsgrunnlag(
         sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() }
     )
+
+    internal companion object {
+        fun gjenopprett(dto: SammenligningsgrunnlagDto) =
+            Sammenligningsgrunnlag(
+                sammenligningsgrunnlag = Inntekt.gjenopprett(dto.sammenligningsgrunnlag),
+                arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map {
+                    ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.gjenopprett(it)
+                }
+            )
+    }
 }

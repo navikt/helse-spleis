@@ -4,6 +4,7 @@ import java.sql.Ref
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
@@ -257,6 +258,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun gjenopprett(
             person: Person,
+            alder: Alder,
             aktørId: String,
             fødselsnummer: String,
             dto: ArbeidsgiverDto,
@@ -279,7 +281,7 @@ internal class Arbeidsgiver private constructor(
                 vedtaksperioder = vedtaksperioder,
                 forkastede = forkastede,
                 utbetalinger = utbetalinger.toMutableList(),
-                feriepengeutbetalinger = mutableListOf(),
+                feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(alder, it) }.toMutableList(),
                 refusjonshistorikk = Refusjonshistorikk.gjenopprett(dto.refusjonshistorikk),
                 yrkesaktivitet = dto.organisasjonsnummer.tilYrkesaktivitet(),
                 jurist = arbeidsgiverJurist

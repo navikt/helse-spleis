@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.InntektsopplysningDto
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
@@ -65,4 +66,16 @@ class SkjønnsmessigFastsatt internal constructor(
             tidsstempel = tidsstempel,
             overstyrtInntekt = overstyrtInntekt?.dto()!!
         )
+
+    internal companion object {
+        fun gjenopprett(dto: InntektsopplysningDto.SkjønnsmessigFastsattDto, inntekter: Map<UUID, Inntektsopplysning>) =
+            SkjønnsmessigFastsatt(
+                id = dto.id,
+                hendelseId = dto.hendelseId,
+                dato = dto.dato,
+                beløp = Inntekt.gjenopprett(dto.beløp),
+                tidsstempel = dto.tidsstempel,
+                overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt.id)
+            )
+    }
 }

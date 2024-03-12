@@ -30,6 +30,17 @@ internal class SkattSykepengegrunnlag private constructor(
             ansattPerioder: List<AnsattPeriode>,
             tidsstempel: LocalDateTime
         ) = SkattSykepengegrunnlag(id, hendelseId, dato, inntektsopplysninger, ansattPerioder, tidsstempel)
+
+        internal fun gjenopprett(dto: InntektsopplysningDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
+            return SkattSykepengegrunnlag(
+                id = dto.id,
+                hendelseId = dto.hendelseId,
+                dato = dto.dato,
+                inntektsopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) },
+                ansattPerioder = dto.ansattPerioder.map { AnsattPeriode.gjenopprett(it) },
+                tidsstempel = dto.tidsstempel
+            )
+        }
     }
 
     private constructor(
@@ -160,6 +171,11 @@ class AnsattPeriode(
         private fun List<AnsattPeriode>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Int) = this
             .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
             .filter { it.gjelder(skjæringstidspunkt) }
+
+        fun gjenopprett(dto: AnsattPeriodeDto) = AnsattPeriode(
+            ansattFom = dto.fom,
+            ansattTom = dto.tom
+        )
     }
 
     internal fun dto() = AnsattPeriodeDto(ansattFom, ansattTom)

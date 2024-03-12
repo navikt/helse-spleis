@@ -29,4 +29,15 @@ internal class Infotrygd(
 
     override fun dto() =
         InntektsopplysningDto.InfotrygdDto(id, hendelseId, dato, beløp.dto(), tidsstempel)
+
+    internal companion object {
+        fun gjenopprett(dto: InntektsopplysningDto.InfotrygdDto) =
+            Infotrygd(
+                id = dto.id,
+                hendelseId = dto.hendelseId,
+                dato = dto.dato,
+                beløp = Inntekt.gjenopprett(dto.beløp),
+                tidsstempel = dto.tidsstempel
+            )
+    }
 }

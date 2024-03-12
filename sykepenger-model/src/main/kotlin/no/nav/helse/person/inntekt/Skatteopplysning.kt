@@ -9,6 +9,7 @@ import no.nav.helse.isWithinRangeOf
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.gjenopprett
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
 class Skatteopplysning(
@@ -88,6 +89,23 @@ class Skatteopplysning(
                 type = it.type.toString(),
                 fordel = it.fordel,
                 beskrivelse = it.beskrivelse
+            )
+        }
+
+        fun gjenopprett(dto: SkatteopplysningDto): Skatteopplysning {
+            return Skatteopplysning(
+                hendelseId = dto.hendelseId,
+                beløp = Inntekt.gjenopprett(dto.beløp),
+                måned = dto.måned,
+                type = when (dto.type) {
+                    InntekttypeDto.LØNNSINNTEKT -> Inntekttype.LØNNSINNTEKT
+                    InntekttypeDto.NÆRINGSINNTEKT -> Inntekttype.NÆRINGSINNTEKT
+                    InntekttypeDto.PENSJON_ELLER_TRYGD -> Inntekttype.PENSJON_ELLER_TRYGD
+                    InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> Inntekttype.YTELSE_FRA_OFFENTLIGE
+                },
+                fordel = dto.fordel,
+                beskrivelse = dto.beskrivelse,
+                tidsstempel = dto.tidsstempel
             )
         }
     }
