@@ -7,7 +7,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.InfotrygdhistorikkelementDto
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
@@ -211,5 +213,12 @@ class InfotrygdhistorikkElement private constructor(
         arbeidskategorikoder = this.arbeidskategorikoder,
         oppdatert = this.oppdatert
     )
+
+    internal fun overlappendeInfotrygdperioder(person: Person, alleVedtaksperioder: List<Vedtaksperiode>) {
+        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.toString())) { result, vedtaksperiode ->
+            vedtaksperiode.overlappendeInfotrygdperioder(result, this.perioder)
+        }
+        person.emitOverlappendeInfotrygdperioder(event)
+    }
 }
 

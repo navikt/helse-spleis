@@ -129,6 +129,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
@@ -2769,6 +2770,27 @@ internal class Vedtaksperiode private constructor(
                 arbeidsgiverjurist = arbeidsgiverjurist
             )
         }
+    }
+
+    fun overlappendeInfotrygdperioder(
+        result: PersonObserver.OverlappendeInfotrygdperioder,
+        perioder: List<Infotrygdperiode>
+    ): PersonObserver.OverlappendeInfotrygdperioder {
+        val overlappende = perioder.filter { it.overlapperMed(this.periode) }
+        if (overlappende.isEmpty()) return result
+        return result.copy(overlappendeInfotrygdperioder = result.overlappendeInfotrygdperioder.plusElement(
+            PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
+                organisasjonsnummer = this.organisasjonsnummer,
+                vedtaksperiodeId = this.id,
+                vedtaksperiodeFom = this.periode.start,
+                vedtaksperiodeTom = this.periode.endInclusive,
+                vedtaksperiodetilstand = tilstand.type.name,
+                infotrygdhistorikkHendelseId = null,
+                infotrygdperioder = overlappende.map {
+                    it.somOverlappendeInfotrygdperiode()
+                }
+            )
+        ))
     }
 
     internal fun dto() = VedtaksperiodeDto(

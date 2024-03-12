@@ -551,6 +551,11 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         }
     }
 
+    data class OverlappendeInfotrygdperioder(
+        val overlappendeInfotrygdperioder: List<OverlappendeInfotrygdperiodeEtterInfotrygdendring>,
+        val infotrygdhistorikkHendelseId: String?
+    )
+
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
@@ -558,7 +563,6 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
         val vedtaksperiodeTom: LocalDate,
         val vedtaksperiodetilstand: String,
         val infotrygdhistorikkHendelseId: String?,
-        val medførteEndringerIHistorikken: Boolean,
         val infotrygdperioder: List<Infotrygdperiode>
     ) {
         data class Infotrygdperiode(
@@ -774,6 +778,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
     ) {}
     fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
     fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: OverlappendeInfotrygdperiodeEtterInfotrygdendring) {}
+    fun overlappendeInfotrygdperioder(event: OverlappendeInfotrygdperioder) {}
     fun inntektsmeldingFørSøknad(event: InntektsmeldingFørSøknadEvent) {}
     fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {}
     fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}

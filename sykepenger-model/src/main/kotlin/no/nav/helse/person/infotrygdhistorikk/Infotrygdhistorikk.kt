@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.dto.InfotrygdhistorikkDto
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
@@ -172,4 +173,9 @@ internal class Infotrygdhistorikk private constructor(
     internal fun dto() = InfotrygdhistorikkDto(
         elementer = this.elementer.map { it.dto() }
     )
+
+    internal fun overlappendeInfotrygdperioder(person: Person, alleVedtaksperioder: List<Vedtaksperiode>) {
+        if (!harHistorikk()) return
+        siste.overlappendeInfotrygdperioder(person, alleVedtaksperioder)
+    }
 }

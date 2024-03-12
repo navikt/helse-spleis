@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.InfotrygdArbeidsgiverutbetalingsperiodeDto
 import no.nav.helse.dto.InfotrygdPersonutbetalingsperiodeDto
 import no.nav.helse.person.InfotrygdperiodeVisitor
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -90,6 +91,15 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
         visitor.visitInfotrygdhistorikkArbeidsgiverUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
     }
 
+    override fun somOverlappendeInfotrygdperiode(): PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode {
+        return PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
+            fom = this.periode.start,
+            tom = this.periode.endInclusive,
+            type = "ARBEIDSGIVERUTBETALING",
+            orgnummer = this.orgnr
+        )
+    }
+
     internal fun dto() = InfotrygdArbeidsgiverutbetalingsperiodeDto(
         orgnr = orgnr,
         periode = periode.dto(),
@@ -103,6 +113,15 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
 
     override fun accept(visitor: InfotrygdperiodeVisitor) {
         visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(this, orgnr, periode.start, periode.endInclusive, grad, inntekt)
+    }
+
+    override fun somOverlappendeInfotrygdperiode(): PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode {
+        return PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode(
+            fom = this.periode.start,
+            tom = this.periode.endInclusive,
+            type = "PERSONUTBETALING",
+            orgnummer = this.orgnr
+        )
     }
 
     internal fun dto() = InfotrygdPersonutbetalingsperiodeDto(

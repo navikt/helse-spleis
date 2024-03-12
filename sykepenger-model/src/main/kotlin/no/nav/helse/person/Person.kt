@@ -294,6 +294,8 @@ class Person private constructor(
             }.varsleObservers(observers)
         }
         arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk, historikkenBleOppdatert)
+        val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
+        infotrygdhistorikk.overlappendeInfotrygdperioder(this, alleVedtaksperioder)
         håndterGjenoppta(hendelse)
     }
 
@@ -611,13 +613,16 @@ class Person private constructor(
             vedtaksperiodeTom = vedtaksperiode.endInclusive,
             vedtaksperiodetilstand = vedtaksperiodetilstand,
             infotrygdhistorikkHendelseId = hendelseId.toString(),
-            medførteEndringerIHistorikken = historikkenBleOppdatert,
             infotrygdperioder = overlappendeInfotrygdPerioder.mapNotNull {
                 PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.InfotrygdperiodeBuilder(it).infotrygdperiode
             }
         )
 
         observers.forEach { it.overlappendeInfotrygdperiodeEtterInfotrygdendring(event) }
+    }
+
+    internal fun emitOverlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
+        observers.forEach {it.overlappendeInfotrygdperioder(event)}
     }
 
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {

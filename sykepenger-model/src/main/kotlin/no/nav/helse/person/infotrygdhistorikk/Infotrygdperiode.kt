@@ -4,7 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InfotrygdperiodeVisitor
-import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -31,6 +31,8 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         if (this::class != other::class) return false
         return this.periode == other.periode
     }
+
+    abstract fun somOverlappendeInfotrygdperiode(): PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
 
     internal companion object {
         internal fun sorter(perioder: List<Infotrygdperiode>) =

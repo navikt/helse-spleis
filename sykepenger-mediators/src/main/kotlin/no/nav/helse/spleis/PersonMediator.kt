@@ -173,6 +173,35 @@ internal class PersonMediator(
         )))
     }
 
+    override fun overlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
+        queueMessage(
+            JsonMessage.newMessage(
+                "overlappende_infotrygdperioder", mutableMapOf<String, Any>(
+                    "vedtaksperioder" to event.overlappendeInfotrygdperioder.map { it ->
+                        mapOf("organisasjonsnummer" to it.organisasjonsnummer,
+                            "vedtaksperiodeId" to it.vedtaksperiodeId,
+                            "vedtaksperiodeFom" to it.vedtaksperiodeFom,
+                            "vedtaksperiodeTom" to it.vedtaksperiodeTom,
+                            "vedtaksperiodetilstand" to it.vedtaksperiodetilstand,
+                            "infotrygdperioder" to it.infotrygdperioder.map { infotrygdperiode ->
+                                mapOf(
+                                    "fom" to infotrygdperiode.fom,
+                                    "tom" to infotrygdperiode.tom,
+                                    "type" to infotrygdperiode.type,
+                                    "organisasjonsnummer" to infotrygdperiode.orgnummer
+                                )
+                            }
+                        )
+                    },
+                ).apply {
+                    compute("infotrygdhistorikkHendelseId") {_,_ ->
+                        event.infotrygdhistorikkHendelseId
+                    }
+                }
+            )
+        )
+    }
+
     override fun overlappendeInfotrygdperiodeEtterInfotrygdendring(event: PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring) {
         queueMessage(JsonMessage.newMessage("overlappende_infotrygdperiode_etter_infotrygdendring", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
@@ -181,7 +210,6 @@ internal class PersonMediator(
             "vedtaksperiodeTom" to event.vedtaksperiodeTom,
             "vedtaksperiodetilstand" to event.vedtaksperiodetilstand,
             "infotrygdhistorikkHendelseId" to (event.infotrygdhistorikkHendelseId ?: ""),
-            "medførteEndringerIHistorikken" to event.medførteEndringerIHistorikken,
             "infotrygdperioder" to event.infotrygdperioder.map {
                 mapOf(
                     "fom" to it.fom,
