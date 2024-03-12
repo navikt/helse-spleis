@@ -617,6 +617,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal companion object {
         internal fun ferdigVilkårsgrunnlagHistorikk(innslag: List<Innslag>) =
             VilkårsgrunnlagHistorikk(innslag.toMutableList())
+
+        internal fun gjenopprett(dto: VilkårsgrunnlaghistorikkDto): VilkårsgrunnlagHistorikk {
+            return VilkårsgrunnlagHistorikk()
+        }
     }
 
     fun dto() = VilkårsgrunnlaghistorikkDto(

@@ -32,6 +32,14 @@ internal class Sykmeldingsperioder(
         dager.overlappendeSykmeldingsperioder(perioder)
 
     internal fun dto() = SykmeldingsperioderDto(perioder = this.perioder.map { it.dto() })
+
+    internal companion object {
+        fun gjenopprett(dto: SykmeldingsperioderDto): Sykmeldingsperioder {
+            return Sykmeldingsperioder(
+                perioder = dto.perioder.map { Periode.gjenopprett(it) }
+            )
+        }
+    }
 }
 
 internal interface SykmeldingsperioderVisitor {

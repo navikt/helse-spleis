@@ -77,6 +77,11 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
             flatten().intersect(other.flatten().toSet()).grupperSammenhengendePerioder()
 
         fun Periode.delvisOverlappMed(other: Periode) = overlapperMed(other) && !inneholder(other)
+
+        fun gjenopprett(dto: PeriodeDto) = Periode(
+            fom = dto.fom,
+            tom = dto.tom
+        )
     }
 
     fun overlapperMed(other: Periode) = overlappendePeriode(other) != null

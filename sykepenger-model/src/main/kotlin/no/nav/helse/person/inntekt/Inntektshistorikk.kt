@@ -3,6 +3,7 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import no.nav.helse.dto.InntektshistorikkDto
+import no.nav.helse.dto.InntektsopplysningDto
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
 
@@ -12,6 +13,11 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
     internal companion object {
         internal fun gjenopprett(list: List<Inntektsmelding>) = Inntektshistorikk(list.toMutableList())
+        internal fun gjenopprett(dto: InntektshistorikkDto) = Inntektshistorikk(
+            historikk = dto.historikk.map {
+                Inntektsmelding.gjenopprett(it)
+            }.toMutableList()
+        )
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {

@@ -36,6 +36,14 @@ internal interface SykdomshistorikkHendelse : Hendelse {
                 check(kilder.all { it.erAvType(type) })
                 return kilder.first().tidsstempel
             }
+
+            internal fun gjenopprett(dto: HendelseskildeDto): Hendelseskilde {
+                return Hendelseskilde(
+                    type = dto.type,
+                    meldingsreferanseId = dto.meldingsreferanseId,
+                    tidsstempel = dto.tidsstempel
+                )
+            }
         }
 
         override fun toString() = type

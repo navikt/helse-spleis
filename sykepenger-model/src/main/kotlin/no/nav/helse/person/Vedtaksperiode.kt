@@ -2725,6 +2725,50 @@ internal class Vedtaksperiode private constructor(
                     .filter(MED_SKJÆRINGSTIDSPUNKT(vedtaksperiode.skjæringstidspunkt))
                 ).maxOf { it.periode.endInclusive }
 
+        internal fun gjenopprett(
+            person: Person,
+            aktørId: String,
+            fødselsnummer: String,
+            arbeidsgiver: Arbeidsgiver,
+            organisasjonsnummer: String,
+            dto: VedtaksperiodeDto,
+            arbeidsgiverjurist: MaskinellJurist,
+            grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
+            utbetalinger: Map<UUID, Utbetaling>
+        ): Vedtaksperiode {
+            return Vedtaksperiode(
+                person = person,
+                arbeidsgiver = arbeidsgiver,
+                id = dto.id,
+                aktørId = aktørId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                tilstand = when (dto.tilstand) {
+                    VedtaksperiodetilstandDto.AVSLUTTET -> Avsluttet
+                    VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> AvsluttetUtenUtbetaling
+                    VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> AvventerBlokkerendePeriode
+                    VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> AvventerGodkjenning
+                    VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> AvventerGodkjenningRevurdering
+                    VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> AvventerHistorikk
+                    VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> AvventerHistorikkRevurdering
+                    VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> AvventerInfotrygdHistorikk
+                    VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> AvventerInntektsmelding
+                    VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> AvventerRevurdering
+                    VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> AvventerSimulering
+                    VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AvventerSimuleringRevurdering
+                    VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AvventerVilkårsprøving
+                    VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> AvventerVilkårsprøvingRevurdering
+                    VedtaksperiodetilstandDto.REVURDERING_FEILET -> RevurderingFeilet
+                    VedtaksperiodetilstandDto.START -> Start
+                    VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilInfotrygd
+                    VedtaksperiodetilstandDto.TIL_UTBETALING -> TilUtbetaling
+                },
+                generasjoner = Generasjoner.gjenopprett(dto.generasjoner, grunnlagsdata, utbetalinger),
+                opprettet = dto.opprettet,
+                oppdatert = dto.oppdatert,
+                arbeidsgiverjurist = arbeidsgiverjurist
+            )
+        }
     }
 
     internal fun dto() = VedtaksperiodeDto(

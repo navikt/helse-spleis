@@ -6,6 +6,7 @@ import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
@@ -87,6 +88,14 @@ internal sealed class Dag(
             visitor.visitDag(this, dato, kilde)
 
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.UkjentDagDto(dato, kilde)
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.UkjentDagDto): UkjentDag {
+                return UkjentDag(
+                    dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class Arbeidsdag(
@@ -97,6 +106,14 @@ internal sealed class Dag(
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsdagDto(dato, kilde)
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsdagDto): Arbeidsdag {
+                return Arbeidsdag(
+                    dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class Arbeidsgiverdag(
@@ -107,6 +124,15 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato, kilde, økonomi.dto())
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsgiverdagDto): Arbeidsgiverdag {
+                return Arbeidsgiverdag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.sykdomsgrad(Prosentdel.gjenopprett(dto.økonomi.grad)),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class Feriedag(
@@ -117,6 +143,14 @@ internal sealed class Dag(
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.FeriedagDto(dato, kilde)
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.FeriedagDto): Feriedag {
+                return Feriedag(
+                    dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class ArbeidIkkeGjenopptattDag(
@@ -125,6 +159,14 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto(dato, kilde)
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto): ArbeidIkkeGjenopptattDag {
+                return ArbeidIkkeGjenopptattDag(
+                    dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class FriskHelgedag(
@@ -136,6 +178,14 @@ internal sealed class Dag(
             visitor.visitDag(this, dato, kilde)
 
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.FriskHelgedagDto(dato, kilde)
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.FriskHelgedagDto): FriskHelgedag {
+                return FriskHelgedag(
+                    dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class ArbeidsgiverHelgedag(
@@ -146,6 +196,15 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto(dato, kilde, økonomi.dto())
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto): ArbeidsgiverHelgedag {
+                return ArbeidsgiverHelgedag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.sykdomsgrad(Prosentdel.gjenopprett(dto.økonomi.grad)),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class Sykedag(
@@ -156,6 +215,15 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagDto(dato, kilde, økonomi.dto())
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.SykedagDto): Sykedag {
+                return Sykedag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.sykdomsgrad(Prosentdel.gjenopprett(dto.økonomi.grad)),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class ForeldetSykedag(
@@ -166,6 +234,15 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ForeldetSykedagDto(dato, kilde, økonomi.dto())
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.ForeldetSykedagDto): ForeldetSykedag {
+                return ForeldetSykedag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.sykdomsgrad(Prosentdel.gjenopprett(dto.økonomi.grad)),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class SykHelgedag(
@@ -176,6 +253,15 @@ internal sealed class Dag(
 
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykHelgedagDto(dato, kilde, økonomi.dto())
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.SykHelgedagDto): SykHelgedag {
+                return SykHelgedag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.sykdomsgrad(Prosentdel.gjenopprett(dto.økonomi.grad)),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class SykedagNav(
@@ -185,6 +271,15 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
         override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagNavDto(dato, kilde, økonomi.dto())
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.SykedagNavDto): SykedagNav {
+                return SykedagNav(
+                    dato = dto.dato,
+                    økonomi = Økonomi.sykdomsgrad(Prosentdel.gjenopprett(dto.økonomi.grad)),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class Permisjonsdag(
@@ -195,6 +290,14 @@ internal sealed class Dag(
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.PermisjonsdagDto(dato, kilde)
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.PermisjonsdagDto): Permisjonsdag {
+                return Permisjonsdag(
+                    dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde)
+                )
+            }
+        }
     }
 
     internal class ProblemDag(
@@ -209,6 +312,17 @@ internal sealed class Dag(
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde, other, melding)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ProblemDagDto(dato, kilde, other.dto(), melding)
+
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.ProblemDagDto): ProblemDag {
+                return ProblemDag(
+                    dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde),
+                    other = Hendelseskilde.gjenopprett(dto.other),
+                    melding = dto.melding
+                )
+            }
+        }
     }
 
     internal class AndreYtelser(
@@ -235,6 +349,24 @@ internal sealed class Dag(
 
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) =
             SykdomstidslinjeDagDto.AndreYtelserDto(dato, kilde, ytelse.dto())
+
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.AndreYtelserDto): AndreYtelser {
+                return AndreYtelser(
+                    dato = dto.dato,
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde),
+                    ytelse = when (dto.ytelse) {
+                        YtelseDto.Foreldrepenger -> AnnenYtelse.Foreldrepenger
+                        YtelseDto.AAP -> AnnenYtelse.AAP
+                        YtelseDto.Omsorgspenger -> AnnenYtelse.Omsorgspenger
+                        YtelseDto.Pleiepenger -> AnnenYtelse.Pleiepenger
+                        YtelseDto.Svangerskapspenger -> AnnenYtelse.Svangerskapspenger
+                        YtelseDto.Opplæringspenger -> AnnenYtelse.Opplæringspenger
+                        YtelseDto.Dagpenger -> AnnenYtelse.Dagpenger
+                    }
+                )
+            }
+        }
     }
 
     internal fun dto() = dto(dato, kilde.dto())

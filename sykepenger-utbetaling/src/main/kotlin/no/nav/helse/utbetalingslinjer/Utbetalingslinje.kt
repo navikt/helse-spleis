@@ -102,6 +102,34 @@ class Utbetalingslinje(
             }
             return result
         }
+
+        internal fun gjenopprett(dto: UtbetalingslinjeDto): Utbetalingslinje {
+            return Utbetalingslinje(
+                fom = dto.fom,
+                tom = dto.tom,
+                satstype = when (dto.satstype) {
+                    SatstypeDto.Daglig -> Satstype.Daglig
+                    SatstypeDto.Engang -> Satstype.Engang
+                },
+                beløp = dto.beløp,
+                grad = dto.grad,
+                refFagsystemId = dto.refFagsystemId,
+                delytelseId = dto.delytelseId,
+                refDelytelseId = dto.refDelytelseId,
+                endringskode = when (dto.endringskode) {
+                    EndringskodeDto.ENDR -> Endringskode.ENDR
+                    EndringskodeDto.NY -> Endringskode.NY
+                    EndringskodeDto.UEND -> Endringskode.UEND
+                },
+                klassekode = when (dto.klassekode) {
+                    KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
+                    KlassekodeDto.RefusjonIkkeOpplysningspliktig -> Klassekode.RefusjonIkkeOpplysningspliktig
+                    KlassekodeDto.SykepengerArbeidstakerFeriepenger -> Klassekode.SykepengerArbeidstakerFeriepenger
+                    KlassekodeDto.SykepengerArbeidstakerOrdinær -> Klassekode.SykepengerArbeidstakerOrdinær
+                },
+                datoStatusFom = dto.datoStatusFom
+            )
+        }
     }
 
     private val statuskode get() = datoStatusFom?.let { "OPPH" }

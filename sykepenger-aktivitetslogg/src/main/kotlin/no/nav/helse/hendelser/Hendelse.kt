@@ -2,10 +2,28 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 enum class Avsender {
-    SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM
+    SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;
+
+    fun dto() = when (this) {
+        SYKMELDT -> AvsenderDto.SYKMELDT
+        ARBEIDSGIVER -> AvsenderDto.ARBEIDSGIVER
+        SAKSBEHANDLER -> AvsenderDto.SAKSBEHANDLER
+        SYSTEM -> AvsenderDto.SYSTEM
+    }
+    companion object {
+        fun gjenopprett(dto: AvsenderDto): Avsender {
+            return when (dto) {
+                AvsenderDto.ARBEIDSGIVER -> ARBEIDSGIVER
+                AvsenderDto.SAKSBEHANDLER -> SAKSBEHANDLER
+                AvsenderDto.SYKMELDT -> SYKMELDT
+                AvsenderDto.SYSTEM -> SYSTEM
+            }
+        }
+    }
 }
 
 interface Hendelse : IAktivitetslogg {

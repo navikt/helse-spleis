@@ -39,6 +39,8 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         }
 
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
+
+        fun gjenopprett(dto: ProsentdelDto) = dto.prosent.prosent
     }
 
     override fun equals(other: Any?) = other is Prosentdel && this.equals(other)

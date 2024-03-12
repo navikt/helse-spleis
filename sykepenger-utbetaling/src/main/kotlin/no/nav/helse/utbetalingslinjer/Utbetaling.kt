@@ -33,6 +33,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -384,6 +385,45 @@ class Utbetaling private constructor(
             return vedtaksperiodeUtbetalinger.filter { it.erAktiv() }.all { utbetaling ->
                 annulleringer.any { annullering -> annullering.hørerSammen(utbetaling) }
             }
+        }
+
+        fun gjenopprett(dto: UtbetalingDto, utbetalinger: List<Utbetaling>): Utbetaling {
+            return Utbetaling(
+                id = dto.id,
+                korrelasjonsId = dto.korrelasjonsId,
+                periode = Periode.gjenopprett(dto.periode),
+                utbetalingstidslinje = Utbetalingstidslinje.gjenopprett(dto.utbetalingstidslinje),
+                arbeidsgiverOppdrag = Oppdrag.gjenopprett(dto.arbeidsgiverOppdrag),
+                personOppdrag = Oppdrag.gjenopprett(dto.personOppdrag),
+                tidsstempel = dto.tidsstempel,
+                tilstand = when (dto.tilstand) {
+                    UtbetalingTilstandDto.ANNULLERT -> Annullert
+                    UtbetalingTilstandDto.FORKASTET -> Forkastet
+                    UtbetalingTilstandDto.GODKJENT -> Godkjent
+                    UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> GodkjentUtenUtbetaling
+                    UtbetalingTilstandDto.IKKE_GODKJENT -> IkkeGodkjent
+                    UtbetalingTilstandDto.IKKE_UTBETALT -> Ubetalt
+                    UtbetalingTilstandDto.NY -> Ny
+                    UtbetalingTilstandDto.OVERFØRT -> Overført
+                    UtbetalingTilstandDto.UTBETALT -> Utbetalt
+                },
+                type = when (dto.type) {
+                    UtbetalingtypeDto.UTBETALING -> UTBETALING
+                    UtbetalingtypeDto.ANNULLERING -> ANNULLERING
+                    UtbetalingtypeDto.ETTERUTBETALING -> Utbetalingtype.ETTERUTBETALING
+                    UtbetalingtypeDto.FERIEPENGER -> Utbetalingtype.FERIEPENGER
+                    UtbetalingtypeDto.REVURDERING -> Utbetalingtype.REVURDERING
+                },
+                maksdato = dto.maksdato,
+                forbrukteSykedager = dto.forbrukteSykedager,
+                gjenståendeSykedager = dto.gjenståendeSykedager,
+                annulleringer = dto.annulleringer.map { annulleringId -> utbetalinger.single { it.id == annulleringId } },
+                vurdering = dto.vurdering?.let { Vurdering.gjenopprett(it) },
+                overføringstidspunkt = dto.overføringstidspunkt,
+                avstemmingsnøkkel = dto.avstemmingsnøkkel,
+                avsluttet = dto.avsluttet,
+                oppdatert = dto.oppdatert
+            )
         }
     }
 
@@ -766,6 +806,18 @@ class Utbetaling private constructor(
             tidspunkt = tidspunkt,
             automatiskBehandling = automatiskBehandling
         )
+
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingVurderingDto): Vurdering {
+                return Vurdering(
+                    godkjent = dto.godkjent,
+                    ident = dto.ident,
+                    epost = dto.epost,
+                    tidspunkt = dto.tidspunkt,
+                    automatiskBehandling = dto.automatiskBehandling
+                )
+            }
+        }
     }
 
     fun dto() = UtbetalingDto(

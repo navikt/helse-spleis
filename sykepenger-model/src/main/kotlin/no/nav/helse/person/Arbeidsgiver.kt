@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import java.sql.Ref
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -43,6 +44,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenoppta
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
+import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -251,6 +253,41 @@ internal class Arbeidsgiver private constructor(
             filter: VedtaksperiodeFilter
         ) {
             arbeidsgivere.flatMap { it.søppelbøtte(hendelse, filter) }.forEach { it.buildAndEmit() }
+        }
+
+        internal fun gjenopprett(
+            person: Person,
+            aktørId: String,
+            fødselsnummer: String,
+            dto: ArbeidsgiverDto,
+            personJurist: MaskinellJurist,
+            grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>
+        ): Arbeidsgiver {
+            val arbeidsgiverJurist = personJurist.medOrganisasjonsnummer(dto.organisasjonsnummer)
+            val vedtaksperioder = mutableListOf<Vedtaksperiode>()
+            val forkastede = mutableListOf<ForkastetVedtaksperiode>()
+            val utbetalinger = dto.utbetalinger.fold(emptyList<Utbetaling>()) { result, utbetaling ->
+                result.plusElement(Utbetaling.gjenopprett(utbetaling, result))
+            }
+            val arbeidsgiver = Arbeidsgiver(
+                person = person,
+                id = dto.id,
+                organisasjonsnummer = dto.organisasjonsnummer,
+                inntektshistorikk = Inntektshistorikk.gjenopprett(dto.inntektshistorikk),
+                sykdomshistorikk = Sykdomshistorikk.gjenopprett(dto.sykdomshistorikk),
+                sykmeldingsperioder = Sykmeldingsperioder.gjenopprett(dto.sykmeldingsperioder),
+                vedtaksperioder = vedtaksperioder,
+                forkastede = forkastede,
+                utbetalinger = utbetalinger.toMutableList(),
+                feriepengeutbetalinger = mutableListOf(),
+                refusjonshistorikk = Refusjonshistorikk.gjenopprett(dto.refusjonshistorikk),
+                yrkesaktivitet = dto.organisasjonsnummer.tilYrkesaktivitet(),
+                jurist = arbeidsgiverJurist
+            )
+            val utbetalingerMap = utbetalinger.associateBy(Utbetaling::id)
+            vedtaksperioder.addAll(dto.vedtaksperioder.map { Vedtaksperiode.gjenopprett(person, aktørId, fødselsnummer, arbeidsgiver, dto.organisasjonsnummer, it, arbeidsgiverJurist, grunnlagsdata, utbetalingerMap) })
+            forkastede.addAll(dto.forkastede.map { ForkastetVedtaksperiode.gjenopprett(person, aktørId, fødselsnummer, arbeidsgiver, dto.organisasjonsnummer, it, arbeidsgiverJurist, grunnlagsdata, utbetalingerMap) })
+            return arbeidsgiver
         }
     }
 

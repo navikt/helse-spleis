@@ -80,6 +80,18 @@ internal class Refusjonshistorikk {
                 refusjon.arbeidsgiverperioder.maxByOrNull { it.endInclusive }?.erRettFør(periode) ?: false
             }.nyesteMedFørsteFraværsdagFørFørsteUtbetalingsdag(periode.start)
                 ?.also { aktivitetslogg.info("Fant refusjon ved å finne tilstøtende arbeidsgiverperiode for første utbetalingsdag i sammenhengende utbetaling") }
+
+            internal fun gjenopprett(dto: RefusjonDto): Refusjon {
+                return Refusjon(
+                    meldingsreferanseId = dto.meldingsreferanseId,
+                    førsteFraværsdag = dto.førsteFraværsdag,
+                    arbeidsgiverperioder = dto.arbeidsgiverperioder.map { Periode.gjenopprett(it) },
+                    beløp = dto.beløp?.let { Inntekt.gjenopprett(it) },
+                    sisteRefusjonsdag = dto.sisteRefusjonsdag,
+                    endringerIRefusjon = dto.endringerIRefusjon.map { EndringIRefusjon.gjenopprett(it) },
+                    tidsstempel = dto.tidsstempel
+                )
+            }
         }
 
         internal fun beløp(dag: LocalDate): Inntekt {
@@ -160,6 +172,13 @@ internal class Refusjonshistorikk {
                     if (sisteRefusjonsdag == null) return
                     refusjonsopplysningerBuilder.leggTil(Refusjonsopplysning(meldingsreferanseId, sisteRefusjonsdag.nesteDag, null, INGEN), tidsstempel)
                 }
+
+                internal fun gjenopprett(dto: EndringIRefusjonDto): EndringIRefusjon {
+                    return EndringIRefusjon(
+                        beløp = Inntekt.gjenopprett(dto.beløp),
+                        endringsdato = dto.endringsdato
+                    )
+                }
             }
 
             internal fun accept(visitor: RefusjonshistorikkVisitor) {
@@ -183,5 +202,15 @@ internal class Refusjonshistorikk {
     internal fun dto() = RefusjonshistorikkDto(
         refusjoner = refusjoner.map { it.dto() }
     )
+
+    internal companion object {
+        fun gjenopprett(dto: RefusjonshistorikkDto): Refusjonshistorikk {
+            return Refusjonshistorikk().apply {
+                dto.refusjoner.forEach {
+                    leggTilRefusjon(Refusjonshistorikk.Refusjon.gjenopprett(it))
+                }
+            }
+        }
+    }
 }
 

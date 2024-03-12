@@ -132,6 +132,15 @@ class Sykdomshistorikk private constructor(
                 beregnetSykdomstidslinje = beregnetSykdomstidslinje
             )
 
+            internal fun gjenopprett(dto: SykdomshistorikkElementDto): Element {
+                return Element(
+                    id = dto.id,
+                    hendelseId = dto.hendelseId,
+                    tidsstempel = dto.tidsstempel,
+                    hendelseSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.hendelseSykdomstidslinje),
+                    beregnetSykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.beregnetSykdomstidslinje)
+                )
+            }
         }
 
         internal fun dto() = SykdomshistorikkElementDto(
@@ -149,5 +158,11 @@ class Sykdomshistorikk private constructor(
     internal companion object {
         internal fun ferdigSykdomshistorikk(historikk: List<Element>): Sykdomshistorikk =
             Sykdomshistorikk(historikk.toMutableList())
+
+        internal fun gjenopprett(dto: SykdomshistorikkDto): Sykdomshistorikk {
+            return Sykdomshistorikk(
+                elementer = dto.elementer.map { Element.gjenopprett(it) }.toMutableList()
+            )
+        }
     }
 }

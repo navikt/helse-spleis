@@ -3,8 +3,10 @@ package no.nav.helse.økonomi
 import no.nav.helse.dto.ØkonomiDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.gjenopprett
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel.Companion.gjenopprett
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import kotlin.properties.Delegates
 
@@ -115,6 +117,27 @@ class Økonomi private constructor(
 
         internal fun er6GBegrenset(økonomiList: List<Økonomi>) =
             økonomiList.any { it.er6GBegrenset() }
+
+        fun gjenopprett(dto: ØkonomiDto, erAvvistDag: Boolean): Økonomi {
+            return Økonomi(
+                grad = Prosentdel.gjenopprett(dto.grad),
+                totalGrad = Prosentdel.gjenopprett(dto.totalGrad),
+                arbeidsgiverRefusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
+                aktuellDagsinntekt = Inntekt.gjenopprett(dto.aktuellDagsinntekt),
+                beregningsgrunnlag = Inntekt.gjenopprett(dto.beregningsgrunnlag),
+                dekningsgrunnlag = Inntekt.gjenopprett(dto.dekningsgrunnlag),
+                grunnbeløpgrense = dto.grunnbeløpgrense?.let { Inntekt.gjenopprett(it) },
+                arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
+                personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) },
+                er6GBegrenset = dto.er6GBegrenset,
+                tilstand = when {
+                    dto.arbeidsgiverbeløp == null && erAvvistDag -> Økonomi.Tilstand.Låst
+                    dto.arbeidsgiverbeløp == null -> Økonomi.Tilstand.HarInntekt
+                    erAvvistDag -> Økonomi.Tilstand.LåstMedBeløp
+                    else -> Økonomi.Tilstand.HarBeløp
+                }
+            )
+        }
     }
 
     init {

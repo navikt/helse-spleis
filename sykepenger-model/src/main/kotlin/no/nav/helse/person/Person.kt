@@ -75,6 +75,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -123,6 +124,26 @@ class Person private constructor(
             tidligereBehandlinger = tidligereBehandlinger,
             jurist = jurist
         )
+
+        internal fun gjenopprett(jurist: MaskinellJurist, dto: PersonDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
+            val personJurist = jurist.medFødselsnummer(dto.fødselsnummer)
+            val arbeidsgivere = mutableListOf<Arbeidsgiver>()
+            val grunnlagsdataMap = mapOf<UUID, VilkårsgrunnlagElement>()
+            val person = Person(
+                aktørId = dto.aktørId,
+                personidentifikator = dto.fødselsnummer.somPersonidentifikator(),
+                alder = Alder.gjenopprett(dto.alder),
+                arbeidsgivere = arbeidsgivere,
+                aktivitetslogg = Aktivitetslogg(),
+                opprettet = dto.opprettet,
+                infotrygdhistorikk = Infotrygdhistorikk.gjenopprett(dto.infotrygdhistorikk),
+                vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk.gjenopprett(dto.vilkårsgrunnlagHistorikk),
+                jurist = personJurist,
+                tidligereBehandlinger = tidligereBehandlinger
+            )
+            arbeidsgivere.addAll(dto.arbeidsgivere.map { Arbeidsgiver.gjenopprett(person, dto.aktørId, dto.fødselsnummer, it, personJurist, grunnlagsdataMap) })
+            return person
+        }
     }
 
     internal constructor(

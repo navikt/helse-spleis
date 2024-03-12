@@ -48,6 +48,9 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
     companion object {
         // for PersonData
         fun ferdigGenerasjoner(generasjoner: List<Generasjon>) = Generasjoner(generasjoner)
+        fun gjenopprett(dto: GenerasjonerDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner(
+            generasjoner = dto.generasjoner.map { Generasjon.gjenopprett(it, grunnlagsdata, utbetalinger) }
+        )
     }
     private val utbetalingene get() = generasjoner.mapNotNull(Generasjon::utbetaling)
     private val generasjoner = generasjoner.toMutableList()
@@ -258,13 +261,19 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             meldingsreferanseId = this.meldingsreferanseId,
             innsendt = this.innsendt,
             registert = this.registert,
-            avsender = when (avsender) {
-                Avsender.SYKMELDT -> AvsenderDto.SYKMELDT
-                Avsender.ARBEIDSGIVER -> AvsenderDto.ARBEIDSGIVER
-                Avsender.SAKSBEHANDLER -> AvsenderDto.SAKSBEHANDLER
-                Avsender.SYSTEM -> AvsenderDto.SYSTEM
-            }
+            avsender = avsender.dto()
         )
+
+        internal companion object {
+            fun gjenopprett(dto: GenerasjonkildeDto): Generasjonkilde {
+                return Generasjonkilde(
+                    meldingsreferanseId = dto.meldingsreferanseId,
+                    innsendt = dto.innsendt,
+                    registert = dto.registert,
+                    avsender = Avsender.gjenopprett(dto.avsender)
+                )
+            }
+        }
     }
 
 
@@ -336,6 +345,18 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
             companion object {
                 val List<Endring>.dokumentsporing get() = map { it.dokumentsporing }.toSet()
+                fun gjenopprett(dto: GenerasjonEndringDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Endring {
+                    return Endring(
+                        id = dto.id,
+                        tidsstempel = dto.tidsstempel,
+                        sykmeldingsperiode = Periode.gjenopprett(dto.periode),
+                        periode = Periode.gjenopprett(dto.periode),
+                        grunnlagsdata = dto.vilkårsgrunnlagId?.let { grunnlagsdata.getValue(it) },
+                        utbetaling = dto.utbetalingId?.let { utbetalinger.getValue(it) },
+                        dokumentsporing = Dokumentsporing.gjenopprett(dto.dokumentsporing),
+                        sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje)
+                    )
+                }
             }
 
             override fun toString() = "$periode - $dokumentsporing - ${sykdomstidslinje.toShortString()}${utbetaling?.let { " - $it" } ?: ""}"
@@ -809,6 +830,31 @@ enum class Periodetilstand {
             }
 
             private val List<Generasjon>.forrigeIverksatte get() = lastOrNull { it.vedtakFattet != null }
+
+            internal fun gjenopprett(dto: GenerasjonDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Generasjon {
+                return Generasjon(
+                    id = dto.id,
+                    tilstand = when (dto.tilstand) {
+                        GenerasjonTilstandDto.ANNULLERT_PERIODE -> Tilstand.AnnullertPeriode
+                        GenerasjonTilstandDto.AVSLUTTET_UTEN_VEDTAK -> Tilstand.AvsluttetUtenVedtak
+                        GenerasjonTilstandDto.BEREGNET -> Tilstand.Beregnet
+                        GenerasjonTilstandDto.BEREGNET_OMGJØRING -> Tilstand.BeregnetOmgjøring
+                        GenerasjonTilstandDto.BEREGNET_REVURDERING -> Tilstand.BeregnetRevurdering
+                        GenerasjonTilstandDto.REVURDERT_VEDTAK_AVVIST -> Tilstand.RevurdertVedtakAvvist
+                        GenerasjonTilstandDto.TIL_INFOTRYGD -> Tilstand.TilInfotrygd
+                        GenerasjonTilstandDto.UBEREGNET -> Tilstand.Uberegnet
+                        GenerasjonTilstandDto.UBEREGNET_OMGJØRING -> Tilstand.UberegnetOmgjøring
+                        GenerasjonTilstandDto.UBEREGNET_REVURDERING -> Tilstand.UberegnetRevurdering
+                        GenerasjonTilstandDto.VEDTAK_FATTET -> Tilstand.VedtakFattet
+                        GenerasjonTilstandDto.VEDTAK_IVERKSATT -> Tilstand.VedtakIverksatt
+                    },
+                    endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger) }.toMutableList(),
+                    vedtakFattet = dto.vedtakFattet,
+                    avsluttet = dto.avsluttet,
+                    kilde = Generasjonkilde.gjenopprett(dto.kilde),
+                    observatører = emptyList()
+                )
+            }
         }
         internal sealed interface Tilstand {
             fun entering(generasjon: Generasjon, hendelse: IAktivitetslogg) {}

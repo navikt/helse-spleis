@@ -43,7 +43,14 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodeDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.ArbeidsgiverperiodeDagDto(dato, økonomi)
-
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.ArbeidsgiverperiodeDagDto): ArbeidsgiverperiodeDag {
+                return ArbeidsgiverperiodeDag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                )
+            }
+        }
     }
 
     class ArbeidsgiverperiodedagNav(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -52,6 +59,14 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = ArbeidsgiverperiodedagNav(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.ArbeidsgiverperiodeDagNavDto(dato, økonomi)
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.ArbeidsgiverperiodeDagNavDto): ArbeidsgiverperiodedagNav {
+                return ArbeidsgiverperiodedagNav(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                )
+            }
+        }
     }
 
     class NavDag(
@@ -63,6 +78,14 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = NavDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.NavDagDto(dato, økonomi)
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.NavDagDto): NavDag {
+                return NavDag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                )
+            }
+        }
     }
 
     class NavHelgDag(dato: LocalDate, økonomi: Økonomi) :
@@ -72,6 +95,14 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = NavHelgDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.NavHelgDagDto(dato, økonomi)
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.NavHelgDagDto): NavHelgDag {
+                return NavHelgDag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                )
+            }
+        }
     }
 
     class Fridag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -80,6 +111,14 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = Fridag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.FridagDto(dato, økonomi)
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.FridagDto): Fridag {
+                return Fridag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                )
+            }
+        }
     }
 
     class Arbeidsdag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -88,6 +127,14 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = Arbeidsdag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.ArbeidsdagDto(dato, økonomi)
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.ArbeidsdagDto): Arbeidsdag {
+                return Arbeidsdag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                )
+            }
+        }
     }
 
     class AvvistDag(
@@ -105,6 +152,15 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = AvvistDag(dato, økonomi, begrunnelser)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.AvvistDagDto(dato, økonomi, begrunnelser.map { it.dto() })
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.AvvistDagDto): AvvistDag {
+                return AvvistDag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, true),
+                    begrunnelser = dto.begrunnelser.map { Begrunnelse.gjenopprett(it) }
+                )
+            }
+        }
     }
 
     class ForeldetDag(dato: LocalDate, økonomi: Økonomi) :
@@ -114,6 +170,14 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = ForeldetDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.ForeldetDagDto(dato, økonomi)
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.ForeldetDagDto): ForeldetDag {
+                return ForeldetDag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                )
+            }
+        }
     }
 
     class UkjentDag(dato: LocalDate, økonomi: Økonomi) : Utbetalingsdag(dato, økonomi) {
@@ -122,6 +186,14 @@ sealed class Utbetalingsdag(
         override fun kopierMed(økonomi: Økonomi) = UkjentDag(dato, økonomi)
         override fun dto(dato: LocalDate, økonomi: ØkonomiDto) =
             UtbetalingsdagDto.UkjentDagDto(dato, økonomi)
+        internal companion object {
+            fun gjenopprett(dto: UtbetalingsdagDto.UkjentDagDto): UkjentDag {
+                return UkjentDag(
+                    dato = dto.dato,
+                    økonomi = Økonomi.gjenopprett(dto.økonomi, false)
+                )
+            }
+        }
     }
 
     companion object {
@@ -158,6 +230,20 @@ sealed class Utbetalingsdag(
                     Utbetalingstidslinje(tidslinjen.map { if (it.dato == dagen) it.kopierMed(økonomi) else it })
                 }
             } ?: tidslinjer
+        }
+
+        internal fun gjenopprett(dto: UtbetalingsdagDto): Utbetalingsdag {
+            return when (dto) {
+                is UtbetalingsdagDto.ArbeidsdagDto -> Arbeidsdag.gjenopprett(dto)
+                is UtbetalingsdagDto.ArbeidsgiverperiodeDagDto -> ArbeidsgiverperiodeDag.gjenopprett(dto)
+                is UtbetalingsdagDto.ArbeidsgiverperiodeDagNavDto -> ArbeidsgiverperiodedagNav.gjenopprett(dto)
+                is UtbetalingsdagDto.AvvistDagDto -> AvvistDag.gjenopprett(dto)
+                is UtbetalingsdagDto.ForeldetDagDto -> ForeldetDag.gjenopprett(dto)
+                is UtbetalingsdagDto.FridagDto -> Fridag.gjenopprett(dto)
+                is UtbetalingsdagDto.NavDagDto -> NavDag.gjenopprett(dto)
+                is UtbetalingsdagDto.NavHelgDagDto -> NavHelgDag.gjenopprett(dto)
+                is UtbetalingsdagDto.UkjentDagDto -> UkjentDag.gjenopprett(dto)
+            }
         }
     }
 

@@ -121,4 +121,16 @@ internal class Inntektsmelding(
             beløp = beløp.dto(),
             tidsstempel = tidsstempel
         )
+
+    internal companion object {
+        internal fun gjenopprett(dto: InntektsopplysningDto.InntektsmeldingDto): Inntektsmelding {
+            return Inntektsmelding(
+                id = dto.id,
+                dato = dto.dato,
+                hendelseId = dto.hendelseId,
+                beløp = Inntekt.gjenopprett(dto.beløp),
+                tidsstempel = dto.tidsstempel
+            )
+        }
+    }
 }

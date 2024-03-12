@@ -18,6 +18,13 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
 
+        internal fun gjenopprett(dto: AlderDto): Alder {
+            return Alder(
+                fødselsdato = dto.fødselsdato,
+                dødsdato = dto.dødsdato
+            )
+        }
+
         val LocalDate.alder get() = Alder(this, null)
     }
 

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
+import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
@@ -437,6 +438,14 @@ internal class Sykdomstidslinje private constructor(
             periode: Periode?,
             perioder: List<Periode>
         ): Sykdomstidslinje = Sykdomstidslinje(dager.toSortedMap(), periode, perioder.map{it}.toMutableList())
+
+        internal fun gjenopprett(dto: SykdomstidslinjeDto): Sykdomstidslinje {
+            return Sykdomstidslinje(
+                dager = dto.dager.associate { it.dato to SykdomstidslinjeDagDto.gjenopprett(it) }.toSortedMap(),
+                periode = dto.periode?.let { Periode.gjenopprett(it) },
+                låstePerioder = dto.låstePerioder.map { Periode.gjenopprett(it) }.toMutableList()
+            )
+        }
     }
 
     internal fun dto() = SykdomstidslinjeDto(

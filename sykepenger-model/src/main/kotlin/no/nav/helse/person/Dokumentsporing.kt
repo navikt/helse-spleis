@@ -40,6 +40,24 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
                 DokumentType.SkjønnsmessigFastsettelse -> KontekstType.SkjønnsmessigFastsettelse
             }
         }
+
+        internal fun gjenopprett(dto: DokumentsporingDto): Dokumentsporing {
+            return Dokumentsporing(
+                id = dto.id,
+                dokumentType = when (dto.type) {
+                    DokumenttypeDto.InntektsmeldingDager -> DokumentType.InntektsmeldingDager
+                    DokumenttypeDto.InntektsmeldingInntekt -> DokumentType.InntektsmeldingInntekt
+                    DokumenttypeDto.OverstyrArbeidsforhold -> DokumentType.OverstyrArbeidsforhold
+                    DokumenttypeDto.OverstyrArbeidsgiveropplysninger -> DokumentType.OverstyrArbeidsgiveropplysninger
+                    DokumenttypeDto.OverstyrInntekt -> DokumentType.OverstyrInntekt
+                    DokumenttypeDto.OverstyrRefusjon -> DokumentType.OverstyrRefusjon
+                    DokumenttypeDto.OverstyrTidslinje -> DokumentType.OverstyrTidslinje
+                    DokumenttypeDto.SkjønnsmessigFastsettelse -> DokumentType.SkjønnsmessigFastsettelse
+                    DokumenttypeDto.Sykmelding -> DokumentType.Sykmelding
+                    DokumenttypeDto.Søknad -> DokumentType.Søknad
+                }
+            )
+        }
     }
 
     override fun equals(other: Any?): Boolean {

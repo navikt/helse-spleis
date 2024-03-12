@@ -60,6 +60,12 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
         }
 
         fun ferdigUtbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) = Utbetalingstidslinje(utbetalingsdager.toMutableList())
+
+        fun gjenopprett(dto: UtbetalingstidslinjeDto): Utbetalingstidslinje {
+            return Utbetalingstidslinje(
+                utbetalingsdager = dto.dager.map { Utbetalingsdag.gjenopprett(it) }.toMutableList()
+            )
+        }
     }
 
     fun er6GBegrenset(): Boolean {
@@ -257,5 +263,30 @@ sealed class Begrunnelse {
     object ManglerOpptjening : Begrunnelse()
     object ManglerMedlemskap : Begrunnelse()
     object NyVilkårsprøvingNødvendig : Begrunnelse()
+
+    companion object {
+        internal fun gjenopprett(dto: BegrunnelseDto): Begrunnelse {
+            return when (dto) {
+                BegrunnelseDto.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
+                BegrunnelseDto.AndreYtelserAap -> AndreYtelserAap
+                BegrunnelseDto.AndreYtelserDagpenger -> AndreYtelserDagpenger
+                BegrunnelseDto.AndreYtelserForeldrepenger -> AndreYtelserForeldrepenger
+                BegrunnelseDto.AndreYtelserOmsorgspenger -> AndreYtelserOmsorgspenger
+                BegrunnelseDto.AndreYtelserOpplaringspenger -> AndreYtelserOpplaringspenger
+                BegrunnelseDto.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
+                BegrunnelseDto.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
+                BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+                BegrunnelseDto.EtterDødsdato -> EtterDødsdato
+                BegrunnelseDto.ManglerMedlemskap -> ManglerMedlemskap
+                BegrunnelseDto.ManglerOpptjening -> ManglerOpptjening
+                BegrunnelseDto.MinimumInntekt -> MinimumInntekt
+                BegrunnelseDto.MinimumInntektOver67 -> MinimumInntektOver67
+                BegrunnelseDto.MinimumSykdomsgrad -> MinimumSykdomsgrad
+                BegrunnelseDto.NyVilkårsprøvingNødvendig -> NyVilkårsprøvingNødvendig
+                BegrunnelseDto.Over70 -> Over70
+                BegrunnelseDto.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
+            }
+        }
+    }
 
 }

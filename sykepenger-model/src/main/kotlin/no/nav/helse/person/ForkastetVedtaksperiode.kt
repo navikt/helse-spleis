@@ -1,9 +1,13 @@
 package no.nav.helse.person
 
+import java.util.UUID
 import no.nav.helse.dto.ForkastetVedtaksperiodeDto
+import no.nav.helse.dto.VedtaksperiodeDto
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class ForkastetVedtaksperiode(
@@ -40,6 +44,32 @@ internal class ForkastetVedtaksperiode(
             (forkastede.map { it.vedtaksperiode } + vedtaksperioder)
                 .sorted()
                 .filter { arbeidsgiverperiode.hørerTil(it.periode()) }
+
+        internal fun gjenopprett(
+            person: Person,
+            aktørId: String,
+            fødselsnummer: String,
+            arbeidsgiver: Arbeidsgiver,
+            organisasjonsnummer: String,
+            dto: ForkastetVedtaksperiodeDto,
+            arbeidsgiverjurist: MaskinellJurist,
+            grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
+            utbetalinger: Map<UUID, Utbetaling>
+        ): ForkastetVedtaksperiode {
+            return ForkastetVedtaksperiode(
+                vedtaksperiode = Vedtaksperiode.gjenopprett(
+                    person = person,
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    arbeidsgiver = arbeidsgiver,
+                    organisasjonsnummer = organisasjonsnummer,
+                    dto = dto.vedtaksperiode,
+                    arbeidsgiverjurist = arbeidsgiverjurist,
+                    grunnlagsdata = grunnlagsdata,
+                    utbetalinger = utbetalinger
+                )
+            )
+        }
 
     }
 

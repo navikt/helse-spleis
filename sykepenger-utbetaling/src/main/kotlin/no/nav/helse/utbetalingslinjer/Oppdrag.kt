@@ -93,6 +93,37 @@ class Oppdrag private constructor(
             if (all { it.nettoBeløp >= 0 }) return
             aktivitetslogg.varsel(RV_UT_23)
         }
+
+        internal fun gjenopprett(dto: OppdragDto): Oppdrag {
+            return Oppdrag(
+                mottaker = dto.mottaker,
+                fagområde = when (dto.fagområde) {
+                    FagområdeDto.SP -> Fagområde.Sykepenger
+                    FagområdeDto.SPREF -> Fagområde.SykepengerRefusjon
+                },
+                linjer = dto.linjer.map { Utbetalingslinje.gjenopprett(it) }.toMutableList(),
+                fagsystemId = dto.fagsystemId,
+                endringskode = when (dto.endringskode) {
+                    EndringskodeDto.ENDR -> Endringskode.ENDR
+                    EndringskodeDto.NY -> Endringskode.NY
+                    EndringskodeDto.UEND -> Endringskode.UEND
+                },
+                nettoBeløp = dto.nettoBeløp,
+                overføringstidspunkt = dto.overføringstidspunkt,
+                avstemmingsnøkkel = dto.avstemmingsnøkkel,
+                status = when (dto.status) {
+                    OppdragstatusDto.AKSEPTERT -> Oppdragstatus.AKSEPTERT
+                    OppdragstatusDto.AKSEPTERT_MED_FEIL -> Oppdragstatus.AKSEPTERT_MED_FEIL
+                    OppdragstatusDto.AVVIST -> Oppdragstatus.AVVIST
+                    OppdragstatusDto.FEIL -> Oppdragstatus.FEIL
+                    OppdragstatusDto.OVERFØRT -> Oppdragstatus.OVERFØRT
+                    null -> null
+                },
+                tidsstempel = dto.tidsstempel,
+                erSimulert = dto.erSimulert,
+                simuleringsResultat = dto.simuleringsResultat
+            )
+        }
     }
 
     private val linjeperiode get() = firstOrNull()?.let { (it.datoStatusFom() ?: it.fom) til last().tom }
