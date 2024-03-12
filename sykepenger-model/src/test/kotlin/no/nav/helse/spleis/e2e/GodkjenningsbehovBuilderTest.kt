@@ -2,15 +2,19 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -139,6 +143,82 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             )
+        )
+    }
+
+    @Test
+    fun `Periode med minst én navdag får Innvilget-tag`() {
+        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = INNTEKT)
+        assertForventetFeil(
+            forklaring = "Skal implementeres snarest",
+            ønsket = {
+                assertGodkjenningsbehov(tags = setOf("Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
+            },
+            nå = {
+                assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "EnArbeidsgiver"))
+            }
+        )
+    }
+
+    @Test
+    fun `Periode uten noen navdager får Avslag-tag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertForventetFeil(
+            forklaring = "Skal implementeres snarest",
+            ønsket = {
+                assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING)
+                // Et eksisterende godkjenningsbehov med Avslag-tag
+            },
+            nå = {
+                assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+            }
+        )
+    }
+
+    @Test
+    fun `Periode med minst én navdag og minst én avslagsdag får DelvisInnvilget-tag`() {
+        val erfarenPersonidentifikator = "18.01.1948".somPersonidentifikator()
+        tilGodkjenning(1.januar, 31.januar, a1, personidentifikator = erfarenPersonidentifikator, beregnetInntekt = INNTEKT)
+        assertForventetFeil(
+            forklaring = "Skal implementeres snarest",
+            ønsket = {
+                assertGodkjenningsbehov(tags = setOf("DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
+            },
+            nå = {
+                assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "EnArbeidsgiver"))
+            }
+        )
+    }
+
+    @Test
+    fun `Periode med arbeidsgiverperiodedager, ingen navdager og minst én avslagsdag får Avslag-tag`() {
+        val erfarenPersonidentifikator = "16.01.1948".somPersonidentifikator()
+        tilGodkjenning(1.januar, 31.januar, a1, personidentifikator = erfarenPersonidentifikator, beregnetInntekt = INNTEKT)
+        assertForventetFeil(
+            forklaring = "Skal implementeres snarest",
+            ønsket = {
+                assertGodkjenningsbehov(tags = setOf("Avslag", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
+            },
+            nå = {
+                assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "EnArbeidsgiver"))
+            }
+        )
+    }
+
+    @Test
+    fun `Periode med kun avslagsdager får Avslag-tag`() {
+        val erfarenPersonidentifikator = "16.01.1946".somPersonidentifikator()
+        tilGodkjenning(1.januar, 31.januar, a1, personidentifikator = erfarenPersonidentifikator, beregnetInntekt = INNTEKT)
+        assertForventetFeil(
+            forklaring = "Skal implementeres snarest",
+            ønsket = {
+                assertGodkjenningsbehov(tags = setOf("Avslag", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
+            },
+            nå = {
+                assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "EnArbeidsgiver"))
+            }
         )
     }
 
