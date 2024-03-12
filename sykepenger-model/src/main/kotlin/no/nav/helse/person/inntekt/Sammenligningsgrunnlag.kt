@@ -34,7 +34,7 @@ internal class Sammenligningsgrunnlag(
     }
 
     internal fun dto() = SammenligningsgrunnlagDto(
-        sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
+        sammenligningsgrunnlag = this.sammenligningsgrunnlag.dtoÅrlig(),
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() }
     )
 

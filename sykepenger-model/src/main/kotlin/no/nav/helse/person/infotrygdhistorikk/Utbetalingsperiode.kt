@@ -1,10 +1,10 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
-import no.nav.helse.erHelg
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.InfotrygdArbeidsgiverutbetalingsperiodeDto
 import no.nav.helse.dto.InfotrygdPersonutbetalingsperiodeDto
+import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdperiodeVisitor
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
@@ -17,7 +17,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.gjenopprett
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
@@ -105,7 +104,7 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
         orgnr = orgnr,
         periode = periode.dto(),
         grad = grad.dto(),
-        inntekt = inntekt.dto()
+        inntekt = inntekt.dtoDagligInt()
     )
 
     internal companion object {
@@ -142,7 +141,7 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
         orgnr = orgnr,
         periode = periode.dto(),
         grad = grad.dto(),
-        inntekt = inntekt.dto()
+        inntekt = inntekt.dtoDagligInt()
     )
 
     internal companion object {

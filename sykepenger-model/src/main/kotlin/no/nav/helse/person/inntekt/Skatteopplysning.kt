@@ -4,12 +4,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.etterlevelse.Inntektsubsumsjon
-import no.nav.helse.isWithinRangeOf
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.SkatteopplysningDto
+import no.nav.helse.etterlevelse.Inntektsubsumsjon
+import no.nav.helse.isWithinRangeOf
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.gjenopprett
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
 class Skatteopplysning(
@@ -112,7 +111,7 @@ class Skatteopplysning(
 
     internal fun dto() = SkatteopplysningDto(
         hendelseId = this.hendelseId,
-        beløp = this.beløp.dto(),
+        beløp = this.beløp.dtoMånedligDouble(),
         måned = this.måned,
         type = when (this.type) {
             Inntekttype.LØNNSINNTEKT -> InntekttypeDto.LØNNSINNTEKT

@@ -99,7 +99,7 @@ private fun InntektsopplysningDto.InntektsmeldingDto.tilPersonData() = PersonDat
     id = this.id,
     dato = this.dato,
     hendelseId = this.hendelseId,
-    beløp = this.beløp.månedligDouble,
+    beløp = this.beløp.beløp,
     tidsstempel = this.tidsstempel
 )
 
@@ -297,13 +297,13 @@ private fun RefusjonDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonDa
     meldingsreferanseId = this.meldingsreferanseId,
     førsteFraværsdag = this.førsteFraværsdag,
     arbeidsgiverperioder = this.arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    beløp = this.beløp?.månedligDouble,
+    beløp = this.beløp?.beløp,
     sisteRefusjonsdag = this.sisteRefusjonsdag,
     endringerIRefusjon = this.endringerIRefusjon.map { it.tilPersonData() },
     tidsstempel = this.tidsstempel
 )
 private fun EndringIRefusjonDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData(
-    beløp = this.beløp.månedligDouble,
+    beløp = this.beløp.beløp,
     endringsdato = this.endringsdato
 )
 
@@ -474,19 +474,19 @@ private fun UtbetalingsdagDto.tilPersonData() = UtbetalingsdagData(
         is UtbetalingsdagDto.NavHelgDagDto -> PersonData.UtbetalingstidslinjeData.TypeData.NavHelgDag
         is UtbetalingsdagDto.UkjentDagDto -> PersonData.UtbetalingstidslinjeData.TypeData.UkjentDag
     },
-    aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.dagligDouble,
-    beregningsgrunnlag = this.økonomi.beregningsgrunnlag.dagligDouble,
-    dekningsgrunnlag = this.økonomi.dekningsgrunnlag.dagligDouble,
-    grunnbeløpgrense = this.økonomi.grunnbeløpgrense?.årlig,
+    aktuellDagsinntekt = this.økonomi.aktuellDagsinntekt.beløp,
+    beregningsgrunnlag = this.økonomi.beregningsgrunnlag.beløp,
+    dekningsgrunnlag = this.økonomi.dekningsgrunnlag.beløp,
+    grunnbeløpgrense = this.økonomi.grunnbeløpgrense?.beløp,
     begrunnelser = when (this) {
         is UtbetalingsdagDto.AvvistDagDto -> this.begrunnelser.map { it.tilPersonData() }
         else -> null
     },
     grad = this.økonomi.grad.prosent,
     totalGrad = this.økonomi.totalGrad.prosent,
-    arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble,
-    arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.dagligDouble,
-    personbeløp = this.økonomi.personbeløp?.dagligDouble,
+    arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.beløp,
+    arbeidsgiverbeløp = this.økonomi.arbeidsgiverbeløp?.beløp,
+    personbeløp = this.økonomi.personbeløp?.beløp,
     er6GBegrenset = this.økonomi.er6GBegrenset,
     dato = this.dato,
     fom = null,
@@ -658,19 +658,19 @@ private fun InfotrygdArbeidsgiverutbetalingsperiodeDto.tilPersonData() = PersonD
     fom = this.periode.fom,
     tom = this.periode.tom,
     grad = this.grad.prosent,
-    inntekt = this.inntekt.dagligInt
+    inntekt = this.inntekt.beløp
 )
 private fun InfotrygdPersonutbetalingsperiodeDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.PersonutbetalingsperiodeData(
     orgnr = this.orgnr,
     fom = this.periode.fom,
     tom = this.periode.tom,
     grad = this.grad.prosent,
-    inntekt = this.inntekt.dagligInt
+    inntekt = this.inntekt.beløp
 )
 private fun InfotrygdInntektsopplysningDto.tilPersonData() = PersonData.InfotrygdhistorikkElementData.InntektsopplysningData(
     orgnr = this.orgnummer,
     sykepengerFom = this.sykepengerFom,
-    inntekt = this.inntekt.månedligDouble,
+    inntekt = this.inntekt.beløp,
     refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
     refusjonTom = refusjonTom,
     lagret = lagret
@@ -728,7 +728,7 @@ private fun OpptjeningDto.tilPersonData() = PersonData.VilkårsgrunnlagElementDa
     }
 )
 private fun SykepengegrunnlagDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData(
-    grunnbeløp = this.`6G`.årlig,
+    grunnbeløp = this.`6G`.beløp,
     arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
     sammenligningsgrunnlag = this.sammenligningsgrunnlag.tilPersonData(),
     deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilPersonData() },
@@ -752,10 +752,10 @@ private fun InntektsopplysningDto.tilPersonData() = PersonData.VilkårsgrunnlagE
     beløp = when (this) {
         is InntektsopplysningDto.SkattSykepengegrunnlagDto -> null
         is InntektsopplysningDto.IkkeRapportertDto -> null
-        is InntektsopplysningDto.InfotrygdDto -> this.beløp.månedligDouble
-        is InntektsopplysningDto.InntektsmeldingDto -> this.beløp.månedligDouble
-        is InntektsopplysningDto.SaksbehandlerDto -> this.beløp.månedligDouble
-        is InntektsopplysningDto.SkjønnsmessigFastsattDto -> this.beløp.månedligDouble
+        is InntektsopplysningDto.InfotrygdDto -> this.beløp.beløp
+        is InntektsopplysningDto.InntektsmeldingDto -> this.beløp.beløp
+        is InntektsopplysningDto.SaksbehandlerDto -> this.beløp.beløp
+        is InntektsopplysningDto.SkjønnsmessigFastsattDto -> this.beløp.beløp
     },
     kilde = when (this) {
         is InntektsopplysningDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
@@ -795,11 +795,11 @@ private fun RefusjonsopplysningDto.tilPersonData() = PersonData.ArbeidsgiverData
     meldingsreferanseId = this.meldingsreferanseId,
     fom = this.fom,
     tom = this.tom,
-    beløp = this.beløp.månedligDouble
+    beløp = this.beløp.beløp
 )
 
 private fun SammenligningsgrunnlagDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.SammenligningsgrunnlagData(
-    sammenligningsgrunnlag = this.sammenligningsgrunnlag.årlig,
+    sammenligningsgrunnlag = this.sammenligningsgrunnlag.beløp,
     arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() }
 )
 
@@ -811,7 +811,7 @@ private fun ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto.tilPerson
 private fun SkatteopplysningDto.tilPersonData() =
     PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.SammenligningsgrunnlagInntektsopplysningData(
         hendelseId = this.hendelseId,
-        beløp = this.beløp.månedligDouble,
+        beløp = this.beløp.beløp,
         måned = this.måned,
         type = when (this.type) {
             InntekttypeDto.LØNNSINNTEKT -> PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.SammenligningsgrunnlagInntektsopplysningData.InntekttypeData.LØNNSINNTEKT
@@ -825,7 +825,7 @@ private fun SkatteopplysningDto.tilPersonData() =
     )
 private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData(
     hendelseId = this.hendelseId,
-    beløp = this.beløp.månedligDouble,
+    beløp = this.beløp.beløp,
     måned = this.måned,
     type = when (this.type) {
         InntekttypeDto.LØNNSINNTEKT -> "LØNNSINNTEKT"

@@ -70,7 +70,7 @@ class Inntektsopplysning private constructor(
     internal fun dto() = InfotrygdInntektsopplysningDto(
         orgnummer = orgnummer,
         sykepengerFom = sykepengerFom,
-        inntekt = inntekt.dto(),
+        inntekt = inntekt.dtoMånedligDouble(),
         refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
         refusjonTom = refusjonTom,
         lagret = lagret

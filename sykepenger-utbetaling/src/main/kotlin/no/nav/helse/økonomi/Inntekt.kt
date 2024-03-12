@@ -48,7 +48,13 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         private val rundNedTilDagligMemoized = { tall: Double -> tilDagligIntMemoized(tall).daglig }.memoize()
 
         fun gjenopprett(dto: InntektDto): Inntekt {
-            return Inntekt(dto.årlig)
+            return when (dto) {
+                is InntektDto.Årlig -> Inntekt(dto.beløp)
+                is InntektDto.DagligDouble -> dto.beløp.daglig
+                is InntektDto.DagligInt -> dto.beløp.daglig
+                is InntektDto.MånedligDouble -> dto.beløp.månedlig
+                is InntektDto.MånedligInt -> dto.beløp.månedlig
+            }
         }
     }
 
@@ -97,12 +103,10 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     fun avviksprosent(other: Inntekt) = Avviksprosent.avvik(this.årlig, other.årlig)
 
-    fun dto() = InntektDto(
-        årlig = this.årlig,
-        månedligDouble = tilMånedligDouble(),
-        dagligDouble = tilDagligDouble(),
-        dagligInt = tilDagligInt()
-    )
+    fun dtoÅrlig() = InntektDto.Årlig(this.årlig)
+    fun dtoMånedligDouble() = InntektDto.MånedligDouble(tilMånedligDouble())
+    fun dtoDagligDouble() = InntektDto.DagligDouble(tilDagligDouble())
+    fun dtoDagligInt() = InntektDto.DagligInt(tilDagligInt())
 }
 
 interface DekningsgradKilde {

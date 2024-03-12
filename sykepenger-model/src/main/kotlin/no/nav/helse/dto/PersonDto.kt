@@ -38,13 +38,13 @@ data class RefusjonDto(
     val meldingsreferanseId: UUID,
     val førsteFraværsdag: LocalDate?,
     val arbeidsgiverperioder: List<PeriodeDto>,
-    val beløp: InntektDto?,
+    val beløp: InntektDto.MånedligDouble?,
     val sisteRefusjonsdag: LocalDate?,
     val endringerIRefusjon: List<EndringIRefusjonDto>,
     val tidsstempel: LocalDateTime
 )
 data class EndringIRefusjonDto(
-    val beløp: InntektDto,
+    val beløp: InntektDto.MånedligDouble,
     val endringsdato: LocalDate
 )
 data class InntektshistorikkDto(val historikk: List<InntektsopplysningDto.InntektsmeldingDto>)
@@ -252,7 +252,7 @@ data class SykepengegrunnlagDto(
     val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningDto>,
     val vurdertInfotrygd: Boolean,
     val sammenligningsgrunnlag: SammenligningsgrunnlagDto,
-    val `6G`: InntektDto
+    val `6G`: InntektDto.Årlig
 )
 data class ArbeidsgiverInntektsopplysningDto(
     val orgnummer: String,
@@ -264,7 +264,7 @@ sealed class InntektsopplysningDto {
     abstract val id: UUID
     abstract val hendelseId: UUID
     abstract val dato: LocalDate
-    abstract val beløp: InntektDto?
+    abstract val beløp: InntektDto.MånedligDouble?
     abstract val tidsstempel: LocalDateTime
 
     data class IkkeRapportertDto(
@@ -273,14 +273,14 @@ sealed class InntektsopplysningDto {
         override val dato: LocalDate,
         override val tidsstempel: LocalDateTime
     ) : InntektsopplysningDto() {
-        override val beløp: InntektDto? = null
+        override val beløp: InntektDto.MånedligDouble? = null
     }
 
     data class InfotrygdDto(
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,
-        override val beløp: InntektDto,
+        override val beløp: InntektDto.MånedligDouble,
         override val tidsstempel: LocalDateTime
     ) : InntektsopplysningDto()
 
@@ -288,7 +288,7 @@ sealed class InntektsopplysningDto {
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,
-        override val beløp: InntektDto,
+        override val beløp: InntektDto.MånedligDouble,
         override val tidsstempel: LocalDateTime,
         val forklaring: String?,
         val subsumsjon: SubsumsjonDto?,
@@ -299,7 +299,7 @@ sealed class InntektsopplysningDto {
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,
-        override val beløp: InntektDto,
+        override val beløp: InntektDto.MånedligDouble,
         override val tidsstempel: LocalDateTime,
         val overstyrtInntekt: InntektsopplysningDto,
     ) : InntektsopplysningDto()
@@ -308,7 +308,7 @@ sealed class InntektsopplysningDto {
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,
-        override val beløp: InntektDto,
+        override val beløp: InntektDto.MånedligDouble,
         override val tidsstempel: LocalDateTime
     ) : InntektsopplysningDto()
     data class SkattSykepengegrunnlagDto(
@@ -319,7 +319,7 @@ sealed class InntektsopplysningDto {
         val inntektsopplysninger: List<SkatteopplysningDto>,
         val ansattPerioder: List<AnsattPeriodeDto>
     ) : InntektsopplysningDto() {
-        override val beløp: InntektDto? = null
+        override val beløp: InntektDto.MånedligDouble? = null
     }
 }
 data class AnsattPeriodeDto(val fom: LocalDate, val tom: LocalDate?)
@@ -329,7 +329,7 @@ data class SubsumsjonDto(
     val bokstav: String?,
 )
 data class SammenligningsgrunnlagDto(
-    val sammenligningsgrunnlag: InntektDto,
+    val sammenligningsgrunnlag: InntektDto.Årlig,
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto>,
 )
 data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
@@ -338,7 +338,7 @@ data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto(
 )
 data class SkatteopplysningDto(
     val hendelseId: UUID,
-    val beløp: InntektDto,
+    val beløp: InntektDto.MånedligDouble,
     val måned: YearMonth,
     val type: InntekttypeDto,
     val fordel: String,
@@ -356,7 +356,7 @@ data class RefusjonsopplysningDto(
     val meldingsreferanseId: UUID,
     val fom: LocalDate,
     val tom: LocalDate?,
-    val beløp: InntektDto
+    val beløp: InntektDto.MånedligDouble
 )
 data class OpptjeningDto(
     val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagDto>,
@@ -440,18 +440,18 @@ data class InfotrygdArbeidsgiverutbetalingsperiodeDto(
     val orgnr: String,
     val periode: PeriodeDto,
     val grad: ProsentdelDto,
-    val inntekt: InntektDto
+    val inntekt: InntektDto.DagligInt
 )
 data class InfotrygdPersonutbetalingsperiodeDto(
     val orgnr: String,
     val periode: PeriodeDto,
     val grad: ProsentdelDto,
-    val inntekt: InntektDto
+    val inntekt: InntektDto.DagligInt
 )
 data class InfotrygdInntektsopplysningDto(
     val orgnummer: String,
     val sykepengerFom: LocalDate,
-    val inntekt: InntektDto,
+    val inntekt: InntektDto.MånedligDouble,
     val refusjonTilArbeidsgiver: Boolean,
     val refusjonTom: LocalDate?,
     val lagret: LocalDateTime?

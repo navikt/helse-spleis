@@ -3,9 +3,8 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.InntektsopplysningDto
-import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
@@ -62,7 +61,7 @@ class SkjønnsmessigFastsatt internal constructor(
             id = id,
             hendelseId = hendelseId,
             dato = dato,
-            beløp = beløp.dto(),
+            beløp = beløp.dtoMånedligDouble(),
             tidsstempel = tidsstempel,
             overstyrtInntekt = overstyrtInntekt?.dto()!!
         )

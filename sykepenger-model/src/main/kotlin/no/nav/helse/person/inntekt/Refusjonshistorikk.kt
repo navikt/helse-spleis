@@ -3,15 +3,15 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.RefusjonDto
 import no.nav.helse.dto.RefusjonshistorikkDto
+import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.RefusjonshistorikkVisitor
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somOverlapperMedArbeidsgiverperiode
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somTilstøterArbeidsgiverperiode
@@ -185,14 +185,14 @@ internal class Refusjonshistorikk {
                 visitor.visitEndringIRefusjon(beløp, endringsdato)
             }
 
-            internal fun dto() = EndringIRefusjonDto(beløp.dto(), endringsdato)
+            internal fun dto() = EndringIRefusjonDto(beløp.dtoMånedligDouble(), endringsdato)
         }
 
         internal fun dto() = RefusjonDto(
             meldingsreferanseId = meldingsreferanseId,
             førsteFraværsdag = førsteFraværsdag,
             arbeidsgiverperioder = arbeidsgiverperioder.map { it.dto() },
-            beløp = beløp?.dto(),
+            beløp = beløp?.dtoMånedligDouble(),
             sisteRefusjonsdag = sisteRefusjonsdag,
             endringerIRefusjon = endringerIRefusjon.map { it.dto() },
             tidsstempel = tidsstempel

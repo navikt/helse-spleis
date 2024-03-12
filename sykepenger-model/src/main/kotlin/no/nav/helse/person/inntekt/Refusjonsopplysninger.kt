@@ -3,14 +3,14 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.RefusjonsopplysningDto
+import no.nav.helse.dto.RefusjonsopplysningerDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.RefusjonsopplysningDto
-import no.nav.helse.dto.RefusjonsopplysningerDto
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
@@ -261,6 +261,6 @@ class Refusjonsopplysning(
         meldingsreferanseId = this.meldingsreferanseId,
         fom = this.fom,
         tom = this.tom,
-        beløp = this.beløp.dto()
+        beløp = this.beløp.dtoMånedligDouble()
     )
 }
