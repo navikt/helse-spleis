@@ -9,6 +9,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
@@ -109,7 +110,8 @@ import kotlin.collections.set
 
 private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 fun Person.serialize(pretty: Boolean = false): SerialisertPerson {
-    val ny = tilSerialisertPerson(pretty)
+    val nyDto = dto()
+    val ny = nyDto.tilPersonData().tilSerialisertPerson(pretty)
     val jsonBuilder = JsonBuilder()
     this.accept(jsonBuilder)
     return SerialisertPerson(if (pretty) jsonBuilder.toPretty() else jsonBuilder.toJson()).also { gammel ->
@@ -117,7 +119,14 @@ fun Person.serialize(pretty: Boolean = false): SerialisertPerson {
         val gammelJson = SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree<ObjectNode>(serdeObjectMapper.readValue<PersonData>(gammel.json))).toString()
         val compareResult = JSONCompare.compareJSON(gammelJson, ny.json, JSONCompareMode.STRICT)
         if (compareResult.failed()) {
-            sikkerLogg.error("Ny JSON gir ulikt resultat i forhold til dagens: {}", compareResult.message)
+            sikkerLogg.error("Ny JSON gir ulikt resultat i forhold til dagens:\n{}", compareResult.message)
+        } else {
+            val gjenopprettetPerson = Person.gjenopprett(MaskinellJurist(), nyDto)
+            val serialisertNyPerson = gjenopprettetPerson.tilSerialisertPerson(pretty)
+            val compareResult2 = JSONCompare.compareJSON(gammelJson, serialisertNyPerson.json, JSONCompareMode.STRICT)
+            if (compareResult2.failed()) {
+                sikkerLogg.error("Ny JSON gir ulikt resultat (etter deserialisering via PersonDto) i forhold til dagens:\n{}", compareResult2.message)
+            }
         }
     }
 }

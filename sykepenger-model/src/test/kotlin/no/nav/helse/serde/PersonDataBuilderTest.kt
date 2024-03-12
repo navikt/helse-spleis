@@ -6,6 +6,7 @@ import no.nav.helse.EnableFeriepenger
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FDATO_2018
@@ -52,6 +53,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -131,6 +133,11 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
                 a3 to INNTEKT
             ), 1.juni))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrArbeidsgiveropplysninger(1.juni, listOf(
+                OverstyrtArbeidsgiveropplysning(a3, INNTEKT + 1.daglig, "for lite inntekt")
+            ))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -334,8 +341,8 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         }
     }
     private fun assertVilkårsgrunnlaghistorikk(historikk: VilkårsgrunnlaghistorikkDto) {
-        assertEquals(5, historikk.historikk.size)
-        historikk.historikk[4].also { innslag ->
+        assertEquals(6, historikk.historikk.size)
+        historikk.historikk[5].also { innslag ->
             assertEquals(1, innslag.vilkårsgrunnlag.size)
             innslag.vilkårsgrunnlag[0].also { vilkårsgrunnlagDto ->
                 assertEquals(2, vilkårsgrunnlagDto.sykepengegrunnlag.arbeidsgiverInntektsopplysninger.size)

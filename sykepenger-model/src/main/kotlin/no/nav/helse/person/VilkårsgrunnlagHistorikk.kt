@@ -667,7 +667,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlaghistorikkDto, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): VilkårsgrunnlagHistorikk {
             val inntekter = mutableMapOf<UUID, Inntektsopplysning>()
             return VilkårsgrunnlagHistorikk(
-                historikk = dto.historikk.map { Innslag.gjenopprett(alder, it, inntekter, grunnlagsdata) }.toMutableList()
+                historikk = dto.historikk.asReversed().map { Innslag.gjenopprett(alder, it, inntekter, grunnlagsdata) }.asReversed().toMutableList()
             )
         }
     }
