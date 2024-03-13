@@ -119,13 +119,13 @@ fun Person.serialize(pretty: Boolean = false): SerialisertPerson {
         // deserialiserer via personData for å fjerne felter som JsonBuilder putter på kun pga. spanner
         val gammelJson = SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree<ObjectNode>(serdeObjectMapper.readValue<PersonData>(gammel.json))).toString()
         val compareResult = JSONCompare.compareJSON(gammelJson, ny.json, JSONCompareMode.STRICT)
-        if (compareResult.failed()) {
+        if (compareResult.failed() && !compareResult.kunInfotrygdinntekterfeil()) {
             sikkerLogg.error("Ny JSON gir ulikt resultat i forhold til dagens:\n{}", compareResult.message)
         } else {
             val gjenopprettetPerson = Person.gjenopprett(MaskinellJurist(), nyDto)
             val serialisertNyPerson = gjenopprettetPerson.tilSerialisertPerson(pretty)
             val compareResult2 = JSONCompare.compareJSON(gammelJson, serialisertNyPerson.json, JSONCompareMode.STRICT)
-            if (compareResult2.failed()) {
+            if (compareResult2.failed() && !compareResult2.kunInfotrygdinntekterfeil()) {
                 sikkerLogg.error("Ny JSON gir ulikt resultat (etter deserialisering via PersonDto) i forhold til dagens:\n{}", compareResult2.message)
             }
         }

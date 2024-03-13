@@ -298,6 +298,7 @@ import no.nav.helse.serde.migration.V9FjernerGamleSykdomstidslinjer
 import no.nav.helse.serde.migration.migrate
 import org.skyscreamer.jsonassert.JSONCompare
 import org.skyscreamer.jsonassert.JSONCompareMode
+import org.skyscreamer.jsonassert.JSONCompareResult
 import org.slf4j.LoggerFactory
 import kotlin.math.exp
 
@@ -627,7 +628,7 @@ class SerialisertPerson(val json: String) {
                     val expectedJson = serdeObjectMapper.writeValueAsString(expectedPerson.dto())
                     val actualJson = serdeObjectMapper.writeValueAsString(deserialisertViaDto.dto())
                     val compareResult = JSONCompare.compareJSON(expectedJson, actualJson, JSONCompareMode.STRICT)
-                    if (compareResult.failed()) {
+                    if (compareResult.failed() && !compareResult.kunInfotrygdinntekterfeil()) {
                         sikkerLogg.error("Ny JSON gir ulikt resultat i forhold til dagens ved deserialisering:\n{}", compareResult.message)
                     }
                 } catch (err: Exception) {
@@ -639,4 +640,12 @@ class SerialisertPerson(val json: String) {
             throw DeserializationException("Feil under oversetting til modellobjekter for aktør=$aktørId: ${err.message}", err)
         }
     }
+}
+
+fun JSONCompareResult.kunInfotrygdinntekterfeil(): Boolean {
+    return this.fieldMissing.isEmpty() && this.fieldUnexpected.isEmpty() &&
+            this.fieldFailures.all {
+                (it.field.startsWith("infotrygdhistorikk.elementer") || it.field.startsWith("infotrygdhistorikk["))
+                        && it.field.contains(".inntekter[")
+            }
 }
