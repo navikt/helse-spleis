@@ -993,14 +993,20 @@ internal data class PersonData(
                 }
                 private fun tilDto(dagen: LocalDate, kilde: HendelseskildeDto) = when (type) {
                     JsonDagType.ARBEIDSDAG -> SykdomstidslinjeDagDto.ArbeidsdagDto(dato = dagen, kilde = kilde)
-                    JsonDagType.ARBEIDSGIVERDAG -> SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    JsonDagType.ARBEIDSGIVERDAG -> if (dagen.erHelg())
+                        SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    else
+                        SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     JsonDagType.FERIEDAG -> SykdomstidslinjeDagDto.FeriedagDto(dato = dagen, kilde = kilde)
                     JsonDagType.ARBEID_IKKE_GJENOPPTATT_DAG -> SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto(dato = dagen, kilde = kilde)
                     JsonDagType.FRISK_HELGEDAG -> SykdomstidslinjeDagDto.FriskHelgedagDto(dato = dagen, kilde = kilde)
                     JsonDagType.FORELDET_SYKEDAG -> SykdomstidslinjeDagDto.ForeldetSykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     JsonDagType.PERMISJONSDAG -> SykdomstidslinjeDagDto.PermisjonsdagDto(dato = dagen, kilde = kilde)
                     JsonDagType.PROBLEMDAG -> SykdomstidslinjeDagDto.ProblemDagDto(dato = dagen, kilde = kilde, other = this.other!!.tilDto(), melding = this.melding!!)
-                    JsonDagType.SYKEDAG -> SykdomstidslinjeDagDto.SykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    JsonDagType.SYKEDAG -> if (dagen.erHelg())
+                        SykdomstidslinjeDagDto.SykHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+                    else
+                        SykdomstidslinjeDagDto.SykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     JsonDagType.SYKEDAG_NAV -> SykdomstidslinjeDagDto.SykedagNavDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     JsonDagType.ANDRE_YTELSER_FORELDREPENGER -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.Foreldrepenger)
                     JsonDagType.ANDRE_YTELSER_AAP -> SykdomstidslinjeDagDto.AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto.AAP)
