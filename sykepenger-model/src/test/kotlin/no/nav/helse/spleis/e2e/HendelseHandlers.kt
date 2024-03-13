@@ -94,9 +94,9 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
     return id
 }
 
-internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, beregnetInntekt: Inntekt = 20000.månedlig, personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018) {
+internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, beregnetInntekt: Inntekt = 20000.månedlig) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    organisasjonsnummere.forEach { nyPeriode(fom til tom, it, fnr = personidentifikator) }
+    organisasjonsnummere.forEach { nyPeriode(fom til tom, it) }
     organisasjonsnummere.forEach {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),

@@ -4,6 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.dto.UtbetalingDto
+import no.nav.helse.dto.UtbetalingTilstandDto
+import no.nav.helse.dto.UtbetalingVurderingDto
+import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -12,10 +16,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.valider
 import no.nav.helse.hendelser.utbetaling.vurdering
-import no.nav.helse.dto.UtbetalingDto
-import no.nav.helse.dto.UtbetalingTilstandDto
-import no.nav.helse.dto.UtbetalingVurderingDto
-import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -163,9 +163,9 @@ class Utbetaling private constructor(
         tilstand.simuler(this, hendelse)
     }
 
-    fun byggGodkjenningsbehov(hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+    fun byggGodkjenningsbehov(hendelse: IAktivitetslogg, periode: Periode, builder: GodkjenningsbehovBuilder) {
         hendelse.kontekst(this)
-        tilstand.byggGodkjenningsbehov(this, hendelse, builder)
+        tilstand.byggGodkjenningsbehov(this, hendelse, periode, builder)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -259,7 +259,7 @@ class Utbetaling private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            type: Utbetalingtype = Utbetalingtype.UTBETALING
+            type: Utbetalingtype = UTBETALING
         ): Pair<Utbetaling, List<Utbetaling>> {
             val bb = UtbetalingkladderBuilder(utbetalingstidslinje, organisasjonsnummer, fødselsnummer)
             val oppdragene = bb.build()
@@ -560,6 +560,7 @@ class Utbetaling private constructor(
         fun byggGodkjenningsbehov(
             utbetaling: Utbetaling,
             hendelse: IAktivitetslogg,
+            periode: Periode,
             builder: GodkjenningsbehovBuilder
         ) {
             hendelse.info("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
@@ -600,15 +601,24 @@ class Utbetaling private constructor(
             utbetaling.personOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
         }
 
-        override fun byggGodkjenningsbehov(utbetaling: Utbetaling, hendelse: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
+        override fun byggGodkjenningsbehov(
+            utbetaling: Utbetaling,
+            hendelse: IAktivitetslogg,
+            periode: Periode,
+            builder: GodkjenningsbehovBuilder
+        ) {
             builder.utbetalingtype(utbetaling.type.name)
-            tags(builder, utbetaling)
+            tags(builder, utbetaling, periode)
         }
 
-        private fun tags(builder: GodkjenningsbehovBuilder, utbetaling: Utbetaling): GodkjenningsbehovBuilder {
+        private fun tags(builder: GodkjenningsbehovBuilder, utbetaling: Utbetaling, periode: Periode): GodkjenningsbehovBuilder {
             val arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag.nettoBeløp()
             val personNettoBeløp = utbetaling.personOppdrag.nettoBeløp()
             builder.tagUtbetaling(arbeidsgiverNettoBeløp, personNettoBeløp)
+            val behandlingsresultat = utbetaling.utbetalingstidslinje.behandlingsresultat(periode)
+            if (behandlingsresultat != null) {
+                builder.tagBehandlingsresultat(behandlingsresultat)
+            }
             return builder
         }
     }
@@ -840,7 +850,7 @@ class Utbetaling private constructor(
             Utbetalt -> UtbetalingTilstandDto.UTBETALT
         },
         type = when (type) {
-            Utbetalingtype.UTBETALING -> UtbetalingtypeDto.UTBETALING
+            UTBETALING -> UtbetalingtypeDto.UTBETALING
             Utbetalingtype.ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
             Utbetalingtype.ANNULLERING -> UtbetalingtypeDto.ANNULLERING
             Utbetalingtype.REVURDERING -> UtbetalingtypeDto.REVURDERING

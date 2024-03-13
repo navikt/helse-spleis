@@ -15,7 +15,6 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,7 +25,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     private fun IdInnhenter.sisteGenerasjonId(orgnr: String) = inspektør(orgnr).vedtaksperioder(this).inspektør.generasjoner.last().id
 
     @Test
-    fun `forlengelse`() {
+    fun forlengelse() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengelseTilGodkjenning(1.februar, 10.februar, a1, a2)
         assertGodkjenningsbehov(
@@ -53,17 +52,17 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiverutbetaling`() {
+    fun arbeidsgiverutbetaling() {
         tilGodkjenning(1.januar, 31.januar, a1)
         assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)))
     }
 
     @Test
-    fun `personutbetaling`() {
+    fun personutbetaling() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null),
+            refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -109,7 +108,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(beløp = Inntekt.INGEN, opphørsdato = null),
+            refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -149,15 +148,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Periode med minst én navdag får Innvilget-tag`() {
         tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = INNTEKT)
-        assertForventetFeil(
-            forklaring = "Skal implementeres snarest",
-            ønsket = {
-                assertGodkjenningsbehov(tags = setOf("Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
-            },
-            nå = {
-                assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "EnArbeidsgiver"))
-            }
-        )
+        assertGodkjenningsbehov(tags = setOf("Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
     }
 
     @Test
@@ -179,47 +170,29 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode med minst én navdag og minst én avslagsdag får DelvisInnvilget-tag`() {
-        val erfarenPersonidentifikator = "18.01.1948".somPersonidentifikator()
-        tilGodkjenning(1.januar, 31.januar, a1, personidentifikator = erfarenPersonidentifikator, beregnetInntekt = INNTEKT)
-        assertForventetFeil(
-            forklaring = "Skal implementeres snarest",
-            ønsket = {
-                assertGodkjenningsbehov(tags = setOf("DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
-            },
-            nå = {
-                assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "EnArbeidsgiver"))
-            }
-        )
+        createTestPerson("18.01.1948".somPersonidentifikator(), 18.januar(1948))
+        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = INNTEKT)
+        assertGodkjenningsbehov(tags = setOf("DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
     }
 
     @Test
     fun `Periode med arbeidsgiverperiodedager, ingen navdager og minst én avslagsdag får Avslag-tag`() {
-        val erfarenPersonidentifikator = "16.01.1948".somPersonidentifikator()
-        tilGodkjenning(1.januar, 31.januar, a1, personidentifikator = erfarenPersonidentifikator, beregnetInntekt = INNTEKT)
-        assertForventetFeil(
-            forklaring = "Skal implementeres snarest",
-            ønsket = {
-                assertGodkjenningsbehov(tags = setOf("Avslag", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
-            },
-            nå = {
-                assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "EnArbeidsgiver"))
-            }
-        )
+        createTestPerson("16.01.1948".somPersonidentifikator(), 16.januar(1948))
+        nyPeriode(1.januar til 31.januar, a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertGodkjenningsbehov(tags = setOf("Avslag", "IngenUtbetaling", "EnArbeidsgiver"))
     }
 
     @Test
     fun `Periode med kun avslagsdager får Avslag-tag`() {
-        val erfarenPersonidentifikator = "16.01.1946".somPersonidentifikator()
-        tilGodkjenning(1.januar, 31.januar, a1, personidentifikator = erfarenPersonidentifikator, beregnetInntekt = INNTEKT)
-        assertForventetFeil(
-            forklaring = "Skal implementeres snarest",
-            ønsket = {
-                assertGodkjenningsbehov(tags = setOf("Avslag", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
-            },
-            nå = {
-                assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "EnArbeidsgiver"))
-            }
-        )
+        createTestPerson("16.01.1946".somPersonidentifikator(), 16.januar(1946))
+        nyPeriode(1.januar til 31.januar, a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertGodkjenningsbehov(tags = setOf("Avslag", "IngenUtbetaling", "EnArbeidsgiver"))
     }
 
     private fun assertGodkjenningsbehov(
@@ -254,7 +227,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         val actualGenerasjonId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
         val actualPerioderMedSammeSkjæringstidspunkt = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
 
-        assertTrue(actualtags.containsAll(tags) )
+        assertTrue(actualtags.containsAll(tags))
         assertEquals(skjæringstidspunkt.toString(), actualSkjæringstidspunkt)
         assertEquals(inntektskilde, actualInntektskilde)
         assertEquals(periodeType, actualPeriodetype)
@@ -269,10 +242,11 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         assertEquals(perioderMedSammeSkjæringstidspunkt, actualPerioderMedSammeSkjæringstidspunkt)
     }
 
-    private inline fun <reified T>hentFelt(vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1), feltNavn: String) = hendelselogg.etterspurtBehov<T>(
-        vedtaksperiodeId = vedtaksperiodeId,
-        behov = Aktivitet.Behov.Behovtype.Godkjenning,
-        felt = feltNavn
-    )
+    private inline fun <reified T> hentFelt(vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1), feltNavn: String) =
+        hendelselogg.etterspurtBehov<T>(
+            vedtaksperiodeId = vedtaksperiodeId,
+            behov = Aktivitet.Behov.Behovtype.Godkjenning,
+            felt = feltNavn
+        )
 
 }

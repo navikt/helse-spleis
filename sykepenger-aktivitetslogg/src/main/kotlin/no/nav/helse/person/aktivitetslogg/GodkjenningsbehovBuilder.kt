@@ -70,6 +70,10 @@ class GodkjenningsbehovBuilder(
         if (arbeidsgiverNettoBeløp == 0 && personNettoBeløp == 0) tags.add("IngenUtbetaling")
     }
 
+    fun tagBehandlingsresultat(behandlingsresultat: String) {
+        tags.add(behandlingsresultat)
+    }
+
     fun omregnedeÅrsinntekter(orgnummer: String, omregnetÅrsinntekt: Double) = apply {
         omregnedeÅrsinntekter.add(mapOf("organisasjonsnummer" to orgnummer, "beløp" to omregnetÅrsinntekt))
     }

@@ -3,6 +3,11 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.GenerasjonDto
+import no.nav.helse.dto.GenerasjonEndringDto
+import no.nav.helse.dto.GenerasjonTilstandDto
+import no.nav.helse.dto.GenerasjonerDto
+import no.nav.helse.dto.GenerasjonkildeDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Avsender
@@ -14,12 +19,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.avvist
-import no.nav.helse.dto.AvsenderDto
-import no.nav.helse.dto.GenerasjonEndringDto
-import no.nav.helse.dto.GenerasjonDto
-import no.nav.helse.dto.GenerasjonTilstandDto
-import no.nav.helse.dto.GenerasjonerDto
-import no.nav.helse.dto.GenerasjonkildeDto
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
@@ -428,7 +427,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                     PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, generasjonId, periode)
                 })
                 grunnlagsdata.byggGodkjenningsbehov(builder)
-                utbetaling.byggGodkjenningsbehov(hendelse, builder)
+                utbetaling.byggGodkjenningsbehov(hendelse, periode, builder)
                 Aktivitet.Behov.godkjenning(
                     aktivitetslogg = hendelse,
                     builder = builder

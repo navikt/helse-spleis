@@ -2,12 +2,12 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import no.nav.helse.dto.BegrunnelseDto
+import no.nav.helse.dto.UtbetalingstidslinjeDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.BegrunnelseDto
-import no.nav.helse.dto.UtbetalingstidslinjeDto
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNav
@@ -216,6 +216,16 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
     fun dto() = UtbetalingstidslinjeDto(
         dager = this.map { it.dto() }
     )
+
+    fun behandlingsresultat(periode: Periode): String? {
+        val relevanteDager = this.subset(periode).utbetalingsdager.filter { it is NavDag || it is AvvistDag || it is ForeldetDag }
+        return when {
+            relevanteDager.all { it is NavDag } -> "Innvilget"
+            relevanteDager.all { it is AvvistDag || it is ForeldetDag } -> "Avslag"
+            relevanteDager.any { it is NavDag } && relevanteDager.any { it is AvvistDag || it is ForeldetDag } -> "DelvisInnvilget"
+            else -> null
+        }
+    }
 }
 
 sealed class Begrunnelse {
