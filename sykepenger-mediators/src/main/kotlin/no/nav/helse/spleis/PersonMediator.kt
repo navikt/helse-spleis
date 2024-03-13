@@ -72,7 +72,8 @@ internal class PersonMediator(
         }
     }
 
-    private fun queueMessage(fødselsnummer: String, eventName: String, message: String) {
+    private fun queueMessage(fødselsnummer: String, message: String) {
+        val eventName = objectMapper.readTree(message).path("@event_name").asText()
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
@@ -246,14 +247,11 @@ internal class PersonMediator(
         utbetalingId: UUID,
         vedtaksperiodeId: UUID
     ) {
-        val eventName = "vedtaksperiode_ny_utbetaling"
-        queueMessage(personidentifikator.toString(), eventName, JsonMessage.newMessage(eventName, mapOf(
-            "fødselsnummer" to personidentifikator.toString(),
-            "aktørId" to aktørId,
+        queueMessage(JsonMessage.newMessage("vedtaksperiode_ny_utbetaling", mapOf(
             "organisasjonsnummer" to organisasjonsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId,
             "utbetalingId" to utbetalingId
-        )).toJson())
+        )))
     }
 
     override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
@@ -509,7 +507,7 @@ internal class PersonMediator(
 
     private fun queueMessage(outgoingMessage: JsonMessage) {
         loggHvisTomHendelseliste(outgoingMessage)
-        queueMessage(hendelse.fødselsnummer(), outgoingMessage.also { it.interestedIn("@event_name") }["@event_name"].asText(), leggPåStandardfelter(outgoingMessage).toJson())
+        queueMessage(hendelse.fødselsnummer(), leggPåStandardfelter(outgoingMessage).toJson())
     }
 
     private fun loggHvisTomHendelseliste(outgoingMessage: JsonMessage) {
