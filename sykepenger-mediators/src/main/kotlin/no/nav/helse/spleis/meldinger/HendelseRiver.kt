@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.prometheus.client.Histogram
 import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -45,11 +46,13 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
                 "melding_type" to eventName,
                 "melding_id" to packet["@id"].asText()
             )) {
-                try {
-                    messageMediator.onRecognizedMessage(createMessage(packet), context)
-                } catch (e: Exception) {
-                    sikkerLogg.error("Klarte ikke å lese melding, innhold: ${packet.toJson()}", e)
-                    throw e
+                behandlingstid.labels(riverName, eventName).time {
+                    try {
+                        messageMediator.onRecognizedMessage(createMessage(packet), context)
+                    } catch (e: Exception) {
+                        sikkerLogg.error("Klarte ikke å lese melding, innhold: ${packet.toJson()}", e)
+                        throw e
+                    }
                 }
             }
         }
@@ -61,5 +64,8 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
 
     companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        private val behandlingstid = Histogram.build("behandlingstid_seconds", "hvor lang tid spleis bruker på behandling av en melding")
+            .labelNames("river_name", "event_name")
+            .register()
     }
 }
