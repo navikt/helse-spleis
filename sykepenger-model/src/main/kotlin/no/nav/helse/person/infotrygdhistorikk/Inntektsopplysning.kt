@@ -36,7 +36,7 @@ class Inntektsopplysning private constructor(
 
     internal companion object {
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
-            inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.inntekt }, { it.hashCode() }))
+            inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.inntekt }, { it.orgnummer }, { it.hashCode() }))
 
         internal fun ferdigInntektsopplysning(
             orgnummer: String,
