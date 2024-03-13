@@ -195,6 +195,27 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         assertGodkjenningsbehov(tags = setOf("Avslag", "IngenUtbetaling", "EnArbeidsgiver"))
     }
 
+    @Test
+    fun `Periode uten navdager og avslagsdager får Avslag-tag`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
+        håndterYtelser(2.vedtaksperiode)
+        assertGodkjenningsbehov(
+            tags = setOf("Avslag", "IngenUtbetaling", "EnArbeidsgiver"),
+            vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+            periodeType = "FORLENGELSE",
+            periodeFom = 1.februar,
+            periodeTom = 28.februar,
+            førstegangsbehandling = false,
+            generasjonId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.generasjoner.last().id,
+            perioderMedSammeSkjæringstidspunkt = listOf(
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(ORGNUMMER).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(ORGNUMMER).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(ORGNUMMER).toString(), "behandlingId" to 2.vedtaksperiode.sisteGenerasjonId(ORGNUMMER).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
+            )
+        )
+    }
+
     private fun assertGodkjenningsbehov(
         tags: Set<String>,
         skjæringstidspunkt: LocalDate = 1.januar,

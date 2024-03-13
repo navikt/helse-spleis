@@ -220,8 +220,9 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
     fun behandlingsresultat(periode: Periode): String? {
         val relevanteDager = this.subset(periode).utbetalingsdager.filter { it is NavDag || it is AvvistDag || it is ForeldetDag }
         return when {
-            relevanteDager.all { it is NavDag } -> "Innvilget"
+            relevanteDager.isEmpty() -> "Avslag"
             relevanteDager.all { it is AvvistDag || it is ForeldetDag } -> "Avslag"
+            relevanteDager.all { it is NavDag } -> "Innvilget"
             relevanteDager.any { it is NavDag } && relevanteDager.any { it is AvvistDag || it is ForeldetDag } -> "DelvisInnvilget"
             else -> null
         }
