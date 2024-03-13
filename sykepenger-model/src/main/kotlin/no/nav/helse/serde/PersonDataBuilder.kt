@@ -59,8 +59,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
 
 fun Person.tilSerialisertPerson(pretty: Boolean = false): SerialisertPerson {
     return tilPersonData().tilSerialisertPerson(pretty)
@@ -190,7 +190,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.økonomi.grad.prosent,
+        grad = this.grad.prosent,
         other = null,
         melding = null,
         dato = dato,
@@ -200,7 +200,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.økonomi.grad.prosent,
+        grad = this.grad.prosent,
         other = null,
         melding = null,
         dato = dato,
@@ -220,7 +220,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.ForeldetSykedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.økonomi.grad.prosent,
+        grad = this.grad.prosent,
         other = null,
         melding = null,
         dato = dato,
@@ -260,7 +260,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.SykHelgedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.økonomi.grad.prosent,
+        grad = this.grad.prosent,
         other = null,
         melding = null,
         dato = dato,
@@ -270,7 +270,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.SykedagDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         kilde = this.kilde.tilPersonData(),
-        grad = this.økonomi.grad.prosent,
+        grad = this.grad.prosent,
         other = null,
         melding = null,
         dato = dato,
@@ -280,7 +280,7 @@ private fun SykdomstidslinjeDagDto.tilPersonData() = when (this) {
     is SykdomstidslinjeDagDto.SykedagNavDto -> DagData(
         type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG_NAV,
         kilde = this.kilde.tilPersonData(),
-        grad = this.økonomi.grad.prosent,
+        grad = this.grad.prosent,
         other = null,
         melding = null,
         dato = dato,
@@ -409,22 +409,22 @@ private fun UtbetalingDto.tilPersonData() = PersonData.UtbetalingData(
     personOppdrag = this.personOppdrag.tilPersonData(),
     tidsstempel = this.tidsstempel,
     type = when (this.type) {
-        UtbetalingtypeDto.ANNULLERING -> "ANNULLERING"
-        UtbetalingtypeDto.ETTERUTBETALING -> "ETTERUTBETALING"
-        UtbetalingtypeDto.FERIEPENGER -> "FERIEPENGER"
-        UtbetalingtypeDto.REVURDERING -> "REVURDERING"
-        UtbetalingtypeDto.UTBETALING -> "UTBETALING"
+        UtbetalingtypeDto.ANNULLERING -> PersonData.UtbetalingData.UtbetalingtypeData.ANNULLERING
+        UtbetalingtypeDto.ETTERUTBETALING -> PersonData.UtbetalingData.UtbetalingtypeData.ETTERUTBETALING
+        UtbetalingtypeDto.FERIEPENGER -> PersonData.UtbetalingData.UtbetalingtypeData.FERIEPENGER
+        UtbetalingtypeDto.REVURDERING -> PersonData.UtbetalingData.UtbetalingtypeData.REVURDERING
+        UtbetalingtypeDto.UTBETALING -> PersonData.UtbetalingData.UtbetalingtypeData.UTBETALING
     },
     status = when (this.tilstand) {
-        UtbetalingTilstandDto.ANNULLERT -> "ANNULLERT"
-        UtbetalingTilstandDto.FORKASTET -> "FORKASTET"
-        UtbetalingTilstandDto.GODKJENT -> "GODKJENT"
-        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> "GODKJENT_UTEN_UTBETALING"
-        UtbetalingTilstandDto.IKKE_GODKJENT -> "IKKE_GODKJENT"
-        UtbetalingTilstandDto.IKKE_UTBETALT -> "IKKE_UTBETALT"
-        UtbetalingTilstandDto.NY -> "NY"
-        UtbetalingTilstandDto.OVERFØRT -> "OVERFØRT"
-        UtbetalingTilstandDto.UTBETALT -> "UTBETALT"
+        UtbetalingTilstandDto.ANNULLERT -> PersonData.UtbetalingData.UtbetalingstatusData.ANNULLERT
+        UtbetalingTilstandDto.FORKASTET -> PersonData.UtbetalingData.UtbetalingstatusData.FORKASTET
+        UtbetalingTilstandDto.GODKJENT -> PersonData.UtbetalingData.UtbetalingstatusData.GODKJENT
+        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> PersonData.UtbetalingData.UtbetalingstatusData.GODKJENT_UTEN_UTBETALING
+        UtbetalingTilstandDto.IKKE_GODKJENT -> PersonData.UtbetalingData.UtbetalingstatusData.IKKE_GODKJENT
+        UtbetalingTilstandDto.IKKE_UTBETALT -> PersonData.UtbetalingData.UtbetalingstatusData.IKKE_UTBETALT
+        UtbetalingTilstandDto.NY -> PersonData.UtbetalingData.UtbetalingstatusData.NY
+        UtbetalingTilstandDto.OVERFØRT -> PersonData.UtbetalingData.UtbetalingstatusData.OVERFØRT
+        UtbetalingTilstandDto.UTBETALT -> PersonData.UtbetalingData.UtbetalingstatusData.UTBETALT
     },
     maksdato = this.maksdato,
     forbrukteSykedager = this.forbrukteSykedager,
@@ -534,11 +534,11 @@ private fun OppdragDto.tilPersonData() = PersonData.OppdragData(
     nettoBeløp = this.nettoBeløp,
     avstemmingsnøkkel = this.avstemmingsnøkkel,
     status = when (this.status) {
-        OppdragstatusDto.AKSEPTERT -> Oppdragstatus.AKSEPTERT
-        OppdragstatusDto.AKSEPTERT_MED_FEIL -> Oppdragstatus.AKSEPTERT_MED_FEIL
-        OppdragstatusDto.AVVIST -> Oppdragstatus.AVVIST
-        OppdragstatusDto.FEIL -> Oppdragstatus.FEIL
-        OppdragstatusDto.OVERFØRT -> Oppdragstatus.OVERFØRT
+        OppdragstatusDto.AKSEPTERT -> PersonData.OppdragData.OppdragstatusData.AKSEPTERT
+        OppdragstatusDto.AKSEPTERT_MED_FEIL -> PersonData.OppdragData.OppdragstatusData.AKSEPTERT_MED_FEIL
+        OppdragstatusDto.AVVIST -> PersonData.OppdragData.OppdragstatusData.AVVIST
+        OppdragstatusDto.FEIL -> PersonData.OppdragData.OppdragstatusData.FEIL
+        OppdragstatusDto.OVERFØRT -> PersonData.OppdragData.OppdragstatusData.OVERFØRT
         null -> null
     },
     overføringstidspunkt = this.overføringstidspunkt,
@@ -781,8 +781,8 @@ private fun InntektsopplysningDto.tilPersonData() = PersonData.VilkårsgrunnlagE
     },
     tidsstempel = this.tidsstempel,
     overstyrtInntektId = when (this) {
-        is InntektsopplysningDto.SaksbehandlerDto -> this.overstyrtInntekt.id
-        is InntektsopplysningDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt.id
+        is InntektsopplysningDto.SaksbehandlerDto -> this.overstyrtInntekt
+        is InntektsopplysningDto.SkjønnsmessigFastsattDto -> this.overstyrtInntekt
         else -> null
     },
     skatteopplysninger = when (this) {
@@ -823,15 +823,15 @@ private fun SkatteopplysningDto.tilPersonData() =
         beskrivelse = beskrivelse,
         tidsstempel = tidsstempel
     )
-private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData(
+private fun SkatteopplysningDto.tilPersonDataSkattopplysning() = SkatteopplysningData(
     hendelseId = this.hendelseId,
     beløp = this.beløp.beløp,
     måned = this.måned,
     type = when (this.type) {
-        InntekttypeDto.LØNNSINNTEKT -> "LØNNSINNTEKT"
-        InntekttypeDto.NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
-        InntekttypeDto.PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
-        InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
+        InntekttypeDto.LØNNSINNTEKT -> SkatteopplysningData.InntekttypeData.LØNNSINNTEKT
+        InntekttypeDto.NÆRINGSINNTEKT -> SkatteopplysningData.InntekttypeData.NÆRINGSINNTEKT
+        InntekttypeDto.PENSJON_ELLER_TRYGD -> SkatteopplysningData.InntekttypeData.PENSJON_ELLER_TRYGD
+        InntekttypeDto.YTELSE_FRA_OFFENTLIGE -> SkatteopplysningData.InntekttypeData.YTELSE_FRA_OFFENTLIGE
     },
     fordel = fordel,
     beskrivelse = beskrivelse,

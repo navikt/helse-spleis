@@ -9,6 +9,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.dto.PersonDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode

@@ -70,15 +70,15 @@ sealed class SykdomstidslinjeDagDto {
 
     data class UkjentDagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
     data class ArbeidsdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
-    data class ArbeidsgiverdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val økonomi: ØkonomiDto) : SykdomstidslinjeDagDto()
+    data class ArbeidsgiverdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
     data class FeriedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
     data class ArbeidIkkeGjenopptattDagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
     data class FriskHelgedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
-    data class ArbeidsgiverHelgedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val økonomi: ØkonomiDto) : SykdomstidslinjeDagDto()
-    data class SykedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val økonomi: ØkonomiDto) : SykdomstidslinjeDagDto()
-    data class SykHelgedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val økonomi: ØkonomiDto) : SykdomstidslinjeDagDto()
-    data class SykedagNavDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val økonomi: ØkonomiDto) : SykdomstidslinjeDagDto()
-    data class ForeldetSykedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val økonomi: ØkonomiDto) : SykdomstidslinjeDagDto()
+    data class ArbeidsgiverHelgedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
+    data class SykedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
+    data class SykHelgedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
+    data class SykedagNavDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
+    data class ForeldetSykedagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val grad: ProsentdelDto) : SykdomstidslinjeDagDto()
     data class PermisjonsdagDto(override val dato: LocalDate, override val kilde: HendelseskildeDto) : SykdomstidslinjeDagDto()
     data class ProblemDagDto(
         override val dato: LocalDate,
@@ -292,7 +292,7 @@ sealed class InntektsopplysningDto {
         override val tidsstempel: LocalDateTime,
         val forklaring: String?,
         val subsumsjon: SubsumsjonDto?,
-        val overstyrtInntekt: InntektsopplysningDto,
+        val overstyrtInntekt: UUID,
     ) : InntektsopplysningDto()
 
     data class SkjønnsmessigFastsattDto(
@@ -301,7 +301,7 @@ sealed class InntektsopplysningDto {
         override val dato: LocalDate,
         override val beløp: InntektDto.MånedligDouble,
         override val tidsstempel: LocalDateTime,
-        val overstyrtInntekt: InntektsopplysningDto,
+        val overstyrtInntekt: UUID,
     ) : InntektsopplysningDto()
 
     data class InntektsmeldingDto(

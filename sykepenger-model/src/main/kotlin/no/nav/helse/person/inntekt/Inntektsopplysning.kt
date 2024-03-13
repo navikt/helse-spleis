@@ -17,7 +17,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.hendelser.Inntektsmelding as InntektsmeldingHendelse
 
-abstract class Inntektsopplysning protected constructor(
+sealed class Inntektsopplysning protected constructor(
     protected val id: UUID,
     protected val hendelseId: UUID,
     protected val dato: LocalDate,

@@ -122,7 +122,7 @@ class Saksbehandler internal constructor(
             tidsstempel = tidsstempel,
             forklaring = forklaring,
             subsumsjon = subsumsjon?.dto(),
-            overstyrtInntekt = overstyrtInntekt?.dto()!!
+            overstyrtInntekt = overstyrtInntekt!!.dto().id
         )
 
     internal companion object {
@@ -137,7 +137,7 @@ class Saksbehandler internal constructor(
                 tidsstempel = dto.tidsstempel,
                 forklaring = dto.forklaring,
                 subsumsjon = dto.subsumsjon?.let { Subsumsjon.gjenopprett(it) },
-                overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt.id)
+                overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt)
             )
     }
 }

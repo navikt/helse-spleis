@@ -63,7 +63,7 @@ class SkjønnsmessigFastsatt internal constructor(
             dato = dato,
             beløp = beløp.dtoMånedligDouble(),
             tidsstempel = tidsstempel,
-            overstyrtInntekt = overstyrtInntekt?.dto()!!
+            overstyrtInntekt = overstyrtInntekt!!.dto().id
         )
 
     internal companion object {
@@ -74,7 +74,7 @@ class SkjønnsmessigFastsatt internal constructor(
                 dato = dto.dato,
                 beløp = Inntekt.gjenopprett(dto.beløp),
                 tidsstempel = dto.tidsstempel,
-                overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt.id)
+                overstyrtInntekt = inntekter.getValue(dto.overstyrtInntekt)
             )
     }
 }
