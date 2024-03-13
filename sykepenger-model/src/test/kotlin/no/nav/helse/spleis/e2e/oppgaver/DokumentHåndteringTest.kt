@@ -1,36 +1,26 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
 import java.util.UUID
-import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Dokumentsporing.Companion.ider
-import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forkastAlle
-import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -38,13 +28,10 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
-import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -133,6 +120,29 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             assertEquals(id, it.inntektsmeldingId)
             assertEquals(listOf(1.januar til 16.januar), it.overlappendeSykmeldingsperioder)
         }
+    }
+
+    @Test
+    fun `Inntektsmelding før søknad med kort gap`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
+        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar)
+        val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
+        inntektsmeldingFørSøknadEvent.let {
+            assertEquals(id, it.inntektsmeldingId)
+            assertEquals(listOf(20.januar til 20.januar), it.overlappendeSykmeldingsperioder)
+        }
+    }
+
+    @Test
+    fun `Inntektsmelding før forlengelse-søknad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
+        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
+        assertEquals(id, inntektsmelding)
     }
 
     @Test
