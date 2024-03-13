@@ -950,10 +950,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
-    internal fun sykefraværsfortelling(list: List<Sykefraværstilfelleeventyr>) =
-        vedtaksperioder.fold(list) { input, vedtaksperiode ->
-            vedtaksperiode.sykefraværsfortelling(input)
-        }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

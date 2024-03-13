@@ -104,7 +104,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         ))
 
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
-        historikk.oppdaterHistorikk(Aktivitetslogg(), sykefraværstilfeller(nyttSkjæringstidspunkt))
+        historikk.oppdaterHistorikk(Aktivitetslogg(), setOf(nyttSkjæringstidspunkt))
 
         assertEquals(2, historikk.inspektør.vilkårsgrunnlagTeller.size)
         assertEquals(0, historikk.inspektør.vilkårsgrunnlagTeller[0]) { "det siste innslaget skal være tomt" }
@@ -552,11 +552,4 @@ internal class VilkårsgrunnlagHistorikkTest {
             )
         )
     }
-
-    private fun sykefraværstilfeller(vararg dato: LocalDate) =
-        dato.map {
-            Sykefraværstilfelleeventyr(it, listOf(
-                Triple(UUID.randomUUID(), "orgnr", 1.januar til 31.januar)
-            ))
-        }
 }

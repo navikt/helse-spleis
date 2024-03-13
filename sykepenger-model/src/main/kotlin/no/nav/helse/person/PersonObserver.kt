@@ -20,7 +20,7 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
-interface PersonObserver : SykefraværstilfelleeventyrObserver {
+interface PersonObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
         val fødselsnummer: String,
         val aktørId: String,

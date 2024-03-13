@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
+import no.nav.helse.dto.PersonDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -43,7 +44,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.dto.PersonDto
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
@@ -60,7 +60,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
-import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.varsleObservers
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -284,15 +283,8 @@ class Person private constructor(
     }
 
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
-        val skjæringstidspunkterFørEndring = skjæringstidspunkter()
         hendelse.kontekst(aktivitetslogg, this)
         oppdatertHistorikk(infotrygdhistorikk)
-        val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
-        if (!skjæringstidspunkterEtterEndring.containsAll(skjæringstidspunkterFørEndring)) {
-            arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
-                arbeidsgiver.sykefraværsfortelling(acc)
-            }.varsleObservers(observers)
-        }
         arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
         infotrygdhistorikk.overlappendeInfotrygdperioder(this, alleVedtaksperioder)
@@ -699,10 +691,8 @@ class Person private constructor(
     }
 
     internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
-        val sykefraværstilfeller = arbeidsgivere.fold(skjæringstidspunkter().map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
-            arbeidsgiver.sykefraværsfortelling(acc)
-        }.varsleObservers(observers)
-        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller)
+        val skjæringstidspunkter = skjæringstidspunkter().toSet()
+        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter)
     }
 
     internal fun søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter) {

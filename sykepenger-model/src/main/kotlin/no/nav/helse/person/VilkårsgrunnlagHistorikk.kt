@@ -4,6 +4,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder
+import no.nav.helse.dto.MedlemskapsvurderingDto
+import no.nav.helse.dto.SykepengegrunnlagDto
+import no.nav.helse.dto.VilkårsgrunnlagDto
+import no.nav.helse.dto.VilkårsgrunnlagInnslagDto
+import no.nav.helse.dto.VilkårsgrunnlaghistorikkDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.forrigeDag
@@ -16,12 +21,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.MedlemskapsvurderingDto
-import no.nav.helse.dto.SykepengegrunnlagDto
-import no.nav.helse.dto.VilkårsgrunnlagInnslagDto
-import no.nav.helse.dto.VilkårsgrunnlagDto
-import no.nav.helse.dto.VilkårsgrunnlaghistorikkDto
-import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.erAktivtSkjæringstidspunkt
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
@@ -76,7 +75,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
     }
 
-    internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: List<Sykefraværstilfelleeventyr>) {
+    internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>) {
         val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller) ?: return
         if (nyttInnslag == sisteInnlag()) return
         historikk.add(0, nyttInnslag)
@@ -182,15 +181,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return this.vilkårsgrunnlag == other.vilkårsgrunnlag
         }
 
-        internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: List<Sykefraværstilfelleeventyr>): Innslag {
+        internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, sykefraværstilfeller: Set<LocalDate>): Innslag {
             val gyldigeVilkårsgrunnlag = beholdAktiveSkjæringstidspunkter(sykefraværstilfeller)
             val diff = this.vilkårsgrunnlag.size - gyldigeVilkårsgrunnlag.size
             if (diff > 0) aktivitetslogg.info("Fjernet $diff vilkårsgrunnlagselementer")
             return Innslag(gyldigeVilkårsgrunnlag)
         }
 
-        private fun beholdAktiveSkjæringstidspunkter(sykefraværstilfeller: List<Sykefraværstilfelleeventyr>): Map<LocalDate, VilkårsgrunnlagElement> {
-            return vilkårsgrunnlag.filter { (dato, _) -> sykefraværstilfeller.erAktivtSkjæringstidspunkt(dato) }
+        private fun beholdAktiveSkjæringstidspunkter(sykefraværstilfeller: Set<LocalDate>): Map<LocalDate, VilkårsgrunnlagElement> {
+            return vilkårsgrunnlag.filter { (dato, _) -> dato in sykefraværstilfeller }
         }
 
         internal fun gjennoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?) = vilkårsgrunnlag.values.firstNotNullOfOrNull { it.gjenoppliv(hendelse, vilkårsgrunnlagId, nyttSkjæringstidspunkt) }

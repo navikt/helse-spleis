@@ -9,7 +9,6 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
-import no.nav.helse.person.SykefraværstilfelleeventyrObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spekemat.Spekemat
 import org.junit.jupiter.api.fail
@@ -38,7 +37,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val generasjonLukketEventer = mutableListOf<PersonObserver.GenerasjonLukketEvent>()
     val generasjonForkastetEventer = mutableListOf<PersonObserver.GenerasjonForkastetEvent>()
     val avsluttetUtenVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetUtenVedtakEvent>>()
-    val sykefraværstilfelleeventyr = mutableListOf<List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>>()
     val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
     val vedtaksperiodeVenter = mutableListOf<PersonObserver.VedtaksperiodeVenterEvent>()
     val inntektsmeldingFørSøknad = mutableListOf<PersonObserver.InntektsmeldingFørSøknadEvent>()
@@ -86,10 +84,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     fun forkastedePerioder() = forkastedeEventer.size
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
-
-    override fun sykefraværstilfelle(sykefraværstilfeller: List<SykefraværstilfelleeventyrObserver.SykefraværstilfelleeventyrObserverEvent>) {
-        this.sykefraværstilfelleeventyr.add(sykefraværstilfeller)
-    }
 
     override fun avstemt(result: Map<String, Any>) {
         avstemming = result

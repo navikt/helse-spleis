@@ -45,7 +45,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkår
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
-import no.nav.helse.person.Sykefraværstilfelleeventyr.Companion.bliMed
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -1155,9 +1154,6 @@ internal class Vedtaksperiode private constructor(
         }
         return null
     }
-
-    internal fun sykefraværsfortelling(list: List<Sykefraværstilfelleeventyr>) =
-        list.bliMed(this.id, this.organisasjonsnummer, this.periode, this.skjæringstidspunkt)
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
