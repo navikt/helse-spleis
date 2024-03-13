@@ -66,6 +66,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val behandlingstid = Histogram.build("behandlingstid_seconds", "hvor lang tid spleis bruker på behandling av en melding")
             .labelNames("river_name", "event_name")
+            .buckets(0.05, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 10.0, 20.0, 60.0, 120.0)
             .register()
     }
 }
