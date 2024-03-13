@@ -71,7 +71,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -287,14 +286,14 @@ class Person private constructor(
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
         val skjæringstidspunkterFørEndring = skjæringstidspunkter()
         hendelse.kontekst(aktivitetslogg, this)
-        val historikkenBleOppdatert = oppdatertHistorikk(infotrygdhistorikk)
+        oppdatertHistorikk(infotrygdhistorikk)
         val skjæringstidspunkterEtterEndring = skjæringstidspunkter()
         if (!skjæringstidspunkterEtterEndring.containsAll(skjæringstidspunkterFørEndring)) {
             arbeidsgivere.fold(skjæringstidspunkterEtterEndring.map { Sykefraværstilfelleeventyr(it) }) { acc, arbeidsgiver ->
                 arbeidsgiver.sykefraværsfortelling(acc)
             }.varsleObservers(observers)
         }
-        arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk, historikkenBleOppdatert)
+        arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
         infotrygdhistorikk.overlappendeInfotrygdperioder(this, alleVedtaksperioder)
         håndterGjenoppta(hendelse)
@@ -598,30 +597,6 @@ class Person private constructor(
         observers.forEach { it.overstyringIgangsatt(event) }
     }
 
-    internal fun emitOverlappendeInfotrygdperiodeEtterInfotrygdendring(
-        vedtaksperiodeId: UUID,
-        vedtaksperiode: Periode,
-        vedtaksperiodetilstand: String,
-        organisasjonsnummer: String,
-        overlappendeInfotrygdPerioder: List<Infotrygdperiode>,
-        hendelseId: UUID?,
-        historikkenBleOppdatert: Boolean
-    ) {
-        val event = PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            vedtaksperiodeFom = vedtaksperiode.start,
-            vedtaksperiodeTom = vedtaksperiode.endInclusive,
-            vedtaksperiodetilstand = vedtaksperiodetilstand,
-            infotrygdhistorikkHendelseId = hendelseId.toString(),
-            infotrygdperioder = overlappendeInfotrygdPerioder.mapNotNull {
-                PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.InfotrygdperiodeBuilder(it).infotrygdperiode
-            }
-        )
-
-        observers.forEach { it.overlappendeInfotrygdperiodeEtterInfotrygdendring(event) }
-    }
-
     internal fun emitOverlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
         observers.forEach {it.overlappendeInfotrygdperioder(event)}
     }
@@ -643,8 +618,7 @@ class Person private constructor(
         hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
         vedtaksperiode.håndterHistorikkFraInfotrygd(
             hendelse = hendelse,
-            infotrygdhistorikk = infotrygdhistorikk,
-            historikkenBleOppdatert = false
+            infotrygdhistorikk = infotrygdhistorikk
         )
     }
 

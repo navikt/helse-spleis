@@ -138,17 +138,6 @@ internal class Infotrygdhistorikk private constructor(
         val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder(organisasjonsnummer), infotrygdkilde) else builder
         build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver, infotrygdkilde)
     }
-    internal fun utbetalingshistorikkEtterInfotrygdendring(
-        vedtaksperiodeId: UUID,
-        vedtaksperiode: Periode,
-        tilstand: String,
-        organisasjonsnummer: String,
-        person: Person,
-        historikkenBleOppdatert: Boolean
-    ) {
-        if (!harHistorikk()) return
-        siste.utbetalingshistorikkEtterInfotrygdendring(vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, person, historikkenBleOppdatert)
-    }
 
 
     private fun harHistorikk() = elementer.isNotEmpty()

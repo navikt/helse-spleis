@@ -68,7 +68,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         nullstillTilstandsendringer()
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, varselkode = RV_IT_3)
-        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
+        assertIngenOverlappendeInfotrygdutbetaling()
     }
 
     @Test
@@ -79,7 +79,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVVENTER_INNTEKTSMELDING")
     }
 
     @Test
@@ -92,7 +92,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVVENTER_BLOKKERENDE_PERIODE")
     }
 
     @Test
@@ -104,7 +104,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertVarsel(RV_IT_38, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVVENTER_BLOKKERENDE_PERIODE")
     }
 
     @Test
@@ -115,7 +115,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.januar, 20.januar, 100.prosent, INNTEKT))
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, varselkode = RV_IT_3)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
+        assertIngenOverlappendeInfotrygdutbetaling()
     }
 
     @Test
@@ -129,7 +129,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertVarsel(RV_IT_3)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode)
+        assertOverlappendeInfotrygdutbetalingIAUU(1.vedtaksperiode, "AVVENTER_BLOKKERENDE_PERIODE")
     }
 
     @Test
@@ -167,13 +167,14 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
     }
 
-    private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiode: IdInnhenter) {
-        val overlapp = observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.single()
-        assertEquals(vedtaksperiode.id(ORGNUMMER), overlapp.vedtaksperiodeId)
-        assertEquals("AVSLUTTET_UTEN_UTBETALING", overlapp.vedtaksperiodetilstand)
+    private fun assertOverlappendeInfotrygdutbetalingIAUU(vedtaksperiode: IdInnhenter, tilstand: String) {
+        val overlapp = observatør.overlappendeInfotrygdperioder.last()
+        val vedtaksperiodeId = vedtaksperiode.id(ORGNUMMER)
+        assertEquals(vedtaksperiodeId, overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodeId)
+        assertEquals(tilstand, overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodetilstand)
     }
 
     private fun assertIngenOverlappendeInfotrygdutbetaling() {
-        assertTrue(observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.isEmpty())
+        assertTrue(observatør.overlappendeInfotrygdperioder.all { it.overlappendeInfotrygdperioder.isEmpty() })
     }
 }

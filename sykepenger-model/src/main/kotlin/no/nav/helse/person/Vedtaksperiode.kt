@@ -349,16 +349,8 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
     }
 
-    internal fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk, historikkenBleOppdatert: Boolean) {
+    internal fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk) {
         kontekst(hendelse)
-        infotrygdhistorikk.utbetalingshistorikkEtterInfotrygdendring(
-            id,
-            periode,
-            tilstand.type.toString(),
-            organisasjonsnummer,
-            person,
-            historikkenBleOppdatert
-        )
         tilstand.håndter(this, hendelse, infotrygdhistorikk)
     }
 

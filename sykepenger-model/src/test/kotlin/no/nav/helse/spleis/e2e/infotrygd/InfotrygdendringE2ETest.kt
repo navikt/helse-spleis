@@ -8,13 +8,10 @@ import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring.Infotrygdperiode
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.nyPeriode
@@ -35,49 +32,6 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
         val infotrygdHistorikk = person.inspektør.utbetaltIInfotrygd
         assertEquals(1.januar(2016) til 31.januar(2016), infotrygdHistorikk.single())
         assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
-    fun `utgående event om overlappende infotrygdperiode`() {
-        nyPeriode(1.januar til 31.januar)
-        håndterInfotrygdendring()
-        val meldingsreferanseId = håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT))
-        val infotrygdHistorikk = person.inspektør.utbetaltIInfotrygd
-        assertEquals(17.januar til 31.januar, infotrygdHistorikk.single())
-        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertVarsel(RV_IT_3)
-
-        val event = observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.single()
-        val forventet =
-            PersonObserver.OverlappendeInfotrygdperiodeEtterInfotrygdendring(
-                organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = observatør.sisteVedtaksperiodeId(ORGNUMMER),
-                vedtaksperiodeFom = 1.januar,
-                vedtaksperiodeTom = 31.januar,
-                vedtaksperiodetilstand = "AVVENTER_INNTEKTSMELDING",
-                infotrygdhistorikkHendelseId = meldingsreferanseId.toString(),
-                infotrygdperioder = listOf(
-                    Infotrygdperiode(
-                        fom = 17.januar,
-                        tom = 31.januar,
-                        type = "ARBEIDSGIVERUTBETALING",
-                        orgnummer = ORGNUMMER,
-                    )
-                )
-            )
-        assertEquals(forventet, event)
-    }
-
-    @Test
-    fun `ingen overlappende infotrygdperioder`() {
-        nyPeriode(1.januar til 31.januar)
-        håndterInfotrygdendring()
-        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar(2016), 31.januar(2016), 100.prosent, INNTEKT))
-        val infotrygdHistorikk = person.inspektør.utbetaltIInfotrygd
-        assertEquals(17.januar(2016) til 31.januar(2016), infotrygdHistorikk.single())
-        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        val event = observatør.overlappendeInfotrygdperiodeEtterInfotrygdendring.singleOrNull()
-        assertEquals(null, event)
     }
 
     @Test

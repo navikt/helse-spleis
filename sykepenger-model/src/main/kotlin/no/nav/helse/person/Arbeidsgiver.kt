@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import java.sql.Ref
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -142,11 +141,10 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.håndterHistorikkFraInfotrygd(
             hendelse: Hendelse,
-            infotrygdhistorikk: Infotrygdhistorikk,
-            historikkenBleOppdatert: Boolean
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
             forEach { arbeidsgiver ->
-                arbeidsgiver.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk, historikkenBleOppdatert)
+                arbeidsgiver.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
             }
         }
 
@@ -513,11 +511,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndterHistorikkFraInfotrygd(
         hendelse: Hendelse,
-        infotrygdhistorikk: Infotrygdhistorikk,
-        historikkenBleOppdatert: Boolean
+        infotrygdhistorikk: Infotrygdhistorikk
     ) {
         hendelse.kontekst(this)
-        håndter(hendelse) { håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk, historikkenBleOppdatert) }
+        håndter(hendelse) { håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk) }
     }
 
     internal fun håndter(

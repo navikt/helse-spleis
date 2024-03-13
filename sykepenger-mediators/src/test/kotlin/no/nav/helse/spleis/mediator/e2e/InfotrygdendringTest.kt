@@ -56,7 +56,7 @@ internal class InfotrygdendringTest : AbstractEndToEndMediatorTest() {
                 )
             )
         )
-        val overlappendeInfotrygdperiodeEtterInfotrygdendringEvent = testRapid.inspektør.siste("overlappende_infotrygdperiode_etter_infotrygdendring")
+        val overlappendeInfotrygdperiodeEtterInfotrygdendringEvent = testRapid.inspektør.siste("overlappende_infotrygdperioder")
         assertNotNull(overlappendeInfotrygdperiodeEtterInfotrygdendringEvent)
     }
 

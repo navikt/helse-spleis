@@ -3,9 +3,8 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.InfotrygdhistorikkelementDto
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -184,21 +183,6 @@ class InfotrygdhistorikkElement private constructor(
     internal fun erEndretUtbetaling(sisteElementSomFantesFørUtbetaling: InfotrygdhistorikkElement): Boolean {
         if (this === sisteElementSomFantesFørUtbetaling) return false
         return this.perioder != sisteElementSomFantesFørUtbetaling.perioder
-    }
-
-    internal fun utbetalingshistorikkEtterInfotrygdendring(
-        vedtaksperiodeId: UUID,
-        vedtaksperiode: Periode,
-        tilstand: String,
-        organisasjonsnummer: String,
-        person: Person,
-        historikkenBleOppdatert: Boolean
-    ) {
-        val overlappendePerioder : List<Infotrygdperiode> = perioder.filter { it.overlapperMed(vedtaksperiode) }
-        if (overlappendePerioder.isEmpty()) return
-        person.emitOverlappendeInfotrygdperiodeEtterInfotrygdendring(
-            vedtaksperiodeId, vedtaksperiode, tilstand, organisasjonsnummer, overlappendePerioder, hendelseId, historikkenBleOppdatert
-        )
     }
 
     internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
