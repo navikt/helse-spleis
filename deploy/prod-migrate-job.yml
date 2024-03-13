@@ -16,10 +16,6 @@ spec:
     pool: nav-prod
   secureLogs:
     enabled: true
-  observability:
-    autoInstrumentation:
-      enabled: true
-      runtime: java
   envFrom:
     - secret: google-sql-spleis-spleis-spleis-avstemming-c09f6283
     - secret: google-sql-spleis-spleis-spleis-migrate-dc6feb9b
