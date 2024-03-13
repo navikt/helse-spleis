@@ -553,7 +553,7 @@ interface PersonObserver : SykefraværstilfelleeventyrObserver {
 
     data class OverlappendeInfotrygdperioder(
         val overlappendeInfotrygdperioder: List<OverlappendeInfotrygdperiodeEtterInfotrygdendring>,
-        val infotrygdhistorikkHendelseId: String?
+        val infotrygdhistorikkHendelseId: String
     )
 
     data class OverlappendeInfotrygdperiodeEtterInfotrygdendring(

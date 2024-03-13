@@ -176,7 +176,8 @@ internal class PersonMediator(
     override fun overlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
         queueMessage(
             JsonMessage.newMessage(
-                "overlappende_infotrygdperioder", mutableMapOf<String, Any>(
+                "overlappende_infotrygdperioder", mutableMapOf(
+                    "infotrygdhistorikkHendelseId" to event.infotrygdhistorikkHendelseId,
                     "vedtaksperioder" to event.overlappendeInfotrygdperioder.map { it ->
                         mapOf("organisasjonsnummer" to it.organisasjonsnummer,
                             "vedtaksperiodeId" to it.vedtaksperiodeId,
@@ -193,11 +194,7 @@ internal class PersonMediator(
                             }
                         )
                     },
-                ).apply {
-                    compute("infotrygdhistorikkHendelseId") {_,_ ->
-                        event.infotrygdhistorikkHendelseId
-                    }
-                }
+                )
             )
         )
     }

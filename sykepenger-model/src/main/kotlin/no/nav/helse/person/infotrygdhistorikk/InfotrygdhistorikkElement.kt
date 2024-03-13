@@ -230,7 +230,7 @@ class InfotrygdhistorikkElement private constructor(
     )
 
     internal fun overlappendeInfotrygdperioder(person: Person, alleVedtaksperioder: List<Vedtaksperiode>) {
-        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId.toString())) { result, vedtaksperiode ->
+        val event = alleVedtaksperioder.fold(PersonObserver.OverlappendeInfotrygdperioder(emptyList(), hendelseId!!.toString())) { result, vedtaksperiode ->
             vedtaksperiode.overlappendeInfotrygdperioder(result, this.perioder)
         }
         person.emitOverlappendeInfotrygdperioder(event)
