@@ -22,14 +22,6 @@ internal class SkattSykepengegrunnlag private constructor(
 ) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
     internal companion object {
         private const val MAKS_INNTEKT_GAP = 2
-        internal fun ferdigSkattSykepengegrunnlag(
-            id: UUID,
-            hendelseId: UUID,
-            dato: LocalDate,
-            inntektsopplysninger: List<Skatteopplysning>,
-            ansattPerioder: List<AnsattPeriode>,
-            tidsstempel: LocalDateTime
-        ) = SkattSykepengegrunnlag(id, hendelseId, dato, inntektsopplysninger, ansattPerioder, tidsstempel)
 
         internal fun gjenopprett(dto: InntektsopplysningDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
             return SkattSykepengegrunnlag(

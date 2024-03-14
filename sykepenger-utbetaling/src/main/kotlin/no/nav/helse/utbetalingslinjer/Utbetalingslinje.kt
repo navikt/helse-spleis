@@ -40,32 +40,6 @@ class Utbetalingslinje(
                 .size
         }
 
-        fun ferdigUtbetalingslinje(
-            fom: LocalDate,
-            tom: LocalDate,
-            satstype: Satstype,
-            sats: Int,
-            grad: Int?,
-            refFagsystemId: String?,
-            delytelseId: Int,
-            refDelytelseId: Int?,
-            endringskode: Endringskode,
-            klassekode: Klassekode,
-            datoStatusFom: LocalDate?
-        ): Utbetalingslinje = Utbetalingslinje(
-            fom = fom,
-            tom = tom,
-            satstype = satstype,
-            beløp = sats,
-            grad = grad,
-            refFagsystemId = refFagsystemId,
-            delytelseId = delytelseId,
-            refDelytelseId = refDelytelseId,
-            endringskode = endringskode,
-            klassekode = klassekode,
-            datoStatusFom = datoStatusFom
-        )
-
         fun List<Utbetalingslinje>.kobleTil(fagsystemId: String) = map { linje ->
             linje.kopier(refFagsystemId = fagsystemId)
         }

@@ -104,8 +104,8 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             inntektshistorikk = listOf(
-                Inntektsopplysning.ferdigInntektsopplysning(a2, 1.januar, inntekt = INNTEKT, true, null, null),
-                Inntektsopplysning.ferdigInntektsopplysning(a3, 1.januar, inntekt = INNTEKT, true, null, null)
+                Inntektsopplysning(a2, 1.januar, inntekt = INNTEKT, true, null),
+                Inntektsopplysning(a3, 1.januar, inntekt = INNTEKT, true, null)
             )
         )
         håndterYtelser()

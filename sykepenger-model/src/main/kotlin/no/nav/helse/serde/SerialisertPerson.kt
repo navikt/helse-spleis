@@ -186,9 +186,9 @@ import no.nav.helse.serde.migration.V25ManglendeForlengelseFraInfotrygd
 import no.nav.helse.serde.migration.V260ForkasteUtbetalinger
 import no.nav.helse.serde.migration.V261ForkastegamleUtbetalinger
 import no.nav.helse.serde.migration.V262None
-import no.nav.helse.serde.migration.V265FikseVilkårsgrunnlagForVedtaksperioder
 import no.nav.helse.serde.migration.V263None
 import no.nav.helse.serde.migration.V264ForkasteAuuUtbetalinger
+import no.nav.helse.serde.migration.V265FikseVilkårsgrunnlagForVedtaksperioder
 import no.nav.helse.serde.migration.V266FerieUtenSykmeldingTilArbeidIkkeGjenopptatt
 import no.nav.helse.serde.migration.V267SpissetMigreringForÅForkasteUtbetaling
 import no.nav.helse.serde.migration.V268ForkasteVilkårsgrunnlagUtenInntekter
@@ -296,13 +296,6 @@ import no.nav.helse.serde.migration.V98SletterITCacheMedUtbetalingsperioder
 import no.nav.helse.serde.migration.V99LeggerTilSatstypePåUtbetalingslinjene
 import no.nav.helse.serde.migration.V9FjernerGamleSykdomstidslinjer
 import no.nav.helse.serde.migration.migrate
-import org.skyscreamer.jsonassert.JSONCompare
-import org.skyscreamer.jsonassert.JSONCompareMode
-import org.skyscreamer.jsonassert.JSONCompareResult
-import org.slf4j.LoggerFactory
-import kotlin.math.exp
-
-private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
 class SerialisertPerson(val json: String) {
     // Teit kommentar
@@ -622,30 +615,11 @@ class SerialisertPerson(val json: String) {
 
         try {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))
-            return personData.createPerson(jurist, tidligereBehandlinger).also { expectedPerson ->
-                try {
-                    val deserialisertViaDto = Person.gjenopprett(jurist, personData.tilPersonDto(), tidligereBehandlinger)
-                    val expectedJson = serdeObjectMapper.writeValueAsString(expectedPerson.dto())
-                    val actualJson = serdeObjectMapper.writeValueAsString(deserialisertViaDto.dto())
-                    val compareResult = JSONCompare.compareJSON(expectedJson, actualJson, JSONCompareMode.STRICT)
-                    if (compareResult.failed() && !compareResult.kunInfotrygdinntekterfeil()) {
-                        sikkerLogg.error("Ny JSON gir ulikt resultat i forhold til dagens ved deserialisering:\n{}", compareResult.message)
-                    }
-                } catch (err: Exception) {
-                    sikkerLogg.error("Feil ved deserialisering til Person via PersonDTO: {}", err.message, err)
-                }
-            }
+            val dto = personData.tilPersonDto()
+            return Person.gjenopprett(jurist, dto, tidligereBehandlinger)
         } catch (err: Exception) {
             val aktørId = jsonNode.path("aktørId").asText()
             throw DeserializationException("Feil under oversetting til modellobjekter for aktør=$aktørId: ${err.message}", err)
         }
     }
-}
-
-fun JSONCompareResult.kunInfotrygdinntekterfeil(): Boolean {
-    return this.fieldMissing.isEmpty() && this.fieldUnexpected.isEmpty() &&
-            this.fieldFailures.all {
-                (it.field.startsWith("infotrygdhistorikk.elementer") || it.field.startsWith("infotrygdhistorikk["))
-                        && it.field.contains(".inntekter[")
-            }
 }

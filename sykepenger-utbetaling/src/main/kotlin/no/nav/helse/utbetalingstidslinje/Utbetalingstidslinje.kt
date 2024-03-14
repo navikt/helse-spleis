@@ -59,8 +59,6 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
             return Utbetalingsdag.betale(tidslinjer)
         }
 
-        fun ferdigUtbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) = Utbetalingstidslinje(utbetalingsdager.toMutableList())
-
         fun gjenopprett(dto: UtbetalingstidslinjeDto): Utbetalingstidslinje {
             return Utbetalingstidslinje(
                 utbetalingsdager = dto.dager.map { Utbetalingsdag.gjenopprett(it) }.toMutableList()

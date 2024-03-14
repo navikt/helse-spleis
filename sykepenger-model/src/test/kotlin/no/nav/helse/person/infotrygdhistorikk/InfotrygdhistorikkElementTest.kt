@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.august
+import no.nav.helse.dto.InfotrygdhistorikkelementDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -13,7 +14,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -39,20 +39,19 @@ internal class InfotrygdhistorikkElementTest {
     internal companion object {
         private const val ORGNUMMER = "987654321"
         internal fun eksisterendeInfotrygdHistorikkelement(
-            perioder: List<Infotrygdperiode> = emptyList(),
-            inntekter: List<Inntektsopplysning> = emptyList(),
-            arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
             hendelseId: UUID = UUID.randomUUID(),
             oppdatert: LocalDateTime = LocalDateTime.now(),
             tidsstempel: LocalDateTime = LocalDateTime.now()
         ) =
-            InfotrygdhistorikkElement.ferdigElement(
+            InfotrygdhistorikkelementDto(
                 id = UUID.randomUUID(),
                 tidsstempel = tidsstempel,
                 hendelseId = hendelseId,
-                infotrygdperioder = perioder,
-                inntekter = inntekter,
-                arbeidskategorikoder = arbeidskategorikoder,
+                ferieperioder = emptyList(),
+                arbeidsgiverutbetalingsperioder = emptyList(),
+                personutbetalingsperioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
                 oppdatert = oppdatert,
             )
     }

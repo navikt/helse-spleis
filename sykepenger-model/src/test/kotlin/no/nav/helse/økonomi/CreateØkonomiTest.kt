@@ -138,7 +138,7 @@ internal class CreateØkonomiTest {
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
         lateinit var fangetØkonomi: Økonomi
-        dagData.parseDag(1.januar).accept(object : UtbetalingsdagVisitor {
+        dagData.tilDto().map { Utbetalingsdag.gjenopprett(it) }.single().accept(object : UtbetalingsdagVisitor {
             override fun visit(
                 dag: Utbetalingsdag.NavDag,
                 dato: LocalDate,
@@ -152,7 +152,7 @@ internal class CreateØkonomiTest {
 
     private fun createØkonomi(dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData): Økonomi {
         lateinit var fangetØkonomi: Økonomi
-        dagData.parseDag(1.januar).accept(object : SykdomstidslinjeVisitor {
+        dagData.tilDto().map { Dag.gjenopprett(it) }.single().accept(object : SykdomstidslinjeVisitor {
             override fun visitDag(
                 dag: Dag.Sykedag,
                 dato: LocalDate,

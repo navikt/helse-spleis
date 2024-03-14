@@ -663,8 +663,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     }
 
     internal companion object {
-        internal fun ferdigVilkårsgrunnlagHistorikk(innslag: List<Innslag>) =
-            VilkårsgrunnlagHistorikk(innslag.toMutableList())
 
         internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlaghistorikkInnDto, grunnlagsdata: MutableMap<UUID, VilkårsgrunnlagElement>): VilkårsgrunnlagHistorikk {
             val inntekter = mutableMapOf<UUID, Inntektsopplysning>()

@@ -62,33 +62,6 @@ class Oppdrag private constructor(
         fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
         fun harFeil(vararg oppdrag: Oppdrag) = oppdrag.any { it.status in listOf(AVVIST, FEIL) }
         fun kanIkkeForsøkesPåNy(vararg oppdrag: Oppdrag) = oppdrag.any { it.status == AVVIST }
-        fun ferdigOppdrag(
-            mottaker: String,
-            from: Fagområde,
-            utbetalingslinjer: List<Utbetalingslinje>,
-            fagsystemId: String,
-            endringskode: Endringskode,
-            nettoBeløp: Int,
-            overføringstidspunkt: LocalDateTime?,
-            avstemmingsnøkkel: Long?,
-            status: Oppdragstatus?,
-            tidsstempel: LocalDateTime,
-            erSimulert: Boolean,
-            simuleringResultat: SimuleringResultat?
-        ): Oppdrag = Oppdrag(
-            mottaker = mottaker,
-            fagområde = from,
-            linjer = utbetalingslinjer.toMutableList(),
-            fagsystemId = fagsystemId,
-            endringskode = endringskode,
-            nettoBeløp = nettoBeløp,
-            overføringstidspunkt = overføringstidspunkt,
-            avstemmingsnøkkel = avstemmingsnøkkel,
-            status = status,
-            tidsstempel = tidsstempel,
-            erSimulert = erSimulert,
-            simuleringsResultat = simuleringResultat
-        )
 
         internal fun List<Oppdrag>.valider(aktivitetslogg: IAktivitetslogg) {
             if (all { it.nettoBeløp >= 0 }) return

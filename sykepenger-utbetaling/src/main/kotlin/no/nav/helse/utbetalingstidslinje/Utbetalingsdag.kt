@@ -1,10 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.dto.UtbetalingsdagDto
 import no.nav.helse.dto.ØkonomiDto
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.utbetalingslinjer.Beløpkilde
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.betal
@@ -232,7 +232,7 @@ sealed class Utbetalingsdag(
             } ?: tidslinjer
         }
 
-        internal fun gjenopprett(dto: UtbetalingsdagDto): Utbetalingsdag {
+        fun gjenopprett(dto: UtbetalingsdagDto): Utbetalingsdag {
             return when (dto) {
                 is UtbetalingsdagDto.ArbeidsdagDto -> Arbeidsdag.gjenopprett(dto)
                 is UtbetalingsdagDto.ArbeidsgiverperiodeDagDto -> ArbeidsgiverperiodeDag.gjenopprett(dto)

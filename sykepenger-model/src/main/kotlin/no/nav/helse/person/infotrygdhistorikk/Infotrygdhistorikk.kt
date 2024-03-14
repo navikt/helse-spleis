@@ -32,8 +32,6 @@ internal class Infotrygdhistorikk private constructor(
         private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
             tidligsteDato.minusYears(4) til LocalDate.now()
 
-        internal fun ferdigInfotrygdhistorikk(elementer: List<InfotrygdhistorikkElement>) = Infotrygdhistorikk(elementer.map { it }.toMutableList())
-
         internal fun gjenopprett(dto: InfotrygdhistorikkDto): Infotrygdhistorikk {
             return Infotrygdhistorikk(
                 elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()

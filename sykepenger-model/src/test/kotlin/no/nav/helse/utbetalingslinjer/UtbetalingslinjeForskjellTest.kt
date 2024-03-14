@@ -4,6 +4,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.august
+import no.nav.helse.dto.EndringskodeDto
+import no.nav.helse.dto.FagområdeDto
+import no.nav.helse.dto.KlassekodeDto
+import no.nav.helse.dto.SatstypeDto
+import no.nav.helse.dto.deserialisering.OppdragInnDto
+import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -1166,20 +1172,20 @@ internal class UtbetalingslinjeForskjellTest {
 
     private fun linjer(vararg linjer: TestUtbetalingslinje, other: Oppdrag? = null): Oppdrag {
         val fagsystemId = other?.inspektør?.fagsystemId() ?: genererUtbetalingsreferanse(UUID.randomUUID())
-        return Oppdrag.ferdigOppdrag(
+        return Oppdrag.gjenopprett(OppdragInnDto(
             mottaker = ORGNUMMER,
-            from = SykepengerRefusjon,
-            utbetalingslinjer = linjer.toList().tilUtbetalingslinjer(fagsystemId),
+            fagområde = FagområdeDto.SPREF,
+            linjer = linjer.toList().tilUtbetalingslinjerDto(fagsystemId),
             fagsystemId = fagsystemId,
-            endringskode = NY,
+            endringskode = EndringskodeDto.NY,
             nettoBeløp = 0,
             overføringstidspunkt = null,
             avstemmingsnøkkel = null,
             status = null,
             tidsstempel = LocalDateTime.now(),
             erSimulert = false,
-            simuleringResultat = null
-        )
+             simuleringsResultat = null
+        ))
     }
 
     private fun linjer(vararg linjer: Utbetalingslinje): Oppdrag {
@@ -1187,8 +1193,24 @@ internal class UtbetalingslinjeForskjellTest {
         return Oppdrag(ORGNUMMER, SykepengerRefusjon, linjer.toList(), fagsystemId = fagsystemId)
     }
 
-    private fun List<TestUtbetalingslinje>.tilUtbetalingslinjer(fagsystemId: String): List<Utbetalingslinje> {
-        return take(1).map { it.asUtbetalingslinje() } + drop(1).map { it.asUtbetalingslinje(fagsystemId) }
+    private fun List<TestUtbetalingslinje>.tilUtbetalingslinjerDto(fagsystemId: String): List<UtbetalingslinjeInnDto> {
+        return (take(1).map { it.asUtbetalingslinje() } + drop(1).map { it.asUtbetalingslinje(fagsystemId) })
+            .map { it.dto() }
+            .map {
+                UtbetalingslinjeInnDto(
+                    fom = it.fom,
+                    tom = it.tom,
+                    satstype = it.satstype,
+                    beløp = it.beløp,
+                    grad = it.grad,
+                    refFagsystemId = it.refFagsystemId,
+                    delytelseId = it.delytelseId,
+                    refDelytelseId = it.refDelytelseId,
+                    endringskode = it.endringskode,
+                    klassekode = it.klassekode,
+                    datoStatusFom = it.datoStatusFom,
+                )
+            }
     }
 
     private inner class TestUtbetalingslinje(

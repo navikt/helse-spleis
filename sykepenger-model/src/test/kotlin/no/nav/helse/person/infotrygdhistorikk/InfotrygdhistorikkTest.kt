@@ -3,6 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.InfotrygdhistorikkDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.somPeriode
@@ -16,7 +17,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData
-import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.testhelpers.A
@@ -126,10 +126,10 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `tømme historikk - etter lagring av tom inntektliste`() {
-        val historikk = Infotrygdhistorikk.ferdigInfotrygdhistorikk(listOf(
+        val historikk = Infotrygdhistorikk.gjenopprett(InfotrygdhistorikkDto(listOf(
             eksisterendeInfotrygdHistorikkelement(),
             eksisterendeInfotrygdHistorikkelement()
-        ))
+        )))
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -198,20 +198,22 @@ internal class InfotrygdhistorikkTest {
             Friperiode(1.mars,  31.mars)
         )
         val nå = LocalDateTime.now()
-        historikk = listOf(PersonData.InfotrygdhistorikkElementData(
-            id = UUID.randomUUID(),
-            tidsstempel = nå,
-            hendelseId = UUID.randomUUID(),
-            ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
-            arbeidsgiverutbetalingsperioder = listOf(
-                PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar, 100.0, 1154),
-                PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100.0, 1154)
-            ),
-            personutbetalingsperioder = emptyList(),
-            inntekter = emptyList(),
-            arbeidskategorikoder = emptyMap(),
-            oppdatert = nå
-        )).tilModellObjekt()
+        historikk = Infotrygdhistorikk.gjenopprett(InfotrygdhistorikkDto(
+            elementer = listOf(PersonData.InfotrygdhistorikkElementData(
+                id = UUID.randomUUID(),
+                tidsstempel = nå,
+                hendelseId = UUID.randomUUID(),
+                ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
+                arbeidsgiverutbetalingsperioder = listOf(
+                    PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar, 100.0, 1154),
+                    PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar, 100.0, 1154)
+                ),
+                personutbetalingsperioder = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
+                oppdatert = nå
+            ).tilDto())
+        ))
         assertEquals(1, historikk.inspektør.elementer())
         assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder)))
         assertEquals(1, historikk.inspektør.elementer())

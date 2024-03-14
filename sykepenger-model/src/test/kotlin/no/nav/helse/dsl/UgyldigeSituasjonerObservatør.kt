@@ -2,9 +2,9 @@ package no.nav.helse.dsl
 
 import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.overlapper
+import no.nav.helse.inspectors.VedtaksperiodeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.GenerasjonObserver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
@@ -12,8 +12,6 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.arbeidsgiver
-import no.nav.helse.serde.PersonData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver {
 
@@ -150,7 +148,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             .filter { it.tilstand == Vedtaksperiode.AvsluttetUtenUtbetaling }
             .all {
                 it.generasjoner.last().let { sisteGenerasjon ->
-                    sisteGenerasjon.avsluttet != null && sisteGenerasjon.tilstand == TilstandData.AVSLUTTET_UTEN_VEDTAK
+                    sisteGenerasjon.avsluttet != null && sisteGenerasjon.tilstand == VedtaksperiodeInspektør.Generasjon.Generasjontilstand.AVSLUTTET_UTEN_VEDTAK
                 }
             }
     }

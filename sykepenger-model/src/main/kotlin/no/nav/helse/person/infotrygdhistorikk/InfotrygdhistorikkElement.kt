@@ -60,24 +60,6 @@ class InfotrygdhistorikkElement private constructor(
                 oppdatert = oppdatert
             )
 
-        internal fun ferdigElement(
-            id: UUID,
-            tidsstempel: LocalDateTime,
-            hendelseId: UUID?,
-            infotrygdperioder: List<Infotrygdperiode>,
-            inntekter: List<Inntektsopplysning>,
-            arbeidskategorikoder: Map<String, LocalDate>,
-            oppdatert: LocalDateTime
-        ): InfotrygdhistorikkElement = InfotrygdhistorikkElement(
-            id = id,
-            tidsstempel = tidsstempel,
-            hendelseId = hendelseId,
-            perioder = infotrygdperioder,
-            inntekter = inntekter,
-            arbeidskategorikoder = arbeidskategorikoder,
-            oppdatert = oppdatert
-        )
-
         internal fun gjenopprett(dto: InfotrygdhistorikkelementDto): InfotrygdhistorikkElement {
             return InfotrygdhistorikkElement(
                 id = dto.id,

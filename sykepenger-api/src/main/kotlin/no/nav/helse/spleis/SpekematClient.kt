@@ -19,8 +19,10 @@ class SpekematClient(
     private val httpClient: HttpClient = HttpClient.newHttpClient(),
     private val tokenProvider: AzureTokenProvider,
     private val scope: String,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    baseUrl: String? = null
 ) {
+    private val baseUrl = baseUrl ?: "http://spekemat"
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -76,7 +78,7 @@ class SpekematClient(
     private fun lagRequest(fnr: String, callId: String): HttpRequest {
         @Language("JSON")
         val requestBody = """{ "fnr": "$fnr" }"""
-        return HttpRequest.newBuilder(URI("http://spekemat/api/pølser"))
+        return HttpRequest.newBuilder(URI("$baseUrl/api/pølser"))
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
             .header(CALL_ID_HEADER, callId)

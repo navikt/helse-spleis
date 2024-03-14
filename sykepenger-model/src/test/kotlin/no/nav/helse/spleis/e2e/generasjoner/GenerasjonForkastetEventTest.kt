@@ -9,7 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.TIL_INFOTRYGD
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand.TIL_INFOTRYGD
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

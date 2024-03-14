@@ -43,31 +43,6 @@ internal class Feriepengeutbetaling private constructor(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId()) || hendelse.erRelevant(it.personoppdrag.fagsystemId()) }
 
-        internal fun ferdigFeriepengeutbetaling(
-            feriepengeberegner: Feriepengeberegner,
-            infotrygdFeriepengebeløpPerson: Double,
-            infotrygdFeriepengebeløpArbeidsgiver: Double,
-            spleisFeriepengebeløpArbeidsgiver: Double,
-            spleisFeriepengebeløpPerson: Double,
-            oppdrag: Oppdrag,
-            personoppdrag: Oppdrag,
-            utbetalingId: UUID,
-            sendTilOppdrag: Boolean,
-            sendPersonoppdragTilOS: Boolean,
-        ): Feriepengeutbetaling =
-            Feriepengeutbetaling(
-                feriepengeberegner = feriepengeberegner,
-                infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
-                infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
-                spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
-                spleisFeriepengebeløpPerson = spleisFeriepengebeløpPerson,
-                oppdrag = oppdrag,
-                personoppdrag = personoppdrag,
-                utbetalingId = utbetalingId,
-                sendTilOppdrag = sendTilOppdrag,
-                sendPersonoppdragTilOS = sendPersonoppdragTilOS,
-            )
-
         internal fun gjenopprett(alder: Alder, dto: FeriepengeInnDto): Feriepengeutbetaling {
             return Feriepengeutbetaling(
                 feriepengeberegner = Feriepengeberegner.gjenopprett(alder, dto.feriepengeberegner),

@@ -118,20 +118,6 @@ class Sykdomshistorikk private constructor(
                 return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(perioder))
             }
 
-            internal fun ferdigSykdomshistorikkElement(
-                id: UUID,
-                hendelseId: UUID?,
-                tidsstempel: LocalDateTime,
-                hendelseSykdomstidslinje: Sykdomstidslinje,
-                beregnetSykdomstidslinje: Sykdomstidslinje
-            ): Element = Element(
-                id = id,
-                hendelseId = hendelseId,
-                tidsstempel = tidsstempel,
-                hendelseSykdomstidslinje = hendelseSykdomstidslinje,
-                beregnetSykdomstidslinje = beregnetSykdomstidslinje
-            )
-
             internal fun gjenopprett(dto: SykdomshistorikkElementDto): Element {
                 return Element(
                     id = dto.id,
@@ -156,8 +142,6 @@ class Sykdomshistorikk private constructor(
         elementer = elementer.map { it.dto() }
     )
     internal companion object {
-        internal fun ferdigSykdomshistorikk(historikk: List<Element>): Sykdomshistorikk =
-            Sykdomshistorikk(historikk.toMutableList())
 
         internal fun gjenopprett(dto: SykdomshistorikkDto): Sykdomshistorikk {
             return Sykdomshistorikk(

@@ -334,53 +334,6 @@ class Utbetaling private constructor(
         }
 
         fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
-        fun ferdigUtbetaling(
-            id: UUID,
-            korrelasjonsId: UUID,
-            annulleringer: List<Utbetaling>,
-            opprinneligPeriode: Periode,
-            utbetalingstidslinje: Utbetalingstidslinje,
-            arbeidsgiverOppdrag: Oppdrag,
-            personOppdrag: Oppdrag,
-            tidsstempel: LocalDateTime,
-            utbetalingstatus: Utbetalingstatus,
-            utbetalingtype: Utbetalingtype,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?,
-            vurdering: Vurdering?,
-            overføringstidspunkt: LocalDateTime?,
-            avstemmingsnøkkel: Long?,
-            avsluttet: LocalDateTime?,
-            oppdatert: LocalDateTime
-        ): Utbetaling = Utbetaling(
-            id = id,
-            korrelasjonsId = korrelasjonsId,
-            periode = opprinneligPeriode,
-            utbetalingstidslinje = utbetalingstidslinje,
-            arbeidsgiverOppdrag = arbeidsgiverOppdrag,
-            personOppdrag = personOppdrag,
-            tidsstempel = tidsstempel,
-            tilstand = utbetalingstatus.tilTilstand(),
-            type = utbetalingtype,
-            maksdato = maksdato,
-            forbrukteSykedager = forbrukteSykedager,
-            gjenståendeSykedager = gjenståendeSykedager,
-            annulleringer = annulleringer,
-            vurdering = vurdering,
-            overføringstidspunkt = overføringstidspunkt,
-            avstemmingsnøkkel = avstemmingsnøkkel,
-            avsluttet = avsluttet,
-            oppdatert = oppdatert
-        )
-
-        fun ferdigVurdering(
-            godkjent: Boolean,
-            ident: String,
-            epost: String,
-            tidspunkt: LocalDateTime,
-            automatiskBehandling: Boolean
-        ): Vurdering = Vurdering(godkjent, ident, epost, tidspunkt, automatiskBehandling)
 
         // kan forkaste dersom ingen utbetalinger er utbetalt/in flight, eller de er annullert
         fun kanForkastes(vedtaksperiodeUtbetalinger: List<Utbetaling>, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {

@@ -51,8 +51,6 @@ internal class Feriepengeberegner(
     private val utbetalteDager: List<UtbetaltDag>
 ) {
     internal companion object {
-        internal fun ferdigFeriepengeberegner(alder: Alder, opptjeningsår: Year, utbetalteDager: List<UtbetaltDag>): Feriepengeberegner =
-            Feriepengeberegner(alder, opptjeningsår, utbetalteDager)
 
         internal fun gjenopprett(alder: Alder, dto: FeriepengeberegnerDto) =
             Feriepengeberegner(

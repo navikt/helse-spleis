@@ -5,12 +5,12 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Generasjoner
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.serde.PersonData
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -42,11 +42,14 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         val id: UUID,
         val endringer: List<Generasjonendring>,
         val periode: Periode,
-        val tilstand: PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData,
+        val tilstand: Generasjontilstand,
         val vedtakFattet: LocalDateTime?,
         val avsluttet: LocalDateTime?,
         val kilde: Generasjonkilde
     ) {
+        internal enum class Generasjontilstand {
+            UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING, VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD
+        }
         data class Generasjonendring(
             val grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
             val utbetaling: Utbetaling?,
@@ -93,7 +96,20 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
             id = id,
             endringer = emptyList(),
             periode = periode,
-            tilstand = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.tilEnum(tilstand),
+            tilstand = when (tilstand) {
+                is Generasjoner.Generasjon.Tilstand.Uberegnet -> Generasjontilstand.BEREGNET
+                is Generasjoner.Generasjon.Tilstand.UberegnetOmgjøring -> Generasjontilstand.UBEREGNET_OMGJØRING
+                is Generasjoner.Generasjon.Tilstand.UberegnetRevurdering -> Generasjontilstand.UBEREGNET_REVURDERING
+                is Generasjoner.Generasjon.Tilstand.Beregnet -> Generasjontilstand.BEREGNET
+                is Generasjoner.Generasjon.Tilstand.BeregnetOmgjøring -> Generasjontilstand.BEREGNET_OMGJØRING
+                is Generasjoner.Generasjon.Tilstand.BeregnetRevurdering -> Generasjontilstand.BEREGNET_REVURDERING
+                is Generasjoner.Generasjon.Tilstand.VedtakFattet -> Generasjontilstand.VEDTAK_FATTET
+                is Generasjoner.Generasjon.Tilstand.VedtakIverksatt -> Generasjontilstand.VEDTAK_IVERKSATT
+                is Generasjoner.Generasjon.Tilstand.RevurdertVedtakAvvist -> Generasjontilstand.REVURDERT_VEDTAK_AVVIST
+                is Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtak -> Generasjontilstand.AVSLUTTET_UTEN_VEDTAK
+                is Generasjoner.Generasjon.Tilstand.TilInfotrygd -> Generasjontilstand.TIL_INFOTRYGD
+                is Generasjoner.Generasjon.Tilstand.AnnullertPeriode -> Generasjontilstand.ANNULLERT_PERIODE
+            },
             vedtakFattet = vedtakFattet,
             avsluttet = avsluttet,
             kilde = Generasjon.Generasjonkilde(

@@ -2660,32 +2660,6 @@ internal class Vedtaksperiode private constructor(
             return Periode(fom, tom)
         }
 
-        internal fun ferdigVedtaksperiode(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            id: UUID,
-            aktørId: String,
-            fødselsnummer: String,
-            organisasjonsnummer: String,
-            tilstand: Vedtaksperiodetilstand,
-            generasjoner: Generasjoner,
-            opprettet: LocalDateTime,
-            oppdatert: LocalDateTime,
-            medOrganisasjonsnummer: MaskinellJurist
-        ): Vedtaksperiode = Vedtaksperiode(
-            person = person,
-            arbeidsgiver = arbeidsgiver,
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            tilstand = tilstand,
-            generasjoner = generasjoner,
-            opprettet = opprettet,
-            oppdatert = oppdatert,
-            arbeidsgiverjurist = medOrganisasjonsnummer
-        )
-
         private fun List<Vedtaksperiode>.manglendeUtbetalingsopplysninger(dag: LocalDate, melding: String) {
             val vedtaksperiode = firstOrNull { dag in it.periode } ?: return
 

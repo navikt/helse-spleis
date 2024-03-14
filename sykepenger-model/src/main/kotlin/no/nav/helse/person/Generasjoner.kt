@@ -3,14 +3,14 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.serialisering.GenerasjonUtDto
-import no.nav.helse.dto.serialisering.GenerasjonEndringUtDto
 import no.nav.helse.dto.GenerasjonTilstandDto
-import no.nav.helse.dto.serialisering.GenerasjonerUtDto
 import no.nav.helse.dto.GenerasjonkildeDto
 import no.nav.helse.dto.deserialisering.GenerasjonEndringInnDto
 import no.nav.helse.dto.deserialisering.GenerasjonInnDto
 import no.nav.helse.dto.deserialisering.GenerasjonerInnDto
+import no.nav.helse.dto.serialisering.GenerasjonEndringUtDto
+import no.nav.helse.dto.serialisering.GenerasjonUtDto
+import no.nav.helse.dto.serialisering.GenerasjonerUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Avsender
@@ -48,8 +48,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 internal class Generasjoner private constructor(generasjoner: List<Generasjon>) {
     internal constructor() : this(emptyList())
     companion object {
-        // for PersonData
-        fun ferdigGenerasjoner(generasjoner: List<Generasjon>) = Generasjoner(generasjoner)
         fun gjenopprett(dto: GenerasjonerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner(
             generasjoner = dto.generasjoner.map { Generasjon.gjenopprett(it, grunnlagsdata, utbetalinger) }
         )
@@ -818,10 +816,6 @@ enum class Periodetilstand {
                     avsluttet = null,
                     kilde = Generasjonkilde(søknad)
                 )
-            // for PersonData
-            fun ferdigGenerasjon(id: UUID, tilstand: Tilstand, endringer: MutableList<Endring>, vedtakFattet: LocalDateTime?, avsluttet: LocalDateTime?, kilde: Generasjonkilde) =
-                Generasjon(id, tilstand, endringer, vedtakFattet, avsluttet, kilde, emptyList())
-
             fun List<Generasjon>.jurist(jurist: MaskinellJurist, vedtaksperiodeId: UUID) =
                 jurist.medVedtaksperiode(vedtaksperiodeId, dokumentsporing.tilSubsumsjonsformat(), sykmeldingsperiode)
 

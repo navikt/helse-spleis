@@ -433,12 +433,6 @@ internal class Sykdomstidslinje private constructor(
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
             )
 
-        internal fun ferdigSykdomstidslinje(
-            dager: Map<LocalDate, Dag>,
-            periode: Periode?,
-            perioder: List<Periode>
-        ): Sykdomstidslinje = Sykdomstidslinje(dager.toSortedMap(), periode, perioder.map{it}.toMutableList())
-
         internal fun gjenopprett(dto: SykdomstidslinjeDto): Sykdomstidslinje {
             return Sykdomstidslinje(
                 dager = dto.dager.associate { it.dato to Dag.gjenopprett(it) }.toSortedMap(),

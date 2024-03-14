@@ -36,14 +36,13 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.PersonData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.REVURDERT_VEDTAK_AVVIST
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.TIL_INFOTRYGD
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.UBEREGNET_REVURDERING
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_IVERKSATT
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand.REVURDERT_VEDTAK_AVVIST
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand.TIL_INFOTRYGD
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand.UBEREGNET_REVURDERING
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand.VEDTAK_FATTET
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand.VEDTAK_IVERKSATT
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
@@ -348,7 +347,7 @@ internal class GenerasjonerE2ETest : AbstractDslTest() {
                 assertEquals(1, generasjoner.size)
                 generasjoner[0].also { generasjon ->
                     assertEquals(5, generasjon.endringer.size)
-                    assertEquals(PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.BEREGNET, generasjon.tilstand)
+                    assertEquals(no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand.BEREGNET, generasjon.tilstand)
                 }
             }
         }
