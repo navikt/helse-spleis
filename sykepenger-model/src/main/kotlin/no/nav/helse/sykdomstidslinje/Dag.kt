@@ -58,6 +58,25 @@ internal sealed class Dag(
             if (høyre is UkjentDag) venstre
             else høyre
         }
+
+        fun gjenopprett(dag: SykdomstidslinjeDagDto): Dag {
+            return when (dag) {
+                is SykdomstidslinjeDagDto.AndreYtelserDto -> AndreYtelser.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto -> ArbeidIkkeGjenopptattDag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.ArbeidsdagDto -> Arbeidsdag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto -> ArbeidsgiverHelgedag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.ArbeidsgiverdagDto -> Arbeidsgiverdag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.FeriedagDto -> Feriedag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.ForeldetSykedagDto -> ForeldetSykedag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.FriskHelgedagDto -> FriskHelgedag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.PermisjonsdagDto -> Permisjonsdag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.ProblemDagDto -> ProblemDag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.SykHelgedagDto -> SykHelgedag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.SykedagDto -> Sykedag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.SykedagNavDto -> SykedagNav.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.UkjentDagDto -> UkjentDag.gjenopprett(dag)
+            }
+        }
     }
 
     internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)

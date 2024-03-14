@@ -441,7 +441,7 @@ internal class Sykdomstidslinje private constructor(
 
         internal fun gjenopprett(dto: SykdomstidslinjeDto): Sykdomstidslinje {
             return Sykdomstidslinje(
-                dager = dto.dager.associate { it.dato to SykdomstidslinjeDagDto.gjenopprett(it) }.toSortedMap(),
+                dager = dto.dager.associate { it.dato to Dag.gjenopprett(it) }.toSortedMap(),
                 periode = dto.periode?.let { Periode.gjenopprett(it) },
                 låstePerioder = dto.låstePerioder.map { Periode.gjenopprett(it) }.toMutableList()
             )

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.sykdomstidslinje.Dag
 
 data class PersonDto(
     val aktørId: String,
@@ -89,27 +88,6 @@ sealed class SykdomstidslinjeDagDto {
     data class AndreYtelserDto(override val dato: LocalDate, override val kilde: HendelseskildeDto, val ytelse: YtelseDto) : SykdomstidslinjeDagDto() {
         enum class YtelseDto {
             Foreldrepenger, AAP, Omsorgspenger, Pleiepenger, Svangerskapspenger, Opplæringspenger, Dagpenger
-        }
-    }
-
-    internal companion object {
-        fun gjenopprett(dag: SykdomstidslinjeDagDto): Dag {
-            return when (dag) {
-                is AndreYtelserDto -> Dag.AndreYtelser.gjenopprett(dag)
-                is ArbeidIkkeGjenopptattDagDto -> Dag.ArbeidIkkeGjenopptattDag.gjenopprett(dag)
-                is ArbeidsdagDto -> Dag.Arbeidsdag.gjenopprett(dag)
-                is ArbeidsgiverHelgedagDto -> Dag.ArbeidsgiverHelgedag.gjenopprett(dag)
-                is ArbeidsgiverdagDto -> Dag.Arbeidsgiverdag.gjenopprett(dag)
-                is FeriedagDto -> Dag.Feriedag.gjenopprett(dag)
-                is ForeldetSykedagDto -> Dag.ForeldetSykedag.gjenopprett(dag)
-                is FriskHelgedagDto -> Dag.FriskHelgedag.gjenopprett(dag)
-                is PermisjonsdagDto -> Dag.Permisjonsdag.gjenopprett(dag)
-                is ProblemDagDto -> Dag.ProblemDag.gjenopprett(dag)
-                is SykHelgedagDto -> Dag.SykHelgedag.gjenopprett(dag)
-                is SykedagDto -> Dag.Sykedag.gjenopprett(dag)
-                is SykedagNavDto -> Dag.SykedagNav.gjenopprett(dag)
-                is UkjentDagDto -> Dag.UkjentDag.gjenopprett(dag)
-            }
         }
     }
 }
