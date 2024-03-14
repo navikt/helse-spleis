@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
 import java.util.UUID
-import no.nav.helse.dto.ForkastetVedtaksperiodeDto
-import no.nav.helse.dto.VedtaksperiodeDto
+import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
+import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -51,7 +51,7 @@ internal class ForkastetVedtaksperiode(
             fødselsnummer: String,
             arbeidsgiver: Arbeidsgiver,
             organisasjonsnummer: String,
-            dto: ForkastetVedtaksperiodeDto,
+            dto: ForkastetVedtaksperiodeInnDto,
             arbeidsgiverjurist: MaskinellJurist,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
             utbetalinger: Map<UUID, Utbetaling>
@@ -73,5 +73,5 @@ internal class ForkastetVedtaksperiode(
 
     }
 
-    internal fun dto() = ForkastetVedtaksperiodeDto(vedtaksperiode.dto())
+    internal fun dto() = ForkastetVedtaksperiodeUtDto(vedtaksperiode.dto())
 }

@@ -9,7 +9,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
-import no.nav.helse.dto.PersonDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -122,7 +121,7 @@ fun Person.serialize(pretty: Boolean = false): SerialisertPerson {
         if (compareResult.failed() && !compareResult.kunInfotrygdinntekterfeil()) {
             sikkerLogg.error("Ny JSON gir ulikt resultat i forhold til dagens:\n{}", compareResult.message)
         } else {
-            val gjenopprettetPerson = Person.gjenopprett(MaskinellJurist(), nyDto)
+            val gjenopprettetPerson = Person.gjenopprett(MaskinellJurist(), nyDto.tilPersonData().tilPersonDto())
             val serialisertNyPerson = gjenopprettetPerson.tilSerialisertPerson(pretty)
             val compareResult2 = JSONCompare.compareJSON(gammelJson, serialisertNyPerson.json, JSONCompareMode.STRICT)
             if (compareResult2.failed() && !compareResult2.kunInfotrygdinntekterfeil()) {

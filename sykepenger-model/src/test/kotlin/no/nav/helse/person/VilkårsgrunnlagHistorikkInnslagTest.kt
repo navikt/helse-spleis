@@ -12,9 +12,8 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.dto.OpptjeningDto
-import no.nav.helse.dto.SykepengegrunnlagDto
-import no.nav.helse.dto.VilkårsgrunnlagDto
+import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
+import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -189,8 +188,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun dto(
                 vilkårsgrunnlagId: UUID,
                 skjæringstidspunkt: LocalDate,
-                sykepengegrunnlag: SykepengegrunnlagDto
-            ): VilkårsgrunnlagDto {
+                sykepengegrunnlag: SykepengegrunnlagUtDto
+            ): VilkårsgrunnlagUtDto {
                 throw IllegalStateException()
             }
         }

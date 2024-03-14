@@ -37,8 +37,9 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.dto.VedtaksperiodeDto
+import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
+import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
@@ -2723,7 +2724,7 @@ internal class Vedtaksperiode private constructor(
             fødselsnummer: String,
             arbeidsgiver: Arbeidsgiver,
             organisasjonsnummer: String,
-            dto: VedtaksperiodeDto,
+            dto: VedtaksperiodeInnDto,
             arbeidsgiverjurist: MaskinellJurist,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
             utbetalinger: Map<UUID, Utbetaling>
@@ -2784,7 +2785,7 @@ internal class Vedtaksperiode private constructor(
         ))
     }
 
-    internal fun dto() = VedtaksperiodeDto(
+    internal fun dto() = VedtaksperiodeUtDto(
         id = id,
         tilstand = when (tilstand) {
             Avsluttet -> VedtaksperiodetilstandDto.AVSLUTTET

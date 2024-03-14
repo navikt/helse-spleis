@@ -6,7 +6,8 @@ import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
-import no.nav.helse.dto.PersonDto
+import no.nav.helse.dto.deserialisering.PersonInnDto
+import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -124,7 +125,7 @@ class Person private constructor(
             jurist = jurist
         )
 
-        internal fun gjenopprett(jurist: MaskinellJurist, dto: PersonDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
+        internal fun gjenopprett(jurist: MaskinellJurist, dto: PersonInnDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
             val personJurist = jurist.medFødselsnummer(dto.fødselsnummer)
             val arbeidsgivere = mutableListOf<Arbeidsgiver>()
             val grunnlagsdataMap = mutableMapOf<UUID, VilkårsgrunnlagElement>()
@@ -861,7 +862,7 @@ class Person private constructor(
     internal fun vurderOmSøknadIkkeKanHåndteres(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver) =
         arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(hendelse, vedtaksperiode, arbeidsgivere)
 
-    fun dto() = PersonDto(
+    fun dto() = PersonUtDto(
         aktørId = aktørId,
         fødselsnummer = personidentifikator.toString(),
         alder = alder.dto(),

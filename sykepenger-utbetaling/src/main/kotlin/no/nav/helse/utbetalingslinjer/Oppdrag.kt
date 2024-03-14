@@ -10,8 +10,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.OppdragDto
+import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.OppdragstatusDto
+import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -94,7 +95,7 @@ class Oppdrag private constructor(
             aktivitetslogg.varsel(RV_UT_23)
         }
 
-        fun gjenopprett(dto: OppdragDto): Oppdrag {
+        fun gjenopprett(dto: OppdragInnDto): Oppdrag {
             return Oppdrag(
                 mottaker = dto.mottaker,
                 fagområde = when (dto.fagområde) {
@@ -103,11 +104,7 @@ class Oppdrag private constructor(
                 },
                 linjer = dto.linjer.map { Utbetalingslinje.gjenopprett(it) }.toMutableList(),
                 fagsystemId = dto.fagsystemId,
-                endringskode = when (dto.endringskode) {
-                    EndringskodeDto.ENDR -> Endringskode.ENDR
-                    EndringskodeDto.NY -> Endringskode.NY
-                    EndringskodeDto.UEND -> Endringskode.UEND
-                },
+                endringskode = Endringskode.gjenopprett(dto.endringskode),
                 nettoBeløp = dto.nettoBeløp,
                 overføringstidspunkt = dto.overføringstidspunkt,
                 avstemmingsnøkkel = dto.avstemmingsnøkkel,
@@ -499,7 +496,7 @@ class Oppdrag private constructor(
         }
     }
 
-    fun dto() = OppdragDto(
+    fun dto() = OppdragUtDto(
         mottaker = mottaker,
         fagområde = when (fagområde) {
             Fagområde.SykepengerRefusjon -> FagområdeDto.SPREF
@@ -519,8 +516,8 @@ class Oppdrag private constructor(
             Oppdragstatus.OVERFØRT -> OppdragstatusDto.OVERFØRT
             Oppdragstatus.AKSEPTERT -> OppdragstatusDto.AKSEPTERT
             Oppdragstatus.AKSEPTERT_MED_FEIL -> OppdragstatusDto.AKSEPTERT_MED_FEIL
-            Oppdragstatus.AVVIST -> OppdragstatusDto.AVVIST
-            Oppdragstatus.FEIL -> OppdragstatusDto.FEIL
+            AVVIST -> OppdragstatusDto.AVVIST
+            FEIL -> OppdragstatusDto.FEIL
             null -> null
         },
         tidsstempel = tidsstempel,

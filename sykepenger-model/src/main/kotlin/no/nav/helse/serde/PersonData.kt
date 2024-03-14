@@ -8,7 +8,6 @@ import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.dto.ArbeidsforholdDto
-import no.nav.helse.dto.ArbeidsgiverDto
 import no.nav.helse.dto.ArbeidsgiverInntektsopplysningDto
 import no.nav.helse.dto.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
@@ -19,9 +18,7 @@ import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.FeriepengeDto
 import no.nav.helse.dto.FeriepengeberegnerDto
-import no.nav.helse.dto.ForkastetVedtaksperiodeDto
 import no.nav.helse.dto.GenerasjonDto
 import no.nav.helse.dto.GenerasjonEndringDto
 import no.nav.helse.dto.GenerasjonTilstandDto
@@ -39,11 +36,9 @@ import no.nav.helse.dto.InntektshistorikkDto
 import no.nav.helse.dto.InntektsopplysningDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.OppdragDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.OpptjeningDto
 import no.nav.helse.dto.PeriodeDto
-import no.nav.helse.dto.PersonDto
 import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.RefusjonDto
 import no.nav.helse.dto.RefusjonshistorikkDto
@@ -57,21 +52,30 @@ import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.SykdomstidslinjeDto
-import no.nav.helse.dto.SykepengegrunnlagDto
+import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
 import no.nav.helse.dto.SykmeldingsperioderDto
-import no.nav.helse.dto.UtbetalingDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingsdagDto
-import no.nav.helse.dto.UtbetalingslinjeDto
 import no.nav.helse.dto.UtbetalingstidslinjeDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.UtbetaltDagDto
-import no.nav.helse.dto.VedtaksperiodeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
-import no.nav.helse.dto.VilkårsgrunnlagDto
-import no.nav.helse.dto.VilkårsgrunnlagInnslagDto
-import no.nav.helse.dto.VilkårsgrunnlaghistorikkDto
+import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
+import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
+import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
+import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
+import no.nav.helse.dto.deserialisering.FeriepengeInnDto
+import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
+import no.nav.helse.dto.deserialisering.OppdragInnDto
+import no.nav.helse.dto.deserialisering.PersonInnDto
+import no.nav.helse.dto.deserialisering.SykepengegrunnlagInnDto
+import no.nav.helse.dto.deserialisering.UtbetalingInnDto
+import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
+import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
+import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
+import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
+import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.ØkonomiDto
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.MaskinellJurist
@@ -179,14 +183,14 @@ internal data class PersonData(
         jurist = jurist
     )
 
-    fun tilPersonDto() = PersonDto(
+    fun tilPersonDto() = PersonInnDto(
         aktørId = this.aktørId,
         fødselsnummer = this.fødselsnummer,
         alder = AlderDto(fødselsdato = this.fødselsdato, dødsdato = this.dødsdato),
         opprettet = this.opprettet,
         arbeidsgivere = this.arbeidsgivere.map { it.tilDto() },
         infotrygdhistorikk = InfotrygdhistorikkDto(this.infotrygdhistorikk.map { it.tilDto() }),
-        vilkårsgrunnlagHistorikk = VilkårsgrunnlaghistorikkDto(vilkårsgrunnlagHistorikk.map { it.tilDto() })
+        vilkårsgrunnlagHistorikk = VilkårsgrunnlaghistorikkInnDto(vilkårsgrunnlagHistorikk.map { it.tilDto() })
     )
 
     internal fun createPerson(jurist: MaskinellJurist, tidligereBehandlinger: List<Person> = emptyList()): Person {
@@ -359,7 +363,7 @@ internal data class PersonData(
             elementer = vilkårsgrunnlag.associate { it.parseDataForVilkårsvurdering(builder, alder) }
         )
 
-        fun tilDto() = VilkårsgrunnlagInnslagDto(
+        fun tilDto() = VilkårsgrunnlagInnslagInnDto(
             id = this.id,
             opprettet = this.opprettet,
             vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.tilDto() }
@@ -397,12 +401,12 @@ internal data class PersonData(
         val vilkårsgrunnlagId: UUID
     ) {
         fun tilDto() = when (type) {
-            GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagDto.Infotrygd(
+            GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagInnDto.Infotrygd(
                 vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                 skjæringstidspunkt = this.skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag.tilInfotrygdDto()
             )
-            GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagDto.Spleis(
+            GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagInnDto.Spleis(
                 vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                 skjæringstidspunkt = this.skjæringstidspunkt,
                 sykepengegrunnlag = this.sykepengegrunnlag.tilSpleisDto(),
@@ -451,14 +455,14 @@ internal data class PersonData(
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             val vurdertInfotrygd: Boolean
         ) {
-            fun tilSpleisDto() = SykepengegrunnlagDto(
+            fun tilSpleisDto() = SykepengegrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 vurdertInfotrygd = this.vurdertInfotrygd,
                 sammenligningsgrunnlag = this.sammenligningsgrunnlag!!.tilDto(),
                 `6G` = InntektDto.Årlig(grunnbeløp!!)
             )
-            fun tilInfotrygdDto() = SykepengegrunnlagDto(
+            fun tilInfotrygdDto() = SykepengegrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 vurdertInfotrygd = this.vurdertInfotrygd,
@@ -836,7 +840,7 @@ internal data class PersonData(
             utbetalinger.zip(modelUtbetalinger) { data, utbetaling -> data.id to utbetaling }.toMap()
         }
 
-        fun tilDto() = ArbeidsgiverDto(
+        fun tilDto() = ArbeidsgiverInnDto(
             id = this.id,
             organisasjonsnummer = this.organisasjonsnummer,
             inntektshistorikk = InntektshistorikkDto(this.inntektshistorikk.map { it.tilDto() }),
@@ -1100,7 +1104,7 @@ internal data class PersonData(
         data class ForkastetVedtaksperiodeData(
             val vedtaksperiode: VedtaksperiodeData
         ) {
-            fun tilDto() = ForkastetVedtaksperiodeDto(vedtaksperiode = this.vedtaksperiode.tilDto())
+            fun tilDto() = ForkastetVedtaksperiodeInnDto(vedtaksperiode = this.vedtaksperiode.tilDto())
         }
 
         data class FeriepengeutbetalingData(
@@ -1117,7 +1121,7 @@ internal data class PersonData(
             val sendTilOppdrag: Boolean,
             val sendPersonoppdragTilOS: Boolean,
         ) {
-            fun tilDto() = FeriepengeDto(
+            fun tilDto() = FeriepengeInnDto(
                 feriepengeberegner = FeriepengeberegnerDto(
                     opptjeningsår = this.opptjeningsår,
                     utbetalteDager = this.utbetalteDager.map { it.tilDto() },
@@ -1213,7 +1217,7 @@ internal data class PersonData(
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime
         ) {
-            fun tilDto() = VedtaksperiodeDto(
+            fun tilDto() = VedtaksperiodeInnDto(
                 id = this.id,
                 tilstand = when (tilstand) {
                     TilstandType.AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
@@ -1673,7 +1677,7 @@ internal data class PersonData(
             ANNULLERT,
             FORKASTET
         }
-        fun tilDto() = UtbetalingDto(
+        fun tilDto() = UtbetalingInnDto(
             id = this.id,
             korrelasjonsId = this.korrelasjonsId,
             periode = PeriodeDto(fom = this.fom, tom = this.tom),
@@ -1769,7 +1773,7 @@ internal data class PersonData(
         val simuleringsResultat: ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData?
     ) {
         enum class OppdragstatusData { OVERFØRT, AKSEPTERT, AKSEPTERT_MED_FEIL, AVVIST, FEIL }
-        fun tilDto() = OppdragDto(
+        fun tilDto() = OppdragInnDto(
             mottaker = this.mottaker,
             fagområde = when (fagområde) {
                 "SPREF" -> FagområdeDto.SPREF
@@ -1828,7 +1832,7 @@ internal data class PersonData(
         val klassekode: String,
         val datoStatusFom: LocalDate?
     ) {
-        fun tilDto() = UtbetalingslinjeDto(
+        fun tilDto() = UtbetalingslinjeInnDto(
             fom = this.fom,
             tom = this.tom,
             satstype = when (this.satstype) {

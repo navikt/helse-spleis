@@ -2,29 +2,6 @@ package no.nav.helse.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.hendelser.SimuleringResultat
-
-data class UtbetalingDto(
-    val id: UUID,
-    val korrelasjonsId: UUID,
-    val periode: PeriodeDto,
-    val utbetalingstidslinje: UtbetalingstidslinjeDto,
-    val arbeidsgiverOppdrag: OppdragDto,
-    val personOppdrag: OppdragDto,
-    val tidsstempel: LocalDateTime,
-    val tilstand: UtbetalingTilstandDto,
-    val type: UtbetalingtypeDto,
-    val maksdato: LocalDate,
-    val forbrukteSykedager: Int?,
-    val gjenståendeSykedager: Int?,
-    val annulleringer: List<UUID>,
-    val vurdering: UtbetalingVurderingDto?,
-    val overføringstidspunkt: LocalDateTime?,
-    val avstemmingsnøkkel: Long?,
-    val avsluttet: LocalDateTime?,
-    val oppdatert: LocalDateTime
-)
 
 data class UtbetalingVurderingDto(
     val godkjent: Boolean,
@@ -122,21 +99,6 @@ sealed class BegrunnelseDto {
     data object NyVilkårsprøvingNødvendig : BegrunnelseDto()
 }
 
-data class OppdragDto(
-    val mottaker: String,
-    val fagområde: FagområdeDto,
-    val linjer: List<UtbetalingslinjeDto>,
-    val fagsystemId: String,
-    val endringskode: EndringskodeDto,
-    val nettoBeløp: Int,
-    val overføringstidspunkt: LocalDateTime?,
-    val avstemmingsnøkkel: Long?,
-    val status: OppdragstatusDto?,
-    val tidsstempel: LocalDateTime,
-    val erSimulert: Boolean,
-    val simuleringsResultat: SimuleringResultat?
-)
-
 sealed class FagområdeDto {
     data object SPREF : FagområdeDto()
     data object SP : FagområdeDto()
@@ -154,20 +116,6 @@ sealed class OppdragstatusDto {
     data object AVVIST : OppdragstatusDto()
     data object FEIL : OppdragstatusDto()
 }
-
-data class UtbetalingslinjeDto(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val satstype: SatstypeDto,
-    val beløp: Int?,
-    val grad: Int?,
-    val refFagsystemId: String?,
-    val delytelseId: Int,
-    val refDelytelseId: Int?,
-    val endringskode: EndringskodeDto,
-    val klassekode: KlassekodeDto,
-    val datoStatusFom: LocalDate?
-)
 
 sealed class KlassekodeDto(val verdi: String) {
     data object RefusjonIkkeOpplysningspliktig : KlassekodeDto("SPREFAG-IOP")

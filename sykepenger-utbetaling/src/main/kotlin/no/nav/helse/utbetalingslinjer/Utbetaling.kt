@@ -4,10 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.dto.UtbetalingDto
+import no.nav.helse.dto.EndringskodeDto
+import no.nav.helse.dto.KlassekodeDto
+import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
+import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -387,7 +390,7 @@ class Utbetaling private constructor(
             }
         }
 
-        fun gjenopprett(dto: UtbetalingDto, utbetalinger: List<Utbetaling>): Utbetaling {
+        fun gjenopprett(dto: UtbetalingInnDto, utbetalinger: List<Utbetaling>): Utbetaling {
             return Utbetaling(
                 id = dto.id,
                 korrelasjonsId = dto.korrelasjonsId,
@@ -720,9 +723,6 @@ class Utbetaling private constructor(
     }
     internal object Forkastet : Tilstand {
         override val status = Utbetalingstatus.FORKASTET
-        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            super.entering(utbetaling, hendelse)
-        }
     }
 
     class Vurdering(
@@ -830,7 +830,7 @@ class Utbetaling private constructor(
         }
     }
 
-    fun dto() = UtbetalingDto(
+    fun dto() = UtbetalingUtDto(
         id = this.id,
         korrelasjonsId = this.korrelasjonsId,
         periode = this.periode.dto(),
@@ -852,7 +852,7 @@ class Utbetaling private constructor(
         type = when (type) {
             UTBETALING -> UtbetalingtypeDto.UTBETALING
             Utbetalingtype.ETTERUTBETALING -> UtbetalingtypeDto.ETTERUTBETALING
-            Utbetalingtype.ANNULLERING -> UtbetalingtypeDto.ANNULLERING
+            ANNULLERING -> UtbetalingtypeDto.ANNULLERING
             Utbetalingtype.REVURDERING -> UtbetalingtypeDto.REVURDERING
             Utbetalingtype.FERIEPENGER -> UtbetalingtypeDto.FERIEPENGER
         },
@@ -892,7 +892,17 @@ enum class Utbetalingstatus {
 }
 
 enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
-enum class Endringskode { NY, UEND, ENDR }
+enum class Endringskode {
+    NY, UEND, ENDR;
+
+    companion object {
+        fun gjenopprett(dto: EndringskodeDto) = when (dto) {
+            EndringskodeDto.ENDR -> ENDR
+            EndringskodeDto.NY -> NY
+            EndringskodeDto.UEND -> UEND
+        }
+    }
+}
 
 enum class Klassekode(val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
@@ -903,5 +913,11 @@ enum class Klassekode(val verdi: String) {
     companion object {
         private val map = values().associateBy(Klassekode::verdi)
         fun from(verdi: String) = requireNotNull(map[verdi]) { "Støtter ikke klassekode: $verdi" }
+        fun gjenopprett(dto: KlassekodeDto) = when (dto) {
+            KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> RefusjonFeriepengerIkkeOpplysningspliktig
+            KlassekodeDto.RefusjonIkkeOpplysningspliktig -> RefusjonIkkeOpplysningspliktig
+            KlassekodeDto.SykepengerArbeidstakerFeriepenger -> SykepengerArbeidstakerFeriepenger
+            KlassekodeDto.SykepengerArbeidstakerOrdinær -> SykepengerArbeidstakerOrdinær
+        }
     }
 }

@@ -6,7 +6,8 @@ import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.dto.SykepengegrunnlagDto
+import no.nav.helse.dto.deserialisering.SykepengegrunnlagInnDto
+import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -155,7 +156,7 @@ internal class Sykepengegrunnlag private constructor(
             return Sykepengegrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag, `6G`)
         }
 
-        fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: SykepengegrunnlagDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Sykepengegrunnlag {
+        fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: SykepengegrunnlagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Sykepengegrunnlag {
             return Sykepengegrunnlag(
                 alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -478,7 +479,7 @@ internal class Sykepengegrunnlag private constructor(
     internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
         arbeidsgiverInntektsopplysninger.firstNotNullOfOrNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }
 
-    internal fun dto() = SykepengegrunnlagDto(
+    internal fun dto() = SykepengegrunnlagUtDto(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
         vurdertInfotrygd = this.vurdertInfotrygd,

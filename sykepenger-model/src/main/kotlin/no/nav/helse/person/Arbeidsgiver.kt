@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
+import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -29,8 +30,7 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
-import no.nav.helse.dto.ArbeidsgiverDto
-import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
+import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
@@ -264,7 +264,7 @@ internal class Arbeidsgiver private constructor(
             alder: Alder,
             aktørId: String,
             fødselsnummer: String,
-            dto: ArbeidsgiverDto,
+            dto: ArbeidsgiverInnDto,
             personJurist: MaskinellJurist,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>
         ): Arbeidsgiver {
@@ -990,7 +990,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun dto() = ArbeidsgiverDto(
+    internal fun dto() = ArbeidsgiverUtDto(
         id = id,
         organisasjonsnummer = organisasjonsnummer,
         inntektshistorikk = inntektshistorikk.dto(),

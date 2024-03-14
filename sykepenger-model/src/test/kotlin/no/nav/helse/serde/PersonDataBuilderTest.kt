@@ -12,7 +12,7 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FDATO_2018
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
-import no.nav.helse.dto.ArbeidsgiverDto
+import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.DokumenttypeDto
@@ -22,7 +22,7 @@ import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.UtbetalingsdagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
-import no.nav.helse.dto.VilkårsgrunnlaghistorikkDto
+import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.februar
@@ -256,7 +256,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         }
     }
 
-    private fun assertArbeidsgivere(arbeidsgivere: List<ArbeidsgiverDto>) {
+    private fun assertArbeidsgivere(arbeidsgivere: List<ArbeidsgiverUtDto>) {
         assertEquals(3, arbeidsgivere.size)
 
         arbeidsgivere[0].also { arbeidsgiver ->
@@ -312,7 +312,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             }
         }
     }
-    private fun assertVilkårsgrunnlaghistorikk(historikk: VilkårsgrunnlaghistorikkDto) {
+    private fun assertVilkårsgrunnlaghistorikk(historikk: VilkårsgrunnlaghistorikkUtDto) {
         assertEquals(6, historikk.historikk.size)
         historikk.historikk[5].also { innslag ->
             assertEquals(1, innslag.vilkårsgrunnlag.size)

@@ -6,30 +6,7 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 
-data class PersonDto(
-    val aktørId: String,
-    val fødselsnummer: String,
-    val alder: AlderDto,
-    val opprettet: LocalDateTime,
-    val arbeidsgivere: List<ArbeidsgiverDto>,
-    val infotrygdhistorikk: InfotrygdhistorikkDto,
-    val vilkårsgrunnlagHistorikk: VilkårsgrunnlaghistorikkDto
-)
-
 data class AlderDto(val fødselsdato: LocalDate, val dødsdato: LocalDate?)
-
-data class ArbeidsgiverDto(
-    val id: UUID,
-    val organisasjonsnummer: String,
-    val inntektshistorikk: InntektshistorikkDto,
-    val sykdomshistorikk: SykdomshistorikkDto,
-    val sykmeldingsperioder: SykmeldingsperioderDto,
-    val vedtaksperioder: List<VedtaksperiodeDto>,
-    val forkastede: List<ForkastetVedtaksperiodeDto>,
-    val utbetalinger: List<UtbetalingDto>,
-    val feriepengeutbetalinger: List<FeriepengeDto>,
-    val refusjonshistorikk: RefusjonshistorikkDto
-)
 
 data class SykmeldingsperioderDto(val perioder: List<PeriodeDto>)
 data class RefusjonshistorikkDto(val refusjoner: List<RefusjonDto>)
@@ -95,14 +72,6 @@ data class HendelseskildeDto(
     val type: String,
     val meldingsreferanseId: UUID,
     val tidsstempel: LocalDateTime
-)
-data class ForkastetVedtaksperiodeDto(val vedtaksperiode: VedtaksperiodeDto)
-data class VedtaksperiodeDto(
-    val id: UUID,
-    var tilstand: VedtaksperiodetilstandDto,
-    val generasjoner: GenerasjonerDto,
-    val opprettet: LocalDateTime,
-    var oppdatert: LocalDateTime
 )
 
 sealed class VedtaksperiodetilstandDto {
@@ -187,37 +156,6 @@ data class GenerasjonkildeDto(
     val avsender: AvsenderDto
 )
 
-data class VilkårsgrunnlaghistorikkDto(
-    val historikk: List<VilkårsgrunnlagInnslagDto>
-)
-
-data class VilkårsgrunnlagInnslagDto(
-    val id: UUID,
-    val opprettet: LocalDateTime,
-    val vilkårsgrunnlag: List<VilkårsgrunnlagDto>
-)
-
-sealed class VilkårsgrunnlagDto {
-    abstract val vilkårsgrunnlagId: UUID
-    abstract val skjæringstidspunkt: LocalDate
-    abstract val sykepengegrunnlag: SykepengegrunnlagDto
-
-    data class Spleis(
-        override val vilkårsgrunnlagId: UUID,
-        override val skjæringstidspunkt: LocalDate,
-        override val sykepengegrunnlag: SykepengegrunnlagDto,
-        val opptjening: OpptjeningDto,
-        val medlemskapstatus: MedlemskapsvurderingDto,
-        val vurdertOk: Boolean,
-        val meldingsreferanseId: UUID?
-    ) : VilkårsgrunnlagDto()
-    data class Infotrygd(
-        override val vilkårsgrunnlagId: UUID,
-        override val skjæringstidspunkt: LocalDate,
-        override val sykepengegrunnlag: SykepengegrunnlagDto
-    ) : VilkårsgrunnlagDto()
-}
-
 sealed class MedlemskapsvurderingDto {
     data object Ja : MedlemskapsvurderingDto()
     data object Nei : MedlemskapsvurderingDto()
@@ -225,13 +163,6 @@ sealed class MedlemskapsvurderingDto {
     data object UavklartMedBrukerspørsmål : MedlemskapsvurderingDto()
 }
 
-data class SykepengegrunnlagDto(
-    val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningDto>,
-    val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningDto>,
-    val vurdertInfotrygd: Boolean,
-    val sammenligningsgrunnlag: SammenligningsgrunnlagDto,
-    val `6G`: InntektDto.Årlig
-)
 data class ArbeidsgiverInntektsopplysningDto(
     val orgnummer: String,
     val gjelder: PeriodeDto,
@@ -350,19 +281,6 @@ data class ArbeidsforholdDto(
     val ansattFom: LocalDate,
     val ansattTom: LocalDate?,
     val deaktivert: Boolean
-)
-
-data class FeriepengeDto(
-    val feriepengeberegner: FeriepengeberegnerDto,
-    val infotrygdFeriepengebeløpPerson: Double,
-    val infotrygdFeriepengebeløpArbeidsgiver: Double,
-    val spleisFeriepengebeløpArbeidsgiver: Double,
-    val spleisFeriepengebeløpPerson: Double,
-    val oppdrag: OppdragDto,
-    val personoppdrag: OppdragDto,
-    val utbetalingId: UUID,
-    val sendTilOppdrag: Boolean,
-    val sendPersonoppdragTilOS: Boolean,
 )
 
 data class FeriepengeberegnerDto(

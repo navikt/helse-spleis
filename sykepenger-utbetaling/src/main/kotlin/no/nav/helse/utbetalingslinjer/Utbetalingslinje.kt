@@ -2,14 +2,15 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import no.nav.helse.dto.EndringskodeDto
+import no.nav.helse.dto.KlassekodeDto
+import no.nav.helse.dto.SatstypeDto
+import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
+import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.EndringskodeDto
-import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.SatstypeDto
-import no.nav.helse.dto.UtbetalingslinjeDto
 import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Endringskode.UEND
@@ -103,7 +104,7 @@ class Utbetalingslinje(
             return result
         }
 
-        internal fun gjenopprett(dto: UtbetalingslinjeDto): Utbetalingslinje {
+        internal fun gjenopprett(dto: UtbetalingslinjeInnDto): Utbetalingslinje {
             return Utbetalingslinje(
                 fom = dto.fom,
                 tom = dto.tom,
@@ -116,17 +117,8 @@ class Utbetalingslinje(
                 refFagsystemId = dto.refFagsystemId,
                 delytelseId = dto.delytelseId,
                 refDelytelseId = dto.refDelytelseId,
-                endringskode = when (dto.endringskode) {
-                    EndringskodeDto.ENDR -> Endringskode.ENDR
-                    EndringskodeDto.NY -> Endringskode.NY
-                    EndringskodeDto.UEND -> Endringskode.UEND
-                },
-                klassekode = when (dto.klassekode) {
-                    KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> Klassekode.RefusjonFeriepengerIkkeOpplysningspliktig
-                    KlassekodeDto.RefusjonIkkeOpplysningspliktig -> Klassekode.RefusjonIkkeOpplysningspliktig
-                    KlassekodeDto.SykepengerArbeidstakerFeriepenger -> Klassekode.SykepengerArbeidstakerFeriepenger
-                    KlassekodeDto.SykepengerArbeidstakerOrdinær -> Klassekode.SykepengerArbeidstakerOrdinær
-                },
+                endringskode = Endringskode.gjenopprett(dto.endringskode),
+                klassekode = Klassekode.gjenopprett(dto.klassekode),
                 datoStatusFom = dto.datoStatusFom
             )
         }
@@ -293,7 +285,7 @@ class Utbetalingslinje(
         "klassekode" to klassekode.verdi
     )
 
-    fun dto() = UtbetalingslinjeDto(
+    fun dto() = UtbetalingslinjeUtDto(
         fom = this.fom,
         tom = this.tom,
         satstype = when {

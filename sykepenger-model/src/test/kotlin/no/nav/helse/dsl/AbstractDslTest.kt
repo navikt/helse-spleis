@@ -21,7 +21,7 @@ import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.dto.PersonDto
+import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.Frilans
 import no.nav.helse.person.Person
@@ -478,10 +478,10 @@ protected fun håndterInntektsmeldingPortal(
         assertTrue(inspektør.aktivitetslogg.harAktiviteter()) { inspektør.aktivitetslogg.toString() }
     }
 
-    protected fun assertGjenoppbygget(dto: PersonDto) {
+    protected fun assertGjenoppbygget(dto: PersonUtDto) {
         val serialisertPerson = dto.tilPersonData().tilSerialisertPerson()
         val gjenoppbyggetPersonViaPersonData = serialisertPerson.deserialize(MaskinellJurist())
-        val gjenoppbyggetPersonViaPersonDto = Person.gjenopprett(MaskinellJurist(), dto)
+        val gjenoppbyggetPersonViaPersonDto = Person.gjenopprett(MaskinellJurist(), dto.tilPersonData().tilPersonDto())
 
         val dtoFraPersonViaPersonData = gjenoppbyggetPersonViaPersonData.dto()
         val dtoFraPersonViaPersonDto = gjenoppbyggetPersonViaPersonDto.dto()

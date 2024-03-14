@@ -6,12 +6,13 @@ import java.time.Year
 import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
+import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.dto.FeriepengeDto
+import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.person.FeriepengeutbetalingVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -67,7 +68,7 @@ internal class Feriepengeutbetaling private constructor(
                 sendPersonoppdragTilOS = sendPersonoppdragTilOS,
             )
 
-        internal fun gjenopprett(alder: Alder, dto: FeriepengeDto): Feriepengeutbetaling {
+        internal fun gjenopprett(alder: Alder, dto: FeriepengeInnDto): Feriepengeutbetaling {
             return Feriepengeutbetaling(
                 feriepengeberegner = Feriepengeberegner.gjenopprett(alder, dto.feriepengeberegner),
                 infotrygdFeriepengebeløpPerson = dto.infotrygdFeriepengebeløpPerson,
@@ -349,7 +350,7 @@ internal class Feriepengeutbetaling private constructor(
         }
     }
 
-    internal fun dto() = FeriepengeDto(
+    internal fun dto() = FeriepengeUtDto(
         feriepengeberegner = feriepengeberegner.dto(),
         infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
         infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,

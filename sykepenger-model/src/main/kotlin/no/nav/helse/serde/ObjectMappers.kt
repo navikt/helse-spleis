@@ -15,7 +15,7 @@ import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.UtbetaltDagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
-import no.nav.helse.dto.VilkårsgrunnlagDto
+import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 
 internal val serdeObjectMapper: ObjectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
@@ -25,7 +25,7 @@ internal val serdeObjectMapper: ObjectMapper = jacksonObjectMapper()
     .addMixIn(VedtaksperiodetilstandDto::class.java, SealedClassMixIn::class.java)
     .addMixIn(GenerasjonTilstandDto::class.java, SealedClassMixIn::class.java)
     .addMixIn(DokumenttypeDto::class.java, SealedClassMixIn::class.java)
-    .addMixIn(VilkårsgrunnlagDto::class.java, SealedClassMixIn::class.java)
+    .addMixIn(VilkårsgrunnlagUtDto::class.java, SealedClassMixIn::class.java)
     .addMixIn(MedlemskapsvurderingDto::class.java, SealedClassMixIn::class.java)
     .addMixIn(InntektsopplysningDto::class.java, SealedClassMixIn::class.java)
     .addMixIn(InntekttypeDto::class.java, SealedClassMixIn::class.java)
