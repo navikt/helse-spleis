@@ -503,6 +503,11 @@ class Utbetaling private constructor(
     fun overlapperMed(other: Periode): Boolean {
         return this.periode.overlapperMed(other)
     }
+
+    fun overlapperMedUtbetaling(other: Periode): Boolean {
+        return listOf(arbeidsgiverOppdrag, personOppdrag).any { oppdrag -> oppdrag.any { linje -> linje.periode.overlapperMed(other) } }
+    }
+
     fun overlapperMed(other: Utbetaling): Boolean {
         return this.periode.overlapperMed(other.periode)
     }
@@ -866,6 +871,16 @@ class Utbetaling private constructor(
         avsluttet = avsluttet,
         oppdatert = oppdatert
     )
+
+    fun loggOverlappendeInfotrygdUtbetaling(aktørId: String, fnr: String, vedtaksperiodeId: UUID) {
+        sikkerlogg.info("person med {} og {} har overlappende IT-utbetaling på {}, det er for utbetaling {} - {}",
+            keyValue("aktørId", aktørId),
+            keyValue("fnr", fnr),
+            keyValue("vedtaksperiodeId", vedtaksperiodeId.toString()),
+            keyValue("fom", periode.start.toString()),
+            keyValue("tom", periode.endInclusive.toString())
+        )
+    }
 }
 
 enum class Utbetalingstatus {

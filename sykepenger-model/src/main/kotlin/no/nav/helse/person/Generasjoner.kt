@@ -60,6 +60,10 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
     private val observatører = mutableListOf<GenerasjonObserver>()
 
+    internal fun loggOverlappendeUtbetalingerMedInfotrygd(person: Person, vedtaksperiodeId: UUID) {
+        person.loggOverlappendeUtbetalingerMedInfotrygd(siste, vedtaksperiodeId)
+    }
+
     internal fun initiellGenerasjon(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) {
         check(generasjoner.isEmpty())
         val generasjon = Generasjon.nyGenerasjon(this.observatører, sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)

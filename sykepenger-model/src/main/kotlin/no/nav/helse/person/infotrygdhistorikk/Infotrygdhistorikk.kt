@@ -169,4 +169,9 @@ internal class Infotrygdhistorikk private constructor(
         if (!harHistorikk()) return
         siste.overlappendeInfotrygdperioder(person, alleVedtaksperioder)
     }
+
+    fun loggOverlappendeUtbetaling(utbetaling: Utbetaling, aktørId: String, fnr: String, vedtaksperiodeId: UUID) {
+        if (!harHistorikk()) return
+        siste.loggOverlappendeUtbetaling(utbetaling, aktørId, fnr, vedtaksperiodeId)
+    }
 }
