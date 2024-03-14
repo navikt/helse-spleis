@@ -527,6 +527,8 @@ internal data class SpannerPersonDto(
         val endringskode: String,
         val tidsstempel: LocalDateTime,
         val nettoBeløp: Int,
+        val stønadsdager: Int,
+        val totalbeløp: Int,
         val avstemmingsnøkkel: Long?,
         val status: OppdragstatusData?,
         val overføringstidspunkt: LocalDateTime?,
@@ -542,12 +544,15 @@ internal data class SpannerPersonDto(
         val satstype: String,
         val sats: Int,
         val grad: Int?,
+        val stønadsdager: Int,
+        val totalbeløp: Int,
         val refFagsystemId: String?,
         val delytelseId: Int,
         val refDelytelseId: Int?,
         val endringskode: String,
         val klassekode: String,
-        val datoStatusFom: LocalDate?
+        val datoStatusFom: LocalDate?,
+        val statuskode: String?
     )
 
     data class UtbetalingstidslinjeData(
@@ -1077,6 +1082,8 @@ private fun OppdragUtDto.tilPersonData() = SpannerPersonDto.OppdragData(
     endringskode = this.endringskode.tilPersonData(),
     tidsstempel = this.tidsstempel,
     nettoBeløp = this.nettoBeløp,
+    totalbeløp = this.totalbeløp,
+    stønadsdager = this.stønadsdager,
     avstemmingsnøkkel = this.avstemmingsnøkkel,
     status = when (this.status) {
         OppdragstatusDto.AKSEPTERT -> SpannerPersonDto.OppdragData.OppdragstatusData.AKSEPTERT
@@ -1104,12 +1111,15 @@ private fun UtbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.Utbetalings
     },
     sats = this.beløp!!,
     grad = this.grad,
+    totalbeløp = this.totalbeløp,
+    stønadsdager = this.stønadsdager,
     refFagsystemId = this.refFagsystemId,
     delytelseId = this.delytelseId,
     refDelytelseId = this.refDelytelseId,
     endringskode = this.endringskode.tilPersonData(),
     klassekode = this.klassekode.tilPersonData(),
-    datoStatusFom = this.datoStatusFom
+    datoStatusFom = this.datoStatusFom,
+    statuskode = this.statuskode
 )
 private fun KlassekodeDto.tilPersonData() = when (this) {
     KlassekodeDto.RefusjonFeriepengerIkkeOpplysningspliktig -> "SPREFAGFER-IOP"
