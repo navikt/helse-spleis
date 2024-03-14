@@ -125,6 +125,7 @@ internal class Avstemmer(person: Person) {
             utbetalinger.add(
                 mutableMapOf<String, Any>(
                     "id" to id,
+                    "korrelasjonsId" to korrelasjonsId,
                     "type" to type.name,
                     "status" to tilstand,
                     "opprettet" to tidsstempel,
