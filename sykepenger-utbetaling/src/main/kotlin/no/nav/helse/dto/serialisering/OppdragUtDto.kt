@@ -13,6 +13,8 @@ data class OppdragUtDto(
     val fagsystemId: String,
     val endringskode: EndringskodeDto,
     val nettoBeløp: Int,
+    val stønadsdager: Int,
+    val totalbeløp: Int,
     val overføringstidspunkt: LocalDateTime?,
     val avstemmingsnøkkel: Long?,
     val status: OppdragstatusDto?,

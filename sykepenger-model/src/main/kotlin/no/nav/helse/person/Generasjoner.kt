@@ -3,11 +3,14 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.GenerasjonDto
-import no.nav.helse.dto.GenerasjonEndringDto
+import no.nav.helse.dto.serialisering.GenerasjonUtDto
+import no.nav.helse.dto.serialisering.GenerasjonEndringUtDto
 import no.nav.helse.dto.GenerasjonTilstandDto
-import no.nav.helse.dto.GenerasjonerDto
+import no.nav.helse.dto.serialisering.GenerasjonerUtDto
 import no.nav.helse.dto.GenerasjonkildeDto
+import no.nav.helse.dto.deserialisering.GenerasjonEndringInnDto
+import no.nav.helse.dto.deserialisering.GenerasjonInnDto
+import no.nav.helse.dto.deserialisering.GenerasjonerInnDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Avsender
@@ -47,7 +50,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
     companion object {
         // for PersonData
         fun ferdigGenerasjoner(generasjoner: List<Generasjon>) = Generasjoner(generasjoner)
-        fun gjenopprett(dto: GenerasjonerDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner(
+        fun gjenopprett(dto: GenerasjonerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner(
             generasjoner = dto.generasjoner.map { Generasjon.gjenopprett(it, grunnlagsdata, utbetalinger) }
         )
     }
@@ -344,7 +347,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
             companion object {
                 val List<Endring>.dokumentsporing get() = map { it.dokumentsporing }.toSet()
-                fun gjenopprett(dto: GenerasjonEndringDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Endring {
+                fun gjenopprett(dto: GenerasjonEndringInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Endring {
                     return Endring(
                         id = dto.id,
                         tidsstempel = dto.tidsstempel,
@@ -433,16 +436,22 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                     builder = builder
                 )
             }
-            internal fun dto() = GenerasjonEndringDto(
-                id = this.id,
-                tidsstempel = this.tidsstempel,
-                sykmeldingsperiode = this.sykmeldingsperiode.dto(),
-                periode = this.periode.dto(),
-                vilkårsgrunnlagId = this.grunnlagsdata?.dto()?.vilkårsgrunnlagId,
-                utbetalingId = this.utbetaling?.dto()?.id,
-                dokumentsporing = this.dokumentsporing.dto(),
-                sykdomstidslinje = this.sykdomstidslinje.dto()
-            )
+            internal fun dto(): GenerasjonEndringUtDto {
+                val vilkårsgrunnlagUtDto = this.grunnlagsdata?.dto()
+                val utbetalingUtDto = this.utbetaling?.dto()
+                return GenerasjonEndringUtDto(
+                    id = this.id,
+                    tidsstempel = this.tidsstempel,
+                    sykmeldingsperiode = this.sykmeldingsperiode.dto(),
+                    periode = this.periode.dto(),
+                    vilkårsgrunnlagId = vilkårsgrunnlagUtDto?.vilkårsgrunnlagId,
+                    skjæringstidspunkt = vilkårsgrunnlagUtDto?.skjæringstidspunkt,
+                    utbetalingId = utbetalingUtDto?.id,
+                    utbetalingstatus = utbetalingUtDto?.tilstand,
+                    dokumentsporing = this.dokumentsporing.dto(),
+                    sykdomstidslinje = this.sykdomstidslinje.dto()
+                )
+            }
         }
 
         internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
@@ -830,7 +839,7 @@ enum class Periodetilstand {
 
             private val List<Generasjon>.forrigeIverksatte get() = lastOrNull { it.vedtakFattet != null }
 
-            internal fun gjenopprett(dto: GenerasjonDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Generasjon {
+            internal fun gjenopprett(dto: GenerasjonInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Generasjon {
                 return Generasjon(
                     id = dto.id,
                     tilstand = when (dto.tilstand) {
@@ -1203,7 +1212,7 @@ enum class Periodetilstand {
             }
         }
 
-        internal fun dto() = GenerasjonDto(
+        internal fun dto() = GenerasjonUtDto(
             id = this.id,
             tilstand = when (tilstand) {
                 Tilstand.AnnullertPeriode -> GenerasjonTilstandDto.ANNULLERT_PERIODE
@@ -1226,5 +1235,5 @@ enum class Periodetilstand {
         )
     }
 
-    internal fun dto() = GenerasjonerDto(generasjoner = this.generasjoner.map { it.dto() })
+    internal fun dto() = GenerasjonerUtDto(generasjoner = this.generasjoner.map { it.dto() })
 }

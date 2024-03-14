@@ -15,8 +15,8 @@ import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
-import no.nav.helse.dto.GenerasjonEndringDto
-import no.nav.helse.dto.GenerasjonDto
+import no.nav.helse.dto.serialisering.GenerasjonEndringUtDto
+import no.nav.helse.dto.serialisering.GenerasjonUtDto
 import no.nav.helse.dto.GenerasjonTilstandDto
 import no.nav.helse.dto.GenerasjonkildeDto
 import no.nav.helse.dto.HendelseskildeDto
@@ -339,7 +339,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
     opprettet = opprettet,
     oppdatert = oppdatert
 )
-private fun GenerasjonDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData(
+private fun GenerasjonUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData(
     id = this.id,
     tilstand = when (this.tilstand) {
         GenerasjonTilstandDto.ANNULLERT_PERIODE -> error("Forventer ikke å serialisere ${this.tilstand}")
@@ -371,7 +371,7 @@ private fun GenerasjonkildeDto.tilPersonData() = PersonData.ArbeidsgiverData.Ved
         AvsenderDto.SYSTEM -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData.SYSTEM
     }
 )
-private fun GenerasjonEndringDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.EndringData(
+private fun GenerasjonEndringUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.EndringData(
     id = id,
     tidsstempel = tidsstempel,
     sykmeldingsperiodeFom = sykmeldingsperiode.fom,

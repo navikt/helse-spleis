@@ -2807,6 +2807,11 @@ internal class Vedtaksperiode private constructor(
             TilInfotrygd -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
             TilUtbetaling -> VedtaksperiodetilstandDto.TIL_UTBETALING
         },
+        skjæringstidspunkt = this.skjæringstidspunkt,
+        fom = this.periode.start,
+        tom = this.periode.endInclusive,
+        sykmeldingFom = this.sykmeldingsperiode.start,
+        sykmeldingTom = this.sykmeldingsperiode.endInclusive,
         generasjoner = generasjoner.dto(),
         opprettet = opprettet,
         oppdatert = oppdatert

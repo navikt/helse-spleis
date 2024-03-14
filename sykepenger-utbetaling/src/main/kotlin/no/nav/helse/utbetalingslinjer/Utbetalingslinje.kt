@@ -295,6 +295,8 @@ class Utbetalingslinje(
         },
         beløp = this.beløp,
         grad = this.grad,
+        stønadsdager = stønadsdager(),
+        totalbeløp = this.totalbeløp(),
         refFagsystemId = this.refFagsystemId,
         delytelseId = this.delytelseId,
         refDelytelseId = this.refDelytelseId,
@@ -309,7 +311,8 @@ class Utbetalingslinje(
             Klassekode.SykepengerArbeidstakerOrdinær -> KlassekodeDto.SykepengerArbeidstakerOrdinær
             Klassekode.SykepengerArbeidstakerFeriepenger -> KlassekodeDto.SykepengerArbeidstakerFeriepenger
         },
-        datoStatusFom = this.datoStatusFom
+        datoStatusFom = this.datoStatusFom,
+        statuskode = this.statuskode
     )
 }
 

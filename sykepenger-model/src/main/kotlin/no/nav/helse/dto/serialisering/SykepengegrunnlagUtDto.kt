@@ -9,5 +9,11 @@ data class SykepengegrunnlagUtDto(
     val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningDto>,
     val vurdertInfotrygd: Boolean,
     val sammenligningsgrunnlag: SammenligningsgrunnlagDto,
-    val `6G`: InntektDto.Årlig
+    val `6G`: InntektDto.Årlig,
+    val totalOmregnetÅrsinntekt: InntektDto.Årlig,
+    val beregningsgrunnlag: InntektDto.Årlig,
+    val er6GBegrenset: Boolean,
+    val forhøyetInntektskrav: Boolean,
+    val minsteinntekt: InntektDto.Årlig,
+    val oppfyllerMinsteinntektskrav: Boolean
 )

@@ -95,16 +95,6 @@ sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_GODKJENNING_REVURDERING : VedtaksperiodetilstandDto()
 }
 
-data class GenerasjonerDto(val generasjoner: List<GenerasjonDto>)
-data class GenerasjonDto(
-    val id: UUID,
-    val tilstand: GenerasjonTilstandDto,
-    val endringer: List<GenerasjonEndringDto>,
-    val vedtakFattet: LocalDateTime?,
-    val avsluttet: LocalDateTime?,
-    val kilde: GenerasjonkildeDto,
-)
-
 sealed class GenerasjonTilstandDto {
     data object UBEREGNET : GenerasjonTilstandDto()
     data object UBEREGNET_OMGJØRING : GenerasjonTilstandDto()
@@ -119,17 +109,6 @@ sealed class GenerasjonTilstandDto {
     data object ANNULLERT_PERIODE : GenerasjonTilstandDto()
     data object TIL_INFOTRYGD : GenerasjonTilstandDto()
 }
-
-data class GenerasjonEndringDto(
-    val id: UUID,
-    val tidsstempel: LocalDateTime,
-    val sykmeldingsperiode: PeriodeDto,
-    val periode: PeriodeDto,
-    val vilkårsgrunnlagId: UUID?,
-    val utbetalingId: UUID?,
-    val dokumentsporing: DokumentsporingDto,
-    val sykdomstidslinje: SykdomstidslinjeDto
-)
 
 data class DokumentsporingDto(
     val id: UUID,

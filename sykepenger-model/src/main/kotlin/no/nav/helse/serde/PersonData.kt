@@ -19,10 +19,10 @@ import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.FeriepengeberegnerDto
-import no.nav.helse.dto.GenerasjonDto
-import no.nav.helse.dto.GenerasjonEndringDto
+import no.nav.helse.dto.serialisering.GenerasjonUtDto
+import no.nav.helse.dto.serialisering.GenerasjonEndringUtDto
 import no.nav.helse.dto.GenerasjonTilstandDto
-import no.nav.helse.dto.GenerasjonerDto
+import no.nav.helse.dto.serialisering.GenerasjonerUtDto
 import no.nav.helse.dto.GenerasjonkildeDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.InfotrygdArbeidsgiverutbetalingsperiodeDto
@@ -52,7 +52,6 @@ import no.nav.helse.dto.SykdomshistorikkDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.SykdomstidslinjeDto
-import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
 import no.nav.helse.dto.SykmeldingsperioderDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
@@ -61,12 +60,12 @@ import no.nav.helse.dto.UtbetalingstidslinjeDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.UtbetaltDagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
+import no.nav.helse.dto.deserialisering.GenerasjonEndringInnDto
+import no.nav.helse.dto.deserialisering.GenerasjonInnDto
+import no.nav.helse.dto.deserialisering.GenerasjonerInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.SykepengegrunnlagInnDto
@@ -1239,7 +1238,7 @@ internal data class PersonData(
                     TilstandType.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
                     TilstandType.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
                 },
-                generasjoner = GenerasjonerDto(this.generasjoner.map { it.tilDto() }),
+                generasjoner = GenerasjonerInnDto(this.generasjoner.map { it.tilDto() }),
                 opprettet = opprettet,
                 oppdatert = oppdatert
             )
@@ -1287,7 +1286,7 @@ internal data class PersonData(
                 val kilde: KildeData,
                 val endringer: List<EndringData>
             ) {
-                fun tilDto() = GenerasjonDto(
+                fun tilDto() = GenerasjonInnDto(
                     id = this.id,
                     tilstand = when (tilstand) {
                         TilstandData.UBEREGNET -> GenerasjonTilstandDto.UBEREGNET
@@ -1394,7 +1393,7 @@ internal data class PersonData(
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val dokumentsporing: DokumentsporingData
                 ) {
-                    fun tilDto() = GenerasjonEndringDto(
+                    fun tilDto() = GenerasjonEndringInnDto(
                         id = this.id,
                         tidsstempel = this.tidsstempel,
                         sykmeldingsperiode = PeriodeDto(fom = sykmeldingsperiodeFom, tom = sykmeldingsperiodeTom),

@@ -484,7 +484,13 @@ internal class Sykepengegrunnlag private constructor(
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
         vurdertInfotrygd = this.vurdertInfotrygd,
         sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
-        `6G` = this.`6G`.dtoÅrlig()
+        `6G` = this.`6G`.dtoÅrlig(),
+        totalOmregnetÅrsinntekt = this.omregnetÅrsinntekt.dtoÅrlig(),
+        beregningsgrunnlag = this.beregningsgrunnlag.dtoÅrlig(),
+        er6GBegrenset = beregningsgrunnlag > this.`6G`,
+        forhøyetInntektskrav = this.forhøyetInntektskrav,
+        minsteinntekt = this.minsteinntekt.dtoÅrlig(),
+        oppfyllerMinsteinntektskrav = this.oppfyllerMinsteinntektskrav
     )
 }
 

@@ -11,10 +11,13 @@ data class UtbetalingslinjeUtDto(
     val satstype: SatstypeDto,
     val beløp: Int?,
     val grad: Int?,
+    val stønadsdager: Int,
+    val totalbeløp: Int,
     val refFagsystemId: String?,
     val delytelseId: Int,
     val refDelytelseId: Int?,
     val endringskode: EndringskodeDto,
     val klassekode: KlassekodeDto,
-    val datoStatusFom: LocalDate?
+    val datoStatusFom: LocalDate?,
+    val statuskode: String?
 )

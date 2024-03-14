@@ -510,6 +510,8 @@ class Oppdrag private constructor(
             Endringskode.ENDR -> EndringskodeDto.ENDR
         },
         nettoBeløp = nettoBeløp,
+        totalbeløp = this.totalbeløp(),
+        stønadsdager = this.stønadsdager(),
         overføringstidspunkt = overføringstidspunkt,
         avstemmingsnøkkel = avstemmingsnøkkel,
         status = when (status) {
