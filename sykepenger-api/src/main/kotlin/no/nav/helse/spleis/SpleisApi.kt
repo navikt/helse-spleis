@@ -22,9 +22,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.api.serializePersonForSporing
-import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
+import no.nav.helse.spleis.spanner.tilSpannerPersonDto
 
 internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao, spurteDuClient: SpurteDuClient?, azureClient: AzureTokenProvider?) {
     routing {
@@ -32,12 +32,9 @@ internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonD
             get("/api/person-json/{maskertId?}") {
                 withContext(Dispatchers.IO) {
                     val ident = fnr(personDao, spurteDuClient, azureClient)
-                    val person = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    call.respond(
-                        person.deserialize(
-                            jurist = MaskinellJurist()
-                        ) { hendelseDao.hentAlleHendelser(ident) }.serialize().json
-                    )
+                    val serialisertPerson = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
+                    val person = serialisertPerson.deserialize(jurist = MaskinellJurist()) { hendelseDao.hentAlleHendelser(ident) }
+                    call.respond(person.dto().tilSpannerPersonDto())
                 }
             }
 
