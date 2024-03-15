@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Vedtaksperiode
@@ -723,7 +723,7 @@ data class SpeilOppdrag(
         private val fagsystemId: String,
         private val tidsstempel: LocalDateTime,
         private val nettobeløp: Int,
-        simuleringresultat: SimuleringResultat?
+        simuleringresultat: SimuleringResultatDto?
     ) {
         private var simulering: Simulering? = null
         private val utbetalingslinjer = mutableListOf<Utbetalingslinje>()
@@ -738,14 +738,14 @@ data class SpeilOppdrag(
 
         fun build() = SpeilOppdrag(fagsystemId, tidsstempel, nettobeløp, simulering, utbetalingslinjer)
 
-        private fun medSimulering(simuleringsresultat: SimuleringResultat?) {
+        private fun medSimulering(simuleringsresultat: SimuleringResultatDto?) {
             if (simuleringsresultat == null) return
             this.simulering = Simulering(
                 totalbeløp = simuleringsresultat.totalbeløp,
                 perioder = simuleringsresultat.perioder.map { periode ->
                     Simuleringsperiode(
-                        fom = periode.periode.start,
-                        tom = periode.periode.endInclusive,
+                        fom = periode.fom,
+                        tom = periode.tom,
                         utbetalinger = periode.utbetalinger.map { utbetaling ->
                             Simuleringsutbetaling(
                                 mottakerId = utbetaling.utbetalesTil.id,
@@ -754,8 +754,8 @@ data class SpeilOppdrag(
                                 feilkonto = utbetaling.feilkonto,
                                 detaljer = utbetaling.detaljer.map {
                                     Simuleringsdetaljer(
-                                        faktiskFom = it.periode.start,
-                                        faktiskTom = it.periode.endInclusive,
+                                        faktiskFom = it.fom,
+                                        faktiskTom = it.tom,
                                         konto = it.konto,
                                         beløp = it.beløp,
                                         tilbakeføring = it.tilbakeføring,

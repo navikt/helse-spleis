@@ -58,7 +58,7 @@ import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.nesteDag
 import no.nav.helse.person.TilstandType
 
@@ -1127,12 +1127,12 @@ private fun KlassekodeDto.tilPersonData() = when (this) {
     KlassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
     KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
 }
-private fun SimuleringResultat.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData(
+private fun SimuleringResultatDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData(
     totalbeløp = this.totalbeløp,
     perioder = this.perioder.map {
         SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.SimulertPeriode(
-            fom = it.periode.start,
-            tom = it.periode.endInclusive,
+            fom = it.fom,
+            tom = it.tom,
 
             utbetalinger = it.utbetalinger.map {
                 SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.SimulertUtbetaling(
@@ -1144,8 +1144,8 @@ private fun SimuleringResultat.tilPersonData() = SpannerPersonDto.ArbeidsgiverDa
                     feilkonto = it.feilkonto,
                     detaljer = it.detaljer.map {
                         SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Detaljer(
-                            fom = it.periode.start,
-                            tom = it.periode.endInclusive,
+                            fom = it.fom,
+                            tom = it.tom,
                             konto = it.konto,
                             beløp = it.beløp,
                             klassekode = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Klassekode(

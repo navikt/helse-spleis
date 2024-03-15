@@ -24,7 +24,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -551,7 +551,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     simuleringOK: Boolean = true,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    simuleringsresultat: SimuleringResultat? = standardSimuleringsresultat(orgnummer)
+    simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
 ) {
     assertEtterspurt(Simulering::class, Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
     simulering(vedtaksperiodeIdInnhenter, simuleringOK, fnr, orgnummer, simuleringsresultat).forEach { simulering -> simulering.håndter(Person::håndter) }
@@ -565,7 +565,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     simuleringOK: Boolean = true,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    simuleringsresultat: SimuleringResultat? = standardSimuleringsresultat(orgnummer)
+    simuleringsresultat: SimuleringResultatDto? = standardSimuleringsresultat(orgnummer)
 ) {
     assertEtterspurt(Simulering::class, Behovtype.Simulering, vedtaksperiodeIdInnhenter, orgnummer)
     Simulering(

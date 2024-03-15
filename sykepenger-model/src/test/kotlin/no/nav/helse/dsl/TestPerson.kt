@@ -10,6 +10,8 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -19,7 +21,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonHendelse
-import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -28,7 +29,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
-import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
@@ -453,32 +453,34 @@ internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Innte
 internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
     lagStandardSykepengegrunnlag(map { it to inntekt }, skjæringstidspunkt)
 
-internal fun standardSimuleringsresultat(orgnummer: String) = SimuleringResultat(
+internal fun standardSimuleringsresultat(orgnummer: String) = SimuleringResultatDto(
     totalbeløp = 2000,
     perioder = listOf(
-        SimuleringResultat.SimulertPeriode(
-            periode = Periode(17.januar, 20.januar),
+        SimuleringResultatDto.SimulertPeriode(
+            fom = 17.januar,
+            tom = 20.januar,
             utbetalinger = listOf(
-                SimuleringResultat.SimulertUtbetaling(
+                SimuleringResultatDto.SimulertUtbetaling(
                     forfallsdato = 21.januar,
-                    utbetalesTil = SimuleringResultat.Mottaker(
+                    utbetalesTil = SimuleringResultatDto.Mottaker(
                         id = orgnummer,
                         navn = "Org Orgesen AS"
                     ),
                     feilkonto = false,
                     detaljer = listOf(
-                        SimuleringResultat.Detaljer(
-                            periode = Periode(17.januar, 20.januar),
+                        SimuleringResultatDto.Detaljer(
+                            fom = 17.januar,
+                            tom = 20.januar,
                             konto = "81549300",
                             beløp = 2000,
-                            klassekode = SimuleringResultat.Klassekode(
+                            klassekode = SimuleringResultatDto.Klassekode(
                                 kode = "SPREFAG-IOP",
                                 beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
                             ),
                             uføregrad = 100,
                             utbetalingstype = "YTEL",
                             tilbakeføring = false,
-                            sats = SimuleringResultat.Sats(
+                            sats = SimuleringResultatDto.Sats(
                                 sats = 1000.toDouble(),
                                 antall = 2,
                                 type = "DAG"

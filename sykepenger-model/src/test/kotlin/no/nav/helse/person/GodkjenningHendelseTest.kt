@@ -16,7 +16,7 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -234,7 +234,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             fagområde = person.personLogg.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
-            simuleringResultat = SimuleringResultat(
+            simuleringResultat = SimuleringResultatDto(
                 totalbeløp = 1000,
                 perioder = emptyList()
             ),

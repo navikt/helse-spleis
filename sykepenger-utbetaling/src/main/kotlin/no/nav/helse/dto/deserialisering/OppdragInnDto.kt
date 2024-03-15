@@ -4,8 +4,7 @@ import java.time.LocalDateTime
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.OppdragstatusDto
-import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 
 data class OppdragInnDto(
     val mottaker: String,
@@ -19,5 +18,5 @@ data class OppdragInnDto(
     val status: OppdragstatusDto?,
     val tidsstempel: LocalDateTime,
     val erSimulert: Boolean,
-    val simuleringsResultat: SimuleringResultat?
+    val simuleringsResultat: SimuleringResultatDto?
 )

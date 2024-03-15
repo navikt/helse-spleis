@@ -9,7 +9,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -1154,7 +1154,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultat?
+        simuleringsResultat: SimuleringResultatDto?
     ) {
         delegatee.preVisitOppdrag(
             oppdrag,
@@ -1188,7 +1188,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultat?
+        simuleringsResultat: SimuleringResultatDto?
     ) {
         delegatee.postVisitOppdrag(
             oppdrag,

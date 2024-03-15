@@ -42,6 +42,7 @@ import no.nav.helse.dto.RefusjonsopplysningDto
 import no.nav.helse.dto.RefusjonsopplysningerDto
 import no.nav.helse.dto.SammenligningsgrunnlagDto
 import no.nav.helse.dto.SatstypeDto
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SubsumsjonDto
 import no.nav.helse.dto.SykdomshistorikkDto
@@ -73,9 +74,6 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.ØkonomiDto
 import no.nav.helse.erHelg
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SimuleringResultat
-import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import kotlin.streams.asSequence
 
@@ -684,32 +682,53 @@ internal data class PersonData(
 
         data class VedtaksperiodeData(
             val id: UUID,
-            val tilstand: TilstandType,
+            val tilstand: TilstandTypeData,
             val generasjoner: List<GenerasjonData>,
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime
         ) {
+            enum class TilstandTypeData {
+                AVVENTER_HISTORIKK,
+                AVVENTER_GODKJENNING,
+                AVVENTER_SIMULERING,
+                TIL_UTBETALING,
+                TIL_INFOTRYGD,
+                AVSLUTTET,
+                AVSLUTTET_UTEN_UTBETALING,
+                REVURDERING_FEILET,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING
+            }
+
             fun tilDto() = VedtaksperiodeInnDto(
                 id = this.id,
                 tilstand = when (tilstand) {
-                    TilstandType.AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
-                    TilstandType.AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
-                    TilstandType.AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING
-                    TilstandType.TIL_UTBETALING -> VedtaksperiodetilstandDto.TIL_UTBETALING
-                    TilstandType.TIL_INFOTRYGD -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
-                    TilstandType.AVSLUTTET -> VedtaksperiodetilstandDto.AVSLUTTET
-                    TilstandType.AVSLUTTET_UTEN_UTBETALING -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
-                    TilstandType.REVURDERING_FEILET -> VedtaksperiodetilstandDto.REVURDERING_FEILET
-                    TilstandType.START -> VedtaksperiodetilstandDto.START
-                    TilstandType.AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK
-                    TilstandType.AVVENTER_INNTEKTSMELDING -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING
-                    TilstandType.AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
-                    TilstandType.AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
-                    TilstandType.AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING
-                    TilstandType.AVVENTER_HISTORIKK_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING
-                    TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING
-                    TilstandType.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
-                    TilstandType.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
+                    TilstandTypeData.AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK
+                    TilstandTypeData.AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING
+                    TilstandTypeData.AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING
+                    TilstandTypeData.TIL_UTBETALING -> VedtaksperiodetilstandDto.TIL_UTBETALING
+                    TilstandTypeData.TIL_INFOTRYGD -> VedtaksperiodetilstandDto.TIL_INFOTRYGD
+                    TilstandTypeData.AVSLUTTET -> VedtaksperiodetilstandDto.AVSLUTTET
+                    TilstandTypeData.AVSLUTTET_UTEN_UTBETALING -> VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING
+                    TilstandTypeData.REVURDERING_FEILET -> VedtaksperiodetilstandDto.REVURDERING_FEILET
+                    TilstandTypeData.START -> VedtaksperiodetilstandDto.START
+                    TilstandTypeData.AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK
+                    TilstandTypeData.AVVENTER_INNTEKTSMELDING -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING
+                    TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE
+                    TilstandTypeData.AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
+                    TilstandTypeData.AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING
+                    TilstandTypeData.AVVENTER_HISTORIKK_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING
+                    TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING
+                    TilstandTypeData.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
+                    TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
                 },
                 generasjoner = GenerasjonerInnDto(this.generasjoner.map { it.tilDto() }),
                 opprettet = opprettet,
@@ -830,7 +849,7 @@ internal data class PersonData(
                 val totalbeløp: Int,
                 val perioder: List<SimulertPeriode>
             ) {
-                internal fun tilDto() = SimuleringResultat(
+                internal fun tilDto() = SimuleringResultatDto(
                     totalbeløp = totalbeløp,
                     perioder = perioder.map { it.tilDto() }
                 )
@@ -841,9 +860,10 @@ internal data class PersonData(
                     val utbetalinger: List<SimulertUtbetaling>
                 ) {
 
-                    internal fun tilDto(): SimuleringResultat.SimulertPeriode {
-                        return SimuleringResultat.SimulertPeriode(
-                            periode = Periode(fom, tom),
+                    internal fun tilDto(): SimuleringResultatDto.SimulertPeriode {
+                        return SimuleringResultatDto.SimulertPeriode(
+                            fom = fom,
+                            tom = tom,
                             utbetalinger = utbetalinger.map { it.tilDto() }
                         )
                     }
@@ -855,10 +875,10 @@ internal data class PersonData(
                     val feilkonto: Boolean,
                     val detaljer: List<Detaljer>
                 ) {
-                    internal fun tilDto(): SimuleringResultat.SimulertUtbetaling {
-                        return SimuleringResultat.SimulertUtbetaling(
+                    internal fun tilDto(): SimuleringResultatDto.SimulertUtbetaling {
+                        return SimuleringResultatDto.SimulertUtbetaling(
                             forfallsdato = forfallsdato,
-                            utbetalesTil = SimuleringResultat.Mottaker(
+                            utbetalesTil = SimuleringResultatDto.Mottaker(
                                 id = utbetalesTil.id,
                                 navn = utbetalesTil.navn
                             ),
@@ -880,19 +900,20 @@ internal data class PersonData(
                     val sats: Sats,
                     val refunderesOrgnummer: String
                 ) {
-                    internal fun tilDto(): SimuleringResultat.Detaljer {
-                        return SimuleringResultat.Detaljer(
-                            periode = Periode(fom, tom),
+                    internal fun tilDto(): SimuleringResultatDto.Detaljer {
+                        return SimuleringResultatDto.Detaljer(
+                            fom = fom,
+                            tom = tom,
                             konto = konto,
                             beløp = beløp,
-                            klassekode = SimuleringResultat.Klassekode(
+                            klassekode = SimuleringResultatDto.Klassekode(
                                 kode = klassekode.kode,
                                 beskrivelse = klassekode.beskrivelse
                             ),
                             uføregrad = uføregrad,
                             utbetalingstype = utbetalingstype,
                             tilbakeføring = tilbakeføring,
-                            sats = SimuleringResultat.Sats(
+                            sats = SimuleringResultatDto.Sats(
                                 sats = sats.sats,
                                 antall = sats.antall,
                                 type = sats.type

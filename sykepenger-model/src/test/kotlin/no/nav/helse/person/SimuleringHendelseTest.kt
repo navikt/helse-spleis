@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidstakerHendelse
@@ -17,7 +18,6 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -232,61 +232,65 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringResultat = if (!simuleringOK) null else SimuleringResultat(
+            simuleringResultat = if (!simuleringOK) null else SimuleringResultatDto(
                 totalbeløp = 44361,
                 perioder = listOf(
-                    SimuleringResultat.SimulertPeriode(
-                        periode = Periode(17.januar, 31.januar),
+                    SimuleringResultatDto.SimulertPeriode(
+                        fom = 17.januar,
+                        tom = 31.januar,
                         utbetalinger = listOf(
-                            SimuleringResultat.SimulertUtbetaling(
+                            SimuleringResultatDto.SimulertUtbetaling(
                                 forfallsdato = 1.februar,
-                                utbetalesTil = SimuleringResultat.Mottaker(
+                                utbetalesTil = SimuleringResultatDto.Mottaker(
                                     UNG_PERSON_FNR_2018.toString(),
                                     "Ung Person"
                                 ),
                                 feilkonto = false,
                                 detaljer = listOf(
-                                    SimuleringResultat.Detaljer(
-                                        periode = Periode(17.januar, 31.januar),
+                                    SimuleringResultatDto.Detaljer(
+                                        fom = 17.januar,
+                                        tom = 31.januar,
                                         konto = "11111111111",
                                         beløp = dagsats * 11,
-                                        klassekode = SimuleringResultat.Klassekode(
+                                        klassekode = SimuleringResultatDto.Klassekode(
                                             "SPREFAG-IOP",
                                             "Sykepenger, Refusjon arbeidsgiver"
                                         ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = SimuleringResultat.Sats(dagsats.toDouble(), 11, "DAGLIG"),
+                                        sats = SimuleringResultatDto.Sats(dagsats.toDouble(), 11, "DAGLIG"),
                                         refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
                             )
                         )
                     ),
-                    SimuleringResultat.SimulertPeriode(
-                        periode = Periode(1.februar, 28.februar),
+                    SimuleringResultatDto.SimulertPeriode(
+                        fom = 1.februar,
+                        tom = 28.februar,
                         utbetalinger = listOf(
-                            SimuleringResultat.SimulertUtbetaling(
+                            SimuleringResultatDto.SimulertUtbetaling(
                                 forfallsdato = 1.mars,
-                                utbetalesTil = SimuleringResultat.Mottaker(
+                                utbetalesTil = SimuleringResultatDto.Mottaker(
                                     UNG_PERSON_FNR_2018.toString(),
                                     "Ung Person"
                                 ),
                                 feilkonto = false,
                                 detaljer = listOf(
-                                    SimuleringResultat.Detaljer(
-                                        periode = Periode(1.februar, 28.februar),
+                                    SimuleringResultatDto.Detaljer(
+                                        fom = 1.februar,
+                                        tom = 28.februar,
                                         konto = "11111111111",
                                         beløp = dagsats * 20,
-                                        klassekode = SimuleringResultat.Klassekode(
+                                        klassekode = SimuleringResultatDto.Klassekode(
                                             "SPREFAG-IOP",
                                             "Sykepenger, Refusjon arbeidsgiver"
                                         ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = SimuleringResultat.Sats(dagsats.toDouble(), 20, "DAGLIG"),
+                                        sats = SimuleringResultatDto.Sats(dagsats.toDouble(), 20, "DAGLIG"),
                                         refunderesOrgnummer = ORGNUMMER
                                     )
                                 )

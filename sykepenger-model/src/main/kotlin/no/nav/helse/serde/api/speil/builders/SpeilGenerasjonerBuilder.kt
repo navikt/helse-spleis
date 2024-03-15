@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
@@ -289,7 +289,7 @@ internal class SpeilGenerasjonerBuilder(
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultat?
+        simuleringsResultat: SimuleringResultatDto?
     ) {
         tilstand.besøkOppdrag(this, fagsystemId, tidsstempel, nettoBeløp, simuleringsResultat)
     }
@@ -348,7 +348,7 @@ internal class SpeilGenerasjonerBuilder(
         fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {}
+        fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultatDto?) {}
         fun forlatArbeidsgiveroppdrag(builder: SpeilGenerasjonerBuilder) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
@@ -421,7 +421,7 @@ internal class SpeilGenerasjonerBuilder(
             override fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {}
             override fun forlatArbeidsgiveroppdrag(builder: SpeilGenerasjonerBuilder) {}
             override fun forlatPersonoppdrag(builder: SpeilGenerasjonerBuilder) {}
-            override fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {}
+            override fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultatDto?) {}
             override fun besøkOppdragslinje(builder: SpeilGenerasjonerBuilder, fom: LocalDate, tom: LocalDate, beløp: Int, grad: Int, endringskode: Endringskode) {}
 
             override fun besøkUtbetaling(
@@ -543,7 +543,7 @@ internal class SpeilGenerasjonerBuilder(
                 beregnetPeriodeBuilder?.medUtbetalingstidslinje(UtbetalingstidslinjeBuilder(utbetalingstidslinje).build())
             }
 
-            override fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultat?) {
+            override fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultatDto?) {
                 oppdragbuilder = SpeilOppdrag.Builder(fagsystemId, tidsstempel, nettobeløp, simulering)
             }
 

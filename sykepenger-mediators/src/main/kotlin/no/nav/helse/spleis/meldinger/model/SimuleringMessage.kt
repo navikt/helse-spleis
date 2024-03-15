@@ -2,9 +2,8 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -28,28 +27,27 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val simuleringResultat =
         packet["@løsning.${Behovtype.Simulering.name}.simulering"].takeUnless(JsonNode::isMissingOrNull)
             ?.let {
-                SimuleringResultat(
+                SimuleringResultatDto(
                     totalbeløp = it.path("totalBelop").asInt(),
                     perioder = it.path("periodeList").map { periode ->
-                        SimuleringResultat.SimulertPeriode(
-                            periode = Periode(periode.path("fom").asLocalDate(), periode.path("tom").asLocalDate()),
+                        SimuleringResultatDto.SimulertPeriode(
+                            fom = periode.path("fom").asLocalDate(),
+                            tom = periode.path("tom").asLocalDate(),
                             utbetalinger = periode.path("utbetaling").map { utbetaling ->
-                                SimuleringResultat.SimulertUtbetaling(
+                                SimuleringResultatDto.SimulertUtbetaling(
                                     forfallsdato = utbetaling.path("forfall").asLocalDate(),
-                                    utbetalesTil = SimuleringResultat.Mottaker(
+                                    utbetalesTil = SimuleringResultatDto.Mottaker(
                                         id = utbetaling.path("utbetalesTilId").asText(),
                                         navn = utbetaling.path("utbetalesTilNavn").asText()
                                     ),
                                     feilkonto = utbetaling.path("feilkonto").asBoolean(),
                                     detaljer = utbetaling.path("detaljer").map { detalj ->
-                                        SimuleringResultat.Detaljer(
-                                            periode = Periode(
-                                                detalj.path("faktiskFom").asLocalDate(),
-                                                detalj.path("faktiskTom").asLocalDate()
-                                            ),
+                                        SimuleringResultatDto.Detaljer(
+                                            fom = detalj.path("faktiskFom").asLocalDate(),
+                                            tom = detalj.path("faktiskTom").asLocalDate(),
                                             konto = detalj.path("konto").asText(),
                                             beløp = detalj.path("belop").asInt(),
-                                            klassekode = SimuleringResultat.Klassekode(
+                                            klassekode = SimuleringResultatDto.Klassekode(
                                                 kode = detalj.path("klassekode").asText(),
                                                 beskrivelse = detalj.path("klassekodeBeskrivelse").asText()
                                             ),
@@ -57,7 +55,7 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
                                             utbetalingstype = detalj.path("utbetalingsType").asText(),
                                             refunderesOrgnummer = detalj.path("refunderesOrgNr").asText(),
                                             tilbakeføring = detalj.path("tilbakeforing").asBoolean(),
-                                            sats = SimuleringResultat.Sats(
+                                            sats = SimuleringResultatDto.Sats(
                                                 sats = detalj.path("sats").asDouble(),
                                                 antall = detalj.path("antallSats").asInt(),
                                                 type = detalj.path("typeSats").asText()

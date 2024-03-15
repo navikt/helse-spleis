@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
@@ -16,7 +17,6 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -236,32 +236,34 @@ abstract class AbstractObservableTest {
             simuleringOK = simuleringOK,
             melding = "",
             utbetalingId = utbetalingId,
-            simuleringResultat = SimuleringResultat(
+            simuleringResultat = SimuleringResultatDto(
                 totalbeløp = 2000,
                 perioder = listOf(
-                    SimuleringResultat.SimulertPeriode(
-                        periode = Periode(fom, tom),
+                    SimuleringResultatDto.SimulertPeriode(
+                        fom = fom,
+                        tom = tom,
                         utbetalinger = listOf(
-                            SimuleringResultat.SimulertUtbetaling(
+                            SimuleringResultatDto.SimulertUtbetaling(
                                 forfallsdato = tom.plusDays(1),
-                                utbetalesTil = SimuleringResultat.Mottaker(
+                                utbetalesTil = SimuleringResultatDto.Mottaker(
                                     id = orgnummer,
                                     navn = "Org Orgesen AS"
                                 ),
                                 feilkonto = false,
                                 detaljer = listOf(
-                                    SimuleringResultat.Detaljer(
-                                        periode = Periode(fom, tom),
+                                    SimuleringResultatDto.Detaljer(
+                                        fom = fom,
+                                        tom = tom,
                                         konto = "81549300",
                                         beløp = 2000,
-                                        klassekode = SimuleringResultat.Klassekode(
+                                        klassekode = SimuleringResultatDto.Klassekode(
                                             kode = "SPREFAG-IOP",
                                             beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
                                         ),
                                         uføregrad = 100,
                                         utbetalingstype = "YTEL",
                                         tilbakeføring = false,
-                                        sats = SimuleringResultat.Sats(
+                                        sats = SimuleringResultatDto.Sats(
                                             sats = 1000.0,
                                             antall = 2,
                                             type = "DAG"

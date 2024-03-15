@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.lang.IllegalStateException
-import java.lang.ProcessHandle.Info
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -9,7 +8,7 @@ import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
 import no.nav.helse.dto.FeriepengeberegnerDto
@@ -372,7 +371,7 @@ internal class Feriepengeberegner(
                 status: Oppdragstatus?,
                 overføringstidspunkt: LocalDateTime?,
                 erSimulert: Boolean,
-                simuleringsResultat: SimuleringResultat?
+                simuleringsResultat: SimuleringResultatDto?
             ) {
                 if (utbetaltUtbetaling || annullertUtbetaling) {
                     utbetalteDagerForOppdrag = mutableListOf()

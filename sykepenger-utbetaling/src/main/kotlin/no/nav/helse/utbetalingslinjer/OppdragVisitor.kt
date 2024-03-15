@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDateTime
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 
 interface OppdragVisitor: UtbetalingslinjeVisitor {
     fun preVisitOppdrag(
@@ -18,7 +18,7 @@ interface OppdragVisitor: UtbetalingslinjeVisitor {
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultat?
+        simuleringsResultat: SimuleringResultatDto?
     ) {
     }
 
@@ -36,7 +36,7 @@ interface OppdragVisitor: UtbetalingslinjeVisitor {
         status: Oppdragstatus?,
         overføringstidspunkt: LocalDateTime?,
         erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultat?
+        simuleringsResultat: SimuleringResultatDto?
     ) {
     }
 }

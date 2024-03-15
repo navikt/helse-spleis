@@ -54,11 +54,11 @@ import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Person
-import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.TilstandTypeData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.UtbetalingsdagData
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.SkatteopplysningData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -318,24 +318,24 @@ private fun ForkastetVedtaksperiodeUtDto.tilPersonData() = PersonData.Arbeidsgiv
 private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData(
     id = id,
     tilstand = when (tilstand) {
-        VedtaksperiodetilstandDto.AVSLUTTET -> TilstandType.AVSLUTTET
-        VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> TilstandType.AVSLUTTET_UTEN_UTBETALING
-        VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> TilstandType.AVVENTER_GODKJENNING
-        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> TilstandType.AVVENTER_GODKJENNING_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> TilstandType.AVVENTER_HISTORIKK
-        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> TilstandType.AVVENTER_HISTORIKK_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-        VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> TilstandType.AVVENTER_INNTEKTSMELDING
-        VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> TilstandType.AVVENTER_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> TilstandType.AVVENTER_SIMULERING
-        VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> TilstandType.AVVENTER_SIMULERING_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> TilstandType.AVVENTER_VILKÅRSPRØVING
-        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-        VedtaksperiodetilstandDto.REVURDERING_FEILET -> TilstandType.REVURDERING_FEILET
-        VedtaksperiodetilstandDto.START -> TilstandType.START
-        VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilstandType.TIL_INFOTRYGD
-        VedtaksperiodetilstandDto.TIL_UTBETALING -> TilstandType.TIL_UTBETALING
+        VedtaksperiodetilstandDto.AVSLUTTET -> TilstandTypeData.AVSLUTTET
+        VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> TilstandTypeData.AVSLUTTET_UTEN_UTBETALING
+        VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> TilstandTypeData.AVVENTER_BLOKKERENDE_PERIODE
+        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> TilstandTypeData.AVVENTER_GODKJENNING
+        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> TilstandTypeData.AVVENTER_HISTORIKK
+        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> TilstandTypeData.AVVENTER_HISTORIKK_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> TilstandTypeData.AVVENTER_INFOTRYGDHISTORIKK
+        VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> TilstandTypeData.AVVENTER_INNTEKTSMELDING
+        VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> TilstandTypeData.AVVENTER_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> TilstandTypeData.AVVENTER_SIMULERING
+        VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> TilstandTypeData.AVVENTER_SIMULERING_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> TilstandTypeData.AVVENTER_VILKÅRSPRØVING
+        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> TilstandTypeData.AVVENTER_VILKÅRSPRØVING_REVURDERING
+        VedtaksperiodetilstandDto.REVURDERING_FEILET -> TilstandTypeData.REVURDERING_FEILET
+        VedtaksperiodetilstandDto.START -> TilstandTypeData.START
+        VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilstandTypeData.TIL_INFOTRYGD
+        VedtaksperiodetilstandDto.TIL_UTBETALING -> TilstandTypeData.TIL_UTBETALING
     },
     generasjoner = generasjoner.generasjoner.map { it.tilPersonData() },
     opprettet = opprettet,
@@ -574,12 +574,12 @@ private fun KlassekodeDto.tilPersonData() = when (this) {
     KlassekodeDto.SykepengerArbeidstakerFeriepenger -> "SPATFER"
     KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
 }
-private fun SimuleringResultat.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData(
+private fun SimuleringResultatDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData(
     totalbeløp = this.totalbeløp,
     perioder = this.perioder.map {
         PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.SimulertPeriode(
-            fom = it.periode.start,
-            tom = it.periode.endInclusive,
+            fom = it.fom,
+            tom = it.tom,
 
             utbetalinger = it.utbetalinger.map {
                 PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.SimulertUtbetaling(
@@ -591,8 +591,8 @@ private fun SimuleringResultat.tilPersonData() = PersonData.ArbeidsgiverData.Ved
                     feilkonto = it.feilkonto,
                     detaljer = it.detaljer.map {
                         PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Detaljer(
-                            fom = it.periode.start,
-                            tom = it.periode.endInclusive,
+                            fom = it.fom,
+                            tom = it.tom,
                             konto = it.konto,
                             beløp = it.beløp,
                             klassekode = PersonData.ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData.Klassekode(

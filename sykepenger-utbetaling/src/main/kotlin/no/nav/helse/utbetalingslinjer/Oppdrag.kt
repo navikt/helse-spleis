@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.dto.EndringskodeDto
@@ -38,7 +38,7 @@ class Oppdrag private constructor(
     private var status: Oppdragstatus? = null,
     private val tidsstempel: LocalDateTime,
     private var erSimulert: Boolean = false,
-    private var simuleringsResultat: SimuleringResultat? = null
+    private var simuleringsResultat: SimuleringResultatDto? = null
 ) : List<Utbetalingslinje> by linjer, Aktivitetskontekst {
     companion object {
         fun periode(vararg oppdrag: Oppdrag): Periode? {

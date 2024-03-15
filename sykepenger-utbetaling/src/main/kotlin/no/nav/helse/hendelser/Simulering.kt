@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.util.UUID
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -15,7 +16,7 @@ class Simulering(
     fagområde: String,
     private val simuleringOK: Boolean,
     private val melding: String,
-    val simuleringResultat: SimuleringResultat?,
+    val simuleringResultat: SimuleringResultatDto?,
     private val utbetalingId: UUID
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer) {
     private val fagområde = Fagområde.from(fagområde)

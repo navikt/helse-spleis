@@ -7,7 +7,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -404,7 +404,7 @@ interface PersonObserver {
                     status: Oppdragstatus?,
                     overføringstidspunkt: LocalDateTime?,
                     erSimulert: Boolean,
-                    simuleringsResultat: SimuleringResultat?
+                    simuleringsResultat: SimuleringResultatDto?
                 ) {
                     dto = OppdragEventDetaljer(fagsystemId, fagområde.verdi, mottaker, nettoBeløp, stønadsdager, linjene.firstOrNull()?.fom ?: LocalDate.MIN, linjene.lastOrNull()?.tom ?: LocalDate.MIN, linjene)
                 }
@@ -540,7 +540,7 @@ interface PersonObserver {
                     status: Oppdragstatus?,
                     overføringstidspunkt: LocalDateTime?,
                     erSimulert: Boolean,
-                    simuleringsResultat: SimuleringResultat?
+                    simuleringsResultat: SimuleringResultatDto?
                 ) {
                     dto = OppdragEventDetaljer(fagsystemId, mottaker, linjene.firstOrNull()?.fom ?: LocalDate.MIN, linjene.lastOrNull()?.tom ?: LocalDate.MIN, linjene)
                 }

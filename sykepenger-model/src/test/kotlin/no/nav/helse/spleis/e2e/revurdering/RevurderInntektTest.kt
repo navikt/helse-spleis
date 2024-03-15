@@ -2,13 +2,11 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.SimuleringResultat
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -35,8 +33,6 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertHarHendelseIder
-import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -675,7 +671,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             status: Oppdragstatus?,
             overføringstidspunkt: LocalDateTime?,
             erSimulert: Boolean,
-            simuleringsResultat: SimuleringResultat?
+            simuleringsResultat: SimuleringResultatDto?
         ) {
             assertEquals(ønsketEndringskode, endringskode, message)
         }
