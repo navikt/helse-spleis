@@ -1,22 +1,16 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
-import no.nav.helse.hendelser.SimuleringResultat
-import no.nav.helse.dto.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto
 import no.nav.helse.dto.ArbeidsgiverInntektsopplysningDto
-import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.serialisering.FeriepengeUtDto
-import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
-import no.nav.helse.dto.serialisering.GenerasjonEndringUtDto
-import no.nav.helse.dto.serialisering.GenerasjonUtDto
 import no.nav.helse.dto.GenerasjonTilstandDto
 import no.nav.helse.dto.GenerasjonkildeDto
 import no.nav.helse.dto.HendelseskildeDto
@@ -29,31 +23,38 @@ import no.nav.helse.dto.InntektsopplysningDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
-import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.OpptjeningDto
-import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.RefusjonDto
 import no.nav.helse.dto.RefusjonsopplysningDto
 import no.nav.helse.dto.SammenligningsgrunnlagDto
 import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SykdomshistorikkElementDto
+import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.SykdomstidslinjeDto
-import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
 import no.nav.helse.dto.SykmeldingsperioderDto
-import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingsdagDto
-import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
 import no.nav.helse.dto.UtbetalingstidslinjeDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.UtbetaltDagDto
-import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
+import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.FeriepengeUtDto
+import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
+import no.nav.helse.dto.serialisering.GenerasjonEndringUtDto
+import no.nav.helse.dto.serialisering.GenerasjonUtDto
+import no.nav.helse.dto.serialisering.OppdragUtDto
+import no.nav.helse.dto.serialisering.PersonUtDto
+import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
+import no.nav.helse.dto.serialisering.UtbetalingUtDto
+import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
+import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
+import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
@@ -68,7 +69,7 @@ fun Person.tilSerialisertPerson(pretty: Boolean = false): SerialisertPerson {
 
 private fun Person.tilPersonData() = dto().tilPersonData()
 internal fun PersonData.tilSerialisertPerson(pretty: Boolean = false): SerialisertPerson {
-    val node = SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree(this))
+    val node = serdeObjectMapper.valueToTree<ObjectNode>(this)
     return SerialisertPerson(if (pretty) node.toPrettyString() else node.toString())
 }
 internal fun PersonUtDto.tilPersonData() = PersonData(
@@ -79,7 +80,8 @@ internal fun PersonUtDto.tilPersonData() = PersonData(
     arbeidsgivere = this.arbeidsgivere.map { it.tilPersonData() },
     infotrygdhistorikk = this.infotrygdhistorikk.elementer.map { it.tilPersonData() },
     vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.historikk.map { it.tilPersonData() },
-    dødsdato = this.alder.dødsdato
+    dødsdato = this.alder.dødsdato,
+    skjemaVersjon = SerialisertPerson.gjeldendeVersjon()
 )
 
 private fun ArbeidsgiverUtDto.tilPersonData() = PersonData.ArbeidsgiverData(

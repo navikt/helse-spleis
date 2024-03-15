@@ -77,7 +77,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
-import no.nav.helse.utbetalingslinjer.Klassekode
 
 internal data class PersonData(
     val aktørId: String,
@@ -87,7 +86,8 @@ internal data class PersonData(
     val opprettet: LocalDateTime,
     val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
     val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
-    val dødsdato: LocalDate?
+    val dødsdato: LocalDate?,
+    val skjemaVersjon: Int
 ) {
     fun tilPersonDto() = PersonInnDto(
         aktørId = this.aktørId,

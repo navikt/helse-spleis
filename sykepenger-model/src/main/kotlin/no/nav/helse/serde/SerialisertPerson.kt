@@ -592,7 +592,6 @@ class SerialisertPerson(val json: String) {
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
-        fun medSkjemaversjon(jsonNode: JsonNode) = JsonMigration.medSkjemaversjon(migrations, jsonNode)
     }
 
     val skjemaVersjon = gjeldendeVersjon()
