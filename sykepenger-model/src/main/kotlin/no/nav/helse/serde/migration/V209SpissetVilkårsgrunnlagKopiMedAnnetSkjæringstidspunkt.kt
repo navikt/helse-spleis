@@ -1,16 +1,9 @@
 package no.nav.helse.serde.migration
 
-import java.time.LocalDate
-import java.util.UUID
+import com.fasterxml.jackson.databind.node.ObjectNode
 
-internal class V209SpissetVilkårsgrunnlagKopiMedAnnetSkjæringstidspunkt : KopiereVilkårsgrunnlag(
-    versjon = 209,
-    Triple(vilkårsgrunnlagId, skjæringstidspunkt, null)
-) {
+internal class V209SpissetVilkårsgrunnlagKopiMedAnnetSkjæringstidspunkt : JsonMigration(version = 209) {
+    override val description = "[utført]"
 
-    private companion object {
-        private val vilkårsgrunnlagId = UUID.fromString("0b407252-8e5e-47a7-b407-23d1acfd02e2")
-        private val skjæringstidspunkt = LocalDate.parse("2021-07-11")
-    }
-
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {}
 }
