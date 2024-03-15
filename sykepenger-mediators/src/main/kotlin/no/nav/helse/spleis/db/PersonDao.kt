@@ -5,7 +5,11 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
+import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
@@ -16,12 +20,14 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
     fun hentEllerOpprettPerson(
+        jurist: MaskinellJurist,
         personidentifikator: Personidentifikator,
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
         aktørId: String,
         message: HendelseMessage,
-        lagNyPerson: () -> SerialisertPerson?,
-        håndterPerson: (SerialisertPerson, List<SerialisertPerson>) -> SerialisertPerson
+        hendelseRepository: HendelseRepository,
+        lagNyPerson: () -> Person?,
+        håndterPerson: (Person) -> Unit
     ) {
         /* finner eksisterende person og låser den for oppdatering, slik at andre
             selects mot samme person (som inkluderer 'FOR UPDATE') blokkeres frem til transaksjonen slutter.
@@ -40,16 +46,39 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
          */
         sessionOf(dataSource, returnGeneratedKey = true).use {
             it.transaction { txSession ->
-                val (personId, serialisertPerson, tidligerePersoner) = hentPersonOgLåsPersonForBehandling(txSession, personidentifikator, historiskeFolkeregisteridenter)
-                    ?: hentPersonFraHistoriskeIdenter(txSession, personidentifikator, historiskeFolkeregisteridenter)
-                    ?: opprettNyPerson(txSession, personidentifikator, aktørId, lagNyPerson)
+                val (personId, person) = hentPersonEllerOpprettNy(txSession, jurist, hendelseRepository, personidentifikator, aktørId, lagNyPerson, historiskeFolkeregisteridenter)
                     ?: return fantIkkePerson(personidentifikator)
+
                 knyttPersonTilHistoriskeIdenter(txSession, personId, personidentifikator, historiskeFolkeregisteridenter)
-                val oppdatertPerson = håndterPerson(serialisertPerson, tidligerePersoner)
+
+                val personUt = person.also(håndterPerson).dto()
+
+                val personData = personUt.tilPersonData()
+                val oppdatertJson = personData.tilSerialisertPerson().json
+
                 oppdaterAvstemmingtidspunkt(txSession, message, personidentifikator)
-                oppdaterPersonversjon(txSession, personId, oppdatertPerson.skjemaVersjon, oppdatertPerson.json)
+                oppdaterPersonversjon(txSession, personId, personData.skjemaVersjon, oppdatertJson)
             }
         }
+    }
+
+    private fun hentPersonEllerOpprettNy(txSession: Session, jurist: MaskinellJurist, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> Person?, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
+        return gjenopprettFraTidligereBehandling(txSession, jurist, hendelseRepository, personidentifikator, historiskeFolkeregisteridenter) ?: opprettNyPerson(txSession, personidentifikator, aktørId, lagNyPerson)
+    }
+
+    private fun gjenopprettFraTidligereBehandling(txSession: Session, jurist: MaskinellJurist, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
+        val (personId, serialisertPerson, tidligerePersoner) = hentPersonOgLåsPersonForBehandling(txSession, personidentifikator, historiskeFolkeregisteridenter)
+            ?: hentPersonFraHistoriskeIdenter(txSession, personidentifikator, historiskeFolkeregisteridenter)
+            ?: return null
+        val tidligereBehandlinger = tidligerePersoner.map { tidligerePerson -> Person.gjenopprett(jurist, tidligerePerson.tilPersonDto()) }
+        val personInn = serialisertPerson.tilPersonDto { hendelseRepository.hentAlleHendelser(personidentifikator) }
+        return personId to Person.gjenopprett(jurist, personInn, tidligereBehandlinger)
+    }
+
+    private fun opprettNyPerson(txSession: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> Person?): Pair<Long, Person>? {
+        val person = lagNyPerson() ?: return null
+        val personId = opprettNyPersonversjon(txSession, personidentifikator, aktørId, 0, "{}")
+        return personId to person
     }
 
     private fun fantIkkePerson(personidentifikator: Personidentifikator) {
@@ -114,12 +143,6 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
     private fun <R> Collection<R>.singleOrNullOrThrow() =
         if (size < 2) this.firstOrNull()
         else throw IllegalStateException("Listen inneholder mer enn ett element!")
-
-    private fun opprettNyPerson(session: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> SerialisertPerson?): Triple<Long, SerialisertPerson, List<SerialisertPerson>>? {
-        return lagNyPerson()?.let {
-            Triple(opprettNyPersonversjon(session, personidentifikator, aktørId, it.skjemaVersjon, it.json), it, emptyList())
-        }
-    }
 
     private fun opprettNyPersonversjon(session: Session, personidentifikator: Personidentifikator, aktørId: String, skjemaVersjon: Int, personJson: String): Long {
         @Language("PostgreSQL")

@@ -491,13 +491,16 @@ internal class HendelseMediator(
     }
 
     private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: Set<Personidentifikator>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
-        personDao.hentEllerOpprettPerson(personidentifikator, historiskeFolkeregisteridenter, hendelse.aktørId(), message, {
-            personopplysninger?.person(jurist)?.dto()?.tilPersonData()?.tilSerialisertPerson()
-        }) { serialisertPerson, tidligereBehandlinger ->
-            val tidligerePersoner = tidligereBehandlinger.map { it -> Person.gjenopprett(jurist, it.tilPersonDto()) }
-            val dto = serialisertPerson.tilPersonDto { hendelseRepository.hentAlleHendelser(personidentifikator) }
-            Person.gjenopprett(jurist, dto, tidligerePersoner).also(block).dto().tilPersonData().tilSerialisertPerson()
-        }
+        personDao.hentEllerOpprettPerson(
+            jurist = jurist,
+            personidentifikator = personidentifikator,
+            historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
+            aktørId = hendelse.aktørId(),
+            message = message,
+            hendelseRepository = hendelseRepository,
+            lagNyPerson = { personopplysninger?.person(jurist) },
+            håndterPerson = { person -> person.also(block) }
+        )
     }
 
     private fun finalize(
