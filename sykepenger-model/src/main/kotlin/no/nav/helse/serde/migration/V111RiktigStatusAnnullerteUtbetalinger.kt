@@ -2,7 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 
-internal class V111RiktigStatusAnnullerteUtbetalinger() : JsonMigration(version = 111) {
+internal class V111RiktigStatusAnnullerteUtbetalinger : JsonMigration(version = 111) {
     override val description: String = "Oppdatere status på annullerte utbetalinger"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {

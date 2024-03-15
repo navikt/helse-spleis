@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
 
 internal class V240KopiereSykdomstidslinjeTilVedtaksperiodeutbetalinger: JsonMigration(240) {

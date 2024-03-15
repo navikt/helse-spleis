@@ -136,7 +136,7 @@ internal class V193UtbetalingerOgVilkårsgrunnlag: JsonMigration(193) {
         return (aktive + forkastede).grupperSammenhengendePerioderMedHensynTilHelg()
     }
 
-    private fun sykdomsperiode(vedtaksperiode: JsonNode): Periode? {
+    private fun sykdomsperiode(vedtaksperiode: JsonNode): Periode {
         val fom = LocalDate.parse(vedtaksperiode.path("fom").asText())
         val tom = LocalDate.parse(vedtaksperiode.path("tom").asText())
         return fom til tom

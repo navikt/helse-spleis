@@ -3,7 +3,6 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.Vedtaksperiode
 import org.slf4j.LoggerFactory
 
 internal class V271RenamerUtbetalingerTilGenerasjon: JsonMigration(271) {

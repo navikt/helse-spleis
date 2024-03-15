@@ -1,8 +1,6 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.time.LocalDate
-import no.nav.helse.forrigeDag
 
 internal class V258ForkastedeRevurdertePerioder : JsonMigration(version = 258) {
     private companion object {

@@ -3,7 +3,6 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.UUID
-import org.slf4j.LoggerFactory
 
 internal class V237KopiereRefusjonsopplysningerTilEldreInnslag: JsonMigration(237) {
     override val description = "V196 innførte refusjonsopplysninger kun på nyeste innslaget den gangen. Denne migreringen kopierer de inn på eldre innslag også"

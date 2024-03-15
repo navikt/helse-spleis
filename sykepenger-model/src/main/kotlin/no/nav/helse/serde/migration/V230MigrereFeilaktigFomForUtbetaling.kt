@@ -38,7 +38,7 @@ internal class V230MigrereFeilaktigFomForUtbetaling: JsonMigration(230) {
                         val utbetalingensFom = utbetaling.path("fom").asLocalDate()
                         val arbeidsgiveroppdrag = oppdragsperiode(utbetaling.path("arbeidsgiverOppdrag"))
                         val personoppdrag = oppdragsperiode(utbetaling.path("personOppdrag"))
-                        val oppdragsperiode = listOfNotNull(arbeidsgiveroppdrag, personoppdrag)?.periode()
+                        val oppdragsperiode = listOfNotNull(arbeidsgiveroppdrag, personoppdrag).periode()
 
                         if (utbetalingensFom < utbetalingstidslinjeSisteUkjentDag) {
                             if (oppdragsperiode == null || oppdragsperiode.start >= utbetalingstidslinjeSisteUkjentDag) {

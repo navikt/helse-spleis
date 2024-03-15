@@ -1,10 +1,8 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate.EPOCH
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import org.slf4j.LoggerFactory
 
 internal class V213FlytteDatoTilSkattSykepengegrunnlag: JsonMigration(213) {
