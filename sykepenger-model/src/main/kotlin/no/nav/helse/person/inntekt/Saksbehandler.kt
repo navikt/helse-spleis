@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
-import org.slf4j.LoggerFactory
 
 class Saksbehandler internal constructor(
     id: UUID,
@@ -107,10 +106,7 @@ class Saksbehandler internal constructor(
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
             )
-        } else {
-            sikkerLogg.warn("Overstyring av ghost: inntekt ble overstyrt med ukjent årsak: $forklaring")
         }
-
     }
 
     override fun dto() =
@@ -126,8 +122,6 @@ class Saksbehandler internal constructor(
         )
 
     internal companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
         fun gjenopprett(dto: InntektsopplysningDto.SaksbehandlerDto, inntekter: Map<UUID, Inntektsopplysning>) =
             Saksbehandler(
                 id = dto.id,

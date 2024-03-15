@@ -27,10 +27,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     private val kildeSykmelding = mutableSetOf<LocalDate>()
 
     internal fun result(): Utbetalingstidslinje {
-        check(kildeSykmelding.isEmpty()) {
-            inntekter.ugyldigUtbetalingstidslinje(kildeSykmelding)
-            "Kan ikke opprette utbetalingsdager med kilde Sykmelding: ${kildeSykmelding.grupperSammenhengendePerioder()}"
-        }
+        check(kildeSykmelding.isEmpty()) { "Kan ikke opprette utbetalingsdager med kilde Sykmelding: ${kildeSykmelding.grupperSammenhengendePerioder()}" }
         return builder.build()
     }
 

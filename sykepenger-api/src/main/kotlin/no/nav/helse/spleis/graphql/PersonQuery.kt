@@ -39,7 +39,10 @@ internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao
             logg.info(it)
             sikkerlogg.info(it, kv("fødselsnummer", fnr))
         }
-        ApiMetrikker.målDeserialisering { serialisertPerson.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
+        ApiMetrikker.målDeserialisering {
+            val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(fnr.toLong()) }
+            Person.gjenopprett(MaskinellJurist(), dto)
+        }
             .let { ApiMetrikker.målByggSnapshot { serializePersonForSpeil(it, spekemat) } }
             .let { person -> mapTilDto(person, hendelseDao.hentHendelser(fnr.toLong())) }
     }

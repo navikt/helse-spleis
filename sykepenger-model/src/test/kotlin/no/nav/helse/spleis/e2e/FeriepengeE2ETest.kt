@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import ch.qos.logback.classic.Logger
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.AppenderBase
 import java.time.Year
 import no.nav.helse.EnableFeriepenger
 import no.nav.helse.Toggle
@@ -38,7 +35,6 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -46,7 +42,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
-import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
 @EnableFeriepenger
@@ -56,38 +51,14 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         val DAGSINNTEKT = INNTEKT.rundTilDaglig().reflection { _, _, _, dagligInt -> dagligInt }
     }
 
-    private fun fangLoggmeldinger(vararg filter: String, block: () -> Any): List<ILoggingEvent> {
-        val logCollector = LogCollector()
-
-        val logger = (LoggerFactory.getLogger("tjenestekall") as Logger)
-        logger.addAppender(logCollector)
-        logCollector.start()
+    private fun fangLoggmeldinger(vararg filter: String, block: () -> Any): List<String> {
         block()
-        logger.detachAppender(logCollector)
-        logCollector.stop()
+        val etter = person.personLogg.toString()
 
-        val bareMeldingerSomMatcher = { event: ILoggingEvent ->
-            filter.isEmpty() || filter.any { filtertekst -> event.formattedMessage.contains(filtertekst) }
+        val bareMeldingerSomMatcher = { event: String ->
+            filter.isEmpty() || filter.any { filtertekst -> event.contains(filtertekst) }
         }
-        return logCollector
-            .iterator()
-            .asSequence()
-            .filter(bareMeldingerSomMatcher)
-            .toList()
-    }
-
-    @AfterEach
-    fun after() {
-        val logger = (LoggerFactory.getLogger("tjenestekall") as Logger)
-        logger.detachAndStopAllAppenders()
-    }
-
-    private class LogCollector private constructor(private val messages: MutableList<ILoggingEvent>): AppenderBase<ILoggingEvent>(), Iterable<ILoggingEvent> by (messages) {
-        constructor() : this(mutableListOf())
-
-        override fun append(eventObject: ILoggingEvent) {
-            messages.add(eventObject)
-        }
+        return etter.lineSequence().filter(bareMeldingerSomMatcher).toList()
     }
 
     @Test

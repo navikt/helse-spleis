@@ -15,6 +15,8 @@ val jsonassertVersion = "1.5.0"
 
 dependencies {
     implementation(project(":sykepenger-model"))
+    implementation(project(":sykepenger-serde"))
+
     implementation(libs.rapids.and.rivers)
     implementation(libs.bundles.database)
     implementation(libs.bundles.flyway)

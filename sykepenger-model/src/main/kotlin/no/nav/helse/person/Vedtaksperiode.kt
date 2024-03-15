@@ -4,8 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
-import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.dto.VedtaksperiodetilstandDto
+import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
+import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -20,7 +21,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
@@ -37,9 +37,6 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
-import no.nav.helse.dto.VedtaksperiodetilstandDto
-import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.memoized
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
@@ -142,7 +139,6 @@ import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.økonomi.Inntekt
-import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode private constructor(
     private val person: Person,
@@ -1015,14 +1011,6 @@ internal class Vedtaksperiode private constructor(
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, subsumsjonObserver)
     }
 
-    private fun loggInnenforArbeidsgiverperiode() {
-        if (forventerInntekt()) return
-        sikkerlogg.info(
-            "Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
-            keyValue("vedtaksperiodeId", id), keyValue("fnr", fødselsnummer), keyValue("tilstand", tilstand.type)
-        )
-    }
-
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
         val perioder = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .map { it.id to it.generasjoner }
@@ -1382,7 +1370,6 @@ internal class Vedtaksperiode private constructor(
             if (!harNødvendigInntektForVilkårsprøving(vedtaksperiode))
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
             if (!harNødvendigInntektForVilkårsprøving(vedtaksperiode, arbeidsgivere)) {
-                loggDersomStuckRevurdering(vedtaksperiode, arbeidsgivere)
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
             }
             if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode))
@@ -1396,14 +1383,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             super.igangsettOverstyring(vedtaksperiode, revurdering)
             vedtaksperiode.generasjoner.forkastUtbetaling(revurdering)
-        }
-
-        private fun loggDersomStuckRevurdering(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) {
-            val vilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) ?: return
-            val arbeidsgivereISykepengegrunnlag = arbeidsgivere.filter { vilkårsgrunnlag.erArbeidsgiverRelevant(it.organisasjonsnummer()) }
-            if (harNødvendigInntektForVilkårsprøving(vedtaksperiode, arbeidsgivere = arbeidsgivereISykepengegrunnlag)) {
-                sikkerlogg.info("Periode sitter fast i revurdering pga ny arbeidsgiver som ikke er i sykepengegrunnlaget. {}, {}", kv("vedtaksperiodeId", "${vedtaksperiode.id}"), kv("fødselsnummer", vedtaksperiode.fødselsnummer))
-            }
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
@@ -1587,7 +1566,7 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.håndterDager(dager)
             if(vedtaksperiode.sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
-                sikkerlogg.warn("Det er egenmeldingsdager fra søknaden på sykdomstidlinjen, selv etter at inntektsmeldingen har oppdatert historikken. Undersøk hvorfor inntektsmeldingen ikke har overskrevet disse. Da er kanskje denne aktørId-en til hjelp: ${vedtaksperiode.aktørId}.")
+                dager.info("Det er egenmeldingsdager fra søknaden på sykdomstidlinjen, selv etter at inntektsmeldingen har oppdatert historikken. Undersøk hvorfor inntektsmeldingen ikke har overskrevet disse. Da er kanskje denne aktørId-en til hjelp: ${vedtaksperiode.aktørId}.")
             }
             if (vedtaksperiode.forventerInntekt()) return
             vedtaksperiode.tilstand(dager, AvsluttetUtenUtbetaling)
@@ -1830,7 +1809,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             checkNotNull(vedtaksperiode.vilkårsgrunnlag) { "Forventer vilkårsgrunnlag for å beregne utbetaling" }
-            vedtaksperiode.loggInnenforArbeidsgiverperiode()
             vedtaksperiode.trengerYtelser(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
@@ -2086,8 +2064,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.generasjoner.vedtakFattet(arbeidsgiver, utbetalingsavgjørelse)
             if (vedtaksperiode.generasjoner.erAvvist()) {
                 if (utbetalingsavgjørelse.automatisert) {
-                    utbetalingsavgjørelse.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
-                    return sikkerlogg.error("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
+                    return utbetalingsavgjørelse.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
                 }
                 utbetalingsavgjørelse.varsel(RV_UT_1)
             }
@@ -2156,18 +2133,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             vedtaksperiode.trengerPotensieltArbeidsgiveropplysninger()
-            loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode)
             vedtaksperiode.generasjoner.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
-        }
-
-        private fun loggPeriodeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode: Vedtaksperiode) {
-            val sykdomstidslinjeUtoverAgp = vedtaksperiode.finnArbeidsgiverperiode()?.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(vedtaksperiode.sykdomstidslinje)?.takeUnless { it.periode() == null } ?: return
-            sikkerlogg.info("Periode som går til avsluttet uten utbetaling og strekker seg utover arbeidsgiverperioden ${sykdomstidslinjeUtoverAgp.toUnikDagtypeShortString()}",
-                keyValue("aktørId", vedtaksperiode.aktørId),
-                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
-                keyValue("fom", "${vedtaksperiode.periode.start}")
-            )
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -2388,7 +2355,6 @@ internal class Vedtaksperiode private constructor(
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
         internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
@@ -2510,7 +2476,6 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Forkaste AUU: Vurderer om periodene $perioder kan forkastes på grunn av $årsak")
                 if (!kanForkastes(hendelse, alleVedtaksperioder)) return
                 hendelse.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak")
-                sikkerlogg.info("Forkaste AUU: Vedtaksperiodene $perioder forkastes på grunn av $årsak", keyValue("aktørId", sisteAuu.aktørId), keyValue("fom", "${førsteAuu.periode.start}"), keyValue("tom", "${sisteAuu.periode.endInclusive}"))
                 val forkastes = auuer.map { it.id }
                 person.søppelbøtte(hendelse) { it.id in forkastes }
             }
@@ -2659,32 +2624,18 @@ internal class Vedtaksperiode private constructor(
             return Periode(fom, tom)
         }
 
-        private fun List<Vedtaksperiode>.manglendeUtbetalingsopplysninger(dag: LocalDate, melding: String) {
+        private fun List<Vedtaksperiode>.manglendeUtbetalingsopplysninger(hendelse: IAktivitetslogg, dag: LocalDate, melding: String) {
             val vedtaksperiode = firstOrNull { dag in it.periode } ?: return
 
-            sikkerlogg.warn("Manglende utbetalingsopplysninger: $melding for $dag med skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt}. {}, {}, {}, {}",
-                keyValue("aktørId", vedtaksperiode.aktørId),
-                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
-                keyValue("tilstand", vedtaksperiode.tilstand.type.name),
-                keyValue("vedtaksperiodeId", "${vedtaksperiode.id}")
-            )
+            hendelse.info("Manglende utbetalingsopplysninger: $melding for $dag med skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt}")
         }
 
-        internal fun List<Vedtaksperiode>.ugyldigUtbetalingstidslinje(dager: Set<LocalDate>) {
-            val vedtaksperiode = firstOrNull() ?: return
-            sikkerlogg.warn("Ugyldig utbetalingstidslinje: utbetalingsdager med kilde Sykmelding: ${dager.grupperSammenhengendePerioder()} {}, {}, {}",
-                keyValue("aktørId", vedtaksperiode.aktørId),
-                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
-                keyValue("antallDager", dager.size)
-            )
-        }
-
-        internal fun List<Vedtaksperiode>.manglerVilkårsgrunnlag(dag: LocalDate) =
-            manglendeUtbetalingsopplysninger(dag, "mangler vilkårsgrunnlag")
-        internal fun List<Vedtaksperiode>.inngårIkkeISykepengegrunnlaget(dag: LocalDate) =
-            manglendeUtbetalingsopplysninger(dag, "inngår ikke i sykepengegrunnlaget")
-        internal fun List<Vedtaksperiode>.manglerRefusjonsopplysninger(dag: LocalDate) =
-            manglendeUtbetalingsopplysninger(dag, "mangler refusjonsopplysninger")
+        internal fun List<Vedtaksperiode>.manglerVilkårsgrunnlag(hendelse: IAktivitetslogg, dag: LocalDate) =
+            manglendeUtbetalingsopplysninger(hendelse, dag, "mangler vilkårsgrunnlag")
+        internal fun List<Vedtaksperiode>.inngårIkkeISykepengegrunnlaget(hendelse: IAktivitetslogg, dag: LocalDate) =
+            manglendeUtbetalingsopplysninger(hendelse, dag, "inngår ikke i sykepengegrunnlaget")
+        internal fun List<Vedtaksperiode>.manglerRefusjonsopplysninger(hendelse: IAktivitetslogg, dag: LocalDate) =
+            manglendeUtbetalingsopplysninger(hendelse, dag, "mangler refusjonsopplysninger")
 
         private fun beregningsperioderFørstegangsbehandling(person: Person, vedtaksperiode: Vedtaksperiode) = (
                 listOf(vedtaksperiode) + person

@@ -9,7 +9,6 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 class GjenopplivVilkårsgrunnlag(
     meldingsreferanseId: UUID,

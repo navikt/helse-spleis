@@ -33,7 +33,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.serde.api.SpekematDTO
-import no.nav.helse.serde.serialize
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spekemat.fabrikk.Pølse
 import no.nav.helse.spekemat.fabrikk.Pølsefabrikk
@@ -879,7 +880,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     }
 
     private fun lagrePerson(dataSource: DataSource, aktørId: String, fødselsnummer: String, person: Person) {
-        val serialisertPerson = person.serialize()
+        val serialisertPerson = person.dto().tilPersonData().tilSerialisertPerson()
         sessionOf(dataSource, returnGeneratedKey = true).use {
             val personId = it.run(queryOf("INSERT INTO person (fnr, aktor_id, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
                 fødselsnummer.toLong(), aktørId.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asUpdateAndReturnGeneratedKey)

@@ -20,9 +20,11 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.api.serializePersonForSpeil
-import no.nav.helse.serde.serialize
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -92,7 +94,9 @@ private fun migrateV2Task(arbeidId: String) {
                 migreringCounter += 1
                 log.info("[$migreringCounter] Utfører migrering")
                 val time = measureTimeMillis {
-                    val resultat = SerialisertPerson(data).deserialize(MaskinellJurist()).serialize()
+                    val dto = SerialisertPerson(data).tilPersonDto()
+                    val gjenopprettetPerson = Person.gjenopprett(MaskinellJurist(), dto)
+                    val resultat = gjenopprettetPerson.dto().tilPersonData().tilSerialisertPerson()
                     check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
                         "skjemaversjon" to resultat.skjemaVersjon,
                         "data" to resultat.json,
@@ -175,7 +179,9 @@ private fun testSpeilJsonTask(arbeidId: String) {
     opprettOgUtførArbeid(arbeidId) { session, fnr ->
         hentPerson(session, fnr)?.let { (aktørId, data) ->
             try {
-                serializePersonForSpeil(SerialisertPerson(data).deserialize(MaskinellJurist()))
+                val dto = SerialisertPerson(data).tilPersonDto()
+                val person = Person.gjenopprett(MaskinellJurist(), dto)
+                serializePersonForSpeil(person)
             } catch (err: Exception) {
                 log.info("$aktørId lar seg ikke serialisere: ${err.message}")
             }

@@ -9,14 +9,13 @@ dependencies {
     api(project(":sykepenger-utbetaling"))
     api(project(":sykepenger-aktivitetslogg"))
     api(project(":sykepenger-etterlevelse"))
-    implementation(libs.bundles.jackson)
-    implementation(libs.bundles.logging) {
-        exclude("com.fasterxml.jackson.core")
-        exclude("com.fasterxml.jackson.dataformat")
-    }
+
+    testImplementation(kotlin("reflect"))
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
     testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
+
+    testImplementation(project(":sykepenger-serde"))
 }
 
 tasks {

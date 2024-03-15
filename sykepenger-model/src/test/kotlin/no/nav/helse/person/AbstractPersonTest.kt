@@ -11,17 +11,16 @@ import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.gjenopprettFraJSON
+import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.readResource
-import no.nav.helse.serde.SerialisertPerson
-import no.nav.helse.serde.serialize
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
@@ -48,9 +47,7 @@ internal abstract class AbstractPersonTest {
         val a3: String = "321987654"
         val a4: String = "456789123"
 
-        private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/infotrygdforlengelse.json".readResource()).deserialize(
-            jurist
-        ).also { person ->
+        private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
@@ -65,9 +62,7 @@ internal abstract class AbstractPersonTest {
                 ),
             )
         }
-        private fun pingPongPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/pingpong.json".readResource()).deserialize(
-            jurist
-        ).also { person ->
+        private fun pingPongPerson(jurist: MaskinellJurist) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
@@ -129,7 +124,7 @@ internal abstract class AbstractPersonTest {
 
     internal fun reserialiser() {
         createTestPerson {
-            SerialisertPerson(person.serialize().json).deserialize(it)
+            gjenopprettFraJSONtekst(person.dto().tilPersonData().tilSerialisertPerson().json)
         }
     }
 

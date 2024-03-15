@@ -84,7 +84,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilderBuilder
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
 class Person private constructor(
@@ -101,8 +100,7 @@ class Person private constructor(
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
     companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        internal fun gjenopprett(jurist: MaskinellJurist, dto: PersonInnDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
+        fun gjenopprett(jurist: MaskinellJurist, dto: PersonInnDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
             val personJurist = jurist.medFødselsnummer(dto.fødselsnummer)
             val arbeidsgivere = mutableListOf<Arbeidsgiver>()
             val grunnlagsdataMap = mutableMapOf<UUID, VilkårsgrunnlagElement>()
@@ -216,7 +214,7 @@ class Person private constructor(
             val msg = andreBehandledeVedtaksperioder.map {
                 "vedtaksperiode(${it.periode()})"
             }
-            sikkerLogg.info("""hendelse: ${hendelse::class.java.simpleName} ($periode) kaster ut personen aktørid: $aktørId fnr: $personidentifikator 
+            hendelse.info("""hendelse: ${hendelse::class.java.simpleName} ($periode) kaster ut personen aktørid: $aktørId fnr: $personidentifikator 
                 | tidligere behandlede identer: ${tidligereBehandlinger.map { it.personidentifikator }}
                 | tidligere behandlede perioder: ${msg.joinToString { it }}
                 | cutoff: $cutoff""".trimMargin())
@@ -278,9 +276,7 @@ class Person private constructor(
         }
 
         if (utbetalingshistorikk.skalBeregnesManuelt) {
-            val msg = "Person er markert for manuell beregning av feriepenger - aktørId: $aktørId"
-            sikkerLogg.info(msg)
-            utbetalingshistorikk.info(msg)
+            utbetalingshistorikk.info("Person er markert for manuell beregning av feriepenger - aktørId: $aktørId")
             return
         }
 
@@ -296,7 +292,7 @@ class Person private constructor(
             feriepengeberegner.beregnFeriepengerForInfotrygdPerson().roundToInt()
 
         if (beregnetFeriepengebeløpPersonInfotrygd != 0 && beregnetFeriepengebeløpPersonInfotrygd !in feriepengepengebeløpPersonUtbetaltAvInfotrygd) {
-            sikkerLogg.info(
+            utbetalingshistorikk.info(
                 """
                 Beregnet feriepengebeløp til person i IT samsvarer ikke med faktisk utbetalt beløp
                 AktørId: $aktørId

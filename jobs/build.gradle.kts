@@ -12,6 +12,7 @@ dependencies {
     implementation("com.github.navikt:rapids-and-rivers-cli:$rapidsAndRiversCliVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation(project(":sykepenger-model"))
+    implementation(project(":sykepenger-serde"))
     implementation(libs.bundles.database)
     implementation(libs.cloudsql)
 }

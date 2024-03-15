@@ -440,7 +440,7 @@ internal class Arbeidsgiver private constructor(
             feriepengeberegner,
             utbetalingshistorikkForFeriepenger,
             feriepengeutbetalinger
-        ).build()
+        ).build(utbetalingshistorikkForFeriepenger)
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
             feriepengeutbetalinger.add(feriepengeutbetaling)

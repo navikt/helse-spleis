@@ -21,6 +21,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.Person
 import no.nav.helse.serde.api.serializePersonForSporing
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
@@ -33,7 +34,8 @@ internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonD
                 withContext(Dispatchers.IO) {
                     val ident = fnr(personDao, spurteDuClient, azureClient)
                     val serialisertPerson = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    val person = serialisertPerson.deserialize(jurist = MaskinellJurist()) { hendelseDao.hentAlleHendelser(ident) }
+                    val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(ident) }
+                    val person = Person.gjenopprett(MaskinellJurist(), dto)
                     call.respond(person.dto().tilSpannerPersonDto())
                 }
             }
@@ -66,13 +68,8 @@ internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonD
                 withContext(Dispatchers.IO) {
                     val fnr =  fnr(personDao)
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    call.respond(
-                        serializePersonForSporing(
-                            person.deserialize(
-                                jurist = MaskinellJurist()
-                            ) { hendelseDao.hentAlleHendelser(fnr) }
-                        )
-                    )
+                    val dto = person.tilPersonDto { hendelseDao.hentAlleHendelser(fnr) }
+                    call.respond(serializePersonForSporing(Person.gjenopprett(MaskinellJurist(), dto)))
                 }
             }
         }

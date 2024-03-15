@@ -12,16 +12,11 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import org.slf4j.LoggerFactory
 
 class InntektForSykepengegrunnlag(
     private val inntekter: List<ArbeidsgiverInntekt>,
     private val arbeidsforhold: List<Arbeidsforhold>
 ) {
-    private companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     init {
         require(inntekter.antallMåneder() <= 3L) { "Forventer maks 3 inntektsmåneder" }
     }
@@ -51,10 +46,6 @@ class InntektForSykepengegrunnlag(
                 it.erFrilanser && inntekter.harInntektFor(arbeidsforhold.orgnummer, it.yearMonth)
             }
         }
-
-    internal fun loggInteressantFrilanserInformasjon(skjæringstidspunkt: LocalDate) {
-        if (finnerFrilansinntektDenSisteMåneden(skjæringstidspunkt)) sikkerLogg.info("Fant frilanserinntekt på en arbeidsgiver den siste måneden")
-    }
 
     internal fun finnerFrilansinntektDenSisteMåneden(skjæringstidspunkt: LocalDate): Boolean {
         val månedFørSkjæringstidspunkt = YearMonth.from(skjæringstidspunkt.minusMonths(1))

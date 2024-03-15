@@ -38,7 +38,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.serde.serialize
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
@@ -491,10 +492,11 @@ internal class HendelseMediator(
 
     private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: Set<Personidentifikator>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
         personDao.hentEllerOpprettPerson(personidentifikator, historiskeFolkeregisteridenter, hendelse.aktørId(), message, {
-            personopplysninger?.person(jurist)?.serialize()
+            personopplysninger?.person(jurist)?.dto()?.tilPersonData()?.tilSerialisertPerson()
         }) { serialisertPerson, tidligereBehandlinger ->
-            val tidligerePersoner = tidligereBehandlinger.map { it -> it.deserialize(jurist) }
-            serialisertPerson.deserialize(jurist, tidligerePersoner) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).serialize()
+            val tidligerePersoner = tidligereBehandlinger.map { it -> Person.gjenopprett(jurist, it.tilPersonDto()) }
+            val dto = serialisertPerson.tilPersonDto { hendelseRepository.hentAlleHendelser(personidentifikator) }
+            Person.gjenopprett(jurist, dto, tidligerePersoner).also(block).dto().tilPersonData().tilSerialisertPerson()
         }
     }
 

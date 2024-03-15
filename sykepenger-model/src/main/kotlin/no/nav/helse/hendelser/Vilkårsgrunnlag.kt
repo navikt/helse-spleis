@@ -61,7 +61,6 @@ class Vilkårsgrunnlag(
     internal fun valider(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         val sykepengegrunnlagOk = sykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.valider(this)
-        inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
         arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
         val opptjening = opptjening(subsumsjonObserver)
         val opptjeningvurderingOk = opptjening.valider(this)
