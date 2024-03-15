@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
+import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -27,8 +28,6 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.readResource
-import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -45,7 +44,6 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -134,11 +132,11 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
 
     private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
-        SerialisertPerson("/personer/dobbelutbetaling.json".readResource()).deserialize(jurist)
+        gjenopprettFraJSON("/personer/dobbelutbetaling.json", jurist)
     }
 
     private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
-        SerialisertPerson("/personer/auu-blir-med-i-revurdering.json".readResource()).deserialize(jurist)
+        gjenopprettFraJSON("/personer/auu-blir-med-i-revurdering.json", jurist)
     }.also {
         person.håndter(
             Utbetalingshistorikk(

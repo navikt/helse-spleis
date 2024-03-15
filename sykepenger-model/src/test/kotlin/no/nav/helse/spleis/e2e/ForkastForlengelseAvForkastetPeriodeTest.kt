@@ -23,24 +23,12 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_28
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_31
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_33
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
-import no.nav.helse.serde.serialize
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest() {
-
-    @Test
-    fun `overlapper med forkastet hos annen arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
-        person.søppelbøtte(hendelselogg, 1.januar til 16.januar)
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        assertDoesNotThrow { person.serialize() }
-    }
 
     @Test
     fun `forlenger med forkastet periode hos annen arbeidsgiver`() {

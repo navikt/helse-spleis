@@ -19,7 +19,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
@@ -269,8 +268,8 @@ internal class Feriepengeutbetaling private constructor(
                 """.trimIndent()
             )
 
-            val arbeidsgiveroppdragdetaljer = serdeObjectMapper.writeValueAsString(PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiveroppdrag))
-            val personoppdragdetaljer = serdeObjectMapper.writeValueAsString(PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personoppdrag))
+            val arbeidsgiveroppdragdetaljer = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiveroppdrag).toString()
+            val personoppdragdetaljer = PersonObserver.FeriepengerUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personoppdrag).toString()
             // Logging
             sikkerLogg.info(
                 """

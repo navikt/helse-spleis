@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -21,7 +22,6 @@ import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.Frilans
 import no.nav.helse.person.Person
@@ -480,7 +480,7 @@ protected fun håndterInntektsmeldingPortal(
 
     protected fun assertGjenoppbygget(dto: PersonUtDto) {
         val serialisertPerson = dto.tilPersonData().tilSerialisertPerson()
-        val gjenoppbyggetPersonViaPersonData = serialisertPerson.deserialize(MaskinellJurist())
+        val gjenoppbyggetPersonViaPersonData = Person.gjenopprett(MaskinellJurist(), serialisertPerson.tilPersonDto())
         val gjenoppbyggetPersonViaPersonDto = Person.gjenopprett(MaskinellJurist(), dto.tilPersonData().tilPersonDto())
 
         val dtoFraPersonViaPersonData = gjenoppbyggetPersonViaPersonData.dto()
@@ -510,7 +510,6 @@ protected fun håndterInntektsmeldingPortal(
         bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
 
     protected fun serializeForSpeil() = testperson.serializeForSpeil(observatør.spekemat.resultat())
-    protected fun serialize(pretty: Boolean = false) = testperson.serialize(pretty)
     protected fun dto() = testperson.dto()
 
     protected fun medFødselsdato(fødselsdato: LocalDate) {

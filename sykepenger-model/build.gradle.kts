@@ -17,6 +17,8 @@ dependencies {
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
     testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
+
+    testImplementation(project(":sykepenger-serde"))
 }
 
 tasks {
