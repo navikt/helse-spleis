@@ -215,14 +215,16 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
         dager = this.map { it.dto() }
     )
 
-    fun behandlingsresultat(periode: Periode): String? {
-        val relevanteDager = this.subset(periode).utbetalingsdager.filter { it is NavDag || it is AvvistDag || it is ForeldetDag }
+    private val Utbetalingsdag.avslag get() = this is AvvistDag || this is ForeldetDag
+    fun behandlingsresultat(periode: Periode): String {
+        val relevantUtbetalingstidslinje = this.subset(periode)
+        val relevanteDager = relevantUtbetalingstidslinje.utbetalingsdager.filter { it is NavDag || it.avslag }
         return when {
             relevanteDager.isEmpty() -> "Avslag"
-            relevanteDager.all { it is AvvistDag || it is ForeldetDag } -> "Avslag"
+            relevanteDager.all { it.avslag } -> "Avslag"
             relevanteDager.all { it is NavDag } -> "Innvilget"
-            relevanteDager.any { it is NavDag } && relevanteDager.any { it is AvvistDag || it is ForeldetDag } -> "DelvisInnvilget"
-            else -> null
+            relevanteDager.any { it is NavDag } && relevanteDager.any { it.avslag } -> "DelvisInnvilget"
+            else -> throw IllegalStateException("Klarte ikke å utlede behandlingsresultat fra utbetalingstidslinjen $relevantUtbetalingstidslinje")
         }
     }
 }

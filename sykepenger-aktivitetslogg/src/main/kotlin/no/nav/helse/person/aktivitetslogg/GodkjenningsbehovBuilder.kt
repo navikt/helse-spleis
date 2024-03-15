@@ -61,6 +61,8 @@ class GodkjenningsbehovBuilder(
         this.orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold
     }
     fun tagUtbetaling(arbeidsgiverNettoBeløp: Int, personNettoBeløp: Int) {
+        val antallTagsFør = tags.size
+
         if (arbeidsgiverNettoBeløp > 0) tags.add("Arbeidsgiverutbetaling")
         else if (arbeidsgiverNettoBeløp < 0) tags.add("NegativArbeidsgiverutbetaling")
 
@@ -68,6 +70,8 @@ class GodkjenningsbehovBuilder(
         else if (personNettoBeløp < 0) tags.add("NegativPersonutbetaling")
 
         if (arbeidsgiverNettoBeløp == 0 && personNettoBeløp == 0) tags.add("IngenUtbetaling")
+
+        check(tags.size > antallTagsFør) { "arbeidsgiverNettoBeløp=$arbeidsgiverNettoBeløp, personNettoBeløp=$personNettoBeløp burde bli minst én ny tag." }
     }
 
     fun tagBehandlingsresultat(behandlingsresultat: String) {

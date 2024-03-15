@@ -576,10 +576,7 @@ class Utbetaling private constructor(
             val arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag.nettoBeløp()
             val personNettoBeløp = utbetaling.personOppdrag.nettoBeløp()
             builder.tagUtbetaling(arbeidsgiverNettoBeløp, personNettoBeløp)
-            val behandlingsresultat = utbetaling.utbetalingstidslinje.behandlingsresultat(periode)
-            if (behandlingsresultat != null) {
-                builder.tagBehandlingsresultat(behandlingsresultat)
-            }
+            builder.tagBehandlingsresultat(utbetaling.utbetalingstidslinje.behandlingsresultat(periode))
             return builder
         }
     }
