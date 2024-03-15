@@ -334,7 +334,11 @@ internal class HendelseMediator(
 
     override fun behandle(message: AvstemmingMessage, avstemming: Avstemming, context: MessageContext) {
         hentPersonOgHåndter(message, avstemming, context) { person ->
-            person.håndter(avstemming)
+            val dto = person.dto()
+            val avstemmer = Avstemmer(dto)
+            context.publish(avstemmer.tilJsonMessage().toJson().also {
+                sikkerLogg.info("sender person_avstemt:\n$it")
+            })
         }
     }
 

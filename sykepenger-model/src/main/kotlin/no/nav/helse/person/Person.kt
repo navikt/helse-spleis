@@ -12,7 +12,6 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
-import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -399,14 +398,6 @@ class Person private constructor(
         }
         observers.forEach { påminnelse.vedtaksperiodeIkkeFunnet(it) }
         håndterGjenoppta(påminnelse)
-    }
-
-    fun håndter(avstemming: Avstemming) {
-        avstemming.kontekst(aktivitetslogg, this)
-        avstemming.info("Avstemmer utbetalinger og vedtaksperioder")
-        val result = Avstemmer(this).toMap()
-        observers.forEach { it.avstemt(result) }
-        håndterGjenoppta(avstemming)
     }
 
     fun håndter(hendelse: OverstyrTidslinje) {

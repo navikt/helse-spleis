@@ -9,6 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
@@ -88,7 +89,7 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         assertDoesNotThrow { UUID.fromString(utbetalinger.path(1).path("id").asText()) }
         assertEquals("IKKE_UTBETALT", utbetalinger.path(1).path("status").asText())
         assertEquals("UTBETALING", utbetalinger.path(1).path("type").asText())
-        assertEquals(null, utbetalinger.path(1).get("vurdering"))
+        assertFalse(utbetalinger.path(1).hasNonNull("vurdering"))
         assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(1).path("opprettet").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(utbetalinger.path(1).path("oppdatert").asText()) }
     }

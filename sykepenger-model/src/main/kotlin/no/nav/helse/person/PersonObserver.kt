@@ -726,7 +726,6 @@ interface PersonObserver {
     fun utbetalingUtenUtbetaling(event: UtbetalingUtbetaltEvent) {}
     fun feriepengerUtbetalt(event: FeriepengerUtbetaltEvent) {}
     fun annullering(event: UtbetalingAnnullertEvent) {}
-    fun avstemt(result: Map<String, Any>) {}
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
 
     fun generasjonLukket(event: GenerasjonLukketEvent) {}

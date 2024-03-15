@@ -434,10 +434,6 @@ internal class PersonMediator(
         }))
     }
 
-    override fun avstemt(result: Map<String, Any>) {
-        queueMessage(JsonMessage.newMessage("person_avstemt", result))
-    }
-
     override fun vedtaksperiodeIkkeFunnet(event: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
         queueMessage(JsonMessage.newMessage("vedtaksperiode_ikke_funnet", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,

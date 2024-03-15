@@ -56,7 +56,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     private val forkastedeEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeForkastetEvent>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
-    lateinit var avstemming: Map<String, Any>
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
 
     internal fun replayInntektsmeldinger(block: () -> Unit): Set<UUID> {
@@ -84,10 +83,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     fun forkastedePerioder() = forkastedeEventer.size
     fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
-
-    override fun avstemt(result: Map<String, Any>) {
-        avstemming = result
-    }
 
     override fun utbetalingUtenUtbetaling(event: PersonObserver.UtbetalingUtbetaltEvent) {
         utbetalingUtenUtbetalingEventer.add(event)
