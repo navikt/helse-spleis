@@ -2,7 +2,6 @@ package no.nav.helse.spleis.mediator
 
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -351,7 +350,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestAnnullerUtbetalingVerdi.set(true)
     }
 
-    override fun behandle(message: AvstemmingMessage, avstemming: Avstemming, context: MessageContext) {
+    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, aktørId: String, context: MessageContext) {
         lestAvstemmingVerdi.set(true)
     }
 

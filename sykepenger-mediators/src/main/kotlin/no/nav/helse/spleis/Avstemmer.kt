@@ -112,4 +112,3 @@ data class AvstemtVurdering(
     val automatiskBehandling: Boolean,
     val godkjent: Boolean
 )
-

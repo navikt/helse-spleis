@@ -3,7 +3,6 @@ package no.nav.helse.spleis
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -38,8 +37,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.serde.tilPersonData
-import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
@@ -332,8 +329,8 @@ internal class HendelseMediator(
         }
     }
 
-    override fun behandle(message: AvstemmingMessage, avstemming: Avstemming, context: MessageContext) {
-        hentPersonOgHåndter(message, avstemming, context) { person ->
+    override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, aktørId: String, context: MessageContext) {
+        person(personidentifikator, message, aktørId, emptySet(), MaskinellJurist(), null) { person  ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
             context.publish(avstemmer.tilJsonMessage().toJson().also {
@@ -486,7 +483,7 @@ internal class HendelseMediator(
         val personMediator = PersonMediator(message, hendelse, hendelseRepository)
         val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
-        person(personidentifikator, message, hendelse, historiskeFolkeregisteridenter, jurist, personopplysninger) { person  ->
+        person(personidentifikator, message, hendelse.aktørId(), historiskeFolkeregisteridenter, jurist, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person)
@@ -494,12 +491,12 @@ internal class HendelseMediator(
         finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
-    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: Set<Personidentifikator>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
+    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, aktørId: String, historiskeFolkeregisteridenter: Set<Personidentifikator>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
         personDao.hentEllerOpprettPerson(
             jurist = jurist,
             personidentifikator = personidentifikator,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
-            aktørId = hendelse.aktørId(),
+            aktørId = aktørId,
             message = message,
             hendelseRepository = hendelseRepository,
             lagNyPerson = { personopplysninger?.person(jurist) },
@@ -604,7 +601,7 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: MessageContext)
     fun behandle(message: SimuleringMessage, simulering: Simulering, context: MessageContext)
     fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: MessageContext)
-    fun behandle(message: AvstemmingMessage, avstemming: Avstemming, context: MessageContext)
+    fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, aktørId: String, context: MessageContext)
     fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext)
     fun behandle(message: OverstyrArbeidsgiveropplysningerMessage, overstyrArbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger, context: MessageContext)
