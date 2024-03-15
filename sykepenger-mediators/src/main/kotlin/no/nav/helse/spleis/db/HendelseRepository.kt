@@ -9,8 +9,8 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
-import no.nav.helse.serde.migration.Json
-import no.nav.helse.serde.migration.Navn
+import no.nav.helse.spleis.serde.migration.Json
+import no.nav.helse.spleis.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage

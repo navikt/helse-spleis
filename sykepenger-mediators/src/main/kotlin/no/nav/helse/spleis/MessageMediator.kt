@@ -4,8 +4,8 @@ import java.sql.SQLException
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.serde.DeserializationException
-import no.nav.helse.serde.migration.JsonMigrationException
+import no.nav.helse.spleis.serde.DeserializationException
+import no.nav.helse.spleis.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver

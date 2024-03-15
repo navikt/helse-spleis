@@ -1,0 +1,17 @@
+package no.nav.helse.spleis.serde.mapping
+
+enum class JsonDagType {
+    ARBEIDSDAG,
+    ARBEIDSGIVERDAG,
+    ARBEIDSGIVER_HELGEDAG,
+    FERIEDAG,
+    FRISK_HELGEDAG,
+    FORELDET_SYKEDAG,
+    PERMISJONSDAG,
+    PROBLEMDAG,
+    STUDIEDAG,
+    SYKEDAG,
+    SYK_HELGEDAG,
+    UTENLANDSDAG,
+    UKJENT_DAG,
+}

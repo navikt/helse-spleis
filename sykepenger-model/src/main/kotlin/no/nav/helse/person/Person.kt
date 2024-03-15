@@ -102,7 +102,7 @@ class Person private constructor(
 ) : Aktivitetskontekst {
     companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        internal fun gjenopprett(jurist: MaskinellJurist, dto: PersonInnDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
+        fun gjenopprett(jurist: MaskinellJurist, dto: PersonInnDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
             val personJurist = jurist.medFødselsnummer(dto.fødselsnummer)
             val arbeidsgivere = mutableListOf<Arbeidsgiver>()
             val grunnlagsdataMap = mutableMapOf<UUID, VilkårsgrunnlagElement>()

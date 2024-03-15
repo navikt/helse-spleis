@@ -5,9 +5,9 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
-import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.serde.SerialisertPerson
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 

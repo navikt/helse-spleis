@@ -38,7 +38,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
@@ -80,6 +79,7 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.spleis.serde.tilSerialisertPerson
 import org.slf4j.LoggerFactory
 
 // Understands how to communicate messages to other objects
@@ -491,10 +491,10 @@ internal class HendelseMediator(
 
     private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, hendelse: PersonHendelse, historiskeFolkeregisteridenter: Set<Personidentifikator>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
         personDao.hentEllerOpprettPerson(personidentifikator, historiskeFolkeregisteridenter, hendelse.aktørId(), message, {
-            personopplysninger?.person(jurist)?.serialize()
+            personopplysninger?.person(jurist)?.tilSerialisertPerson()
         }) { serialisertPerson, tidligereBehandlinger ->
             val tidligerePersoner = tidligereBehandlinger.map { it -> it.deserialize(jurist) }
-            serialisertPerson.deserialize(jurist, tidligerePersoner) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).serialize()
+            serialisertPerson.deserialize(jurist, tidligerePersoner) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).tilSerialisertPerson()
         }
     }
 
