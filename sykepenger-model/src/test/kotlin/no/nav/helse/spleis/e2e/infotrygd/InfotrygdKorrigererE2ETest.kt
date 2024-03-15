@@ -107,11 +107,10 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterYtelser(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
         håndterYtelser(3.vedtaksperiode)
 
-        assertEquals(5, inspektør.utbetalinger.size)
+        assertEquals(4, inspektør.utbetalinger.size)
         inspektør.utbetaling(2).inspektør.also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).inspektør.korrelasjonsId)
             assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId())
@@ -124,9 +123,6 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
             assertEquals(31.januar, it.arbeidsgiverOppdrag[1].inspektør.tom)
         }
         inspektør.utbetaling(3).inspektør.also {
-            assertEquals(Utbetalingstatus.FORKASTET, it.tilstand)
-        }
-        inspektør.utbetaling(4).inspektør.also {
             assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).inspektør.korrelasjonsId)
             assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
             assertEquals(1, it.arbeidsgiverOppdrag.size)
@@ -142,22 +138,22 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }
 
     private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
-        SerialisertPerson("/personer/auu-blir-med-i-revurdering.json".readResource()).deserialize(jurist).also { person ->
-            person.håndter(
-                Utbetalingshistorikk(
-                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
-                    InfotrygdhistorikkElement.opprett(
-                        oppdatert = LocalDateTime.now(),
-                        hendelseId = UUID.randomUUID(),
-                        perioder = listOf(
-                            Friperiode(fom = 1.februar, tom = 28.februar)
-                        ),
-                        inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
-                        arbeidskategorikoder = emptyMap()
+        SerialisertPerson("/personer/auu-blir-med-i-revurdering.json".readResource()).deserialize(jurist)
+    }.also {
+        person.håndter(
+            Utbetalingshistorikk(
+                UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                InfotrygdhistorikkElement.opprett(
+                    oppdatert = LocalDateTime.now(),
+                    hendelseId = UUID.randomUUID(),
+                    perioder = listOf(
+                        Friperiode(fom = 1.februar, tom = 28.februar)
                     ),
-                    besvart = LocalDateTime.now()
+                    inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
+                    arbeidskategorikoder = emptyMap()
                 ),
-            )
-        }
+                besvart = LocalDateTime.now()
+            ),
+        )
     }
 }
