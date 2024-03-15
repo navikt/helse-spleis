@@ -821,8 +821,8 @@ class Person private constructor(
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
     internal fun forkastAuu(hendelse: Hendelse, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu, infotrygdhistorikk)
 
-    internal fun erBetaltInfotrygd(vedtaksperiode: Periode): Boolean {
-        return infotrygdhistorikk.harUtbetaltI(vedtaksperiode)
+    internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean {
+        return infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
     }
 
     internal fun erFerieIInfotrygd(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {

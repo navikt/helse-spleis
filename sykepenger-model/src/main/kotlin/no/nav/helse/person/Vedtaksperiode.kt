@@ -451,7 +451,7 @@ internal class Vedtaksperiode private constructor(
         if (!arbeidsgiver.kanForkastes(this, hendelse)) return false
         val villeBlittKastetUt = person.vurderOmSøknadIkkeKanHåndteres(hendelse, this, arbeidsgiver)
         if (!villeBlittKastetUt) {
-            val forNærmeInfotrygdhistorikk = person.erBetaltInfotrygd(
+            val forNærmeInfotrygdhistorikk = person.erBehandletIInfotrygd(
                 periode.oppdaterFom(
                     periode.start.minusDays(MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD)
                 )
@@ -517,7 +517,7 @@ internal class Vedtaksperiode private constructor(
                     hendelser = hendelseIder,
                     fom = periode.start,
                     tom = periode.endInclusive,
-                    behandletIInfotrygd = person.erBetaltInfotrygd(periode),
+                    behandletIInfotrygd = person.erBehandletIInfotrygd(periode),
                     forlengerPeriode = person.nåværendeVedtaksperioder {
                         (it.periode.overlapperMed(periode) || it.periode.erRettFør(
                             periode
