@@ -77,6 +77,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SimuleringResultat
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
+import kotlin.streams.asSequence
 
 internal data class PersonData(
     val aktørId: String,
@@ -535,11 +536,11 @@ internal data class PersonData(
                     }
                 }
 
-                private val datoer = if (dato != null) DateRange.Single(dato) else DateRange.Range(fom!!, tom!!)
+                private val datoer = datosekvens(dato, fom, tom)
 
-                internal fun tilDto(): List<SykdomstidslinjeDagDto> {
+                internal fun tilDto(): Sequence<SykdomstidslinjeDagDto> {
                     val kilde = this.kilde.tilDto()
-                    return datoer.dates().map { tilDto(it, kilde) }
+                    return datoer.map { tilDto(it, kilde) }
                 }
                 private fun tilDto(dagen: LocalDate, kilde: HendelseskildeDto) = when (type) {
                     JsonDagType.ARBEIDSDAG -> SykdomstidslinjeDagDto.ArbeidsdagDto(dato = dagen, kilde = kilde)
@@ -1216,7 +1217,7 @@ internal data class PersonData(
             val fom: LocalDate?,
             val tom: LocalDate?
         ) {
-            private val datoer: DateRange = if (dato != null) DateRange.Single(dato) else DateRange.Range(fom!!, tom!!)
+            private val datoer = datosekvens(dato, fom, tom)
             private val økonomiDto = ØkonomiDto(
                 grad = ProsentdelDto(grad),
                 totalGrad = ProsentdelDto(totalGrad),
@@ -1230,7 +1231,7 @@ internal data class PersonData(
                 er6GBegrenset = this.er6GBegrenset
             )
 
-            fun tilDto() = datoer.dates().map { tilDto(it) }
+            fun tilDto() = datoer.map { tilDto(it) }
             private fun tilDto(dato: LocalDate): UtbetalingsdagDto {
                 return when (type) {
                     TypeData.ArbeidsgiverperiodeDag -> UtbetalingsdagDto.ArbeidsgiverperiodeDagDto(dato = dato, økonomi = økonomiDto)
@@ -1245,5 +1246,15 @@ internal data class PersonData(
                 }
             }
         }
+    }
+}
+
+private fun datosekvens(dato: LocalDate?, fom: LocalDate?, tom: LocalDate?): Sequence<LocalDate> {
+    check(dato != null || (fom != null && tom != null)) {
+        "må ha <dato> eller både <fom> og <tom>. Fikk dato=$dato, fom = $fom, tom = $tom"
+    }
+    return when {
+        dato != null -> sequenceOf(dato)
+        else -> fom!!.datesUntil(tom!!.plusDays(1)).asSequence()
     }
 }
