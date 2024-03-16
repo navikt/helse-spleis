@@ -55,7 +55,6 @@ spec:
         - application: spesialist
         - application: spanner
         - application: sporing
-        - application: spekemat
     outbound:
       rules:
         - application: spurtedu
