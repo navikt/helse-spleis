@@ -16,8 +16,10 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
 import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder
@@ -46,17 +48,17 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         private const val AG2 = "123456789"
     }
 
-    private fun vilkårsgrunnlag(organisasjonsnummer: String = AG1): Map<UUID, Vilkårsgrunnlag> {
+    private fun vilkårsgrunnlag(organisasjonsnummer: String = AG1): Pair<Map<UUID, Vilkårsgrunnlag>, List<SpeilGenerasjonDTO>> {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
 
-        SpeilGenerasjonerBuilder(
+        val perioder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),
             vilkårsgrunnlagHistorikkBuilderResult,
             observatør.spekemat.resultat(organisasjonsnummer)
         ).build()
-        return vilkårsgrunnlagHistorikkBuilderResult.toDTO()
+        return vilkårsgrunnlagHistorikkBuilderResult.toDTO() to perioder
     }
 
     private val primitivInntekt = 40000.0
@@ -71,7 +73,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterYtelser()
         håndterSimulering()
 
-        val spleisgrunnlag = vilkårsgrunnlag().values.single() as SpleisVilkårsgrunnlag
+        val (vilkårsgrunnlag, _) = vilkårsgrunnlag()
+        val spleisgrunnlag = vilkårsgrunnlag.values.single() as SpleisVilkårsgrunnlag
 
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = spleisgrunnlag,
@@ -105,7 +108,11 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterYtelser()
         håndterSimulering()
 
-        val førsteGenerasjon = requireNotNull(vilkårsgrunnlag().values.first()) as SpleisVilkårsgrunnlag
+        val (vilkårsgrunnlag, perioder) = vilkårsgrunnlag()
+        assertEquals(2, perioder.size)
+
+        val eldstePeriode = perioder.last().perioder.single() as BeregnetPeriode
+        val førsteGenerasjon = vilkårsgrunnlag.getValue(eldstePeriode.vilkårsgrunnlagId!!) as SpleisVilkårsgrunnlag
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = førsteGenerasjon,
             omregnetÅrsinntekt = 372000.0,
@@ -118,7 +125,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val inntekt = førsteGenerasjon.inntekter.first()
         assertEquals(372000.0, inntekt.omregnetÅrsinntekt.beløp)
 
-        val andreGenerasjon = requireNotNull(vilkårsgrunnlag().values.last()) as SpleisVilkårsgrunnlag
+        val nyestePeriode = perioder.first().perioder.single() as BeregnetPeriode
+        val andreGenerasjon = vilkårsgrunnlag.getValue(nyestePeriode.vilkårsgrunnlagId!!) as SpleisVilkårsgrunnlag
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = andreGenerasjon,
             omregnetÅrsinntekt = 420000.0,
@@ -143,7 +151,12 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        val førsteGenerasjon = requireNotNull(vilkårsgrunnlag().values.first()) as SpleisVilkårsgrunnlag
+        val (vilkårsgrunnlag, perioder) = vilkårsgrunnlag()
+        assertEquals(1, perioder.size)
+        assertEquals(2, perioder.single().perioder.size)
+
+        val januarPeriode = perioder.single().perioder.last() as BeregnetPeriode
+        val førsteGenerasjon = vilkårsgrunnlag.getValue(januarPeriode.vilkårsgrunnlagId!!) as SpleisVilkårsgrunnlag
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = førsteGenerasjon,
             omregnetÅrsinntekt = 372000.0,
@@ -156,7 +169,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val inntekt = førsteGenerasjon.inntekter.first()
         assertInntekt(inntekt, ORGNUMMER, 372000.0, Inntektkilde.Inntektsmelding, 31000.0)
 
-        val andreGenerasjon = requireNotNull(vilkårsgrunnlag().values.last()) as SpleisVilkårsgrunnlag
+        val marsPeriode = perioder.single().perioder.first() as BeregnetPeriode
+        val andreGenerasjon = vilkårsgrunnlag.getValue(marsPeriode.vilkårsgrunnlagId!!) as SpleisVilkårsgrunnlag
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = andreGenerasjon,
             omregnetÅrsinntekt = 372000.0,
@@ -201,7 +215,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(1.vedtaksperiode, orgnummer = AG1)
 
-        val generasjon = requireNotNull(vilkårsgrunnlag().values.single()) as SpleisVilkårsgrunnlag
+        val (vilkårsgrunnlag, _) = vilkårsgrunnlag()
+        val generasjon = vilkårsgrunnlag.values.single() as SpleisVilkårsgrunnlag
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = generasjon,
             omregnetÅrsinntekt = 756000.0,

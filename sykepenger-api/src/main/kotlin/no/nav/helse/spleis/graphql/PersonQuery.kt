@@ -32,13 +32,9 @@ private object ApiMetrikker {
     fun målByggSnapshot(block: () -> PersonDTO): PersonDTO = responstid.labels("bygg_snapshot").time(block)
 }
 
-internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String, spekematEnabled: Boolean): GraphQLPerson? {
+internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao, hendelseDao: HendelseDao, fnr: String, callId: String): GraphQLPerson? {
     return ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
-        val spekemat = if (spekematEnabled) spekematClient.hentSpekemat(fnr, callId) else null
-        "Bruker ${if (spekemat == null) "spleis" else "spekemat"} for å lage pølsevisning".also {
-            logg.info(it)
-            sikkerlogg.info(it, kv("fødselsnummer", fnr))
-        }
+        val spekemat = spekematClient.hentSpekemat(fnr, callId)
         ApiMetrikker.målDeserialisering {
             val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(fnr.toLong()) }
             Person.gjenopprett(MaskinellJurist(), dto)

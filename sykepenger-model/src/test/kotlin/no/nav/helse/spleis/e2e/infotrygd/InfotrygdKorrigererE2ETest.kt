@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
@@ -70,7 +71,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to sykefraværstilfeller blir til en, starter med AUU`() {
+    fun `to sykefraværstilfeller blir til en, starter med AUU`() = Toggle.Spekemat.disable {
         createDobbelutbetalingPerson()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
@@ -96,7 +97,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to sykefraværstilfeller blir til en, starter med Avsluttet`() {
+    fun `to sykefraværstilfeller blir til en, starter med Avsluttet`() = Toggle.Spekemat.disable {
         createAuuBlirMedIRevureringPerson()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))

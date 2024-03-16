@@ -26,6 +26,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
@@ -36,7 +37,6 @@ import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.UberegnetPeriode
-import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
 import no.nav.helse.serde.api.dto.Utbetalingsinfo
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -64,12 +64,11 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.standardSimuleringsresultat
 import no.nav.helse.spleis.e2e.tilGodkjenning
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -120,7 +119,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         }, meldingsreferanseId = idOverstyring)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
-        val tidslinje = speilJson.arbeidsgivere.single().generasjoner.single().perioder.single().sammenslåttTidslinje
+        val generasjoner = speilJson.arbeidsgivere.single().generasjoner
+        assertEquals(2, generasjoner.size)
+        val tidslinje = generasjoner[0].perioder.single().sammenslåttTidslinje
         val forventetFørstedag = SammenslåttDag(
             dagen = 1.januar,
             sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
@@ -225,11 +226,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterAnnullerUtbetaling()
         val personDto = speilApi()
-        val utbetaltPeriode = (personDto.arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val annullertPeriode = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-
-        assertNotNull(utbetaltPeriode)
-        assertNull(annullertPeriode)
+        val generasjoner = personDto.arbeidsgivere.first().generasjoner
+        assertEquals(2, generasjoner.size)
+        assertInstanceOf(BeregnetPeriode::class.java, generasjoner.last().perioder.single())
+        assertInstanceOf(AnnullertPeriode::class.java, generasjoner.first().perioder.single())
     }
 
     @Test

@@ -57,7 +57,7 @@ internal object Api {
         ))
     }
 
-    internal fun Application.installGraphQLApi(spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao, spekematToggle: Boolean) {
+    internal fun Application.installGraphQLApi(spekematClient: SpekematClient, hendelseDao: HendelseDao, personDao: PersonDao) {
         routing {
             authenticate(optional = true) {
                 post("/graphql{...}") {
@@ -65,8 +65,7 @@ internal object Api {
                     call.principal<JWTPrincipal>() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                     try {
                         val callId = call.callId ?: UUID.randomUUID().toString()
-                        val spekematEnabled = call.request.queryParameters["spekematEnabled"]?.toBoolean() ?: spekematToggle
-                        val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, callId, spekematEnabled)
+                        val person = personResolver(spekematClient, personDao, hendelseDao, fødselsnummer, callId)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                     } catch (err: Exception) {
                         logger.error("callId=${call.callId} Kunne ikke lage JSON for Spesialist, sjekk tjenestekall-indeksen!")

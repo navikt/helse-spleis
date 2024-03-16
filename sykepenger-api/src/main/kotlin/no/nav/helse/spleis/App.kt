@@ -77,8 +77,7 @@ internal fun Application.lagApplikasjonsmodul(
     azureClient: AzureTokenProvider?,
     spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
-    collectorRegistry: CollectorRegistry,
-    spekematToggle: Boolean = System.getenv("SPEKEMAT_ENABLED")?.toBoolean() ?: true
+    collectorRegistry: CollectorRegistry
 ) {
     install(CallId) {
         header("callId")
@@ -101,5 +100,5 @@ internal fun Application.lagApplikasjonsmodul(
 
     spannerApi(hendelseDao, personDao, spurteDuClient, azureClient)
     sporingApi(hendelseDao, personDao)
-    installGraphQLApi(spekematClient, hendelseDao, personDao, spekematToggle)
+    installGraphQLApi(spekematClient, hendelseDao, personDao)
 }
