@@ -10,13 +10,10 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
-import no.nav.helse.spekemat.Spekemat
 import org.junit.jupiter.api.fail
 
 internal class TestObservatør(person: Person? = null) : PersonObserver {
-    val spekemat = Spekemat()
     init {
-        person?.addObserver(spekemat)
         person?.addObserver(this)
     }
     internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()

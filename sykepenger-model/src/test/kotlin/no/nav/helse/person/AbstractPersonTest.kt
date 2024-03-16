@@ -22,6 +22,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spekemat.Spekemat
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -81,6 +82,7 @@ internal abstract class AbstractPersonTest {
 
     lateinit var person: Person
     lateinit var observatør: TestObservatør
+    lateinit var spekemat: Spekemat
     lateinit var ugyldigeSituasjonerObservatør: UgyldigeSituasjonerObservatør
     lateinit var jurist: MaskinellJurist
     val inspektør get() = inspektør(ORGNUMMER)
@@ -118,6 +120,7 @@ internal abstract class AbstractPersonTest {
         jurist = MaskinellJurist()
         person = block(jurist)
         observatør = TestObservatør(person)
+        spekemat = Spekemat().also { person.addObserver(it) }
         ugyldigeSituasjonerObservatør = UgyldigeSituasjonerObservatør(person)
         return person
     }

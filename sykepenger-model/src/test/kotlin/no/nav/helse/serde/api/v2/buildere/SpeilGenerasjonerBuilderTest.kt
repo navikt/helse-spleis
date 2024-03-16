@@ -4,9 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.EnableSpekemat
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.den
@@ -131,7 +129,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@EnableSpekemat
 internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
@@ -259,25 +256,16 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
 
         generasjoner {
-            if (Toggle.Spekemat.enabled) {
+            assertEquals(2, size)
+            0.generasjon {
                 assertEquals(2, size)
-                0.generasjon {
-                    assertEquals(2, size)
-                    uberegnetPeriode(0) medTilstand ForberederGodkjenning medHendelser setOf(søknad2, inntektsmelding1)
-                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1, inntektsmelding2)
-                }
-                1.generasjon {
-                    assertEquals(2, size)
-                    uberegnetPeriode(0) medTilstand IngenUtbetaling medHendelser setOf(søknad2, inntektsmelding1)
-                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1)
-                }
-            } else {
-                assertEquals(1, size)
-                0.generasjon {
-                    assertEquals(2, size)
-                    uberegnetPeriode(0) medTilstand ForberederGodkjenning medHendelser setOf(søknad2, inntektsmelding1)
-                    uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1)
-                }
+                uberegnetPeriode(0) medTilstand ForberederGodkjenning medHendelser setOf(søknad2, inntektsmelding1)
+                uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1, inntektsmelding2)
+            }
+            1.generasjon {
+                assertEquals(2, size)
+                uberegnetPeriode(0) medTilstand IngenUtbetaling medHendelser setOf(søknad2, inntektsmelding1)
+                uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1)
             }
         }
 
@@ -304,7 +292,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 3 else 2, size)
+            assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
                 uberegnetPeriode(0) fra 23.januar til 31.januar medTilstand VenterPåAnnenPeriode
@@ -316,11 +304,9 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(0) fra 17.januar til 22.januar avType UTBETALING medTilstand Utbetalt
                 uberegnetPeriode(1) fra 1.januar til 16.januar medTilstand IngenUtbetaling
             }
-            if (Toggle.Spekemat.enabled) {
-                2.generasjon {
-                    assertEquals(1, size)
-                    uberegnetPeriode(0) fra 1.januar til 16.januar medTilstand IngenUtbetaling
-                }
+            2.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra 1.januar til 16.januar medTilstand IngenUtbetaling
             }
         }
     }
@@ -441,7 +427,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 3 else 4, size)
+            assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
                 uberegnetPeriode(0) fra 1.mars til 31.mars medTilstand UtbetaltVenterPåAnnenPeriode
@@ -454,23 +440,10 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(0) avType REVURDERING fra 1.januar til 31.januar medTilstand Utbetalt
             }
             2.generasjon {
-                if (Toggle.Spekemat.enabled) {
-                    assertEquals(3, size)
-                    beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
-                    beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
-                    beregnetPeriode(2) avType UTBETALING medTilstand Utbetalt
-                } else {
-                    assertEquals(1, size)
-                    beregnetPeriode(0) avType UTBETALING fra 1.januar til 31.januar medTilstand Utbetalt
-                }
-            }
-            if (Toggle.Spekemat.disabled) {
-                3.generasjon {
-                    assertEquals(3, size)
-                    beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
-                    beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
-                    beregnetPeriode(2) avType UTBETALING medTilstand Utbetalt
-                }
+                assertEquals(3, size)
+                beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(2) avType UTBETALING medTilstand Utbetalt
             }
         }
     }
@@ -497,7 +470,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 3 else 4, size)
+            assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
                 uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
@@ -505,35 +478,16 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(2) medTilstand TilGodkjenning
             }
             1.generasjon {
-                if (Toggle.Spekemat.enabled) {
-                    assertEquals(3, size)
-                    beregnetPeriode(0) avType REVURDERING fra 1.mars til 31.mars medTilstand Utbetalt
-                    beregnetPeriode(1) avType REVURDERING fra 1.februar til 28.februar medTilstand Utbetalt
-                    beregnetPeriode(2) avType REVURDERING fra 1.januar til 31.januar  medTilstand Utbetalt
-                } else {
-                    assertEquals(1, size)
-                    beregnetPeriode(0) avType REVURDERING fra 1.januar til 31.januar medTilstand Utbetalt
-                }
+                assertEquals(3, size)
+                beregnetPeriode(0) avType REVURDERING fra 1.mars til 31.mars medTilstand Utbetalt
+                beregnetPeriode(1) avType REVURDERING fra 1.februar til 28.februar medTilstand Utbetalt
+                beregnetPeriode(2) avType REVURDERING fra 1.januar til 31.januar  medTilstand Utbetalt
             }
             2.generasjon {
                 assertEquals(3, size)
-                if (Toggle.Spekemat.enabled) {
-                    beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
-                    beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
-                    beregnetPeriode(2) avType UTBETALING medTilstand Utbetalt
-                } else {
-                    beregnetPeriode(0) avType REVURDERING fra 1.mars til 31.mars medTilstand Utbetalt
-                    beregnetPeriode(1) avType REVURDERING fra 1.februar til 28.februar medTilstand Utbetalt
-                    beregnetPeriode(2) avType REVURDERING fra 1.januar til 31.januar  medTilstand Utbetalt
-                }
-            }
-            if (Toggle.Spekemat.disabled) {
-                3.generasjon {
-                    assertEquals(3, size)
-                    beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
-                    beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
-                    beregnetPeriode(2) avType UTBETALING medTilstand Utbetalt
-                }
+                beregnetPeriode(0) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(1) avType UTBETALING medTilstand Utbetalt
+                beregnetPeriode(2) avType UTBETALING medTilstand Utbetalt
             }
         }
     }
@@ -619,8 +573,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(1, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) er Overført avType ANNULLERING medTilstand TilAnnullering
-                else beregnetPeriode(0) er Overført avType ANNULLERING medTilstand TilAnnullering
+                annullertPeriode(0) er Overført avType ANNULLERING medTilstand TilAnnullering
             }
             1.generasjon {
                 assertEquals(1, size)
@@ -1006,8 +959,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(1, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-                else beregnetPeriode(0) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
+                annullertPeriode(0) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
             }
             1.generasjon {
                 assertEquals(1, size)
@@ -1026,10 +978,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) er Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-                else beregnetPeriode(0) er Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-                else beregnetPeriode(1) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
+                annullertPeriode(0) er Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand TilAnnullering
+                annullertPeriode(1) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
             }
             1.generasjon {
                 assertEquals(2, size)
@@ -1053,10 +1003,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             0.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 30.april) medAntallDager 30 forkastet false medTilstand Utbetalt
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand Annullert
-                else beregnetPeriode(1) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(2) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand Annullert
-                else beregnetPeriode(2) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand Annullert
+                annullertPeriode(1) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand Annullert
+                annullertPeriode(2) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand Annullert
             }
             1.generasjon {
                 assertEquals(2, size)
@@ -1076,8 +1024,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) er Overført avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 0 forkastet true medTilstand TilAnnullering
-                else beregnetPeriode(0) er Overført avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 0 forkastet true medTilstand TilAnnullering
+                annullertPeriode(0) er Overført avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 0 forkastet true medTilstand TilAnnullering
                 beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
             }
             1.generasjon {
@@ -1182,17 +1129,15 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 2 else 1, size)
+            assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) er Ubetalt avType UTBETALING fra (16.januar til 15.februar) medTilstand ForberederGodkjenning
                 uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
             }
-            if (Toggle.Spekemat.enabled) {
-                1.generasjon {
-                    assertEquals(1, size)
-                    uberegnetPeriode(0) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
-                }
+            1.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
         }
     }
@@ -1215,7 +1160,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 3 else 2, size)
+            assertEquals(3, size)
             0.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) er Ubetalt avType REVURDERING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand ForberederGodkjenning
@@ -1226,11 +1171,9 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand Utbetalt
                 uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
             }
-            if (Toggle.Spekemat.enabled) {
-                2.generasjon {
-                    assertEquals(1, size)
-                    uberegnetPeriode(0) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
-                }
+            2.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
             }
         }
     }
@@ -1376,16 +1319,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 2 else 1, size)
+            assertEquals(2, size)
             0.generasjon {
                 assertEquals(1, size)
                 uberegnetPeriode(0) fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand IngenUtbetaling
             }
-            if (Toggle.Spekemat.enabled) {
-                1.generasjon {
-                    assertEquals(1, size)
-                    uberegnetPeriode(0) fra (1.januar til 31.januar) medTilstand IngenUtbetaling
-                }
+            1.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra (1.januar til 31.januar) medTilstand IngenUtbetaling
             }
         }
     }
@@ -1612,8 +1553,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(1, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) er Utbetalingstatus.Annullert avType ANNULLERING medTilstand Annullert
-                else beregnetPeriode(0) er Utbetalingstatus.Annullert avType ANNULLERING medTilstand Annullert
+                annullertPeriode(0) er Utbetalingstatus.Annullert avType ANNULLERING medTilstand Annullert
             }
 
             1.generasjon {
@@ -1919,8 +1859,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
                 beregnetPeriode(1) medTilstand Utbetalt
             }
             1.generasjon {
@@ -1945,10 +1884,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
             }
             1.generasjon {
                 assertEquals(2, size)
@@ -1982,10 +1919,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
             }
             1.generasjon {
                 assertEquals(2, size)
@@ -2024,20 +1959,15 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(2) medTilstand Annullert
-                else beregnetPeriode(2) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
+                annullertPeriode(2) medTilstand Annullert
             }
             1.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) medTilstand Utbetalt
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(2) medTilstand Annullert
-                else beregnetPeriode(2) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
+                annullertPeriode(2) medTilstand Annullert
             }
             2.generasjon {
                 assertEquals(2, size)
@@ -2064,17 +1994,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
                 beregnetPeriode(2) medTilstand Utbetalt
             }
             1.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) medTilstand Utbetalt
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
                 beregnetPeriode(2) medTilstand Utbetalt
             }
             2.generasjon {
@@ -2091,18 +2018,14 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(2) medTilstand Annullert
-                else beregnetPeriode(2) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
+                annullertPeriode(2) medTilstand Annullert
             }
             1.generasjon {
                 assertEquals(3, size)
                 beregnetPeriode(0) medTilstand Utbetalt
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
                 beregnetPeriode(2) medTilstand Utbetalt
             }
             2.generasjon {
@@ -2133,40 +2056,23 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 3 else 4, size)
+            assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
                 beregnetPeriode(2) medTilstand Utbetalt avType REVURDERING
             }
             1.generasjon {
                 assertEquals(3, size)
-                beregnetPeriode(0) medTilstand if (Toggle.Spekemat.enabled) Utbetalt else Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(0) medTilstand Utbetalt
+                annullertPeriode(1) medTilstand Annullert
                 beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
             }
             2.generasjon {
-                if (Toggle.Spekemat.enabled) {
-                    assertEquals(2, size)
-                    beregnetPeriode(0) medTilstand Utbetalt
-                    beregnetPeriode(1) medTilstand Utbetalt
-                } else {
-                    assertEquals(3, size)
-                    beregnetPeriode(0) medTilstand Utbetalt
-                    beregnetPeriode(1) medTilstand Annullert
-                    beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
-                }
-            }
-            if (Toggle.Spekemat.disabled) {
-                3.generasjon {
-                    assertEquals(2, size)
-                    beregnetPeriode(0) medTilstand Utbetalt
-                    beregnetPeriode(1) medTilstand Utbetalt
-                }
+                assertEquals(2, size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
             }
         }
 
@@ -2174,49 +2080,29 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 4 else 5, size)
+            assertEquals(4, size)
             0.generasjon {
                 assertEquals(3, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(2) medTilstand Annullert
-                else beregnetPeriode(2) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
+                annullertPeriode(2) medTilstand Annullert
             }
             1.generasjon {
                 assertEquals(3, size)
-                if (Toggle.Spekemat.enabled) annullertPeriode(0) medTilstand Annullert
-                else beregnetPeriode(0) medTilstand Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                annullertPeriode(0) medTilstand Annullert
+                annullertPeriode(1) medTilstand Annullert
                 beregnetPeriode(2) medTilstand Utbetalt avType REVURDERING
             }
             2.generasjon {
                 assertEquals(3, size)
-                beregnetPeriode(0) medTilstand if (Toggle.Spekemat.enabled) Utbetalt else Annullert
-                if (Toggle.Spekemat.enabled) annullertPeriode(1) medTilstand Annullert
-                else beregnetPeriode(1) medTilstand Annullert
+                beregnetPeriode(0) medTilstand Utbetalt
+                annullertPeriode(1) medTilstand Annullert
                 beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
             }
             3.generasjon {
-                if (Toggle.Spekemat.enabled) {
-                    assertEquals(2, size)
-                    beregnetPeriode(0) medTilstand Utbetalt
-                    beregnetPeriode(1) medTilstand Utbetalt
-                } else {
-                    assertEquals(3, size)
-                    beregnetPeriode(0) medTilstand Utbetalt
-                    beregnetPeriode(1) medTilstand Annullert
-                    beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
-                }
-            }
-            if (Toggle.Spekemat.disabled) {
-                4.generasjon {
-                    assertEquals(2, size)
-                    beregnetPeriode(0) medTilstand Utbetalt
-                    beregnetPeriode(1) medTilstand Utbetalt
-                }
+                assertEquals(2, size)
+                beregnetPeriode(0) medTilstand Utbetalt
+                beregnetPeriode(1) medTilstand Utbetalt
             }
         }
     }
@@ -2332,25 +2218,21 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
 
         generasjoner {
-            if (Toggle.Spekemat.disabled) {
-                assertEquals(0, size)
-            } else {
-                assertEquals(3, size)
+            assertEquals(3, size)
 
-                0.generasjon {
-                    assertEquals(2, size)
-                    uberegnetPeriode(0) fra 21.januar til 27.januar medTilstand Annullert
-                    uberegnetPeriode(1) fra 10.januar til 20.januar medTilstand Annullert
-                }
-                1.generasjon {
-                    assertEquals(1, size)
-                    uberegnetPeriode(0) fra 10.januar til 20.januar medTilstand IngenUtbetaling
-                }
-                2.generasjon {
-                    assertEquals(2, size)
-                    uberegnetPeriode(0) fra 21.januar til 27.januar medTilstand IngenUtbetaling
-                    uberegnetPeriode(1) fra 12.januar til 20.januar medTilstand IngenUtbetaling
-                }
+            0.generasjon {
+                assertEquals(2, size)
+                uberegnetPeriode(0) fra 21.januar til 27.januar medTilstand Annullert
+                uberegnetPeriode(1) fra 10.januar til 20.januar medTilstand Annullert
+            }
+            1.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra 10.januar til 20.januar medTilstand IngenUtbetaling
+            }
+            2.generasjon {
+                assertEquals(2, size)
+                uberegnetPeriode(0) fra 21.januar til 27.januar medTilstand IngenUtbetaling
+                uberegnetPeriode(1) fra 12.januar til 20.januar medTilstand IngenUtbetaling
             }
         }
     }
@@ -2490,20 +2372,18 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         generasjoner {
-            assertEquals(if (Toggle.Spekemat.enabled) 3 else 1, size)
+            assertEquals(3, size)
             0.generasjon {
                 assertEquals(1, size)
                 beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 20.januar) medTilstand Utbetalt medHendelser setOf(søknad, im, overstyring)
             }
-            if (Toggle.Spekemat.enabled) {
-                1.generasjon {
-                    assertEquals(1, size)
-                    uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
-                }
-                2.generasjon {
-                    assertEquals(1, size)
-                    uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
-                }
+            1.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling medHendelser setOf(søknad, im)
+            }
+            2.generasjon {
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra 4.januar til 20.januar medTilstand IngenUtbetaling medHendelser setOf(søknad)
             }
         }
     }
@@ -2592,15 +2472,8 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
                 uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
             1.generasjon {
-                if (Toggle.Spekemat.enabled) {
-                    assertEquals(1, size)
-                    uberegnetPeriode(0) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
-                } else {
-                    assertEquals(3, size)
-                    beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
-                    beregnetPeriode(1) fra (16.januar til 31.januar) medTilstand Utbetalt
-                    uberegnetPeriode(2) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
-                }
+                assertEquals(1, size)
+                uberegnetPeriode(0) fra (1.januar til 15.januar) medTilstand IngenUtbetaling
             }
             2.generasjon {
                 assertEquals(1, size)
@@ -2866,7 +2739,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     private fun generasjoner(organisasjonsnummer: String = ORGNUMMER, block: Arbeidsgivergenerasjoner.() -> Unit = {}) {
-        val spekemat = observatør.spekemat.resultat(organisasjonsnummer)
+        val spekemat = spekemat.resultat(organisasjonsnummer)
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
         val generasjonerBuilder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,

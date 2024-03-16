@@ -81,7 +81,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         assertEquals(
             emptyList<GhostPeriodeDTO>(),
             speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
@@ -130,7 +130,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val speilJson1 = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson1 = serializePersonForSpeil(person, spekemat.resultat())
         val vilkårsgrunnlagId = person.vilkårsgrunnlagFor(1.januar)!!.inspektør.vilkårsgrunnlagId
 
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { ghostPerioder ->
@@ -207,7 +207,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         assertEquals(
             emptyList<GhostPeriodeDTO>(),
             speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
@@ -268,7 +268,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         assertEquals(
             emptyList<GhostPeriodeDTO>(),
             speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
@@ -311,7 +311,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         assertEquals(
             emptyList<GhostPeriodeDTO>(),
             speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
@@ -354,7 +354,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        val personDto = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val personDto = serializePersonForSpeil(person, spekemat.resultat())
         val ghostpølser = personDto.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
         assertEquals(0, ghostpølser.size)
     }
@@ -386,7 +386,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val personDto = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val personDto = serializePersonForSpeil(person, spekemat.resultat())
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
@@ -436,7 +436,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val personDto = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val personDto = serializePersonForSpeil(person, spekemat.resultat())
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
@@ -470,7 +470,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val personDto = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val personDto = serializePersonForSpeil(person, spekemat.resultat())
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
@@ -522,7 +522,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val personDto = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val personDto = serializePersonForSpeil(person, spekemat.resultat())
         val vilkårsgrunnlagId =
             (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
@@ -556,7 +556,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val personDto = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val personDto = serializePersonForSpeil(person, spekemat.resultat())
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
         assertNull(vilkårsgrunnlag?.inntekter?.firstOrNull { it.organisasjonsnummer == a2 }?.omregnetÅrsinntekt)
@@ -587,7 +587,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, a1)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
 
         assertEquals(1, perioder.size)
@@ -623,7 +623,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         val vilkårsgrunnlag = speilJson.vilkårsgrunnlag
         assertEquals(1, vilkårsgrunnlag.size)
 
@@ -709,7 +709,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
 
         assertEquals(1, perioder.size)
@@ -753,7 +753,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
 
         assertEquals(2, perioder.size)
@@ -848,7 +848,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         val skjæringstidspunkt = inspektør(a1).skjæringstidspunkt(1.vedtaksperiode)
         val vilkårsgrunnlagId = person.vilkårsgrunnlagFor(skjæringstidspunkt)!!.inspektør.vilkårsgrunnlagId
 

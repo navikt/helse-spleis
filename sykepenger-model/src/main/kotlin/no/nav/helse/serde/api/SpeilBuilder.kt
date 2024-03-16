@@ -9,7 +9,7 @@ import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.speil.builders.PersonBuilder
 
-fun serializePersonForSpeil(person: Person, pølsepakke: SpekematDTO? = null): PersonDTO {
+fun serializePersonForSpeil(person: Person, pølsepakke: SpekematDTO): PersonDTO {
     val jsonBuilder = SpeilBuilder(pølsepakke)
     person.accept(jsonBuilder)
     return jsonBuilder.build()
@@ -39,7 +39,7 @@ data class SpekematDTO(
     }
 }
 
-internal class SpeilBuilder(private val pølsepakke: SpekematDTO?) : AbstractBuilder() {
+internal class SpeilBuilder(private val pølsepakke: SpekematDTO) : AbstractBuilder() {
 
     private companion object {
         /* Økes for å signalisere til spesialist at strukturen i snapshot'et

@@ -20,7 +20,7 @@ internal class ArbeidsgiverBuilder(
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
             id = id,
-            generasjoner = SpeilGenerasjonerBuilder(organisasjonsnummer, alder, arbeidsgiver, vilkårsgrunnlagHistorikk, pølsepakke).build()
+            generasjoner = pølsepakke?.let { SpeilGenerasjonerBuilder(organisasjonsnummer, alder, arbeidsgiver, vilkårsgrunnlagHistorikk, pølsepakke).build() } ?: emptyList()
         )
     }
 

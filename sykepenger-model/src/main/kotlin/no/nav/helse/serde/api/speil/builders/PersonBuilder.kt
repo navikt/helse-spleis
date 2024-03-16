@@ -17,7 +17,7 @@ internal class  PersonBuilder(
     builder: AbstractBuilder,
     private val personidentifikator: Personidentifikator,
     private val aktørId: String,
-    private val pølsepakke: SpekematDTO?,
+    private val pølsepakke: SpekematDTO,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val versjon: Int
 ) : BuilderState(builder) {
@@ -54,7 +54,7 @@ internal class  PersonBuilder(
         id: UUID,
         organisasjonsnummer: String
     ) {
-        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer, pølsepakke?.pakker?.singleOrNull { it.yrkesaktivitetidentifikator == organisasjonsnummer })
+        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == organisasjonsnummer })
         arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
     }

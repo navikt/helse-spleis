@@ -22,6 +22,7 @@ import kotliquery.sessionOf
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
@@ -176,17 +177,18 @@ private fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (se
 }
 
 private fun testSpeilJsonTask(arbeidId: String) {
-    opprettOgUtførArbeid(arbeidId) { session, fnr ->
+    /*opprettOgUtførArbeid(arbeidId) { session, fnr ->
         hentPerson(session, fnr)?.let { (aktørId, data) ->
             try {
                 val dto = SerialisertPerson(data).tilPersonDto()
                 val person = Person.gjenopprett(MaskinellJurist(), dto)
-                serializePersonForSpeil(person)
+                val pølsepakke: SpekematDTO.PølsepakkeDTO = TODO("Må hente pølsepakken fra spekemat")
+                serializePersonForSpeil(person, pølsepakke)
             } catch (err: Exception) {
                 log.info("$aktørId lar seg ikke serialisere: ${err.message}")
             }
         }
-    }
+    }*/
 }
 
 internal val objectMapper: ObjectMapper = jacksonObjectMapper()

@@ -17,10 +17,10 @@ class Spekemat : PersonObserver {
     private val arbeidsgivere = mutableMapOf<String, Pølsefabrikk>()
 
     fun resultat() = SpekematDTO(
-        pakker = arbeidsgivere.mapNotNull { resultat(it.key) }
+        pakker = arbeidsgivere.map { resultat(it.key) }
     )
     fun resultat(orgnr: String) =
-        if (Toggle.Spekemat.enabled) arbeidsgivere.getValue(orgnr).pakke().mapTilPølsepakkeDTO(orgnr) else null
+        arbeidsgivere.getValue(orgnr).pakke().mapTilPølsepakkeDTO(orgnr)
 
     private fun List<PølseradDto>.mapTilPølsepakkeDTO(orgnr: String) =
         PølsepakkeDTO(

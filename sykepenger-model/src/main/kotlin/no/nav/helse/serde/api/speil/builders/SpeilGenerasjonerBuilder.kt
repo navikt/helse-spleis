@@ -4,9 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
@@ -23,10 +23,8 @@ import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
-import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.sorterEtterHendelse
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.utledPeriodetyper
 import no.nav.helse.serde.api.dto.UberegnetPeriode
-import no.nav.helse.serde.api.speil.SpeilGenerasjoner
 import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.fjernUnødvendigeRader
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.AktivePerioder
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.ForkastedePerioder
@@ -51,16 +49,13 @@ internal class SpeilGenerasjonerBuilder(
     private val alder: Alder,
     arbeidsgiver: Arbeidsgiver,
     private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
-    private val pølsepakke: SpekematDTO.PølsepakkeDTO?
+    private val pølsepakke: SpekematDTO.PølsepakkeDTO
 ) : ArbeidsgiverVisitor {
-    private val spekematEnabled = pølsepakke != null
     private var tilstand: Byggetilstand = Initiell
 
     private val allePerioder = mutableListOf<SpeilTidslinjeperiode>()
     private val annullertePerioder = mutableListOf<Pair<UberegnetPeriode, BeregnetPeriode>>()
 
-    private val aktivePerioder = mutableListOf<SpeilTidslinjeperiode>()
-    private val forkastedePerioder = mutableListOf<Pair<UberegnetPeriode, List<BeregnetPeriode>>>()
     private val annulleringer = mutableListOf<AnnullertUtbetaling>()
 
     init {
@@ -68,13 +63,12 @@ internal class SpeilGenerasjonerBuilder(
     }
 
     internal fun build(): List<SpeilGenerasjonDTO> {
-        if (!spekematEnabled) return buildSpleis()
         return buildSpekemat()
     }
 
     private fun buildSpekemat(): List<SpeilGenerasjonDTO> {
         val generasjoner = buildTidslinjeperioder()
-        return pølsepakke!!.rader
+        return pølsepakke.rader
             .fjernUnødvendigeRader()
             .map { rad -> mapRadTilSpeilGenerasjon(rad, generasjoner) }
             .filterNot { rad -> rad.size == 0 } // fjerner tomme rader
@@ -97,20 +91,6 @@ internal class SpeilGenerasjonerBuilder(
                 .map { it.registrerBruk(vilkårsgrunnlaghistorikk, organisasjonsnummer) }
                 .utledPeriodetyper()
         )
-    }
-
-    private fun buildSpleis(): List<SpeilGenerasjonDTO> {
-        val perioder = aktivePerioder + forkastedePerioder.flatMap { (sisteUberegnede, tidligere) ->
-            val siste = tidligere.last()
-            val annulleringen = annulleringer.firstOrNull { it.annullerer(siste.utbetaling.korrelasjonsId) }
-            annulleringen?.let { tidligere + sisteUberegnede.somAnnullering(it, siste) } ?: emptyList()
-        }
-        return SpeilGenerasjoner().apply {
-            perioder
-                .sorterEtterHendelse()
-                .map { it.registrerBruk(vilkårsgrunnlaghistorikk, organisasjonsnummer) }
-                .forEach { periode -> periode.tilGenerasjon(this) }
-        }.build()
     }
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
@@ -572,19 +552,11 @@ internal class SpeilGenerasjonerBuilder(
 
         class AktivePerioder : Periodebygger() {
             override fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
-                builder.aktivePerioder.add(beregnetPeriode)
-                if (builder.spekematEnabled) builder.allePerioder.add(beregnetPeriode)
+                builder.allePerioder.add(beregnetPeriode)
             }
 
             override fun nyUberegnetPeriode(builder: SpeilGenerasjonerBuilder, uberegnetPeriode: UberegnetPeriode) {
-                if (builder.spekematEnabled) builder.allePerioder.add(uberegnetPeriode)
-
-                val indeks = builder.aktivePerioder.indexOfLast { it.erSammeVedtaksperiode(uberegnetPeriode) }
-                val forrigeUberegnet = builder.aktivePerioder.getOrNull(indeks)
-                val oppdatertEksisterende = forrigeUberegnet?.medOpplysningerFra(uberegnetPeriode)
-                // alle like AUU-generasjoner slås sammen til én pølse
-                if (oppdatertEksisterende == null) builder.aktivePerioder.add(uberegnetPeriode)
-                else builder.aktivePerioder[indeks] = oppdatertEksisterende
+                builder.allePerioder.add(uberegnetPeriode)
             }
 
             override fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {}
@@ -594,33 +566,19 @@ internal class SpeilGenerasjonerBuilder(
             private val perioder = mutableListOf<SpeilTidslinjeperiode>()
             private var sisteBeregnetPeriode: BeregnetPeriode? = null
             private var sisteUBeregnetPeriode: UberegnetPeriode? = null
-            private val beregnedePerioder = mutableListOf<BeregnetPeriode>()
 
             override fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode) {
-                beregnedePerioder.add(beregnetPeriode)
                 sisteUBeregnetPeriode = null
-                if (!builder.spekematEnabled) return
                 perioder.add(beregnetPeriode)
                 sisteBeregnetPeriode = beregnetPeriode
             }
 
             override fun nyUberegnetPeriode(builder: SpeilGenerasjonerBuilder, uberegnetPeriode: UberegnetPeriode) {
                 sisteUBeregnetPeriode = uberegnetPeriode
-                if (!builder.spekematEnabled) return
                 perioder.add(uberegnetPeriode)
             }
 
             override fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {
-                if (builder.spekematEnabled) forlatVedtaksperiodeSpekemat(builder)
-                if (beregnedePerioder.isEmpty()) return
-                // skal bare ta vare på dem dersom de har blitt annullert!
-                builder.forkastedePerioder.add(checkNotNull(sisteUBeregnetPeriode) {
-                    "fant ikke en uberegnet periode som etterfølger de beregnede!"
-                } to beregnedePerioder.toList())
-                beregnedePerioder.clear()
-            }
-
-            private fun forlatVedtaksperiodeSpekemat(builder: SpeilGenerasjonerBuilder) {
                 // en forkastet periode bestående av én generasjon har ikke blitt
                 // avsluttet tidligere, ellers ville den hatt minst to generasjoner.
                 if (perioder.size <= 1) return perioder.clear()

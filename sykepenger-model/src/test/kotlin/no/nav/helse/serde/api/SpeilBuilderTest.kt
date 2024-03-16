@@ -77,7 +77,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `Dødsdato ligger på person`() {
         val dødsdato = 1.januar
         createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO, dødsdato)
-        assertEquals(dødsdato, serializePersonForSpeil(person, observatør.spekemat.resultat()).dødsdato)
+        assertEquals(dødsdato, serializePersonForSpeil(person, spekemat.resultat()).dødsdato)
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         }, meldingsreferanseId = id)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         val tidslinje = speilJson.arbeidsgivere.single().generasjoner.single().perioder.single().sammenslåttTidslinje
         val forventetFørstedag = SammenslåttDag(
             dagen = 1.januar,
@@ -118,7 +118,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
         }, meldingsreferanseId = idOverstyring)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         val generasjoner = speilJson.arbeidsgivere.single().generasjoner
         assertEquals(2, generasjoner.size)
         val tidslinje = generasjoner[0].perioder.single().sammenslåttTidslinje
@@ -142,7 +142,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val speilJson = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
         assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single().ghostPerioder)
     }
 
@@ -180,7 +180,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        val personDto = serializePersonForSpeil(person, observatør.spekemat.resultat())
+        val personDto = serializePersonForSpeil(person, spekemat.resultat())
 
         assertEquals(listOf(a1, a2).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
 //        assertEquals(listOf(a1, a2).map(String::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })

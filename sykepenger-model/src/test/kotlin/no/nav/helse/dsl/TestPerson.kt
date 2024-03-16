@@ -50,10 +50,10 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spekemat.Spekemat
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
@@ -84,6 +84,7 @@ internal class TestPerson(
 
     private lateinit var forrigeHendelse: IAktivitetslogg
 
+    private val spekemat = Spekemat()
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, personidentifikator)
@@ -91,6 +92,7 @@ internal class TestPerson(
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)
+        it.addObserver(spekemat)
     }
 
     private val ugyldigeSituasjonerObservatør = UgyldigeSituasjonerObservatør(person)
@@ -145,8 +147,8 @@ internal class TestPerson(
         return testblokk(this)
     }
 
-    fun serializeForSpeil(spekematDTO: SpekematDTO): PersonDTO {
-        return serializePersonForSpeil(person, spekematDTO)
+    fun serializeForSpeil(): PersonDTO {
+        return serializePersonForSpeil(person, spekemat.resultat())
     }
     fun dto(): PersonUtDto {
         return person.dto()
