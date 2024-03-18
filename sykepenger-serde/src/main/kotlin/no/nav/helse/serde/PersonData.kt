@@ -29,10 +29,6 @@ import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.OpptjeningDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
-import no.nav.helse.dto.RefusjonDto
-import no.nav.helse.dto.RefusjonshistorikkDto
-import no.nav.helse.dto.RefusjonsopplysningDto
-import no.nav.helse.dto.RefusjonsopplysningerDto
 import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.SkatteopplysningDto
@@ -63,6 +59,10 @@ import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
+import no.nav.helse.dto.deserialisering.RefusjonInnDto
+import no.nav.helse.dto.deserialisering.RefusjonshistorikkInnDto
+import no.nav.helse.dto.deserialisering.RefusjonsopplysningInnDto
+import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
 import no.nav.helse.dto.deserialisering.SammenligningsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.SykepengegrunnlagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
@@ -273,7 +273,7 @@ data class PersonData(
                 orgnummer = this.orgnummer,
                 gjelder = PeriodeDto(fom = this.fom, tom = this.tom),
                 inntektsopplysning = this.inntektsopplysning.tilDto(),
-                refusjonsopplysninger = RefusjonsopplysningerDto(opplysninger = this.refusjonsopplysninger.map { it.tilDto() })
+                refusjonsopplysninger = RefusjonsopplysningerInnDto(opplysninger = this.refusjonsopplysninger.map { it.tilDto() })
             )
 
             data class SkatteopplysningData(
@@ -471,7 +471,7 @@ data class PersonData(
             forkastede = this.forkastede.map { it.tilDto() },
             utbetalinger = this.utbetalinger.map { it.tilDto() },
             feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilDto() },
-            refusjonshistorikk = RefusjonshistorikkDto(this.refusjonshistorikk.map { it.tilDto() })
+            refusjonshistorikk = RefusjonshistorikkInnDto(this.refusjonshistorikk.map { it.tilDto() })
         )
 
         data class InntektsmeldingData(
@@ -496,7 +496,7 @@ data class PersonData(
             val tom: LocalDate?,
             val beløp: Double
         ) {
-            fun tilDto() = RefusjonsopplysningDto(
+            fun tilDto() = RefusjonsopplysningInnDto(
                 meldingsreferanseId = this.meldingsreferanseId,
                 fom = this.fom,
                 tom = this.tom,
@@ -950,7 +950,7 @@ data class PersonData(
             val endringerIRefusjon: List<EndringIRefusjonData>,
             val tidsstempel: LocalDateTime
         ) {
-            fun tilDto() = RefusjonDto(
+            fun tilDto() = RefusjonInnDto(
                 meldingsreferanseId = this.meldingsreferanseId,
                 førsteFraværsdag = this.førsteFraværsdag,
                 arbeidsgiverperioder = this.arbeidsgiverperioder.map { it.tilDto() },

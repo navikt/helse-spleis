@@ -3,8 +3,10 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.RefusjonsopplysningDto
-import no.nav.helse.dto.RefusjonsopplysningerDto
+import no.nav.helse.dto.deserialisering.RefusjonsopplysningInnDto
+import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
+import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
+import no.nav.helse.dto.serialisering.RefusjonsopplysningerUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -103,7 +105,7 @@ class Refusjonsopplysning(
             return flatMap { eksisterendeOpplysning -> eksisterendeOpplysning.trim(nyOpplysningBegrensetStart.periode) }.plus(nyOpplysningBegrensetStart)
         }
 
-        internal fun gjenopprett(dto: RefusjonsopplysningDto): Refusjonsopplysning {
+        internal fun gjenopprett(dto: RefusjonsopplysningInnDto): Refusjonsopplysning {
             return Refusjonsopplysning(
                 meldingsreferanseId = dto.meldingsreferanseId,
                 fom = dto.fom,
@@ -234,7 +236,7 @@ class Refusjonsopplysning(
             internal fun List<Refusjonsopplysning>.gjennopprett() = Refusjonsopplysninger(this)
             internal val Refusjonsopplysning.refusjonsopplysninger get() = Refusjonsopplysninger(listOf(this))
 
-            internal fun gjenopprett(dto: RefusjonsopplysningerDto) = Refusjonsopplysninger(
+            internal fun gjenopprett(dto: RefusjonsopplysningerInnDto) = Refusjonsopplysninger(
                 refusjonsopplysninger = dto.opplysninger.map { Refusjonsopplysning.gjenopprett(it) }
             )
         }
@@ -252,15 +254,15 @@ class Refusjonsopplysning(
             fun build() = Refusjonsopplysninger(emptyList<Refusjonsopplysning>().mergeInnNyeOpplysninger(sorterteRefusjonsopplysninger()))
         }
 
-        internal fun dto() = RefusjonsopplysningerDto(
+        internal fun dto() = RefusjonsopplysningerUtDto(
             opplysninger = this.validerteRefusjonsopplysninger.map { it.dto() }
         )
     }
 
-    internal fun dto() = RefusjonsopplysningDto(
+    internal fun dto() = RefusjonsopplysningUtDto(
         meldingsreferanseId = this.meldingsreferanseId,
         fom = this.fom,
         tom = this.tom,
-        beløp = this.beløp.dtoMånedligDouble()
+        beløp = this.beløp.dto()
     )
 }

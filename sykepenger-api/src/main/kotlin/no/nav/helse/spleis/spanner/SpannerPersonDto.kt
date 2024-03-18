@@ -19,6 +19,7 @@ import no.nav.helse.dto.GenerasjonkildeDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
+import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
@@ -29,8 +30,8 @@ import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.OpptjeningDto
-import no.nav.helse.dto.RefusjonDto
-import no.nav.helse.dto.RefusjonsopplysningDto
+import no.nav.helse.dto.serialisering.RefusjonUtDto
+import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
 import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SkatteopplysningDto
@@ -177,7 +178,7 @@ internal data class SpannerPersonDto(
                 val id: UUID,
                 val dato: LocalDate,
                 val hendelseId: UUID,
-                val beløp: Double?,
+                val beløp: InntektDto?,
                 val kilde: String,
                 val forklaring: String?,
                 val subsumsjon: SubsumsjonData?,
@@ -228,6 +229,13 @@ internal data class SpannerPersonDto(
         }
     }
 
+    data class InntektDto(
+        val årlig: Double,
+        val månedligDouble: Double,
+        val dagligDouble: Double,
+        val dagligInt: Int
+    )
+
     data class ArbeidsgiverData(
         val organisasjonsnummer: String,
         val id: UUID,
@@ -244,7 +252,7 @@ internal data class SpannerPersonDto(
             val id: UUID,
             val dato: LocalDate,
             val hendelseId: UUID,
-            val beløp: Double,
+            val beløp: InntektDto,
             val tidsstempel: LocalDateTime
         )
 
@@ -252,7 +260,7 @@ internal data class SpannerPersonDto(
             val meldingsreferanseId: UUID,
             val fom: LocalDate,
             val tom: LocalDate?,
-            val beløp: Double
+            val beløp: InntektDto
         )
 
         data class PeriodeData(val fom: LocalDate, val tom: LocalDate)
@@ -457,7 +465,7 @@ internal data class SpannerPersonDto(
             val meldingsreferanseId: UUID,
             val førsteFraværsdag: LocalDate?,
             val arbeidsgiverperioder: List<PeriodeData>,
-            val beløp: Double?,
+            val beløp: InntektDto?,
             val sisteRefusjonsdag: LocalDate?,
             val endringerIRefusjon: List<EndringIRefusjonData>,
             val tidsstempel: LocalDateTime
@@ -635,11 +643,18 @@ private fun ArbeidsgiverUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverDat
     refusjonshistorikk = this.refusjonshistorikk.refusjoner.map { it.tilPersonData() }
 )
 
+private fun InntektDto.tilPersonData() = SpannerPersonDto.InntektDto(
+    årlig = this.årlig.beløp,
+    månedligDouble = this.månedligDouble.beløp,
+    dagligDouble = this.dagligDouble.beløp,
+    dagligInt = this.dagligInt.beløp
+)
+
 private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData(
     id = this.id,
     dato = this.dato,
     hendelseId = this.hendelseId,
-    beløp = this.beløp.månedligDouble.beløp,
+    beløp = this.beløp.tilPersonData(),
     tidsstempel = this.tidsstempel
 )
 
@@ -833,11 +848,11 @@ private fun HendelseskildeDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverDat
     id = this.meldingsreferanseId,
     tidsstempel = this.tidsstempel
 )
-private fun RefusjonDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.RefusjonData(
+private fun RefusjonUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.RefusjonData(
     meldingsreferanseId = this.meldingsreferanseId,
     førsteFraværsdag = this.førsteFraværsdag,
     arbeidsgiverperioder = this.arbeidsgiverperioder.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    beløp = this.beløp?.beløp,
+    beløp = this.beløp?.tilPersonData(),
     sisteRefusjonsdag = this.sisteRefusjonsdag,
     endringerIRefusjon = this.endringerIRefusjon.map { it.tilPersonData() },
     tidsstempel = this.tidsstempel
@@ -1313,10 +1328,10 @@ private fun InntektsopplysningUtDto.tilPersonData() = SpannerPersonDto.Vilkårsg
     beløp = when (this) {
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
         is InntektsopplysningUtDto.IkkeRapportertDto -> null
-        is InntektsopplysningUtDto.InfotrygdDto -> this.beløp.månedligDouble.beløp
-        is InntektsopplysningUtDto.InntektsmeldingDto -> this.beløp.månedligDouble.beløp
-        is InntektsopplysningUtDto.SaksbehandlerDto -> this.beløp.månedligDouble.beløp
-        is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.beløp.månedligDouble.beløp
+        is InntektsopplysningUtDto.InfotrygdDto -> this.beløp.tilPersonData()
+        is InntektsopplysningUtDto.InntektsmeldingDto -> this.beløp.tilPersonData()
+        is InntektsopplysningUtDto.SaksbehandlerDto -> this.beløp.tilPersonData()
+        is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.beløp.tilPersonData()
     },
     kilde = when (this) {
         is InntektsopplysningUtDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
@@ -1352,11 +1367,11 @@ private fun InntektsopplysningUtDto.tilPersonData() = SpannerPersonDto.Vilkårsg
     }
 )
 
-private fun RefusjonsopplysningDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.RefusjonsopplysningData(
+private fun RefusjonsopplysningUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.RefusjonsopplysningData(
     meldingsreferanseId = this.meldingsreferanseId,
     fom = this.fom,
     tom = this.tom,
-    beløp = this.beløp.beløp
+    beløp = this.beløp.tilPersonData()
 )
 
 private fun SammenligningsgrunnlagUtDto.tilPersonData() = SpannerPersonDto.VilkårsgrunnlagElementData.SammenligningsgrunnlagData(

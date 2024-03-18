@@ -9,16 +9,6 @@ import java.util.UUID
 data class AlderDto(val fødselsdato: LocalDate, val dødsdato: LocalDate?)
 
 data class SykmeldingsperioderDto(val perioder: List<PeriodeDto>)
-data class RefusjonshistorikkDto(val refusjoner: List<RefusjonDto>)
-data class RefusjonDto(
-    val meldingsreferanseId: UUID,
-    val førsteFraværsdag: LocalDate?,
-    val arbeidsgiverperioder: List<PeriodeDto>,
-    val beløp: InntektbeløpDto.MånedligDouble?,
-    val sisteRefusjonsdag: LocalDate?,
-    val endringerIRefusjon: List<EndringIRefusjonDto>,
-    val tidsstempel: LocalDateTime
-)
 data class EndringIRefusjonDto(
     val beløp: InntektbeløpDto.MånedligDouble,
     val endringsdato: LocalDate
@@ -167,13 +157,7 @@ sealed class InntekttypeDto {
     data object PENSJON_ELLER_TRYGD : InntekttypeDto()
     data object YTELSE_FRA_OFFENTLIGE : InntekttypeDto()
 }
-data class RefusjonsopplysningerDto(val opplysninger: List<RefusjonsopplysningDto>)
-data class RefusjonsopplysningDto(
-    val meldingsreferanseId: UUID,
-    val fom: LocalDate,
-    val tom: LocalDate?,
-    val beløp: InntektbeløpDto.MånedligDouble
-)
+
 data class OpptjeningDto(
     val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagDto>,
     val opptjeningsperiode: PeriodeDto

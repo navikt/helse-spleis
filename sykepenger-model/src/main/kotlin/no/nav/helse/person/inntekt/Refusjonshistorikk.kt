@@ -4,8 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.EndringIRefusjonDto
-import no.nav.helse.dto.RefusjonDto
-import no.nav.helse.dto.RefusjonshistorikkDto
+import no.nav.helse.dto.deserialisering.RefusjonInnDto
+import no.nav.helse.dto.deserialisering.RefusjonshistorikkInnDto
+import no.nav.helse.dto.serialisering.RefusjonUtDto
+import no.nav.helse.dto.serialisering.RefusjonshistorikkUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -81,7 +83,7 @@ internal class Refusjonshistorikk {
             }.nyesteMedFørsteFraværsdagFørFørsteUtbetalingsdag(periode.start)
                 ?.also { aktivitetslogg.info("Fant refusjon ved å finne tilstøtende arbeidsgiverperiode for første utbetalingsdag i sammenhengende utbetaling") }
 
-            internal fun gjenopprett(dto: RefusjonDto): Refusjon {
+            internal fun gjenopprett(dto: RefusjonInnDto): Refusjon {
                 return Refusjon(
                     meldingsreferanseId = dto.meldingsreferanseId,
                     førsteFraværsdag = dto.førsteFraværsdag,
@@ -188,23 +190,23 @@ internal class Refusjonshistorikk {
             internal fun dto() = EndringIRefusjonDto(beløp.dtoMånedligDouble(), endringsdato)
         }
 
-        internal fun dto() = RefusjonDto(
+        internal fun dto() = RefusjonUtDto(
             meldingsreferanseId = meldingsreferanseId,
             førsteFraværsdag = førsteFraværsdag,
             arbeidsgiverperioder = arbeidsgiverperioder.map { it.dto() },
-            beløp = beløp?.dtoMånedligDouble(),
+            beløp = beløp?.dto(),
             sisteRefusjonsdag = sisteRefusjonsdag,
             endringerIRefusjon = endringerIRefusjon.map { it.dto() },
             tidsstempel = tidsstempel
         )
     }
 
-    internal fun dto() = RefusjonshistorikkDto(
+    internal fun dto() = RefusjonshistorikkUtDto(
         refusjoner = refusjoner.map { it.dto() }
     )
 
     internal companion object {
-        fun gjenopprett(dto: RefusjonshistorikkDto): Refusjonshistorikk {
+        fun gjenopprett(dto: RefusjonshistorikkInnDto): Refusjonshistorikk {
             return Refusjonshistorikk().apply {
                 dto.refusjoner.forEach {
                     leggTilRefusjon(Refusjonshistorikk.Refusjon.gjenopprett(it))

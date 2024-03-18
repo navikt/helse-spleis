@@ -25,8 +25,8 @@ import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.OpptjeningDto
-import no.nav.helse.dto.RefusjonDto
-import no.nav.helse.dto.RefusjonsopplysningDto
+import no.nav.helse.dto.serialisering.RefusjonUtDto
+import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
 import no.nav.helse.dto.SatstypeDto
 import no.nav.helse.dto.SkatteopplysningDto
@@ -288,11 +288,11 @@ private fun HendelseskildeDto.tilPersonData() = PersonData.ArbeidsgiverData.Sykd
     id = this.meldingsreferanseId,
     tidsstempel = this.tidsstempel
 )
-private fun RefusjonDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonData(
+private fun RefusjonUtDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonData(
     meldingsreferanseId = this.meldingsreferanseId,
     førsteFraværsdag = this.førsteFraværsdag,
     arbeidsgiverperioder = this.arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-    beløp = this.beløp?.beløp,
+    beløp = this.beløp?.månedligDouble?.beløp,
     sisteRefusjonsdag = this.sisteRefusjonsdag,
     endringerIRefusjon = this.endringerIRefusjon.map { it.tilPersonData() },
     tidsstempel = this.tidsstempel
@@ -786,11 +786,11 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
     }
 )
 
-private fun RefusjonsopplysningDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonsopplysningData(
+private fun RefusjonsopplysningUtDto.tilPersonData() = PersonData.ArbeidsgiverData.RefusjonsopplysningData(
     meldingsreferanseId = this.meldingsreferanseId,
     fom = this.fom,
     tom = this.tom,
-    beløp = this.beløp.beløp
+    beløp = this.beløp.månedligDouble.beløp
 )
 
 private fun SammenligningsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.SammenligningsgrunnlagData(
