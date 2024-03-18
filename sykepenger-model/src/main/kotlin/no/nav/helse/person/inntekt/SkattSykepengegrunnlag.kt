@@ -5,7 +5,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.dto.AnsattPeriodeDto
-import no.nav.helse.dto.InntektsopplysningDto
+import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -23,7 +24,7 @@ internal class SkattSykepengegrunnlag private constructor(
     internal companion object {
         private const val MAKS_INNTEKT_GAP = 2
 
-        internal fun gjenopprett(dto: InntektsopplysningDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
+        internal fun gjenopprett(dto: InntektsopplysningInnDto.SkattSykepengegrunnlagDto): SkattSykepengegrunnlag {
             return SkattSykepengegrunnlag(
                 id = dto.id,
                 hendelseId = dto.hendelseId,
@@ -140,7 +141,7 @@ internal class SkattSykepengegrunnlag private constructor(
         )
     }
     override fun dto() =
-        InntektsopplysningDto.SkattSykepengegrunnlagDto(
+        InntektsopplysningUtDto.SkattSykepengegrunnlagDto(
             id = id,
             hendelseId = hendelseId,
             dato = dato,

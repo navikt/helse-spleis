@@ -17,10 +17,11 @@ import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.InntektDto
-import no.nav.helse.dto.InntektsopplysningDto
+import no.nav.helse.dto.InntektbeløpDto
+import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto
-import no.nav.helse.dto.UtbetalingsdagDto
+import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
@@ -62,7 +63,12 @@ import org.junit.jupiter.api.Test
 @EnableFeriepenger
 internal class PersonDataBuilderTest : AbstractDslTest() {
     private companion object {
-        private val IngenBeløp = InntektDto.DagligDouble(beløp = 0.0)
+        private val IngenBeløp = InntektDto(
+            InntektbeløpDto.Årlig(beløp = 0.0),
+            InntektbeløpDto.MånedligDouble(beløp = 0.0),
+            InntektbeløpDto.DagligDouble(beløp = 0.0),
+            InntektbeløpDto.DagligInt(beløp = 0)
+        )
         private val IngenGrad = ProsentdelDto(prosent = 0.0)
     }
 
@@ -176,31 +182,51 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(IngenGrad, dag.økonomi.totalGrad)
             assertEquals(IngenBeløp, dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.ArbeidsgiverperiodeDagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.ArbeidsgiverperiodeDagDto>(dag)
         }
         dto.dager[1].also { dag ->
             assertEquals(2.januar, dag.dato)
             assertEquals(100.0, dag.økonomi.grad.prosent)
             assertEquals(100.0, dag.økonomi.totalGrad.prosent)
-            assertEquals(InntektDto.DagligDouble(beløp = 1200.0), dag.økonomi.arbeidsgiverbeløp)
+            assertEquals(InntektDto(
+                InntektbeløpDto.Årlig(beløp = 312000.0),
+                InntektbeløpDto.MånedligDouble(beløp = 26000.0),
+                InntektbeløpDto.DagligDouble(beløp = 1200.0),
+                InntektbeløpDto.DagligInt(beløp = 1200)
+            ), dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.ArbeidsgiverperiodeDagNavDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto>(dag)
         }
         dto.dager[2].also { dag ->
             assertEquals(3.januar, dag.dato)
             assertEquals(100.0, dag.økonomi.grad.prosent)
             assertEquals(100.0, dag.økonomi.totalGrad.prosent)
-            assertEquals(InntektDto.DagligDouble(beløp = 600.0), dag.økonomi.arbeidsgiverbeløp)
-            assertEquals(InntektDto.DagligDouble(beløp = 600.0), dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.NavDagDto>(dag)
+            assertEquals(InntektDto(
+                InntektbeløpDto.Årlig(beløp = 156000.0),
+                InntektbeløpDto.MånedligDouble(beløp = 13000.0),
+                InntektbeløpDto.DagligDouble(beløp = 600.0),
+                InntektbeløpDto.DagligInt(beløp = 600)
+            ), dag.økonomi.arbeidsgiverbeløp)
+            assertEquals(InntektDto(
+                InntektbeløpDto.Årlig(beløp = 156000.0),
+                InntektbeløpDto.MånedligDouble(beløp = 13000.0),
+                InntektbeløpDto.DagligDouble(beløp = 600.0),
+                InntektbeløpDto.DagligInt(beløp = 600)
+            ), dag.økonomi.personbeløp)
+            assertInstanceOf<UtbetalingsdagUtDto.NavDagDto>(dag)
         }
         dto.dager[3].also { dag ->
             assertEquals(4.januar, dag.dato)
             assertEquals(100.0, dag.økonomi.grad.prosent)
             assertEquals(100.0, dag.økonomi.totalGrad.prosent)
-            assertEquals(InntektDto.DagligDouble(beløp = 1200.0), dag.økonomi.arbeidsgiverbeløp)
+            assertEquals(InntektDto(
+                InntektbeløpDto.Årlig(beløp = 312000.0),
+                InntektbeløpDto.MånedligDouble(beløp = 26000.0),
+                InntektbeløpDto.DagligDouble(beløp = 1200.0),
+                InntektbeløpDto.DagligInt(beløp = 1200)
+            ), dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto. NavHelgDagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto. NavHelgDagDto>(dag)
         }
         dto.dager[4].also { dag ->
             assertEquals(5.januar, dag.dato)
@@ -208,7 +234,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(IngenGrad, dag.økonomi.totalGrad)
             assertEquals(IngenBeløp, dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.ArbeidsdagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.ArbeidsdagDto>(dag)
         }
         dto.dager[5].also { dag ->
             assertEquals(6.januar, dag.dato)
@@ -216,7 +242,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(IngenGrad, dag.økonomi.totalGrad)
             assertEquals(IngenBeløp, dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.FridagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.FridagDto>(dag)
         }
         dto.dager[6].also { dag ->
             assertEquals(7.januar, dag.dato)
@@ -224,7 +250,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(IngenGrad, dag.økonomi.totalGrad)
             assertEquals(IngenBeløp, dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.ForeldetDagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.ForeldetDagDto>(dag)
         }
         dto.dager[7].also { dag ->
             assertEquals(8.januar, dag.dato)
@@ -232,7 +258,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(IngenGrad, dag.økonomi.totalGrad)
             assertEquals(IngenBeløp, dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.AvvistDagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.AvvistDagDto>(dag)
             assertEquals(1, dag.begrunnelser.size)
             assertInstanceOf<BegrunnelseDto.SykepengedagerOppbrukt>(dag.begrunnelser.single())
         }
@@ -242,7 +268,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(IngenGrad, dag.økonomi.totalGrad)
             assertEquals(IngenBeløp, dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.AvvistDagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.AvvistDagDto>(dag)
             assertEquals(1, dag.begrunnelser.size)
             assertInstanceOf<BegrunnelseDto.MinimumInntekt>(dag.begrunnelser.single())
         }
@@ -252,7 +278,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(IngenGrad, dag.økonomi.totalGrad)
             assertEquals(IngenBeløp, dag.økonomi.arbeidsgiverbeløp)
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
-            assertInstanceOf<UtbetalingsdagDto.UkjentDagDto>(dag)
+            assertInstanceOf<UtbetalingsdagUtDto.UkjentDagDto>(dag)
         }
     }
 
@@ -265,7 +291,10 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             arbeidsgiver.inntektshistorikk.historikk[0].also { inntektsmelding ->
                 assertEquals(1.januar, inntektsmelding.dato)
                 val forventetInntekt = INNTEKT
-                assertEquals(forventetInntekt.reflection { _, månedligDouble, _, _ -> månedligDouble }, inntektsmelding.beløp.beløp)
+                assertEquals(forventetInntekt.reflection { årlig, _, _, _ -> årlig }, inntektsmelding.beløp.årlig.beløp)
+                assertEquals(forventetInntekt.reflection { _, månedligDouble, _, _ -> månedligDouble }, inntektsmelding.beløp.månedligDouble.beløp)
+                assertEquals(forventetInntekt.reflection { _, _, dagligDouble, _ -> dagligDouble }, inntektsmelding.beløp.dagligDouble.beløp)
+                assertEquals(forventetInntekt.reflection { _, _, _, dagligInt -> dagligInt }, inntektsmelding.beløp.dagligInt.beløp)
             }
             assertEquals(3, arbeidsgiver.sykdomshistorikk.elementer.size)
             arbeidsgiver.sykdomshistorikk.elementer[2].also { sykdomshistorikkElement ->
@@ -319,11 +348,16 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             innslag.vilkårsgrunnlag[0].also { vilkårsgrunnlagDto ->
                 assertEquals(2, vilkårsgrunnlagDto.sykepengegrunnlag.arbeidsgiverInntektsopplysninger.size)
                 vilkårsgrunnlagDto.sykepengegrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
-                    assertInstanceOf<InntektsopplysningDto.InntektsmeldingDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
-                    assertEquals(InntektDto.MånedligDouble(beløp = 31000.0), arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp)
+                    assertInstanceOf<InntektsopplysningUtDto.InntektsmeldingDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
+                    assertEquals(InntektDto(
+                        InntektbeløpDto.Årlig(beløp = 372000.0),
+                        InntektbeløpDto.MånedligDouble(beløp = 31000.0),
+                        InntektbeløpDto.DagligDouble(beløp = 1430.7692307692307),
+                        InntektbeløpDto.DagligInt(beløp = 1430)
+                    ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp)
                 }
                 vilkårsgrunnlagDto.sykepengegrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
-                    assertInstanceOf<InntektsopplysningDto.IkkeRapportertDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
+                    assertInstanceOf<InntektsopplysningUtDto.IkkeRapportertDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
                     assertNull(arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp)
                 }
             }

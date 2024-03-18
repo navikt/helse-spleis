@@ -1,6 +1,5 @@
 package no.nav.helse.dto
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class UtbetalingVurderingDto(
@@ -29,53 +28,6 @@ sealed class UtbetalingTilstandDto {
     data object GODKJENT_UTEN_UTBETALING : UtbetalingTilstandDto()
     data object ANNULLERT : UtbetalingTilstandDto()
     data object FORKASTET : UtbetalingTilstandDto()
-}
-
-data class UtbetalingstidslinjeDto(
-    val dager: List<UtbetalingsdagDto>
-)
-
-sealed class UtbetalingsdagDto {
-    abstract val dato: LocalDate
-    abstract val økonomi: ØkonomiDto
-
-    data class ArbeidsgiverperiodeDagDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto
-    ) : UtbetalingsdagDto()
-    data class ArbeidsgiverperiodeDagNavDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto
-    ) : UtbetalingsdagDto()
-    data class NavDagDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto
-    ) : UtbetalingsdagDto()
-    data class NavHelgDagDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto
-    ) : UtbetalingsdagDto()
-    data class FridagDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto
-    ) : UtbetalingsdagDto()
-    data class ArbeidsdagDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto
-    ) : UtbetalingsdagDto()
-    data class AvvistDagDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto,
-        val begrunnelser: List<BegrunnelseDto>
-    ) : UtbetalingsdagDto()
-    data class ForeldetDagDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto
-    ) : UtbetalingsdagDto()
-    data class UkjentDagDto(
-        override val dato: LocalDate,
-        override val økonomi: ØkonomiDto
-    ) : UtbetalingsdagDto()
 }
 
 sealed class BegrunnelseDto {

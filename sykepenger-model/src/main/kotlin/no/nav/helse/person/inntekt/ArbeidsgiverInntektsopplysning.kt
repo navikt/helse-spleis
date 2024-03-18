@@ -2,12 +2,13 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.ArbeidsgiverInntektsopplysningDto
+import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -293,7 +294,7 @@ class ArbeidsgiverInntektsopplysning(
             this.forEach{it.inntektsopplysning.omregnetÅrsinntekt(builder, it.orgnummer)}
         }
 
-        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningDto, inntekter: MutableMap<UUID, Inntektsopplysning>): ArbeidsgiverInntektsopplysning {
+        internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): ArbeidsgiverInntektsopplysning {
             return ArbeidsgiverInntektsopplysning(
                 orgnummer = dto.orgnummer,
                 gjelder = Periode.gjenopprett(dto.gjelder),
@@ -303,7 +304,7 @@ class ArbeidsgiverInntektsopplysning(
         }
     }
 
-    internal fun dto() = ArbeidsgiverInntektsopplysningDto(
+    internal fun dto() = ArbeidsgiverInntektsopplysningUtDto(
         orgnummer = this.orgnummer,
         gjelder = this.gjelder.dto(),
         inntektsopplysning = this.inntektsopplysning.dto(),

@@ -6,14 +6,14 @@ import java.util.UUID
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
-import no.nav.helse.dto.UtbetalingstidslinjeDto
+import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
 import no.nav.helse.dto.UtbetalingtypeDto
 
 data class UtbetalingInnDto(
     val id: UUID,
     val korrelasjonsId: UUID,
     val periode: PeriodeDto,
-    val utbetalingstidslinje: UtbetalingstidslinjeDto,
+    val utbetalingstidslinje: UtbetalingstidslinjeInnDto,
     val arbeidsgiverOppdrag: OppdragInnDto,
     val personOppdrag: OppdragInnDto,
     val tidsstempel: LocalDateTime,

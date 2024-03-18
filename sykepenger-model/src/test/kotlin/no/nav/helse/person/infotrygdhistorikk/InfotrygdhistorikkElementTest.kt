@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.august
-import no.nav.helse.dto.InfotrygdhistorikkelementDto
+import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -43,7 +43,7 @@ internal class InfotrygdhistorikkElementTest {
             oppdatert: LocalDateTime = LocalDateTime.now(),
             tidsstempel: LocalDateTime = LocalDateTime.now()
         ) =
-            InfotrygdhistorikkelementDto(
+            InfotrygdhistorikkelementInnDto(
                 id = UUID.randomUUID(),
                 tidsstempel = tidsstempel,
                 hendelseId = hendelseId,

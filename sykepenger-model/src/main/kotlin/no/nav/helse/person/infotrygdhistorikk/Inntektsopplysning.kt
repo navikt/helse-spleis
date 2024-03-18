@@ -2,7 +2,8 @@ package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.dto.InfotrygdInntektsopplysningDto
+import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
+import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
 
@@ -38,7 +39,7 @@ class Inntektsopplysning private constructor(
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
             inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.inntekt }, { it.orgnummer }, { it.hashCode() }))
 
-        internal fun gjenopprett(dto: InfotrygdInntektsopplysningDto): Inntektsopplysning {
+        internal fun gjenopprett(dto: InfotrygdInntektsopplysningInnDto): Inntektsopplysning {
             return Inntektsopplysning(
                 orgnummer = dto.orgnummer,
                 sykepengerFom = dto.sykepengerFom,
@@ -50,10 +51,10 @@ class Inntektsopplysning private constructor(
         }
     }
 
-    internal fun dto() = InfotrygdInntektsopplysningDto(
+    internal fun dto() = InfotrygdInntektsopplysningUtDto(
         orgnummer = orgnummer,
         sykepengerFom = sykepengerFom,
-        inntekt = inntekt.dtoMånedligDouble(),
+        inntekt = inntekt.dto(),
         refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
         refusjonTom = refusjonTom,
         lagret = lagret

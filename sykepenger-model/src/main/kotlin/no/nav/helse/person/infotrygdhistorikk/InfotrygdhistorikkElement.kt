@@ -3,7 +3,8 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.InfotrygdhistorikkelementDto
+import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
+import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
@@ -60,7 +61,7 @@ class InfotrygdhistorikkElement private constructor(
                 oppdatert = oppdatert
             )
 
-        internal fun gjenopprett(dto: InfotrygdhistorikkelementDto): InfotrygdhistorikkElement {
+        internal fun gjenopprett(dto: InfotrygdhistorikkelementInnDto): InfotrygdhistorikkElement {
             return InfotrygdhistorikkElement(
                 id = dto.id,
                 tidsstempel = dto.tidsstempel,
@@ -184,7 +185,7 @@ class InfotrygdhistorikkElement private constructor(
         }
     }
 
-    internal fun dto() = InfotrygdhistorikkelementDto(
+    internal fun dto() = InfotrygdhistorikkelementUtDto(
         id = this.id,
         tidsstempel = this.tidsstempel,
         hendelseId = this.hendelseId,

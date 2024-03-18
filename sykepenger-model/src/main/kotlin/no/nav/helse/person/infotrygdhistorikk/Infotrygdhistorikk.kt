@@ -3,10 +3,11 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.InfotrygdhistorikkDto
+import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
@@ -32,7 +33,7 @@ internal class Infotrygdhistorikk private constructor(
         private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
             tidligsteDato.minusYears(4) til LocalDate.now()
 
-        internal fun gjenopprett(dto: InfotrygdhistorikkDto): Infotrygdhistorikk {
+        internal fun gjenopprett(dto: InfotrygdhistorikkInnDto): Infotrygdhistorikk {
             return Infotrygdhistorikk(
                 elementer = dto.elementer.map { InfotrygdhistorikkElement.gjenopprett(it) }.toMutableList()
             )
@@ -159,7 +160,7 @@ internal class Infotrygdhistorikk private constructor(
         return siste.ingenUtbetalingerMellom(organisasjonsnummer, periode)
     }
 
-    internal fun dto() = InfotrygdhistorikkDto(
+    internal fun dto() = InfotrygdhistorikkUtDto(
         elementer = this.elementer.map { it.dto() }
     )
 

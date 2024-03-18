@@ -1,6 +1,7 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.dto.ØkonomiDto
+import no.nav.helse.dto.deserialisering.ØkonomiInnDto
+import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -116,7 +117,7 @@ class Økonomi private constructor(
         internal fun er6GBegrenset(økonomiList: List<Økonomi>) =
             økonomiList.any { it.er6GBegrenset() }
 
-        fun gjenopprett(dto: ØkonomiDto, erAvvistDag: Boolean): Økonomi {
+        fun gjenopprett(dto: ØkonomiInnDto, erAvvistDag: Boolean): Økonomi {
             return Økonomi(
                 grad = Prosentdel.gjenopprett(dto.grad),
                 totalGrad = Prosentdel.gjenopprett(dto.totalGrad),
@@ -377,16 +378,16 @@ class Økonomi private constructor(
         }
     }
 
-    fun dto() = ØkonomiDto(
+    fun dto() = ØkonomiUtDto(
         grad = grad.dto(),
         totalGrad = totalGrad.dto(),
-        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp.dtoDagligDouble(),
-        aktuellDagsinntekt = aktuellDagsinntekt.dtoDagligDouble(),
-        beregningsgrunnlag = beregningsgrunnlag.dtoDagligDouble(),
-        dekningsgrunnlag = dekningsgrunnlag.dtoDagligDouble(),
-        grunnbeløpgrense = grunnbeløpgrense?.dtoÅrlig(),
-        arbeidsgiverbeløp = arbeidsgiverbeløp?.dtoDagligDouble(),
-        personbeløp = personbeløp?.dtoDagligDouble(),
+        arbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp.dto(),
+        aktuellDagsinntekt = aktuellDagsinntekt.dto(),
+        beregningsgrunnlag = beregningsgrunnlag.dto(),
+        dekningsgrunnlag = dekningsgrunnlag.dto(),
+        grunnbeløpgrense = grunnbeløpgrense?.dto(),
+        arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
+        personbeløp = personbeløp?.dto(),
         er6GBegrenset = er6GBegrenset
     )
 }

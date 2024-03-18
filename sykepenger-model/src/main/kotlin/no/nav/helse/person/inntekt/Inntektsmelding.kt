@@ -4,7 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import no.nav.helse.dto.InntektsopplysningDto
+import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
@@ -114,16 +115,16 @@ internal class Inntektsmelding(
     }
 
     override fun dto() =
-        InntektsopplysningDto.InntektsmeldingDto(
+        InntektsopplysningUtDto.InntektsmeldingDto(
             id = id,
             hendelseId = hendelseId,
             dato = dato,
-            beløp = beløp.dtoMånedligDouble(),
+            beløp = beløp.dto(),
             tidsstempel = tidsstempel
         )
 
     internal companion object {
-        internal fun gjenopprett(dto: InntektsopplysningDto.InntektsmeldingDto): Inntektsmelding {
+        internal fun gjenopprett(dto: InntektsopplysningInnDto.InntektsmeldingDto): Inntektsmelding {
             return Inntektsmelding(
                 id = dto.id,
                 dato = dto.dato,

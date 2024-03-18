@@ -1,8 +1,10 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
-import no.nav.helse.dto.InfotrygdArbeidsgiverutbetalingsperiodeDto
-import no.nav.helse.dto.InfotrygdPersonutbetalingsperiodeDto
+import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
+import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
+import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
+import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdperiodeVisitor
@@ -100,15 +102,15 @@ class ArbeidsgiverUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDa
         )
     }
 
-    internal fun dto() = InfotrygdArbeidsgiverutbetalingsperiodeDto(
+    internal fun dto() = InfotrygdArbeidsgiverutbetalingsperiodeUtDto(
         orgnr = orgnr,
         periode = periode.dto(),
         grad = grad.dto(),
-        inntekt = inntekt.dtoDagligInt()
+        inntekt = inntekt.dto()
     )
 
     internal companion object {
-        internal fun gjenopprett(dto: InfotrygdArbeidsgiverutbetalingsperiodeDto): ArbeidsgiverUtbetalingsperiode {
+        internal fun gjenopprett(dto: InfotrygdArbeidsgiverutbetalingsperiodeInnDto): ArbeidsgiverUtbetalingsperiode {
             val periode = Periode.gjenopprett(dto.periode)
             return ArbeidsgiverUtbetalingsperiode(
                 orgnr = dto.orgnr,
@@ -137,15 +139,15 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
         )
     }
 
-    internal fun dto() = InfotrygdPersonutbetalingsperiodeDto(
+    internal fun dto() = InfotrygdPersonutbetalingsperiodeUtDto(
         orgnr = orgnr,
         periode = periode.dto(),
         grad = grad.dto(),
-        inntekt = inntekt.dtoDagligInt()
+        inntekt = inntekt.dto()
     )
 
     internal companion object {
-        internal fun gjenopprett(dto: InfotrygdPersonutbetalingsperiodeDto): PersonUtbetalingsperiode {
+        internal fun gjenopprett(dto: InfotrygdPersonutbetalingsperiodeInnDto): PersonUtbetalingsperiode {
             val periode = Periode.gjenopprett(dto.periode)
             return PersonUtbetalingsperiode(
                 orgnr = dto.orgnr,

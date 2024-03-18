@@ -1,8 +1,9 @@
 package no.nav.helse.økonomi
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.dto.InntektDto
+import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.memoize
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.roundToInt
@@ -47,13 +48,12 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         private val rundTilDagligMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).roundToInt().daglig }.memoize()
         private val rundNedTilDagligMemoized = { tall: Double -> tilDagligIntMemoized(tall).daglig }.memoize()
 
-        fun gjenopprett(dto: InntektDto): Inntekt {
+        fun gjenopprett(dto: InntektbeløpDto): Inntekt {
             return when (dto) {
-                is InntektDto.Årlig -> Inntekt(dto.beløp)
-                is InntektDto.DagligDouble -> dto.beløp.daglig
-                is InntektDto.DagligInt -> dto.beløp.daglig
-                is InntektDto.MånedligDouble -> dto.beløp.månedlig
-                is InntektDto.MånedligInt -> dto.beløp.månedlig
+                is InntektbeløpDto.Årlig -> Inntekt(dto.beløp)
+                is InntektbeløpDto.DagligDouble -> dto.beløp.daglig
+                is InntektbeløpDto.DagligInt -> dto.beløp.daglig
+                is InntektbeløpDto.MånedligDouble -> dto.beløp.månedlig
             }
         }
     }
@@ -103,10 +103,16 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
     fun avviksprosent(other: Inntekt) = Avviksprosent.avvik(this.årlig, other.årlig)
 
-    fun dtoÅrlig() = InntektDto.Årlig(this.årlig)
-    fun dtoMånedligDouble() = InntektDto.MånedligDouble(tilMånedligDouble())
-    fun dtoDagligDouble() = InntektDto.DagligDouble(tilDagligDouble())
-    fun dtoDagligInt() = InntektDto.DagligInt(tilDagligInt())
+    fun dto() = InntektDto(
+        årlig = dtoÅrlig(),
+        månedligDouble = dtoMånedligDouble(),
+        dagligInt = dtoDagligInt(),
+        dagligDouble = dtoDagligDouble()
+    )
+    private fun dtoÅrlig() = InntektbeløpDto.Årlig(this.årlig)
+    fun dtoMånedligDouble() = InntektbeløpDto.MånedligDouble(tilMånedligDouble())
+    private fun dtoDagligDouble() = InntektbeløpDto.DagligDouble(tilDagligDouble())
+    private fun dtoDagligInt() = InntektbeløpDto.DagligInt(tilDagligInt())
 }
 
 interface DekningsgradKilde {

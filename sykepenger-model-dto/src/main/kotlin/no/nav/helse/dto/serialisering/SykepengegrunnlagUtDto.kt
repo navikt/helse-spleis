@@ -1,19 +1,17 @@
 package no.nav.helse.dto.serialisering
 
-import no.nav.helse.dto.ArbeidsgiverInntektsopplysningDto
 import no.nav.helse.dto.InntektDto
-import no.nav.helse.dto.SammenligningsgrunnlagDto
 
 data class SykepengegrunnlagUtDto(
-    val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningDto>,
-    val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningDto>,
+    val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningUtDto>,
+    val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningUtDto>,
     val vurdertInfotrygd: Boolean,
-    val sammenligningsgrunnlag: SammenligningsgrunnlagDto,
-    val `6G`: InntektDto.Årlig,
-    val totalOmregnetÅrsinntekt: InntektDto.Årlig,
-    val beregningsgrunnlag: InntektDto.Årlig,
+    val sammenligningsgrunnlag: SammenligningsgrunnlagUtDto,
+    val `6G`: InntektDto,
+    val totalOmregnetÅrsinntekt: InntektDto,
+    val beregningsgrunnlag: InntektDto,
     val er6GBegrenset: Boolean,
     val forhøyetInntektskrav: Boolean,
-    val minsteinntekt: InntektDto.Årlig,
+    val minsteinntekt: InntektDto,
     val oppfyllerMinsteinntektskrav: Boolean
 )

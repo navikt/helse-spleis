@@ -1,6 +1,7 @@
 package no.nav.helse.person.inntekt
 
-import no.nav.helse.dto.SammenligningsgrunnlagDto
+import no.nav.helse.dto.deserialisering.SammenligningsgrunnlagInnDto
+import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattISpleisBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
@@ -33,13 +34,13 @@ internal class Sammenligningsgrunnlag(
         builder.innrapportertÅrsinntekt(sammenligningsgrunnlag)
     }
 
-    internal fun dto() = SammenligningsgrunnlagDto(
-        sammenligningsgrunnlag = this.sammenligningsgrunnlag.dtoÅrlig(),
+    internal fun dto() = SammenligningsgrunnlagUtDto(
+        sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() }
     )
 
     internal companion object {
-        fun gjenopprett(dto: SammenligningsgrunnlagDto) =
+        fun gjenopprett(dto: SammenligningsgrunnlagInnDto) =
             Sammenligningsgrunnlag(
                 sammenligningsgrunnlag = Inntekt.gjenopprett(dto.sammenligningsgrunnlag),
                 arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map {

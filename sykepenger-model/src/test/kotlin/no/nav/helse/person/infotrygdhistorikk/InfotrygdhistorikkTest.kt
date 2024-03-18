@@ -3,7 +3,7 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.InfotrygdhistorikkDto
+import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.somPeriode
@@ -126,10 +126,12 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `tømme historikk - etter lagring av tom inntektliste`() {
-        val historikk = Infotrygdhistorikk.gjenopprett(InfotrygdhistorikkDto(listOf(
+        val historikk = Infotrygdhistorikk.gjenopprett(
+            InfotrygdhistorikkInnDto(listOf(
             eksisterendeInfotrygdHistorikkelement(),
             eksisterendeInfotrygdHistorikkelement()
-        )))
+        ))
+        )
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -198,7 +200,8 @@ internal class InfotrygdhistorikkTest {
             Friperiode(1.mars,  31.mars)
         )
         val nå = LocalDateTime.now()
-        historikk = Infotrygdhistorikk.gjenopprett(InfotrygdhistorikkDto(
+        historikk = Infotrygdhistorikk.gjenopprett(
+            InfotrygdhistorikkInnDto(
             elementer = listOf(PersonData.InfotrygdhistorikkElementData(
                 id = UUID.randomUUID(),
                 tidsstempel = nå,
@@ -213,7 +216,8 @@ internal class InfotrygdhistorikkTest {
                 arbeidskategorikoder = emptyMap(),
                 oppdatert = nå
             ).tilDto())
-        ))
+        )
+        )
         assertEquals(1, historikk.inspektør.elementer())
         assertFalse(historikk.oppdaterHistorikk(historikkelement(perioder)))
         assertEquals(1, historikk.inspektør.elementer())

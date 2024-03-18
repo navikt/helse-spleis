@@ -3,7 +3,8 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.InntektsopplysningDto
+import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -57,17 +58,17 @@ class SkjønnsmessigFastsatt internal constructor(
     override fun erSamme(other: Inntektsopplysning) =
         other is SkjønnsmessigFastsatt && this.dato == other.dato && this.beløp == other.beløp
     override fun dto() =
-        InntektsopplysningDto.SkjønnsmessigFastsattDto(
+        InntektsopplysningUtDto.SkjønnsmessigFastsattDto(
             id = id,
             hendelseId = hendelseId,
             dato = dato,
-            beløp = beløp.dtoMånedligDouble(),
+            beløp = beløp.dto(),
             tidsstempel = tidsstempel,
             overstyrtInntekt = overstyrtInntekt!!.dto().id
         )
 
     internal companion object {
-        fun gjenopprett(dto: InntektsopplysningDto.SkjønnsmessigFastsattDto, inntekter: Map<UUID, Inntektsopplysning>) =
+        fun gjenopprett(dto: InntektsopplysningInnDto.SkjønnsmessigFastsattDto, inntekter: Map<UUID, Inntektsopplysning>) =
             SkjønnsmessigFastsatt(
                 id = dto.id,
                 hendelseId = dto.hendelseId,

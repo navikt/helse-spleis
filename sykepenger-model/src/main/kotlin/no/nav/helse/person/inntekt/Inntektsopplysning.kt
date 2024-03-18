@@ -3,11 +3,12 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.InntektsopplysningDto
+import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -140,20 +141,20 @@ sealed class Inntektsopplysning protected constructor(
             check(all { it is SkjønnsmessigFastsatt } || none { it is SkjønnsmessigFastsatt }) {"Enten så må alle inntektsopplysninger var skjønnsmessig fastsatt, eller så må ingen være det"}
         }
 
-        internal fun gjenopprett(dto: InntektsopplysningDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Inntektsopplysning {
+        internal fun gjenopprett(dto: InntektsopplysningInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Inntektsopplysning {
             val inntektsopplysning = inntekter.getOrPut(dto.id) {
                 when (dto) {
-                    is InntektsopplysningDto.IkkeRapportertDto -> IkkeRapportert.gjenopprett(dto)
-                    is InntektsopplysningDto.InfotrygdDto -> Infotrygd.gjenopprett(dto)
-                    is InntektsopplysningDto.InntektsmeldingDto -> Inntektsmelding.gjenopprett(dto)
-                    is InntektsopplysningDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)
-                    is InntektsopplysningDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
-                    is InntektsopplysningDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsatt.gjenopprett(dto, inntekter)
+                    is InntektsopplysningInnDto.IkkeRapportertDto -> IkkeRapportert.gjenopprett(dto)
+                    is InntektsopplysningInnDto.InfotrygdDto -> Infotrygd.gjenopprett(dto)
+                    is InntektsopplysningInnDto.InntektsmeldingDto -> Inntektsmelding.gjenopprett(dto)
+                    is InntektsopplysningInnDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)
+                    is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
+                    is InntektsopplysningInnDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsatt.gjenopprett(dto, inntekter)
                 }
             }
             return inntektsopplysning
         }
     }
 
-    internal abstract fun dto(): InntektsopplysningDto
+    internal abstract fun dto(): InntektsopplysningUtDto
 }

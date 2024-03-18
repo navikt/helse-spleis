@@ -3,7 +3,8 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.dto.BegrunnelseDto
-import no.nav.helse.dto.UtbetalingstidslinjeDto
+import no.nav.helse.dto.deserialisering.UtbetalingstidslinjeInnDto
+import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
@@ -59,7 +60,7 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
             return Utbetalingsdag.betale(tidslinjer)
         }
 
-        fun gjenopprett(dto: UtbetalingstidslinjeDto): Utbetalingstidslinje {
+        fun gjenopprett(dto: UtbetalingstidslinjeInnDto): Utbetalingstidslinje {
             return Utbetalingstidslinje(
                 utbetalingsdager = dto.dager.map { Utbetalingsdag.gjenopprett(it) }.toMutableList()
             )
@@ -211,7 +212,7 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
         }
     }
 
-    fun dto() = UtbetalingstidslinjeDto(
+    fun dto() = UtbetalingstidslinjeUtDto(
         dager = this.map { it.dto() }
     )
 

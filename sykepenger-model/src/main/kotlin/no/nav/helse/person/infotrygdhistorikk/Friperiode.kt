@@ -1,7 +1,6 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
-import no.nav.helse.dto.InfotrygdArbeidsgiverutbetalingsperiodeDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdperiodeVisitor
@@ -9,8 +8,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
 class Friperiode(fom: LocalDate, tom: LocalDate) : Infotrygdperiode(fom, tom) {

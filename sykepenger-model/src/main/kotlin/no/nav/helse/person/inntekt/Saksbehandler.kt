@@ -3,7 +3,8 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.InntektsopplysningDto
+import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
@@ -110,11 +111,11 @@ class Saksbehandler internal constructor(
     }
 
     override fun dto() =
-        InntektsopplysningDto.SaksbehandlerDto(
+        InntektsopplysningUtDto.SaksbehandlerDto(
             id = id,
             hendelseId = hendelseId,
             dato = dato,
-            beløp = beløp.dtoMånedligDouble(),
+            beløp = beløp.dto(),
             tidsstempel = tidsstempel,
             forklaring = forklaring,
             subsumsjon = subsumsjon?.dto(),
@@ -122,7 +123,7 @@ class Saksbehandler internal constructor(
         )
 
     internal companion object {
-        fun gjenopprett(dto: InntektsopplysningDto.SaksbehandlerDto, inntekter: Map<UUID, Inntektsopplysning>) =
+        fun gjenopprett(dto: InntektsopplysningInnDto.SaksbehandlerDto, inntekter: Map<UUID, Inntektsopplysning>) =
             Saksbehandler(
                 id = dto.id,
                 hendelseId = dto.hendelseId,
