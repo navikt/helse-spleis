@@ -383,9 +383,7 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse) {
         påminnelse.kontekst(aktivitetslogg, this)
         påminnelse.info("Håndterer påminnelse for person")
-
-        val tidligsteDato = arbeidsgivere.tidligsteDato()
-        infotrygdhistorikk.oppfrisk(påminnelse, tidligsteDato)
+        gjenopptaBehandling(påminnelse)
         håndterGjenoppta(påminnelse)
     }
 
