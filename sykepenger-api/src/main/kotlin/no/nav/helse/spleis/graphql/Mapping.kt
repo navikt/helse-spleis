@@ -18,7 +18,7 @@ import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
-import no.nav.helse.serde.api.dto.UberegnetVilkårsprøvdPeriode
+import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
@@ -60,7 +60,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
-import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetVilkarsprovdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
@@ -313,24 +312,7 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
     when (periode) {
         is AnnullertPeriode -> mapBeregnetPeriode(periode.somBeregnetPeriode(), hendelser)
         is BeregnetPeriode -> mapBeregnetPeriode(periode, hendelser)
-        is UberegnetVilkårsprøvdPeriode -> GraphQLUberegnetVilkarsprovdPeriode(
-            generasjonId = periode.generasjonId,
-            behandlingId = periode.generasjonId,
-            kilde = periode.kilde,
-            fom = periode.fom,
-            tom = periode.tom,
-            tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
-            periodetype = mapPeriodetype(periode.periodetype),
-            inntektstype = mapInntektstype(periode.inntektskilde),
-            erForkastet = periode.erForkastet,
-            opprettet = periode.oppdatert,
-            vedtaksperiodeId = periode.vedtaksperiodeId,
-            periodetilstand = mapTilstand(periode.periodetilstand),
-            skjaeringstidspunkt = periode.skjæringstidspunkt,
-            hendelser = periode.hendelser.tilHendelseDTO(hendelser),
-            vilkarsgrunnlagId = periode.vilkårsgrunnlagId
-        )
-        else -> GraphQLUberegnetPeriode(
+        is UberegnetPeriode -> GraphQLUberegnetPeriode(
             generasjonId = periode.generasjonId,
             behandlingId = periode.generasjonId,
             kilde = periode.kilde,

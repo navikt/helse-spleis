@@ -11,7 +11,6 @@ import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
-import no.nav.helse.serde.api.speil.SpeilGenerasjoner
 import no.nav.helse.serde.api.speil.builders.ISpleisGrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 
@@ -54,7 +53,7 @@ enum class Tidslinjeperiodetype {
     INFOTRYGDFORLENGELSE;
 }
 
-abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
+sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val vedtaksperiodeId: UUID
     abstract val generasjonId: UUID
     abstract val kilde: UUID
@@ -79,14 +78,10 @@ abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     internal fun erSammeVedtaksperiode(other: SpeilTidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
     internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon, UtbetaltVenterPåAnnenPeriode)
 
-    internal abstract fun tilGenerasjon(generasjoner: SpeilGenerasjoner)
     override fun compareTo(other: SpeilTidslinjeperiode) = tom.compareTo(other.tom)
     internal open fun medOpplysningerFra(other: UberegnetPeriode): UberegnetPeriode? = null
 
     internal companion object {
-        fun List<SpeilTidslinjeperiode>.sorterEtterHendelse() = this
-            .sortedBy { it.sorteringstidspunkt }
-
         fun List<SpeilTidslinjeperiode>.utledPeriodetyper(): List<SpeilTidslinjeperiode> {
             val out = mutableListOf<SpeilTidslinjeperiode>()
             val sykefraværstilfeller = this.sortedBy { it.fom }.groupBy { it.skjæringstidspunkt }
@@ -104,34 +99,6 @@ abstract class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
 
 private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 private fun LocalDate.format() = format(formatter)
-
-data class UberegnetVilkårsprøvdPeriode(
-    override val vedtaksperiodeId: UUID,
-    override val generasjonId: UUID,
-    override val kilde: UUID,
-    override val fom: LocalDate,
-    override val tom: LocalDate,
-    override val sammenslåttTidslinje: List<SammenslåttDag>,
-    override val periodetype: Tidslinjeperiodetype, // feltet gir ikke mening for uberegnede perioder
-    override val inntektskilde: UtbetalingInntektskilde, // feltet gir ikke mening for uberegnede perioder
-    override val erForkastet: Boolean,
-    override val sorteringstidspunkt: LocalDateTime,
-    override val opprettet: LocalDateTime,
-    override val oppdatert: LocalDateTime,
-    override val periodetilstand: Periodetilstand,
-    override val skjæringstidspunkt: LocalDate,
-    override val hendelser: Set<UUID>,
-    val vilkårsgrunnlagId: UUID
-) : SpeilTidslinjeperiode() {
-
-    override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
-        return this.copy(periodetype = periodetype)
-    }
-
-    override fun tilGenerasjon(generasjoner: SpeilGenerasjoner) {
-        generasjoner.uberegnetVilkårsprøvdPeriode(this)
-    }
-}
 
 data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
@@ -152,10 +119,6 @@ data class UberegnetPeriode(
 ) : SpeilTidslinjeperiode() {
     override fun toString(): String {
         return "${fom.format()}-${tom.format()} - $periodetilstand"
-    }
-
-    override fun tilGenerasjon(generasjoner: SpeilGenerasjoner) {
-        generasjoner.uberegnetPeriode(this)
     }
 
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
@@ -233,16 +196,6 @@ data class BeregnetPeriode(
         return "${fom.format()}-${tom.format()} - $periodetilstand - ${utbetaling.type}"
     }
 
-    override fun tilGenerasjon(generasjoner: SpeilGenerasjoner) {
-        check(utbetaling.type in setOf(Utbetalingtype.REVURDERING, Utbetalingtype.UTBETALING)) {
-            "beregnet periode skal bare anvendes på utbetalte perioder"
-        }
-        when (utbetaling.type) {
-            Utbetalingtype.REVURDERING -> generasjoner.revurdertPeriode(this)
-            else -> generasjoner.utbetaltPeriode(this)
-        }
-    }
-
     data class Vilkår(
         val sykepengedager: Sykepengedager,
         val alder: Alder
@@ -288,10 +241,6 @@ data class AnnullertPeriode(
     override val sorteringstidspunkt = beregnet
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
         return this
-    }
-
-    override fun tilGenerasjon(generasjoner: SpeilGenerasjoner) {
-        generasjoner.annullertPeriode(this)
     }
 
     // returnerer en beregnet perioder for

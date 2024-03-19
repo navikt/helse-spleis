@@ -204,25 +204,6 @@ data class GraphQLUberegnetPeriode(
     override val hendelser: List<GraphQLHendelse>
     ) : GraphQLTidslinjeperiode
 
-data class GraphQLUberegnetVilkarsprovdPeriode(
-    @Deprecated("", replaceWith = ReplaceWith("behandlingId"))
-    override val generasjonId: UUID,
-    override val behandlingId: UUID,
-    override val kilde: UUID,
-    override val fom: LocalDate,
-    override val tom: LocalDate,
-    override val tidslinje: List<GraphQLDag>,
-    override val periodetype: GraphQLPeriodetype,
-    override val inntektstype: GraphQLInntektstype,
-    override val erForkastet: Boolean,
-    override val opprettet: LocalDateTime,
-    override val vedtaksperiodeId: UUID,
-    override val periodetilstand: GraphQLPeriodetilstand,
-    override val skjaeringstidspunkt: LocalDate,
-    override val hendelser: List<GraphQLHendelse>,
-    val vilkarsgrunnlagId: UUID
-    ) : GraphQLTidslinjeperiode
-
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,
     val alder: Alder

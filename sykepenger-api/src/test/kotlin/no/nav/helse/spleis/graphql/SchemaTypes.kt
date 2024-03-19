@@ -42,7 +42,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLTidslinjeperiode
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
-import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetVilkarsprovdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
@@ -146,7 +145,6 @@ private fun SchemaBuilder.tidslinjeperiodeTypes() {
     type<GraphQLDag>()
     type<GraphQLTidslinjeperiode>()
     type<GraphQLUberegnetPeriode>()
-    type<GraphQLUberegnetVilkarsprovdPeriode>()
     type<GraphQLPeriodevilkar>()
     type<GraphQLPeriodevilkar.Sykepengedager>()
     type<GraphQLPeriodevilkar.Alder>()
