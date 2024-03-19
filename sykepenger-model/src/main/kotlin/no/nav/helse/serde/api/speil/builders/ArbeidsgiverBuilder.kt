@@ -1,35 +1,23 @@
 package no.nav.helse.serde.api.speil.builders
 
-import java.util.UUID
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.serde.api.BuilderState
-import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 import no.nav.helse.Alder
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO
+import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 
 internal class ArbeidsgiverBuilder(
-    private val arbeidsgiver: Arbeidsgiver,
     private val arbeidsgiverUtDto: ArbeidsgiverUtDto,
     private val pølsepakke: SpekematDTO.PølsepakkeDTO?
-) : BuilderState() {
+) {
 
     internal fun build(alder: Alder, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
         return ArbeidsgiverDTO(
             id = arbeidsgiverUtDto.id,
             organisasjonsnummer = arbeidsgiverUtDto.organisasjonsnummer,
-            generasjoner = pølsepakke?.let { SpeilGenerasjonerBuilder(arbeidsgiverUtDto.organisasjonsnummer, alder, arbeidsgiver, arbeidsgiverUtDto, vilkårsgrunnlagHistorikk, pølsepakke).build() } ?: emptyList()
+            generasjoner = pølsepakke?.let { SpeilGenerasjonerBuilder(arbeidsgiverUtDto.organisasjonsnummer, alder, arbeidsgiverUtDto, vilkårsgrunnlagHistorikk, pølsepakke).build() } ?: emptyList()
         )
-    }
-
-    override fun postVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String
-    ) {
-        popState()
     }
 
     internal companion object {

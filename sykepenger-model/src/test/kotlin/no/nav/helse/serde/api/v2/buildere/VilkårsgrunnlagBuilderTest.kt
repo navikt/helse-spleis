@@ -54,7 +54,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val perioder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
             UNG_PERSON_FØDSELSDATO.alder,
-            person.arbeidsgiver(organisasjonsnummer),
             person.arbeidsgiver(organisasjonsnummer).dto(),
             vilkårsgrunnlagHistorikkBuilderResult,
             spekemat.resultat(organisasjonsnummer)

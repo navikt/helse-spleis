@@ -2744,7 +2744,6 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         val generasjonerBuilder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
             UNG_PERSON_FØDSELSDATO.alder,
-            person.arbeidsgiver(organisasjonsnummer),
             person.arbeidsgiver(organisasjonsnummer).dto(),
             vilkårsgrunnlagHistorikkBuilderResult,
             spekemat

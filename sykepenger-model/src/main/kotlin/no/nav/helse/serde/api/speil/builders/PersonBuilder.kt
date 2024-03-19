@@ -1,11 +1,9 @@
 package no.nav.helse.serde.api.speil.builders
 
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.Alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
@@ -20,12 +18,14 @@ internal class  PersonBuilder(
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val versjon: Int
 ) : BuilderState(builder) {
-    private val alder: Alder = Alder(personUtDto.alder.fødselsdato, personUtDto.alder.dødsdato)
-    private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
-
     internal fun build(): PersonDTO {
+        val alder = Alder(personUtDto.alder.fødselsdato, personUtDto.alder.dødsdato)
+
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk).build()
-        val arbeidsgivere = arbeidsgivere
+        val arbeidsgivere = personUtDto.arbeidsgivere
+            .map { arbeidsgiverDto ->
+                ArbeidsgiverBuilder(arbeidsgiverDto, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == arbeidsgiverDto.organisasjonsnummer })
+            }
             .map { it.build(alder, vilkårsgrunnlagHistorikk) }
             .let { arbeidsgivere ->
                 arbeidsgivere.map { it.medGhostperioder(vilkårsgrunnlagHistorikk, arbeidsgivere) }
@@ -40,16 +40,6 @@ internal class  PersonBuilder(
             versjon = versjon,
             vilkårsgrunnlag = vilkårsgrunnlagHistorikk.toDTO()
         )
-    }
-
-    override fun preVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String
-    ) {
-        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, personUtDto.arbeidsgivere.single { it.id == id }, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == organisasjonsnummer })
-        arbeidsgivere.add(arbeidsgiverBuilder)
-        pushState(arbeidsgiverBuilder)
     }
 
     override fun postVisitPerson(
