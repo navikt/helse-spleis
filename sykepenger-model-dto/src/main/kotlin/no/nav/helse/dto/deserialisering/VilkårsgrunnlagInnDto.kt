@@ -3,7 +3,7 @@ package no.nav.helse.dto.deserialisering
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dto.MedlemskapsvurderingDto
-import no.nav.helse.dto.OpptjeningDto
+import no.nav.helse.dto.serialisering.OpptjeningUtDto
 
 sealed class VilkårsgrunnlagInnDto {
     abstract val vilkårsgrunnlagId: UUID
@@ -14,7 +14,7 @@ sealed class VilkårsgrunnlagInnDto {
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,
         override val sykepengegrunnlag: SykepengegrunnlagInnDto,
-        val opptjening: OpptjeningDto,
+        val opptjening: OpptjeningInnDto,
         val medlemskapstatus: MedlemskapsvurderingDto,
         val vurdertOk: Boolean,
         val meldingsreferanseId: UUID?

@@ -1,17 +1,12 @@
 package no.nav.helse.serde.api
 
-import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Personidentifikator
 import no.nav.helse.person.Person
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.speil.builders.PersonBuilder
 
 fun serializePersonForSpeil(person: Person, pølsepakke: SpekematDTO): PersonDTO {
-    val jsonBuilder = SpeilBuilder(pølsepakke)
-    person.accept(jsonBuilder)
+    val jsonBuilder = SpeilBuilder(person, pølsepakke)
     return jsonBuilder.build()
 }
 
@@ -39,7 +34,7 @@ data class SpekematDTO(
     }
 }
 
-internal class SpeilBuilder(private val pølsepakke: SpekematDTO) : AbstractBuilder() {
+internal class SpeilBuilder(person: Person, private val pølsepakke: SpekematDTO) {
 
     private companion object {
         /* Økes for å signalisere til spesialist at strukturen i snapshot'et
@@ -48,19 +43,8 @@ internal class SpeilBuilder(private val pølsepakke: SpekematDTO) : AbstractBuil
         const val SNAPSHOT_VERSJON = 52
     }
 
-    private lateinit var personBuilder: PersonBuilder
+    private val personBuilder = PersonBuilder(person.dto(), pølsepakke, SNAPSHOT_VERSJON)
 
     fun build() = personBuilder.build()
-
-    override fun preVisitPerson(
-        person: Person,
-        opprettet: LocalDateTime,
-        aktørId: String,
-        personidentifikator: Personidentifikator,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
-    ) {
-        personBuilder = PersonBuilder(this, person.dto(), pølsepakke, vilkårsgrunnlagHistorikk, SNAPSHOT_VERSJON)
-        pushState(personBuilder)
-    }
 }
 

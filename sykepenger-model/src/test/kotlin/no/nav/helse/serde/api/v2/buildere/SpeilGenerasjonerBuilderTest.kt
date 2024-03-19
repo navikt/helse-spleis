@@ -2740,7 +2740,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private fun generasjoner(organisasjonsnummer: String = ORGNUMMER, block: Arbeidsgivergenerasjoner.() -> Unit = {}) {
         val spekemat = spekemat.resultat(organisasjonsnummer)
-        val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
+        val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk.dto()).build()
         val generasjonerBuilder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
             UNG_PERSON_FØDSELSDATO.alder,

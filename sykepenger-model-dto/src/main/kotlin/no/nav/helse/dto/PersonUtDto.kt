@@ -158,11 +158,6 @@ sealed class InntekttypeDto {
     data object YTELSE_FRA_OFFENTLIGE : InntekttypeDto()
 }
 
-data class OpptjeningDto(
-    val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagDto>,
-    val opptjeningsperiode: PeriodeDto
-)
-
 data class ArbeidsgiverOpptjeningsgrunnlagDto(
     val orgnummer: String,
     val ansattPerioder: List<ArbeidsforholdDto>

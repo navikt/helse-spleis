@@ -485,6 +485,7 @@ internal class Sykepengegrunnlag private constructor(
         vurdertInfotrygd = this.vurdertInfotrygd,
         sammenligningsgrunnlag = this.sammenligningsgrunnlag.dto(),
         `6G` = this.`6G`.dto(),
+        sykepengegrunnlag = this.sykepengegrunnlag.dto(),
         totalOmregnetÅrsinntekt = this.omregnetÅrsinntekt.dto(),
         beregningsgrunnlag = this.beregningsgrunnlag.dto(),
         er6GBegrenset = beregningsgrunnlag > this.`6G`,

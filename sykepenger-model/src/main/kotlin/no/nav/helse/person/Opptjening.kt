@@ -9,7 +9,8 @@ import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
-import no.nav.helse.dto.OpptjeningDto
+import no.nav.helse.dto.deserialisering.OpptjeningInnDto
+import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
@@ -203,7 +204,7 @@ internal class Opptjening private constructor(
         internal fun gjenopprett(skjæringstidspunkt: LocalDate, arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) =
             Opptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
 
-        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: OpptjeningDto): Opptjening {
+        internal fun gjenopprett(skjæringstidspunkt: LocalDate, dto: OpptjeningInnDto): Opptjening {
             return Opptjening(
                 skjæringstidspunkt = skjæringstidspunkt,
                 dto.arbeidsforhold.map { ArbeidsgiverOpptjeningsgrunnlag.gjenopprett(it) },
@@ -229,8 +230,10 @@ internal class Opptjening private constructor(
         }
     }
 
-    internal fun dto() = OpptjeningDto(
+    internal fun dto() = OpptjeningUtDto(
         arbeidsforhold = this.arbeidsforhold.map { it.dto() },
-        opptjeningsperiode = this.opptjeningsperiode.dto()
+        opptjeningsperiode = this.opptjeningsperiode.dto(),
+        opptjeningsdager = opptjeningsdager,
+        erOppfylt = erOppfylt()
     )
 }

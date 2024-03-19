@@ -64,10 +64,9 @@ sealed class InntektsopplysningUtDto {
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,
+        override val beløp: InntektDto,
         override val tidsstempel: LocalDateTime,
         val inntektsopplysninger: List<SkatteopplysningDto>,
         val ansattPerioder: List<AnsattPeriodeDto>
-    ) : InntektsopplysningUtDto() {
-        override val beløp: InntektDto? = null
-    }
+    ) : InntektsopplysningUtDto()
 }

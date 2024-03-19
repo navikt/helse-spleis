@@ -49,7 +49,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     private fun vilkårsgrunnlag(organisasjonsnummer: String = AG1): Pair<Map<UUID, Vilkårsgrunnlag>, List<SpeilGenerasjonDTO>> {
-        val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
+        val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk.dto()).build()
 
         val perioder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,

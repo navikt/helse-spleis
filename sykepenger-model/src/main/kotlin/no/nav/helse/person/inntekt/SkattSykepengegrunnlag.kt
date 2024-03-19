@@ -145,6 +145,7 @@ internal class SkattSykepengegrunnlag private constructor(
             id = id,
             hendelseId = hendelseId,
             dato = dato,
+            beløp = beløp.dto(),
             tidsstempel = tidsstempel,
             inntektsopplysninger = inntektsopplysninger.map { it.dto() },
             ansattPerioder = ansattPerioder.map { it.dto() })

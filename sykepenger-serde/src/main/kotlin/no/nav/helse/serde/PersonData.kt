@@ -26,7 +26,7 @@ import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.OppdragstatusDto
-import no.nav.helse.dto.OpptjeningDto
+import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.SatstypeDto
@@ -58,6 +58,7 @@ import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
+import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.RefusjonInnDto
 import no.nav.helse.dto.deserialisering.RefusjonshistorikkInnDto
@@ -424,7 +425,7 @@ data class PersonData(
             val opptjeningTom: LocalDate,
             val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagData>
         ) {
-            fun tilDto() = OpptjeningDto(
+            fun tilDto() = OpptjeningInnDto(
                 arbeidsforhold = this.arbeidsforhold.map { it.tilDto() },
                 opptjeningsperiode = PeriodeDto(fom = this.opptjeningFom, tom = this.opptjeningTom)
             )

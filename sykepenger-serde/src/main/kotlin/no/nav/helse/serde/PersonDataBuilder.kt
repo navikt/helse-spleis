@@ -24,7 +24,7 @@ import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.OppdragstatusDto
-import no.nav.helse.dto.OpptjeningDto
+import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.RefusjonUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
@@ -706,7 +706,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
     vilkårsgrunnlagId = this.vilkårsgrunnlagId
 )
 
-private fun OpptjeningDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.OpptjeningData(
+private fun OpptjeningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.OpptjeningData(
     opptjeningFom = this.opptjeningsperiode.fom,
     opptjeningTom = this.opptjeningsperiode.tom,
     arbeidsforhold = this.arbeidsforhold.map {
