@@ -59,7 +59,7 @@ internal class SpeilBuilder(private val pølsepakke: SpekematDTO) : AbstractBuil
         personidentifikator: Personidentifikator,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        personBuilder = PersonBuilder(this, personidentifikator, aktørId, pølsepakke, vilkårsgrunnlagHistorikk, SNAPSHOT_VERSJON)
+        personBuilder = PersonBuilder(this, person.dto(), pølsepakke, vilkårsgrunnlagHistorikk, SNAPSHOT_VERSJON)
         pushState(personBuilder)
     }
 }
