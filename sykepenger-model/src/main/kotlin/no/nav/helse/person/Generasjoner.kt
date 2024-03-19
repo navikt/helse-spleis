@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -48,6 +49,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 internal class Generasjoner private constructor(generasjoner: List<Generasjon>) {
     internal constructor() : this(emptyList())
     companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         fun gjenopprett(dto: GenerasjonerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner(
             generasjoner = dto.generasjoner.map { Generasjon.gjenopprett(it, grunnlagsdata, utbetalinger) }
         )
@@ -729,12 +731,13 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
 
         private fun emitNyGenerasjonOpprettet() {
             check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
-            val type = when(tilstand) {
-                Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
-                Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring
+            val type = when (tilstand) {
+                is Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
+                is Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring
                 is Tilstand.TilInfotrygd,
                 is Tilstand.AnnullertPeriode -> PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd
-                else -> PersonObserver.GenerasjonOpprettetEvent.Type.Søknad
+                is Tilstand.Uberegnet -> PersonObserver.GenerasjonOpprettetEvent.Type.Søknad
+                else -> PersonObserver.GenerasjonOpprettetEvent.Type.Søknad.also { sikkerlogg.warn("Forventet ikke å opprette generasjon i tilstand ${tilstand::class.simpleName}. GenerasjonId=$id") }
             }
             observatører.forEach { it.nyGenerasjon(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
         }

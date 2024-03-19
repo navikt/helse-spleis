@@ -16,6 +16,10 @@ dependencies {
     testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
 
     testImplementation(project(":sykepenger-serde"))
+    implementation(libs.bundles.logging) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
 }
 
 tasks {
