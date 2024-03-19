@@ -1,46 +1,47 @@
 package no.nav.helse.serde.api.sporing
 
-import no.nav.helse.Personidentifikator
-import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
+import no.nav.helse.erRettFør
 import no.nav.helse.person.Person
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.serde.AbstractBuilder
-import no.nav.helse.serde.api.BuilderState
-import java.time.LocalDateTime
-import java.util.*
 
-internal class PersonBuilder(builder: AbstractBuilder) : BuilderState(builder) {
-    private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
-    private lateinit var personidentifikator: Personidentifikator
-    private lateinit var aktørId: String
-
+internal class PersonBuilder(private val person: Person) {
     internal fun build(): PersonDTO {
+        val dto = person.dto()
         return PersonDTO(
-            fødselsnummer = personidentifikator.toString(),
-            aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.build() },
+            fødselsnummer = dto.fødselsnummer,
+            aktørId = dto.aktørId,
+            arbeidsgivere = dto.arbeidsgivere.map { mapArbeidsgiver(it) },
         )
     }
 
-    override fun preVisitArbeidsgiver(
-        arbeidsgiver: Arbeidsgiver,
-        id: UUID,
-        organisasjonsnummer: String
-    ) {
-        val arbeidsgiverBuilder = ArbeidsgiverBuilder(organisasjonsnummer)
-        arbeidsgivere.add(arbeidsgiverBuilder)
-        pushState(arbeidsgiverBuilder)
+    private fun mapArbeidsgiver(arbeidsgiverDto: ArbeidsgiverUtDto): ArbeidsgiverDTO {
+        val perioderBuilder = arbeidsgiverDto.vedtaksperioder.map { mapVedtaksperiode(it, false) }
+        val forkastetPerioderBuilder = arbeidsgiverDto.vedtaksperioder.map { mapVedtaksperiode(it, true) }
+
+        val perioder = (perioderBuilder + forkastetPerioderBuilder).sortedBy { it.fom }.toMutableList()
+        return ArbeidsgiverDTO(
+            organisasjonsnummer = arbeidsgiverDto.organisasjonsnummer,
+            vedtaksperioder = perioder.onEachIndexed { index, denne ->
+                val erForlengelse = if (index > 0) perioder[index - 1].forlenger(denne) else false
+                val erForlenget = if (perioder.size > (index + 1)) denne.forlenger(perioder[index + 1]) else false
+                perioder[index] = denne.copy(periodetype = when {
+                    !erForlengelse && !erForlenget -> PeriodetypeDTO.GAP_SISTE
+                    !erForlengelse && erForlenget -> PeriodetypeDTO.GAP
+                    erForlengelse && !erForlenget -> PeriodetypeDTO.FORLENGELSE_SISTE
+                    else -> PeriodetypeDTO.FORLENGELSE
+                })
+            }
+        )
     }
 
-    override fun postVisitPerson(
-        person: Person,
-        opprettet: LocalDateTime,
-        aktørId: String,
-        personidentifikator: Personidentifikator,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
-    ) {
-        this.personidentifikator = personidentifikator
-        this.aktørId = aktørId
-        popState()
-    }
+    private fun mapVedtaksperiode(dto: VedtaksperiodeUtDto, forkastet: Boolean) = VedtaksperiodeDTO(
+        id = dto.id,
+        fom = dto.fom,
+        tom = dto.tom,
+        periodetype = PeriodetypeDTO.GAP,
+        forkastet = forkastet
+    )
+
+    private fun VedtaksperiodeDTO.forlenger(other: VedtaksperiodeDTO) = this.tom.erRettFør(other.fom)
 }
