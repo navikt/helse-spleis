@@ -149,13 +149,13 @@ internal class SpeilGenerasjonerBuilder(
         )
     }
 
-    private fun mapAnnullertPeriode(vedtaksperiode: VedtaksperiodeUtDto, forrigeBeregnetPeriode: BeregnetPeriode?, generasjon: GenerasjonUtDto): AnnullertPeriode {
+    private fun mapAnnullertPeriode(vedtaksperiode: VedtaksperiodeUtDto, forrigeBeregnetPeriode: BeregnetPeriode?, generasjon: GenerasjonUtDto): AnnullertPeriode? {
         val sisteEndring = generasjon.endringer.last()
         // todo: når alle annullerte generasjoner har en endring som peker på den annullerte utbetalingen så kan vi hente
         // ut annulleringen vha: `annulleringer.single { it.id == sisteEndring.utbetalingId }`
         val annulleringen = annulleringer.singleOrNull { it.id == sisteEndring.utbetalingId }
-            ?: forrigeBeregnetPeriode?.let { annulleringer.single { it.annullerer(forrigeBeregnetPeriode.utbetaling.korrelasjonsId) } }
-            ?: error("Forventer å finne en annullering for ${vedtaksperiode.id}")
+            ?: forrigeBeregnetPeriode?.let { annulleringer.singleOrNull { it.annullerer(forrigeBeregnetPeriode.utbetaling.korrelasjonsId) } }
+            ?: return null // todo: Forventer å finne en annullering for vedtaksperioden. Det er flere vedtaksperioder som er forkastet, som ikke skulle vært der fordi de ikke er annullert på ekte
         return AnnullertPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             generasjonId = generasjon.id,
