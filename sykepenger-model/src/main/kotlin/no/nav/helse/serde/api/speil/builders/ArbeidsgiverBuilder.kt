@@ -5,22 +5,22 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 import no.nav.helse.Alder
+import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO
 
 internal class ArbeidsgiverBuilder(
     private val arbeidsgiver: Arbeidsgiver,
-    private val id: UUID,
-    private val organisasjonsnummer: String,
+    private val arbeidsgiverUtDto: ArbeidsgiverUtDto,
     private val pølsepakke: SpekematDTO.PølsepakkeDTO?
 ) : BuilderState() {
 
     internal fun build(alder: Alder, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
         return ArbeidsgiverDTO(
-            organisasjonsnummer = organisasjonsnummer,
-            id = id,
-            generasjoner = pølsepakke?.let { SpeilGenerasjonerBuilder(organisasjonsnummer, alder, arbeidsgiver, vilkårsgrunnlagHistorikk, pølsepakke).build() } ?: emptyList()
+            id = arbeidsgiverUtDto.id,
+            organisasjonsnummer = arbeidsgiverUtDto.organisasjonsnummer,
+            generasjoner = pølsepakke?.let { SpeilGenerasjonerBuilder(arbeidsgiverUtDto.organisasjonsnummer, alder, arbeidsgiver, vilkårsgrunnlagHistorikk, pølsepakke).build() } ?: emptyList()
         )
     }
 

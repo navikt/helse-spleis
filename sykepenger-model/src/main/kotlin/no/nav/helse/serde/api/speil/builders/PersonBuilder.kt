@@ -47,7 +47,7 @@ internal class  PersonBuilder(
         id: UUID,
         organisasjonsnummer: String
     ) {
-        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == organisasjonsnummer })
+        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, personUtDto.arbeidsgivere.single { it.id == id }, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == organisasjonsnummer })
         arbeidsgivere.add(arbeidsgiverBuilder)
         pushState(arbeidsgiverBuilder)
     }
