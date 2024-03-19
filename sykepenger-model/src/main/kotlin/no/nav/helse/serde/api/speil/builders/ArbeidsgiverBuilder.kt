@@ -1,10 +1,10 @@
 package no.nav.helse.serde.api.speil.builders
 
-import no.nav.helse.Alder
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO
 import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO
+import no.nav.helse.serde.api.dto.AlderDTO
 import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 
 internal class ArbeidsgiverBuilder(
@@ -12,7 +12,7 @@ internal class ArbeidsgiverBuilder(
     private val pølsepakke: SpekematDTO.PølsepakkeDTO?
 ) {
 
-    internal fun build(alder: Alder, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
+    internal fun build(alder: AlderDTO, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
         return ArbeidsgiverDTO(
             id = arbeidsgiverUtDto.id,
             organisasjonsnummer = arbeidsgiverUtDto.organisasjonsnummer,

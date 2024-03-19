@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 data class PersonDTO(
@@ -11,3 +12,11 @@ data class PersonDTO(
     val versjon: Int,
     val vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>
 )
+
+data class AlderDTO(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {
+    fun alderPåDato(dagen: LocalDate): Int {
+        val alderPåDagen = ChronoUnit.YEARS.between(fødselsdato, dagen)
+        if (dødsdato == null || dagen < dødsdato) return alderPåDagen.toInt()
+        return ChronoUnit.YEARS.between(fødselsdato, dødsdato).toInt()
+    }
+}

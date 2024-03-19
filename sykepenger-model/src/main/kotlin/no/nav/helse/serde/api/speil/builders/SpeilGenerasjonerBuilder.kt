@@ -2,7 +2,6 @@ package no.nav.helse.serde.api.speil.builders
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Alder
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.GenerasjonTilstandDto
 import no.nav.helse.dto.UtbetalingTilstandDto
@@ -14,6 +13,7 @@ import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.serde.api.SpekematDTO
+import no.nav.helse.serde.api.dto.AlderDTO
 import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.AnnullertUtbetaling
 import no.nav.helse.serde.api.dto.BeregnetPeriode
@@ -32,7 +32,7 @@ import no.nav.helse.serde.api.speil.merge
 
 internal class SpeilGenerasjonerBuilder(
     private val organisasjonsnummer: String,
-    private val alder: Alder,
+    private val alder: AlderDTO,
     private val arbeidsgiverUtDto: ArbeidsgiverUtDto,
     private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
     private val pølsepakke: SpekematDTO.PølsepakkeDTO
@@ -232,7 +232,7 @@ internal class SpeilGenerasjonerBuilder(
     private fun periodevilkår(
         sisteSykepengedag: LocalDate,
         utbetaling: no.nav.helse.serde.api.dto.Utbetaling,
-        alder: Alder,
+        alder: AlderDTO,
         skjæringstidspunkt: LocalDate
     ): BeregnetPeriode.Vilkår {
         val sykepengedager = BeregnetPeriode.Sykepengedager(
@@ -242,9 +242,8 @@ internal class SpeilGenerasjonerBuilder(
             utbetaling.gjenståendeDager,
             utbetaling.maksdato > sisteSykepengedag
         )
-        val alderSisteSykepengedag = alder.let {
-            val alderSisteSykedag = it.alderPåDato(sisteSykepengedag)
-            BeregnetPeriode.Alder(alderSisteSykedag, alderSisteSykedag < 70)
+        val alderSisteSykepengedag = alder.alderPåDato(sisteSykepengedag).let {
+            BeregnetPeriode.Alder(it, it < 70)
         }
         return BeregnetPeriode.Vilkår(sykepengedager, alderSisteSykepengedag)
     }

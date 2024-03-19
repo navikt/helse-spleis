@@ -8,7 +8,6 @@ import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.erHelg
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.serde.api.dto.AvvistDag
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
@@ -19,7 +18,7 @@ import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagUtenGrad
 import kotlin.math.roundToInt
 
-internal class SykdomstidslinjeBuilder(private val dto: SykdomstidslinjeDto): SykdomstidslinjeVisitor {
+internal class SykdomstidslinjeBuilder(private val dto: SykdomstidslinjeDto) {
     private val tidslinje by lazy {
         dto.dager.map {
             when (it) {

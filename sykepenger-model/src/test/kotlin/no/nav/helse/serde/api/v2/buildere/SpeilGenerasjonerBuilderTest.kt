@@ -52,6 +52,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
+import no.nav.helse.serde.api.dto.AlderDTO
 import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Inntekt
@@ -2743,7 +2744,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk.dto()).build()
         val generasjonerBuilder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
-            UNG_PERSON_FØDSELSDATO.alder,
+            AlderDTO(UNG_PERSON_FØDSELSDATO, null),
             person.arbeidsgiver(organisasjonsnummer).dto(),
             vilkårsgrunnlagHistorikkBuilderResult,
             spekemat

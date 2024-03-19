@@ -15,6 +15,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.serde.api.dto.AlderDTO
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
@@ -53,7 +54,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
         val perioder = SpeilGenerasjonerBuilder(
             organisasjonsnummer,
-            UNG_PERSON_FØDSELSDATO.alder,
+            AlderDTO(UNG_PERSON_FØDSELSDATO, null),
             person.arbeidsgiver(organisasjonsnummer).dto(),
             vilkårsgrunnlagHistorikkBuilderResult,
             spekemat.resultat(organisasjonsnummer)
