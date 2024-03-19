@@ -524,7 +524,7 @@ internal class SpeilGenerasjonerBuilder(
             }
 
             override fun besøkSykdomstidslinje(builder: SpeilGenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {
-                val sykdomstidslinjeDto = SykdomstidslinjeBuilder(sykdomstidslinje).build()
+                val sykdomstidslinjeDto = SykdomstidslinjeBuilder(sykdomstidslinje.dto()).build()
                 this.beregnetPeriodeBuilder?.medSykdomstidslinje(sykdomstidslinjeDto)
                 this.uberegnetPeriodeBuilder?.medSykdomstidslinje(sykdomstidslinjeDto)
             }

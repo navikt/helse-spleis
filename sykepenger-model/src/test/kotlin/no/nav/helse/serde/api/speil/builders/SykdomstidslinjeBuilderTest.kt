@@ -16,7 +16,7 @@ internal class SykdomstidslinjeBuilderTest() {
 
     @Test
     fun `ferie uten sykmelding`() {
-        val builder = SykdomstidslinjeBuilder(7.AIG)
+        val builder = SykdomstidslinjeBuilder(7.AIG.dto())
         val build = builder.build()
         assertEquals(7, build.size)
         build.forEach { assertEquals(ARBEID_IKKE_GJENOPPTATT_DAG, it.type) }
