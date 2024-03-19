@@ -151,7 +151,8 @@ internal class PersonMediator(
             "fom" to vedtaksperiodeAnnullertEvent.fom,
             "tom" to vedtaksperiodeAnnullertEvent.tom,
             "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
-            "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.organisasjonsnummer,
+            "behandlingId" to vedtaksperiodeAnnullertEvent.generasjonId,
+            "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.organisasjonsnummer
         )))
     }
 

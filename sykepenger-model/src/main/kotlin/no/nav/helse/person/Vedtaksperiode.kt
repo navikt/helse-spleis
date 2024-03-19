@@ -931,7 +931,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     override fun vedtakAnnullert(hendelse: IAktivitetslogg, generasjonId: UUID) {
-        person.vedtaksperiodeAnnullert(PersonObserver.VedtaksperiodeAnnullertEvent(periode.start, periode.endInclusive, id, organisasjonsnummer))
+        person.vedtaksperiodeAnnullert(PersonObserver.VedtaksperiodeAnnullertEvent(periode.start, periode.endInclusive, id, organisasjonsnummer, generasjonId))
     }
 
     override fun generasjonLukket(generasjonId: UUID) {

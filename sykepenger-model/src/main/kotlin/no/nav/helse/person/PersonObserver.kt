@@ -699,11 +699,12 @@ interface PersonObserver {
         val opprettet: LocalDateTime
     )
 
-    data class VedtaksperiodeAnnullertEvent (
+    data class VedtaksperiodeAnnullertEvent(
         val fom: LocalDate,
         val tom: LocalDate,
         val vedtaksperiodeId: UUID,
-        val organisasjonsnummer: String
+        val organisasjonsnummer: String,
+        val generasjonId: UUID
     )
 
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {}
