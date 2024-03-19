@@ -12,5 +12,6 @@ enum class KontekstType {
     OverstyrRefusjon,
     OverstyrArbeidsgiveropplysninger,
     OverstyrArbeidsforhold,
-    SkjønnsmessigFastsettelse
+    SkjønnsmessigFastsettelse,
+    AndreYtelser
 }

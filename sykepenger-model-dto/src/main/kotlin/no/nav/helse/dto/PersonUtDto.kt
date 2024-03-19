@@ -115,6 +115,7 @@ sealed class DokumenttypeDto {
     data object OverstyrArbeidsgiveropplysninger : DokumenttypeDto()
     data object OverstyrArbeidsforhold : DokumenttypeDto()
     data object SkjønnsmessigFastsettelse : DokumenttypeDto()
+    data object AndreYtelser : DokumenttypeDto()
 }
 
 data class GenerasjonkildeDto(

@@ -20,6 +20,7 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
         internal fun overstyrArbeidsforhold(id: UUID) = Dokumentsporing(id, DokumentType.OverstyrArbeidsforhold)
         internal fun skjønnsmessigFastsettelse(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse)
         internal fun grunnbeløpendring(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse) // TODO: bytte DokumentType
+        internal fun andreYtelser(id: UUID) = Dokumentsporing(id, DokumentType.AndreYtelser)
 
         internal fun Iterable<Dokumentsporing>.toJsonList() = map { it.id to it.dokumentType }
         internal fun Iterable<Dokumentsporing>.ider() = map { it.id }.toSet()
@@ -38,6 +39,7 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
                 DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
                 DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
                 DokumentType.SkjønnsmessigFastsettelse -> KontekstType.SkjønnsmessigFastsettelse
+                DokumentType.AndreYtelser -> KontekstType.AndreYtelser
             }
         }
 
@@ -55,6 +57,7 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
                     DokumenttypeDto.SkjønnsmessigFastsettelse -> DokumentType.SkjønnsmessigFastsettelse
                     DokumenttypeDto.Sykmelding -> DokumentType.Sykmelding
                     DokumenttypeDto.Søknad -> DokumentType.Søknad
+                    DokumenttypeDto.AndreYtelser -> DokumentType.AndreYtelser
                 }
             )
         }
@@ -83,6 +86,7 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
             DokumentType.OverstyrArbeidsgiveropplysninger -> DokumenttypeDto.OverstyrArbeidsgiveropplysninger
             DokumentType.OverstyrArbeidsforhold -> DokumenttypeDto.OverstyrArbeidsforhold
             DokumentType.SkjønnsmessigFastsettelse -> DokumenttypeDto.SkjønnsmessigFastsettelse
+            DokumentType.AndreYtelser -> DokumenttypeDto.AndreYtelser
         }
     )
 }

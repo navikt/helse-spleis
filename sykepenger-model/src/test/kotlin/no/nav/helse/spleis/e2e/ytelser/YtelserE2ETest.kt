@@ -55,6 +55,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.søknad
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -344,5 +345,14 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
                 assertIngenInfo("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
             }
         )
+    }
+
+    @Test
+    fun `Fullstendig overlapp med foreldrepenger`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.januar til 31.januar))
+        assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
     }
 }

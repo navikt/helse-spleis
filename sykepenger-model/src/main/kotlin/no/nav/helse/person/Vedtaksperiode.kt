@@ -1857,6 +1857,7 @@ internal class Vedtaksperiode private constructor(
             håndterFørstegangsbehandling(ytelser, vedtaksperiode) {
                 validation(ytelser) {
                     onValidationFailed { vedtaksperiode.forkast(ytelser) }
+                    vedtaksperiode.oppdaterHistorikk(ytelser)
                     valider { vedtaksperiode.kalkulerUtbetalinger(this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
                     onSuccess { vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning) }
                 }
