@@ -552,7 +552,7 @@ private fun UtbetalingslinjeUtDto.tilPersonData() = PersonData.UtbetalingslinjeD
         SatstypeDto.Daglig -> "DAG"
         SatstypeDto.Engang -> "ENG"
     },
-    sats = this.beløp!!,
+    sats = this.beløp,
     grad = this.grad,
     refFagsystemId = this.refFagsystemId,
     delytelseId = this.delytelseId,

@@ -4,8 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Vedtaksperiode
@@ -218,16 +218,19 @@ data class UberegnetPeriode(
             hendelser = hendelser,
             beregningId = sisteBeregnetPeriode.beregningId,
             utbetaling = Utbetaling(
+                annulleringen.id,
                 Utbetalingtype.ANNULLERING,
                 sisteBeregnetPeriode.utbetaling.korrelasjonsId,
+                LocalDate.MAX,
+                0,
+                0,
                 annulleringen.utbetalingstatus,
                 0,
                 0,
                 sisteBeregnetPeriode.utbetaling.arbeidsgiverFagsystemId,
                 sisteBeregnetPeriode.utbetaling.personFagsystemId,
                 emptyMap(),
-                null,
-                annulleringen.id
+                null
             )
         )
     }
@@ -299,7 +302,6 @@ data class BeregnetPeriode(
     override val inntektskilde: UtbetalingInntektskilde, // verdien av dette feltet brukes bare for å sjekke !=null i speil
     override val opprettet: LocalDateTime,
     val generasjonOpprettet: LocalDateTime,
-    val beregnet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
@@ -307,15 +309,12 @@ data class BeregnetPeriode(
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
     val beregningId: UUID,
-    val gjenståendeSykedager: Int?,
-    val forbrukteSykedager: Int?,
-    val maksdato: LocalDate,
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
     val vilkårsgrunnlagId: UUID?, // dette feltet er i != for beregnede perioder, men må være nullable så lenge annullerte perioder mappes til beregnet periode
     val forrigeGenerasjon: BeregnetPeriode? = null
 ) : SpeilTidslinjeperiode() {
-    override val sorteringstidspunkt = beregnet
+    override val sorteringstidspunkt = generasjonOpprettet
 
     override fun venter(): Boolean = super.venter() && periodetilstand != Utbetalt
 
@@ -392,49 +391,21 @@ data class BeregnetPeriode(
         private val forrigeBeregnetPeriode: BeregnetPeriode?,
         private val generasjonOpprettet: LocalDateTime
     ) {
-        private lateinit var beregnet: LocalDateTime
         private lateinit var skjæringstidspunkt: LocalDate
-        private lateinit var utbetalingId: UUID
-        private lateinit var korrelasjonsId: UUID
-        private var gjenståendeSykedager: Int = 0
-        private var forbrukteSykedager: Int = 0
-        private lateinit var maksdato: LocalDate
         private lateinit var vilkårsgrunnlagId: UUID
 
         private lateinit var utbetalingstidslinje: List<Utbetalingstidslinjedag>
         private lateinit var sykdomstidslinje: List<Sykdomstidslinjedag>
 
-        private var utbetalingtype: Utbetalingtype? = null
-        private lateinit var utbetalingstatus: Utbetalingstatus
-        private var utbetalingvurdering: Utbetaling.Vurdering? = null
+        private lateinit var utbetaling: Utbetaling
 
-        private var arbeidsgiverNettoBeløp: Int = 0
-        private var personNettoBeløp: Int = 0
-        private lateinit var arbeidsgiverFagsystemId: String
-        private lateinit var personFagsystemId: String
-        private val oppdrag = mutableMapOf<String, SpeilOppdrag>()
-
-        fun build(alder: no.nav.helse.Alder, dokumentsporinger: Set<Dokumentsporing>): BeregnetPeriode? {
-            val utbetalingtype = this.utbetalingtype ?: return null
-
+        fun build(alder: no.nav.helse.Alder, dokumentsporinger: Set<Dokumentsporing>): BeregnetPeriode {
             val avgrensetUtbetalingstidslinje = utbetalingstidslinje.filter { it.dato in periode }
-            val utbetalingDTO = Utbetaling(
-                type = utbetalingtype,
-                korrelasjonsId = korrelasjonsId,
-                status = utbetalingstatus,
-                arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
-                personNettoBeløp = personNettoBeløp,
-                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-                personFagsystemId = personFagsystemId,
-                oppdrag = oppdrag,
-                vurdering = utbetalingvurdering,
-                id = utbetalingId
-            )
             return BeregnetPeriode(
                 vedtaksperiodeId = vedtaksperiodeId,
                 generasjonId = generasjonId,
                 kilde = kilde,
-                beregningId = utbetalingId,
+                beregningId = utbetaling.id,
                 fom = periode.start,
                 tom = periode.endInclusive,
                 erForkastet = false,
@@ -442,20 +413,21 @@ data class BeregnetPeriode(
                 inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // verdien av feltet brukes ikke i speil
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = dokumentsporinger.ider(),
-                maksdato = maksdato,
                 generasjonOpprettet = generasjonOpprettet,
-                beregnet = beregnet,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
                 periodevilkår = periodevilkår(alder, skjæringstidspunkt, avgrensetUtbetalingstidslinje),
                 sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
-                gjenståendeSykedager = gjenståendeSykedager,
-                forbrukteSykedager = forbrukteSykedager,
-                utbetaling = utbetalingDTO,
+                utbetaling = utbetaling,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                periodetilstand = utledePeriodetilstand(utbetalingDTO, avgrensetUtbetalingstidslinje),
+                periodetilstand = utledePeriodetilstand(utbetaling, avgrensetUtbetalingstidslinje),
                 forrigeGenerasjon = forrigeBeregnetPeriode
             )
+        }
+
+        internal fun medUtbetaling(utbetaling: Utbetaling, utbetalingstidslinje: List<Utbetalingstidslinjedag>) {
+            this.utbetaling = utbetaling
+            this.utbetalingstidslinje = utbetalingstidslinje
         }
 
         private fun utledePeriodetilstand(utbetalingDTO: Utbetaling, avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>) =
@@ -491,75 +463,12 @@ data class BeregnetPeriode(
             avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>
         ): Vilkår {
             val sisteSykepengedag = avgrensetUtbetalingstidslinje.sisteNavDag()?.dato ?: periode.endInclusive
-            val sykepengedager = Sykepengedager(skjæringstidspunkt, maksdato, forbrukteSykedager, gjenståendeSykedager, maksdato > sisteSykepengedag)
+            val sykepengedager = Sykepengedager(skjæringstidspunkt, utbetaling.maksdato, utbetaling.forbrukteSykedager, utbetaling.gjenståendeDager, utbetaling.maksdato > sisteSykepengedag)
             val alderSisteSykepengedag = alder.let {
                 val alderSisteSykedag = it.alderPåDato(sisteSykepengedag)
                 Alder(alderSisteSykedag, alderSisteSykedag < 70)
             }
             return Vilkår(sykepengedager, alderSisteSykepengedag)
-        }
-
-        internal fun medUtbetaling(
-            id: UUID,
-            korrelasjonsId: UUID,
-            status: String,
-            opprettet: LocalDateTime,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int,
-            gjenståendeDager: Int
-        ) = apply {
-            medUtbetaling(Utbetalingtype.UTBETALING, id, korrelasjonsId, status, opprettet, maksdato, forbrukteSykedager, gjenståendeDager)
-        }
-        internal fun medRevurdering(
-            id: UUID,
-            korrelasjonsId: UUID,
-            status: String,
-            opprettet: LocalDateTime,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int,
-            gjenståendeDager: Int
-        ) = apply {
-            medUtbetaling(Utbetalingtype.REVURDERING, id, korrelasjonsId, status, opprettet, maksdato, forbrukteSykedager, gjenståendeDager)
-        }
-
-        private fun medUtbetaling(
-            type: Utbetalingtype,
-            id: UUID,
-            korrelasjonsId: UUID,
-            status: String,
-            opprettet: LocalDateTime,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int,
-            gjenståendeDager: Int
-        ) {
-            this.utbetalingtype = type
-            this.korrelasjonsId = korrelasjonsId
-            this.utbetalingstatus = utledStatus(type, status)
-            this.utbetalingId = id
-            this.beregnet = opprettet
-            this.maksdato = maksdato
-            this.forbrukteSykedager = forbrukteSykedager
-            this.gjenståendeSykedager = gjenståendeDager
-        }
-
-        internal fun medVurdering(godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) = apply {
-            this.utbetalingvurdering = Utbetaling.Vurdering(godkjent, tidsstempel, automatisk, ident)
-        }
-
-        fun medArbeidsgiveroppdrag(oppdrag: SpeilOppdrag) = apply {
-            this.arbeidsgiverFagsystemId = oppdrag.fagsystemId
-            this.arbeidsgiverNettoBeløp = oppdrag.nettobeløp
-            this.oppdrag[oppdrag.fagsystemId] = oppdrag
-        }
-
-        fun medPersonoppdrag(oppdrag: SpeilOppdrag) = apply {
-            this.personFagsystemId = oppdrag.fagsystemId
-            this.personNettoBeløp = oppdrag.nettobeløp
-            this.oppdrag[oppdrag.fagsystemId] = oppdrag
-        }
-
-        fun medUtbetalingstidslinje(utbetalingstidslinje: List<Utbetalingstidslinjedag>) {
-            this.utbetalingstidslinje = utbetalingstidslinje
         }
 
         fun medVilkårsgrunnlag(vilkårsgrunnlagId: UUID, skjæringstidspunkt: LocalDate) {
@@ -569,22 +478,6 @@ data class BeregnetPeriode(
 
         fun medSykdomstidslinje(sykdomstidslinje: List<Sykdomstidslinjedag>) = apply {
             this.sykdomstidslinje = sykdomstidslinje
-        }
-
-        private fun utledStatus(type: Utbetalingtype, status: String): Utbetalingstatus {
-            return when (status) {
-                "ANNULLERT" -> Utbetalingstatus.Annullert
-                "GODKJENT" -> Utbetalingstatus.Godkjent
-                "GODKJENT_UTEN_UTBETALING" -> Utbetalingstatus.GodkjentUtenUtbetaling
-                "IKKE_GODKJENT" -> when (type) {
-                    Utbetalingtype.REVURDERING -> Utbetalingstatus.IkkeGodkjent
-                    else -> error("forsøker å mappe en IKKE_GODKJENT-utbetaling til Speil, som ikke er revurdering")
-                }
-                "OVERFØRT" -> Utbetalingstatus.Overført
-                "IKKE_UTBETALT" -> Utbetalingstatus.Ubetalt
-                "UTBETALT" -> Utbetalingstatus.Utbetalt
-                else -> error("har ingen mappingregel for $status")
-            }
         }
     }
 }
@@ -638,15 +531,11 @@ data class AnnullertPeriode(
             inntektskilde = inntektskilde,
             opprettet = opprettet,
             generasjonOpprettet = beregnet,
-            beregnet = beregnet,
             oppdatert = oppdatert,
             periodetilstand = periodetilstand,
             skjæringstidspunkt = skjæringstidspunkt,
             hendelser = hendelser,
             beregningId = beregningId,
-            gjenståendeSykedager = null,
-            forbrukteSykedager = null,
-            maksdato = LocalDate.MAX,
             utbetaling = utbetaling,
             periodevilkår = vilkår,
             vilkårsgrunnlagId = null
@@ -732,10 +621,6 @@ data class SpeilOppdrag(
             medSimulering(simuleringresultat)
         }
 
-        fun medOppdragslinje(fom: LocalDate, tom: LocalDate, beløp: Int, grad: Int, endringskode: EndringskodeDTO) = apply {
-            utbetalingslinjer.add(Utbetalingslinje(fom, tom, beløp, grad, endringskode))
-        }
-
         fun build() = SpeilOppdrag(fagsystemId, tidsstempel, nettobeløp, simulering, utbetalingslinjer)
 
         private fun medSimulering(simuleringsresultat: SimuleringResultatDto?) {
@@ -797,16 +682,19 @@ enum class Utbetalingtype {
 }
 
 class Utbetaling(
+    val id: UUID,
     val type: Utbetalingtype,
     val korrelasjonsId: UUID,
+    val maksdato: LocalDate,
+    val forbrukteSykedager: Int,
+    val gjenståendeDager: Int,
     val status: Utbetalingstatus,
     val arbeidsgiverNettoBeløp: Int,
     val personNettoBeløp: Int,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
     val oppdrag: Map<String, SpeilOppdrag>,
-    val vurdering: Vurdering?,
-    val id: UUID
+    val vurdering: Vurdering?
 ) {
     data class Vurdering(
         val godkjent: Boolean,

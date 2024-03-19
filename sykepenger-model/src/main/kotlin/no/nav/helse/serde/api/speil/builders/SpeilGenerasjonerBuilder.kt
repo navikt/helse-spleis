@@ -4,7 +4,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder
-import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.dto.EndringskodeDto
+import no.nav.helse.dto.UtbetalingTilstandDto
+import no.nav.helse.dto.UtbetalingtypeDto
+import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
+import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
@@ -19,7 +23,7 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.serde.api.dto.AnnullertUtbetaling
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
+import no.nav.helse.serde.api.dto.EndringskodeDTO
 import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
 import no.nav.helse.serde.api.dto.SpeilOppdrag
 import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
@@ -29,25 +33,17 @@ import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.fjern
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.AktivePerioder
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.ForkastedePerioder
 import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.Initiell
-import no.nav.helse.serde.api.speil.builders.SpeilGenerasjonerBuilder.Byggetilstand.Utbetalinger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 // Besøker hele arbeidsgiver-treet
 internal class SpeilGenerasjonerBuilder(
     private val organisasjonsnummer: String,
     private val alder: Alder,
     arbeidsgiver: Arbeidsgiver,
+    private val arbeidsgiverUtDto: ArbeidsgiverUtDto,
     private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
     private val pølsepakke: SpekematDTO.PølsepakkeDTO
 ) : ArbeidsgiverVisitor {
@@ -56,7 +52,9 @@ internal class SpeilGenerasjonerBuilder(
     private val allePerioder = mutableListOf<SpeilTidslinjeperiode>()
     private val annullertePerioder = mutableListOf<Pair<UberegnetPeriode, BeregnetPeriode>>()
 
-    private val annulleringer = mutableListOf<AnnullertUtbetaling>()
+    private val utbetalinger = mapUtbetalinger()
+    private val annulleringer = mapAnnulleringer()
+    private val utbetalingstidslinjer = mapUtbetalingstidslinjer()
 
     init {
         arbeidsgiver.accept(this)
@@ -64,6 +62,136 @@ internal class SpeilGenerasjonerBuilder(
 
     internal fun build(): List<SpeilGenerasjonDTO> {
         return buildSpekemat()
+    }
+
+    private fun mapUtbetalingstidslinjer(): List<Pair<UUID, UtbetalingstidslinjeBuilder>> {
+        return arbeidsgiverUtDto.utbetalinger.map {
+            it.id to UtbetalingstidslinjeBuilder(it.utbetalingstidslinje)
+        }
+    }
+
+    private fun mapUtbetalinger(): List<no.nav.helse.serde.api.dto.Utbetaling> {
+        return arbeidsgiverUtDto.utbetalinger
+            .filter { it.type in setOf(UtbetalingtypeDto.REVURDERING, UtbetalingtypeDto.UTBETALING) }
+            .mapNotNull {
+                no.nav.helse.serde.api.dto.Utbetaling(
+                    id = it.id,
+                    type = when (it.type) {
+                        UtbetalingtypeDto.REVURDERING -> no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
+                        UtbetalingtypeDto.UTBETALING -> no.nav.helse.serde.api.dto.Utbetalingtype.UTBETALING
+                        else -> error("Forventer ikke mapping for utbetalingtype=${it.type}")
+                    },
+                    korrelasjonsId = it.korrelasjonsId,
+                    status = when (it.tilstand) {
+                        UtbetalingTilstandDto.ANNULLERT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Annullert
+                        UtbetalingTilstandDto.GODKJENT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Godkjent
+                        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> no.nav.helse.serde.api.dto.Utbetalingstatus.GodkjentUtenUtbetaling
+                        UtbetalingTilstandDto.IKKE_GODKJENT -> no.nav.helse.serde.api.dto.Utbetalingstatus.IkkeGodkjent
+                        UtbetalingTilstandDto.IKKE_UTBETALT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Ubetalt
+                        UtbetalingTilstandDto.OVERFØRT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Overført
+                        UtbetalingTilstandDto.UTBETALT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Utbetalt
+                        else -> return@mapNotNull null
+                    },
+                    maksdato = it.maksdato!!,
+                    forbrukteSykedager = it.forbrukteSykedager!!,
+                    gjenståendeDager = it.gjenståendeSykedager!!,
+                    arbeidsgiverNettoBeløp = it.arbeidsgiverOppdrag.nettoBeløp,
+                    arbeidsgiverFagsystemId = it.arbeidsgiverOppdrag.fagsystemId,
+                    personNettoBeløp = it.personOppdrag.nettoBeløp,
+                    personFagsystemId = it.personOppdrag.fagsystemId,
+                    oppdrag = mapOf(
+                        it.arbeidsgiverOppdrag.fagsystemId to mapOppdrag(it.arbeidsgiverOppdrag),
+                        it.personOppdrag.fagsystemId to mapOppdrag(it.personOppdrag),
+                    ),
+                    vurdering = it.vurdering?.let { vurdering ->
+                        no.nav.helse.serde.api.dto.Utbetaling.Vurdering(
+                            godkjent = vurdering.godkjent,
+                            tidsstempel = vurdering.tidspunkt,
+                            automatisk = vurdering.automatiskBehandling,
+                            ident = vurdering.ident
+                        )
+                    }
+                )
+            }
+    }
+
+    private fun mapAnnulleringer(): List<AnnullertUtbetaling> {
+        return arbeidsgiverUtDto.utbetalinger
+            .filter { it.type == UtbetalingtypeDto.ANNULLERING }
+            .mapNotNull {
+                AnnullertUtbetaling(
+                    id = it.id,
+                    korrelasjonsId = it.korrelasjonsId,
+                    annulleringstidspunkt = it.tidsstempel,
+                    utbetalingstatus = when (it.tilstand) {
+                        UtbetalingTilstandDto.ANNULLERT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Annullert
+                        UtbetalingTilstandDto.GODKJENT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Godkjent
+                        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> no.nav.helse.serde.api.dto.Utbetalingstatus.GodkjentUtenUtbetaling
+                        UtbetalingTilstandDto.IKKE_GODKJENT -> no.nav.helse.serde.api.dto.Utbetalingstatus.IkkeGodkjent
+                        UtbetalingTilstandDto.IKKE_UTBETALT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Ubetalt
+                        UtbetalingTilstandDto.OVERFØRT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Overført
+                        UtbetalingTilstandDto.UTBETALT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Utbetalt
+                        else -> return@mapNotNull null
+                    }
+                )
+            }
+    }
+
+    private fun mapOppdrag(dto: OppdragUtDto): SpeilOppdrag {
+        return SpeilOppdrag(
+            fagsystemId = dto.fagsystemId,
+            tidsstempel = dto.tidsstempel,
+            nettobeløp = dto.nettoBeløp,
+            simulering = dto.simuleringsResultat?.let {
+                SpeilOppdrag.Simulering(
+                    totalbeløp = it.totalbeløp,
+                    perioder = it.perioder.map {
+                        SpeilOppdrag.Simuleringsperiode(
+                            fom = it.fom,
+                            tom = it.tom,
+                            utbetalinger = it.utbetalinger.map {
+                                SpeilOppdrag.Simuleringsutbetaling(
+                                    mottakerNavn = it.utbetalesTil.navn,
+                                    mottakerId = it.utbetalesTil.id,
+                                    forfall = it.forfallsdato,
+                                    feilkonto = it.feilkonto,
+                                    detaljer = it.detaljer.map {
+                                        SpeilOppdrag.Simuleringsdetaljer(
+                                            faktiskFom = it.fom,
+                                            faktiskTom = it.tom,
+                                            konto = it.konto,
+                                            beløp = it.beløp,
+                                            tilbakeføring = it.tilbakeføring,
+                                            sats = it.sats.sats,
+                                            typeSats = it.sats.type,
+                                            antallSats = it.sats.antall,
+                                            uføregrad = it.uføregrad,
+                                            klassekode = it.klassekode.kode,
+                                            klassekodeBeskrivelse = it.klassekode.beskrivelse,
+                                            utbetalingstype = it.utbetalingstype,
+                                            refunderesOrgNr = it.refunderesOrgnummer
+                                        )
+                                    }
+                                )
+                            }
+                        )
+                    }
+                )
+            },
+            utbetalingslinjer = dto.linjer.map { linje ->
+                SpeilOppdrag.Utbetalingslinje(
+                    fom = linje.fom,
+                    tom = linje.tom,
+                    dagsats = linje.beløp,
+                    grad = linje.grad!!,
+                    endringskode = when (linje.endringskode) {
+                        EndringskodeDto.ENDR -> EndringskodeDTO.ENDR
+                        EndringskodeDto.NY -> EndringskodeDTO.NY
+                        EndringskodeDto.UEND -> EndringskodeDTO.UEND
+                    }
+                )
+            }
+        )
     }
 
     private fun buildSpekemat(): List<SpeilGenerasjonDTO> {
@@ -209,14 +337,6 @@ internal class SpeilGenerasjonerBuilder(
         this.tilstand.forlatVedtaksperiode(this)
     }
 
-    override fun preVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-        this.tilstand = Utbetalinger
-    }
-
-    override fun postVisitUtbetalinger(utbetalinger: List<Utbetaling>) {
-        this.tilstand = Initiell
-    }
-
     override fun preVisitUtbetaling(
         utbetaling: Utbetaling,
         id: UUID,
@@ -251,68 +371,6 @@ internal class SpeilGenerasjonerBuilder(
         )
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
-        tilstand.besøkUtbetalingstidslinje(this, tidslinje)
-    }
-
-    override fun preVisitOppdrag(
-        oppdrag: Oppdrag,
-        fagområde: Fagområde,
-        fagsystemId: String,
-        mottaker: String,
-        stønadsdager: Int,
-        totalBeløp: Int,
-        nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        endringskode: Endringskode,
-        avstemmingsnøkkel: Long?,
-        status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?,
-        erSimulert: Boolean,
-        simuleringsResultat: SimuleringResultatDto?
-    ) {
-        tilstand.besøkOppdrag(this, fagsystemId, tidsstempel, nettoBeløp, simuleringsResultat)
-    }
-
-    override fun postVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        tilstand.forlatArbeidsgiveroppdrag(this)
-    }
-    override fun postVisitPersonOppdrag(oppdrag: Oppdrag) {
-        tilstand.forlatPersonoppdrag(this)
-    }
-
-    override fun visitUtbetalingslinje(
-        linje: Utbetalingslinje,
-        fom: LocalDate,
-        tom: LocalDate,
-        stønadsdager: Int,
-        totalbeløp: Int,
-        satstype: Satstype,
-        beløp: Int?,
-        grad: Int?,
-        delytelseId: Int,
-        refDelytelseId: Int?,
-        refFagsystemId: String?,
-        endringskode: Endringskode,
-        datoStatusFom: LocalDate?,
-        statuskode: String?,
-        klassekode: Klassekode
-    ) {
-        if (beløp == null || grad == null) return
-        tilstand.besøkOppdragslinje(this, fom, tom, beløp, grad, endringskode)
-    }
-
-    override fun visitVurdering(
-        vurdering: Utbetaling.Vurdering,
-        ident: String,
-        epost: String,
-        tidspunkt: LocalDateTime,
-        automatiskBehandling: Boolean,
-        godkjent: Boolean
-    ) {
-        tilstand.besøkUtbetalingvurdering(this, godkjent, tidspunkt, automatiskBehandling, ident)
-    }
-
     private interface Byggetilstand {
         fun besøkUtbetaling(
             builder: SpeilGenerasjonerBuilder,
@@ -325,26 +383,6 @@ internal class SpeilGenerasjonerBuilder(
             forbrukteSykedager: Int?,
             gjenståendeSykedager: Int?
         ) {}
-        fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {
-            throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
-        }
-        fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultatDto?) {}
-        fun forlatArbeidsgiveroppdrag(builder: SpeilGenerasjonerBuilder) {
-            throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
-        }
-        fun forlatPersonoppdrag(builder: SpeilGenerasjonerBuilder) {
-            throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
-        }
-        fun besøkOppdragslinje(
-            builder: SpeilGenerasjonerBuilder,
-            fom: LocalDate,
-            tom: LocalDate,
-            beløp: Int,
-            grad: Int,
-            endringskode: Endringskode
-        ) {
-            throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
-        }
         fun besøkVedtaksperiode(
             builder: SpeilGenerasjonerBuilder,
             vedtaksperiode: Vedtaksperiode,
@@ -390,46 +428,17 @@ internal class SpeilGenerasjonerBuilder(
         fun besøkVilkårsgrunnlagelement(builder: SpeilGenerasjonerBuilder, vilkårsgrunnlagId: UUID, skjæringstidspunkt: LocalDate) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
-        fun besøkUtbetalingstidslinje(builder: SpeilGenerasjonerBuilder, utbetalingstidslinje: Utbetalingstidslinje) {}
         fun besøkSykdomstidslinje(builder: SpeilGenerasjonerBuilder, sykdomstidslinje: Sykdomstidslinje) {}
         fun forlatVedtaksperiode(builder: SpeilGenerasjonerBuilder) {
             throw IllegalStateException("a-hoy! dette var ikke forventet gitt!")
         }
 
         object Initiell : Byggetilstand
-        object Utbetalinger : Byggetilstand {
-            override fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {}
-            override fun forlatArbeidsgiveroppdrag(builder: SpeilGenerasjonerBuilder) {}
-            override fun forlatPersonoppdrag(builder: SpeilGenerasjonerBuilder) {}
-            override fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultatDto?) {}
-            override fun besøkOppdragslinje(builder: SpeilGenerasjonerBuilder, fom: LocalDate, tom: LocalDate, beløp: Int, grad: Int, endringskode: Endringskode) {}
-
-            override fun besøkUtbetaling(
-                builder: SpeilGenerasjonerBuilder,
-                id: UUID,
-                korrelasjonsId: UUID,
-                type: Utbetalingtype,
-                utbetalingstatus: Utbetalingstatus,
-                tidsstempel: LocalDateTime,
-                maksdato: LocalDate,
-                forbrukteSykedager: Int?,
-                gjenståendeSykedager: Int?
-            ) {
-                when (type) {
-                    Utbetalingtype.ANNULLERING -> {
-                        val status = if (utbetalingstatus == Utbetalingstatus.ANNULLERT) no.nav.helse.serde.api.dto.Utbetalingstatus.Annullert else no.nav.helse.serde.api.dto.Utbetalingstatus.Overført
-                        builder.annulleringer.add(AnnullertUtbetaling(id, korrelasjonsId, tidsstempel, status))
-                    }
-                    else -> { /* ignorer */ }
-                }
-            }
-        }
 
         abstract class Periodebygger : Byggetilstand {
             protected var vedtaksperiodebuilder: TidslinjeperioderBuilder? = null
             private var beregnetPeriodeBuilder: BeregnetPeriode.Builder? = null
             private var uberegnetPeriodeBuilder: UberegnetPeriode.Builder? = null
-            private var oppdragbuilder: SpeilOppdrag.Builder? = null
 
             protected abstract fun nyBeregnetPeriode(builder: SpeilGenerasjonerBuilder, beregnetPeriode: BeregnetPeriode)
             protected abstract fun nyUberegnetPeriode(builder: SpeilGenerasjonerBuilder, uberegnetPeriode: UberegnetPeriode)
@@ -504,39 +513,10 @@ internal class SpeilGenerasjonerBuilder(
                 forbrukteSykedager: Int?,
                 gjenståendeSykedager: Int?
             ) {
-                when (type) {
-                    Utbetalingtype.UTBETALING -> {
-                        if (utbetalingstatus != Utbetalingstatus.IKKE_GODKJENT) {
-                            beregnetPeriodeBuilder?.medUtbetaling(id, korrelasjonsId, utbetalingstatus.name, tidsstempel, maksdato, forbrukteSykedager!!, gjenståendeSykedager!!)
-                        }
-                    }
-                    Utbetalingtype.REVURDERING -> beregnetPeriodeBuilder?.medRevurdering(id, korrelasjonsId, utbetalingstatus.name, tidsstempel, maksdato, forbrukteSykedager!!, gjenståendeSykedager!!)
-                    else -> { /* ignorer, aktive perioder kan ikke være annullerte */ }
-                }
-            }
-
-            override fun besøkUtbetalingvurdering(builder: SpeilGenerasjonerBuilder, godkjent: Boolean, tidsstempel: LocalDateTime, automatisk: Boolean, ident: String) {
-                beregnetPeriodeBuilder?.medVurdering(godkjent, tidsstempel, automatisk, ident)
-            }
-
-            override fun besøkUtbetalingstidslinje(builder: SpeilGenerasjonerBuilder, utbetalingstidslinje: Utbetalingstidslinje) {
-                beregnetPeriodeBuilder?.medUtbetalingstidslinje(UtbetalingstidslinjeBuilder(utbetalingstidslinje).build())
-            }
-
-            override fun besøkOppdrag(builder: SpeilGenerasjonerBuilder, fagsystemId: String, tidsstempel: LocalDateTime, nettobeløp: Int, simulering: SimuleringResultatDto?) {
-                oppdragbuilder = SpeilOppdrag.Builder(fagsystemId, tidsstempel, nettobeløp, simulering)
-            }
-
-            override fun besøkOppdragslinje(builder: SpeilGenerasjonerBuilder, fom: LocalDate, tom: LocalDate, beløp: Int, grad: Int, endringskode: Endringskode) {
-                oppdragbuilder?.medOppdragslinje(fom, tom, beløp, grad, endringskode.dto())
-            }
-
-            override fun forlatArbeidsgiveroppdrag(builder: SpeilGenerasjonerBuilder) {
-                beregnetPeriodeBuilder?.medArbeidsgiveroppdrag(checkNotNull(oppdragbuilder).build())
-            }
-
-            override fun forlatPersonoppdrag(builder: SpeilGenerasjonerBuilder) {
-                beregnetPeriodeBuilder?.medPersonoppdrag(checkNotNull(oppdragbuilder).build())
+                beregnetPeriodeBuilder?.medUtbetaling(
+                    utbetaling = builder.utbetalinger.single { it.id == id },
+                    utbetalingstidslinje = builder.utbetalingstidslinjer.single { it.first == id }.second.build()
+                )
             }
 
             override fun besøkVilkårsgrunnlagelement(builder: SpeilGenerasjonerBuilder, vilkårsgrunnlagId: UUID, skjæringstidspunkt: LocalDate) {

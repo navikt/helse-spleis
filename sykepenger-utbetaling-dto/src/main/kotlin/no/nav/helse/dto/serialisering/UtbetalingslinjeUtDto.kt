@@ -9,7 +9,7 @@ data class UtbetalingslinjeUtDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val satstype: SatstypeDto,
-    val beløp: Int?,
+    val beløp: Int,
     val grad: Int?,
     val stønadsdager: Int,
     val totalbeløp: Int,

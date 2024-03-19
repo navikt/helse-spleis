@@ -2745,6 +2745,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractEndToEndTest() {
             organisasjonsnummer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),
+            person.arbeidsgiver(organisasjonsnummer).dto(),
             vilkårsgrunnlagHistorikkBuilderResult,
             spekemat
         )

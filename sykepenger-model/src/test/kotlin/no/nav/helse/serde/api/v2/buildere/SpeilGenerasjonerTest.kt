@@ -284,16 +284,19 @@ internal class SpeilGenerasjonerTest {
     }
 
     private fun utbetaling(type: Utbetalingtype, utbetalingId: UUID = UUID.randomUUID()) = Utbetaling(
+        id = utbetalingId,
         type = type,
         korrelasjonsId = UUID.randomUUID(),
         status = Utbetalingstatus.Utbetalt,
+        maksdato = LocalDate.MAX,
+        forbrukteSykedager = 0,
+        gjenståendeDager = 0,
         arbeidsgiverNettoBeløp = 0,
         personNettoBeløp = 0,
         arbeidsgiverFagsystemId = "",
         personFagsystemId = "",
         oppdrag = emptyMap(),
-        vurdering = null,
-        id = utbetalingId
+        vurdering = null
     )
     private fun uberegnetPeriode(periode: Periode) = UberegnetPeriode(
         vedtaksperiodeId = UUID.randomUUID(),
@@ -324,14 +327,10 @@ internal class SpeilGenerasjonerTest {
         erForkastet = false,
         opprettet = LocalDateTime.now(),
         generasjonOpprettet = LocalDateTime.now(),
-        beregnet = LocalDateTime.now(),
         oppdatert = LocalDateTime.now(),
         periodetilstand = Periodetilstand.IngenUtbetaling,
         skjæringstidspunkt = periode.start,
         beregningId = UUID.randomUUID(),
-        gjenståendeSykedager = 0,
-        forbrukteSykedager = 0,
-        maksdato = 28.desember,
         utbetaling = utbetaling,
         hendelser = emptySet(),
         periodevilkår = BeregnetPeriode.Vilkår(

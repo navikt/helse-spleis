@@ -267,7 +267,7 @@ class Utbetalingslinje(
             satstype === Satstype.Engang -> SatstypeDto.Engang
             else -> error("ukjent statype: $satstype")
         },
-        beløp = this.beløp,
+        beløp = this.beløp!!,
         grad = this.grad,
         stønadsdager = stønadsdager(),
         totalbeløp = this.totalbeløp(),

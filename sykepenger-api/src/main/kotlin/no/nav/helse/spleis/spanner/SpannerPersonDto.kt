@@ -1124,7 +1124,7 @@ private fun UtbetalingslinjeUtDto.tilPersonData() = SpannerPersonDto.Utbetalings
         SatstypeDto.Daglig -> "DAG"
         SatstypeDto.Engang -> "ENG"
     },
-    sats = this.beløp!!,
+    sats = this.beløp,
     grad = this.grad,
     totalbeløp = this.totalbeløp,
     stønadsdager = this.stønadsdager,

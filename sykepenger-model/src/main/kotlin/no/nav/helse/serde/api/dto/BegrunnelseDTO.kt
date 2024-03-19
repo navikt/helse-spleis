@@ -1,6 +1,6 @@
 package no.nav.helse.serde.api.dto
 
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.dto.BegrunnelseDto
 
 enum class BegrunnelseDTO {
     SykepengedagerOppbrukt,
@@ -22,25 +22,25 @@ enum class BegrunnelseDTO {
     Over70;
 
     internal companion object {
-        fun fraBegrunnelse(begrunnelse: Begrunnelse) = when (begrunnelse) {
-            is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
-            is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
-            is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
-            is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
-            is Begrunnelse.MinimumInntekt -> MinimumInntekt
-            is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
-            is Begrunnelse.EtterDødsdato -> EtterDødsdato
-            is Begrunnelse.ManglerMedlemskap -> ManglerMedlemskap
-            is Begrunnelse.ManglerOpptjening -> ManglerOpptjening
-            is Begrunnelse.Over70 -> Over70
-            is Begrunnelse.AndreYtelserAap -> AndreYtelserAap
-            is Begrunnelse.AndreYtelserDagpenger -> AndreYtelserDagpenger
-            is Begrunnelse.AndreYtelserForeldrepenger -> AndreYtelserForeldrepenger
-            is Begrunnelse.AndreYtelserOmsorgspenger -> AndreYtelserOmsorgspenger
-            is Begrunnelse.AndreYtelserOpplaringspenger -> AndreYtelserOpplaringspenger
-            is Begrunnelse.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
-            is Begrunnelse.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
-            is Begrunnelse.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
+        fun fraBegrunnelse(begrunnelse: BegrunnelseDto) = when (begrunnelse) {
+            is BegrunnelseDto.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
+            is BegrunnelseDto.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
+            is BegrunnelseDto.MinimumSykdomsgrad -> MinimumSykdomsgrad
+            is BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
+            is BegrunnelseDto.MinimumInntekt -> MinimumInntekt
+            is BegrunnelseDto.MinimumInntektOver67 -> MinimumInntektOver67
+            is BegrunnelseDto.EtterDødsdato -> EtterDødsdato
+            is BegrunnelseDto.ManglerMedlemskap -> ManglerMedlemskap
+            is BegrunnelseDto.ManglerOpptjening -> ManglerOpptjening
+            is BegrunnelseDto.Over70 -> Over70
+            is BegrunnelseDto.AndreYtelserAap -> AndreYtelserAap
+            is BegrunnelseDto.AndreYtelserDagpenger -> AndreYtelserDagpenger
+            is BegrunnelseDto.AndreYtelserForeldrepenger -> AndreYtelserForeldrepenger
+            is BegrunnelseDto.AndreYtelserOmsorgspenger -> AndreYtelserOmsorgspenger
+            is BegrunnelseDto.AndreYtelserOpplaringspenger -> AndreYtelserOpplaringspenger
+            is BegrunnelseDto.AndreYtelserPleiepenger -> AndreYtelserPleiepenger
+            is BegrunnelseDto.AndreYtelserSvangerskapspenger -> AndreYtelserSvangerskapspenger
+            is BegrunnelseDto.NyVilkårsprøvingNødvendig -> SykepengedagerOppbrukt // TODO: Map til NyVilkårsprøvingNødvendig
         }
     }
 }

@@ -1,6 +1,10 @@
 package no.nav.helse.serde.api.speil.builders
 
 import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
+import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
+import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -11,6 +15,7 @@ import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
+import no.nav.helse.serde.api.dto.UtbetalingsdagDTO
 import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagUtenGrad
@@ -21,6 +26,7 @@ import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
+import kotlin.math.roundToInt
 
 internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): SykdomstidslinjeVisitor {
     private val tidslinje = mutableListOf<Sykdomstidslinjedag>()
@@ -153,100 +159,45 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
     }
 }
 
-// Besøker hele utbetaling-treet
-internal class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstidslinje): UtbetalingVisitor {
-    private val utbetalingstidslinje: MutableList<Utbetalingstidslinjedag> = mutableListOf()
-
-    init {
-        utbetalingstidslinje.accept(this)
-    }
-
-    internal fun build() = utbetalingstidslinje.toList()
-
-    override fun visit(
-        dag: Utbetalingsdag.Arbeidsdag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        utbetalingstidslinje.add(UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.Arbeidsdag, dato = dato))
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        utbetalingstidslinje.add(UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, dato = dato))
-    }
-
-    private fun leggTilUtbetalingsdag(dato: LocalDate, økonomi: Økonomi, type: UtbetalingstidslinjedagType) {
-        utbetalingstidslinje.add(UtbetalingsdagDTOBuilder(økonomi, type, dato).build())
-    }
-
-    override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
-        leggTilUtbetalingsdag(dato, økonomi, UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag)
-    }
-
-    override fun visit(dag: Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
-        leggTilUtbetalingsdag(dato, økonomi, UtbetalingstidslinjedagType.NavDag)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.NavHelgDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        utbetalingstidslinje.add(UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.NavHelgDag, dato = dato))
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.Fridag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        utbetalingstidslinje.add(
-            UtbetalingstidslinjedagUtenGrad(
-                type = if (dato.erHelg()) UtbetalingstidslinjedagType.Helgedag else UtbetalingstidslinjedagType.Feriedag,
-                dato = dato
-            )
-        )
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.UkjentDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        utbetalingstidslinje.add(
-            UtbetalingstidslinjedagUtenGrad(
-                type = UtbetalingstidslinjedagType.UkjentDag,
-                dato = dato
-            )
-        )
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.AvvistDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        økonomi.brukTotalGrad { totalGrad->
-            utbetalingstidslinje.add(
-                AvvistDag(
+internal class UtbetalingstidslinjeBuilder(private val dto: UtbetalingstidslinjeUtDto) {
+    private val utbetalingstidslinje by lazy {
+        dto.dager.map {
+            when (it) {
+                is UtbetalingsdagUtDto.ArbeidsdagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.Arbeidsdag, dato = it.dato)
+                is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, dato = it.dato)
+                is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto -> mapUtbetalingsdag(it.dato, UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, it.økonomi)
+                is UtbetalingsdagUtDto.AvvistDagDto -> AvvistDag(
                     type = UtbetalingstidslinjedagType.AvvistDag,
-                    dato = dato,
-                    begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.fraBegrunnelse(it) },
-                    totalGrad = totalGrad
+                    dato = it.dato,
+                    begrunnelser = it.begrunnelser.map { BegrunnelseDTO.fraBegrunnelse(it) },
+                    totalGrad = it.økonomi.totalGrad.prosent.toInt()
                 )
-            )
+
+                is UtbetalingsdagUtDto.ForeldetDagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ForeldetDag, dato = it.dato)
+                is UtbetalingsdagUtDto.FridagDto -> UtbetalingstidslinjedagUtenGrad(
+                    type = if (it.dato.erHelg()) UtbetalingstidslinjedagType.Helgedag else UtbetalingstidslinjedagType.Feriedag,
+                    dato = it.dato
+                )
+                is UtbetalingsdagUtDto.NavDagDto -> mapUtbetalingsdag(it.dato, UtbetalingstidslinjedagType.NavDag, it.økonomi)
+                is UtbetalingsdagUtDto.NavHelgDagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.NavHelgDag, dato = it.dato)
+                is UtbetalingsdagUtDto.UkjentDagDto -> UtbetalingstidslinjedagUtenGrad(
+                    type = UtbetalingstidslinjedagType.UkjentDag,
+                    dato = it.dato
+                )
+
+            }
         }
     }
 
-    override fun visit(
-        dag: Utbetalingsdag.ForeldetDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        utbetalingstidslinje.add(UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ForeldetDag, dato = dato))
+    private fun mapUtbetalingsdag(dato: LocalDate, type: UtbetalingstidslinjedagType, økonomi: ØkonomiUtDto): UtbetalingsdagDTO {
+        return UtbetalingsdagDTO(
+            type = type,
+            dato = dato,
+            arbeidsgiverbeløp = økonomi.arbeidsgiverbeløp!!.dagligInt.beløp,
+            personbeløp = økonomi.personbeløp!!.dagligInt.beløp,
+            totalGrad = økonomi.totalGrad.prosent.roundToInt()
+        )
     }
+
+    internal fun build() = utbetalingstidslinje.toList()
 }
