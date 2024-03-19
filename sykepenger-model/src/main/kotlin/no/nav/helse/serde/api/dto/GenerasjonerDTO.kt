@@ -5,12 +5,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
-import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
-import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
-import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
-import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
-import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.speil.builders.ISpleisGrunnlag
 import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 
@@ -68,15 +63,12 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val periodetilstand: Periodetilstand
     abstract val skjæringstidspunkt: LocalDate
     abstract val hendelser: Set<UUID>
-    abstract val sorteringstidspunkt: LocalDateTime
 
     internal open fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): SpeilTidslinjeperiode {
         return this
     }
 
     internal abstract fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode
-    internal fun erSammeVedtaksperiode(other: SpeilTidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
-    internal open fun venter() = periodetilstand in setOf(VenterPåAnnenPeriode, ForberederGodkjenning, ManglerInformasjon, UtbetaltVenterPåAnnenPeriode)
 
     override fun compareTo(other: SpeilTidslinjeperiode) = tom.compareTo(other.tom)
     internal open fun medOpplysningerFra(other: UberegnetPeriode): UberegnetPeriode? = null
@@ -112,7 +104,6 @@ data class UberegnetPeriode(
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
-    override val sorteringstidspunkt: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
     override val hendelser: Set<UUID>
@@ -158,38 +149,16 @@ data class BeregnetPeriode(
     val beregningId: UUID,
     val utbetaling: Utbetaling,
     val periodevilkår: Vilkår,
-    val vilkårsgrunnlagId: UUID?, // dette feltet er i != for beregnede perioder, men må være nullable så lenge annullerte perioder mappes til beregnet periode
-    val forrigeGenerasjon: BeregnetPeriode? = null
+    val vilkårsgrunnlagId: UUID
 ) : SpeilTidslinjeperiode() {
-    override val sorteringstidspunkt = generasjonOpprettet
-
-    override fun venter(): Boolean = super.venter() && periodetilstand != Utbetalt
-
     override fun registrerBruk(vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk, organisasjonsnummer: String): BeregnetPeriode {
-        val vilkårsgrunnlag = vilkårsgrunnlagId?.let { vilkårsgrunnlaghistorikk.leggIBøtta(it) } ?: return this
+        val vilkårsgrunnlag = vilkårsgrunnlagId.let { vilkårsgrunnlaghistorikk.leggIBøtta(it) }
         if (vilkårsgrunnlag !is ISpleisGrunnlag) return this
         return this.copy(hendelser = this.hendelser + vilkårsgrunnlag.overstyringer)
     }
 
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
         return this.copy(periodetype = periodetype)
-    }
-
-    /*
-        finner ut om det har vært endringer i sykdomstidslinjen eller vilkårsgrunnlagene mellom periodene
-        ved å se om det har vært endringer på den nye perioden
-     */
-    internal fun ingenEndringerMellom(other: BeregnetPeriode): Boolean {
-        checkNotNull(this.forrigeGenerasjon) { "forventet ikke at forrigeGenerasjon er null" }
-        if (other.vedtaksperiodeId == this.vedtaksperiodeId) return false
-        // hvis vilkårsgrunnlaget har endret seg mellom forrige generasjon, så kan det likevel hende at 'other' (revurderingen før)
-        // har allerede laget ny rad - og derfor trenger vi ikke lage enda en
-        if (this.vilkårsgrunnlagId != this.forrigeGenerasjon.vilkårsgrunnlagId && this.vilkårsgrunnlagId != other.vilkårsgrunnlagId) return false
-        return this.sammenslåttTidslinje
-            .zip(this.forrigeGenerasjon.sammenslåttTidslinje) { ny, gammel ->
-                ny.sammeGrunnlag(gammel)
-            }
-            .all { it }
     }
 
     override fun toString(): String {
@@ -238,37 +207,8 @@ data class AnnullertPeriode(
     override val skjæringstidspunkt = fom // feltet gir ikke mening for annullert periode
     override val periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING // feltet gir ikke mening for annullert periode
     override val inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER // feltet gir ikke mening for annullert periode
-    override val sorteringstidspunkt = beregnet
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
         return this
-    }
-
-    // returnerer en beregnet perioder for
-    // at mapping til graphql skal være lik.
-    // TODO: Speil bør ha et konsept om 'AnnullertPeriode' som egen type,
-    // slik at vi kan slippe å sende så mange unødvendige felter for annulleringene
-    fun somBeregnetPeriode(): BeregnetPeriode {
-        return BeregnetPeriode(
-            vedtaksperiodeId = vedtaksperiodeId,
-            generasjonId = generasjonId,
-            kilde = kilde,
-            fom = fom,
-            tom = tom,
-            sammenslåttTidslinje = sammenslåttTidslinje,
-            erForkastet = erForkastet,
-            periodetype = periodetype,
-            inntektskilde = inntektskilde,
-            opprettet = opprettet,
-            generasjonOpprettet = beregnet,
-            oppdatert = oppdatert,
-            periodetilstand = periodetilstand,
-            skjæringstidspunkt = skjæringstidspunkt,
-            hendelser = hendelser,
-            beregningId = beregningId,
-            utbetaling = utbetaling,
-            periodevilkår = vilkår,
-            vilkårsgrunnlagId = null
-        )
     }
 }
 

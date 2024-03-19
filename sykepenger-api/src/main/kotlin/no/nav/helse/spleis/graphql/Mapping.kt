@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.graphql
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.serde.api.dto.AnnullertPeriode
@@ -310,7 +311,7 @@ private fun mapInntektstype(kilde: UtbetalingInntektskilde) = when (kilde) {
 
 internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List<HendelseDTO>) =
     when (periode) {
-        is AnnullertPeriode -> mapBeregnetPeriode(periode.somBeregnetPeriode(), hendelser)
+        is AnnullertPeriode -> mapAnnullertPeriode(periode, hendelser)
         is BeregnetPeriode -> mapBeregnetPeriode(periode, hendelser)
         is UberegnetPeriode -> GraphQLUberegnetPeriode(
             generasjonId = periode.generasjonId,
@@ -352,6 +353,42 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
         periodevilkar = mapPeriodevilkår(periode.periodevilkår),
         periodetilstand = mapTilstand(periode.periodetilstand),
         vilkarsgrunnlagId = periode.vilkårsgrunnlagId
+    )
+private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<HendelseDTO>) =
+    GraphQLBeregnetPeriode(
+        generasjonId = periode.generasjonId,
+        behandlingId = periode.generasjonId,
+        kilde = periode.kilde,
+        fom = periode.fom,
+        tom = periode.tom,
+        tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
+        periodetype = mapPeriodetype(periode.periodetype),
+        inntektstype = mapInntektstype(periode.inntektskilde),
+        erForkastet = periode.erForkastet,
+        opprettet = periode.opprettet,
+        vedtaksperiodeId = periode.vedtaksperiodeId,
+        beregningId = periode.beregningId,
+        gjenstaendeSykedager = periode.utbetaling.gjenståendeDager,
+        forbrukteSykedager = periode.utbetaling.forbrukteSykedager,
+        skjaeringstidspunkt = periode.skjæringstidspunkt,
+        maksdato = periode.utbetaling.maksdato,
+        utbetaling = mapUtbetaling(periode.utbetaling),
+        hendelser = periode.hendelser.tilHendelseDTO(hendelser),
+        periodevilkar = GraphQLPeriodevilkar(
+            sykepengedager = GraphQLPeriodevilkar.Sykepengedager(
+                skjaeringstidspunkt = LocalDate.MIN,
+                maksdato = LocalDate.MAX,
+                forbrukteSykedager = null,
+                gjenstaendeSykedager = null,
+                oppfylt = false
+            ),
+            alder = GraphQLPeriodevilkar.Alder(
+                alderSisteSykedag = 0,
+                oppfylt = false
+            )
+        ),
+        periodetilstand = mapTilstand(periode.periodetilstand),
+        vilkarsgrunnlagId = null
     )
 private fun Set<UUID>.tilHendelseDTO(hendelser: List<HendelseDTO>): List<GraphQLHendelse> {
     return this

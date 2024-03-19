@@ -96,7 +96,6 @@ internal class SpeilGenerasjonerBuilder(
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
             inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
             erForkastet = erForkastet,
-            sorteringstidspunkt = generasjon.endringer.first().tidsstempel,
             opprettet = generasjon.endringer.first().tidsstempel,
             oppdatert = sisteEndring.tidsstempel,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
@@ -144,8 +143,7 @@ internal class SpeilGenerasjonerBuilder(
             beregningId = utbetaling.id,
             utbetaling = utbetaling,
             periodevilkår = periodevilkår(sisteSykepengedag, utbetaling, alder, skjæringstidspunkt),
-            vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
-            forrigeGenerasjon = null
+            vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!
         )
     }
 
