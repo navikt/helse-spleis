@@ -7,6 +7,7 @@ on:
     paths:
     - 'jobs/**'
     - 'sykepenger-model/**'
+    - 'sykepenger-serde/**'
     - 'Dockerfile-jobs'
     - 'build.gradle.kts'
     - '.github/workflows/**'

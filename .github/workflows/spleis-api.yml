@@ -7,6 +7,11 @@ on:
     paths:
     - 'sykepenger-api/**'
     - 'sykepenger-model/**'
+    - 'sykepenger-aktivitetslogg-dto/**'
+    - 'sykepenger-model-dto/**'
+    - 'sykepenger-primitiver-dto/**'
+    - 'sykepenger-serde/**'
+    - 'sykepenger-utbetaling-dto/**'
     - 'build.gradle.kts'
     - 'settings.gradle.kts'
     - '.github/workflows/**'
