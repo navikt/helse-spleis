@@ -1,5 +1,4 @@
 val jsonassertVersion = "1.5.0"
-val spekematVersion = "2024.03.07-12.28-78550ee8"
 
 dependencies {
     // bruker "api" sånn at avhengigheten blir kopiert ut til konsumenter av denne modulen
@@ -13,7 +12,6 @@ dependencies {
     testImplementation(kotlin("reflect"))
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
-    testImplementation("com.github.navikt.spekemat:fabrikk:$spekematVersion")
 
     testImplementation(project(":sykepenger-serde"))
     implementation(libs.bundles.logging) {
