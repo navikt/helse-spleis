@@ -44,7 +44,6 @@ class Spekemat : PersonObserver {
             .nyPølse(
                 Pølse(
                     vedtaksperiodeId = event.vedtaksperiodeId,
-                    generasjonId = event.generasjonId,
                     behandlingId = event.generasjonId,
                     status = Pølsestatus.ÅPEN,
                     kilde = event.kilde.meldingsreferanseId

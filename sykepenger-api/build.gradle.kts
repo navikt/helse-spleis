@@ -5,7 +5,7 @@ plugins {
 }
 
 val tbdLibsVersion = "2024.02.09-10.44-24d5802f"
-val spekematVersion = "2024.03.07-12.03-d183235a"
+val spekematVersion = "2024.03.07-12.49-d2ad6319"
 val micrometerRegistryPrometheusVersion = "1.12.3"
 val ktorVersion = "2.3.7"
 val wireMockVersion = "3.3.1"
