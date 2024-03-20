@@ -2199,7 +2199,6 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             if (!vedtaksperiode.forventerInntekt()) return
-            if (hvorforVenter(vedtaksperiode) != VIL_OMGJØRES) return
             håndterRevurdering(hendelse) {
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             }
