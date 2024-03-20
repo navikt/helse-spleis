@@ -612,7 +612,6 @@ interface PersonObserver {
     ) {
         enum class Type {
             Søknad,
-            TilInfotrygd,
             Omgjøring,
             Revurdering
         }

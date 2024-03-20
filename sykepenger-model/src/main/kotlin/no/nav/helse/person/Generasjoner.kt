@@ -1184,7 +1184,7 @@ enum class Periodetilstand {
                     generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetRevurdering)
             }
             data object AnnullertPeriode : Tilstand {
-                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd)
+                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering)
                 override fun kanForkastes(generasjon: Generasjon, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
 
                 override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon? {
@@ -1198,7 +1198,7 @@ enum class Periodetilstand {
                 }
             }
             data object TilInfotrygd : Tilstand {
-                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd)
+                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring)
                 override fun entering(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.avsluttet = LocalDateTime.now()
                 }

@@ -104,7 +104,7 @@ internal class GenerasjonForkastetEventTest : AbstractDslTest() {
             assertEquals(2, generasjonOpprettetEventer.size)
             val sisteGenerasjonOpprettet = generasjonOpprettetEventer.last()
             assertEquals(sisteGenerasjon.id, sisteGenerasjonOpprettet.generasjonId)
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, sisteGenerasjonOpprettet.type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering, sisteGenerasjonOpprettet.type)
         }
     }
 }

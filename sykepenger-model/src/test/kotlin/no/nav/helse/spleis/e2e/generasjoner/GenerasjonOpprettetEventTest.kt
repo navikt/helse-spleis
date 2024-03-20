@@ -80,7 +80,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
     }
 
     @Test
-    fun `til infotrygd`() {
+    fun annullering() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             forlengVedtak(1.februar, 28.februar)
@@ -89,8 +89,13 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
             assertEquals(4, generasjonOpprettetEventer.size)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, generasjonOpprettetEventer[0].type)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, generasjonOpprettetEventer[1].type)
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, generasjonOpprettetEventer[2].type)
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, generasjonOpprettetEventer[3].type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering, generasjonOpprettetEventer[2].type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering, generasjonOpprettetEventer[3].type)
+
+            val vedtaksperiodeForkastetEventer = observatør.generasjonForkastetEventer
+            assertEquals(2, vedtaksperiodeForkastetEventer.size)
+            assertEquals(1.vedtaksperiode, vedtaksperiodeForkastetEventer[0].vedtaksperiodeId)
+            assertEquals(2.vedtaksperiode, vedtaksperiodeForkastetEventer[1].vedtaksperiodeId)
         }
     }
 
@@ -111,7 +116,9 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
             val generasjonOpprettet = observatør.generasjonOpprettetEventer
             assertEquals(2, generasjonOpprettet.size)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, generasjonOpprettet[0].type)
-            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, generasjonOpprettet[1].type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring, generasjonOpprettet[1].type)
+            val generasjonForkastetEvent = observatør.generasjonForkastetEventer.single()
+            assertEquals(1.vedtaksperiode, generasjonForkastetEvent.vedtaksperiodeId)
         }
     }
 }
