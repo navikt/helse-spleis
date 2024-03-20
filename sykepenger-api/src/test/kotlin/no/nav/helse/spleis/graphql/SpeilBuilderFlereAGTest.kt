@@ -1,5 +1,33 @@
 package no.nav.helse.spleis.graphql
 
+import java.time.LocalDate.EPOCH
+import java.time.Month
+import java.time.YearMonth
+import java.util.UUID
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.serde.api.dto.BeregnetPeriode
+import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.mars
+import no.nav.helse.oktober
+import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.dto.GhostPeriodeDTO
+import no.nav.helse.serde.api.dto.Inntekt
+import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
+import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+
 internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
@@ -7,8 +35,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(1.januar, 19.januar)
         håndterSøknad(22.januar, 31.januar)
         håndterInntektsmelding(1.januar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode(a1))
-        håndterYtelserTilGodkjenning(1.vedtaksperiode(a1))
+        håndterVilkårsgrunnlagTilGodkjenning()
 
         val speilJson = speilApi()
         assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single().ghostPerioder)
@@ -16,26 +43,12 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `sender med ghost tidslinjer til speil`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
+        håndterYtelserTilGodkjenning()
 
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
+        val speilJson = speilApi()
         assertEquals(
             emptyList<GhostPeriodeDTO>(),
             speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
@@ -43,15 +56,15 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
 
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
-
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
         assertEquals(1, perioder.size)
         val actual = perioder.first()
         val expected = GhostPeriodeDTO(
             id = actual.id,
             fom = 1.januar,
             tom = 20.januar,
-            skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-            vilkårsgrunnlagId = person.vilkårsgrunnlagFor(inspektør.skjæringstidspunkt(1.vedtaksperiode))!!.inspektør.vilkårsgrunnlagId,
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
             deaktivert = false
         )
         assertEquals(expected, actual)
@@ -59,33 +72,20 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `sender med ghost tidslinjer til speil med flere arbeidsgivere ulik fom`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterInntektsmelding(listOf(4.januar til 19.januar), beregnetInntekt = 5000.månedlig, orgnummer = a2,)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(4.januar til 19.januar), beregnetInntekt = 5000.månedlig, orgnummer = a2)
 
         håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 5000.månedlig
-                    a3 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
+            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelserTilGodkjenning()
 
-        val speilJson1 = serializePersonForSpeil(person, spekemat.resultat())
-        val vilkårsgrunnlagId = person.vilkårsgrunnlagFor(1.januar)!!.inspektør.vilkårsgrunnlagId
+        val speilJson1 = speilApi()
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
 
         speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { ghostPerioder ->
             assertEquals(1, ghostPerioder.size)
@@ -95,7 +95,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     fom = 21.januar,
                     tom = 31.januar,
                     skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                     deaktivert = false
                 )
                 assertEquals(expected, actual)
@@ -110,7 +110,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     fom = 1.januar,
                     tom = 3.januar,
                     skjæringstidspunkt = 1.januar,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                     deaktivert = false
                 )
                 assertEquals(expected, actual)
@@ -124,8 +124,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                 id = actual.id,
                 fom = 1.januar,
                 tom = 31.januar,
-                skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                skjæringstidspunkt = 1.januar,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                 deaktivert = false
             )
             assertEquals(expected, actual)
@@ -134,39 +134,19 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `lager ikke ghosts for forkastede perioder med vilkårsgrunnlag fra spleis`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false, orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterVilkårsgrunnlagTilGodkjenning()
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
+        håndterYtelserTilGodkjenning()
 
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
-        assertEquals(
-            emptyList<GhostPeriodeDTO>(),
-            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
-        )
-
+        val speilJson = speilApi()
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder)
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.februar }.vilkårsgrunnlagId
         val perioder = speilJson.arbeidsgivere.find { it.organisasjonsnummer == a2 }?.ghostPerioder
         assertEquals(1, perioder?.size)
         val actual = perioder!!.first()
@@ -174,8 +154,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
             id = actual.id,
             fom = 1.februar,
             tom = 20.februar,
-            skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-            vilkårsgrunnlagId = person.vilkårsgrunnlagFor(inspektør.skjæringstidspunkt(1.vedtaksperiode))!!.inspektør.vilkårsgrunnlagId,
+            skjæringstidspunkt = 1.februar,
+            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
             deaktivert = false
         )
 
@@ -184,51 +164,19 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `skal ikke lage ghosts for gamle arbeidsgivere`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 20.januar(2017)), orgnummer = a3)
-        håndterSøknad(Sykdom(1.januar(2017), 20.januar(2017), 100.prosent), orgnummer = a3)
-        håndterInntektsmelding(listOf(1.januar(2017) til 16.januar(2017)), orgnummer = a3,)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a3)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = true, orgnummer = a3)
-        håndterUtbetalt(orgnummer = a3)
+        håndterSøknad(Sykdom(1.januar(2017), 20.januar(2017), 100.prosent), sendtTilNAV = 20.januar(2017).atStartOfDay(), orgnummer = a3)
+        håndterInntektsmelding(1.januar(2017), orgnummer = a3)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a3 to INNTEKT))
+        håndterYtelserTilUtbetalt()
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(
-                    a1,
-                    LocalDate.EPOCH,
-                    null,
-                    Arbeidsforholdtype.ORDINÆRT
-                ),
-                Vilkårsgrunnlag.Arbeidsforhold(
-                    a2,
-                    LocalDate.EPOCH,
-                    null,
-                    Arbeidsforholdtype.ORDINÆRT
-                )
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
+        håndterYtelserTilGodkjenning()
 
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
-        assertEquals(
-            emptyList<GhostPeriodeDTO>(),
-            speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
-        )
-
-
+        val speilJson = speilApi()
+        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder)
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
         assertEquals(1, perioder.size)
         val actual = perioder.first()
@@ -236,8 +184,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
             id = actual.id,
             fom = 1.januar,
             tom = 20.januar,
-            skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-            vilkårsgrunnlagId = person.vilkårsgrunnlagFor(inspektør.skjæringstidspunkt(1.vedtaksperiode))!!.inspektør.vilkårsgrunnlagId,
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
             deaktivert = false
         )
 
@@ -247,32 +195,18 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `ghost periode kuttes ved skjæringstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 3.januar, orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
+        håndterInntektsmelding(3.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
+        håndterYtelserTilGodkjenning()
+        val speilJson = speilApi()
         assertEquals(
             emptyList<GhostPeriodeDTO>(),
             speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
         )
 
         val perioder = speilJson.arbeidsgivere.find { it.organisasjonsnummer == a2 }?.ghostPerioder
-
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 3.januar }.vilkårsgrunnlagId
         assertEquals(1, perioder?.size)
 
         val actual = perioder!!.first()
@@ -280,8 +214,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
             id = actual.id,
             fom = 3.januar,
             tom = 31.januar,
-            skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-            vilkårsgrunnlagId = person.vilkårsgrunnlagFor(inspektør.skjæringstidspunkt(1.vedtaksperiode))!!.inspektør.vilkårsgrunnlagId,
+            skjæringstidspunkt = 3.januar,
+            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
             deaktivert = false
         )
         assertEquals(expected, actual)
@@ -289,58 +223,29 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `arbeidsforhold uten sykepengegrunnlag de tre siste månedene før skjæringstidspunktet skal ikke ha ghostperioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            orgnummer = a1
+            inntekter = listOf(a1 to INNTEKT),
+            arbeidsforhold = listOf(a1 to EPOCH, a2 to EPOCH)
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        val personDto = serializePersonForSpeil(person, spekemat.resultat())
+        håndterYtelserTilGodkjenning()
+        val personDto = speilApi()
         val ghostpølser = personDto.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder
         assertEquals(0, ghostpølser.size)
     }
 
     @Test
     fun `legger ved sammenlignignsgrunnlag og sykepengegrunnlag for deaktiverte arbeidsforhold`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 1000.månedlig))
+        håndterYtelserTilGodkjenning()
 
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelserTilGodkjenning()
 
-        val personDto = serializePersonForSpeil(person, spekemat.resultat())
+        val personDto = speilApi()
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
@@ -366,31 +271,18 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `deaktiverte arbeidsforhold vises i speil selvom sammenligninggrunnlag og sykepengegrunnlag ikke er rapportert til A-ordningen enda`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            ),
-            orgnummer = a1
+            inntekter = listOf(a1 to INNTEKT),
+            arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017))
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelserTilGodkjenning()
 
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelserTilGodkjenning()
 
-        val personDto = serializePersonForSpeil(person, spekemat.resultat())
+        val personDto = speilApi()
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
@@ -400,31 +292,17 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode, arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
-            )
+            arbeidsforhold = listOf(a1 to EPOCH, a2 to 1.desember(2017))
         )
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        val relevanteOrgnumre: Iterable<String> = hendelselogg.etterspurtBehov(1.vedtaksperiode.id(a1), Aktivitet.Behov.Behovtype.Godkjenning, "orgnummereMedRelevanteArbeidsforhold") ?: fail { "forventet orgnummereMedRelevanteArbeidsforhold" }
-        assertEquals(listOf(a1, a2).toList(), relevanteOrgnumre.toList())
-        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(
-            OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
-                a2,
-                true,
-                "forklaring"
-            )
-        ))
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelserTilGodkjenning()
+        val skjæringstidspunkt = 1.januar
+        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        håndterYtelserTilGodkjenning()
 
-        val personDto = serializePersonForSpeil(person, spekemat.resultat())
+        val personDto = speilApi()
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
 
@@ -433,8 +311,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                 organisasjonsnummer = a1,
                 omregnetÅrsinntekt = Inntekt(
                     kilde = Inntektkilde.Inntektsmelding,
-                    beløp = 372000.0,
-                    månedsbeløp = 31000.0,
+                    beløp = 576000.0,
+                    månedsbeløp = 48000.0,
                     inntekterFraAOrdningen = null
                 ),
                 deaktivert = false
@@ -457,26 +335,12 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     fun `Skal ikke ta med inntekt på vilkårsgrunnlaget som mangler både sykepengegrunnlag og sammenligningsgrunnlag på skjæringstidspunktet`() {
         nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsforhold = listOf(a1 to 1.oktober(2017)))
+        håndterYtelserTilGodkjenning()
 
-        val personDto = serializePersonForSpeil(person, spekemat.resultat())
+        val personDto = speilApi()
         val vilkårsgrunnlagId =
             (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
@@ -485,73 +349,25 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `ikke ta med sykepengegrunnlag fra a-ordningen dersom det ikke er rapportert inntekt de 2 siste mnd`() {
-        nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a2)
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.november(2017), listOf(INNTEKT))
-                ),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val personDto = serializePersonForSpeil(person, spekemat.resultat())
-        val vilkårsgrunnlagId = (personDto.arbeidsgivere.find { it.organisasjonsnummer == a1 }!!.generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val vilkårsgrunnlag = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]
-        assertNull(vilkårsgrunnlag?.inntekter?.firstOrNull { it.organisasjonsnummer == a2 }?.omregnetÅrsinntekt)
-    }
-
-    @Test
     fun `Ghostpølse forsvinner ikke etter overstyring av ghost-inntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterOverstyrInntekt(9000.månedlig, a2, 1.januar)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, a1)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
+        håndterYtelserTilGodkjenning()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, 9000.månedlig, "")))
+        håndterYtelserTilGodkjenning()
 
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
+        val speilJson = speilApi()
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
-
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
         assertEquals(1, perioder.size)
         val actual = perioder.first()
         val expected = GhostPeriodeDTO(
             id = actual.id,
             fom = 1.januar,
             tom = 20.januar,
-            skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-            vilkårsgrunnlagId = person.vilkårsgrunnlagFor(inspektør.skjæringstidspunkt(1.vedtaksperiode))!!.inspektør.vilkårsgrunnlagId,
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
             deaktivert = false
         )
         assertEquals(expected, actual)
@@ -559,25 +375,12 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `Ghosten finnes ikke i vilkårsgrunnlaget`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
+        håndterYtelser()
 
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
+        val speilJson = speilApi()
         val vilkårsgrunnlag = speilJson.vilkårsgrunnlag
         assertEquals(1, vilkårsgrunnlag.size)
 
@@ -586,7 +389,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         assertEquals(1, arbeidsgiverA1?.generasjoner?.single()?.perioder?.size)
         val beregnetPeriode = arbeidsgiverA1?.generasjoner?.single()?.perioder?.single()
         assertInstanceOf(BeregnetPeriode::class.java, beregnetPeriode)
-
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
         val arbeidsgiverA2 = speilJson.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a2 }
         assertEquals(0, arbeidsgiverA2?.generasjoner?.size)
         val perioder = arbeidsgiverA2?.ghostPerioder
@@ -597,7 +400,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                 fom = 1.januar,
                 tom = 20.januar,
                 skjæringstidspunkt = 1.januar,
-                vilkårsgrunnlagId = person.vilkårsgrunnlagFor(inspektør.skjæringstidspunkt(1.vedtaksperiode))!!.inspektør.vilkårsgrunnlagId,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                 deaktivert = false
             ),
             actual
@@ -606,29 +409,12 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `lager ikke Ghostperiode på et vilkårsgrunnlag som ingen beregnede perioder peker på`() {
-        nyPeriode(1.januar til 16.januar)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        nyPeriode(17.januar til 31.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            )
-        )
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
-
-        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        håndterSøknad(1.januar til 16.januar)
+        håndterSøknad(17.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
+        håndterYtelserTilGodkjenning()
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
         val personDto = speilApi()
         val ghostPerioder = personDto.arbeidsgivere.singleOrNull { it.organisasjonsnummer == a2 }?.ghostPerioder
@@ -637,43 +423,27 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `Finner riktig ghostpølse etter overstyring av ghost-inntekt selvom begge arbeidsgiverne har saksbehandlerinntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt 10000.månedlig
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterOverstyrInntekt(30000.månedlig, a1, 1.januar)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig))
+        håndterYtelserTilGodkjenning()
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, 30000.månedlig, "")))
+        håndterYtelserTilGodkjenning()
 
-        håndterOverstyrInntekt(9000.månedlig, a2, 1.januar)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a2, 9000.månedlig, "")))
+        håndterYtelserTilGodkjenning()
 
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
+        val speilJson = speilApi()
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
-
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
         assertEquals(1, perioder.size)
         val actual = perioder.first()
         val expected = GhostPeriodeDTO(
             id = actual.id,
             fom = 1.januar,
             tom = 20.januar,
-            skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
-            vilkårsgrunnlagId = person.vilkårsgrunnlagFor(inspektør.skjæringstidspunkt(1.vedtaksperiode))!!.inspektør.vilkårsgrunnlagId,
+            skjæringstidspunkt = 1.januar,
+            vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
             deaktivert = false
         )
         assertEquals(expected, actual)
@@ -681,45 +451,31 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
     @Test
     fun `ghost-perioder før og etter søknad`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT))
+        håndterYtelserTilGodkjenning()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
 
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
+        val speilJson = speilApi()
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
 
         assertEquals(2, perioder.size)
-        val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        val vilkårsgrunnlagId = person.vilkårsgrunnlagFor(skjæringstidspunkt)!!.inspektør.vilkårsgrunnlagId
+        val skjæringstidspunkt = 1.januar
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
         perioder[0].also { actual ->
             val expected = GhostPeriodeDTO(
                 id = actual.id,
                 fom = 1.januar,
                 tom = 31.januar,
                 skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                 deaktivert = false
             )
             assertEquals(expected, actual)
@@ -730,7 +486,7 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                 fom = 1.mars,
                 tom = 31.mars,
                 skjæringstidspunkt = skjæringstidspunkt,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                 deaktivert = false
             )
             assertEquals(expected, actual)
@@ -757,10 +513,10 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
         assertEquals(1.januar, refusjonsopplysningerForAG1.fom)
         assertEquals(null, refusjonsopplysningerForAG1.tom)
-        assertEquals(20000.månedlig,refusjonsopplysningerForAG1.beløp.månedlig)
+        assertEquals(48000.månedlig,refusjonsopplysningerForAG1.beløp.månedlig)
         assertEquals(1.januar, refusjonsopplysningerForAG2.fom)
         assertEquals(null, refusjonsopplysningerForAG2.tom)
-        assertEquals(20000.månedlig,refusjonsopplysningerForAG2.beløp.månedlig)
+        assertEquals(48000.månedlig,refusjonsopplysningerForAG2.beløp.månedlig)
     }
 
     @Test
@@ -771,40 +527,16 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(13.mars, 31.mars, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar, orgnummer = a1,)
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), orgnummer = a2)
+        håndterInntektsmelding(listOf(17.januar til 26.januar, 1.februar til 6.februar), orgnummer = a2)
 
-        håndterInntektsmelding(
-            listOf(17.januar til 26.januar, 1.februar til 6.februar),
-            førsteFraværsdag = 1.februar,
-            orgnummer = a2,
-        )
-        håndterInntektsmelding(
-            listOf(17.januar til 26.januar, 1.februar til 6.februar),
-            førsteFraværsdag = 13.mars,
-            orgnummer = a2,
-        )
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to INNTEKT, a2 to INNTEKT))
+        håndterYtelserTilGodkjenning()
 
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                    a2 inntekt INNTEKT
-                }
-            }, emptyList()),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            ),
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
-        val skjæringstidspunkt = inspektør(a1).skjæringstidspunkt(1.vedtaksperiode)
-        val vilkårsgrunnlagId = person.vilkårsgrunnlagFor(skjæringstidspunkt)!!.inspektør.vilkårsgrunnlagId
+        val speilJson = speilApi()
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
 
         speilJson.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { perioder ->
             assertEquals(2, perioder.size)
@@ -814,8 +546,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     id = actual.id,
                     fom = 1.februar,
                     tom = 11.februar,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    skjæringstidspunkt = 1.januar,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                     deaktivert = false
                 )
                 assertEquals(expected, actual)
@@ -825,8 +557,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     id = actual.id,
                     fom = 13.mars,
                     tom = 31.mars,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    skjæringstidspunkt = 1.januar,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                     deaktivert = false
                 )
                 assertEquals(expected, actual)
@@ -840,8 +572,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     id = actual.id,
                     fom = 1.januar,
                     tom = 16.januar,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    skjæringstidspunkt = 1.januar,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                     deaktivert = false
                 )
                 assertEquals(expected, actual)
@@ -851,8 +583,8 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                     id = actual.id,
                     fom = 1.mars,
                     tom = 12.mars,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    skjæringstidspunkt = 1.januar,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
                     deaktivert = false
                 )
                 assertEquals(expected, actual)

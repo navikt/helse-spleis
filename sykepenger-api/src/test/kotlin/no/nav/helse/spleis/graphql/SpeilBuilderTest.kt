@@ -1,34 +1,18 @@
-package no.nav.helse.serde.api
+package no.nav.helse.spleis.graphql
 
-import java.time.LocalDate
+import java.time.LocalDate.EPOCH
 import java.util.UUID
-import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SI_3
-import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
-import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.serde.api.dto.AnnullertPeriode
 import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.SammenslåttDag
@@ -39,31 +23,7 @@ import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetalingsinfo
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
-import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.grunnlag
-import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
-import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSkjønnsmessigFastsettelse
-import no.nav.helse.spleis.e2e.håndterSykmelding
-import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalt
-import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
-import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.nyPeriode
-import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.spleis.e2e.speilApi
-import no.nav.helse.spleis.e2e.standardSimuleringsresultat
-import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -72,24 +32,23 @@ import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SpeilBuilderTest : AbstractEndToEndTest() {
+internal class SpeilBuilderTest : AbstractE2ETest() {
     @Test
     fun `Dødsdato ligger på person`() {
         val dødsdato = 1.januar
-        createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO, dødsdato)
-        assertEquals(dødsdato, serializePersonForSpeil(person, spekemat.resultat()).dødsdato)
+        håndterDødsmelding(dødsdato)
+        assertEquals(dødsdato, speilApi().dødsdato)
     }
 
     @Test
     fun `nav utbetaler agp`() {
-        tilGodkjenning(1.januar, 31.januar, 100.prosent, 1.januar)
+        tilGodkjenning(1.januar, 31.januar)
         val id = UUID.randomUUID()
         håndterOverstyrTidslinje((1.januar til 16.januar).map {
             ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
         }, meldingsreferanseId = id)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
+        håndterYtelserTilGodkjenning()
+        val speilJson = speilApi()
         val tidslinje = speilJson.arbeidsgivere.single().generasjoner.single().perioder.single().sammenslåttTidslinje
         val forventetFørstedag = SammenslåttDag(
             dagen = 1.januar,
@@ -99,7 +58,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             grad = 100,
             utbetalingsinfo = Utbetalingsinfo(
                 personbeløp = 0,
-                arbeidsgiverbeløp = 1431,
+                arbeidsgiverbeløp = 2161,
                 totalGrad = 100
             )
         )
@@ -108,17 +67,15 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
-        nyPeriode(1.januar til 16.januar)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ja",)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
+        håndterSøknad(1.januar til 16.januar)
+        håndterInntektsmelding(1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ja",)
+        håndterVilkårsgrunnlag()
+        håndterYtelserTilGodkjenning()
         val idOverstyring = UUID.randomUUID()
         håndterOverstyrTidslinje((1.januar til 16.januar).map {
             ManuellOverskrivingDag(it, Dagtype.Sykedag, 100)
         }, meldingsreferanseId = idOverstyring)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
+        val speilJson = speilApi()
         val generasjoner = speilJson.arbeidsgivere.single().generasjoner
         assertEquals(2, generasjoner.size)
         val tidslinje = generasjoner[0].perioder.single().sammenslåttTidslinje
@@ -134,56 +91,20 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `lager ikke hvit pølse i helg`() {
-        håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
-        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        val speilJson = serializePersonForSpeil(person, spekemat.resultat())
-        assertEquals(emptyList<GhostPeriodeDTO>(), speilJson.arbeidsgivere.single().ghostPerioder)
-    }
-
-    @Test
-    fun `Negativt nettobeløp på simulering skal gi warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode, simuleringsresultat = standardSimuleringsresultat(ORGNUMMER, totalbeløp = -1))
-        assertVarsel(RV_SI_3)
-    }
-
-    @Test
     fun `Viser inntektsgrunnlag for arbeidsforhold som startet innen 3 måneder før skjæringstidspunktet, selvom vi ikke har inntekt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        håndterInntektsmelding(1.januar, orgnummer = a1,)
         håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-                ), arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 25.november(2017), null, Arbeidsforholdtype.ORDINÆRT),
-            )
+            inntekter = listOf(a1 to 31000.månedlig),
+            arbeidsforhold = listOf(a1 to EPOCH, a2 to 25.november(2017))
         )
-        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
+        håndterYtelserTilGodkjenning()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
 
-        val personDto = serializePersonForSpeil(person, spekemat.resultat())
+        val personDto = speilApi()
 
         assertEquals(listOf(a1, a2).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
-//        assertEquals(listOf(a1, a2).map(String::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
 
         val vilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val arbeidsgiverInntektA2 = personDto.vilkårsgrunnlag[vilkårsgrunnlagId]?.inntekter?.first { it.organisasjonsnummer == a2 }
@@ -193,38 +114,23 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `beregnet periode peker på vilkårsgrunnlagid`() {
-        nyttVedtak(1.januar, 31.januar)
-        val personDto = speilApi()
-        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val spleisVilkårsgrunnlagId = inspektør.vilkårsgrunnlagHistorikkInnslag().single().vilkårsgrunnlagFor(1.januar)?.inspektør?.vilkårsgrunnlagId
-        val spleisVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling = inspektør.arbeidsgiver.inspektør.aktiveVedtaksperioder().single().inspektør.utbetalingIdTilVilkårsgrunnlagId.second
-
-        assertEquals(speilVilkårsgrunnlagId, spleisVilkårsgrunnlagId)
-        assertEquals(speilVilkårsgrunnlagId, spleisVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling)
-    }
-
-    @Test
     fun `beregnet periode peker på vilkårsgrunnlagid for infotrygdvilkårsgrunnlag`() {
         createOvergangFraInfotrygdPerson()
-        forlengVedtak(1.mars, 31.mars, 100.prosent)
+        forlengVedtak(1.mars, 31.mars)
 
-        val infotrygdVilkårsgrunnlag = inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlagFor(1.januar)
-        assertTrue(infotrygdVilkårsgrunnlag is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag)
+        val infotrygdVilkårsgrunnlag = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.first { it.skjæringstidspunkt == 1.januar }
+        val infotrygdVilkårsgrunnlagId = infotrygdVilkårsgrunnlag.vilkårsgrunnlagId
 
         val personDto = speilApi()
-        val infotrygdVilkårsgrunnlagId = infotrygdVilkårsgrunnlag?.inspektør?.vilkårsgrunnlagId
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val infotrygdVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling = inspektør.arbeidsgiver.inspektør.aktiveVedtaksperioder().last().inspektør.utbetalingIdTilVilkårsgrunnlagId.second
 
         assertEquals(speilVilkårsgrunnlagId, infotrygdVilkårsgrunnlagId)
-        assertEquals(speilVilkårsgrunnlagId, infotrygdVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling)
     }
 
     @Test
     fun `annullert periode skal ikke ha vilkårsgrunnlagsId`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterAnnullerUtbetaling()
+        val utbetaling = nyttVedtak(1.januar, 31.januar)
+        håndterAnnullerUtbetaling(utbetaling)
         val personDto = speilApi()
         val generasjoner = personDto.arbeidsgivere.first().generasjoner
         assertEquals(2, generasjoner.size)
@@ -234,7 +140,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `beregnet periode peker på et vilkårsgrunnlag`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(1.januar, 31.januar)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId]
@@ -243,13 +149,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `refusjon ligger på vilkårsgrunnlaget`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(1.januar, 31.januar)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
         assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
         val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
-        assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
+        assertEquals(a1, arbeidsgiverrefusjon.arbeidsgiver)
         val refusjonsopplysning = arbeidsgiverrefusjon.refusjonsopplysninger.single()
 
         assertEquals(1.januar, refusjonsopplysning.fom)
@@ -260,39 +166,37 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `refusjon ligger på vilkårsgrunnlaget - også for infotrygd`() {
         createOvergangFraInfotrygdPerson()
-        forlengVedtak(1.mars, 31.mars, 100.prosent)
+        forlengVedtak(1.mars, 31.mars)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? InfotrygdVilkårsgrunnlag
         assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
         val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
-        assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
+        assertEquals(a1, arbeidsgiverrefusjon.arbeidsgiver)
         val refusjonsopplysning = arbeidsgiverrefusjon.refusjonsopplysninger.single()
 
         assertEquals(1.januar, refusjonsopplysning.fom)
         assertEquals(null, refusjonsopplysning.tom)
-        assertEquals(INNTEKT,refusjonsopplysning.beløp.månedlig)
+        assertEquals(31000.0, refusjonsopplysning.beløp)
     }
 
     @Test
     fun `endring i refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, endringerIRefusjon = listOf(
                 Inntektsmelding.Refusjon.EndringIRefusjon(INGEN, 1.februar))),
         )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
+        håndterVilkårsgrunnlag()
+        håndterYtelserTilGodkjenning()
 
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId] as? SpleisVilkårsgrunnlag
         assertTrue(vilkårsgrunnlag!!.arbeidsgiverrefusjoner.isNotEmpty())
         val arbeidsgiverrefusjon = vilkårsgrunnlag.arbeidsgiverrefusjoner.single()
-        assertEquals(ORGNUMMER, arbeidsgiverrefusjon.arbeidsgiver)
+        assertEquals(a1, arbeidsgiverrefusjon.arbeidsgiver)
         val refusjonsopplysninger = arbeidsgiverrefusjon.refusjonsopplysninger
 
         assertEquals(2, refusjonsopplysninger.size)
@@ -309,12 +213,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigert inntektsmelding i Avsluttet, velger opprinnelig refusjon for eldste generasjon`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
         )
-        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser()
 
         val speil = speilApi()
         val generasjoner = speil.arbeidsgivere.first().generasjoner
@@ -336,20 +240,15 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Endring til ingen refusjon i forlengelsen`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterInntektsmelding(
+        håndterYtelserTilGodkjenning()
+        håndterInntektsmeldingUtenRefusjon(
             listOf(1.januar til 16.januar),
-            1.februar,
-            refusjon = Inntektsmelding.Refusjon(INGEN, null),
+            inntektdato = 1.februar
         )
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
+        håndterYtelserTilUtbetalt()
+        håndterYtelserTilGodkjenning()
 
         val januarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId
         val februarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
@@ -383,33 +282,17 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val inntektSkatt = 31000.0 * 2
         val inntektSkjønnsfastsatt = 31000 * 1.5
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektIm.månedlig,)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntektSkatt.månedlig)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        håndterInntektsmelding(1.januar, beregnetInntekt = inntektIm.månedlig,)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to inntektSkatt.månedlig))
+        håndterYtelserTilGodkjenning()
         håndterSkjønnsmessigFastsettelse(
-            1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(
-                    orgnummer = ORGNUMMER,
-                    inntekt = inntektSkjønnsfastsatt.månedlig,
-                    forklaring = "",
-                    subsumsjon = null,
-                    refusjonsopplysninger = listOf(
-                        Triple(1.januar, null, 31000.månedlig)
-                    )
-                )
-            )
+            skjæringstidspunkt = 1.januar,
+            opplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, inntektSkjønnsfastsatt.månedlig, refusjonsopplysninger = listOf(Triple(1.januar, null, 31000.månedlig))))
         )
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
-        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertTrue(inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(ORGNUMMER) }.inspektør.inntektsopplysning is SkjønnsmessigFastsatt)
+        håndterYtelserTilGodkjenning()
 
         val personDto = speilApi()
-        val vilkårsgrunnlagId = (personDto.arbeidsgivere.single().generasjoner.single().perioder.single() as BeregnetPeriode).vilkårsgrunnlagId!!
+        val vilkårsgrunnlagId = (personDto.arbeidsgivere.single().generasjoner.single().perioder.single() as BeregnetPeriode).vilkårsgrunnlagId
         val vilkårsgrunnlag = (personDto.vilkårsgrunnlag[vilkårsgrunnlagId] as SpleisVilkårsgrunnlag)
         assertEquals(inntektIm * 12, vilkårsgrunnlag.omregnetÅrsinntekt)
         assertEquals(inntektSkjønnsfastsatt * 12, vilkårsgrunnlag.beregningsgrunnlag)
@@ -424,28 +307,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sykmeldt 20 % fra to forskjellige arbeidsforhold gir faktisk rett på sykepenger`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent), orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                listOf(
-                    a1 to 18199.7.månedlig,
-                    a2 to 22966.54.månedlig
-                ), 1.januar
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
-        )
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
+        håndterInntektsmelding(1.januar, orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to 18199.7.månedlig, a2 to 22966.54.månedlig))
+        håndterYtelser()
 
         val personDto = speilApi()
         assertEquals(20,
@@ -460,28 +328,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sykmeldt rett under 20 % fra to forskjellige arbeidsforhold gir ikke rett på sykepenger`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 19.99.prosent), orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 19.99.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
-                listOf(
-                    a1 to 18199.7.månedlig,
-                    a2 to 22966.54.månedlig
-                ), 1.januar
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-            ), orgnummer = a1
-        )
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a2, beregnetInntekt = 22966.54.månedlig)
+        håndterInntektsmelding(1.januar, orgnummer = a1, beregnetInntekt = 18199.7.månedlig)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to 18199.7.månedlig, a2 to 22966.54.månedlig))
+        håndterYtelser()
 
         val personDto = speilApi()
         assertEquals(19,

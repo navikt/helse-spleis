@@ -8,11 +8,13 @@ import java.util.concurrent.ConcurrentLinkedDeque
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
+import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Søknad
@@ -46,14 +48,17 @@ internal abstract class AbstractE2ETest {
         private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val a1 = "a1"
         const val a2 = "a2"
+        const val a3 = "a3"
         val INNTEKT = 48000.månedlig
 
         private val personfabrikk = PersonHendelsefabrikk(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator())
         private val a1fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), a1)
         private val a2fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), a2)
+        private val a3fabrikk = ArbeidsgiverHendelsefabrikk(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), a3)
         private val fabrikker = mapOf(
             a1 to a1fabrikk,
-            a2 to a2fabrikk
+            a2 to a2fabrikk,
+            a3 to a3fabrikk
         )
     }
 
@@ -63,13 +68,22 @@ internal abstract class AbstractE2ETest {
     private lateinit var hendelselogg: IAktivitetslogg
     private val ubesvarteBehov = ConcurrentLinkedDeque<Aktivitet.Behov>()
 
-    @BeforeEach
-    fun setup() {
+    private fun createTestPerson(creator: (MaskinellJurist) -> Person) {
         observatør = TestObservatør()
         spekemat = Spekemat()
-        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), Alder(UNG_PERSON_FØDSELSDATO, null), MaskinellJurist())
+        person = creator(MaskinellJurist())
         person.addObserver(observatør)
         person.addObserver(spekemat)
+    }
+    protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist ->
+        gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist)
+    }
+
+    @BeforeEach
+    fun setup() {
+        createTestPerson {
+            Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), Alder(UNG_PERSON_FØDSELSDATO, null), it)
+        }
         hendelselogg = Aktivitetslogg()
     }
 
@@ -78,6 +92,7 @@ internal abstract class AbstractE2ETest {
 
     protected val UUID.vedtaksperiode get() = IdInnhenter { _ -> this }
 
+    protected fun dto() = person.dto()
     protected fun speilApi() = serializePersonForSpeil(person, spekemat.resultat())
 
     protected fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit) = apply {
@@ -90,6 +105,9 @@ internal abstract class AbstractE2ETest {
         }
     }
 
+    protected fun håndterSøknad(fom: LocalDate, tom: LocalDate, orgnummer: String = a1): UUID {
+        return håndterSøknad(fom til tom, orgnummer)
+    }
     protected fun håndterSøknad(periode: Periode, orgnummer: String = a1): UUID {
         return håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), sykmeldingSkrevet = periode.start.atStartOfDay(), sendtTilNAV = periode.endInclusive.atStartOfDay(), orgnummer = orgnummer)
     }
@@ -148,8 +166,27 @@ internal abstract class AbstractE2ETest {
         )
     }
 
+    protected fun håndterInntektsmeldingUtenRefusjon(
+        arbeidsgiverperioder: List<Periode>,
+        inntektdato: LocalDate,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        meldingsreferanseId: UUID = UUID.randomUUID(),
+        orgnummer: String = a1
+    ): UUID {
+        return håndterInntektsmelding(
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            inntektdato = inntektdato,
+            beregnetInntekt = INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(INGEN, null),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            meldingsreferanseId = meldingsreferanseId,
+            orgnummer = orgnummer
+        )
+    }
+
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
+        inntektdato: LocalDate = arbeidsgiverperioder.maxOf { it.start },
         beregnetInntekt: Inntekt = INNTEKT,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
@@ -159,8 +196,8 @@ internal abstract class AbstractE2ETest {
         (fabrikker.getValue(orgnummer).lagPortalinntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperioder,
             beregnetInntekt = beregnetInntekt,
-            førsteFraværsdag = arbeidsgiverperioder.maxOf { it.start },
-            inntektsdato = arbeidsgiverperioder.maxOf { it.start },
+            førsteFraværsdag = inntektdato,
+            inntektsdato = inntektdato,
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             id = meldingsreferanseId
@@ -244,6 +281,10 @@ internal abstract class AbstractE2ETest {
         )).håndter(Person::håndter)
     }
 
+    protected fun håndterDødsmelding(dødsdato: LocalDate) {
+        personfabrikk.lagDødsmelding(dødsdato).håndter(Person::håndter)
+    }
+
     protected fun håndterYtelserTilGodkjenning() {
         håndterYtelser()
         try {
@@ -306,6 +347,13 @@ internal abstract class AbstractE2ETest {
         return håndterUtbetalt()
     }
 
+    protected fun håndterOverstyrArbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        opplysninger: List<OverstyrArbeidsforhold.ArbeidsforholdOverstyrt>
+    ) {
+        personfabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *opplysninger.toTypedArray()).håndter(Person::håndter)
+    }
+
     protected fun håndterOverstyrArbeidsgiveropplysninger(
         skjæringstidspunkt: LocalDate,
         opplysninger: List<OverstyrtArbeidsgiveropplysning>,
@@ -348,7 +396,11 @@ internal abstract class AbstractE2ETest {
     protected fun håndterYtelserTilUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning()
-        håndterUtbetalt(status)
+        try {
+            håndterUtbetalt(status)
+        } catch (err: IllegalStateException) {
+            // tillater manglende utbetalingsbehov pga "utbetalinger uten utbetalinger"
+        }
     }
     protected fun håndterAnnullerUtbetaling(behov: Utbetalingbehov) {
         fabrikker.getValue(behov.orgnummer).lagAnnullering(behov.oppdrag.first { it.fagområde == "SPREF" }.fagsystemId)

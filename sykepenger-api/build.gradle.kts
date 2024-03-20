@@ -62,6 +62,9 @@ dependencies {
 
     testImplementation("com.apurebase:kgraphql:$kGraphQLVersion")
     testImplementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
+
+    // for å kunne gjenopprette personer fra json
+    testImplementation(project(":sykepenger-serde"))
 }
 
 tasks {
