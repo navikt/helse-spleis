@@ -1,9 +1,9 @@
-package no.nav.helse.serde.api.speil.builders
+package no.nav.helse.spleis.speil.builders
 
 import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.serde.api.SpekematDTO
-import no.nav.helse.serde.api.dto.AlderDTO
-import no.nav.helse.serde.api.dto.PersonDTO
+import no.nav.helse.spleis.speil.SpekematDTO
+import no.nav.helse.spleis.speil.dto.AlderDTO
+import no.nav.helse.spleis.speil.dto.PersonDTO
 
 internal class PersonBuilder(
     private val personUtDto: PersonUtDto,

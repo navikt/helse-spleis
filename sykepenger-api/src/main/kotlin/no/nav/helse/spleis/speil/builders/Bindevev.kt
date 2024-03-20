@@ -1,14 +1,14 @@
-package no.nav.helse.serde.api.speil.builders
+package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
-import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
-import no.nav.helse.serde.api.dto.Inntekt
-import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
-import no.nav.helse.serde.api.dto.Inntektkilde
-import no.nav.helse.serde.api.dto.Refusjonselement
-import no.nav.helse.serde.api.dto.SkjønnsmessigFastsattDTO
+import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
+import no.nav.helse.spleis.speil.dto.Arbeidsgiverrefusjon
+import no.nav.helse.spleis.speil.dto.Inntekt
+import no.nav.helse.spleis.speil.dto.InntekterFraAOrdningen
+import no.nav.helse.spleis.speil.dto.Inntektkilde
+import no.nav.helse.spleis.speil.dto.Refusjonselement
+import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,

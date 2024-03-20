@@ -1,11 +1,9 @@
-package no.nav.helse.serde.api.speil.builders
+package no.nav.helse.spleis.speil.builders
 
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
-import no.nav.helse.serde.api.SpekematDTO
-import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO
-import no.nav.helse.serde.api.SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO
-import no.nav.helse.serde.api.dto.AlderDTO
-import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
+import no.nav.helse.spleis.speil.SpekematDTO
+import no.nav.helse.spleis.speil.dto.AlderDTO
+import no.nav.helse.spleis.speil.dto.ArbeidsgiverDTO
 
 internal class ArbeidsgiverBuilder(
     private val arbeidsgiverUtDto: ArbeidsgiverUtDto,
@@ -21,11 +19,11 @@ internal class ArbeidsgiverBuilder(
     }
 
     internal companion object {
-        fun List<PølseradDTO>.fjernUnødvendigeRader(): List<PølseradDTO> {
+        fun List<SpekematDTO.PølsepakkeDTO.PølseradDTO>.fjernUnødvendigeRader(): List<SpekematDTO.PølsepakkeDTO.PølseradDTO> {
             // rader hvor alle pølser er kopiert fra forrige rad - eller blir kopiert til neste rad - kan i praksis fjernes
             // det betyr at vi bare behøver vurdere pølsepakker med minst tre rader siden den vi skal vurdere én rad mot to andre
             if (size <= 2) return this
-            val pølseFinnesIRad = { rad: PølseradDTO, pølse: PølseDTO ->
+            val pølseFinnesIRad = { rad: SpekematDTO.PølsepakkeDTO.PølseradDTO, pølse: SpekematDTO.PølsepakkeDTO.PølseradDTO.PølseDTO ->
                 rad.pølser.any { it.behandlingId == pølse.behandlingId }
             }
 

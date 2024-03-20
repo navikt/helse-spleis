@@ -1,13 +1,13 @@
-package no.nav.helse.serde.api.dto
+package no.nav.helse.spleis.speil.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
-import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
-import no.nav.helse.serde.api.speil.builders.ISpleisGrunnlag
-import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
+import no.nav.helse.spleis.speil.builders.ISpleisGrunnlag
+import no.nav.helse.spleis.speil.builders.IVilkårsgrunnlagHistorikk
+import no.nav.helse.spleis.speil.dto.Periodetilstand.IngenUtbetaling
 
 data class SpeilGenerasjonDTO(
     val id: UUID, // Runtime
@@ -205,7 +205,8 @@ data class AnnullertPeriode(
     override val sammenslåttTidslinje: List<SammenslåttDag> = emptyList() // feltet gir ikke mening for annullert periode
     override val erForkastet = true
     override val skjæringstidspunkt = fom // feltet gir ikke mening for annullert periode
-    override val periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING // feltet gir ikke mening for annullert periode
+    override val periodetype =
+        Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING // feltet gir ikke mening for annullert periode
     override val inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER // feltet gir ikke mening for annullert periode
     override fun medPeriodetype(periodetype: Tidslinjeperiodetype): SpeilTidslinjeperiode {
         return this

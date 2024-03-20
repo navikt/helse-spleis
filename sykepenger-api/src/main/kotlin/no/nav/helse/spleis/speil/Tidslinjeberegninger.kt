@@ -1,10 +1,10 @@
-package no.nav.helse.serde.api.speil
+package no.nav.helse.spleis.speil
 
-import no.nav.helse.serde.api.dto.AvvistDag
-import no.nav.helse.serde.api.dto.SammenslåttDag
-import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
-import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
-import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
+import no.nav.helse.spleis.speil.dto.AvvistDag
+import no.nav.helse.spleis.speil.dto.SammenslåttDag
+import no.nav.helse.spleis.speil.dto.Sykdomstidslinjedag
+import no.nav.helse.spleis.speil.dto.Utbetalingstidslinjedag
+import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 
 internal fun List<Sykdomstidslinjedag>.merge(utbetalingstidslinje: List<Utbetalingstidslinjedag>): List<SammenslåttDag> {
 

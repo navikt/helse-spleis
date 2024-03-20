@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.speil.builders
+package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
 import no.nav.helse.dto.HendelseskildeDto
@@ -8,14 +8,14 @@ import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.erHelg
-import no.nav.helse.serde.api.dto.AvvistDag
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
-import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
-import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
-import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
-import no.nav.helse.serde.api.dto.UtbetalingsdagDTO
-import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
-import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagUtenGrad
+import no.nav.helse.spleis.speil.dto.AvvistDag
+import no.nav.helse.spleis.speil.dto.BegrunnelseDTO
+import no.nav.helse.spleis.speil.dto.Sykdomstidslinjedag
+import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagKildetype
+import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagType
+import no.nav.helse.spleis.speil.dto.UtbetalingsdagDTO
+import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
+import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagUtenGrad
 import kotlin.math.roundToInt
 
 internal class SykdomstidslinjeBuilder(private val dto: SykdomstidslinjeDto) {

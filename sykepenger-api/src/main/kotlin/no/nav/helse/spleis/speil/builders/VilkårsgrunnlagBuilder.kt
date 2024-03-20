@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.speil.builders
+package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
 import java.util.LinkedList
@@ -11,11 +11,12 @@ import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
-import no.nav.helse.serde.api.dto.GhostPeriodeDTO
-import no.nav.helse.serde.api.dto.Refusjonselement
-import no.nav.helse.serde.api.dto.SkjønnsmessigFastsattDTO
-import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
-import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
+import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
+import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
+import no.nav.helse.spleis.speil.dto.Refusjonselement
+import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
+import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
+import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal abstract class IVilkårsgrunnlag(
@@ -112,7 +113,7 @@ internal class IInfotrygdGrunnlag(
 ) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, refusjonsopplysningerPerArbeidsgiver, id) {
 
     override fun toDTO(): Vilkårsgrunnlag {
-        return no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag(
+        return InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             beregningsgrunnlag = beregningsgrunnlag,
             sykepengegrunnlag = sykepengegrunnlag,
@@ -222,7 +223,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
                 is InntektsopplysningUtDto.InntektsmeldingDto -> IOmregnetÅrsinntekt(IInntektkilde.Inntektsmelding, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
                 is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
-                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(IInntektkilde.AOrdningen, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, io.inntektsopplysninger
+                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
+                    IInntektkilde.AOrdningen, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, io.inntektsopplysninger
                     .groupBy { it.måned }
                     .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
                     .map { (måned, månedligSum) ->

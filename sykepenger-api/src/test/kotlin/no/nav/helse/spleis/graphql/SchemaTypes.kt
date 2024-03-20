@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.serde.api.dto.Utbetalingtype
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse
@@ -49,6 +48,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
+import no.nav.helse.spleis.speil.dto.Utbetalingtype
 
 internal fun SchemaBuilder.personSchema(personResolver: (fnr: String) -> GraphQLPerson?) {
     query("person") {

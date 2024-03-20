@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.dto
+package no.nav.helse.spleis.speil.dto
 
 import java.util.UUID
 

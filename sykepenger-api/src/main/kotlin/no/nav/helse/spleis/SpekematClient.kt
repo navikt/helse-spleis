@@ -11,7 +11,7 @@ import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.serde.api.SpekematDTO
+import no.nav.helse.spleis.speil.SpekematDTO
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 

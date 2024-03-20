@@ -1,12 +1,9 @@
 package no.nav.helse.spleis.graphql
 
 import io.prometheus.client.Histogram
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
-import no.nav.helse.serde.api.dto.PersonDTO
-import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.spleis.SpekematClient
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
@@ -15,7 +12,8 @@ import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
-import no.nav.helse.spleis.logg
+import no.nav.helse.spleis.speil.dto.PersonDTO
+import no.nav.helse.spleis.speil.serializePersonForSpeil
 import org.slf4j.LoggerFactory
 
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

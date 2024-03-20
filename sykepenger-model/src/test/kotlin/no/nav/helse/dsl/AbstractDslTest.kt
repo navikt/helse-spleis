@@ -509,7 +509,6 @@ protected fun håndterInntektsmeldingPortal(
     ) =
         bareÈnArbeidsgiver(a1).nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
 
-    protected fun serializeForSpeil() = testperson.serializeForSpeil()
     protected fun dto() = testperson.dto()
 
     protected fun medFødselsdato(fødselsdato: LocalDate) {

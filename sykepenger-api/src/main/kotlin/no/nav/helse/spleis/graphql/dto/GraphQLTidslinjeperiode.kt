@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.serde.api.dto.Utbetalingtype
+import no.nav.helse.spleis.speil.dto.Utbetalingtype
 
 enum class GraphQLInntektstype {
     EnArbeidsgiver,

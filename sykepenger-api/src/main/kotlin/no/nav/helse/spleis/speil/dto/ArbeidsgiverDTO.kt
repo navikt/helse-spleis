@@ -1,9 +1,9 @@
-package no.nav.helse.serde.api.dto
+package no.nav.helse.spleis.speil.dto
 
 import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.til
-import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
+import no.nav.helse.spleis.speil.builders.IVilkårsgrunnlagHistorikk
 
 data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,

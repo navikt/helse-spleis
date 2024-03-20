@@ -3,28 +3,6 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
-import no.nav.helse.serde.api.dto.AnnullertPeriode
-import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
-import no.nav.helse.serde.api.dto.Arbeidsgiverrefusjon
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
-import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
-import no.nav.helse.serde.api.dto.Inntekt
-import no.nav.helse.serde.api.dto.Inntektkilde
-import no.nav.helse.serde.api.dto.Periodetilstand
-import no.nav.helse.serde.api.dto.SammenslåttDag
-import no.nav.helse.serde.api.dto.SpeilOppdrag
-import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
-import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
-import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
-import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
-import no.nav.helse.serde.api.dto.UberegnetPeriode
-import no.nav.helse.serde.api.dto.Utbetaling
-import no.nav.helse.serde.api.dto.Utbetalingstatus
-import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
-import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
-import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
 import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.dto.HendelsetypeDto
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
@@ -66,6 +44,28 @@ import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
+import no.nav.helse.spleis.speil.builders.SykepengegrunnlagsgrenseDTO
+import no.nav.helse.spleis.speil.dto.AnnullertPeriode
+import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
+import no.nav.helse.spleis.speil.dto.Arbeidsgiverrefusjon
+import no.nav.helse.spleis.speil.dto.BegrunnelseDTO
+import no.nav.helse.spleis.speil.dto.BeregnetPeriode
+import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
+import no.nav.helse.spleis.speil.dto.Inntekt
+import no.nav.helse.spleis.speil.dto.Inntektkilde
+import no.nav.helse.spleis.speil.dto.Periodetilstand
+import no.nav.helse.spleis.speil.dto.SammenslåttDag
+import no.nav.helse.spleis.speil.dto.SpeilOppdrag
+import no.nav.helse.spleis.speil.dto.SpeilTidslinjeperiode
+import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
+import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagKildetype
+import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagType
+import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype
+import no.nav.helse.spleis.speil.dto.UberegnetPeriode
+import no.nav.helse.spleis.speil.dto.Utbetaling
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus
+import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
+import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
 
 private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     dato = dag.dagen,

@@ -22,8 +22,6 @@ import kotliquery.sessionOf
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
-import no.nav.helse.serde.api.SpekematDTO
-import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.rapids_and_rivers.cli.AivenConfig

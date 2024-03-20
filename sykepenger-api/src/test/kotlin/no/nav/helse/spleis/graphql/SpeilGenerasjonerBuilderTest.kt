@@ -14,22 +14,22 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.serde.api.dto.AnnullertPeriode
-import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.Periodetilstand
-import no.nav.helse.serde.api.dto.Periodetilstand.*
-import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
-import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
-import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
-import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
-import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype.*
-import no.nav.helse.serde.api.dto.UberegnetPeriode
-import no.nav.helse.serde.api.dto.Utbetalingstatus
-import no.nav.helse.serde.api.dto.Utbetalingstatus.*
-import no.nav.helse.serde.api.dto.Utbetalingtype
-import no.nav.helse.serde.api.dto.Utbetalingtype.*
+import no.nav.helse.spleis.speil.dto.AnnullertPeriode
+import no.nav.helse.spleis.speil.dto.BeregnetPeriode
+import no.nav.helse.spleis.speil.dto.Periodetilstand
+import no.nav.helse.spleis.speil.dto.Periodetilstand.*
+import no.nav.helse.spleis.speil.dto.Periodetilstand.Annullert
+import no.nav.helse.spleis.speil.dto.Periodetilstand.Utbetalt
+import no.nav.helse.spleis.speil.dto.SpeilGenerasjonDTO
+import no.nav.helse.spleis.speil.dto.SpeilTidslinjeperiode
+import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagType
+import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype
+import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype.*
+import no.nav.helse.spleis.speil.dto.UberegnetPeriode
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus.*
+import no.nav.helse.spleis.speil.dto.Utbetalingtype
+import no.nav.helse.spleis.speil.dto.Utbetalingtype.*
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.august
 import no.nav.helse.den
@@ -41,8 +41,8 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.september
-import no.nav.helse.serde.api.dto.Inntekt
-import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.spleis.speil.dto.Inntekt
+import no.nav.helse.spleis.speil.dto.Inntektkilde
 import no.nav.helse.søndag
 import no.nav.helse.til
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -2007,7 +2007,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractE2ETest() {
 
     private class Arbeidsgivergenerasjoner(
         private val orgnummer: String,
-        private val vilkårsgrunnlag: Map<UUID, no.nav.helse.serde.api.dto.Vilkårsgrunnlag>,
+        private val vilkårsgrunnlag: Map<UUID, no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag>,
         private val generasjoner: List<SpeilGenerasjonDTO>
     ) {
         val size = generasjoner.size
@@ -2049,7 +2049,7 @@ internal class SpeilGenerasjonerBuilderTest : AbstractE2ETest() {
             return this
         }
 
-        fun BeregnetPeriode.vilkårsgrunnlag(): no.nav.helse.serde.api.dto.Vilkårsgrunnlag {
+        fun BeregnetPeriode.vilkårsgrunnlag(): no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag {
             return requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) { "Forventet å finne vilkårsgrunnlag for periode" }
         }
 

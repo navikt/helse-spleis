@@ -1,9 +1,9 @@
-package no.nav.helse.serde.api
+package no.nav.helse.spleis.speil
 
 import java.util.UUID
 import no.nav.helse.person.Person
-import no.nav.helse.serde.api.dto.PersonDTO
-import no.nav.helse.serde.api.speil.builders.PersonBuilder
+import no.nav.helse.spleis.speil.builders.PersonBuilder
+import no.nav.helse.spleis.speil.dto.PersonDTO
 
 fun serializePersonForSpeil(person: Person, pølsepakke: SpekematDTO): PersonDTO {
     val jsonBuilder = SpeilBuilder(person, pølsepakke)

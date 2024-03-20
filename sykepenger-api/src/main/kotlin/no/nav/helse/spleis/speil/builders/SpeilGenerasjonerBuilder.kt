@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.speil.builders
+package no.nav.helse.spleis.speil.builders
 
 import java.time.LocalDate
 import java.util.UUID
@@ -12,23 +12,26 @@ import no.nav.helse.dto.serialisering.GenerasjonUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
-import no.nav.helse.serde.api.SpekematDTO
-import no.nav.helse.serde.api.dto.AlderDTO
-import no.nav.helse.serde.api.dto.AnnullertPeriode
-import no.nav.helse.serde.api.dto.AnnullertUtbetaling
-import no.nav.helse.serde.api.dto.BeregnetPeriode
-import no.nav.helse.serde.api.dto.EndringskodeDTO
-import no.nav.helse.serde.api.dto.Periodetilstand
-import no.nav.helse.serde.api.dto.SpeilGenerasjonDTO
-import no.nav.helse.serde.api.dto.SpeilOppdrag
-import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode
-import no.nav.helse.serde.api.dto.SpeilTidslinjeperiode.Companion.utledPeriodetyper
-import no.nav.helse.serde.api.dto.Tidslinjeperiodetype
-import no.nav.helse.serde.api.dto.UberegnetPeriode
-import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
-import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
-import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.fjernUnødvendigeRader
-import no.nav.helse.serde.api.speil.merge
+import no.nav.helse.spleis.speil.SpekematDTO
+import no.nav.helse.spleis.speil.builders.ArbeidsgiverBuilder.Companion.fjernUnødvendigeRader
+import no.nav.helse.spleis.speil.dto.AlderDTO
+import no.nav.helse.spleis.speil.dto.AnnullertPeriode
+import no.nav.helse.spleis.speil.dto.AnnullertUtbetaling
+import no.nav.helse.spleis.speil.dto.BeregnetPeriode
+import no.nav.helse.spleis.speil.dto.EndringskodeDTO
+import no.nav.helse.spleis.speil.dto.Periodetilstand
+import no.nav.helse.spleis.speil.dto.SpeilGenerasjonDTO
+import no.nav.helse.spleis.speil.dto.SpeilOppdrag
+import no.nav.helse.spleis.speil.dto.SpeilTidslinjeperiode
+import no.nav.helse.spleis.speil.dto.SpeilTidslinjeperiode.Companion.utledPeriodetyper
+import no.nav.helse.spleis.speil.dto.Tidslinjeperiodetype
+import no.nav.helse.spleis.speil.dto.UberegnetPeriode
+import no.nav.helse.spleis.speil.dto.Utbetaling
+import no.nav.helse.spleis.speil.dto.Utbetalingstatus
+import no.nav.helse.spleis.speil.dto.Utbetalingstidslinjedag
+import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
+import no.nav.helse.spleis.speil.dto.Utbetalingtype
+import no.nav.helse.spleis.speil.merge
 
 internal class SpeilGenerasjonerBuilder(
     private val organisasjonsnummer: String,
@@ -174,9 +177,9 @@ internal class SpeilGenerasjonerBuilder(
             periodetilstand = annulleringen.periodetilstand,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
             beregningId = annulleringen.id,
-            utbetaling = no.nav.helse.serde.api.dto.Utbetaling(
+            utbetaling = Utbetaling(
                 annulleringen.id,
-                no.nav.helse.serde.api.dto.Utbetalingtype.ANNULLERING,
+                Utbetalingtype.ANNULLERING,
                 annulleringen.korrelasjonsId,
                 LocalDate.MAX,
                 0,
@@ -205,14 +208,14 @@ internal class SpeilGenerasjonerBuilder(
     private fun List<Utbetalingstidslinjedag>.sisteNavDag() =
         lastOrNull { it.type == UtbetalingstidslinjedagType.NavDag }
 
-    private fun utledePeriodetilstand(periodetilstand: VedtaksperiodetilstandDto, utbetalingDTO: no.nav.helse.serde.api.dto.Utbetaling, avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>) =
+    private fun utledePeriodetilstand(periodetilstand: VedtaksperiodetilstandDto, utbetalingDTO: Utbetaling, avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>) =
         when (utbetalingDTO.status) {
-            no.nav.helse.serde.api.dto.Utbetalingstatus.IkkeGodkjent -> Periodetilstand.RevurderingFeilet
-            no.nav.helse.serde.api.dto.Utbetalingstatus.Utbetalt -> when {
+            Utbetalingstatus.IkkeGodkjent -> Periodetilstand.RevurderingFeilet
+            Utbetalingstatus.Utbetalt -> when {
                 avgrensetUtbetalingstidslinje.none { it.utbetalingsinfo()?.harUtbetaling() == true } -> Periodetilstand.IngenUtbetaling
                 else -> Periodetilstand.Utbetalt
             }
-            no.nav.helse.serde.api.dto.Utbetalingstatus.Ubetalt -> when {
+            Utbetalingstatus.Ubetalt -> when {
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING, VedtaksperiodetilstandDto.AVVENTER_GODKJENNING) -> Periodetilstand.TilGodkjenning
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING, VedtaksperiodetilstandDto.AVVENTER_SIMULERING, VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING) -> Periodetilstand.ForberederGodkjenning
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_HISTORIKK) -> Periodetilstand.ForberederGodkjenning
@@ -220,18 +223,18 @@ internal class SpeilGenerasjonerBuilder(
                 periodetilstand == VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> Periodetilstand.VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
                 else -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
             }
-            no.nav.helse.serde.api.dto.Utbetalingstatus.GodkjentUtenUtbetaling -> when {
-                utbetalingDTO.type == no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING -> Periodetilstand.Utbetalt
+            Utbetalingstatus.GodkjentUtenUtbetaling -> when {
+                utbetalingDTO.type == Utbetalingtype.REVURDERING -> Periodetilstand.Utbetalt
                 else -> Periodetilstand.IngenUtbetaling
             }
-            no.nav.helse.serde.api.dto.Utbetalingstatus.Godkjent,
-            no.nav.helse.serde.api.dto.Utbetalingstatus.Overført -> Periodetilstand.TilUtbetaling
+            Utbetalingstatus.Godkjent,
+            Utbetalingstatus.Overført -> Periodetilstand.TilUtbetaling
             else -> error("har ikke mappingregel for ${utbetalingDTO.status}")
         }
 
     private fun periodevilkår(
         sisteSykepengedag: LocalDate,
-        utbetaling: no.nav.helse.serde.api.dto.Utbetaling,
+        utbetaling: Utbetaling,
         alder: AlderDTO,
         skjæringstidspunkt: LocalDate
     ): BeregnetPeriode.Vilkår {
@@ -254,26 +257,26 @@ internal class SpeilGenerasjonerBuilder(
         }
     }
 
-    private fun mapUtbetalinger(): List<no.nav.helse.serde.api.dto.Utbetaling> {
+    private fun mapUtbetalinger(): List<Utbetaling> {
         return arbeidsgiverUtDto.utbetalinger
             .filter { it.type in setOf(UtbetalingtypeDto.REVURDERING, UtbetalingtypeDto.UTBETALING) }
             .mapNotNull {
-                no.nav.helse.serde.api.dto.Utbetaling(
+                Utbetaling(
                     id = it.id,
                     type = when (it.type) {
-                        UtbetalingtypeDto.REVURDERING -> no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
-                        UtbetalingtypeDto.UTBETALING -> no.nav.helse.serde.api.dto.Utbetalingtype.UTBETALING
+                        UtbetalingtypeDto.REVURDERING -> Utbetalingtype.REVURDERING
+                        UtbetalingtypeDto.UTBETALING -> Utbetalingtype.UTBETALING
                         else -> error("Forventer ikke mapping for utbetalingtype=${it.type}")
                     },
                     korrelasjonsId = it.korrelasjonsId,
                     status = when (it.tilstand) {
-                        UtbetalingTilstandDto.ANNULLERT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Annullert
-                        UtbetalingTilstandDto.GODKJENT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Godkjent
-                        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> no.nav.helse.serde.api.dto.Utbetalingstatus.GodkjentUtenUtbetaling
-                        UtbetalingTilstandDto.IKKE_GODKJENT -> no.nav.helse.serde.api.dto.Utbetalingstatus.IkkeGodkjent
-                        UtbetalingTilstandDto.IKKE_UTBETALT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Ubetalt
-                        UtbetalingTilstandDto.OVERFØRT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Overført
-                        UtbetalingTilstandDto.UTBETALT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Utbetalt
+                        UtbetalingTilstandDto.ANNULLERT -> Utbetalingstatus.Annullert
+                        UtbetalingTilstandDto.GODKJENT -> Utbetalingstatus.Godkjent
+                        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> Utbetalingstatus.GodkjentUtenUtbetaling
+                        UtbetalingTilstandDto.IKKE_GODKJENT -> Utbetalingstatus.IkkeGodkjent
+                        UtbetalingTilstandDto.IKKE_UTBETALT -> Utbetalingstatus.Ubetalt
+                        UtbetalingTilstandDto.OVERFØRT -> Utbetalingstatus.Overført
+                        UtbetalingTilstandDto.UTBETALT -> Utbetalingstatus.Utbetalt
                         else -> return@mapNotNull null
                     },
                     maksdato = it.maksdato,
@@ -288,7 +291,7 @@ internal class SpeilGenerasjonerBuilder(
                         it.personOppdrag.fagsystemId to mapOppdrag(it.personOppdrag),
                     ),
                     vurdering = it.vurdering?.let { vurdering ->
-                        no.nav.helse.serde.api.dto.Utbetaling.Vurdering(
+                        Utbetaling.Vurdering(
                             godkjent = vurdering.godkjent,
                             tidsstempel = vurdering.tidspunkt,
                             automatisk = vurdering.automatiskBehandling,
@@ -310,13 +313,13 @@ internal class SpeilGenerasjonerBuilder(
                     arbeidsgiverFagsystemId = it.personOppdrag.fagsystemId,
                     personFagsystemId = it.personOppdrag.fagsystemId,
                     utbetalingstatus = when (it.tilstand) {
-                        UtbetalingTilstandDto.ANNULLERT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Annullert
-                        UtbetalingTilstandDto.GODKJENT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Godkjent
-                        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> no.nav.helse.serde.api.dto.Utbetalingstatus.GodkjentUtenUtbetaling
-                        UtbetalingTilstandDto.IKKE_GODKJENT -> no.nav.helse.serde.api.dto.Utbetalingstatus.IkkeGodkjent
-                        UtbetalingTilstandDto.IKKE_UTBETALT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Ubetalt
-                        UtbetalingTilstandDto.OVERFØRT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Overført
-                        UtbetalingTilstandDto.UTBETALT -> no.nav.helse.serde.api.dto.Utbetalingstatus.Utbetalt
+                        UtbetalingTilstandDto.ANNULLERT -> Utbetalingstatus.Annullert
+                        UtbetalingTilstandDto.GODKJENT -> Utbetalingstatus.Godkjent
+                        UtbetalingTilstandDto.GODKJENT_UTEN_UTBETALING -> Utbetalingstatus.GodkjentUtenUtbetaling
+                        UtbetalingTilstandDto.IKKE_GODKJENT -> Utbetalingstatus.IkkeGodkjent
+                        UtbetalingTilstandDto.IKKE_UTBETALT -> Utbetalingstatus.Ubetalt
+                        UtbetalingTilstandDto.OVERFØRT -> Utbetalingstatus.Overført
+                        UtbetalingTilstandDto.UTBETALT -> Utbetalingstatus.Utbetalt
                         else -> return@mapNotNull null
                     }
                 )

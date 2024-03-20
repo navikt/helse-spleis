@@ -26,9 +26,9 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IdInnhenter
+import no.nav.helse.spleis.speil.serializePersonForSpeil
 import no.nav.helse.spleis.testhelpers.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.testhelpers.PersonHendelsefabrikk

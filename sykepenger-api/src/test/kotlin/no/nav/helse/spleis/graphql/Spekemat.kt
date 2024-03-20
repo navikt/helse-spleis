@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.graphql
 
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.serde.api.SpekematDTO
 import no.nav.helse.spekemat.fabrikk.Pølse
 import no.nav.helse.spekemat.fabrikk.Pølsefabrikk
 import no.nav.helse.spekemat.fabrikk.PølseradDto
 import no.nav.helse.spekemat.fabrikk.Pølsestatus
+import no.nav.helse.spleis.speil.SpekematDTO
 
 class Spekemat : PersonObserver {
     private val hendelser = mutableListOf<Any>()

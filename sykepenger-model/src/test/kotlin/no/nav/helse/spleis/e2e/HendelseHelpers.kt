@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.serde.api.serializePersonForSpeil
 
 internal class EtterspurtBehov(
     private val type: Aktivitet.Behov.Behovtype,
@@ -57,5 +56,3 @@ internal class EtterspurtBehov(
 
 internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =
     inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)
-
-internal fun AbstractEndToEndTest.speilApi() = serializePersonForSpeil(person, spekemat.resultat())
