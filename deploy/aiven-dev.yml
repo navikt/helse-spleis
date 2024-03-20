@@ -161,9 +161,6 @@ spec:
           application: sporbar
           access: readwrite
         - team: tbd
-          application: spre-arbeidsgiver
-          access: readwrite
-        - team: tbd
           application: spre-gosys
           access: readwrite
         - team: tbd
