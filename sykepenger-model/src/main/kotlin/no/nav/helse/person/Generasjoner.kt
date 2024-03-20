@@ -300,7 +300,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             check(observatører.isNotEmpty()) {
                 "må ha minst én observatør for å registrere en generasjon"
             }
-            emitNyGenerasjonOpprettet()
+            tilstand.generasjonOpprettet(this)
         }
 
         init {
@@ -727,16 +727,8 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             observatører.forEach { it.avsluttetUtenVedtak(hendelse, id, avsluttet!!, periode, dokumentsporing.ider()) }
         }
 
-        private fun emitNyGenerasjonOpprettet() {
+        private fun emitNyGenerasjonOpprettet(type: PersonObserver.GenerasjonOpprettetEvent.Type) {
             check(observatører.isNotEmpty()) { "generasjonen har ingen registrert observatør" }
-            val type = when (tilstand) {
-                is Tilstand.UberegnetRevurdering -> PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering
-                is Tilstand.UberegnetOmgjøring -> PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring
-                is Tilstand.TilInfotrygd,
-                is Tilstand.AnnullertPeriode -> PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd
-                is Tilstand.Uberegnet -> PersonObserver.GenerasjonOpprettetEvent.Type.Søknad
-                else -> throw IllegalStateException("Forventer ikke å opprette generasjon i tilstand ${tilstand.javaClass.simpleName}")
-            }
             observatører.forEach { it.nyGenerasjon(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
         }
 
@@ -864,6 +856,9 @@ enum class Periodetilstand {
             }
         }
         internal sealed interface Tilstand {
+            fun generasjonOpprettet(generasjon: Generasjon) {
+                throw IllegalStateException("Forventer ikke å opprette generasjon i tilstand ${this.javaClass.simpleName}")
+            }
             fun entering(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
             fun leaving(generasjon: Generasjon) {}
             fun annuller(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Generasjon? {
@@ -917,6 +912,7 @@ enum class Periodetilstand {
             fun håndterUtbetalinghendelse(generasjon: Generasjon, hendelse: UtbetalingHendelse) = false
 
             data object Uberegnet : Tilstand {
+                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad)
                 override fun entering(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     check(generasjon.utbetaling() == null) { "skal ikke ha utbetaling og være uberegnet samtidig" }
                 }
@@ -952,6 +948,7 @@ enum class Periodetilstand {
                 }
             }
             data object UberegnetOmgjøring : Tilstand by (Uberegnet) {
+                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.Omgjøring)
                 override fun utbetaling(
                     generasjon: Generasjon,
                     vedtaksperiodeSomLagerUtbetaling: UUID,
@@ -980,6 +977,7 @@ enum class Periodetilstand {
                 }
             }
             data object UberegnetRevurdering : Tilstand by (Uberegnet) {
+                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.Revurdering)
                 override fun kanForkastes(generasjon: Generasjon, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
                 override fun annuller(
                     generasjon: Generasjon,
@@ -1186,6 +1184,7 @@ enum class Periodetilstand {
                     generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetRevurdering)
             }
             data object AnnullertPeriode : Tilstand {
+                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd)
                 override fun kanForkastes(generasjon: Generasjon, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
 
                 override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon? {
@@ -1199,6 +1198,7 @@ enum class Periodetilstand {
                 }
             }
             data object TilInfotrygd : Tilstand {
+                override fun generasjonOpprettet(generasjon: Generasjon) = generasjon.emitNyGenerasjonOpprettet(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd)
                 override fun entering(generasjon: Generasjon, hendelse: IAktivitetslogg) {
                     generasjon.avsluttet = LocalDateTime.now()
                 }
