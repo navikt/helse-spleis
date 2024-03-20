@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -49,7 +48,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 internal class Generasjoner private constructor(generasjoner: List<Generasjon>) {
     internal constructor() : this(emptyList())
     companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         fun gjenopprett(dto: GenerasjonerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Generasjoner(
             generasjoner = dto.generasjoner.map { Generasjon.gjenopprett(it, grunnlagsdata, utbetalinger) }
         )
@@ -737,7 +735,7 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
                 is Tilstand.TilInfotrygd,
                 is Tilstand.AnnullertPeriode -> PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd
                 is Tilstand.Uberegnet -> PersonObserver.GenerasjonOpprettetEvent.Type.Søknad
-                else -> PersonObserver.GenerasjonOpprettetEvent.Type.Søknad.also { sikkerlogg.warn("Forventet ikke å opprette generasjon i tilstand ${tilstand::class.simpleName}. GenerasjonId=$id") }
+                else -> throw IllegalStateException("Forventer ikke å opprette generasjon i tilstand ${tilstand.javaClass.simpleName}")
             }
             observatører.forEach { it.nyGenerasjon(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
         }
