@@ -675,17 +675,6 @@ internal class Generasjoner private constructor(generasjoner: List<Generasjon>) 
             )
         }
 
-        private fun nyGenerasjonTilInfotrygd(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon {
-            arbeidsgiver.låsOpp(periode)
-            return Generasjon(
-                observatører = this.observatører,
-                tilstand = Tilstand.TilInfotrygd,
-                endringer = listOf(this.gjeldende.kopierUtenUtbetaling()),
-                avsluttet = LocalDateTime.now(),
-                kilde = Generasjonkilde(hendelse)
-            )
-        }
-
         private fun nyAnnullertGenerasjon(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Generasjon {
             arbeidsgiver.låsOpp(periode)
             return Generasjon(
@@ -857,7 +846,7 @@ enum class Periodetilstand {
         }
         internal sealed interface Tilstand {
             fun generasjonOpprettet(generasjon: Generasjon) {
-                throw IllegalStateException("Forventer ikke å opprette generasjon i tilstand ${this.javaClass.simpleName}")
+                error("Forventer ikke å opprette generasjon i tilstand ${this.javaClass.simpleName}")
             }
             fun entering(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
             fun leaving(generasjon: Generasjon) {}
@@ -1086,8 +1075,10 @@ enum class Periodetilstand {
                 }
             }
             data object RevurdertVedtakAvvist : Tilstand {
+                override fun kanForkastes(generasjon: Generasjon, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
+
                 override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon {
-                    return generasjon.nyGenerasjonTilInfotrygd(arbeidsgiver, hendelse)
+                    error("Kan ikke forkaste i tilstand ${this.javaClass.simpleName}")
                 }
 
                 override fun sikreNyGenerasjon(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon {
@@ -1097,7 +1088,6 @@ enum class Periodetilstand {
                 override fun annuller(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Generasjon {
                     return generasjon.nyAnnullertGenerasjon(arbeidsgiver, hendelse, annullering, grunnlagsdata)
                 }
-                override fun kanForkastes(generasjon: Generasjon, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
                 override fun tillaterNyGenerasjon(generasjon: Generasjon, other: Generasjon): Boolean {
                     return true
                 }
@@ -1108,6 +1098,11 @@ enum class Periodetilstand {
                     checkNotNull(generasjon.gjeldende.grunnlagsdata)
                 }
                 override fun kanForkastes(generasjon: Generasjon, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
+
+                override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon? {
+                    error("Kan ikke forkaste i tilstand ${this.javaClass.simpleName}")
+                }
+
                 override fun tillaterNyGenerasjon(generasjon: Generasjon, other: Generasjon): Boolean {
                     return true
                 }
@@ -1125,10 +1120,6 @@ enum class Periodetilstand {
 
                 override fun utenUtbetaling(generasjon: Generasjon, hendelse: IAktivitetslogg) {}
 
-                override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon? {
-                    error("usikker på hvordan vi kan forkaste vedtaksperioden som har fått utbetaling godkjent, men ikke avsluttet i $this")
-                }
-
                 override fun håndterEndring(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) =
                     generasjon.nyGenerasjonMedEndring(arbeidsgiver, hendelse, UberegnetRevurdering)
 
@@ -1144,10 +1135,18 @@ enum class Periodetilstand {
                     generasjon.avsluttetUtenVedtak(hendelse)
                 }
                 override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon {
-                    return generasjon.nyGenerasjonTilInfotrygd(arbeidsgiver, hendelse)
+                    arbeidsgiver.låsOpp(generasjon.periode)
+                    return Generasjon(
+                        observatører = generasjon.observatører,
+                        tilstand = TilInfotrygd,
+                        endringer = listOf(generasjon.gjeldende.kopierUtenUtbetaling()),
+                        avsluttet = LocalDateTime.now(),
+                        kilde = Generasjonkilde(hendelse)
+                    )
                 }
                 override fun kanForkastes(generasjon: Generasjon, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) =
                     generasjon.kanForkastingAvKortPeriodeTillates(hendelse, arbeidsgiverUtbetalinger)
+
                 override fun tillaterNyGenerasjon(generasjon: Generasjon, other: Generasjon): Boolean {
                     return true
                 }
@@ -1168,10 +1167,11 @@ enum class Periodetilstand {
                 override fun annuller(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Generasjon {
                     return generasjon.nyAnnullertGenerasjon(arbeidsgiver, hendelse, annullering, grunnlagsdata)
                 }
-                override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon {
-                    return generasjon.nyGenerasjonTilInfotrygd(arbeidsgiver, hendelse)
-                }
                 override fun kanForkastes(generasjon: Generasjon, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = false
+
+                override fun forkastVedtaksperiode(generasjon: Generasjon, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Generasjon {
+                    error("Kan ikke forkaste i tilstand ${this.javaClass.simpleName}")
+                }
                 override fun tillaterNyGenerasjon(generasjon: Generasjon, other: Generasjon): Boolean {
                     return true
                 }
