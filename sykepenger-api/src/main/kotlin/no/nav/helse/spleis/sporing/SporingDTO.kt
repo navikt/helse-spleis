@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.sporing
+package no.nav.helse.spleis.sporing
 
 import java.time.LocalDate
 import java.util.*
