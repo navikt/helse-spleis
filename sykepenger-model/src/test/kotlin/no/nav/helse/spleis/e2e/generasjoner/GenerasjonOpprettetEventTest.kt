@@ -52,7 +52,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
     }
 
     @Test
-    fun `revurdering`() {
+    fun revurdering() {
         a1 {
             nyttVedtak(1.januar, 31.januar, 100.prosent)
             håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
@@ -66,7 +66,7 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
     }
 
     @Test
-    fun `omgjøring`() {
+    fun omgjøring() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterInntektsmelding(listOf(25.desember(2017) til 10.januar), beregnetInntekt = INNTEKT)
@@ -91,6 +91,27 @@ internal class GenerasjonOpprettetEventTest : AbstractDslTest() {
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, generasjonOpprettetEventer[1].type)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, generasjonOpprettetEventer[2].type)
             assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, generasjonOpprettetEventer[3].type)
+        }
+    }
+
+    @Test
+    fun `søknaden som forkastes på direkten`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), utenlandskSykmelding = true)
+            val generasjonOpprettet = observatør.generasjonOpprettetEventer.single()
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, generasjonOpprettet.type)
+        }
+    }
+
+    @Test
+    fun `anmoder en periode om forkasting`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+            håndterAnmodningOmForkasting(1.vedtaksperiode)
+            val generasjonOpprettet = observatør.generasjonOpprettetEventer
+            assertEquals(2, generasjonOpprettet.size)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.Søknad, generasjonOpprettet[0].type)
+            assertEquals(PersonObserver.GenerasjonOpprettetEvent.Type.TilInfotrygd, generasjonOpprettet[1].type)
         }
     }
 }
