@@ -681,7 +681,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 observatører = this.observatører,
                 tilstand = Tilstand.AnnullertPeriode,
                 endringer = listOf(this.gjeldende.kopierMedUtbetaling(annullering, grunnlagsdata)),
-                avsluttet = null,
+                avsluttet = LocalDateTime.now(),
                 kilde = Behandlingkilde(hendelse)
             )
         }
@@ -723,7 +723,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         internal fun forkastetBehandling(hendelse: Hendelse) {
             check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
-            check(this.tilstand === Tilstand.TilInfotrygd)
+            check(this.tilstand in setOf(Tilstand.TilInfotrygd, Tilstand.AnnullertPeriode))
             observatører.forEach { it.behandlingForkastet(id, hendelse) }
         }
 
@@ -1184,13 +1184,16 @@ enum class Periodetilstand {
                     behandling.nyBehandlingMedEndring(arbeidsgiver, hendelse, UberegnetRevurdering)
             }
             data object AnnullertPeriode : Tilstand {
+                override fun entering(behandling: Behandling, hendelse: IAktivitetslogg) {
+                    behandling.avsluttet = LocalDateTime.now()
+                }
+
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)
                 override fun kanForkastes(behandling: Behandling, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
 
                 override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Behandling? {
                     behandling.vedtakAnnullert(hendelse)
-                    // todo: beholde AnnullertPeriode som siste tilstand for annullerte perioder
-                    return super.forkastVedtaksperiode(behandling, arbeidsgiver, hendelse)
+                    return null
                 }
 
                 override fun annuller(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling? {

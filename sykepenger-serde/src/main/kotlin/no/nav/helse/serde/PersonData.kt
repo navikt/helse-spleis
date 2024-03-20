@@ -788,6 +788,7 @@ data class PersonData(
                         TilstandData.REVURDERT_VEDTAK_AVVIST -> BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST
                         TilstandData.VEDTAK_IVERKSATT -> BehandlingtilstandDto.VEDTAK_IVERKSATT
                         TilstandData.AVSLUTTET_UTEN_VEDTAK -> BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK
+                        TilstandData.ANNULLERT_PERIODE -> BehandlingtilstandDto.ANNULLERT_PERIODE
                         TilstandData.TIL_INFOTRYGD -> BehandlingtilstandDto.TIL_INFOTRYGD
                     },
                     vedtakFattet = this.vedtakFattet,
@@ -796,7 +797,8 @@ data class PersonData(
                     endringer = this.endringer.map { it.tilDto() }
                 )
                 enum class TilstandData {
-                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING, VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, TIL_INFOTRYGD
+                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
+                    VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD
                 }
                 enum class AvsenderData {
                     SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM;

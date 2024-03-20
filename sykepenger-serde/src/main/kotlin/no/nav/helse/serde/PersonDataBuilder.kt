@@ -337,7 +337,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
 private fun BehandlingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData(
     id = this.id,
     tilstand = when (this.tilstand) {
-        BehandlingtilstandDto.ANNULLERT_PERIODE -> error("Forventer ikke å serialisere ${this.tilstand}")
+        BehandlingtilstandDto.ANNULLERT_PERIODE -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.ANNULLERT_PERIODE
         BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.AVSLUTTET_UTEN_VEDTAK
         BehandlingtilstandDto.BEREGNET -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET
         BehandlingtilstandDto.BEREGNET_OMGJØRING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_OMGJØRING

@@ -41,6 +41,7 @@ import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtil
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.UBEREGNET_REVURDERING
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.VEDTAK_FATTET
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.VEDTAK_IVERKSATT
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.ANNULLERT_PERIODE
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -156,7 +157,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(Avsender.SAKSBEHANDLER, behandlinger.last().kilde.avsender)
                 behandlinger.last().also { sisteBehandling ->
                     assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+                    assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
                     assertEquals(1, sisteBehandling.endringer.size)
                     sisteBehandling.endringer.single().also { endring ->
                         assertNotNull(endring.utbetaling)
@@ -183,7 +184,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(Avsender.SAKSBEHANDLER, behandlinger.last().kilde.avsender)
                 behandlinger.last().also { sisteBehandling ->
                     assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+                    assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
                     assertEquals(1, sisteBehandling.endringer.size)
                     sisteBehandling.endringer.single().also { endring ->
                         assertNotNull(endring.utbetaling)
@@ -200,7 +201,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(Avsender.SAKSBEHANDLER, behandlinger.last().kilde.avsender)
                 behandlinger.last().also { sisteBehandling ->
                     assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+                    assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
                     assertEquals(1, sisteBehandling.endringer.size)
                     sisteBehandling.endringer.single().also { endring ->
                         assertNotNull(endring.utbetaling)
@@ -217,7 +218,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(Avsender.SAKSBEHANDLER, behandlinger.last().kilde.avsender)
                 behandlinger.last().also { sisteBehandling ->
                     assertNotNull(sisteBehandling.avsluttet)
-                    assertEquals(TIL_INFOTRYGD, sisteBehandling.tilstand)
+                    assertEquals(ANNULLERT_PERIODE, sisteBehandling.tilstand)
                     assertEquals(1, sisteBehandling.endringer.size)
                     sisteBehandling.endringer.single().also { endring ->
                         assertNotNull(endring.utbetaling)
@@ -239,7 +240,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterAnnullering(inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(TIL_INFOTRYGD, behandlinger.last().tilstand)
+                assertEquals(ANNULLERT_PERIODE, behandlinger.last().tilstand)
             }
         }
     }
@@ -254,7 +255,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).inspektør.tilstand)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                assertEquals(TIL_INFOTRYGD, behandlinger.last().tilstand)
+                assertEquals(ANNULLERT_PERIODE, behandlinger.last().tilstand)
             }
         }
     }
