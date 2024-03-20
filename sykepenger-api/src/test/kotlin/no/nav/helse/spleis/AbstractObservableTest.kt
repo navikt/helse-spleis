@@ -41,7 +41,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
-abstract class AbstractObservableTest {
+internal abstract class AbstractObservableTest {
     protected companion object {
         const val UNG_PERSON_FNR = "12029240045"
         val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
@@ -58,7 +58,7 @@ abstract class AbstractObservableTest {
     protected lateinit var person: Person
     internal lateinit var observatør: TestObservatør
 
-    private val Int.vedtaksperiode: IdInnhenter get() = { orgnummer -> this.vedtaksperiode(orgnummer) }
+    private val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this.vedtaksperiode(orgnummer) }
     private fun Int.vedtaksperiode(orgnummer: String) = observatør.vedtaksperiode(orgnummer, this - 1)
 
     protected fun sykmelding(
@@ -164,7 +164,7 @@ abstract class AbstractObservableTest {
         fnr: String = UNG_PERSON_FNR
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             skjæringstidspunkt = FOM,
             aktørId = AKTØRID,
             personidentifikator = fnr.somPersonidentifikator(),
@@ -194,7 +194,7 @@ abstract class AbstractObservableTest {
             aktørId = AKTØRID,
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepenger),
             svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapspenger),
             pleiepenger = Pleiepenger(
@@ -227,7 +227,7 @@ abstract class AbstractObservableTest {
     ) =
         Simulering(
             meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR,
             orgnummer = orgnummer,
@@ -290,7 +290,7 @@ abstract class AbstractObservableTest {
         fødselsnummer = UNG_PERSON_FNR,
         organisasjonsnummer = orgnummer,
         utbetalingId = utbetalingId,
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+        vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         saksbehandler = "Ola Nordmann",
         saksbehandlerEpost = "ola.nordmann@nav.no",
         utbetalingGodkjent = utbetalingGodkjent,
@@ -319,5 +319,7 @@ abstract class AbstractObservableTest {
         )
 }
 
-internal typealias IdInnhenter = (orgnummer: String) -> UUID
+internal fun interface IdInnhenter {
+    fun id(orgnummer: String): UUID
+}
 
