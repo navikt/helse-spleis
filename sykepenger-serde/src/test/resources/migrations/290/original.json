@@ -1,0 +1,26 @@
+{
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "id": "699aff0c-49b7-4845-ab39-6ee881f7140c",
+          "forbrukteSykedager": 1,
+          "gjenståendeSykedager": 19,
+          "type": "UTBETALING"
+        },
+        {
+          "id": "141edc60-f850-42c0-88d2-f3f220fa7c53",
+          "forbrukteSykedager": null,
+          "gjenståendeSykedager": null,
+          "type": "ANNULLERING"
+        },
+        {
+          "id": "55588aca-1255-428a-b123-3fff4f20d951",
+          "forbrukteSykedager": null,
+          "gjenståendeSykedager": null,
+          "type": "UTBETALING"
+        }
+      ]
+    }
+  ]
+}
