@@ -316,23 +316,23 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
     fun postVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {}
 }
 
-internal interface GenerasjonerVisitor : GenerasjonVisitor {
+internal interface BehandlingerVisitor : BehandlingVisitor {
 
-    fun preVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {}
-    fun postVisitGenerasjoner(generasjoner: List<Generasjoner.Generasjon>) {}
+    fun preVisitBehandlinger(behandlinger: List<Behandlinger.Behandling>) {}
+    fun postVisitBehandlinger(behandlinger: List<Behandlinger.Behandling>) {}
 }
 
-internal interface GenerasjonVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor, SykdomstidslinjeVisitor {
-    fun preVisitGenerasjon(
+internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor, SykdomstidslinjeVisitor {
+    fun preVisitBehandling(
         id: UUID,
         tidsstempel: LocalDateTime,
-        tilstand: Generasjoner.Generasjon.Tilstand,
+        tilstand: Behandlinger.Behandling.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde
+        kilde: Behandlinger.Behandlingkilde
     ) {}
-    fun preVisitGenerasjonendring(
+    fun preVisitBehandlingendring(
         id: UUID,
         tidsstempel: LocalDateTime,
         sykmeldingsperiode: Periode,
@@ -342,7 +342,7 @@ internal interface GenerasjonVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje
     ) {}
-    fun postVisitGenerasjonendring(
+    fun postVisitBehandlingendring(
         id: UUID,
         tidsstempel: LocalDateTime,
         sykmeldingsperiode: Periode,
@@ -352,24 +352,24 @@ internal interface GenerasjonVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje
     ) {}
-    fun preVisitGenerasjonkilde(
+    fun visitBehandlingkilde(
         meldingsreferanseId: UUID,
         innsendt: LocalDateTime,
         registrert: LocalDateTime,
         avsender: Avsender
     ) {}
-    fun postVisitGenerasjon(
+    fun postVisitBehandling(
         id: UUID,
         tidsstempel: LocalDateTime,
-        tilstand: Generasjoner.Generasjon.Tilstand,
+        tilstand: Behandlinger.Behandling.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde
+        kilde: Behandlinger.Behandlingkilde
     ) {}
 }
 
-internal interface VedtaksperiodeVisitor : GenerasjonerVisitor, UtbetalingsdagVisitor {
+internal interface VedtaksperiodeVisitor : BehandlingerVisitor, UtbetalingsdagVisitor {
     fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,

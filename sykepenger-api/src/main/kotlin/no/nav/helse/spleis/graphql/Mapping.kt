@@ -314,8 +314,7 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
         is AnnullertPeriode -> mapAnnullertPeriode(periode, hendelser)
         is BeregnetPeriode -> mapBeregnetPeriode(periode, hendelser)
         is UberegnetPeriode -> GraphQLUberegnetPeriode(
-            generasjonId = periode.generasjonId,
-            behandlingId = periode.generasjonId,
+            behandlingId = periode.behandlingId,
             kilde = periode.kilde,
             fom = periode.fom,
             tom = periode.tom,
@@ -332,8 +331,7 @@ internal fun mapTidslinjeperiode(periode: SpeilTidslinjeperiode, hendelser: List
     }
 private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<HendelseDTO>) =
     GraphQLBeregnetPeriode(
-        generasjonId = periode.generasjonId,
-        behandlingId = periode.generasjonId,
+        behandlingId = periode.behandlingId,
         kilde = periode.kilde,
         fom = periode.fom,
         tom = periode.tom,
@@ -341,7 +339,7 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
         periodetype = mapPeriodetype(periode.periodetype),
         inntektstype = mapInntektstype(periode.inntektskilde),
         erForkastet = periode.erForkastet,
-        opprettet = periode.generasjonOpprettet,
+        opprettet = periode.behandlingOpprettet,
         vedtaksperiodeId = periode.vedtaksperiodeId,
         beregningId = periode.beregningId,
         gjenstaendeSykedager = periode.utbetaling.gjenståendeDager,
@@ -356,8 +354,7 @@ private fun mapBeregnetPeriode(periode: BeregnetPeriode, hendelser: List<Hendels
     )
 private fun mapAnnullertPeriode(periode: AnnullertPeriode, hendelser: List<HendelseDTO>) =
     GraphQLBeregnetPeriode(
-        generasjonId = periode.generasjonId,
-        behandlingId = periode.generasjonId,
+        behandlingId = periode.behandlingId,
         kilde = periode.kilde,
         fom = periode.fom,
         tom = periode.tom,

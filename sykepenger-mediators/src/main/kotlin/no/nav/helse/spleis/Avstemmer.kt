@@ -65,7 +65,7 @@ class Avstemmer(private val person: PersonUtDto) {
             tilstand = vedtaksperiode.tilstand.toString(),
             opprettet = vedtaksperiode.opprettet,
             oppdatert = vedtaksperiode.oppdatert,
-            utbetalinger = vedtaksperiode.generasjoner.generasjoner.flatMap { generasjon ->
+            utbetalinger = vedtaksperiode.behandlinger.behandlinger.flatMap { generasjon ->
                 generasjon.endringer
                     .filterNot { endring -> endring.utbetalingstatus === UtbetalingTilstandDto.FORKASTET }
                     .mapNotNull { endring -> endring.utbetalingId }

@@ -537,15 +537,15 @@ class Person private constructor(
         observers.forEach { it.avsluttetMedVedtak(avsluttetMedVedtakEvent) }
     }
 
-    internal fun generasjonLukket(generasjonLukketEvent: PersonObserver.GenerasjonLukketEvent) {
-        observers.forEach { it.generasjonLukket(generasjonLukketEvent) }
+    internal fun behandlingLukket(behandlingLukketEvent: PersonObserver.BehandlingLukketEvent) {
+        observers.forEach { it.behandlingLukket(behandlingLukketEvent) }
     }
 
-    internal fun generasjonForkastet(generasjonForkastetEvent: PersonObserver.GenerasjonForkastetEvent) {
-        observers.forEach { it.generasjonForkastet(generasjonForkastetEvent) }
+    internal fun behandlingForkastet(behandlingForkastetEvent: PersonObserver.BehandlingForkastetEvent) {
+        observers.forEach { it.behandlingForkastet(behandlingForkastetEvent) }
     }
-    internal fun nyGenerasjon(nyGenerasjon: PersonObserver.GenerasjonOpprettetEvent) {
-        observers.forEach { it.nyGenerasjon(nyGenerasjon) }
+    internal fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
+        observers.forEach { it.nyBehandling(event) }
     }
 
     internal fun emitOverstyringIgangsattEvent(event: PersonObserver.OverstyringIgangsatt) {

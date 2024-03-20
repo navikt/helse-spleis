@@ -3,12 +3,12 @@ package no.nav.helse.spleis.speil.builders
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dto.EndringskodeDto
-import no.nav.helse.dto.GenerasjonTilstandDto
+import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
-import no.nav.helse.dto.serialisering.GenerasjonUtDto
+import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
@@ -57,41 +57,41 @@ internal class SpeilGenerasjonerBuilder(
     }
     private fun mapVedtaksperiode(erForkastet: Boolean, vedtaksperiode: VedtaksperiodeUtDto): List<SpeilTidslinjeperiode> {
         var forrigeGenerasjon: SpeilTidslinjeperiode? = null
-        return vedtaksperiode.generasjoner.generasjoner.mapNotNull { generasjon ->
+        return vedtaksperiode.behandlinger.behandlinger.mapNotNull { generasjon ->
             when (generasjon.tilstand) {
-                GenerasjonTilstandDto.BEREGNET,
-                GenerasjonTilstandDto.BEREGNET_OMGJØRING,
-                GenerasjonTilstandDto.BEREGNET_REVURDERING,
-                GenerasjonTilstandDto.REVURDERT_VEDTAK_AVVIST,
-                GenerasjonTilstandDto.VEDTAK_FATTET,
-                GenerasjonTilstandDto.VEDTAK_IVERKSATT -> mapBeregnetPeriode(vedtaksperiode, generasjon)
-                GenerasjonTilstandDto.UBEREGNET,
-                GenerasjonTilstandDto.UBEREGNET_OMGJØRING,
-                GenerasjonTilstandDto.UBEREGNET_REVURDERING,
-                GenerasjonTilstandDto.AVSLUTTET_UTEN_VEDTAK -> mapUberegnetPeriode(erForkastet, vedtaksperiode, generasjon)
-                GenerasjonTilstandDto.TIL_INFOTRYGD -> when (val forrige = forrigeGenerasjon) {
+                BehandlingtilstandDto.BEREGNET,
+                BehandlingtilstandDto.BEREGNET_OMGJØRING,
+                BehandlingtilstandDto.BEREGNET_REVURDERING,
+                BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST,
+                BehandlingtilstandDto.VEDTAK_FATTET,
+                BehandlingtilstandDto.VEDTAK_IVERKSATT -> mapBeregnetPeriode(vedtaksperiode, generasjon)
+                BehandlingtilstandDto.UBEREGNET,
+                BehandlingtilstandDto.UBEREGNET_OMGJØRING,
+                BehandlingtilstandDto.UBEREGNET_REVURDERING,
+                BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> mapUberegnetPeriode(erForkastet, vedtaksperiode, generasjon)
+                BehandlingtilstandDto.TIL_INFOTRYGD -> when (val forrige = forrigeGenerasjon) {
                     // todo: må mappe TIL_INFOTRYGD som annullert periode så lenge annullerte perioder ikke har link til annulleringutbetalingen
                     is BeregnetPeriode -> mapAnnullertPeriode(vedtaksperiode, forrige, generasjon)
                     else -> mapTilInfotrygdperiode(vedtaksperiode, forrige, generasjon)
                 }
-                GenerasjonTilstandDto.ANNULLERT_PERIODE -> mapAnnullertPeriode(vedtaksperiode, null, generasjon)
+                BehandlingtilstandDto.ANNULLERT_PERIODE -> mapAnnullertPeriode(vedtaksperiode, null, generasjon)
             }.also {
                 forrigeGenerasjon = it
             }
         }
     }
 
-    private fun mapTilInfotrygdperiode(vedtaksperiode: VedtaksperiodeUtDto, forrigePeriode: SpeilTidslinjeperiode?, generasjon: GenerasjonUtDto): UberegnetPeriode? {
+    private fun mapTilInfotrygdperiode(vedtaksperiode: VedtaksperiodeUtDto, forrigePeriode: SpeilTidslinjeperiode?, generasjon: BehandlingUtDto): UberegnetPeriode? {
         if (forrigePeriode == null) return null // todo: her kan vi mappe perioder som tas ut av Speil
         return mapUberegnetPeriode(true, vedtaksperiode, generasjon, Periodetilstand.Annullert)
     }
 
-    private fun mapUberegnetPeriode(erForkastet: Boolean, vedtaksperiode: VedtaksperiodeUtDto, generasjon: GenerasjonUtDto, periodetilstand: Periodetilstand? = null): UberegnetPeriode {
+    private fun mapUberegnetPeriode(erForkastet: Boolean, vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto, periodetilstand: Periodetilstand? = null): UberegnetPeriode {
         val sisteEndring = generasjon.endringer.last()
         val sykdomstidslinje = SykdomstidslinjeBuilder(sisteEndring.sykdomstidslinje).build()
         return UberegnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
-            generasjonId = generasjon.id,
+            behandlingId = generasjon.id,
             kilde = generasjon.kilde.meldingsreferanseId,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
@@ -119,7 +119,7 @@ internal class SpeilGenerasjonerBuilder(
 
         )
     }
-    private fun mapBeregnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: GenerasjonUtDto): BeregnetPeriode {
+    private fun mapBeregnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): BeregnetPeriode {
         val sisteEndring = generasjon.endringer.last()
         val utbetaling = utbetalinger.single { it.id == sisteEndring.utbetalingId }
         val utbetalingstidslinje = utbetalingstidslinjer.single { it.first == sisteEndring.utbetalingId }.second.build()
@@ -129,7 +129,7 @@ internal class SpeilGenerasjonerBuilder(
         val sykdomstidslinje = SykdomstidslinjeBuilder(sisteEndring.sykdomstidslinje).build()
         return BeregnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
-            generasjonId = generasjon.id,
+            behandlingId = generasjon.id,
             kilde = generasjon.kilde.meldingsreferanseId,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
@@ -138,7 +138,7 @@ internal class SpeilGenerasjonerBuilder(
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // TODO: fikse
             inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // verdien av feltet brukes ikke i speil
             opprettet = vedtaksperiode.opprettet,
-            generasjonOpprettet = generasjon.endringer.first().tidsstempel,
+            behandlingOpprettet = generasjon.endringer.first().tidsstempel,
             oppdatert = vedtaksperiode.oppdatert,
             periodetilstand = utledePeriodetilstand(vedtaksperiode.tilstand, utbetaling, avgrensetUtbetalingstidslinje),
             skjæringstidspunkt = skjæringstidspunkt,
@@ -150,7 +150,7 @@ internal class SpeilGenerasjonerBuilder(
         )
     }
 
-    private fun mapAnnullertPeriode(vedtaksperiode: VedtaksperiodeUtDto, forrigeBeregnetPeriode: BeregnetPeriode?, generasjon: GenerasjonUtDto): AnnullertPeriode? {
+    private fun mapAnnullertPeriode(vedtaksperiode: VedtaksperiodeUtDto, forrigeBeregnetPeriode: BeregnetPeriode?, generasjon: BehandlingUtDto): AnnullertPeriode? {
         val sisteEndring = generasjon.endringer.last()
         // todo: når alle annullerte generasjoner har en endring som peker på den annullerte utbetalingen så kan vi hente
         // ut annulleringen vha: `annulleringer.single { it.id == sisteEndring.utbetalingId }`
@@ -159,7 +159,7 @@ internal class SpeilGenerasjonerBuilder(
             ?: return null // todo: Forventer å finne en annullering for vedtaksperioden. Det er flere vedtaksperioder som er forkastet, som ikke skulle vært der fordi de ikke er annullert på ekte
         return AnnullertPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
-            generasjonId = generasjon.id,
+            behandlingId = generasjon.id,
             kilde = generasjon.kilde.meldingsreferanseId,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
@@ -195,8 +195,8 @@ internal class SpeilGenerasjonerBuilder(
         )
     }
 
-    private fun dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode: VedtaksperiodeUtDto, generasjon: GenerasjonUtDto): Set<UUID> {
-        return vedtaksperiode.generasjoner.generasjoner
+    private fun dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): Set<UUID> {
+        return vedtaksperiode.behandlinger.behandlinger
             .asSequence()
             .takeWhile { it.id != generasjon.id }
             .plus(generasjon)
@@ -396,7 +396,7 @@ internal class SpeilGenerasjonerBuilder(
     }
 
     private fun mapRadTilSpeilGenerasjon(rad: SpekematDTO.PølsepakkeDTO.PølseradDTO, generasjoner: List<SpeilTidslinjeperiode>): SpeilGenerasjonDTO {
-        val perioder = rad.pølser.mapNotNull { pølse -> generasjoner.firstOrNull { it.generasjonId == pølse.behandlingId } }
+        val perioder = rad.pølser.mapNotNull { pølse -> generasjoner.firstOrNull { it.behandlingId == pølse.behandlingId } }
         return SpeilGenerasjonDTO(
             id = UUID.randomUUID(),
             kildeTilGenerasjon = rad.kildeTilRad,

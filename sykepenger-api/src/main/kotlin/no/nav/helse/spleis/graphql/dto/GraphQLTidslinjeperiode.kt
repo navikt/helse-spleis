@@ -169,8 +169,6 @@ data class GraphQLDag(
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "__typename")
 interface GraphQLTidslinjeperiode {
-    @Deprecated("", ReplaceWith("behandlingId"))
-    val generasjonId: UUID
     val behandlingId: UUID
     val kilde: UUID
     val fom: LocalDate
@@ -187,8 +185,6 @@ interface GraphQLTidslinjeperiode {
 }
 
 data class GraphQLUberegnetPeriode(
-    @Deprecated("", replaceWith = ReplaceWith("behandlingId"))
-    override val generasjonId: UUID,
     override val behandlingId: UUID,
     override val kilde: UUID,
     override val fom: LocalDate,
@@ -223,8 +219,6 @@ data class GraphQLPeriodevilkar(
 }
 
 data class GraphQLBeregnetPeriode(
-    @Deprecated("", replaceWith = ReplaceWith("behandlingId"))
-    override val generasjonId: UUID,
     override val behandlingId: UUID,
     override val kilde: UUID,
     override val fom: LocalDate,

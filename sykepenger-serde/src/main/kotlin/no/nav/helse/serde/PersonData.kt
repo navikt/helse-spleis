@@ -18,15 +18,14 @@ import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.FeriepengeberegnerDto
-import no.nav.helse.dto.GenerasjonTilstandDto
-import no.nav.helse.dto.GenerasjonkildeDto
+import no.nav.helse.dto.BehandlingtilstandDto
+import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.OppdragstatusDto
-import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
 import no.nav.helse.dto.SatstypeDto
@@ -47,9 +46,9 @@ import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
-import no.nav.helse.dto.deserialisering.GenerasjonEndringInnDto
-import no.nav.helse.dto.deserialisering.GenerasjonInnDto
-import no.nav.helse.dto.deserialisering.GenerasjonerInnDto
+import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
+import no.nav.helse.dto.deserialisering.BehandlingInnDto
+import no.nav.helse.dto.deserialisering.BehandlingerInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
@@ -684,7 +683,7 @@ data class PersonData(
         data class VedtaksperiodeData(
             val id: UUID,
             val tilstand: TilstandTypeData,
-            val generasjoner: List<GenerasjonData>,
+            val generasjoner: List<BehandlingData>,
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime
         ) {
@@ -731,7 +730,7 @@ data class PersonData(
                     TilstandTypeData.AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
                     TilstandTypeData.AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING
                 },
-                generasjoner = GenerasjonerInnDto(this.generasjoner.map { it.tilDto() }),
+                behandlinger = BehandlingerInnDto(this.generasjoner.map { it.tilDto() }),
                 opprettet = opprettet,
                 oppdatert = oppdatert
             )
@@ -768,7 +767,7 @@ data class PersonData(
                 SkjønnsmessigFastsettelse
             }
 
-            data class GenerasjonData(
+            data class BehandlingData(
                 val id: UUID,
                 val tilstand: TilstandData,
                 val vedtakFattet: LocalDateTime?,
@@ -776,20 +775,20 @@ data class PersonData(
                 val kilde: KildeData,
                 val endringer: List<EndringData>
             ) {
-                fun tilDto() = GenerasjonInnDto(
+                fun tilDto() = BehandlingInnDto(
                     id = this.id,
                     tilstand = when (tilstand) {
-                        TilstandData.UBEREGNET -> GenerasjonTilstandDto.UBEREGNET
-                        TilstandData.UBEREGNET_OMGJØRING -> GenerasjonTilstandDto.UBEREGNET_OMGJØRING
-                        TilstandData.UBEREGNET_REVURDERING -> GenerasjonTilstandDto.UBEREGNET_REVURDERING
-                        TilstandData.BEREGNET -> GenerasjonTilstandDto.BEREGNET
-                        TilstandData.BEREGNET_OMGJØRING -> GenerasjonTilstandDto.BEREGNET_OMGJØRING
-                        TilstandData.BEREGNET_REVURDERING -> GenerasjonTilstandDto.BEREGNET_REVURDERING
-                        TilstandData.VEDTAK_FATTET -> GenerasjonTilstandDto.VEDTAK_FATTET
-                        TilstandData.REVURDERT_VEDTAK_AVVIST -> GenerasjonTilstandDto.REVURDERT_VEDTAK_AVVIST
-                        TilstandData.VEDTAK_IVERKSATT -> GenerasjonTilstandDto.VEDTAK_IVERKSATT
-                        TilstandData.AVSLUTTET_UTEN_VEDTAK -> GenerasjonTilstandDto.AVSLUTTET_UTEN_VEDTAK
-                        TilstandData.TIL_INFOTRYGD -> GenerasjonTilstandDto.TIL_INFOTRYGD
+                        TilstandData.UBEREGNET -> BehandlingtilstandDto.UBEREGNET
+                        TilstandData.UBEREGNET_OMGJØRING -> BehandlingtilstandDto.UBEREGNET_OMGJØRING
+                        TilstandData.UBEREGNET_REVURDERING -> BehandlingtilstandDto.UBEREGNET_REVURDERING
+                        TilstandData.BEREGNET -> BehandlingtilstandDto.BEREGNET
+                        TilstandData.BEREGNET_OMGJØRING -> BehandlingtilstandDto.BEREGNET_OMGJØRING
+                        TilstandData.BEREGNET_REVURDERING -> BehandlingtilstandDto.BEREGNET_REVURDERING
+                        TilstandData.VEDTAK_FATTET -> BehandlingtilstandDto.VEDTAK_FATTET
+                        TilstandData.REVURDERT_VEDTAK_AVVIST -> BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST
+                        TilstandData.VEDTAK_IVERKSATT -> BehandlingtilstandDto.VEDTAK_IVERKSATT
+                        TilstandData.AVSLUTTET_UTEN_VEDTAK -> BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK
+                        TilstandData.TIL_INFOTRYGD -> BehandlingtilstandDto.TIL_INFOTRYGD
                     },
                     vedtakFattet = this.vedtakFattet,
                     avsluttet = this.avsluttet,
@@ -815,7 +814,7 @@ data class PersonData(
                     val registrert: LocalDateTime,
                     val avsender: AvsenderData
                 ) {
-                    fun tilDto() = GenerasjonkildeDto(
+                    fun tilDto() = BehandlingkildeDto(
                         meldingsreferanseId = this.meldingsreferanseId,
                         innsendt = this.innsendt,
                         registert = this.registrert,
@@ -834,7 +833,7 @@ data class PersonData(
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val dokumentsporing: DokumentsporingData
                 ) {
-                    fun tilDto() = GenerasjonEndringInnDto(
+                    fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
                         tidsstempel = this.tidsstempel,
                         sykmeldingsperiode = PeriodeDto(fom = sykmeldingsperiodeFom, tom = sykmeldingsperiodeTom),

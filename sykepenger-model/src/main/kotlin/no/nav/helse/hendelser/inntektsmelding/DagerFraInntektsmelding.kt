@@ -17,7 +17,7 @@ import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Generasjoner
+import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.påvirkerArbeidsgiverperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -138,7 +138,7 @@ internal class DagerFraInntektsmelding(
     override fun innsendt() = mottatt
     override fun avsender() = ARBEIDSGIVER
 
-    internal fun alleredeHåndtert(generasjoner: Generasjoner) = generasjoner.dokumentHåndtert(dokumentsporing)
+    internal fun alleredeHåndtert(behandlinger: Behandlinger) = behandlinger.dokumentHåndtert(dokumentsporing)
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
         gjenståendeDager.removeAll {gjenstående -> gjenstående <= dato}

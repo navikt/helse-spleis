@@ -5,9 +5,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Generasjon.Generasjontilstand
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Generasjoner
+import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -33,31 +33,31 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
     internal lateinit var skjæringstidspunkt: LocalDate
     internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID>
     internal lateinit var utbetalingstidslinje: Utbetalingstidslinje
-    internal val generasjoner = mutableListOf<Generasjon>()
+    internal val behandlinger = mutableListOf<Behandling>()
     init {
         vedtaksperiode.accept(this)
     }
 
-    data class Generasjon(
+    data class Behandling(
         val id: UUID,
-        val endringer: List<Generasjonendring>,
+        val endringer: List<Behandlingendring>,
         val periode: Periode,
-        val tilstand: Generasjontilstand,
+        val tilstand: Behandlingtilstand,
         val vedtakFattet: LocalDateTime?,
         val avsluttet: LocalDateTime?,
-        val kilde: Generasjonkilde
+        val kilde: Behandlingkilde
     ) {
-        internal enum class Generasjontilstand {
+        internal enum class Behandlingtilstand {
             UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING, VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD
         }
-        data class Generasjonendring(
+        data class Behandlingendring(
             val grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
             val utbetaling: Utbetaling?,
             val periode: Periode,
             val dokumentsporing: Dokumentsporing
         )
 
-        data class Generasjonkilde(
+        data class Behandlingkilde(
            val meldingsreferanseId: UUID,
            val innsendt: LocalDateTime,
            val registert: LocalDateTime,
@@ -83,36 +83,36 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         this.tilstand = tilstand
     }
 
-    override fun preVisitGenerasjon(
+    override fun preVisitBehandling(
         id: UUID,
         tidsstempel: LocalDateTime,
-        tilstand: Generasjoner.Generasjon.Tilstand,
+        tilstand: Behandlinger.Behandling.Tilstand,
         periode: Periode,
         vedtakFattet: LocalDateTime?,
         avsluttet: LocalDateTime?,
-        kilde: Generasjoner.Generasjonkilde
+        kilde: Behandlinger.Behandlingkilde
     ) {
-        this.generasjoner.add(Generasjon(
+        this.behandlinger.add(Behandling(
             id = id,
             endringer = emptyList(),
             periode = periode,
             tilstand = when (tilstand) {
-                is Generasjoner.Generasjon.Tilstand.Uberegnet -> Generasjontilstand.BEREGNET
-                is Generasjoner.Generasjon.Tilstand.UberegnetOmgjøring -> Generasjontilstand.UBEREGNET_OMGJØRING
-                is Generasjoner.Generasjon.Tilstand.UberegnetRevurdering -> Generasjontilstand.UBEREGNET_REVURDERING
-                is Generasjoner.Generasjon.Tilstand.Beregnet -> Generasjontilstand.BEREGNET
-                is Generasjoner.Generasjon.Tilstand.BeregnetOmgjøring -> Generasjontilstand.BEREGNET_OMGJØRING
-                is Generasjoner.Generasjon.Tilstand.BeregnetRevurdering -> Generasjontilstand.BEREGNET_REVURDERING
-                is Generasjoner.Generasjon.Tilstand.VedtakFattet -> Generasjontilstand.VEDTAK_FATTET
-                is Generasjoner.Generasjon.Tilstand.VedtakIverksatt -> Generasjontilstand.VEDTAK_IVERKSATT
-                is Generasjoner.Generasjon.Tilstand.RevurdertVedtakAvvist -> Generasjontilstand.REVURDERT_VEDTAK_AVVIST
-                is Generasjoner.Generasjon.Tilstand.AvsluttetUtenVedtak -> Generasjontilstand.AVSLUTTET_UTEN_VEDTAK
-                is Generasjoner.Generasjon.Tilstand.TilInfotrygd -> Generasjontilstand.TIL_INFOTRYGD
-                is Generasjoner.Generasjon.Tilstand.AnnullertPeriode -> Generasjontilstand.ANNULLERT_PERIODE
+                is Behandlinger.Behandling.Tilstand.Uberegnet -> Behandlingtilstand.BEREGNET
+                is Behandlinger.Behandling.Tilstand.UberegnetOmgjøring -> Behandlingtilstand.UBEREGNET_OMGJØRING
+                is Behandlinger.Behandling.Tilstand.UberegnetRevurdering -> Behandlingtilstand.UBEREGNET_REVURDERING
+                is Behandlinger.Behandling.Tilstand.Beregnet -> Behandlingtilstand.BEREGNET
+                is Behandlinger.Behandling.Tilstand.BeregnetOmgjøring -> Behandlingtilstand.BEREGNET_OMGJØRING
+                is Behandlinger.Behandling.Tilstand.BeregnetRevurdering -> Behandlingtilstand.BEREGNET_REVURDERING
+                is Behandlinger.Behandling.Tilstand.VedtakFattet -> Behandlingtilstand.VEDTAK_FATTET
+                is Behandlinger.Behandling.Tilstand.VedtakIverksatt -> Behandlingtilstand.VEDTAK_IVERKSATT
+                is Behandlinger.Behandling.Tilstand.RevurdertVedtakAvvist -> Behandlingtilstand.REVURDERT_VEDTAK_AVVIST
+                is Behandlinger.Behandling.Tilstand.AvsluttetUtenVedtak -> Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
+                is Behandlinger.Behandling.Tilstand.TilInfotrygd -> Behandlingtilstand.TIL_INFOTRYGD
+                is Behandlinger.Behandling.Tilstand.AnnullertPeriode -> Behandlingtilstand.ANNULLERT_PERIODE
             },
             vedtakFattet = vedtakFattet,
             avsluttet = avsluttet,
-            kilde = Generasjon.Generasjonkilde(
+            kilde = Behandling.Behandlingkilde(
                 meldingsreferanseId = kilde.meldingsreferanseId,
                 innsendt = kilde.innsendt,
                 registert = kilde.registert,
@@ -121,7 +121,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         ))
     }
 
-    override fun preVisitGenerasjonendring(
+    override fun preVisitBehandlingendring(
         id: UUID,
         tidsstempel: LocalDateTime,
         sykmeldingsperiode: Periode,
@@ -131,24 +131,24 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje
     ) {
-        val sisteGenerasjon = this.generasjoner.last()
-        this.generasjoner[this.generasjoner.lastIndex] = sisteGenerasjon.copy(
-            endringer = sisteGenerasjon.endringer.plus(Generasjon.Generasjonendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing))
+        val sisteBehandling = this.behandlinger.last()
+        this.behandlinger[this.behandlinger.lastIndex] = sisteBehandling.copy(
+            endringer = sisteBehandling.endringer.plus(Behandling.Behandlingendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing))
         )
         val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId ?: return
         val utbetalingId = utbetaling!!.inspektør.utbetalingId
         utbetalingIdTilVilkårsgrunnlagId = utbetalingId to vilkårsgrunnlagId
     }
 
-    override fun preVisitGenerasjonkilde(
+    override fun visitBehandlingkilde(
         meldingsreferanseId: UUID,
         innsendt: LocalDateTime,
         registrert: LocalDateTime,
         avsender: Avsender
     ) {
-        val sisteGenerasjon = this.generasjoner.last()
-        this.generasjoner[this.generasjoner.lastIndex] = sisteGenerasjon.copy(
-            kilde = Generasjon.Generasjonkilde(meldingsreferanseId, innsendt, registrert, avsender)
+        val sisteBehandling = this.behandlinger.last()
+        this.behandlinger[this.behandlinger.lastIndex] = sisteBehandling.copy(
+            kilde = Behandling.Behandlingkilde(meldingsreferanseId, innsendt, registrert, avsender)
         )
     }
 

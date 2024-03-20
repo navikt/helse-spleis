@@ -84,19 +84,19 @@ sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_GODKJENNING_REVURDERING : VedtaksperiodetilstandDto()
 }
 
-sealed class GenerasjonTilstandDto {
-    data object UBEREGNET : GenerasjonTilstandDto()
-    data object UBEREGNET_OMGJØRING : GenerasjonTilstandDto()
-    data object UBEREGNET_REVURDERING : GenerasjonTilstandDto()
-    data object BEREGNET : GenerasjonTilstandDto()
-    data object BEREGNET_OMGJØRING : GenerasjonTilstandDto()
-    data object BEREGNET_REVURDERING : GenerasjonTilstandDto()
-    data object VEDTAK_FATTET : GenerasjonTilstandDto()
-    data object REVURDERT_VEDTAK_AVVIST : GenerasjonTilstandDto()
-    data object VEDTAK_IVERKSATT : GenerasjonTilstandDto()
-    data object AVSLUTTET_UTEN_VEDTAK : GenerasjonTilstandDto()
-    data object ANNULLERT_PERIODE : GenerasjonTilstandDto()
-    data object TIL_INFOTRYGD : GenerasjonTilstandDto()
+sealed class BehandlingtilstandDto {
+    data object UBEREGNET : BehandlingtilstandDto()
+    data object UBEREGNET_OMGJØRING : BehandlingtilstandDto()
+    data object UBEREGNET_REVURDERING : BehandlingtilstandDto()
+    data object BEREGNET : BehandlingtilstandDto()
+    data object BEREGNET_OMGJØRING : BehandlingtilstandDto()
+    data object BEREGNET_REVURDERING : BehandlingtilstandDto()
+    data object VEDTAK_FATTET : BehandlingtilstandDto()
+    data object REVURDERT_VEDTAK_AVVIST : BehandlingtilstandDto()
+    data object VEDTAK_IVERKSATT : BehandlingtilstandDto()
+    data object AVSLUTTET_UTEN_VEDTAK : BehandlingtilstandDto()
+    data object ANNULLERT_PERIODE : BehandlingtilstandDto()
+    data object TIL_INFOTRYGD : BehandlingtilstandDto()
 }
 
 data class DokumentsporingDto(
@@ -117,7 +117,7 @@ sealed class DokumenttypeDto {
     data object SkjønnsmessigFastsettelse : DokumenttypeDto()
 }
 
-data class GenerasjonkildeDto(
+data class BehandlingkildeDto(
     val meldingsreferanseId: UUID,
     val innsendt: LocalDateTime,
     val registert: LocalDateTime,

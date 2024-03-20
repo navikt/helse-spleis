@@ -11,8 +11,8 @@ import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.GenerasjonTilstandDto
-import no.nav.helse.dto.GenerasjonkildeDto
+import no.nav.helse.dto.BehandlingtilstandDto
+import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
@@ -44,8 +44,8 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.FeriepengeUtDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
-import no.nav.helse.dto.serialisering.GenerasjonEndringUtDto
-import no.nav.helse.dto.serialisering.GenerasjonUtDto
+import no.nav.helse.dto.serialisering.BehandlingendringUtDto
+import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
@@ -330,43 +330,43 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilstandTypeData.TIL_INFOTRYGD
         VedtaksperiodetilstandDto.TIL_UTBETALING -> TilstandTypeData.TIL_UTBETALING
     },
-    generasjoner = generasjoner.generasjoner.map { it.tilPersonData() },
+    generasjoner = behandlinger.behandlinger.map { it.tilPersonData() },
     opprettet = opprettet,
     oppdatert = oppdatert
 )
-private fun GenerasjonUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData(
+private fun BehandlingUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData(
     id = this.id,
     tilstand = when (this.tilstand) {
-        GenerasjonTilstandDto.ANNULLERT_PERIODE -> error("Forventer ikke å serialisere ${this.tilstand}")
-        GenerasjonTilstandDto.AVSLUTTET_UTEN_VEDTAK -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.AVSLUTTET_UTEN_VEDTAK
-        GenerasjonTilstandDto.BEREGNET -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.BEREGNET
-        GenerasjonTilstandDto.BEREGNET_OMGJØRING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.BEREGNET_OMGJØRING
-        GenerasjonTilstandDto.BEREGNET_REVURDERING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.BEREGNET_REVURDERING
-        GenerasjonTilstandDto.REVURDERT_VEDTAK_AVVIST -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.REVURDERT_VEDTAK_AVVIST
-        GenerasjonTilstandDto.TIL_INFOTRYGD -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.TIL_INFOTRYGD
-        GenerasjonTilstandDto.UBEREGNET -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.UBEREGNET
-        GenerasjonTilstandDto.UBEREGNET_OMGJØRING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.UBEREGNET_OMGJØRING
-        GenerasjonTilstandDto.UBEREGNET_REVURDERING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.UBEREGNET_REVURDERING
-        GenerasjonTilstandDto.VEDTAK_FATTET -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_FATTET
-        GenerasjonTilstandDto.VEDTAK_IVERKSATT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.TilstandData.VEDTAK_IVERKSATT
+        BehandlingtilstandDto.ANNULLERT_PERIODE -> error("Forventer ikke å serialisere ${this.tilstand}")
+        BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.AVSLUTTET_UTEN_VEDTAK
+        BehandlingtilstandDto.BEREGNET -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET
+        BehandlingtilstandDto.BEREGNET_OMGJØRING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_OMGJØRING
+        BehandlingtilstandDto.BEREGNET_REVURDERING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_REVURDERING
+        BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.REVURDERT_VEDTAK_AVVIST
+        BehandlingtilstandDto.TIL_INFOTRYGD -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.TIL_INFOTRYGD
+        BehandlingtilstandDto.UBEREGNET -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET
+        BehandlingtilstandDto.UBEREGNET_OMGJØRING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET_OMGJØRING
+        BehandlingtilstandDto.UBEREGNET_REVURDERING -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.UBEREGNET_REVURDERING
+        BehandlingtilstandDto.VEDTAK_FATTET -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_FATTET
+        BehandlingtilstandDto.VEDTAK_IVERKSATT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.VEDTAK_IVERKSATT
     },
     vedtakFattet = this.vedtakFattet,
     avsluttet = this.avsluttet,
     kilde = this.kilde.tilPersonData(),
     endringer = this.endringer.map { it.tilPersonData() }
 )
-private fun GenerasjonkildeDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.KildeData(
+private fun BehandlingkildeDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.KildeData(
     meldingsreferanseId = this.meldingsreferanseId,
     innsendt = this.innsendt,
     registrert = this.registert,
     avsender = when (this.avsender) {
-        AvsenderDto.ARBEIDSGIVER -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData.ARBEIDSGIVER
-        AvsenderDto.SAKSBEHANDLER -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData.SAKSBEHANDLER
-        AvsenderDto.SYKMELDT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData.SYKMELDT
-        AvsenderDto.SYSTEM -> PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.AvsenderData.SYSTEM
+        AvsenderDto.ARBEIDSGIVER -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.ARBEIDSGIVER
+        AvsenderDto.SAKSBEHANDLER -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SAKSBEHANDLER
+        AvsenderDto.SYKMELDT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYKMELDT
+        AvsenderDto.SYSTEM -> PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData.SYSTEM
     }
 )
-private fun GenerasjonEndringUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.GenerasjonData.EndringData(
+private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData(
     id = id,
     tidsstempel = tidsstempel,
     sykmeldingsperiodeFom = sykmeldingsperiode.fom,

@@ -30,9 +30,9 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val utbetaltEndretEventer = mutableListOf<PersonObserver.UtbetalingEndretEvent>()
     val avsluttetMedVedtakEvent = mutableMapOf<UUID, PersonObserver.AvsluttetMedVedtakEvent>()
     val avsluttetMedVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetMedVedtakEvent>>()
-    val generasjonOpprettetEventer = mutableListOf<PersonObserver.GenerasjonOpprettetEvent>()
-    val generasjonLukketEventer = mutableListOf<PersonObserver.GenerasjonLukketEvent>()
-    val generasjonForkastetEventer = mutableListOf<PersonObserver.GenerasjonForkastetEvent>()
+    val behandlingOpprettetEventer = mutableListOf<PersonObserver.BehandlingOpprettetEvent>()
+    val behandlingLukketEventer = mutableListOf<PersonObserver.BehandlingLukketEvent>()
+    val behandlingForkastetEventer = mutableListOf<PersonObserver.BehandlingForkastetEvent>()
     val avsluttetUtenVedtakEventer = mutableMapOf<UUID, MutableList<PersonObserver.AvsluttetUtenVedtakEvent>>()
     val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
     val vedtaksperiodeVenter = mutableListOf<PersonObserver.VedtaksperiodeVenterEvent>()
@@ -102,16 +102,16 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         avsluttetMedVedtakEventer.getOrPut(event.vedtaksperiodeId) { mutableListOf() }.add(event)
     }
 
-    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
-        generasjonOpprettetEventer.add(event)
+    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
+        behandlingOpprettetEventer.add(event)
     }
 
-    override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
-        generasjonLukketEventer.add(event)
+    override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
+        behandlingLukketEventer.add(event)
     }
 
-    override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
-        generasjonForkastetEventer.add(event)
+    override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
+        behandlingForkastetEventer.add(event)
     }
 
     override fun avsluttetUtenVedtak(event: PersonObserver.AvsluttetUtenVedtakEvent) {

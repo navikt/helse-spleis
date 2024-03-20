@@ -103,7 +103,7 @@ private data class PølseDto(
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
     val status: Pølsestatus,
-    // tingen som gjorde at generasjonen ble opprettet
+    // tingen som gjorde at behandlingen ble opprettet
     val kilde: UUID
 )
 private enum class Pølsestatus { ÅPEN, LUKKET, FORKASTET }

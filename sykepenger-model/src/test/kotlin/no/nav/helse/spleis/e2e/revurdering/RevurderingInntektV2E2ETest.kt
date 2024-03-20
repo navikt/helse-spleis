@@ -27,8 +27,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.spleis.e2e.assertHarHendelseIder
-import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -591,17 +589,17 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         val overstyrInntektHendelseId = UUID.randomUUID()
         håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
 
-        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.generasjoner.last().also { generasjon ->
-            assertNotEquals(overstyrInntektHendelseId, generasjon.kilde.meldingsreferanseId)
-            assertTrue(overstyrInntektHendelseId !in generasjon.endringer.map { it.dokumentsporing }.ider())
+        inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
+            assertNotEquals(overstyrInntektHendelseId, behandling.kilde.meldingsreferanseId)
+            assertTrue(overstyrInntektHendelseId !in behandling.endringer.map { it.dokumentsporing }.ider())
         }
-        inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.generasjoner.last().also { generasjon ->
-            assertEquals(overstyrInntektHendelseId, generasjon.kilde.meldingsreferanseId)
-            assertTrue(overstyrInntektHendelseId !in generasjon.endringer.map { it.dokumentsporing }.ider())
+        inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
+            assertEquals(overstyrInntektHendelseId, behandling.kilde.meldingsreferanseId)
+            assertTrue(overstyrInntektHendelseId !in behandling.endringer.map { it.dokumentsporing }.ider())
         }
-        inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.generasjoner.last().also { generasjon ->
-            assertEquals(overstyrInntektHendelseId, generasjon.kilde.meldingsreferanseId)
-            assertTrue(overstyrInntektHendelseId !in generasjon.endringer.map { it.dokumentsporing }.ider())
+        inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.behandlinger.last().also { behandling ->
+            assertEquals(overstyrInntektHendelseId, behandling.kilde.meldingsreferanseId)
+            assertTrue(overstyrInntektHendelseId !in behandling.endringer.map { it.dokumentsporing }.ider())
         }
     }
 

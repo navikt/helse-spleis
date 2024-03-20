@@ -151,7 +151,7 @@ internal class PersonMediator(
             "fom" to vedtaksperiodeAnnullertEvent.fom,
             "tom" to vedtaksperiodeAnnullertEvent.tom,
             "vedtaksperiodeId" to vedtaksperiodeAnnullertEvent.vedtaksperiodeId,
-            "behandlingId" to vedtaksperiodeAnnullertEvent.generasjonId,
+            "behandlingId" to vedtaksperiodeAnnullertEvent.behandlingId,
             "organisasjonsnummer" to vedtaksperiodeAnnullertEvent.organisasjonsnummer
         )))
     }
@@ -342,11 +342,11 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("vedtaksperiode_forkastet", event.toJsonMap()))
     }
 
-    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
+    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
         queueMessage(JsonMessage.newMessage("behandling_opprettet", mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.generasjonId,
+            "behandlingId" to event.behandlingId,
             "type" to event.type,
             "fom" to event.fom,
             "tom" to event.tom,
@@ -359,20 +359,20 @@ internal class PersonMediator(
         )))
     }
 
-    override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
+    override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
         queueMessage(JsonMessage.newMessage("behandling_forkastet", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.generasjonId,
+            "behandlingId" to event.behandlingId,
             "automatiskBehandling" to event.automatiskBehandling
         )))
     }
 
-    override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
+    override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
         queueMessage(JsonMessage.newMessage("behandling_lukket", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "behandlingId" to event.generasjonId
+            "behandlingId" to event.behandlingId
         )))
     }
 
@@ -380,8 +380,8 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("avsluttet_uten_vedtak", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "generasjonId" to event.generasjonId,
-            "behandlingId" to event.generasjonId,
+            "generasjonId" to event.behandlingId,
+            "behandlingId" to event.behandlingId,
             "fom" to event.periode.start,
             "tom" to event.periode.endInclusive,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
@@ -394,8 +394,8 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("avsluttet_med_vedtak", mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "generasjonId" to event.generasjonId,
-            "behandlingId" to event.generasjonId,
+            "generasjonId" to event.behandlingId,
+            "behandlingId" to event.behandlingId,
             "fom" to event.periode.start,
             "tom" to event.periode.endInclusive,
             "hendelser" to event.hendelseIder,

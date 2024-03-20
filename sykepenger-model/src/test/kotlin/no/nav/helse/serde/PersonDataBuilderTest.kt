@@ -321,13 +321,13 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             assertEquals(1, arbeidsgiver.forkastede.size)
             arbeidsgiver.forkastede[0].vedtaksperiode.also { vedtaksperiode ->
                 assertEquals(VedtaksperiodetilstandDto.TIL_INFOTRYGD, vedtaksperiode.tilstand)
-                assertEquals(3, vedtaksperiode.generasjoner.generasjoner.size)
-                vedtaksperiode.generasjoner.generasjoner[0].also { generasjon ->
-                    assertEquals(AvsenderDto.SYKMELDT, generasjon.kilde.avsender)
-                    assertNull(generasjon.vedtakFattet)
-                    assertNotNull(generasjon.avsluttet)
-                    assertEquals(1, generasjon.endringer.size)
-                    generasjon.endringer[0].also { endring ->
+                assertEquals(3, vedtaksperiode.behandlinger.behandlinger.size)
+                vedtaksperiode.behandlinger.behandlinger[0].also { behandling ->
+                    assertEquals(AvsenderDto.SYKMELDT, behandling.kilde.avsender)
+                    assertNull(behandling.vedtakFattet)
+                    assertNotNull(behandling.avsluttet)
+                    assertEquals(1, behandling.endringer.size)
+                    behandling.endringer[0].also { endring ->
                         assertEquals(5.januar, endring.periode.fom)
                         assertEquals(17.januar, endring.periode.tom)
                         assertEquals(5.januar, endring.sykmeldingsperiode.fom)

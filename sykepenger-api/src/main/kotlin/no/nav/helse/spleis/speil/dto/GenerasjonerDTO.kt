@@ -50,7 +50,7 @@ enum class Tidslinjeperiodetype {
 
 sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val vedtaksperiodeId: UUID
-    abstract val generasjonId: UUID
+    abstract val behandlingId: UUID
     abstract val kilde: UUID
     abstract val fom: LocalDate
     abstract val tom: LocalDate
@@ -94,7 +94,7 @@ private fun LocalDate.format() = format(formatter)
 
 data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
-    override val generasjonId: UUID,
+    override val behandlingId: UUID,
     override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
@@ -130,7 +130,7 @@ data class UberegnetPeriode(
 // Dekker datagrunnlaget vi trenger for å populere både pølsen og _hele_ saksbildet
 data class BeregnetPeriode(
     override val vedtaksperiodeId: UUID,
-    override val generasjonId: UUID,
+    override val behandlingId: UUID,
     override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,
@@ -139,7 +139,7 @@ data class BeregnetPeriode(
     override val periodetype: Tidslinjeperiodetype,
     override val inntektskilde: UtbetalingInntektskilde, // verdien av dette feltet brukes bare for å sjekke !=null i speil
     override val opprettet: LocalDateTime,
-    val generasjonOpprettet: LocalDateTime,
+    val behandlingOpprettet: LocalDateTime,
     override val oppdatert: LocalDateTime,
     override val periodetilstand: Periodetilstand,
     override val skjæringstidspunkt: LocalDate,
@@ -186,7 +186,7 @@ data class BeregnetPeriode(
 
 data class AnnullertPeriode(
     override val vedtaksperiodeId: UUID,
-    override val generasjonId: UUID,
+    override val behandlingId: UUID,
     override val kilde: UUID,
     override val fom: LocalDate,
     override val tom: LocalDate,

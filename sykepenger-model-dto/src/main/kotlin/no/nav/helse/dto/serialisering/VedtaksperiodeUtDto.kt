@@ -13,7 +13,7 @@ data class VedtaksperiodeUtDto(
     val tom: LocalDate,
     val sykmeldingFom: LocalDate,
     val sykmeldingTom: LocalDate,
-    val generasjoner: GenerasjonerUtDto,
+    val behandlinger: BehandlingerUtDto,
     val opprettet: LocalDateTime,
     var oppdatert: LocalDateTime
 )

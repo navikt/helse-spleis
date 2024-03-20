@@ -7,8 +7,7 @@ import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Generasjoner
+import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 
@@ -53,9 +52,9 @@ abstract class SykdomstidslinjeHendelse internal constructor(
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
         && this.meldingsreferanseId() == other.meldingsreferanseId()
 
-    internal fun leggTil(vedtaksperiodeId: UUID, generasjoner: Generasjoner): Boolean {
+    internal fun leggTil(vedtaksperiodeId: UUID, behandlinger: Behandlinger): Boolean {
         håndtertAv.add(vedtaksperiodeId)
-        // return generasjoner.oppdaterDokumentsporing(dokumentsporing())
+        // return behandlinger.oppdaterDokumentsporing(dokumentsporing())
         return true
     }
 

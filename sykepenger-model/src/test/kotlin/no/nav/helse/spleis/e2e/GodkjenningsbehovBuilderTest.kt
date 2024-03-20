@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
-    private fun IdInnhenter.sisteGenerasjonId(orgnr: String) = inspektør(orgnr).vedtaksperioder(this).inspektør.generasjoner.last().id
+    private fun IdInnhenter.sisteBehandlingId(orgnr: String) = inspektør(orgnr).vedtaksperioder(this).inspektør.behandlinger.last().id
 
     @Test
     fun forlengelse() {
@@ -32,7 +32,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             vedtaksperiodeId = 2.vedtaksperiode.id(a1),
             periodeFom = 1.februar,
             periodeTom = 10.februar,
-            generasjonId = 2.vedtaksperiode.sisteGenerasjonId(a1),
+            behandlingId = 2.vedtaksperiode.sisteBehandlingId(a1),
             tags = setOf("Arbeidsgiverutbetaling"),
             periodeType = "FORLENGELSE",
             førstegangsbehandling = false,
@@ -43,10 +43,10 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
                 mapOf("organisasjonsnummer" to a2, "beløp" to 240000.0)
             ),
             perioderMedSammeSkjæringstidspunkt = listOf(
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteGenerasjonId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a2).toString(), "behandlingId" to 2.vedtaksperiode.sisteGenerasjonId(a2).toString(), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a2).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
             )
         )
     }
@@ -95,10 +95,10 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             periodeTom = 28.februar,
             periodeType = "FORLENGELSE",
             førstegangsbehandling = false,
-            generasjonId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.generasjoner.last().id,
+            behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
             perioderMedSammeSkjæringstidspunkt = listOf(
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteGenerasjonId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
             )
         )
     }
@@ -139,8 +139,8 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
                 mapOf("organisasjonsnummer" to a2, "beløp" to 240000.0)
             ),
             perioderMedSammeSkjæringstidspunkt = listOf(
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             )
         )
     }
@@ -208,10 +208,10 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             periodeFom = 1.februar,
             periodeTom = 28.februar,
             førstegangsbehandling = false,
-            generasjonId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.generasjoner.last().id,
+            behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
             perioderMedSammeSkjæringstidspunkt = listOf(
-                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(ORGNUMMER).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(ORGNUMMER).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(ORGNUMMER).toString(), "behandlingId" to 2.vedtaksperiode.sisteGenerasjonId(ORGNUMMER).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(ORGNUMMER).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(ORGNUMMER).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(ORGNUMMER).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(ORGNUMMER).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
             )
         )
     }
@@ -229,9 +229,9 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         utbetalingstype: String = "UTBETALING",
         inntektskilde: String = "EN_ARBEIDSGIVER",
         omregnedeÅrsinntekter: List<Map<String, Any>> = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.reflection { årlig, _, _, _ ->  årlig })),
-        generasjonId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.generasjoner.last().id,
+        behandlingId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().id,
         perioderMedSammeSkjæringstidspunkt: List<Map<String, String>> = listOf(
-            mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteGenerasjonId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+            mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
         )
     ) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
@@ -245,7 +245,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         val actualOrgnummereMedRelevanteArbeidsforhold = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "orgnummereMedRelevanteArbeidsforhold")!!
         val actualKanAvises = hentFelt<Boolean>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "kanAvvises")!!
         val actualOmregnedeÅrsinntekter = hentFelt<List<Map<String, String>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "omregnedeÅrsinntekter")!!
-        val actualGenerasjonId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
+        val actualBehandlingId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
         val actualPerioderMedSammeSkjæringstidspunkt = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
 
         assertTrue(actualtags.containsAll(tags))
@@ -259,7 +259,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         assertEquals(orgnummere, actualOrgnummereMedRelevanteArbeidsforhold)
         assertEquals(kanAvvises, actualKanAvises)
         assertEquals(omregnedeÅrsinntekter, actualOmregnedeÅrsinntekter)
-        assertEquals(generasjonId.toString(), actualGenerasjonId)
+        assertEquals(behandlingId.toString(), actualBehandlingId)
         assertEquals(perioderMedSammeSkjæringstidspunkt, actualPerioderMedSammeSkjæringstidspunkt)
     }
 

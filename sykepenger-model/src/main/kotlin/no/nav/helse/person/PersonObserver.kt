@@ -575,36 +575,36 @@ interface PersonObserver {
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
-        val generasjonId: UUID,
+        val behandlingId: UUID,
         val periode: Periode,
         val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
         val avsluttetTidspunkt: LocalDateTime
     )
 
-    data class GenerasjonLukketEvent(
+    data class BehandlingLukketEvent(
         val fødselsnummer: String,
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
-        val generasjonId: UUID
+        val behandlingId: UUID
     )
 
-    data class GenerasjonForkastetEvent(
+    data class BehandlingForkastetEvent(
         val fødselsnummer: String,
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
-        val generasjonId: UUID,
+        val behandlingId: UUID,
         val automatiskBehandling: Boolean
     )
 
-    data class GenerasjonOpprettetEvent(
+    data class BehandlingOpprettetEvent(
         val fødselsnummer: String,
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
-        val generasjonId: UUID,
+        val behandlingId: UUID,
         val fom: LocalDate,
         val tom: LocalDate,
         val type: Type,
@@ -628,7 +628,7 @@ interface PersonObserver {
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
-        val generasjonId: UUID,
+        val behandlingId: UUID,
         val periode: Periode,
         val hendelseIder: Set<UUID>,
         val skjæringstidspunkt: LocalDate,
@@ -703,7 +703,7 @@ interface PersonObserver {
         val tom: LocalDate,
         val vedtaksperiodeId: UUID,
         val organisasjonsnummer: String,
-        val generasjonId: UUID
+        val behandlingId: UUID
     )
 
     fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {}
@@ -728,9 +728,9 @@ interface PersonObserver {
     fun annullering(event: UtbetalingAnnullertEvent) {}
     fun avsluttetMedVedtak(event: AvsluttetMedVedtakEvent) {}
 
-    fun generasjonLukket(event: GenerasjonLukketEvent) {}
-    fun generasjonForkastet(event: GenerasjonForkastetEvent) {}
-    fun nyGenerasjon(event: GenerasjonOpprettetEvent) {}
+    fun behandlingLukket(event: BehandlingLukketEvent) {}
+    fun behandlingForkastet(event: BehandlingForkastetEvent) {}
+    fun nyBehandling(event: BehandlingOpprettetEvent) {}
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
     fun nyVedtaksperiodeUtbetaling(
         personidentifikator: Personidentifikator,

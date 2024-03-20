@@ -53,7 +53,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SpeilGenerasjonerBuilderTest : AbstractE2ETest() {
+internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
 
     @Test
     fun `periodene viser til overstyring av sykepengegrunnlag i hendelser`() {

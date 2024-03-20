@@ -38,28 +38,28 @@ class Spekemat : PersonObserver {
             }
         )
 
-    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
+    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
         hendelser.add(event)
         arbeidsgivere.getOrPut(event.organisasjonsnummer) { Pølsefabrikk() }
             .nyPølse(
                 Pølse(
                     vedtaksperiodeId = event.vedtaksperiodeId,
-                    behandlingId = event.generasjonId,
+                    behandlingId = event.behandlingId,
                     status = Pølsestatus.ÅPEN,
                     kilde = event.kilde.meldingsreferanseId
                 )
             )
     }
 
-    override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
+    override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
         hendelser.add(event)
         arbeidsgivere.getValue(event.organisasjonsnummer)
-            .oppdaterPølse(event.vedtaksperiodeId, event.generasjonId, Pølsestatus.LUKKET)
+            .oppdaterPølse(event.vedtaksperiodeId, event.behandlingId, Pølsestatus.LUKKET)
     }
 
-    override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
+    override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
         hendelser.add(event)
         arbeidsgivere.getValue(event.organisasjonsnummer)
-            .oppdaterPølse(event.vedtaksperiodeId, event.generasjonId, Pølsestatus.FORKASTET)
+            .oppdaterPølse(event.vedtaksperiodeId, event.behandlingId, Pølsestatus.FORKASTET)
     }
 }

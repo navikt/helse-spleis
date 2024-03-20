@@ -20,51 +20,51 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     private val arbeidsgivere get() = arbeidsgivereMap.values
     private val IM = Inntektsmeldinger()
 
-    private val generasjonerOpprettetEventer = mutableListOf<PersonObserver.GenerasjonOpprettetEvent>()
-    private val generasjonerLukketEventer = mutableListOf<PersonObserver.GenerasjonLukketEvent>()
-    private val generasjonerForkastetEventer = mutableListOf<PersonObserver.GenerasjonForkastetEvent>()
+    private val behandlingOpprettetEventer = mutableListOf<PersonObserver.BehandlingOpprettetEvent>()
+    private val behandlingLukketEventer = mutableListOf<PersonObserver.BehandlingLukketEvent>()
+    private val behandlingForkastetEventer = mutableListOf<PersonObserver.BehandlingForkastetEvent>()
 
     init {
         person.addObserver(this)
     }
 
-    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
-        check(generasjonerOpprettetEventer.none { it.generasjonId == event.generasjonId }) {
-            "generasjon ${event.generasjonId} har allerede sendt ut opprettet event"
+    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
+        check(behandlingOpprettetEventer.none { it.behandlingId == event.behandlingId }) {
+            "behandling ${event.behandlingId} har allerede sendt ut opprettet event"
         }
-        generasjonerOpprettetEventer.add(event)
+        behandlingOpprettetEventer.add(event)
     }
 
-    override fun generasjonLukket(event: PersonObserver.GenerasjonLukketEvent) {
-        bekreftAtGenerasjonFinnes(event.generasjonId)
-        check(generasjonerLukketEventer.none { it.generasjonId == event.generasjonId }) {
-            "generasjon ${event.generasjonId} har allerede sendt ut lukket event"
-        }
-    }
-
-    override fun generasjonForkastet(event: PersonObserver.GenerasjonForkastetEvent) {
-        bekreftAtGenerasjonFinnes(event.generasjonId)
-        check(generasjonerForkastetEventer.none { it.generasjonId == event.generasjonId }) {
-            "generasjon ${event.generasjonId} har allerede sendt ut forkastet event"
+    override fun behandlingLukket(event: PersonObserver.BehandlingLukketEvent) {
+        bekreftAtBehandlingFinnes(event.behandlingId)
+        check(behandlingLukketEventer.none { it.behandlingId == event.behandlingId }) {
+            "behandling ${event.behandlingId} har allerede sendt ut lukket event"
         }
     }
 
-    private fun bekreftAtGenerasjonFinnes(generasjonId: UUID) {
-        val generasjonVarsletOmFør = { id: UUID ->
-            generasjonerOpprettetEventer.singleOrNull { it.generasjonId == id } != null
+    override fun behandlingForkastet(event: PersonObserver.BehandlingForkastetEvent) {
+        bekreftAtBehandlingFinnes(event.behandlingId)
+        check(behandlingForkastetEventer.none { it.behandlingId == event.behandlingId }) {
+            "behandling ${event.behandlingId} har allerede sendt ut forkastet event"
+        }
+    }
+
+    private fun bekreftAtBehandlingFinnes(behandlingId: UUID) {
+        val behandlingVarsletOmFør = { id: UUID ->
+            behandlingOpprettetEventer.singleOrNull { it.behandlingId == id } != null
         }
         // gjelder tester som tar utgangspunkt i en serialisert personjson
-        val generasjonFinnesHosArbeidsgiver = { id: UUID ->
+        val behandlingFinnesHosArbeidsgiver = { id: UUID ->
             person.inspektør.vedtaksperioder().any { (_, perioder) ->
                 perioder.any { periode ->
-                    periode.inspektør.generasjoner.any { generasjon ->
-                        generasjon.id == generasjonId
+                    periode.inspektør.behandlinger.any { behandling ->
+                        behandling.id == behandlingId
                     }
                 }
             }
         }
-        check(generasjonVarsletOmFør(generasjonId) || generasjonFinnesHosArbeidsgiver(generasjonId)) {
-            "generasjon $generasjonId forkastes uten at det er registrert et opprettet event"
+        check(behandlingVarsletOmFør(behandlingId) || behandlingFinnesHosArbeidsgiver(behandlingId)) {
+            "behandling $behandlingId forkastes uten at det er registrert et opprettet event"
         }
     }
 
@@ -110,7 +110,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     internal fun bekreftIngenUgyldigeSituasjoner() {
         bekreftIngenOverlappende()
-        bekreftAvsluttetUtenUtbetalingHarLukketGenerasjon()
+        bekreftAvsluttetUtenUtbetalingHarLukketBehandling()
         validerSykdomshistorikk()
         IM.bekreftEntydighåndtering()
     }
@@ -141,14 +141,14 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             }
     }
 
-    private fun bekreftAvsluttetUtenUtbetalingHarLukketGenerasjon() {
+    private fun bekreftAvsluttetUtenUtbetalingHarLukketBehandling() {
         person.inspektør.vedtaksperioder()
             .flatMap { (_, perioder) -> perioder }
             .map { it.inspektør }
             .filter { it.tilstand == Vedtaksperiode.AvsluttetUtenUtbetaling }
             .all {
-                it.generasjoner.last().let { sisteGenerasjon ->
-                    sisteGenerasjon.avsluttet != null && sisteGenerasjon.tilstand == VedtaksperiodeInspektør.Generasjon.Generasjontilstand.AVSLUTTET_UTEN_VEDTAK
+                it.behandlinger.last().let { sisteBehandling ->
+                    sisteBehandling.avsluttet != null && sisteBehandling.tilstand == VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
                 }
             }
     }

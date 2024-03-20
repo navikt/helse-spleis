@@ -11,7 +11,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Generasjoner
+import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -111,9 +111,9 @@ class Inntektsmelding(
         refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
     }
 
-    internal fun leggTil(generasjoner: Generasjoner): Boolean {
+    internal fun leggTil(behandlinger: Behandlinger): Boolean {
         håndtertInntekt = true
-        return generasjoner.oppdaterDokumentsporing(dokumentsporing)
+        return behandlinger.oppdaterDokumentsporing(dokumentsporing)
     }
 
 

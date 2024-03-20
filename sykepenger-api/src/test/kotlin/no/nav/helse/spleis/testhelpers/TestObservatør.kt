@@ -28,7 +28,7 @@ internal class TestObservatør : PersonObserver {
         ventendeReplays.clear()
     }
 
-    override fun nyGenerasjon(event: PersonObserver.GenerasjonOpprettetEvent) {
+    override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
         sisteVedtaksperiode = event.vedtaksperiodeId
     }
 
