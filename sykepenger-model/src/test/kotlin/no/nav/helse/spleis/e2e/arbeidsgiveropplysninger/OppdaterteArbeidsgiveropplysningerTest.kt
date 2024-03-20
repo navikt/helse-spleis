@@ -215,15 +215,29 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender oppdatert forespørsel når vi vi får inn ny forrigeInntekt`() {
+    fun `Sender oppdatert forespørsel når vi vi får inn ny inntekt på en forrige periode`() {
         nyPeriode(1.januar til 31.januar)
         nyPeriode(10.februar til 10.mars)
 
-        val im = håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertForventetFeil(
             forklaring = "ønsker å sende ut en oppdatert forespørsel for andre vedtaksperiode med oppdatert forrige inntekt",
             nå = {
                 assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+                val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                    organisasjonsnummer = ORGNUMMER,
+                    vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+                    skjæringstidspunkt = 10.februar,
+                    sykmeldingsperioder = listOf(10.februar til 10.mars),
+                    egenmeldingsperioder = emptyList(),
+                    førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 10.februar)),
+                    forespurteOpplysninger = listOf(
+                        PersonObserver.Inntekt(forslag = null),
+                        PersonObserver.Refusjon(forslag = emptyList())
+                    )
+                )
+
+                assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())
             },
             ønsket = {
                 assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -232,7 +246,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                     organisasjonsnummer = ORGNUMMER,
                     vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
                     skjæringstidspunkt = 10.februar,
-                    sykmeldingsperioder = listOf(1.januar til 31.januar, 10.februar til 10.mars),
+                    sykmeldingsperioder = listOf(10.februar til 10.mars),
                     egenmeldingsperioder = emptyList(),
                     førsteFraværsdager = listOf(
                         mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 10.februar),
