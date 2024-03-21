@@ -393,17 +393,16 @@ internal abstract class AbstractE2ETest {
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt(status)
     }
-    protected fun håndterYtelserTilUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
+    protected fun håndterYtelserTilGodkjent() {
         håndterYtelserTilGodkjenning()
         håndterUtbetalingsgodkjenning()
-        try {
-            håndterUtbetalt(status)
-        } catch (err: IllegalStateException) {
-            // tillater manglende utbetalingsbehov pga "utbetalinger uten utbetalinger"
-        }
+    }
+    protected fun håndterYtelserTilUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT): Utbetalingbehov {
+        håndterYtelserTilGodkjent()
+        return håndterUtbetalt(status)
     }
     protected fun håndterAnnullerUtbetaling(behov: Utbetalingbehov) {
-        fabrikker.getValue(behov.orgnummer).lagAnnullering(behov.oppdrag.first { it.fagområde == "SPREF" }.fagsystemId)
+        fabrikker.getValue(behov.orgnummer).lagAnnullering(behov.utbetalingId)
             .håndter(Person::håndter)
     }
 

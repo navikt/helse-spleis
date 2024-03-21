@@ -88,7 +88,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     fun `annullering oppretter ny behandling som forkastes`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
-            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.utbetalingId)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id
@@ -118,7 +118,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingId)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id

@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
@@ -19,9 +18,9 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
     fun `annullere tidligere utbetaling på samme arbeidsgiver`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
-            val fagsystemId = inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.fagsystemId()
+            val utbetalingId = inspektør.utbetalinger.single().inspektør.utbetalingId
             nyttVedtak(1.mars, 31.mars)
-            assertThrows<IllegalStateException> { håndterAnnullering(fagsystemId) }
+            assertThrows<IllegalStateException> { håndterAnnullering(utbetalingId) }
         }
     }
 
@@ -30,7 +29,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
         }
-        val fagsystemId = inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.fagsystemId()
+        val utbetalingId = inspektør.utbetalinger.single().inspektør.utbetalingId
         a2 {
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
             håndterInntektsmelding(listOf(1.mars til 16.mars))
@@ -41,7 +40,7 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a1 {
-            håndterAnnullering(fagsystemId)
+            håndterAnnullering(utbetalingId)
             assertIngenFunksjonelleFeil()
             Assertions.assertEquals(Utbetalingtype.ANNULLERING, inspektør.utbetalinger.last().inspektør.type)
         }

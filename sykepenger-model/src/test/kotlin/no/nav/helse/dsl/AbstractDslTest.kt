@@ -302,8 +302,8 @@ internal abstract class AbstractDslTest {
         this { håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent) }
     protected fun String.håndterUtbetalt(status: Oppdragstatus) =
         this { håndterUtbetalt(status) }
-    protected fun String.håndterAnnullering(fagsystemId: String) =
-        this { håndterAnnullering(fagsystemId) }
+    protected fun String.håndterAnnullering(utbetalingId: UUID) =
+        this { håndterAnnullering(utbetalingId) }
     protected fun String.håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
         this { håndterIdentOpphørt(nyttFnr, nyAktørId) }
     protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
@@ -435,8 +435,8 @@ protected fun håndterInntektsmeldingPortal(
         bareÈnArbeidsgiver(a1).håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent)
     internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT, orgnummer: String = a1) =
         bareÈnArbeidsgiver(a1).håndterUtbetalt(status)
-    protected fun håndterAnnullering(fagsystemId: String) =
-        bareÈnArbeidsgiver(a1).håndterAnnullering(fagsystemId)
+    protected fun håndterAnnullering(utbetalingId: UUID) =
+        bareÈnArbeidsgiver(a1).håndterAnnullering(utbetalingId)
     protected fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
         bareÈnArbeidsgiver(a1).håndterIdentOpphørt(nyttFnr, nyAktørId)
     protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =

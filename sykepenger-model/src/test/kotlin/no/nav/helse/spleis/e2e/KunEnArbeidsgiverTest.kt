@@ -636,10 +636,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 10.februar))
         håndterSøknad(Sykdom(5.februar, 10.februar, 100.prosent))
-        håndterAnnullering(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
-        håndterAnnullering(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullering(inspektør.utbetalinger[0].inspektør.utbetalingId)
+        håndterAnnullering(inspektør.utbetalinger[0].inspektør.utbetalingId)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterAnnullering(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullering(inspektør.utbetalinger[0].inspektør.utbetalingId)
 
         assertTrue(inspektør.utbetalinger[0].inspektør.erUtbetalt)
         assertTrue(inspektør.utbetalinger[1].inspektør.erAnnullering)

@@ -1515,7 +1515,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterUtbetalt()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-        håndterYtelserTilUtbetalt()
+        val sisteutbetaling = håndterYtelserTilUtbetalt()
 
         generasjoner {
             assertEquals(3, size)
@@ -1538,7 +1538,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
             }
         }
 
-        håndterAnnullerUtbetaling(januarutbetaling)
+        håndterAnnullerUtbetaling(sisteutbetaling)
         håndterUtbetalt()
 
         generasjoner {

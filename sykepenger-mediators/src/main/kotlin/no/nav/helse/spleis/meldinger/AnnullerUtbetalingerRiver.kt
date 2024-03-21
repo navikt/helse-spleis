@@ -18,11 +18,11 @@ internal class AnnullerUtbetalingerRiver(
             "aktørId",
             "fødselsnummer",
             "organisasjonsnummer",
-            "fagsystemId",
             "saksbehandler",
             "saksbehandler.epostaddresse",
             "saksbehandler.ident",
         )
+        message.interestedIn("fagsystemId", "utbetalingId")
     }
 
     override fun createMessage(packet: JsonMessage) = AnnulleringMessage(packet)

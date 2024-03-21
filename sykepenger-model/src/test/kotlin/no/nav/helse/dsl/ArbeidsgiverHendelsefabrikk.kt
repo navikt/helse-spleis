@@ -420,13 +420,14 @@ internal class ArbeidsgiverHendelsefabrikk(
             overføringstidspunkt = LocalDateTime.now()
         )
 
-    internal fun lagAnnullering(fagsystemId: String) =
+    internal fun lagAnnullering(utbetalingId: UUID) =
         AnnullerUtbetaling(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
-            fagsystemId = fagsystemId,
+            fagsystemId = null,
+            utbetalingId = utbetalingId,
             saksbehandlerIdent = "Ola Nordmann",
             saksbehandlerEpost = "tbd@nav.no",
             opprettet = LocalDateTime.now()

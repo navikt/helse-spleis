@@ -62,7 +62,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         assertEquals(4, inspektør.utbetalinger.size)
         val marsutbetalingen = inspektør.utbetaling(1).inspektør
-        håndterAnnullering(marsutbetalingen.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        håndterAnnullering(marsutbetalingen.utbetalingId)
 
         assertEquals(5, inspektør.utbetalinger.size)
         val annulleringen = inspektør.utbetaling(4).inspektør

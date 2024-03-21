@@ -150,7 +150,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
     fun `annullere iverksatt vedtak`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
-            håndterAnnullering(inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            håndterAnnullering(inspektør.utbetalinger.single().inspektør.utbetalingId)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
@@ -176,7 +176,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyttVedtak(1.januar, 31.januar)
             forlengVedtak(1.februar, 28.februar)
             nyttVedtak(10.mars, 31.mars, arbeidsgiverperiode = listOf(10.mars til 25.mars))
-            håndterAnnullering(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            håndterAnnullering(inspektør.utbetalinger.last().inspektør.utbetalingId)
             assertEquals(4, inspektør.utbetalinger.size)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
@@ -237,7 +237,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-            håndterAnnullering(inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            håndterAnnullering(inspektør.utbetalinger.single().inspektør.utbetalingId)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(ANNULLERT_PERIODE, behandlinger.last().tilstand)
@@ -251,7 +251,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyttVedtak(1.januar, 31.januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
-            håndterAnnullering(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            håndterAnnullering(inspektør.utbetalinger.first().inspektør.utbetalingId)
             assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetaling(1).inspektør.tilstand)
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.isMissingOrNull
+import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.IHendelseMediator
 
 internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet) {
@@ -11,7 +13,8 @@ internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet)
     private val aktørId = packet["aktørId"].asText()
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val fagsystemId = packet["fagsystemId"].asText().trim()
+    private val fagsystemId = packet["fagsystemId"].takeUnless(JsonNode::isMissingOrNull)?.asText()?.trim()
+    private val utbetalingId = packet["utbetalingId"].takeUnless(JsonNode::isMissingOrNull)?.asText()?.trim()?.toUUID()
     private val saksbehandler = Saksbehandler.fraJson(packet["saksbehandler"])
     private val annullerUtbetaling
         get() = AnnullerUtbetaling(
@@ -20,6 +23,7 @@ internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet)
             fødselsnummer,
             organisasjonsnummer,
             fagsystemId,
+            utbetalingId,
             saksbehandler.ident,
             saksbehandler.epostadresse,
             opprettet

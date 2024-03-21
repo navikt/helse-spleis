@@ -12,14 +12,22 @@ class AnnullerUtbetaling(
     aktørId: String,
     fødselsnummer: String,
     organisasjonsnummer: String,
-    private val fagsystemId: String,
+    private val fagsystemId: String?,
+    private val utbetalingId: UUID?,
     private val saksbehandlerIdent: String,
     private val saksbehandlerEpost: String,
     internal val opprettet: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
-    fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
+    init {
+        check(fagsystemId != null || utbetalingId != null) {
+            "fagsystemId eller utbetalingId må være satt"
+        }
+    }
+
+    fun erRelevant(utbetalingId: UUID, fagsystemId: String) =
+        utbetalingId == this.utbetalingId || this.fagsystemId == fagsystemId
 
     fun erAutomatisk() = this.saksbehandlerIdent == "Automatisk behandlet"
 

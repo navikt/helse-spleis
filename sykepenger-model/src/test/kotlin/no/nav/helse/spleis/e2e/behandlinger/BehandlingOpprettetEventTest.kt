@@ -84,7 +84,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
             forlengVedtak(1.februar, 28.februar)
-            håndterAnnullering(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            håndterAnnullering(inspektør.utbetaling(0).inspektør.utbetalingId)
             val behandlingOpprettetEventer = observatør.behandlingOpprettetEventer
             assertEquals(4, behandlingOpprettetEventer.size)
             assertEquals(PersonObserver.BehandlingOpprettetEvent.Type.Søknad, behandlingOpprettetEventer[0].type)

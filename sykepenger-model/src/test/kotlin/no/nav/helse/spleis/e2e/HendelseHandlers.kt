@@ -768,7 +768,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 
 internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    fagsystemId: String = inspektør.arbeidsgiverOppdrag.last().fagsystemId(),
+    utbetalingId: UUID = inspektør.utbetalinger.last().inspektør.utbetalingId,
     opprettet: LocalDateTime = LocalDateTime.now()
 ) {
     AnnullerUtbetaling(
@@ -776,7 +776,8 @@ internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = orgnummer,
-        fagsystemId = fagsystemId,
+        fagsystemId = null,
+        utbetalingId = utbetalingId,
         saksbehandlerIdent = "Ola Nordmann",
         saksbehandlerEpost = "tbd@nav.no",
         opprettet = opprettet

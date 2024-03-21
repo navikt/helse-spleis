@@ -743,7 +743,7 @@ internal class UtbetalingTest {
     fun `kan forkaste annullert utbetaling`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje)
-        val annullering = annuller(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()) ?: fail { "Kunne ikke annullere" }
+        val annullering = annuller(utbetaling) ?: fail { "Kunne ikke annullere" }
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullering)))
     }
 
@@ -752,7 +752,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 32.NAV).betale()
         val utbetaling = opprettUtbetaling(tidslinje.kutt(31.januar))
         val annullert = opprettUtbetaling(tidslinje.kutt(17.februar), tidligere = utbetaling).let {
-            annuller(it, it.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            annuller(it)
         } ?: fail { "Kunne ikke annullere" }
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullert)))
     }
@@ -816,14 +816,6 @@ internal class UtbetalingTest {
         val annullering = annuller(utbetaling) ?: fail { "forventet utbetaling" }
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
         assertTrue(annullering.inspektør.personOppdrag.last().erOpphør())
-    }
-
-    @Test
-    fun `annullere på fagsystemId for personoppdrag`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)).betale()
-        val utbetaling = opprettUtbetaling(tidslinje)
-        val annullering = annuller(utbetaling, utbetaling.inspektør.personOppdrag.fagsystemId())
-        assertNull(annullering) { "Det er ikke støttet å annullere på personoppdrag sin fagsystemId pt. Annullering bør skje på utbetalingId" }
     }
 
     @Test
@@ -1174,8 +1166,11 @@ internal class UtbetalingTest {
             utbetaling.håndter(it)
         }
 
-    private fun annuller(utbetaling: Utbetaling, fagsystemId: String = utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()) =
-        utbetaling.annuller(AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", fagsystemId, "Z123456", "tbd@nav.no", LocalDateTime.now()))?.also {
+    private fun annuller(utbetaling: Utbetaling, utbetalingId: UUID = utbetaling.inspektør.utbetalingId) =
+        utbetaling.annuller(
+            hendelse = AnnullerUtbetaling(UUID.randomUUID(), "aktør", "fnr", "orgnr", null, utbetalingId, "Z123456", "tbd@nav.no", LocalDateTime.now()),
+            alleUtbetalinger = listOf(utbetaling)
+        )?.also {
             it.opprett(aktivitetslogg)
         }
 

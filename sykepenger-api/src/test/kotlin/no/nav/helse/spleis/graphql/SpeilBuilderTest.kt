@@ -247,7 +247,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
             listOf(1.januar til 16.januar),
             inntektdato = 1.februar
         )
-        håndterYtelserTilUtbetalt()
+        håndterYtelserTilGodkjent()
         håndterYtelserTilGodkjenning()
 
         val januarVilkårsgrunnlagId = (speilApi().arbeidsgivere.first().generasjoner.last().perioder.last() as BeregnetPeriode).vilkårsgrunnlagId

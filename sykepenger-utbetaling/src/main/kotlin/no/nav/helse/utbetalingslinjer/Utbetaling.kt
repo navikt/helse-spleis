@@ -34,6 +34,7 @@ import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
@@ -196,9 +197,21 @@ class Utbetaling private constructor(
         godkjenn(hendelse, hendelse.vurdering())
     }
 
-    fun annuller(hendelse: AnnullerUtbetaling): Utbetaling? {
-        if (!hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId())) return null
-        return opphør(hendelse)
+    fun annuller(hendelse: AnnullerUtbetaling, alleUtbetalinger: List<Utbetaling>): Utbetaling? {
+        val korrelerendeUtbetaling = alleUtbetalinger.firstOrNull { hendelse.erRelevant(it.id, it.arbeidsgiverOppdrag.fagsystemId()) } ?: return null
+        if (korrelerendeUtbetaling.korrelasjonsId != this.korrelasjonsId) return null
+
+        val aktiveUtbetalinger = alleUtbetalinger.aktive()
+
+        val sisteUtbetalteForUtbetaling = checkNotNull(aktiveUtbetalinger.singleOrNull { it.hørerSammen(this) }) {
+            "Det er gjort forsøk på å annullere en utbetaling som ikke lenger er aktiv"
+        }
+
+        check(sisteUtbetalteForUtbetaling === aktiveUtbetalinger.last()) {
+            "Det er ikke tillatt å annullere annen utbetaling enn den som er siste aktive"
+        }
+
+        return sisteUtbetalteForUtbetaling.opphør(hendelse)
     }
 
     private fun opphør(hendelse: IAktivitetslogg) =

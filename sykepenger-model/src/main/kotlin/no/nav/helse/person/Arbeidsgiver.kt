@@ -564,14 +564,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun nyAnnullering(hendelse: AnnullerUtbetaling, utbetalingSomSkalAnnulleres: Utbetaling): Utbetaling? {
-        val aktiveUtbetalinger = utbetalinger.aktive()
-        val sisteUtbetalteForUtbetaling = checkNotNull(aktiveUtbetalinger.singleOrNull { it.hørerSammen(utbetalingSomSkalAnnulleres) }) {
-            "Det er gjort forsøk på å annullere en utbetaling som ikke lenger er aktiv"
-        }
-        val annullering = sisteUtbetalteForUtbetaling.annuller(hendelse) ?: return null
-        check(sisteUtbetalteForUtbetaling === aktiveUtbetalinger.last()) {
-            "Det er ikke tillatt å annullere annen utbetaling enn den som er siste aktive"
-        }
+        val annullering = utbetalingSomSkalAnnulleres.annuller(hendelse, utbetalinger.toList()) ?: return null
         nyUtbetaling(hendelse, annullering)
         annullering.håndter(hendelse)
         return annullering
