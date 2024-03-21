@@ -19,6 +19,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AndreYtelser
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Fridag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavDag
@@ -514,7 +515,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(forventetUtbetaling, observatør.utbetalingMedUtbetalingEventer.first().dager)
 
         val forventetRevurdering =
-            (1.januar til 10.januar).associateWith { Fridag } +
+            (1.januar til 10.januar).associateWith { AndreYtelser } +
             (11.januar til 26.januar).associateWith { ArbeidsgiverperiodeDag } +
             (27.januar til 28.januar).associateWith { NavHelgDag } +
             (29.januar til 31.januar).associateWith { NavDag }
