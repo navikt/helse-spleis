@@ -1,0 +1,88 @@
+{
+  "skjemaVersjon": 292,
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "id": "9c204944-fda3-4bb7-949b-be8473a7dcab",
+          "korrelasjonsId": "korrelasjonsId-1",
+          "type": "UTBETALING",
+          "status": "UTBETALT"
+        },
+        {
+          "id": "9229f3b8-8172-4bcd-a189-bf3c786e922b",
+          "korrelasjonsId": "korrelasjonsId-1",
+          "type": "ANNULLERING",
+          "status": "ANNULLERT"
+        },
+        {
+          "id": "d289572c-5def-4a05-8280-401511df6fbe",
+          "korrelasjonsId": "korrelasjonsId-2",
+          "type": "UTBETALING",
+          "status": "UTBETALT"
+        },
+        {
+          "id": "f63cfed7-3f21-434b-a1c2-1e3c2d101041",
+          "korrelasjonsId": "korrelasjonsId-2",
+          "type": "ANNULLERING",
+          "status": "GODKJENT_UTEN_UTBETALING"
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "REVURDERING_FEILET",
+            "generasjoner": [
+              {
+                "id": "6a1df165-fdfb-402e-9fb2-244b12dacda7",
+                "tilstand": "VEDTAK_IVERKSATT",
+                "endringer": [
+                  {
+                    "id": "e4dbf7d1-8e59-4472-88f1-55f2fd2e057a",
+                    "utbetalingId": "9c204944-fda3-4bb7-949b-be8473a7dcab",
+                    "vilkårsgrunnlagId": "a4a0efc7-09f4-49fb-90ec-b1da1e5a331e"
+                  }
+                ]
+              },
+              {
+                "id": "93bb1178-434f-4aee-892b-9048cb54c919",
+                "tilstand": "ANNULLERT_PERIODE",
+                "avsluttet": "i forgårs",
+                "endringer": [
+                  {
+                    "id": "994b994d-c38a-479b-ba8d-28f9d3886e27",
+                    "tidsstempel": "mandag",
+                    "utbetalingId": "9229f3b8-8172-4bcd-a189-bf3c786e922b",
+                    "vilkårsgrunnlagId": "a4a0efc7-09f4-49fb-90ec-b1da1e5a331e"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVSLUTTET",
+            "generasjoner": [
+              {
+                "id": "b080cc09-9034-4526-9643-37970cc1526d",
+                "tilstand": "VEDTAK_IVERKSATT",
+                "endringer": [
+                  {
+                    "id": "b21ae713-55c2-4a69-9c63-cdabde904cd2",
+                    "utbetalingId": "d289572c-5def-4a05-8280-401511df6fbe"
+                  }
+                ]
+              },
+              {
+                "id": "f3dab061-e6d9-45d0-96f8-f5c031e92151",
+                "tilstand": "TIL_INFOTRYGD",
+                "avsluttet": "i forgårs"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
