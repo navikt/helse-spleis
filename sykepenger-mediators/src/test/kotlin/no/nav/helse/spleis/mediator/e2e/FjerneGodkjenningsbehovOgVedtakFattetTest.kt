@@ -26,7 +26,6 @@ internal class FjerneGodkjenningsbehovOgVedtakFattetTest: AbstractEndToEndMediat
             "skjæringstidspunkt": "2018-01-01",
             "hendelser": ["$søknadId"],
             "vedtaksperiodeId": "<uuid>",
-            "generasjonId": "<uuid>",
             "behandlingId": "<uuid>",
             "avsluttetTidspunkt": "<timestamp>"
         }

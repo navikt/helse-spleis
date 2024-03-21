@@ -33,7 +33,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "@event_name": "avsluttet_med_vedtak",
             "vedtakFattetTidspunkt": "<timestamp>",
             "vedtaksperiodeId": "<uuid>",
-            "generasjonId": "<uuid>",
             "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",
@@ -86,7 +85,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "@event_name": "avsluttet_med_vedtak",
             "vedtakFattetTidspunkt": "<timestamp>",
             "vedtaksperiodeId": "<uuid>",
-            "generasjonId": "<uuid>",
             "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",
@@ -145,7 +143,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "skjæringstidspunkt": "2018-01-03",
             "hendelser": ["$søknadId"],
             "vedtaksperiodeId": "<uuid>",
-            "generasjonId": "<uuid>",
             "behandlingId": "<uuid>",
             "avsluttetTidspunkt": "<timestamp>"
         }
@@ -183,7 +180,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "@event_name": "avsluttet_med_vedtak",
             "vedtakFattetTidspunkt": "<timestamp>",
             "vedtaksperiodeId": "<uuid>",
-            "generasjonId": "<uuid>",
             "behandlingId": "<uuid>",
             "utbetalingId": "<uuid>",
             "aktørId": "$AKTØRID",

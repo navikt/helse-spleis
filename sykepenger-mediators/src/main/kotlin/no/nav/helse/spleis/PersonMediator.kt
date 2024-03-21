@@ -380,7 +380,6 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("avsluttet_uten_vedtak", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "generasjonId" to event.behandlingId,
             "behandlingId" to event.behandlingId,
             "fom" to event.periode.start,
             "tom" to event.periode.endInclusive,
@@ -394,7 +393,6 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("avsluttet_med_vedtak", mutableMapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
-            "generasjonId" to event.behandlingId,
             "behandlingId" to event.behandlingId,
             "fom" to event.periode.start,
             "tom" to event.periode.endInclusive,
