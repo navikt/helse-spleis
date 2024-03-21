@@ -385,7 +385,8 @@ internal data class SpannerPersonDto(
                 val endringer: List<EndringData>
             ) {
                 internal enum class TilstandData {
-                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING, VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, TIL_INFOTRYGD
+                    UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
+                    VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD
                 }
                 internal enum class AvsenderData {
                     SYKMELDT, ARBEIDSGIVER, SAKSBEHANDLER, SYSTEM
@@ -902,7 +903,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverD
 private fun BehandlingUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData(
     id = this.id,
     tilstand = when (this.tilstand) {
-        BehandlingtilstandDto.ANNULLERT_PERIODE -> error("Forventer ikke å serialisere ${this.tilstand}")
+        BehandlingtilstandDto.ANNULLERT_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.ANNULLERT_PERIODE
         BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.AVSLUTTET_UTEN_VEDTAK
         BehandlingtilstandDto.BEREGNET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET
         BehandlingtilstandDto.BEREGNET_OMGJØRING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.TilstandData.BEREGNET_OMGJØRING
