@@ -106,6 +106,7 @@ internal class TestPerson(
 
     private fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
         forrigeHendelse = this
+        this.register(ugyldigeSituasjonerObservatør)
         person.håndter(this)
         behovsamler.registrerBehov(forrigeHendelse)
         return this

@@ -330,19 +330,22 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
-        val hendelse = dager.bitAvInntektsmelding(periode)
-        håndterDager(hendelse)
-        dager.validerArbeidsgiverperiode(periode, finnArbeidsgiverperiode())
+        val hendelse = dager.bitAvInntektsmelding(periode) ?: dager.tomBitAvInntektsmelding()
+        håndterDager(hendelse) {
+            dager.valider(periode)
+            dager.validerArbeidsgiverperiode(periode, finnArbeidsgiverperiode())
+        }
     }
 
     private fun håndterDagerUtenEndring(dager: DagerFraInntektsmelding) {
         val hendelse = dager.tomBitAvInntektsmelding()
-        håndterDager(hendelse)
+        håndterDager(hendelse) {
+            dager.valider(periode)
+        }
     }
 
-    private fun håndterDager(hendelse: DagerFraInntektsmelding.BitAvInntektsmelding?) {
-        if (hendelse == null) return
-        oppdaterHistorikk(hendelse)
+    private fun håndterDager(hendelse: DagerFraInntektsmelding.BitAvInntektsmelding, validering: () -> Unit) {
+        oppdaterHistorikk(hendelse, validering)
     }
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -597,8 +600,8 @@ internal class Vedtaksperiode private constructor(
         periodeEtter?.lagreTidsnæreopplysninger(hendelse)
     }
 
-    private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse) {
-        behandlinger.håndterEndring(person, arbeidsgiver, hendelse)
+    private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse, validering: () -> Unit = {}) {
+        behandlinger.håndterEndring(person, arbeidsgiver, hendelse, validering)
     }
 
     private fun lagreTidsnæreopplysninger(hendelse: IAktivitetslogg) {
@@ -644,8 +647,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding) {
-        dager.valider(periode)
-        if (dager.harFunksjonelleFeilEllerVerre()) return
         val korrigertInntektsmeldingId = behandlinger.sisteInntektsmeldingId()
         val opprinneligAgp = finnArbeidsgiverperiode()
         if (dager.erKorrigeringForGammel(opprinneligAgp)) {
@@ -653,6 +654,9 @@ internal class Vedtaksperiode private constructor(
         } else {
             håndterDager(dager)
         }
+
+        if (dager.harFunksjonelleFeilEllerVerre()) return
+
         val nyAgp = finnArbeidsgiverperiode()
         if (opprinneligAgp != null && !opprinneligAgp.klinLik(nyAgp)) {
             dager.varsel(RV_IM_24, "Ny agp er utregnet til å være ulik tidligere utregnet agp i ${tilstand.type.name}")
@@ -1562,13 +1566,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            dager.valider(vedtaksperiode.periode)
-            if (dager.harFunksjonelleFeilEllerVerre()) {
-                vedtaksperiode.forkast(dager)
-                return
-            }
             vedtaksperiode.håndterDager(dager)
-            if(vedtaksperiode.sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
+            if (dager.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager)
+            if (vedtaksperiode.sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
                 dager.info("Det er egenmeldingsdager fra søknaden på sykdomstidlinjen, selv etter at inntektsmeldingen har oppdatert historikken. Undersøk hvorfor inntektsmeldingen ikke har overskrevet disse. Da er kanskje denne aktørId-en til hjelp: ${vedtaksperiode.aktørId}.")
             }
             if (vedtaksperiode.forventerInntekt()) return
@@ -2186,11 +2186,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
-            dager.valider(vedtaksperiode.periode)
-            if (dager.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager)
-
             vedtaksperiode.håndterDager(dager)
-
+            if (dager.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager)
             vedtaksperiode.person.igangsettOverstyring(
                 Revurderingseventyr.arbeidsgiverperiode(dager, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )

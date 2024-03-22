@@ -193,7 +193,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertFunksjonellFeil(RV_IM_23)
-        assertEquals(Dokumentsporing.søknad(søknad), inspektør.hendelser(1.vedtaksperiode).single())
+        assertEquals(setOf(Dokumentsporing.søknad(søknad), Dokumentsporing.inntektsmeldingDager(im)), inspektør.hendelser(1.vedtaksperiode).toSet())
         assertTrue(observatør.inntektsmeldingHåndtert.isEmpty())
         assertEquals(im, observatør.inntektsmeldingIkkeHåndtert.single())
     }

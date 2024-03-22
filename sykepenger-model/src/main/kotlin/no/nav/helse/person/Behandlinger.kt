@@ -230,7 +230,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
 
-    fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
+    fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, validering: () -> Unit) {
         val nyBehandling = behandlinger.last().håndterEndring(arbeidsgiver, hendelse)?.also {
             leggTilNyBehandling(it)
         }
@@ -240,6 +240,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         // fordi når vedtaksperioden skal håndtere sykefraværstilfelle-signalet så avhenger den at behandlingen er på plass
         person.sykdomshistorikkEndret(hendelse)
         // 🤯 </OBS! NB!> 🤯
+
+        validering()
+
         nyBehandling?.vurderLukkeAutomatisk(arbeidsgiver, hendelse)
     }
 
