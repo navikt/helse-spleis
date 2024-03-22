@@ -220,11 +220,12 @@ internal class DagerFraInntektsmelding(
         return arbeidsgiverperiode.overlapperMed(periode)
     }
 
-    internal fun valider(periode: Periode) {
+    internal fun valider(periode: Periode, gammelAgp: Arbeidsgiverperiode? = null) {
         if (!skalValideresAv(periode)) return
         if (harOpphørAvNaturalytelser) funksjonellFeil(Varselkode.RV_IM_7)
         if (harFlereInntektsmeldinger) varsel(Varselkode.RV_IM_22)
         validerBegrunnelseForReduksjonEllerIkkeUtbetalt()
+        validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp)
     }
 
     private fun validerBegrunnelseForReduksjonEllerIkkeUtbetalt() {
@@ -265,14 +266,20 @@ internal class DagerFraInntektsmelding(
         return sykmeldingsperioder.mapNotNull { it.overlappendePeriode(overlappsperiode) }
     }
 
+    private fun validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp: Arbeidsgiverperiode?) {
+        if (!overstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp)) return
+        varsel(Varselkode.RV_IM_24, "Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 10 dager")
+    }
+    private fun overstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp: Arbeidsgiverperiode?): Boolean {
+        if (opprinneligPeriode == null) return false
+        val periodeMellom = gammelAgp?.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start) ?: return false
+        return periodeMellom.count() > MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER
+    }
+
     internal fun erKorrigeringForGammel(gammelAgp: Arbeidsgiverperiode?): Boolean {
         if (opprinneligPeriode == null) return true
         if (gammelAgp == null) return false
-        val periodeMellom = gammelAgp.omsluttendePeriode?.periodeMellom(opprinneligPeriode.start)
-        if (periodeMellom != null && periodeMellom.count() > MAKS_ANTALL_DAGER_MELLOM_TIDLIGERE_OG_NY_AGP_FOR_HÅNDTERING_AV_DAGER) {
-            varsel(Varselkode.RV_IM_24, "Ignorerer dager fra inntektsmelding fordi perioden mellom gammel agp og opplyst agp er mer enn 10 dager")
-            return true
-        }
+        if (overstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp)) return true
         info("Håndterer dager fordi perioden mellom gammel agp og opplyst agp er mindre enn 10 dager")
         return false
     }

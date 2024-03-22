@@ -100,7 +100,6 @@ internal class FjerneGodkjenningsbehovTest: AbstractDslTest() {
             håndterKanIkkeBehandlesHer(1.vedtaksperiode, automatisert = false)
             assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
             assertEquals(IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
-            assertVarsel(RV_UT_1, 1.vedtaksperiode.filter())
         }
     }
 

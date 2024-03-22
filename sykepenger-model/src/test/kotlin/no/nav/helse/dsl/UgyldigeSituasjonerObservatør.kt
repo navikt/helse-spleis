@@ -63,9 +63,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             "Det er opprettet et varsel utenom Vedtaksperiode"
         }
         val vedtaksperiodeId = UUID.fromString(vedtaksperiodekontekst.kontekstMap.getValue("vedtaksperiodeId"))
-        /*check(gjeldendeBehandlingstatus[vedtaksperiodeId] == Behandlingstatus.ÅPEN) {
+        check(gjeldendeBehandlingstatus[vedtaksperiodeId] == Behandlingstatus.ÅPEN) {
             "Det er opprettet et varsel utenom en åpen behandling"
-        }*/
+        }
     }
 
     override fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {

@@ -340,7 +340,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterDagerUtenEndring(dager: DagerFraInntektsmelding) {
         val hendelse = dager.tomBitAvInntektsmelding()
         håndterDager(hendelse) {
-            dager.valider(periode)
+            dager.valider(periode, finnArbeidsgiverperiode())
         }
     }
 
@@ -537,7 +537,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
-        oppdaterHistorikk(hendelse)
+        oppdaterHistorikk(hendelse) {
+            // ingen validering å gjøre :(
+        }
         igangsettOverstyringAvTidslinje(hendelse)
     }
 
@@ -590,21 +592,22 @@ internal class Vedtaksperiode private constructor(
         tilstand.entering(this, event)
     }
 
-    private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
+    private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse, validering: () -> Unit) {
         val rettEtterFørEndring = arbeidsgiver.finnVedtaksperiodeRettEtter(this)
 
-        oppdaterHistorikk(hendelse as SykdomshistorikkHendelse)
+        oppdaterHistorikk(hendelse as SykdomshistorikkHendelse, validering)
 
         lagreTidsnæreopplysninger(hendelse)
         val periodeEtter = rettEtterFørEndring ?: arbeidsgiver.finnVedtaksperiodeRettEtter(this)
+        periodeEtter?.behandlinger?.sikreNyBehandling(arbeidsgiver, hendelse)
         periodeEtter?.lagreTidsnæreopplysninger(hendelse)
     }
 
-    private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse, validering: () -> Unit = {}) {
+    private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse, validering: () -> Unit) {
         behandlinger.håndterEndring(person, arbeidsgiver, hendelse, validering)
     }
 
-    private fun lagreTidsnæreopplysninger(hendelse: IAktivitetslogg) {
+    private fun lagreTidsnæreopplysninger(hendelse: Hendelse) {
         val periodeFør = arbeidsgiver.finnVedtaksperiodeFør(this)?.takeUnless { it.erVedtaksperiodeRettFør(this) }
         val oppholdsperiodeMellom = periodeFør?.sykdomstidslinje?.oppholdsperiodeMellom(this.sykdomstidslinje)
 
@@ -617,9 +620,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
-        oppdaterHistorikk(søknad)
-        søknad.valider(vilkårsgrunnlag, jurist)
-        if (manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) søknad.funksjonellFeil(RV_SV_2)
+        oppdaterHistorikk(søknad) {
+            søknad.valider(vilkårsgrunnlag, jurist)
+            if (manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) søknad.funksjonellFeil(RV_SV_2)
+        }
         if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
@@ -638,9 +642,10 @@ internal class Vedtaksperiode private constructor(
         if (søknad.sendtTilGosys()) return søknad.funksjonellFeil(RV_SØ_30)
         if (søknad.utenlandskSykmelding()) return søknad.funksjonellFeil(RV_SØ_29)
         else {
-            søknad.valider(vilkårsgrunnlag, jurist)
             søknad.info("Søknad har trigget en revurdering")
-            oppdaterHistorikk(søknad)
+            oppdaterHistorikk(søknad) {
+                søknad.valider(vilkårsgrunnlag, jurist)
+            }
         }
 
         person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode))
@@ -2069,7 +2074,6 @@ internal class Vedtaksperiode private constructor(
                 if (utbetalingsavgjørelse.automatisert) {
                     return utbetalingsavgjørelse.info("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck")
                 }
-                utbetalingsavgjørelse.varsel(RV_UT_1)
             }
             vedtaksperiode.tilstand(utbetalingsavgjørelse, when {
                 vedtaksperiode.behandlinger.erAvvist() -> RevurderingFeilet
@@ -2199,16 +2203,16 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             if (!vedtaksperiode.forventerInntekt()) return
-            håndterRevurdering(hendelse) {
-                infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
-            }
-
             if (forkastPåGrunnAvInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) {
                 hendelse.funksjonellFeil(RV_IT_3)
                 vedtaksperiode.person.forkastAuu(hendelse, vedtaksperiode)
                 return
             }
 
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, hendelse)
+            håndterRevurdering(hendelse) {
+                infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
+            }
             hendelse.varsel(RV_IT_38)
             vedtaksperiode.person.igangsettOverstyring(
                 Revurderingseventyr.infotrygdendring(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
@@ -2269,9 +2273,9 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
-            revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
-            vedtaksperiode.jurist.`fvl § 35 ledd 1`()
             vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering)
+            vedtaksperiode.jurist.`fvl § 35 ledd 1`()
+            revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)
         }
 

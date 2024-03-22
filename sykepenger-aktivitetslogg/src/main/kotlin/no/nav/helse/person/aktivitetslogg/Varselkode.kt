@@ -205,7 +205,7 @@ enum class Varselkode(
     RV_SI_7("Simulering kom frem til et annet totalbeløp. Kontroller beløpet til utbetaling", avviklet = true),
 
     // UT: Utbetaling
-    RV_UT_1("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres"),
+    RV_UT_1("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres", avviklet = true),
     RV_UT_2("Utbetalingen ble gjennomført, men med advarsel"),
     RV_UT_3("Feil ved utbetalingstidslinjebygging"),
     RV_UT_4("Finner ingen utbetaling å annullere", avviklet = true),

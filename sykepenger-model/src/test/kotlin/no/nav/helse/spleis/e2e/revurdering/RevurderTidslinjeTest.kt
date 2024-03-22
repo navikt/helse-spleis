@@ -673,7 +673,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING,
             REVURDERING_FEILET
         )
-        assertVarsel(RV_UT_1, 1.vedtaksperiode.filter())
     }
 
     @Test
