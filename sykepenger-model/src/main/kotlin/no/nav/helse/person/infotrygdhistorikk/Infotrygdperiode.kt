@@ -5,6 +5,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InfotrygdperiodeVisitor
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -18,6 +21,35 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
     internal open fun utbetalingstidslinje(): Utbetalingstidslinje = Utbetalingstidslinje()
 
     internal abstract fun accept(visitor: InfotrygdperiodeVisitor)
+
+    internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
+        validerHarBetaltTidligere(periode, aktivitetslogg)
+        validerOverlapp(aktivitetslogg, periode)
+        validerNyereOpplysninger(aktivitetslogg, organisasjonsnummer, periode)
+    }
+
+
+    private fun validerHarBetaltTidligere(periode: Periode, aktivitetslogg: IAktivitetslogg) {
+        if (!harBetaltTidligere(periode)) return
+        aktivitetslogg.funksjonellFeil(Varselkode.RV_IT_37)
+    }
+
+    private fun harBetaltTidligere(other: Periode): Boolean {
+        val periodeMellom = periode.periodeMellom(other.start) ?: return false
+        return periodeMellom.count() < Vedtaksperiode.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
+    }
+
+    private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+        if (!this.periode.overlapperMed(periode)) return
+        aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
+        aktivitetslogg.varsel(Varselkode.RV_IT_3)
+    }
+
+    private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
+        if (!gjelder(organisasjonsnummer)) return
+        if (this.periode.start <= periode.endInclusive) return
+        aktivitetslogg.varsel(Varselkode.RV_IT_1)
+    }
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kilde: Hendelseskilde): Sykdomstidslinje {
         if (!gjelder(orgnummer)) return sykdomstidslinje

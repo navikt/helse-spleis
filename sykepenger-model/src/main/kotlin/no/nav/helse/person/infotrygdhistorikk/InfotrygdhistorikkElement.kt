@@ -108,8 +108,7 @@ class InfotrygdhistorikkElement private constructor(
     internal fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, organisasjonsnummer: String): Boolean {
         validerBetaltRettFør(periode, aktivitetslogg)
         aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.filterIsInstance<Utbetalingsperiode>()
-            .forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode) }
+        perioder.forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode) }
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 

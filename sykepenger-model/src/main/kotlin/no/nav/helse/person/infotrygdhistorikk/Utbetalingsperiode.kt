@@ -48,35 +48,6 @@ abstract class Utbetalingsperiode(
         builder.addNAVdag(dato, økonomi.inntekt(inntekt, `6G` = INGEN, refusjonsbeløp = INGEN))
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
-        validerHarBetaltTidligere(periode, aktivitetslogg)
-        validerOverlapp(aktivitetslogg, periode)
-        validerNyereOpplysninger(aktivitetslogg, organisasjonsnummer, periode)
-    }
-
-
-    private fun validerHarBetaltTidligere(periode: Periode, aktivitetslogg: IAktivitetslogg) {
-        if (!harBetaltTidligere(periode)) return
-        aktivitetslogg.funksjonellFeil(Varselkode.RV_IT_37)
-    }
-
-    private fun harBetaltTidligere(other: Periode): Boolean {
-        val periodeMellom = periode.periodeMellom(other.start) ?: return false
-        return periodeMellom.count() < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
-    }
-
-    private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
-        if (!this.periode.overlapperMed(periode)) return
-        aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
-        aktivitetslogg.varsel(RV_IT_3)
-    }
-
-    private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
-        if (!gjelder(organisasjonsnummer)) return
-        if (this.periode.start <= periode.endInclusive) return
-        aktivitetslogg.varsel(RV_IT_1)
-    }
-
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
 
     override fun funksjoneltLik(other: Infotrygdperiode): Boolean {
