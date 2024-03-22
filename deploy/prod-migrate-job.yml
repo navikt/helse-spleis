@@ -12,6 +12,9 @@ spec:
   resources:
     limits:
       memory: 4096Mi
+      cpu: 4000m
+    requests:
+      cpu: 200m
   kafka:
     pool: nav-prod
   secureLogs:
