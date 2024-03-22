@@ -51,11 +51,11 @@ internal class SpeilGenerasjonerBuilder(
     }
 
     private fun mapPerioder(): List<SpeilTidslinjeperiode> {
-        val aktive = arbeidsgiverUtDto.vedtaksperioder.flatMap { mapVedtaksperiode(false, it) }
-        val forkastede = arbeidsgiverUtDto.forkastede.flatMap { mapVedtaksperiode(true, it.vedtaksperiode) }
+        val aktive = arbeidsgiverUtDto.vedtaksperioder.flatMap { mapVedtaksperiode(it) }
+        val forkastede = arbeidsgiverUtDto.forkastede.flatMap { mapVedtaksperiode(it.vedtaksperiode) }
         return aktive + forkastede
     }
-    private fun mapVedtaksperiode(erForkastet: Boolean, vedtaksperiode: VedtaksperiodeUtDto): List<SpeilTidslinjeperiode> {
+    private fun mapVedtaksperiode(vedtaksperiode: VedtaksperiodeUtDto): List<SpeilTidslinjeperiode> {
         var forrigeGenerasjon: SpeilTidslinjeperiode? = null
         return vedtaksperiode.behandlinger.behandlinger.mapNotNull { generasjon ->
             when (generasjon.tilstand) {
@@ -68,13 +68,9 @@ internal class SpeilGenerasjonerBuilder(
                 BehandlingtilstandDto.UBEREGNET,
                 BehandlingtilstandDto.UBEREGNET_OMGJØRING,
                 BehandlingtilstandDto.UBEREGNET_REVURDERING,
-                BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> mapUberegnetPeriode(erForkastet, vedtaksperiode, generasjon)
-                BehandlingtilstandDto.TIL_INFOTRYGD -> when (val forrige = forrigeGenerasjon) {
-                    // todo: må mappe TIL_INFOTRYGD som annullert periode så lenge annullerte perioder ikke har link til annulleringutbetalingen
-                    is BeregnetPeriode -> mapAnnullertPeriode(vedtaksperiode, forrige, generasjon)
-                    else -> mapTilInfotrygdperiode(vedtaksperiode, forrige, generasjon)
-                }
-                BehandlingtilstandDto.ANNULLERT_PERIODE -> mapAnnullertPeriode(vedtaksperiode, null, generasjon)
+                BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK -> mapUberegnetPeriode(vedtaksperiode, generasjon)
+                BehandlingtilstandDto.TIL_INFOTRYGD -> mapTilInfotrygdperiode(vedtaksperiode, forrigeGenerasjon, generasjon)
+                BehandlingtilstandDto.ANNULLERT_PERIODE -> mapAnnullertPeriode(vedtaksperiode, generasjon)
             }.also {
                 forrigeGenerasjon = it
             }
@@ -83,10 +79,10 @@ internal class SpeilGenerasjonerBuilder(
 
     private fun mapTilInfotrygdperiode(vedtaksperiode: VedtaksperiodeUtDto, forrigePeriode: SpeilTidslinjeperiode?, generasjon: BehandlingUtDto): UberegnetPeriode? {
         if (forrigePeriode == null) return null // todo: her kan vi mappe perioder som tas ut av Speil
-        return mapUberegnetPeriode(true, vedtaksperiode, generasjon, Periodetilstand.Annullert)
+        return mapUberegnetPeriode(vedtaksperiode, generasjon, Periodetilstand.Annullert)
     }
 
-    private fun mapUberegnetPeriode(erForkastet: Boolean, vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto, periodetilstand: Periodetilstand? = null): UberegnetPeriode {
+    private fun mapUberegnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto, periodetilstand: Periodetilstand? = null): UberegnetPeriode {
         val sisteEndring = generasjon.endringer.last()
         val sykdomstidslinje = SykdomstidslinjeBuilder(sisteEndring.sykdomstidslinje).build()
         return UberegnetPeriode(
@@ -98,7 +94,7 @@ internal class SpeilGenerasjonerBuilder(
             sammenslåttTidslinje = sykdomstidslinje.merge(emptyList()),
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
             inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
-            erForkastet = erForkastet,
+            erForkastet = false,
             opprettet = generasjon.endringer.first().tidsstempel,
             oppdatert = sisteEndring.tidsstempel,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
@@ -150,13 +146,9 @@ internal class SpeilGenerasjonerBuilder(
         )
     }
 
-    private fun mapAnnullertPeriode(vedtaksperiode: VedtaksperiodeUtDto, forrigeBeregnetPeriode: BeregnetPeriode?, generasjon: BehandlingUtDto): AnnullertPeriode? {
+    private fun mapAnnullertPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): AnnullertPeriode {
         val sisteEndring = generasjon.endringer.last()
-        // todo: når alle annullerte generasjoner har en endring som peker på den annullerte utbetalingen så kan vi hente
-        // ut annulleringen vha: `annulleringer.single { it.id == sisteEndring.utbetalingId }`
-        val annulleringen = annulleringer.singleOrNull { it.id == sisteEndring.utbetalingId }
-            ?: forrigeBeregnetPeriode?.let { annulleringer.singleOrNull { it.annullerer(forrigeBeregnetPeriode.utbetaling.korrelasjonsId) } }
-            ?: return null // todo: Forventer å finne en annullering for vedtaksperioden. Det er flere vedtaksperioder som er forkastet, som ikke skulle vært der fordi de ikke er annullert på ekte
+        val annulleringen = annulleringer.single { it.id == sisteEndring.utbetalingId }
         return AnnullertPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,
