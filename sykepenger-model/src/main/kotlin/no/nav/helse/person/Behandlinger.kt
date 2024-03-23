@@ -3,13 +3,13 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.BehandlingkildeDto
-import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
+import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.BehandlingInnDto
+import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
 import no.nav.helse.dto.deserialisering.BehandlingerInnDto
-import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
+import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.BehandlingerUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -22,15 +22,15 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.avvist
-import no.nav.helse.person.Dokumentsporing.Companion.ider
-import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
-import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
-import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.jurist
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
+import no.nav.helse.person.Dokumentsporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
+import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
+import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
@@ -81,6 +81,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         visitor.postVisitBehandlinger(behandlinger)
     }
 
+    internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt()
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje()
 
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
@@ -230,6 +231,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
 
+    fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: (Periode) -> LocalDate) {
+        behandlinger.last().beregnSkjæringstidspunkt(beregnSkjæringstidspunkt)
+    }
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, validering: () -> Unit) {
         val nyBehandling = behandlinger.last().håndterEndring(arbeidsgiver, hendelse)?.also {
             leggTilNyBehandling(it)
@@ -339,6 +343,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val utbetaling: Utbetaling?,
             val dokumentsporing: Dokumentsporing,
             val sykdomstidslinje: Sykdomstidslinje,
+            val skjæringstidspunkt: LocalDate
         ) {
 
             internal constructor(
@@ -347,8 +352,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing: Dokumentsporing,
                 sykdomstidslinje: Sykdomstidslinje,
                 sykmeldingsperiode: Periode,
-                periode: Periode
-            ) : this(UUID.randomUUID(), LocalDateTime.now(), sykmeldingsperiode, periode, grunnlagsdata, utbetaling, dokumentsporing, sykdomstidslinje)
+                periode: Periode,
+                skjæringstidspunkt: LocalDate
+            ) : this(UUID.randomUUID(), LocalDateTime.now(), sykmeldingsperiode, periode, grunnlagsdata, utbetaling, dokumentsporing, sykdomstidslinje, skjæringstidspunkt)
 
             companion object {
                 val List<Endring>.dokumentsporing get() = map { it.dokumentsporing }.toSet()
@@ -361,9 +367,24 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         grunnlagsdata = dto.vilkårsgrunnlagId?.let { grunnlagsdata.getValue(it) },
                         utbetaling = dto.utbetalingId?.let { utbetalinger.getValue(it) },
                         dokumentsporing = Dokumentsporing.gjenopprett(dto.dokumentsporing),
-                        sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje)
+                        sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje),
+                        skjæringstidspunkt = LocalDate.MIN
                     )
                 }
+            }
+
+            internal fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: (Periode) -> LocalDate): Endring? {
+                val nyttSkjæringstidspunkt = beregnSkjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
+                if (nyttSkjæringstidspunkt == this.skjæringstidspunkt) return null
+                return Endring(
+                    grunnlagsdata = null,
+                    utbetaling = null,
+                    dokumentsporing = this.dokumentsporing,
+                    sykdomstidslinje = this.sykdomstidslinje,
+                    sykmeldingsperiode = this.sykmeldingsperiode,
+                    periode = this.periode,
+                    skjæringstidspunkt = nyttSkjæringstidspunkt
+                )
             }
 
             override fun toString() = "$periode - $dokumentsporing - ${sykdomstidslinje.toShortString()}${utbetaling?.let { " - $it" } ?: ""}"
@@ -388,7 +409,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = dokument,
                 sykdomstidslinje = sykdomstidslinje,
                 sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = periode
+                periode = periode,
+                skjæringstidspunkt = this.skjæringstidspunkt
             )
             internal fun kopierUtenUtbetaling() = Endring(
                 grunnlagsdata = null,
@@ -396,7 +418,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje = this.sykdomstidslinje,
                 sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = this.periode
+                periode = this.periode,
+                skjæringstidspunkt = this.skjæringstidspunkt
             )
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement) = Endring(
                 grunnlagsdata = grunnlagsdata,
@@ -404,7 +427,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje = this.sykdomstidslinje,
                 sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = this.periode
+                periode = this.periode,
+                skjæringstidspunkt = this.skjæringstidspunkt
             )
             internal fun kopierDokument(dokument: Dokumentsporing) = Endring(
                 grunnlagsdata = this.grunnlagsdata,
@@ -412,7 +436,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = dokument,
                 sykdomstidslinje = this.sykdomstidslinje,
                 sykmeldingsperiode = this.sykmeldingsperiode,
-                periode = this.periode
+                periode = this.periode,
+                skjæringstidspunkt = this.skjæringstidspunkt
             )
 
             fun lagreTidsnæreInntekter(
@@ -459,6 +484,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
         }
 
+        internal fun skjæringstidspunkt() = endringer.last().skjæringstidspunkt
         internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
 
         override fun equals(other: Any?): Boolean {
@@ -637,6 +663,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             endringer.add(endring)
         }
 
+        fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: (Periode) -> LocalDate) {
+            return tilstand.beregnSkjæringstidspunkt(this, beregnSkjæringstidspunkt)
+        }
         fun håndterEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Behandling? {
             return tilstand.håndterEndring(this, arbeidsgiver, hendelse)
         }
@@ -644,6 +673,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         fun vurderLukkeAutomatisk(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
             return tilstand.vurderLukkeAutomatisk(this, arbeidsgiver, hendelse)
         }
+
+        private fun oppdaterMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt: (Periode) -> LocalDate) {
+            val nyEndring = endringer.last().beregnSkjæringstidspunkt(beregnSkjæringstidspunkt) ?: return
+            endringer.add(nyEndring)
+        }
+
         private fun håndtereEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Endring {
             val oppdatertPeriode = hendelse.oppdaterFom(endringer.last().periode)
             val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(oppdatertPeriode)
@@ -795,7 +830,8 @@ enum class Periodetilstand {
                             dokumentsporing = dokumentsporing,
                             sykdomstidslinje = sykdomstidslinje,
                             sykmeldingsperiode = sykmeldingsperiode,
-                            periode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette behandling på tom sykdomstidslinje" }
+                            periode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette behandling på tom sykdomstidslinje" },
+                            skjæringstidspunkt = LocalDate.MIN // vi vet ikke hva skjæringstidspunktet er på dette punktet.
                         )
                     ),
                     avsluttet = null,
@@ -860,6 +896,9 @@ enum class Periodetilstand {
                 behandling.tilstand(TilInfotrygd, hendelse)
                 return null
             }
+            fun beregnSkjæringstidspunkt(behandling: Behandling, beregnSkjæringstidspunkt: (Periode) -> LocalDate) {
+                /* gjør ingenting by default */
+            }
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
@@ -910,6 +949,13 @@ enum class Periodetilstand {
                 }
 
                 override fun kanForkastes(behandling: Behandling, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) = true
+
+                override fun beregnSkjæringstidspunkt(
+                    behandling: Behandling,
+                    beregnSkjæringstidspunkt: (Periode) -> LocalDate
+                ) {
+                    behandling.oppdaterMedNyttSkjæringstidspunkt(beregnSkjæringstidspunkt)
+                }
 
                 override fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Behandling? {
                     behandling.oppdaterMedEndring(arbeidsgiver, hendelse)
@@ -1007,6 +1053,18 @@ enum class Periodetilstand {
                 override fun forkastVedtaksperiode(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Behandling? {
                     behandling.gjeldende.forkastUtbetaling(hendelse)
                     return super.forkastVedtaksperiode(behandling, arbeidsgiver, hendelse)
+                }
+
+                override fun beregnSkjæringstidspunkt(
+                    behandling: Behandling,
+                    beregnSkjæringstidspunkt: (Periode) -> LocalDate
+                ) {
+                    /*
+                    * gjør ingenting her; hvis endringen har hendt på en periode -før- denne så skal
+                    *   ikke denne være Beregnet. Hvis endringen har hendt på en periode -etter- denne så har ikke
+                    *   det noe å si for skjæringstidspunktet vi har fra før. Det er ugyldig situasjon om endringen skal ha hendt på *denne*
+                    *   perioden fordi da skulle den ikke vært Beregnet
+                    */
                 }
 
                 override fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Behandling? {
@@ -1152,6 +1210,13 @@ enum class Periodetilstand {
 
                 override fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean {
                     return true
+                }
+
+                override fun beregnSkjæringstidspunkt(
+                    behandling: Behandling,
+                    beregnSkjæringstidspunkt: (Periode) -> LocalDate
+                ) {
+                    /* bør vi endre dette her? */
                 }
 
                 override fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse): Behandling {

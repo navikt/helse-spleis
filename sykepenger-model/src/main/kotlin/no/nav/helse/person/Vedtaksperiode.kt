@@ -120,7 +120,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_35
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_36
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_37
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
@@ -187,7 +186,7 @@ internal class Vedtaksperiode private constructor(
     private val periode get() = behandlinger.periode()
     private val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
     private val jurist get() = behandlinger.jurist(arbeidsgiverjurist, id)
-    private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
+    private val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val hendelseIder get() = behandlinger.dokumentsporing()
 
@@ -2422,6 +2421,9 @@ internal class Vedtaksperiode private constructor(
             it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt(NullObserver)
         }
 
+        internal fun List<Vedtaksperiode>.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt: (Periode) -> LocalDate) {
+            forEach { it.behandlinger.beregnSkjæringstidspunkt(beregnSkjæringstidspunkt) }
+        }
         internal fun List<Vedtaksperiode>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
             return map { it.skjæringstidspunkt }.toSet()
         }
