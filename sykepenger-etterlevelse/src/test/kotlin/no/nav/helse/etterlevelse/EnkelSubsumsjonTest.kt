@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test
 
 internal class EnkelSubsumsjonTest {
 
-    private lateinit var vurderinger: List<Subsumsjon>
+    private val vurderinger: MutableList<Subsumsjon> = mutableListOf()
 
     @BeforeEach
     fun beforeEach() {
-        vurderinger = emptyList()
+        vurderinger.clear()
     }
 
     @Test
@@ -75,6 +75,8 @@ internal class EnkelSubsumsjonTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, KontekstType> = emptyMap()
     ) {
-        vurderinger = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).sammenstill(vurderinger)
+        EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
+            if (!it.sammenstill(vurderinger)) vurderinger.add(it)
+        }
     }
 }

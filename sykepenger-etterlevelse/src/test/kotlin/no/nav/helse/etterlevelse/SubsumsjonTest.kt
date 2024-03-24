@@ -126,9 +126,9 @@ internal class SubsumsjonTest {
         override val bokstav: Bokstav? = bokstav
         override val punktum: Punktum? = punktum
         override val input = input
-        override val output = output
         override val kontekster = kontekster
 
+        override fun output() = output
         override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
     }
 }

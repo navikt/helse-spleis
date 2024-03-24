@@ -1,20 +1,20 @@
 package no.nav.helse.etterlevelse
 
+import java.time.LocalDate
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class BetingetSubsumsjonTest {
 
     private val observatør get() = SubsumsjonObservatør()
-    private lateinit var vurderinger: List<Subsumsjon>
+    private val vurderinger: MutableList<Subsumsjon> = mutableListOf()
 
     @BeforeEach
     fun beforeEach() {
-        vurderinger = emptyList()
+        vurderinger.clear()
     }
 
     @Test
@@ -51,7 +51,9 @@ internal class BetingetSubsumsjonTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, KontekstType> = emptyMap()
     ) {
-        vurderinger = BetingetSubsumsjon(funnetRelevant, lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).sammenstill(vurderinger)
+        BetingetSubsumsjon(funnetRelevant, lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
+            if (!it.sammenstill(vurderinger)) vurderinger.add(it)
+        }
     }
 
     private class SubsumsjonObservatør : SubsumsjonVisitor {

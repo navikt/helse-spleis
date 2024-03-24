@@ -1,21 +1,21 @@
 package no.nav.helse.etterlevelse
 
+import java.time.LocalDate
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class GrupperbarSubsumsjonTest {
 
     private val observatør get() = SubsumsjonObservatør()
 
-    private lateinit var vurderinger: List<Subsumsjon>
+    private val vurderinger: MutableList<Subsumsjon> = mutableListOf()
 
     @BeforeEach
     fun beforeEach() {
-        vurderinger = emptyList()
+        vurderinger.clear()
     }
 
     @Test
@@ -184,7 +184,7 @@ internal class GrupperbarSubsumsjonTest {
     }
 
     private fun nyVurdering(dato: LocalDate, lovverk: String = "folketrygdloven", input: Map<String, Any> = emptyMap(), output: Map<String, Any> = emptyMap()) {
-        vurderinger = GrupperbarSubsumsjon(
+        GrupperbarSubsumsjon(
             dato = dato,
             lovverk = lovverk,
             input = input,
@@ -194,7 +194,9 @@ internal class GrupperbarSubsumsjonTest {
             paragraf = Paragraf.PARAGRAF_8_2,
             ledd = 1.ledd,
             kontekster = emptyMap()
-        ).sammenstill(vurderinger)
+        ).also {
+            if (!it.sammenstill(vurderinger)) vurderinger.add(it)
+        }
     }
 
     private class SubsumsjonObservatør : SubsumsjonVisitor {
