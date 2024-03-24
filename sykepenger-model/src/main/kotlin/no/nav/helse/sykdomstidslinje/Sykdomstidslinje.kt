@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
-import no.nav.helse.dto.SykdomstidslinjeDagDto
+import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
@@ -17,7 +17,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.SykdomstidslinjeDto
+import no.nav.helse.nesteDag
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse
@@ -82,7 +82,7 @@ internal class Sykdomstidslinje private constructor(
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag(dato, INGEN)
     internal fun subset(periode: Periode) =
         if (this.periode == null || !periode.overlapperMed(this.periode)) Sykdomstidslinje()
-        else Sykdomstidslinje(dager.filter { it.key in periode }.toSortedMap(), this.periode.subset(periode))
+        else Sykdomstidslinje(dager.subMap(periode.start, periode.endInclusive.nesteDag), this.periode.subset(periode))
 
     /**
      * Uten å utvide tidslinjen
@@ -177,8 +177,13 @@ internal class Sykdomstidslinje private constructor(
         return !erGyldigHelgegap(dato)
     }
 
-    private fun erOppholdsdagtype(dato: LocalDate) =
-        this[dato] is Arbeidsdag || this[dato] is FriskHelgedag || this[dato] is ArbeidIkkeGjenopptattDag || this[dato] is AndreYtelser
+    private fun erOppholdsdagtype(dato: LocalDate) = when (this[dato]) {
+        is Arbeidsdag,
+        is FriskHelgedag,
+        is ArbeidIkkeGjenopptattDag,
+        is AndreYtelser -> true
+        else -> false
+    }
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false
