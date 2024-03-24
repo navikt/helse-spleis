@@ -1,9 +1,7 @@
 package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.RangeIterator.Companion.iterator
 import no.nav.helse.etterlevelse.RangeIterator.Companion.merge
-import no.nav.helse.etterlevelse.RangeIterator.Companion.utvide
 
 abstract class Subsumsjon {
 
@@ -20,25 +18,26 @@ abstract class Subsumsjon {
     open val bokstav: Bokstav? = null
 
     abstract val input: Map<String, Any>
-    abstract val output: Map<String, Any>
     protected abstract val kontekster: Map<String, KontekstType>
 
+    protected abstract fun output(): Map<String, Any>
+
     fun accept(visitor: SubsumsjonVisitor) {
-        visitor.preVisitSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        visitor.preVisitSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output(), kontekster)
         acceptSpesifikk(visitor)
-        visitor.postVisitSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+        visitor.postVisitSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output(), kontekster)
     }
 
     protected abstract fun acceptSpesifikk(visitor: SubsumsjonVisitor)
 
-    fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
-        if (!skalSammenstille()) return subsumsjoner
-        val (medSammeDatagrunnlag, utenSammeDatagrunnlag) = subsumsjoner.partition { subsumsjon -> subsumsjon == this }
-        if (medSammeDatagrunnlag.isEmpty()) return subsumsjoner + this
-        return utenSammeDatagrunnlag + sammenstillMed(medSammeDatagrunnlag)
+    fun sammenstill(subsumsjoner: List<Subsumsjon>): Boolean {
+        if (!skalSammenstille()) return true
+        val medSammeDatagrunnlag = subsumsjoner.firstOrNull { it == this } ?: return false
+        medSammeDatagrunnlag.sammenstillMed(this)
+        return true
     }
 
-    protected open fun sammenstillMed(medSammeDatagrunnlag: List<Subsumsjon>) = this
+    protected open fun sammenstillMed(ny: Subsumsjon) {}
     protected open fun skalSammenstille() = true
 
     override fun equals(other: Any?): Boolean {
@@ -55,7 +54,7 @@ abstract class Subsumsjon {
     }
 
     protected open fun ekstraEquals(other: Subsumsjon): Boolean {
-        return other.versjon == this.versjon && other.output == this.output
+        return other.versjon == this.versjon && other.output() == this.output()
     }
 
     override fun hashCode(): Int {
@@ -66,7 +65,7 @@ abstract class Subsumsjon {
         result = 31 * result + punktum.hashCode()
         result = 31 * result + bokstav.hashCode()
         result = 31 * result + input.hashCode()
-        result = 31 * result + output.hashCode()
+        result = 31 * result + output().hashCode()
         result = 31 * result + kontekster.hashCode()
         return result
     }
@@ -85,14 +84,15 @@ class EnkelSubsumsjon(
     override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
-    override val output: Map<String, Any>,
+    private val output: Map<String, Any>,
     override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
+    override fun output() = output
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
 }
 
 class GrupperbarSubsumsjon private constructor(
-    private val perioder: List<ClosedRange<LocalDate>>,
+    private var perioder: List<ClosedRange<LocalDate>>,
     override val lovverk: String,
     override val utfall: Utfall,
     override val versjon: LocalDate,
@@ -116,14 +116,16 @@ class GrupperbarSubsumsjon private constructor(
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         kontekster: Map<String, KontekstType>
-    ) : this(listOf(dato.rangeTo(dato)), lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
+    ) : this(mutableListOf(dato.rangeTo(dato)), lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
 
-    override val output: Map<String, Any> = originalOutput.toMutableMap().apply {
-        this["perioder"] = perioder.map {
-            mapOf(
-                "fom" to it.start,
-                "tom" to it.endInclusive
-            )
+    override fun output(): Map<String, Any> {
+        return originalOutput.toMutableMap().apply {
+            this["perioder"] = perioder.map {
+                mapOf(
+                    "fom" to it.start,
+                    "tom" to it.endInclusive
+                )
+            }
         }
     }
 
@@ -136,32 +138,9 @@ class GrupperbarSubsumsjon private constructor(
         return originalOutput == other.originalOutput
     }
 
-    override fun sammenstillMed(medSammeDatagrunnlag: List<Subsumsjon>): Subsumsjon {
-        // en ny grupperbar subsumsjon er alltid én enkelt dato
-        val ny = this.perioder.single().iterator().asSequence().toList().single()
-        var dato: LocalDate? = ny
-        // utvider eventuelt en av de andre periodene om <ny> forlenger (over evt. helg)
-        val sammenstiltePerioder = medSammeDatagrunnlag
-            .filterIsInstance<GrupperbarSubsumsjon>()
-            .flatMap { it.perioder }
-            .map { other ->
-                dato?.let {
-                    other.utvide(it)?.also { dato = null }
-                } ?: other
-            } + listOfNotNull(dato?.let { it.rangeTo(it) })
-        return GrupperbarSubsumsjon(
-            perioder = sammenstiltePerioder.merge(),
-            lovverk = lovverk,
-            utfall = utfall,
-            versjon = versjon,
-            paragraf = paragraf,
-            ledd = ledd,
-            punktum = punktum,
-            bokstav = bokstav,
-            originalOutput = originalOutput,
-            input = input,
-            kontekster = kontekster
-        )
+    override fun sammenstillMed(ny: Subsumsjon) {
+        check(ny is GrupperbarSubsumsjon)
+        this.perioder = this.perioder.plusElement(ny.perioder.single()).merge()
     }
 }
 
@@ -175,9 +154,11 @@ class BetingetSubsumsjon(
     override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
-    override val output: Map<String, Any>,
+    private val output: Map<String, Any>,
     override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
+    override fun output() = output
+
     override fun skalSammenstille() = funnetRelevant
 
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {

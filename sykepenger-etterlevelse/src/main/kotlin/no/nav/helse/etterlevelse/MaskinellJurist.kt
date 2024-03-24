@@ -29,7 +29,6 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_28
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_29
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
-import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_30
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
@@ -56,12 +55,13 @@ class MaskinellJurist private constructor(
         periode =  { checkNotNull(vedtaksperiode){"MaksinellJurist må være i kontekst av en vedtaksperiode for å registrere subsumsjonen"} }
     }
 
-    private var subsumsjoner = listOf<Subsumsjon>()
+    private val subsumsjoner = mutableListOf<Subsumsjon>()
 
     constructor() : this(null, emptyMap())
 
     private fun leggTil(subsumsjon: Subsumsjon) {
-        subsumsjoner = subsumsjon.sammenstill(subsumsjoner)
+        if (!subsumsjon.sammenstill(subsumsjoner))
+            subsumsjoner.add(subsumsjon)
         parent?.leggTil(subsumsjon)
     }
 
