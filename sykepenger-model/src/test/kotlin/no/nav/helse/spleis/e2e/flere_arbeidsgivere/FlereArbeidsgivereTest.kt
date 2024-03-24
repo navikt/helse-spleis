@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -1362,7 +1361,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     fun `skal ikke ha to vedtaksperioder til godkjenning samtidig`() {
         a1 {
             nyPeriode(12.januar til 16.januar)
-            håndterSykmelding(Sykmeldingsperiode(17.januar, 21.januar))
             håndterSøknad(Sykdom(17.januar, 21.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(2.vedtaksperiode)
@@ -1376,8 +1374,16 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             //Overlappende vedtaksperiode men med senere skjæringstidspunkt enn a1
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
         }
-
-        a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING) }
+        a1 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+        }
+        a1 {
+            inspektør.utbetalinger(2.vedtaksperiode).last().inspektør.utbetalingstidslinje.also { utbetalingstidslinje ->
+                assertEquals(100, utbetalingstidslinje[12.januar].økonomi.inspektør.totalGrad)
+            }
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
     }
 
