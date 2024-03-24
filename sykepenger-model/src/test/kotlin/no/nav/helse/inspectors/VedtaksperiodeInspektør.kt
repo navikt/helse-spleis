@@ -6,8 +6,8 @@ import java.util.UUID
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Behandlinger
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -30,9 +30,14 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
 
     internal lateinit var oppdatert: LocalDateTime
         private set
-    internal lateinit var skjæringstidspunkt: LocalDate
+    internal lateinit var skjæringstidspunktLazy: () -> LocalDate
+        private set
+    internal val skjæringstidspunkt get() = skjæringstidspunktLazy()
+
     internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID>
+        private set
     internal lateinit var utbetalingstidslinje: Utbetalingstidslinje
+        private set
     internal val behandlinger = mutableListOf<Behandling>()
     init {
         vedtaksperiode.accept(this)
@@ -80,7 +85,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         this.id = id
         this.periode = periode
         this.oppdatert = oppdatert
-        this.skjæringstidspunkt = skjæringstidspunkt()
+        this.skjæringstidspunktLazy = skjæringstidspunkt
         this.tilstand = tilstand
     }
 
