@@ -179,7 +179,9 @@ internal class Vedtaksperiode private constructor(
         kontekst(søknad)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
         person.vedtaksperiodeOpprettet(id, organisasjonsnummer, periode, periode.start, opprettet)
-        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, dokumentsporing, søknad)
+        // todo: skal vi "liksom-regne-ut" skjæringstidspunktet ved å trøkke inn sykdomstidslinjen,
+        // eller skal vi sette en default a la periode.start?
+        behandlinger.initiellBehandling(sykmeldingsperiode, sykdomstidslinje, person.beregnSkjæringstidspunkt(sykdomstidslinje)(sykdomstidslinje.periode() ?: periode), dokumentsporing, søknad)
     }
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
@@ -598,12 +600,12 @@ internal class Vedtaksperiode private constructor(
 
         lagreTidsnæreopplysninger(hendelse)
         val periodeEtter = rettEtterFørEndring ?: arbeidsgiver.finnVedtaksperiodeRettEtter(this)
-        periodeEtter?.behandlinger?.sikreNyBehandling(arbeidsgiver, hendelse)
+        periodeEtter?.behandlinger?.sikreNyBehandling(arbeidsgiver, person.beregnSkjæringstidspunkt(), hendelse)
         periodeEtter?.lagreTidsnæreopplysninger(hendelse)
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse, validering: () -> Unit) {
-        behandlinger.håndterEndring(person, arbeidsgiver, hendelse, validering)
+        behandlinger.håndterEndring(person, arbeidsgiver, person.beregnSkjæringstidspunkt(), hendelse, validering)
     }
 
     private fun lagreTidsnæreopplysninger(hendelse: Hendelse) {
@@ -1270,7 +1272,7 @@ internal class Vedtaksperiode private constructor(
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering)
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, vedtaksperiode.person.beregnSkjæringstidspunkt(), revurdering)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)
         }
 
@@ -2172,7 +2174,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering)
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, vedtaksperiode.person.beregnSkjæringstidspunkt(), revurdering)
             revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
             revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
             revurdering.info(RV_RV_1.varseltekst)
@@ -2208,7 +2210,7 @@ internal class Vedtaksperiode private constructor(
                 return
             }
 
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, hendelse)
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, vedtaksperiode.person.beregnSkjæringstidspunkt(), hendelse)
             håndterRevurdering(hendelse) {
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             }
@@ -2272,7 +2274,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering)
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, vedtaksperiode.person.beregnSkjæringstidspunkt(), revurdering)
             vedtaksperiode.jurist.`fvl § 35 ledd 1`()
             revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)

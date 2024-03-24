@@ -47,6 +47,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
+import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
@@ -262,6 +263,7 @@ class Person private constructor(
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
         hendelse.kontekst(aktivitetslogg, this)
         oppdatertHistorikk(infotrygdhistorikk)
+        sykdomshistorikkEndret(hendelse)
         arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
         infotrygdhistorikk.overlappendeInfotrygdperioder(this, alleVedtaksperioder)
@@ -653,6 +655,11 @@ class Person private constructor(
             subsumsjonObserver
         )
     }
+
+    internal fun beregnSkjæringstidspunkt() =
+        arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk)
+    internal fun beregnSkjæringstidspunkt(sykdomstidslinje: Sykdomstidslinje) =
+        arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk, sykdomstidslinje)
 
     internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
         arbeidsgivere.beregnSkjæringstidspunkter(infotrygdhistorikk)

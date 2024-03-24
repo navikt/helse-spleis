@@ -140,11 +140,15 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
-            val beregnSkjæringstidspunkt = { periode: Periode ->
-                infotrygdhistorikk.skjæringstidspunkt(periode, map(Arbeidsgiver::sykdomstidslinje))
+        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk) =
+            beregnSkjæringstidspunkt(infotrygdhistorikk, Sykdomstidslinje())
+        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk, sykdomstidslinje: Sykdomstidslinje) =
+            { periode: Periode ->
+                infotrygdhistorikk.skjæringstidspunkt(periode, map(Arbeidsgiver::sykdomstidslinje).plusElement(sykdomstidslinje))
             }
-            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt) }
+
+        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
+            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt(infotrygdhistorikk)) }
         }
 
         internal fun List<Arbeidsgiver>.aktiveSkjæringstidspunkter(): Set<LocalDate> {

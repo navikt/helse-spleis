@@ -73,6 +73,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(10.mars til 26.mars),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
+        // todo: infotrygdendringen -må- trigge revurdering av vedtaksperiode slik at skjæringstidspunktet kan reberegnes
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 

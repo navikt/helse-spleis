@@ -6,8 +6,8 @@ import java.util.UUID
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Behandlinger
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -55,7 +55,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
             val grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
             val utbetaling: Utbetaling?,
             val periode: Periode,
-            val dokumentsporing: Dokumentsporing
+            val dokumentsporing: Dokumentsporing,
+            val skjæringstidspunkt: LocalDate
         )
 
         data class Behandlingkilde(
@@ -130,11 +131,12 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
         utbetaling: Utbetaling?,
         dokumentsporing: Dokumentsporing,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        skjæringstidspunkt: LocalDate
     ) {
         val sisteBehandling = this.behandlinger.last()
         this.behandlinger[this.behandlinger.lastIndex] = sisteBehandling.copy(
-            endringer = sisteBehandling.endringer.plus(Behandling.Behandlingendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing))
+            endringer = sisteBehandling.endringer.plus(Behandling.Behandlingendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing, skjæringstidspunkt))
         )
         val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId ?: return
         val utbetalingId = utbetaling!!.inspektør.utbetalingId
