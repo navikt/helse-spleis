@@ -13,7 +13,9 @@ class Foreldrepenger(
             return false
         }
         val overlappsperiode = if (erForlengelse) sykdomsperiode else sykdomsperiode.familieYtelserPeriode
-        return foreldrepengeytelse.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }
+        return foreldrepengeytelse.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }.also { overlapper ->
+            if (!overlapper) aktivitetslogg.info("Bruker har foreldrepenger, men det slår ikke ut på overlappsjekken")
+        }
     }
 
 }
