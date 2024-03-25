@@ -368,7 +368,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         utbetaling = dto.utbetalingId?.let { utbetalinger.getValue(it) },
                         dokumentsporing = Dokumentsporing.gjenopprett(dto.dokumentsporing),
                         sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje),
-                        skjæringstidspunkt = LocalDate.MIN
+                        skjæringstidspunkt = dto.skjæringstidspunkt
                     )
                 }
             }
@@ -479,7 +479,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     sykmeldingsperiode = this.sykmeldingsperiode.dto(),
                     periode = this.periode.dto(),
                     vilkårsgrunnlagId = vilkårsgrunnlagUtDto?.vilkårsgrunnlagId,
-                    skjæringstidspunkt = vilkårsgrunnlagUtDto?.skjæringstidspunkt,
+                    skjæringstidspunkt = this.skjæringstidspunkt,
                     utbetalingId = utbetalingUtDto?.id,
                     utbetalingstatus = utbetalingUtDto?.tilstand,
                     dokumentsporing = this.dokumentsporing.dto(),

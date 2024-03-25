@@ -376,6 +376,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     utbetalingId = utbetalingId,
     vilkårsgrunnlagId = vilkårsgrunnlagId,
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
+    skjæringstidspunkt = skjæringstidspunkt,
     dokumentsporing = dokumentsporing.tilPersonData()
 )
 private fun DokumentsporingDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(

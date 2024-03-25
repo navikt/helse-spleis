@@ -12,14 +12,14 @@ import no.nav.helse.dto.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagD
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.AvsenderDto
 import no.nav.helse.dto.BegrunnelseDto
+import no.nav.helse.dto.BehandlingkildeDto
+import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.dto.EndringIRefusjonDto
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.FagområdeDto
 import no.nav.helse.dto.FeriepengeberegnerDto
-import no.nav.helse.dto.BehandlingtilstandDto
-import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.InntektbeløpDto
@@ -44,11 +44,11 @@ import no.nav.helse.dto.UtbetaltDagDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.BehandlingInnDto
+import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
+import no.nav.helse.dto.deserialisering.BehandlingerInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeInnDto
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
-import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
-import no.nav.helse.dto.deserialisering.BehandlingInnDto
-import no.nav.helse.dto.deserialisering.BehandlingerInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdInntektsopplysningInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
@@ -833,6 +833,7 @@ data class PersonData(
                     val utbetalingId: UUID?,
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
+                    val skjæringstidspunkt: LocalDate,
                     val dokumentsporing: DokumentsporingData
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
@@ -843,7 +844,8 @@ data class PersonData(
                         vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                         utbetalingId = this.utbetalingId,
                         dokumentsporing = this.dokumentsporing.tilDto(),
-                        sykdomstidslinje = this.sykdomstidslinje.tilDto()
+                        sykdomstidslinje = this.sykdomstidslinje.tilDto(),
+                        skjæringstidspunkt = this.skjæringstidspunkt
                     )
                 }
             }
