@@ -44,6 +44,7 @@ class Toggle private constructor(enabled: Boolean) {
         val SendFeriepengeOppdrag = fraEnv("SEND_FERIEPENGEOPPDRAG", false)
         val Spekemat = fraEnv("SPEKEMAT_ENABLED", true)
         val OppdaterteForespørsler = fraEnv("OPPDATERTE_FORESPOERSLER", false)
+        val AndreYtelserUnderveis = fraEnv("ANDRE_YTELSER_UNDERVEIS", defaultValue = false)
 
         fun fraEnv(navn: String, defaultValue: Boolean) = Toggle(System.getenv(navn)?.lowercase()?.toBooleanStrictOrNull() ?: defaultValue)
 

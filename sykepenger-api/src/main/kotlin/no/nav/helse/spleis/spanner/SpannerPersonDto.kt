@@ -373,7 +373,8 @@ internal data class SpannerPersonDto(
                 OverstyrRefusjon,
                 OverstyrArbeidsgiveropplysninger,
                 OverstyrArbeidsforhold,
-                SkjønnsmessigFastsettelse
+                SkjønnsmessigFastsettelse,
+                AndreYtelser
             }
 
             data class BehandlingData(
@@ -959,6 +960,7 @@ private fun DokumentsporingDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverDa
         DokumenttypeDto.SkjønnsmessigFastsettelse -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.SkjønnsmessigFastsettelse
         DokumenttypeDto.Sykmelding -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Sykmelding
         DokumenttypeDto.Søknad -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.Søknad
+        DokumenttypeDto.AndreYtelser -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentTypeData.AndreYtelser
     }
 )
 private fun UtbetalingUtDto.tilPersonData() = SpannerPersonDto.UtbetalingData(

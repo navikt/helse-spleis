@@ -10,5 +10,6 @@ enum class DokumentType {
     OverstyrRefusjon,
     OverstyrArbeidsgiveropplysninger,
     OverstyrArbeidsforhold,
-    SkjønnsmessigFastsettelse
+    SkjønnsmessigFastsettelse,
+    AndreYtelser
 }

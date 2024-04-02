@@ -27,6 +27,7 @@ internal class BesteDagTest {
         private val egenmeldingsdagFraSaksbehandler = Dag.Arbeidsgiverdag(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
         private val arbeidsdagFraSaksbehandler = Dag.Arbeidsdag(1.januar, TestEvent.saksbehandler)
         private val sykedagNavFraSaksbehandler = Dag.SykedagNav(1.januar, Økonomi.sykdomsgrad(100.prosent), TestEvent.saksbehandler)
+        private val andreYtelser = Dag.AndreYtelser(1.januar, TestEvent.testkilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
     }
 
     @Test
@@ -130,6 +131,16 @@ internal class BesteDagTest {
     fun `sykedag fra søknad vinner over egenmeldingsdag i inntektsmelding`() {
         assertWinner(sykedagFraSøknad, arbeidsgiverdagFraInntektsmelding, sykedagFraSøknad)
         assertWinner(arbeidsgiverdagFraInntektsmelding, sykedagFraSøknad, sykedagFraSøknad)
+    }
+
+    @Test
+    fun `andre ytelser vinner over sykedag fra søknad`() {
+        assertWinnerBidirectional(sykedagFraSøknad, andreYtelser, andreYtelser)
+    }
+
+    @Test
+    fun `saksbehandler vinner over andre ytelser`() {
+        assertWinnerBidirectional(andreYtelser, arbeidsdagFraSaksbehandler, arbeidsdagFraSaksbehandler)
     }
 
     private fun assertWinner(

@@ -1110,9 +1110,9 @@ internal class Vedtaksperiode private constructor(
     private fun kalkulerUtbetalinger(aktivitetslogg: IAktivitetslogg, ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
         val vilkårsgrunnlag = requireNotNull(vilkårsgrunnlag)
         aktivitetslogg.kontekst(vilkårsgrunnlag)
-
         person.valider(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt)
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, organisasjonsnummer)
+        ytelser.oppdaterHistorikk(periode) { oppdaterHistorikk(ytelser, {}) }
         val maksimumSykepenger = beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger) ?: return false
         ytelser.valider(periode, skjæringstidspunkt, maksimumSykepenger.maksdato, erForlengelse())
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()

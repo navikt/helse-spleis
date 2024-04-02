@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -344,5 +345,14 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
                 assertIngenInfo("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
             }
         )
+    }
+
+    @Test
+    fun `Overlapp med foreldrepenger`() = Toggle.AndreYtelserUnderveis.enable{
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.januar til 31.januar))
+        assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
     }
 }
