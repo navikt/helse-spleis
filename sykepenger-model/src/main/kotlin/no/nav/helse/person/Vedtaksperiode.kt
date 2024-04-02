@@ -1086,6 +1086,7 @@ internal class Vedtaksperiode private constructor(
             ventetSiden = oppdatert,
             venterTil = venterTil(venterPå)
         )
+        behandlinger.behandlingVenter(builder)
         builder.hendelseIder(hendelseIder)
         emitVedtaksperiodeVenter(builder.build())
     }

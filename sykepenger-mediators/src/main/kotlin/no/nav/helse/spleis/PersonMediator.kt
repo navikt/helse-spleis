@@ -312,6 +312,7 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("vedtaksperiode_venter", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
             "hendelser" to event.hendelser,
             "ventetSiden" to event.ventetSiden,

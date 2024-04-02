@@ -46,6 +46,7 @@ interface PersonObserver {
         val aktørId: String,
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
         val skjæringstidspunkt: LocalDate,
         val hendelser: Set<UUID>,
         val ventetSiden: LocalDateTime,

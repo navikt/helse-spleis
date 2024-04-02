@@ -95,6 +95,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun harId(utbetalingId: UUID) = utbetalingene.harId(utbetalingId)
     internal fun håndterUtbetalinghendelse(hendelse: UtbetalingHendelse) = behandlinger.any { it.håndterUtbetalinghendelse(hendelse) }
 
+    internal fun behandlingVenter(builder: VedtaksperiodeVenter.Builder) {
+        behandlinger.last().behandlingVenter(builder)
+    }
+
     internal fun lagreTidsnæreInntekter(
         arbeidsgiver: Arbeidsgiver,
         skjæringstidspunkt: LocalDate,
@@ -329,6 +333,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         fun sykmeldingsperiode() = endringer.first().sykmeldingsperiode
         fun periode() = periode
+        fun behandlingVenter(builder: VedtaksperiodeVenter.Builder) {
+            builder.behandlingVenter(id)
+        }
 
         // TODO: se på om det er nødvendig å støtte Dokumentsporing som et sett; eventuelt om Behandling må ha et sett
         class Endring constructor(

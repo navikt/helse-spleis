@@ -6,6 +6,7 @@ import java.util.UUID
 
 internal class VedtaksperiodeVenter private constructor(
     private val vedtaksperiodeId: UUID,
+    private val behandlingId: UUID,
     private val skjæringstidspunkt: LocalDate,
     private val ventetSiden: LocalDateTime,
     private val venterTil: LocalDateTime,
@@ -19,6 +20,7 @@ internal class VedtaksperiodeVenter private constructor(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
             ventetSiden = ventetSiden,
             venterTil = venterTil,
@@ -28,6 +30,7 @@ internal class VedtaksperiodeVenter private constructor(
 
     internal class Builder {
         private lateinit var vedtaksperiodeId: UUID
+        private lateinit var behandlingId: UUID
         private lateinit var skjæringstidspunkt: LocalDate
         private lateinit var ventetSiden: LocalDateTime
         private lateinit var venterTil: LocalDateTime
@@ -42,6 +45,11 @@ internal class VedtaksperiodeVenter private constructor(
             this.venterTil = venterTil
             this.orgnanisasjonsnummer = orgnummer
         }
+
+        internal fun behandlingVenter(behandlingId: UUID) {
+            this.behandlingId = behandlingId
+        }
+
         internal fun hendelseIder(hendelseIder: Set<UUID>) {
             this.hendelseIder.addAll(hendelseIder)
         }
@@ -51,7 +59,7 @@ internal class VedtaksperiodeVenter private constructor(
         }
 
         internal fun build() =
-            VedtaksperiodeVenter(vedtaksperiodeId, skjæringstidspunkt, ventetSiden, venterTil, venterPå, orgnanisasjonsnummer, hendelseIder.toSet())
+            VedtaksperiodeVenter(vedtaksperiodeId, behandlingId, skjæringstidspunkt, ventetSiden, venterTil, venterPå, orgnanisasjonsnummer, hendelseIder.toSet())
     }
 }
 
