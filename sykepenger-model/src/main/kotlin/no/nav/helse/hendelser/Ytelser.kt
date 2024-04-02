@@ -49,14 +49,14 @@ class Ytelser(
         return !harFunksjonelleFeilEllerVerre()
     }
 
-    internal fun oppdaterHistorikk(periode: Periode, oppdaterHistorikk: () -> Unit) {
-        if (!skalOppdatereHistorikk(periode)) return
+    internal fun oppdaterHistorikk(periode: Periode, periodeRettEtter: Periode?, oppdaterHistorikk: () -> Unit) {
+        if (!skalOppdatereHistorikk(periode, periodeRettEtter)) return
         oppdaterHistorikk()
     }
 
-    private fun skalOppdatereHistorikk(periode: Periode): Boolean {
+    private fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode?): Boolean {
         if (Toggle.AndreYtelserUnderveis.disabled) return false
-        return foreldrepenger.skalOppdatereHistorikk(periode)
+        return foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter)
     }
 
     override fun dokumentsporing(): Dokumentsporing {

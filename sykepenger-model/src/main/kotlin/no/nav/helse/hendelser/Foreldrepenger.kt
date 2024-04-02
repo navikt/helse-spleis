@@ -33,9 +33,14 @@ class Foreldrepenger(
         return Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
     }
 
-    fun skalOppdatereHistorikk(periode: Periode): Boolean {
+    internal fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode? = null): Boolean {
         if (foreldrepengeytelse.isEmpty()) return false
-        return true // TODO
+        if (foreldrepengeytelse.size > 1) return false
+        if (periodeRettEtter != null) return false
+        val foreldrepengeperiode = foreldrepengeytelse.first()
+        val fullstendigOverlapp = foreldrepengeperiode == periode
+        val foreldrepengerIHalen = periode.contains(foreldrepengeperiode) && foreldrepengeperiode.endInclusive == periode.endInclusive
+        return fullstendigOverlapp || foreldrepengerIHalen
     }
 
 }
