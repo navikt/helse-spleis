@@ -56,7 +56,7 @@ class Ytelser(
 
     private fun skalOppdatereHistorikk(periode: Periode): Boolean {
         if (Toggle.AndreYtelserUnderveis.disabled) return false
-        return true // TODO
+        return foreldrepenger.skalOppdatereHistorikk(periode)
     }
 
     override fun dokumentsporing(): Dokumentsporing {

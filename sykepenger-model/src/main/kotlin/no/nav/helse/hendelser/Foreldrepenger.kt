@@ -33,4 +33,9 @@ class Foreldrepenger(
         return Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
     }
 
+    fun skalOppdatereHistorikk(periode: Periode): Boolean {
+        if (foreldrepengeytelse.isEmpty()) return false
+        return true // TODO
+    }
+
 }
