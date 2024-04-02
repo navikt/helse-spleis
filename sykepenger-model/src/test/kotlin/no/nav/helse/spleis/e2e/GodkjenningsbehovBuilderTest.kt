@@ -216,6 +216,30 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `legger til førstegangsbehandling eller forlengelse som tag`() {
+        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = INNTEKT)
+        assertGodkjenningsbehov(
+            tags = setOf("Førstegangsbehandling")
+        )
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        forlengTilGodkjenning(1.februar, 28.februar)
+        assertGodkjenningsbehov(
+            tags = setOf("Forlengelse"),
+            periodeFom = 1.februar,
+            periodeTom = 28.februar,
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1),
+            behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
+            periodeType = "FORLENGELSE",
+            førstegangsbehandling = false,
+            perioderMedSammeSkjæringstidspunkt = listOf(
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+            )
+        )
+    }
+
     private fun assertGodkjenningsbehov(
         tags: Set<String>,
         skjæringstidspunkt: LocalDate = 1.januar,

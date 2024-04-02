@@ -27,8 +27,13 @@ class GodkjenningsbehovBuilder(
     private lateinit var orgnummereMedRelevanteArbeidsforhold: Set<String>
     private val omregnedeÅrsinntekter: MutableList<Map<String, Any>> = mutableListOf()
 
+    init {
+        if (førstegangsbehandling) tags.add("Førstegangsbehandling")
+        else tags.add("Forlengelse")
+    }
+
     fun tagFlereArbeidsgivere(antall: Int) {
-        if( antall > 1) tags.add("FlereArbeidsgivere")
+        if (antall > 1) tags.add("FlereArbeidsgivere")
         else tags.add("EnArbeidsgiver")
     }
     fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) = apply {
