@@ -436,14 +436,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling?.forkast(hendelse)
             }
 
-            fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean, behandlingId: UUID, perioderMedSammeSkjæringstidspunkt: List<Triple<UUID, UUID, Periode>>) {
+            fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean, behandling: Behandling, perioderMedSammeSkjæringstidspunkt: List<Triple<UUID, UUID, Periode>>) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
-                val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode, behandlingId, perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, behandlingId, periode) ->
+                val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode, behandling.id, perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, behandlingId, periode) ->
                     PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, behandlingId, periode)
                 })
                 grunnlagsdata.byggGodkjenningsbehov(builder)
                 utbetaling.byggGodkjenningsbehov(hendelse, periode, builder)
+                behandling.observatører.forEach { it.utkastTilVedtak(behandling.id, builder.tags()) }
                 Aktivitet.Behov.godkjenning(
                     aktivitetslogg = hendelse,
                     builder = builder
@@ -737,7 +738,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, behandlingerMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandling>>, kanForkastes: Boolean) {
             val perioderMedSammeSkjæringstidspunkt = behandlingerMedSammeSkjæringstidspunkt.map { Triple(it.first, it.second.id, it.second.periode) }
-            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, id, perioderMedSammeSkjæringstidspunkt)
+            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt)
         }
 
         fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, behandlinger: List<Behandling>): Utbetaling? {

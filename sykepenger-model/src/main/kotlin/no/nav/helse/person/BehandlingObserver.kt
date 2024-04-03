@@ -39,4 +39,9 @@ internal interface BehandlingObserver {
         avsender: Avsender,
         type: PersonObserver.BehandlingOpprettetEvent.Type
     )
+
+    fun utkastTilVedtak(
+        id: UUID,
+        tags: Set<String>
+    )
 }

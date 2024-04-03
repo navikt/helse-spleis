@@ -111,5 +111,6 @@ class GodkjenningsbehovBuilder(
         }
     )
 
+    fun tags() = tags.toSet()
 
 }

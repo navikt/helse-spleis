@@ -544,8 +544,13 @@ class Person private constructor(
     internal fun behandlingForkastet(behandlingForkastetEvent: PersonObserver.BehandlingForkastetEvent) {
         observers.forEach { it.behandlingForkastet(behandlingForkastetEvent) }
     }
+
     internal fun nyBehandling(event: PersonObserver.BehandlingOpprettetEvent) {
         observers.forEach { it.nyBehandling(event) }
+    }
+
+    internal fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
+        observers.forEach { it.utkastTilVedtak(event) }
     }
 
     internal fun emitOverstyringIgangsattEvent(event: PersonObserver.OverstyringIgangsatt) {

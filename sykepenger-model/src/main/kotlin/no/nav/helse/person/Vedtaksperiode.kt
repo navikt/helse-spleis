@@ -1004,6 +1004,17 @@ internal class Vedtaksperiode private constructor(
         person.nyBehandling(event)
     }
 
+    override fun utkastTilVedtak(id: UUID, tags: Set<String>) {
+        val event = PersonObserver.UtkastTilVedtakEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = this.id,
+            behandlingId = id,
+            tags = tags
+        )
+        person.utkastTilVedtak(event)
+    }
+
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {
         behandlinger.harUtbetalinger() -> tilstand(hendelse, simuleringtilstand) {
             hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")

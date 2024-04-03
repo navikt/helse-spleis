@@ -285,6 +285,11 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         assertEquals(omregnedeÅrsinntekter, actualOmregnedeÅrsinntekter)
         assertEquals(behandlingId.toString(), actualBehandlingId)
         assertEquals(perioderMedSammeSkjæringstidspunkt, actualPerioderMedSammeSkjæringstidspunkt)
+
+        val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
+        assertEquals(actualtags, utkastTilVedtak.tags)
+        assertEquals(actualBehandlingId, utkastTilVedtak.behandlingId.toString())
+        assertEquals(vedtaksperiodeId, utkastTilVedtak.vedtaksperiodeId)
     }
 
     private inline fun <reified T> hentFelt(vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1), feltNavn: String) =

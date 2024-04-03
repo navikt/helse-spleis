@@ -625,6 +625,14 @@ interface PersonObserver {
         )
     }
 
+    data class UtkastTilVedtakEvent(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val tags: Set<String>
+    )
+
     data class AvsluttetMedVedtakEvent(
         val fødselsnummer: String,
         val aktørId: String,
@@ -749,4 +757,5 @@ interface PersonObserver {
     fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun behandlingUtført() {}
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
+    fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
 }

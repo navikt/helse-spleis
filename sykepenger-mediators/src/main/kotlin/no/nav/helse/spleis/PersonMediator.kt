@@ -477,6 +477,14 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("arbeidsgiveropplysninger_korrigert", event.toJsonMap()))
     }
 
+    override fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
+        queueMessage(JsonMessage.newMessage("utkast_til_vedtak", mapOf(
+            "vedtaksperiodeId" to event.vedtaksperiodeId,
+            "behandlingId" to event.behandlingId,
+            "tags" to event.tags
+        )))
+    }
+
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {
         this["aktørId"] = hendelse.aktørId()
         this["fødselsnummer"] = hendelse.fødselsnummer()
