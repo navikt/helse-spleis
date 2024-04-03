@@ -5,6 +5,21 @@ import no.nav.helse.erHelg
 import no.nav.helse.dto.SykdomstidslinjeDagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.AndreYtelserDto.YtelseDto
 import no.nav.helse.dto.HendelseskildeDto
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserAap
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserDagpenger
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserForeldrepenger
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserOmsorgspenger
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserOpplaringspenger
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserPleiepenger
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.AndreYtelserSvangerskapspenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.AAP
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Dagpenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Omsorgspenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Opplæringspenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
@@ -363,6 +378,18 @@ internal sealed class Dag(
             }
         }
 
+        internal fun tilEksternBegrunnelse(): PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO {
+            return when (ytelse) {
+                Foreldrepenger -> AndreYtelserForeldrepenger
+                AAP -> AndreYtelserAap
+                Omsorgspenger -> AndreYtelserOmsorgspenger
+                Pleiepenger -> AndreYtelserPleiepenger
+                Svangerskapspenger -> AndreYtelserSvangerskapspenger
+                Opplæringspenger -> AndreYtelserOpplaringspenger
+                Dagpenger -> AndreYtelserDagpenger
+            }
+        }
+
         override fun accept(visitor: SykdomstidslinjeDagVisitor) =
             visitor.visitDag(this, dato, kilde, ytelse)
 
@@ -375,13 +402,13 @@ internal sealed class Dag(
                     dato = dto.dato,
                     kilde = Hendelseskilde.gjenopprett(dto.kilde),
                     ytelse = when (dto.ytelse) {
-                        YtelseDto.Foreldrepenger -> AnnenYtelse.Foreldrepenger
-                        YtelseDto.AAP -> AnnenYtelse.AAP
-                        YtelseDto.Omsorgspenger -> AnnenYtelse.Omsorgspenger
-                        YtelseDto.Pleiepenger -> AnnenYtelse.Pleiepenger
-                        YtelseDto.Svangerskapspenger -> AnnenYtelse.Svangerskapspenger
-                        YtelseDto.Opplæringspenger -> AnnenYtelse.Opplæringspenger
-                        YtelseDto.Dagpenger -> AnnenYtelse.Dagpenger
+                        YtelseDto.Foreldrepenger -> Foreldrepenger
+                        YtelseDto.AAP -> AAP
+                        YtelseDto.Omsorgspenger -> Omsorgspenger
+                        YtelseDto.Pleiepenger -> Pleiepenger
+                        YtelseDto.Svangerskapspenger -> Svangerskapspenger
+                        YtelseDto.Opplæringspenger -> Opplæringspenger
+                        YtelseDto.Dagpenger -> Dagpenger
                     }
                 )
             }

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -19,8 +20,8 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AndreYtelser
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag
-import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Fridag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavDag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -494,7 +495,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av andre ytelser i snuten`() {
+    fun `overstyring av andre ytelser i snuten`() = Toggle.AndreYtelserUnderveis.enable {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje((1.januar til 10.januar).map { manuellForeldrepengedag(it) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -514,7 +515,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(forventetUtbetaling, observatør.utbetalingMedUtbetalingEventer.first().dager)
 
         val forventetRevurdering =
-            (1.januar til 10.januar).associateWith { Fridag } +
+            (1.januar til 10.januar).associateWith { AndreYtelser } +
             (11.januar til 26.januar).associateWith { ArbeidsgiverperiodeDag } +
             (27.januar til 28.januar).associateWith { NavHelgDag } +
             (29.januar til 31.januar).associateWith { NavDag }
