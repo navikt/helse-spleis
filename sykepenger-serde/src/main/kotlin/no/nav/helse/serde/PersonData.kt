@@ -683,6 +683,7 @@ data class PersonData(
         data class VedtaksperiodeData(
             val id: UUID,
             val tilstand: TilstandTypeData,
+            val skjæringstidspunkt: LocalDate?,
             val behandlinger: List<BehandlingData>,
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime
@@ -832,6 +833,7 @@ data class PersonData(
                     val sykmeldingsperiodeTom: LocalDate,
                     val fom: LocalDate,
                     val tom: LocalDate,
+                    val skjæringstidspunkt: LocalDate?,
                     val utbetalingId: UUID?,
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,

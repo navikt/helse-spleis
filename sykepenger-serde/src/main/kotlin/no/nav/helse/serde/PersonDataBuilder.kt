@@ -331,6 +331,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
         VedtaksperiodetilstandDto.TIL_UTBETALING -> TilstandTypeData.TIL_UTBETALING
     },
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
+    skjæringstidspunkt = skjæringstidspunkt,
     opprettet = opprettet,
     oppdatert = oppdatert
 )
@@ -373,6 +374,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     sykmeldingsperiodeTom = sykmeldingsperiode.tom,
     fom = periode.fom,
     tom = periode.tom,
+    skjæringstidspunkt = skjæringstidspunkt,
     utbetalingId = utbetalingId,
     vilkårsgrunnlagId = vilkårsgrunnlagId,
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
