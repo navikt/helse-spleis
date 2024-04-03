@@ -57,7 +57,5 @@ spec:
     value: earliest
   - name: IDENTBYTTE
     value: "true"
-  - name: OPPDATERTE_FORESPOERSLER
-    value: "true"
   - name: ANDRE_YTELSER_UNDERVEIS
     value: "true"

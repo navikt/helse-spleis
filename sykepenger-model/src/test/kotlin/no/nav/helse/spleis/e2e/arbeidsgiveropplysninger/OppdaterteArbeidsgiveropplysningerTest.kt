@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -273,8 +272,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender oppdatert forespørsel om arbeidsgiveropplysninger når forrige periode som ikke er auu får et nytt vilkårsgrunnlag`()  = Toggle.OppdaterteForespørsler.enable {
-        nyttVedtak(1.november(2017), 30.november(2017))  // skal ikke oppdatere tidligere perioder
+    fun `sender oppdatert forespørsel om arbeidsgiveropplysninger når forrige periode som ikke er auu får et nytt vilkårsgrunnlag`() {
+        nyttVedtak(1.november(2017), 30.november(2017))     // skal ikke oppdatere tidligere perioder
         nyPeriode(1.januar til 31.januar)                   // periode som får et vilkårsgrunnlag som skal være med i oppdatert forespørsel
         nyPeriode(18.februar til 22.februar)                // en kort periode vi ikke skal bry oss om
         nyPeriode(1.mars til 31.mars)                       // perioden som skal sende ut oppdatert forespørsel
