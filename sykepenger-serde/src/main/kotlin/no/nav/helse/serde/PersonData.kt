@@ -683,7 +683,7 @@ data class PersonData(
         data class VedtaksperiodeData(
             val id: UUID,
             val tilstand: TilstandTypeData,
-            val skjæringstidspunkt: LocalDate?,
+            val skjæringstidspunkt: LocalDate,
             val behandlinger: List<BehandlingData>,
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime

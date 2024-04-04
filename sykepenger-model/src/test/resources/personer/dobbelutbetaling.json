@@ -384,6 +384,7 @@
         {
           "id": "24279c53-67fb-42fc-8b03-344dcca8e1a0",
           "tilstand": "AVSLUTTET_UTEN_UTBETALING",
+          "skjæringstidspunkt": "2018-01-01",
           "generasjoner": [
             {
               "id": "0c9af59a-d353-4123-a784-3945cd26721c",
@@ -591,6 +592,7 @@
         {
           "id": "a36d3e1a-dc0f-41af-b957-16b390273c6b",
           "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2018-01-01",
           "generasjoner": [
             {
               "id": "e27a2a80-f66f-4134-b463-85bbb873af4a",
@@ -760,6 +762,7 @@
         {
           "id": "12793318-7a9f-441e-b269-9d4da920ac7b",
           "tilstand": "AVSLUTTET_UTEN_UTBETALING",
+          "skjæringstidspunkt": "2018-03-01",
           "generasjoner": [
             {
               "id": "8e799506-a232-4969-82db-b5e895a4dcba",
@@ -819,6 +822,7 @@
         {
           "id": "8c00bcfb-8d49-48c9-81b7-2a615a27fe36",
           "tilstand": "AVVENTER_INNTEKTSMELDING",
+          "skjæringstidspunkt": "2018-03-01",
           "generasjoner": [
             {
               "id": "9ebe070d-8e89-4e3d-9c93-50966003de5b",

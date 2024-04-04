@@ -195,6 +195,7 @@
         {
           "id": "1a95e24a-f987-4251-99f3-2ad52da3c8fd",
           "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2018-01-01",
           "generasjoner": [
             {
               "id": "b89b512e-b308-4b32-a8ad-183952c26e58",
@@ -365,6 +366,7 @@
         {
           "id": "84beef00-8428-4924-af5d-101323409e70",
           "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2018-01-01",
           "generasjoner": [
             {
               "id": "23c6c526-6dc9-46ea-b61d-6f08a70a0061",

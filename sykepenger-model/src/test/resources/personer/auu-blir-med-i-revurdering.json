@@ -451,6 +451,7 @@
         {
           "id": "c43166f3-2781-44a5-a587-813a800d1db5",
           "tilstand": "AVSLUTTET",
+          "skjæringstidspunkt": "2018-01-01",
           "generasjoner": [
             {
               "id": "5d3d1cba-b0d2-4d91-a32c-22a51094a9e0",
@@ -621,6 +622,7 @@
         {
           "id": "dedf39f0-8bbe-4dfb-974c-c47731e33240",
           "tilstand": "AVVENTER_HISTORIKK",
+          "skjæringstidspunkt": "2018-03-01",
           "generasjoner": [
             {
               "id": "fb055437-3596-4ace-b137-22c93966cb71",
@@ -805,6 +807,7 @@
         {
           "id": "149406fb-134f-4185-99ec-9117d76d38f1",
           "tilstand": "AVVENTER_REVURDERING",
+          "skjæringstidspunkt": "2018-05-01",
           "generasjoner": [
             {
               "id": "b0409346-de2a-4930-9f10-2d1e27726af7",
