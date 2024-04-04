@@ -167,7 +167,7 @@ private fun klargjørEllerVentPåTilgjengeligArbeid(session: Session, arbeidId: 
 }
 
 private fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: Session, fnr: Long) -> Unit) {
-    DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
+    DataSourceConfiguration(DbUser.MIGRATE).dataSource(maximumPoolSize = 1).use { ds ->
         sessionOf(ds).use { session ->
             klargjørEllerVentPåTilgjengeligArbeid(session, arbeidId)
             do {
