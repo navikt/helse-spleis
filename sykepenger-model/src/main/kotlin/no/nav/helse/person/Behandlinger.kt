@@ -239,15 +239,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val nyBehandling = behandlinger.last().håndterEndring(arbeidsgiver, hendelse)?.also {
             leggTilNyBehandling(it)
         }
-        // 🤯 <OBS! NB!> 🤯
-        // spesialist er -avhengig- av at sykefraværstilfelle går ut før behandlingen kan lukkes automatisk
-        // Meldingen kan dessuten ikke sendes ut før behandlingen er fysisk lagt til i listen (se leggTilNyBehandling(it) over),
-        // fordi når vedtaksperioden skal håndtere sykefraværstilfelle-signalet så avhenger den at behandlingen er på plass
         person.sykdomshistorikkEndret(hendelse)
-        // 🤯 </OBS! NB!> 🤯
-
         validering()
-
         nyBehandling?.vurderLukkeAutomatisk(arbeidsgiver, hendelse)
     }
 
