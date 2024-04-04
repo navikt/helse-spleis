@@ -15,6 +15,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.Infotrygd
 import no.nav.helse.person.inntekt.Refusjonsopplysning
@@ -30,6 +31,7 @@ import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,6 +39,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `infotrygd flytter skjæringstidspunkt`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+        håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
+        assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.elementer.size)
+    }
 
     @Test
     fun `Infotrygdhistorikk som er nærme`() {

@@ -261,6 +261,7 @@ class Person private constructor(
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
         hendelse.kontekst(aktivitetslogg, this)
         oppdatertHistorikk(infotrygdhistorikk)
+        sykdomshistorikkEndret(hendelse)
         arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
         infotrygdhistorikk.overlappendeInfotrygdperioder(this, alleVedtaksperioder)
