@@ -1,7 +1,6 @@
 package no.nav.helse.person.builders
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AndreYtelser
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidIkkeGjenopptattDag
@@ -47,7 +46,7 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
             is Dag.Permisjonsdag -> Permisjonsdag to null
             is Dag.Feriedag -> Feriedag to null
             is Dag.ArbeidIkkeGjenopptattDag -> ArbeidIkkeGjenopptattDag to null
-            is Dag.AndreYtelser -> if (Toggle.AndreYtelserUnderveis.enabled) AndreYtelser to eksternBegrunnelse(sykdomstidslinje[dato])?.let { listOf(it) } else Fridag to null
+            is Dag.AndreYtelser -> AndreYtelser to eksternBegrunnelse(sykdomstidslinje[dato])?.let { listOf(it) }
             else -> Fridag to null
         }
         utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, dagtype, begrunnelse))

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -495,7 +494,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av andre ytelser i snuten`() = Toggle.AndreYtelserUnderveis.enable {
+    fun `overstyring av andre ytelser i snuten`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje((1.januar til 10.januar).map { manuellForeldrepengedag(it) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
