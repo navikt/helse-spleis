@@ -55,8 +55,11 @@ class Ytelser(
     }
 
     private fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode?): Boolean {
+        val foreldrepengerIHalen = foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter).also { foreldrepengerIHalen ->
+            if (foreldrepengerIHalen) this.info("Kandidat for å legge til foreldrepenger i historikken")
+        }
         if (Toggle.AndreYtelserUnderveis.disabled) return false
-        return foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter)
+        return foreldrepengerIHalen
     }
 
     override fun dokumentsporing(): Dokumentsporing {
