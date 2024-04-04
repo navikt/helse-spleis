@@ -45,7 +45,7 @@ class ForeldrepengerTest {
     fun `foreldrepenger i halen og etter perioden`() {
         val vedtaksperiode = 1.januar til 31.januar
         val foreldrepenger = Foreldrepenger(listOf(20.januar til 10.februar))
-        assertFalse(foreldrepenger.skalOppdatereHistorikk(vedtaksperiode))
+        assertTrue(foreldrepenger.skalOppdatereHistorikk(vedtaksperiode))
     }
 
     @Test

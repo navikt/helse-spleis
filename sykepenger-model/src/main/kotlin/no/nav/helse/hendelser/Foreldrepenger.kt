@@ -39,7 +39,7 @@ class Foreldrepenger(
         if (periodeRettEtter != null) return false
         val foreldrepengeperiode = foreldrepengeytelse.first()
         val fullstendigOverlapp = foreldrepengeperiode == periode
-        val foreldrepengerIHalen = periode.contains(foreldrepengeperiode) && foreldrepengeperiode.endInclusive == periode.endInclusive
+        val foreldrepengerIHalen = periode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(periode.endInclusive)
         return fullstendigOverlapp || foreldrepengerIHalen
     }
 
