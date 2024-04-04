@@ -112,7 +112,7 @@ private fun fåLås(session: Session, arbeidId: String): Boolean {
     // oppretter en lås som varer ut levetiden til sesjonen.
     // returnerer umiddelbart med true/false avhengig om vi fikk låsen eller ikke
     @Language("PostgreSQL")
-    val query = "SELECT pg_try_advisory_lock_shared(:arbeidId)"
+    val query = "SELECT pg_try_advisory_lock(:arbeidId)"
     return session.run(queryOf(query, mapOf("arbeidId" to arbeidId)).map { it.boolean(1) }.asSingle)!!
 }
 
