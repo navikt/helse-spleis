@@ -24,7 +24,7 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
-    aktivitetslogg: Aktivitetslogg
+    private val aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg), SykdomshistorikkHendelse {
 
     companion object {
@@ -71,8 +71,24 @@ class Ytelser(
     }
 
     override fun element(): Sykdomshistorikk.Element {
-        val meldingsreferanseId = meldingsreferanseId()
-        val hendelseskilde = SykdomshistorikkHendelse.Hendelseskilde(this::class, meldingsreferanseId, registrert())
-        return foreldrepenger.sykdomshistorikkElement(meldingsreferanseId, hendelseskilde)
+        val hendelseskilde = SykdomshistorikkHendelse.Hendelseskilde(this::class, meldingsreferanseId(), registrert())
+        return foreldrepenger.sykdomshistorikkElement(meldingsreferanseId(), hendelseskilde)
     }
+
+    internal fun tilOgMed(dato: LocalDate) = Ytelser(
+        meldingsreferanseId = this.meldingsreferanseId(),
+        aktørId = this.aktørId,
+        fødselsnummer = this.fødselsnummer,
+        organisasjonsnummer = this.organisasjonsnummer,
+        vedtaksperiodeId = this.vedtaksperiodeId,
+        foreldrepenger = this.foreldrepenger.tilOgMed(dato),
+        svangerskapspenger = this.svangerskapspenger,
+        pleiepenger = this.pleiepenger,
+        omsorgspenger = this.omsorgspenger,
+        opplæringspenger = this.opplæringspenger,
+        institusjonsopphold = this.institusjonsopphold,
+        arbeidsavklaringspenger = this.arbeidsavklaringspenger,
+        dagpenger= this.dagpenger,
+        aktivitetslogg = this.aktivitetslogg
+    )
 }

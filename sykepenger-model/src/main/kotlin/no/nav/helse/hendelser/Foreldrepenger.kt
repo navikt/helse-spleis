@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -21,6 +22,11 @@ class Foreldrepenger(
         return foreldrepengeytelse.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }.also { overlapper ->
             if (!overlapper) aktivitetslogg.info("Bruker har foreldrepenger, men det slår ikke ut på overlappsjekken")
         }
+    }
+
+    internal fun tilOgMed(dato: LocalDate): Foreldrepenger {
+        return Foreldrepenger(foreldrepengeytelse.mapNotNull { periode ->
+            if (periode.starterEtter(dato.somPeriode())) null else periode.start til minOf(periode.endInclusive, dato) })
     }
 
     internal fun sykdomshistorikkElement(

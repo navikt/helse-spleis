@@ -348,11 +348,20 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Overlapp med foreldrepenger`() = Toggle.AndreYtelserUnderveis.enable{
+    fun `Fullstendig overlapp med foreldrepenger`() = Toggle.AndreYtelserUnderveis.enable {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.januar til 31.januar))
+        assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
+    }
+
+    @Test
+    fun `Overlapp med foreldrepenger i halen og utenfor perioden begrenses av perioden`() = Toggle.AndreYtelserUnderveis.enable {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(1.januar til 10.februar))
         assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
     }
 }
