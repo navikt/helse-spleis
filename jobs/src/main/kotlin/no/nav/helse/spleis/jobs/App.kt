@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.sun.tools.javac.jvm.ByteCodes.ret
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
@@ -108,6 +109,13 @@ private fun migrateV2Task(arbeidId: String) {
     }
 }
 
+private fun fåLås(session: Session, arbeidId: String): Boolean {
+    // oppretter en lås som varer ut levetiden til sesjonen.
+    // returnerer umiddelbart med true/false avhengig om vi fikk låsen eller ikke
+    @Language("PostgreSQL")
+    val query = "SELECT pg_try_advisory_lock_shared(:arbeidId)"
+    return session.run(queryOf(query, mapOf("arbeidId" to arbeidId)).map { it.boolean(1) }.asSingle)!!
+}
 
 private fun fyllArbeidstabell(session: Session, arbeidId: String) {
     @Language("PostgreSQL")
@@ -145,16 +153,23 @@ private fun arbeidFinnes(session: Session, arbeidId: String): Boolean {
     return antall > 0
 }
 
+private fun klargjørEllerVentPåTilgjengeligArbeid(session: Session, arbeidId: String) {
+    if (fåLås(session, arbeidId)) {
+        if (arbeidFinnes(session, arbeidId)) return
+        return fyllArbeidstabell(session, arbeidId)
+    }
+
+    log.info("Venter på at arbeid skal bli tilgjengelig")
+    while (!arbeidFinnes(session, arbeidId)) {
+        log.info("Arbeid finnes ikke ennå, venter litt")
+        runBlocking { delay(250) }
+    }
+}
+
 private fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: Session, fnr: Long) -> Unit) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         sessionOf(ds).use { session ->
-            fyllArbeidstabell(session, arbeidId)
-
-            log.info("Venter på at arbeid skal bli tilgjengelig")
-            while (!arbeidFinnes(session, arbeidId)) {
-                log.info("Arbeid finnes ikke ennå, venter litt")
-                runBlocking { delay(250) }
-            }
+            klargjørEllerVentPåTilgjengeligArbeid(session, arbeidId)
             do {
                 log.info("Forsøker å hente arbeid")
                 val arbeidsliste = hentArbeid(session, arbeidId, size)
