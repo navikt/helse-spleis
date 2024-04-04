@@ -1,6 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.januar
+import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -32,115 +33,114 @@ internal class BesteDagTest {
 
     @Test
     fun `sammenhengende sykdom`() {
-        assertWinnerBidirectional(sykedagFraSøknad, arbeidsdagFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
-        assertWinnerBidirectional(ferieFraSøknad, arbeidsdagFraSøknad, ferieFraSøknad, Dag.sammenhengendeSykdom)
-        assertWinnerBidirectional(sykedagFraSøknad, ferieFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
-        assertWinnerBidirectional(sykedagFraSøknad, permisjonFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
-        assertWinnerBidirectional(permisjonFraSøknad, arbeidsdagFraSøknad, permisjonFraSøknad, Dag.sammenhengendeSykdom)
-        assertWinnerBidirectional(sykedagFraSøknad, arbeidsdagFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
-        assertWinnerBidirectional(sykedagNavFraSaksbehandler, arbeidsdagFraSøknad, sykedagNavFraSaksbehandler, Dag.sammenhengendeSykdom)
-        assertWinnerBidirectional(sykedagNavFraSaksbehandler, permisjonFraSøknad, sykedagNavFraSaksbehandler, Dag.sammenhengendeSykdom)
+        sammenhengendeSykdom betyr_at sykedagFraSøknad slår arbeidsdagFraSøknad
+        sammenhengendeSykdom betyr_at sykedagFraSøknad slår ferieFraSøknad
+        sammenhengendeSykdom betyr_at sykedagFraSøknad slår permisjonFraSøknad
+        sammenhengendeSykdom betyr_at sykedagFraSøknad slår arbeidsdagFraSøknad
+        sammenhengendeSykdom betyr_at ferieFraSøknad slår arbeidsdagFraSøknad
+        sammenhengendeSykdom betyr_at permisjonFraSøknad slår arbeidsdagFraSøknad
+        sammenhengendeSykdom betyr_at sykedagNavFraSaksbehandler slår arbeidsdagFraSøknad
+        sammenhengendeSykdom betyr_at sykedagNavFraSaksbehandler slår permisjonFraSøknad
     }
 
     @Test
     fun `inntektsmelding sier ferie, søknad sier syk blir feriedag`() {
-        assertWinnerBidirectional(sykedagFraSøknad, ferieFraInntektsmelding, ferieFraInntektsmelding)
+        ferieFraInntektsmelding slår sykedagFraSøknad
     }
 
     @Test
     fun `egensmeldingdag fra saksbehandler`() {
-        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, arbeidsdagFraSøknad, egenmeldingsdagFraSaksbehandler)
-        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, sykedagFraSøknad, sykedagFraSøknad)
-        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, ferieFraSøknad, ferieFraSøknad)
-        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, permisjonFraSøknad, permisjonFraSøknad)
-        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, arbeidsgiverdagFraInntektsmelding, arbeidsgiverdagFraInntektsmelding)
-        assertWinnerBidirectional(egenmeldingsdagFraSaksbehandler, ukjentDag, egenmeldingsdagFraSaksbehandler)
+        egenmeldingsdagFraSaksbehandler slår arbeidsdagFraSøknad
+        egenmeldingsdagFraSaksbehandler slår ukjentDag
+        sykedagFraSøknad slår egenmeldingsdagFraSaksbehandler
+        ferieFraSøknad slår egenmeldingsdagFraSaksbehandler
+        permisjonFraSøknad slår egenmeldingsdagFraSaksbehandler
+        arbeidsgiverdagFraInntektsmelding slår egenmeldingsdagFraSaksbehandler
     }
 
     @Test
     fun `ferie uten sykmelding`() {
-        assertWinnerBidirectional(arbeidsdagFraSøknad, arbeidIkkeGjenopptattDag, arbeidsdagFraSøknad)
-        assertWinnerBidirectional(arbeidsdagFraInntektsmelding, arbeidIkkeGjenopptattDag, arbeidsdagFraInntektsmelding)
-        assertWinnerBidirectional(sykedagFraSøknad, arbeidIkkeGjenopptattDag, sykedagFraSøknad)
-        assertWinnerBidirectional(ferieFraSøknad, arbeidIkkeGjenopptattDag, ferieFraSøknad)
-        assertWinnerBidirectional(arbeidsgiverdagFraInntektsmelding, arbeidIkkeGjenopptattDag, arbeidsgiverdagFraInntektsmelding)
+        arbeidsdagFraSøknad slår arbeidIkkeGjenopptattDag
+        arbeidsdagFraInntektsmelding slår arbeidIkkeGjenopptattDag
+        sykedagFraSøknad slår arbeidIkkeGjenopptattDag
+        ferieFraSøknad slår arbeidIkkeGjenopptattDag
+        arbeidsgiverdagFraInntektsmelding slår arbeidIkkeGjenopptattDag
 
-        assertWinner(ferieFraSaksbehandler, arbeidIkkeGjenopptattDag, arbeidIkkeGjenopptattDag)
-        assertWinner(arbeidIkkeGjenopptattDag, ferieFraSaksbehandler, ferieFraSaksbehandler)
+        ferieFraSaksbehandler mot arbeidIkkeGjenopptattDag gir arbeidIkkeGjenopptattDag
+        arbeidIkkeGjenopptattDag mot ferieFraSaksbehandler gir ferieFraSaksbehandler
 
-        assertWinner(sykedagNavFraSaksbehandler, arbeidIkkeGjenopptattDag, arbeidIkkeGjenopptattDag)
-        assertWinner(arbeidIkkeGjenopptattDag, sykedagNavFraSaksbehandler, sykedagNavFraSaksbehandler)
+        sykedagNavFraSaksbehandler mot arbeidIkkeGjenopptattDag gir arbeidIkkeGjenopptattDag
+        arbeidIkkeGjenopptattDag mot sykedagNavFraSaksbehandler gir sykedagNavFraSaksbehandler
 
-        assertWinner(sykedagFraSaksbehandler, arbeidIkkeGjenopptattDag, arbeidIkkeGjenopptattDag)
-        assertWinner(arbeidIkkeGjenopptattDag, sykedagFraSaksbehandler, sykedagFraSaksbehandler)
+        sykedagFraSaksbehandler mot arbeidIkkeGjenopptattDag gir arbeidIkkeGjenopptattDag
+        arbeidIkkeGjenopptattDag mot sykedagFraSaksbehandler gir sykedagFraSaksbehandler
     }
 
     @Test
     fun `arbeidsdag fra saksbehandler`() {
-        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, arbeidsdagFraSøknad, arbeidsdagFraSaksbehandler)
-        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, sykedagFraSøknad, arbeidsdagFraSaksbehandler)
-        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, ferieFraSøknad, arbeidsdagFraSaksbehandler)
-        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, permisjonFraSøknad, arbeidsdagFraSaksbehandler)
-        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, arbeidsgiverdagFraInntektsmelding, arbeidsdagFraSaksbehandler)
-        assertWinnerBidirectional(arbeidsdagFraSaksbehandler, ukjentDag, arbeidsdagFraSaksbehandler)
+        arbeidsdagFraSaksbehandler slår arbeidsdagFraSøknad
+        arbeidsdagFraSaksbehandler slår sykedagFraSøknad
+        arbeidsdagFraSaksbehandler slår ferieFraSøknad
+        arbeidsdagFraSaksbehandler slår permisjonFraSøknad
+        arbeidsdagFraSaksbehandler slår arbeidsgiverdagFraInntektsmelding
+        arbeidsdagFraSaksbehandler slår ukjentDag
     }
 
     @Test
     fun `sykedag nav fra saksbehandler`() {
-        assertWinnerBidirectional(sykedagNavFraSaksbehandler, arbeidsdagFraSøknad, sykedagNavFraSaksbehandler)
-        assertWinner(sykedagNavFraSaksbehandler, arbeidsdagFraSaksbehandler, arbeidsdagFraSaksbehandler)
-        assertWinner(arbeidsdagFraSaksbehandler, sykedagNavFraSaksbehandler, sykedagNavFraSaksbehandler)
-        assertWinnerBidirectional(sykedagNavFraSaksbehandler, sykedagFraSøknad, sykedagNavFraSaksbehandler)
-        assertWinnerBidirectional(sykedagNavFraSaksbehandler, ferieFraSøknad, sykedagNavFraSaksbehandler)
-        assertWinnerBidirectional(sykedagNavFraSaksbehandler, permisjonFraSøknad, sykedagNavFraSaksbehandler)
-        assertWinnerBidirectional(sykedagNavFraSaksbehandler, arbeidsgiverdagFraInntektsmelding, sykedagNavFraSaksbehandler)
-        assertWinnerBidirectional(sykedagNavFraSaksbehandler, ukjentDag, sykedagNavFraSaksbehandler)
+        sykedagNavFraSaksbehandler slår arbeidsdagFraSøknad
+        sykedagNavFraSaksbehandler mot arbeidsdagFraSaksbehandler gir arbeidsdagFraSaksbehandler
+        arbeidsdagFraSaksbehandler mot sykedagNavFraSaksbehandler gir sykedagNavFraSaksbehandler
+        sykedagNavFraSaksbehandler slår sykedagFraSøknad
+        sykedagNavFraSaksbehandler slår ferieFraSøknad
+        sykedagNavFraSaksbehandler slår permisjonFraSøknad
+        sykedagNavFraSaksbehandler slår arbeidsgiverdagFraInntektsmelding
+        sykedagNavFraSaksbehandler slår ukjentDag
     }
 
     @Test
     fun `nulldag taper mot en gitt dag`() {
-        assertWinnerBidirectional(ukjentDag, sykedagFraSøknad, sykedagFraSøknad)
+        sykedagFraSøknad slår ukjentDag
     }
 
     @Test
     fun `ferie vinner over sykdom`() {
-        assertWinner(sykedagFraSøknad, ferieFraSøknad, ferieFraSøknad)
-        assertWinner(ferieFraSøknad, sykedagFraSøknad, sykedagFraSøknad)
+        sykedagFraSøknad mot ferieFraSøknad gir ferieFraSøknad
+        ferieFraSøknad mot sykedagFraSøknad gir sykedagFraSøknad
     }
 
     @Test
     fun `permisjon vinner over sykdom`() {
-        assertWinner(sykedagFraSøknad, permisjonFraSøknad, permisjonFraSøknad)
-        assertWinner(permisjonFraSøknad, sykedagFraSøknad, sykedagFraSøknad)
+        sykedagFraSøknad mot permisjonFraSøknad gir permisjonFraSøknad
+        permisjonFraSøknad mot sykedagFraSøknad gir sykedagFraSøknad
 
-        assertWinner(permisjonHelgedagFraSøknad, sykHelgedagFraSøknad, sykHelgedagFraSøknad)
-        assertWinner(sykHelgedagFraSøknad, permisjonHelgedagFraSøknad, permisjonHelgedagFraSøknad)
+        permisjonHelgedagFraSøknad mot sykHelgedagFraSøknad gir sykHelgedagFraSøknad
+        sykHelgedagFraSøknad mot permisjonHelgedagFraSøknad gir permisjonHelgedagFraSøknad
     }
 
     @Test
     fun `søknad med egenmelding vinner over en gitt dag`() {
-        assertWinnerBidirectional(ferieFraSøknad, arbeidsgiverdagFraInntektsmelding, arbeidsgiverdagFraInntektsmelding)
+        arbeidsgiverdagFraInntektsmelding slår ferieFraSøknad
     }
 
     @Test
     fun `arbeidsdag vinner over sykedag`() {
-        assertWinner(sykedagFraSøknad, arbeidsdagFraSøknad, arbeidsdagFraSøknad)
+        sykedagFraSøknad mot arbeidsdagFraSøknad gir arbeidsdagFraSøknad
     }
 
     @Test
     fun `sykedag fra søknad vinner over egenmeldingsdag i inntektsmelding`() {
-        assertWinner(sykedagFraSøknad, arbeidsgiverdagFraInntektsmelding, sykedagFraSøknad)
-        assertWinner(arbeidsgiverdagFraInntektsmelding, sykedagFraSøknad, sykedagFraSøknad)
+        sykedagFraSøknad slår arbeidsgiverdagFraInntektsmelding
     }
 
     @Test
     fun `andre ytelser vinner over sykedag fra søknad`() {
-        assertWinnerBidirectional(sykedagFraSøknad, andreYtelser, andreYtelser)
+        andreYtelser slår sykedagFraSøknad
     }
 
     @Test
     fun `saksbehandler vinner over andre ytelser`() {
-        assertWinnerBidirectional(andreYtelser, arbeidsdagFraSaksbehandler, arbeidsdagFraSaksbehandler)
+        arbeidsdagFraSaksbehandler slår andreYtelser
     }
 
     private fun assertWinner(
@@ -162,4 +162,10 @@ internal class BesteDagTest {
         assertWinner(dag1, dag2, expectedWinner, turnering)
         assertWinner(dag2, dag1, expectedWinner, turnering)
     }
+
+    private infix fun Dag.slår(taper: Dag) = Pair(Dagturnering.TURNERING::beste, this) slår taper
+    private infix fun Pair<BesteStrategy, Dag>.slår(taper: Dag) = assertWinnerBidirectional(this.second, taper, this.second, this.first)
+    private infix fun Dag.mot(høyre: Dag) = Pair(this, høyre)
+    private infix fun Pair<Dag, Dag>.gir(vinner: Dag) = assertWinner(this.first, this.second, vinner)
+    private infix fun BesteStrategy.betyr_at(dag: Dag) = Pair(this, dag)
 }
