@@ -1,0 +1,76 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "behandlinger": [
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "id": "65d0a568-26ca-45fd-bed7-ec83d6c1f38c"
+                }
+              ]
+            },
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "id": "d2e709e0-02cd-4bc2-b9dd-707d0891bb36"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "skjæringstidspunkt": "2018-03-01",
+          "behandlinger": [
+            {
+              "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+              "endringer": [
+                {
+                  "id": "82ac20c2-c5a8-43fa-9ecf-9fdc0a36e0a2"
+                }
+              ]
+            },
+            {
+              "tilstand": "VEDTAK_IVERKSATT",
+              "endringer": [
+                {
+                  "id": "10a30dc8-fbec-4ae0-a183-c010d74a510d",
+                  "skjæringstidspunkt": "2018-03-05"
+                }
+              ]
+            },
+            {
+              "tilstand": "UBEREGNET_REVURDERING",
+              "endringer": [
+                {
+                  "id": "c1090c6a-fb52-4265-b81c-133c0e0dc435"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "skjæringstidspunkt": "2018-02-01",
+            "behandlinger": [
+              {
+                "tilstand": "AVSLUTTET_UTEN_VEDTAK",
+                "endringer": [
+                  {
+                    "id": "c2dd30a8-fa22-42c9-8d97-f3cbda2c7a1d"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
