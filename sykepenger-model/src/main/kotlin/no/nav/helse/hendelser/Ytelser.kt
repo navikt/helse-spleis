@@ -59,7 +59,9 @@ class Ytelser(
             if (foreldrepengerIHalen) this.info("Kandidat for å legge til foreldrepenger i historikken")
         }
         if (Toggle.AndreYtelserUnderveis.disabled) return false
-        return foreldrepengerIHalen
+        return foreldrepengerIHalen.also {
+            if (it) this.info("Legger til foreldrepenger i historikken")
+        }
     }
 
     override fun dokumentsporing(): Dokumentsporing {
