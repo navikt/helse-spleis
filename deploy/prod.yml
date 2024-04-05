@@ -65,3 +65,5 @@ spec:
     value: none
   - name: SEND_FERIEPENGEOPPDRAG
     value: "false"
+  - name: ANDRE_YTELSER_UNDERVEIS
+    value: "true"
