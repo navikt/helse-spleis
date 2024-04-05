@@ -71,7 +71,7 @@ private fun finnBehandlinger(person: PersonInnDto): List<BehandlingDto> {
                     )
                 }
                 .also {
-                    if (vedtaksperiode.tilstand == VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING) {
+                    if (it.isNotEmpty() && vedtaksperiode.tilstand == VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING) {
                         sikkerlogg.info("vedtaksperiodeId {} er i AUU mens siste behandling er ikke Avsluttet uten vedtak", kv("vedtaksperiodeId", vedtaksperiode.id))
                     }
                 }
