@@ -798,7 +798,8 @@ enum class Periodetilstand {
                 jurist.medVedtaksperiode(vedtaksperiodeId, dokumentsporing.tilSubsumsjonsformat(), sykmeldingsperiode)
 
             fun List<Behandling>.lagreTidsnæreInntekter(behandlinger: Behandlinger, arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate, hendelse: Hendelse, aktivitetslogg: IAktivitetslogg, oppholdsperiodeMellom: Periode?) {
-                val sisteEndringMedUtbetaling = asReversed().firstNotNullOfOrNull { it.endringer.lastOrNull { it.utbetaling != null } } ?: return
+                val sisteBehandlingMedUtbetaling = lastOrNull { it.tilstand != Tilstand.AvsluttetUtenVedtak && it.endringer.any { endring -> endring.utbetaling != null } } ?: return
+                val sisteEndringMedUtbetaling = sisteBehandlingMedUtbetaling.endringer.lastOrNull { it.utbetaling != null } ?: return
                 behandlinger.sikreNyBehandling(arbeidsgiver, hendelse)
                 return sisteEndringMedUtbetaling.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, oppholdsperiodeMellom)
             }

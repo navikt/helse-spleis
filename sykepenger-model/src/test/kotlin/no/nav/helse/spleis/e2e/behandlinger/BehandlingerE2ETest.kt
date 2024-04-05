@@ -16,8 +16,10 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
@@ -579,6 +581,28 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(2, behandlinger.size)
                 assertEquals(VEDTAK_IVERKSATT, behandlinger[0].tilstand)
                 assertEquals(UBEREGNET_REVURDERING, behandlinger[1].tilstand)
+            }
+        }
+    }
+
+    @Test
+    fun `korrigert søknad på kort periode som har hatt beregnet utbetaling`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 15.januar))
+            håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrTidslinje((1.januar til 15.januar).map { ManuellOverskrivingDag(it, Dagtype.Permisjonsdag) })
+
+            håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Permisjon(1.januar, 10.januar), Permisjon(14.januar, 15.januar))
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(3, behandlinger.size)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[0].tilstand)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[1].tilstand)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, behandlinger[2].tilstand)
             }
         }
     }
