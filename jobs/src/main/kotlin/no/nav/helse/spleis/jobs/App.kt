@@ -1,18 +1,10 @@
 package no.nav.helse.spleis.jobs
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -29,16 +21,13 @@ import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
-import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
 import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
-private val log = LoggerFactory.getLogger("no.nav.helse.spleis.gc.App")
-private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+val log = LoggerFactory.getLogger("no.nav.helse.spleis.gc.App")
+val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
 @ExperimentalTime
 fun main(cliArgs: Array<String>) {
@@ -59,7 +48,7 @@ fun main(cliArgs: Array<String>) {
         "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
         "migrate_v2" -> migrateV2Task(args[1].trim())
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
-        "migrere_avviksvurderinger" -> migrereAvviksvurderinger(ConsumerProducerFactory(AivenConfig.default), args[1].trim())
+        "migrere_behandlinger" -> migrereBehandlinger(ConsumerProducerFactory(AivenConfig.default), args[1].trim())
         else -> log.error("Unknown task $task")
     }
 }
@@ -165,7 +154,7 @@ private fun klargjørEllerVentPåTilgjengeligArbeid(session: Session, arbeidId: 
     }
 }
 
-private fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: Session, fnr: Long) -> Unit) {
+fun opprettOgUtførArbeid(arbeidId: String, size: Int = 1, arbeider: (session: Session, fnr: Long) -> Unit) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource(maximumPoolSize = 1).use { ds ->
         sessionOf(ds).use { session ->
             klargjørEllerVentPåTilgjengeligArbeid(session, arbeidId)
@@ -203,196 +192,7 @@ private fun testSpeilJsonTask(arbeidId: String) {
     }*/
 }
 
-internal val objectMapper: ObjectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-private fun migrereAvviksvurderinger(factory: ConsumerProducerFactory, arbeidId: String) {
-    factory.createProducer().use { producer ->
-        opprettOgUtførArbeid(arbeidId, size = 500) { session, fnr ->
-            hentPerson(session, fnr)?.let { (aktørId, data) ->
-                val mdcContextMap = MDC.getCopyOfContextMap() ?: emptyMap()
-                try {
-                    MDC.put("aktørId", aktørId)
-                    val node = objectMapper.readTree(data)
-                    val vurderinger = hentAvviksvurderinger(node)
-                    if (vurderinger.isEmpty()) return@let
-                    val fødselsnummer = fødselsnummerSomString(fnr)
-                    val event = AvviksvurderingerEvent(fødselsnummer, vurderinger)
-                    sikkerlogg.info("Ønsker å skrive avviksvurdering til kafka:\n {}", objectMapper.writeValueAsString(event))
-                    producer.send(
-                        ProducerRecord(
-                            "tbd.avviksvurdering.migreringer.v2",
-                            null,
-                            fødselsnummer,
-                            objectMapper.writeValueAsString(event)
-                        )
-                    )
-                    sikkerlogg.info("Skrev avviksvurderinger til avviksvurdering.migreringer")
-
-                } catch (err: Exception) {
-                    log.info("$aktørId lar seg ikke serialisere: ${err.message}")
-                    sikkerlogg.error("$aktørId lar seg ikke serialisere: ${err.message}", err)
-                } finally {
-                    MDC.setContextMap(mdcContextMap)
-                }
-            }
-        }
-        producer.flush()
-    }
-    runBlocking {
-        log.info("Venter med å skru av i ett minutt for at securelogs-sidecar forhåpentligvis skal synce loggene")
-        delay(60000L)
-    }
-}
-
-private fun fødselsnummerSomString(fnr: Long) = fnr.toString().let { if (it.length == 11) it else "0$it" }
-
-private fun hentAvviksvurderinger(node: JsonNode): List<AvviksvurderingDto> {
-    return node.path("vilkårsgrunnlagHistorikk")
-        .flatMap { innslag ->
-            val opprettet = LocalDateTime.parse(innslag.path("opprettet").asText())
-            innslag.path("vilkårsgrunnlag")
-                .mapNotNull { vilkårsgrunnlag ->
-                    val type = vilkårsgrunnlag.path("type").asText()
-                    when (type) {
-                        "Vilkårsprøving" -> parseSpleisVilkårsgrunnlag(node, vilkårsgrunnlag, opprettet)
-                        "Infotrygd" -> parseInfotrygdVilkårsgrunnlag(vilkårsgrunnlag, opprettet)
-                        else -> null
-                    }
-                }
-        }
-        .groupBy { it.vilkårsgrunnlagId }
-        .map { (_, values) -> values.minByOrNull { it.vurderingstidspunkt }!! }
-}
-
-private val DA_SPINNVILL_TOK_OVER = LocalDateTime.of(2024, 1, 2, 10, 0, 0, 0)
-private fun parseSpleisVilkårsgrunnlag(node: JsonNode, grunnlagsdata: JsonNode, opprettet: LocalDateTime): AvviksvurderingDto? {
-    val sammenligningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("sammenligningsgrunnlag").asDouble()
-    if (opprettet >= DA_SPINNVILL_TOK_OVER && sammenligningsgrunnlagTotalbeløp == 0.0) return null
-    val skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText())
-    return try {
-        val vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
-        val beregningsgrunnlagTotalbeløp = grunnlagsdata.path("sykepengegrunnlag").path("totalOmregnetÅrsinntekt").asDouble()
-        val avviksprosentSomBrøk = when (sammenligningsgrunnlagTotalbeløp) {
-            0.0 -> 1.0
-            else -> (sammenligningsgrunnlagTotalbeløp - beregningsgrunnlagTotalbeløp).absoluteValue / sammenligningsgrunnlagTotalbeløp
-        }
-        AvviksvurderingDto(
-            beregningsgrunnlagTotalbeløp = beregningsgrunnlagTotalbeløp,
-            sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlagTotalbeløp,
-            avviksprosent = (avviksprosentSomBrøk * 10_000).roundToInt() / 100.0,
-            skjæringstidspunkt = skjæringstidspunkt,
-            vurderingstidspunkt = opprettet,
-            type = VilkårsgrunnlagtypeDto.SPLEIS,
-            omregnedeÅrsinntekter = grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
-                OmregnetÅrsinntektDto(
-                    orgnummer = opplysning.path("orgnummer").asText(),
-                    beløp = omregnetÅrsinntekt(node, opplysning.path("inntektsopplysning"))
-                )
-            },
-            sammenligningsgrunnlag = grunnlagsdata.path("sykepengegrunnlag").path("sammenligningsgrunnlag").path("arbeidsgiverInntektsopplysninger").map { opplysning ->
-                SammenligningsgrunnlagDto(
-                    orgnummer = opplysning.path("orgnummer").asText(),
-                    skatteopplysninger = opplysning.path("skatteopplysninger").map { skatt ->
-                        SkatteopplysningDto(
-                            beløp = skatt.path("beløp").asDouble(),
-                            måned = YearMonth.parse(skatt.path("måned").asText()),
-                            type = skatt.path("type").asText(),
-                            fordel = skatt.path("fordel").asText(),
-                            beskrivelse = skatt.path("beskrivelse").asText()
-                        )
-                    }
-                )
-            },
-            vilkårsgrunnlagId = vilkårsgrunnlagId
-        )
-    } catch (err: Exception) {
-        sikkerlogg.error("Klarte ikke migrere skjæringstidspunkt $skjæringstidspunkt: ${err.message}", err)
-        null
-    }
-}
-private fun omregnetÅrsinntekt(node: JsonNode, opplysning: JsonNode): Double {
-    if (opplysning.path("kilde").asText() == "SKJØNNSMESSIG_FASTSATT") return omregnetÅrsinntekt(node, finnInntektsopplysning(node, opplysning.path("overstyrtInntektId").asText()))
-    val månedsbeløp = opplysning.path("skatteopplysninger")
-        .takeIf(JsonNode::isArray)
-        ?.sumOf { skatt -> skatt.path("beløp").asDouble() }
-        ?.coerceAtLeast(0.0)
-        ?.div(3)
-        ?: opplysning.path("beløp").asDouble()
-    return månedsbeløp * 12
-}
-private fun finnInntektsopplysning(node: JsonNode, opplysningId: String): JsonNode {
-    return node.path("vilkårsgrunnlagHistorikk").firstNotNullOfOrNull { vilkårsgrunnlag ->
-        vilkårsgrunnlag.path("vilkårsgrunnlag").firstNotNullOfOrNull { grunnlagsdata ->
-            grunnlagsdata.path("sykepengegrunnlag").path("arbeidsgiverInntektsopplysninger").firstOrNull { opplysning ->
-                opplysning.path("inntektsopplysning").path("id").asText() == opplysningId
-            }
-        }
-    } ?: throw IllegalStateException("Finner ikke vilkårsgrunnlag med inntektsopplysning med $opplysningId")
-}
-private fun parseInfotrygdVilkårsgrunnlag(grunnlagsdata: JsonNode, opprettet: LocalDateTime): AvviksvurderingDto {
-    return AvviksvurderingDto(
-        beregningsgrunnlagTotalbeløp = null,
-        sammenligningsgrunnlagTotalbeløp = null,
-        avviksprosent = null,
-        skjæringstidspunkt = LocalDate.parse(grunnlagsdata.path("skjæringstidspunkt").asText()),
-        vurderingstidspunkt = opprettet,
-        type = VilkårsgrunnlagtypeDto.INFOTRYGD,
-        omregnedeÅrsinntekter = emptyList(),
-        sammenligningsgrunnlag = emptyList(),
-        vilkårsgrunnlagId = UUID.fromString(grunnlagsdata.path("vilkårsgrunnlagId").asText())
-    )
-}
-
-private data class AvviksvurderingerEvent(
-    val fødselsnummer: String,
-    val skjæringstidspunkter: List<AvviksvurderingDto>,
-    @JsonProperty("@event_name")
-    val eventName: String = "avviksvurderinger"
-)
-private data class AvviksvurderingDto(
-    val beregningsgrunnlagTotalbeløp: Double?,
-    val sammenligningsgrunnlagTotalbeløp: Double?,
-    val avviksprosent: Double?,
-    val skjæringstidspunkt: LocalDate,
-    val vurderingstidspunkt: LocalDateTime,
-    val type: VilkårsgrunnlagtypeDto,
-    val omregnedeÅrsinntekter: List<OmregnetÅrsinntektDto>,
-    val sammenligningsgrunnlag: List<SammenligningsgrunnlagDto>,
-    val vilkårsgrunnlagId: UUID
-) {
-    init {
-        if (type == VilkårsgrunnlagtypeDto.SPLEIS && omregnedeÅrsinntekter.isEmpty()) sikkerlogg.error("Ingen omregnede årsinntekter for $skjæringstidspunkt")
-        if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlag.isEmpty()) sikkerlogg.error("Ingen sammenligningsgrunnlag for $skjæringstidspunkt")
-        if (type == VilkårsgrunnlagtypeDto.SPLEIS && sammenligningsgrunnlagTotalbeløp == 0.0) sikkerlogg.error("sammenligningsgrunnlagTotalbeløp er 0 for $skjæringstidspunkt")
-    }
-}
-
-private class OmregnetÅrsinntektDto(
-    val orgnummer: String,
-    val beløp: Double
-)
-
-private class SammenligningsgrunnlagDto(
-    val orgnummer: String,
-    val skatteopplysninger: List<SkatteopplysningDto>
-)
-
-private class SkatteopplysningDto(
-    val beløp: Double,
-    val måned: YearMonth,
-    val type: String,
-    val fordel: String,
-    val beskrivelse: String
-)
-
-private enum class VilkårsgrunnlagtypeDto {
-    INFOTRYGD, SPLEIS
-}
-
-private fun hentPerson(session: Session, fnr: Long) =
+fun hentPerson(session: Session, fnr: Long) =
     session.run(queryOf("SELECT aktor_id, data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fnr).map {
         it.string("aktor_id") to it.string("data")
     }.asSingle)
