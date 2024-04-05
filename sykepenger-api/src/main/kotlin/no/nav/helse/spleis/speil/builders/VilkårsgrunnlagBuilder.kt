@@ -217,25 +217,25 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     }
 
     private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, deaktivert: Boolean): IArbeidsgiverinntekt {
-        val omregnetÅrsinntekt = inntekter.getOrPut(io.id) {
-            when (io) {
-                is InntektsopplysningUtDto.IkkeRapportertDto -> IOmregnetÅrsinntekt(IInntektkilde.IkkeRapportert, fom, tom, 0.0, 0.0, null)
-                is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
-                is InntektsopplysningUtDto.InntektsmeldingDto -> IOmregnetÅrsinntekt(IInntektkilde.Inntektsmelding, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
-                is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
-                is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
-                    IInntektkilde.AOrdningen, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, io.inntektsopplysninger
-                    .groupBy { it.måned }
-                    .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
-                    .map { (måned, månedligSum) ->
-                        IInntekterFraAOrdningen(
-                            måned = måned,
-                            sum = månedligSum
-                        )
-                    }
-                )
-                is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> inntekter.getValue(io.overstyrtInntekt)
-            }
+        val omregnetÅrsinntekt = when (io) {
+            is InntektsopplysningUtDto.IkkeRapportertDto -> IOmregnetÅrsinntekt(IInntektkilde.IkkeRapportert, fom, tom, 0.0, 0.0, null)
+            is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
+            is InntektsopplysningUtDto.InntektsmeldingDto -> IOmregnetÅrsinntekt(IInntektkilde.Inntektsmelding, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
+            is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
+            is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
+                IInntektkilde.AOrdningen, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, io.inntektsopplysninger
+                .groupBy { it.måned }
+                .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
+                .map { (måned, månedligSum) ->
+                    IInntekterFraAOrdningen(
+                        måned = måned,
+                        sum = månedligSum
+                    )
+                }
+            )
+            is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> inntekter.getValue(io.overstyrtInntekt)
+        }.also {
+            inntekter[io.id] = it
         }
         return IArbeidsgiverinntekt(
             arbeidsgiver = orgnummer,
