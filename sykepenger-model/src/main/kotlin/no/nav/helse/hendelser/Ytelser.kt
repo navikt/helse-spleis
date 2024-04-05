@@ -89,6 +89,6 @@ class Ytelser(
         institusjonsopphold = this.institusjonsopphold,
         arbeidsavklaringspenger = this.arbeidsavklaringspenger,
         dagpenger= this.dagpenger,
-        aktivitetslogg = this.aktivitetslogg
+        aktivitetslogg = aktivitetslogg.barn()
     )
 }
