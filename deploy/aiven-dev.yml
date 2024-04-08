@@ -271,3 +271,6 @@ spec:
         - team: tbd
           application: spotlight
           access: readwrite
+        - team: tbd
+          application: sparkel-stoppknapp
+          access: readwrite
