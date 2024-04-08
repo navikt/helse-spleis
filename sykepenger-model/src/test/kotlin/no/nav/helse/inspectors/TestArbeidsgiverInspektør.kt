@@ -51,7 +51,7 @@ internal class TestArbeidsgiverInspektør(
     private var vedtaksperiodeindeks = 0
     private val tilstander = mutableMapOf<Int, TilstandType>()
     private val perioder = mutableMapOf<Int, Periode>()
-    private val skjæringstidspunkter = mutableMapOf<Int, () -> LocalDate>()
+    private val skjæringstidspunkter = mutableMapOf<Int, LocalDate>()
     private val maksdatoer = mutableListOf<LocalDate>()
     private val forbrukteSykedagerer = mutableListOf<Int?>()
     private val gjenståendeSykedagerer = mutableListOf<Int?>()
@@ -138,7 +138,7 @@ internal class TestArbeidsgiverInspektør(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: () -> LocalDate,
+        skjæringstidspunkt: LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {
         inVedtaksperiode = true
@@ -168,7 +168,7 @@ internal class TestArbeidsgiverInspektør(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: () -> LocalDate,
+        skjæringstidspunkt: LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {
         vedtaksperiodeindeks += 1
@@ -368,7 +368,7 @@ internal class TestArbeidsgiverInspektør(
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            skjæringstidspunkt: () -> LocalDate,
+            skjæringstidspunkt: LocalDate,
             hendelseIder: Set<Dokumentsporing>
         ) {
             vedtaksperiodeId = id
@@ -439,8 +439,8 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(tilstander)
 
-    internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(skjæringstidspunkter)()
-    internal fun skjæringstidspunkt(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(skjæringstidspunkter)()
+    internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(skjæringstidspunkter)
+    internal fun skjæringstidspunkt(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(skjæringstidspunkter)
 
     internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalingstidslinjer(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun utbetalingstidslinjer(vedtaksperiodeId: UUID) = utbetalinger(vedtaksperiodeId).last().inspektør.utbetalingstidslinje.subset(periode(vedtaksperiodeId))
@@ -466,9 +466,9 @@ internal class TestArbeidsgiverInspektør(
     internal fun arbeidsgiverperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = arbeidsgiverperioder(vedtaksperiodeIdInnhenter).singleOrNullOrThrow()
     private fun <R> Collection<R>.singleOrNullOrThrow() = if (size < 2) this.firstOrNull() else throw IllegalStateException("Listen inneholder $size elementer: $this")
 
-    internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value()) =
+    internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value) =
         personInspektør.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(orgnummer)?.inspektør?.refusjonsopplysninger ?: Refusjonsopplysninger()
-    internal fun refusjonsopplysningerFraRefusjonshistorikk(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value()) =
+    internal fun refusjonsopplysningerFraRefusjonshistorikk(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value) =
         arbeidsgiver.inspektør.refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 
     internal data class UtbetalingstidslinjeberegningData(

@@ -51,7 +51,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: () -> LocalDate,
+        skjæringstidspunkt: LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {
         vedtaksperioder[id] = vedtaksperiode

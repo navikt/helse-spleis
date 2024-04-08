@@ -30,9 +30,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
 
     internal lateinit var oppdatert: LocalDateTime
         private set
-    internal lateinit var skjæringstidspunktLazy: () -> LocalDate
+    internal lateinit var skjæringstidspunkt: LocalDate
         private set
-    internal val skjæringstidspunkt get() = skjæringstidspunktLazy()
 
     internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID>
         private set
@@ -60,7 +59,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
             val grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
             val utbetaling: Utbetaling?,
             val periode: Periode,
-            val dokumentsporing: Dokumentsporing
+            val dokumentsporing: Dokumentsporing,
+            val skjæringstidspunkt: LocalDate
         )
 
         data class Behandlingkilde(
@@ -79,13 +79,13 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: () -> LocalDate,
+        skjæringstidspunkt: LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {
         this.id = id
         this.periode = periode
         this.oppdatert = oppdatert
-        this.skjæringstidspunktLazy = skjæringstidspunkt
+        this.skjæringstidspunkt = skjæringstidspunkt
         this.tilstand = tilstand
     }
 
@@ -135,11 +135,12 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
         utbetaling: Utbetaling?,
         dokumentsporing: Dokumentsporing,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        skjæringstidspunkt: LocalDate
     ) {
         val sisteBehandling = this.behandlinger.last()
         this.behandlinger[this.behandlinger.lastIndex] = sisteBehandling.copy(
-            endringer = sisteBehandling.endringer.plus(Behandling.Behandlingendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing))
+            endringer = sisteBehandling.endringer.plus(Behandling.Behandlingendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing, skjæringstidspunkt))
         )
         val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId ?: return
         val utbetalingId = utbetaling!!.inspektør.utbetalingId

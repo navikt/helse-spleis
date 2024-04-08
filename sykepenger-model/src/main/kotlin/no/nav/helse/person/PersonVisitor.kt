@@ -340,7 +340,8 @@ internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
         utbetaling: Utbetaling?,
         dokumentsporing: Dokumentsporing,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        skjæringstidspunkt: LocalDate
     ) {}
     fun postVisitBehandlingendring(
         id: UUID,
@@ -350,7 +351,8 @@ internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
         utbetaling: Utbetaling?,
         dokumentsporing: Dokumentsporing,
-        sykdomstidslinje: Sykdomstidslinje
+        sykdomstidslinje: Sykdomstidslinje,
+        skjæringstidspunkt: LocalDate
     ) {}
     fun visitBehandlingkilde(
         meldingsreferanseId: UUID,
@@ -378,7 +380,7 @@ internal interface VedtaksperiodeVisitor : BehandlingerVisitor, UtbetalingsdagVi
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: () -> LocalDate,
+        skjæringstidspunkt: LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {}
 
@@ -390,7 +392,7 @@ internal interface VedtaksperiodeVisitor : BehandlingerVisitor, UtbetalingsdagVi
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: () -> LocalDate,
+        skjæringstidspunkt: LocalDate,
         hendelseIder: Set<Dokumentsporing>
     ) {
     }

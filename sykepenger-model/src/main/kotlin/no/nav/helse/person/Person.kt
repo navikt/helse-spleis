@@ -47,6 +47,8 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
+import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
+import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.førsteFraværsdager
@@ -659,7 +661,11 @@ class Person private constructor(
         )
     }
 
-    internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {}
+    internal fun beregnSkjæringstidspunkt() = arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk)
+
+    internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
+        arbeidsgivere.beregnSkjæringstidspunkter(infotrygdhistorikk)
+    }
 
     internal fun søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter) {
         infotrygdhistorikk.tøm()
