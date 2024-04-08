@@ -117,7 +117,7 @@ internal class SpeilGenerasjonerBuilder(
     }
     private fun mapBeregnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): BeregnetPeriode {
         val sisteEndring = generasjon.endringer.last()
-        val utbetaling = utbetalinger.single { it.id == sisteEndring.utbetalingId }
+        val utbetaling = utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId } ?: error("Fant ikke tilhørende utbetaling for vedtaksperiodeId=${vedtaksperiode.id}")
         val utbetalingstidslinje = utbetalingstidslinjer.single { it.first == sisteEndring.utbetalingId }.second.build()
         val avgrensetUtbetalingstidslinje = utbetalingstidslinje.filter { it.dato in sisteEndring.periode.fom..sisteEndring.periode.tom }
         val skjæringstidspunkt = sisteEndring.skjæringstidspunkt!!
