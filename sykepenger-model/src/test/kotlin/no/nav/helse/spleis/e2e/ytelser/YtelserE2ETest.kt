@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -348,7 +347,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Fullstendig overlapp med foreldrepenger`() = Toggle.AndreYtelserUnderveis.enable {
+    fun `Fullstendig overlapp med foreldrepenger`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -358,7 +357,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Overlapp med foreldrepenger i halen og utenfor perioden begrenses av perioden`() = Toggle.AndreYtelserUnderveis.enable {
+    fun `Overlapp med foreldrepenger i halen og utenfor perioden begrenses av perioden`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)

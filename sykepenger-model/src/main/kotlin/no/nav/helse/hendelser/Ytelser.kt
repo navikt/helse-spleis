@@ -3,7 +3,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -55,10 +54,7 @@ class Ytelser(
     }
 
     private fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode?): Boolean {
-        val foreldrepengerIHalen = foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter).also { foreldrepengerIHalen ->
-            if (foreldrepengerIHalen) this.info("Kandidat for å legge til foreldrepenger i historikken")
-        }
-        if (Toggle.AndreYtelserUnderveis.disabled) return false
+        val foreldrepengerIHalen = foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter)
         return foreldrepengerIHalen.also {
             if (it) this.info("Legger til foreldrepenger i historikken")
         }
