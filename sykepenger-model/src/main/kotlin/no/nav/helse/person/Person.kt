@@ -659,15 +659,13 @@ class Person private constructor(
         )
     }
 
-    internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
-        val skjæringstidspunkter = arbeidsgivere.aktiveSkjæringstidspunkter()
-        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter)
-    }
+    internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {}
 
     internal fun søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter) {
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
         sykdomshistorikkEndret(hendelse)
+        ryddOppVilkårsgrunnlag()
         gjenopptaBehandling(hendelse)
     }
 
@@ -784,6 +782,12 @@ class Person private constructor(
     internal fun igangsettOverstyring(revurdering: Revurderingseventyr) {
         arbeidsgivere.igangsettOverstyring(revurdering)
         revurdering.sendOverstyringIgangsattEvent(this)
+        ryddOppVilkårsgrunnlag()
+    }
+
+    private fun ryddOppVilkårsgrunnlag() {
+        val skjæringstidspunkter = arbeidsgivere.aktiveSkjæringstidspunkter()
+        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter)
     }
 
     internal fun valider(

@@ -45,7 +45,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.februar, 9.februar))
-        assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.elementer.size)
+        assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().first().inspektør.elementer.size)
     }
 
     @Test
