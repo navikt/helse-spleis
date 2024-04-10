@@ -449,6 +449,9 @@ internal class Sykepengegrunnlag private constructor(
         builder.inntektskilde(inntektskilde())
         builder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
         arbeidsgiverInntektsopplysninger.omregnedeÅrsinntekter(builder)
+        if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) {
+            builder.tagSykepengergrunnlagErUnder2G()
+        }
     }
 
     enum class Begrensning {

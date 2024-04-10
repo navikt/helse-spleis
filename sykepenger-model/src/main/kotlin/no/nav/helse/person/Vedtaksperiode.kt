@@ -1045,9 +1045,9 @@ internal class Vedtaksperiode private constructor(
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
         val perioder = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .map { it.id to it.behandlinger }
-        behandlinger.godkjenning(hendelse, erForlengelse(), perioder, arbeidsgiver.kanForkastes(this, Aktivitetslogg()))
+        val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
+        behandlinger.godkjenning(hendelse, erForlengelse(), perioder, arbeidsgiver.kanForkastes(this, Aktivitetslogg()), finnArbeidsgiverperiode(), harPeriodeRettFør)
     }
-
     internal fun gjenopptaBehandling(hendelse: Hendelse, arbeidsgivere: Iterable<Arbeidsgiver>) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)

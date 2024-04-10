@@ -16,6 +16,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -55,6 +56,29 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     fun arbeidsgiverutbetaling() {
         tilGodkjenning(1.januar, 31.januar, a1)
         assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)))
+    }
+
+    @Test
+    fun `ingen ny arbeidsgiverperiode og sykepengegrunnlag under 2g`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        tilGodkjenning(10.februar, 20.februar, a1, beregnetInntekt = 10000.månedlig)
+        assertGodkjenningsbehov(
+            skjæringstidspunkt = 10.februar,
+            periodeFom = 10.februar,
+            periodeTom = 20.februar,
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1),
+            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 10000.månedlig.reflection { årlig, _, _, _ ->  årlig })),
+            behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
+            tags = setOf("IngenNyArbeidsgiverperiode", "SykepengegrunnlagUnder2G"),
+            perioderMedSammeSkjæringstidspunkt= listOf(
+                mapOf(
+                    "vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(),
+                    "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                    "fom" to 10.februar.toString(),
+                    "tom" to 20.februar.toString()
+                ),
+            )
+        )
     }
 
     @Test

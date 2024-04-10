@@ -82,6 +82,12 @@ class GodkjenningsbehovBuilder(
     fun tagBehandlingsresultat(behandlingsresultat: String) {
         tags.add(behandlingsresultat)
     }
+    fun tagSykepengergrunnlagErUnder2G() {
+        tags.add("SykepengegrunnlagUnder2G")
+    }
+    fun tagIngenNyArbeidsgiverperiode() {
+        tags.add("IngenNyArbeidsgiverperiode")
+    }
 
     fun omregnedeÅrsinntekter(orgnummer: String, omregnetÅrsinntekt: Double) = apply {
         omregnedeÅrsinntekter.add(mapOf("organisasjonsnummer" to orgnummer, "beløp" to omregnetÅrsinntekt))

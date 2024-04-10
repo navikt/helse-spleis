@@ -127,9 +127,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
 
-    internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, perioderMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandlinger>>, kanForkastes: Boolean) {
+    internal fun godkjenning(
+        hendelse: IAktivitetslogg,
+        erForlengelse: Boolean,
+        perioderMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandlinger>>,
+        kanForkastes: Boolean,
+        arbeidsgiverperiode: Arbeidsgiverperiode?,
+        harPeriodeRettFør: Boolean
+    ) {
         val behandlingerMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map { it.first to it.second.behandlinger.last() }
-        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes)
+        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør)
     }
 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Boolean {
@@ -429,7 +436,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utbetaling?.forkast(hendelse)
             }
 
-            fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, kanForkastes: Boolean, behandling: Behandling, perioderMedSammeSkjæringstidspunkt: List<Triple<UUID, UUID, Periode>>) {
+            fun godkjenning(
+                hendelse: IAktivitetslogg,
+                erForlengelse: Boolean,
+                kanForkastes: Boolean,
+                behandling: Behandling,
+                perioderMedSammeSkjæringstidspunkt: List<Triple<UUID, UUID, Periode>>,
+                arbeidsgiverperiode: Arbeidsgiverperiode?,
+                harPeriodeRettFør: Boolean
+            ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
                 val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode, behandling.id, perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, behandlingId, periode) ->
@@ -437,6 +452,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 })
                 grunnlagsdata.byggGodkjenningsbehov(builder)
                 utbetaling.byggGodkjenningsbehov(hendelse, periode, builder)
+                arbeidsgiverperiode?.tags(this.periode, builder, harPeriodeRettFør)
                 behandling.observatører.forEach { it.utkastTilVedtak(behandling.id, builder.tags()) }
                 Aktivitet.Behov.godkjenning(
                     aktivitetslogg = hendelse,
@@ -729,9 +745,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             observatører.forEach { it.vedtakAnnullert(hendelse, id) }
         }
 
-        internal fun godkjenning(hendelse: IAktivitetslogg, erForlengelse: Boolean, behandlingerMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandling>>, kanForkastes: Boolean) {
+        internal fun godkjenning(
+            hendelse: IAktivitetslogg,
+            erForlengelse: Boolean,
+            behandlingerMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandling>>,
+            kanForkastes: Boolean,
+            arbeidsgiverperiode: Arbeidsgiverperiode?,
+            harPeriodeRettFør: Boolean
+        ) {
             val perioderMedSammeSkjæringstidspunkt = behandlingerMedSammeSkjæringstidspunkt.map { Triple(it.first, it.second.id, it.second.periode) }
-            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt)
+            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt, arbeidsgiverperiode, harPeriodeRettFør)
         }
 
         fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, behandlinger: List<Behandling>): Utbetaling? {
