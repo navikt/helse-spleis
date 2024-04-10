@@ -14,6 +14,7 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -291,7 +292,7 @@ internal class TestPerson(
 
         internal fun håndterYtelser(
             vedtaksperiodeId: UUID,
-            foreldrepenger: List<Periode> = emptyList(),
+            foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
             svangerskapspenger: List<Periode> = emptyList(),
             pleiepenger: List<Periode> = emptyList(),
             omsorgspenger: List<Periode> = emptyList(),

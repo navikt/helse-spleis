@@ -4,6 +4,7 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Sykedag
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -464,7 +465,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(20.januar til 31.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(20.januar til 31.januar, 100)), orgnummer = a1)
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter(a1))
         assertIngenVarsel(RV_AY_5, 1.vedtaksperiode.filter(a2))
     }
@@ -476,7 +477,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         forlengVedtak(1.mars, 31.mars, a2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(20.mars til 31.mars), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(20.mars til 31.mars, 100)), orgnummer = a1)
         assertIngenVarsel(RV_AY_5)
     }
 

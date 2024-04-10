@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -631,7 +632,7 @@ private fun AbstractPersonTest.finnArbeidsgivere() = person.inspektør.arbeidsgi
 
 internal fun AbstractEndToEndTest.håndterYtelser(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-    foreldrepenger: List<Periode> = emptyList(),
+    foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
     svangerskapspenger: List<Periode> = emptyList(),
     pleiepenger: List<Periode> = emptyList(),
     omsorgspenger: List<Periode> = emptyList(),

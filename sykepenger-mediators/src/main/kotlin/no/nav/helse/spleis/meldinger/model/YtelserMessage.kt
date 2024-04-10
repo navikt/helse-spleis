@@ -6,6 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Omsorgspenger
@@ -39,7 +40,9 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse"]
-        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asPeriode) ?: emptyList()
+        .takeIf(JsonNode::isObject)?.path("perioder")?.map {
+            ForeldrepengerPeriode(Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()), it.path("grad").asInt())
+        } ?: emptyList()
     private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse"]
         .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asPeriode) ?: emptyList()
 

@@ -8,6 +8,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -176,7 +177,7 @@ internal abstract class AbstractObservableTest {
 
     protected fun ytelser(
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-        foreldrepenger: List<Periode> = emptyList(),
+        foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
         svangerskapspenger: List<Periode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),

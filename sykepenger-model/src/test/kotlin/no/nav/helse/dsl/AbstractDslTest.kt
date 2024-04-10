@@ -7,6 +7,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -286,7 +287,7 @@ internal abstract class AbstractDslTest {
         this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold) }
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
-        foreldrepenger: List<Periode> = emptyList(),
+        foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
         svangerskapspenger: List<Periode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),
@@ -418,7 +419,7 @@ protected fun håndterInntektsmeldingPortal(
         bareÈnArbeidsgiver(a1).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,
-        foreldrepenger: List<Periode> = emptyList(),
+        foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
         svangerskapspenger: List<Periode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),

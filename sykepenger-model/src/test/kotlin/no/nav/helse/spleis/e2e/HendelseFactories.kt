@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Foreldrepenger
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -385,7 +386,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikkForFeriepenger(
 
 internal fun AbstractEndToEndTest.ytelser(
     vedtaksperiodeIdInnhenter: IdInnhenter,
-    foreldrepenger: List<Periode> = emptyList(),
+    foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
     svangerskapspenger: List<Periode> = emptyList(),
     pleiepenger: List<Periode> = emptyList(),
     omsorgspenger: List<Periode> = emptyList(),

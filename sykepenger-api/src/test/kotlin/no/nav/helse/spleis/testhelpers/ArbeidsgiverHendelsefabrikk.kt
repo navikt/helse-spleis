@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
@@ -263,7 +264,7 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     internal fun lagYtelser(
         vedtaksperiodeId: UUID,
-        foreldrepenger: List<Periode> = emptyList(),
+        foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
         svangerskapspenger: List<Periode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),

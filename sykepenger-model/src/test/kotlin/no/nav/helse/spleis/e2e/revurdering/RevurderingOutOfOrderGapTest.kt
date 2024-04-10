@@ -5,6 +5,7 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Sykedag
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -92,7 +93,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 25.januar)
         nyttVedtak(1.februar, 28.februar)
         håndterSøknad(Sykdom(26.januar, 31.januar, 100.prosent))
-        håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(26.januar til 31.januar))
+        håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(26.januar til 31.januar, 100)))
         assertVarsel(`Overlapper med foreldrepenger`, 3.vedtaksperiode.filter())
         assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }

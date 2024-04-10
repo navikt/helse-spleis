@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -118,7 +119,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     private fun ytelser(
-        foreldrepengeYtelse: List<Periode> = emptyList(),
+        foreldrepengeYtelse: List<ForeldrepengerPeriode> = emptyList(),
         svangerskapYtelse: List<Periode> = emptyList()
     ) = Aktivitetslogg().let {
         val meldingsreferanseId = UUID.randomUUID()

@@ -10,8 +10,9 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 class Foreldrepenger(
-    private val foreldrepengeytelse: List<Periode>
+    private val foreldrepengeytelse: List<ForeldrepengerPeriode>
 ) {
+    private val perioder get() = foreldrepengeytelse.map { it.periode }
 
     internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
         if (foreldrepengeytelse.isEmpty()) {
@@ -19,22 +20,22 @@ class Foreldrepenger(
             return false
         }
         val overlappsperiode = if (erForlengelse) sykdomsperiode else sykdomsperiode.familieYtelserPeriode
-        return foreldrepengeytelse.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }.also { overlapper ->
+        return perioder.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }.also { overlapper ->
             if (!overlapper) aktivitetslogg.info("Bruker har foreldrepenger, men det slår ikke ut på overlappsjekken")
         }
     }
 
     internal fun tilOgMed(dato: LocalDate): Foreldrepenger {
-        return Foreldrepenger(foreldrepengeytelse.mapNotNull { periode ->
-            if (periode.starterEtter(dato.somPeriode())) null else periode.start til minOf(periode.endInclusive, dato) })
+        return Foreldrepenger(foreldrepengeytelse.mapNotNull { foreldrepenger ->
+            if (foreldrepenger.periode.starterEtter(dato.somPeriode())) null else ForeldrepengerPeriode(foreldrepenger.periode.start til minOf(foreldrepenger.periode.endInclusive, dato), foreldrepenger.grad) })
     }
 
     internal fun sykdomshistorikkElement(
         meldingsreferanseId: UUID,
         hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde
     ): Sykdomshistorikk.Element {
-        val førsteDag = foreldrepengeytelse.minOf { it.start }
-        val sisteDag = foreldrepengeytelse.maxOf { it.endInclusive }
+        val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }
+        val sisteDag = foreldrepengeytelse.map { it.periode }.maxOf { it.endInclusive }
         val sykdomstidslinje = Sykdomstidslinje.andreYtelsedager(førsteDag, sisteDag, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
         return Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
     }
@@ -43,10 +44,10 @@ class Foreldrepenger(
         if (foreldrepengeytelse.isEmpty()) return false
         if (foreldrepengeytelse.size > 1) return false
         if (periodeRettEtter != null) return false
-        val foreldrepengeperiode = foreldrepengeytelse.first()
+        val foreldrepengeperiode = foreldrepengeytelse.first().periode
         val fullstendigOverlapp = foreldrepengeperiode == periode
         val foreldrepengerIHalen = periode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(periode.endInclusive)
         return fullstendigOverlapp || foreldrepengerIHalen
     }
-
 }
+class ForeldrepengerPeriode(internal val periode: Periode, internal val grad: Int)
