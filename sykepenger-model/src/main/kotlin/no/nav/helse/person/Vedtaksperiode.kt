@@ -186,7 +186,7 @@ internal class Vedtaksperiode private constructor(
     private val periode get() = behandlinger.periode()
     private val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
     private val jurist get() = behandlinger.jurist(arbeidsgiverjurist, id)
-    private val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
+    private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val hendelseIder get() = behandlinger.dokumentsporing()
 
@@ -195,6 +195,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
+        val skjæringstidspunktMemoized = this::skjæringstidspunkt.memoized()
         visitor.preVisitVedtaksperiode(
             this,
             id,
@@ -203,7 +204,7 @@ internal class Vedtaksperiode private constructor(
             oppdatert,
             periode,
             sykmeldingsperiode,
-            skjæringstidspunkt,
+            skjæringstidspunktMemoized,
             behandlinger.hendelseIder()
         )
         sykdomstidslinje.accept(visitor)
@@ -216,7 +217,7 @@ internal class Vedtaksperiode private constructor(
             oppdatert,
             periode,
             sykmeldingsperiode,
-            skjæringstidspunkt,
+            skjæringstidspunktMemoized,
             behandlinger.hendelseIder()
         )
     }
@@ -601,7 +602,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse, validering: () -> Unit) {
-        behandlinger.håndterEndring(person, arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), validering)
+        behandlinger.håndterEndring(person, arbeidsgiver, hendelse, validering)
     }
 
     private fun lagreTidsnæreopplysninger(hendelse: Hendelse) {
@@ -610,7 +611,7 @@ internal class Vedtaksperiode private constructor(
 
         behandlinger.lagreTidsnæreInntekter(
             arbeidsgiver,
-            person.beregnSkjæringstidspunkt(),
+            skjæringstidspunkt,
             hendelse,
             aktivitetsloggkopi(hendelse),
             oppholdsperiodeMellom
@@ -1294,7 +1295,7 @@ internal class Vedtaksperiode private constructor(
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering, vedtaksperiode.person.beregnSkjæringstidspunkt())
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)
         }
 
@@ -2196,7 +2197,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             if (!vedtaksperiode.forventerInntekt()) return
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering, vedtaksperiode.person.beregnSkjæringstidspunkt())
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering)
             revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
             revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
             revurdering.info(RV_RV_1.varseltekst)
@@ -2232,7 +2233,7 @@ internal class Vedtaksperiode private constructor(
                 return
             }
 
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, hendelse, vedtaksperiode.person.beregnSkjæringstidspunkt())
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, hendelse)
             håndterRevurdering(hendelse) {
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             }
@@ -2296,7 +2297,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
-            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering, vedtaksperiode.person.beregnSkjæringstidspunkt())
+            vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering)
             vedtaksperiode.jurist.`fvl § 35 ledd 1`()
             revurdering.inngåSomRevurdering(vedtaksperiode, vedtaksperiode.periode)
             vedtaksperiode.tilstand(revurdering, AvventerRevurdering)
@@ -2443,10 +2444,6 @@ internal class Vedtaksperiode private constructor(
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
             it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt(NullObserver)
-        }
-
-        internal fun List<Vedtaksperiode>.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt: (Periode) -> LocalDate) {
-            forEach { it.behandlinger.beregnSkjæringstidspunkt(beregnSkjæringstidspunkt) }
         }
 
         internal fun List<Vedtaksperiode>.aktiveSkjæringstidspunkter(): Set<LocalDate> {

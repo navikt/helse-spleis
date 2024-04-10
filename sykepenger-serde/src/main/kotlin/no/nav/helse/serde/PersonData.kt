@@ -833,7 +833,7 @@ data class PersonData(
                     val sykmeldingsperiodeTom: LocalDate,
                     val fom: LocalDate,
                     val tom: LocalDate,
-                    val skjæringstidspunkt: LocalDate,
+                    val skjæringstidspunkt: LocalDate?,
                     val utbetalingId: UUID?,
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
@@ -847,8 +847,7 @@ data class PersonData(
                         vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                         utbetalingId = this.utbetalingId,
                         dokumentsporing = this.dokumentsporing.tilDto(),
-                        sykdomstidslinje = this.sykdomstidslinje.tilDto(),
-                        skjæringstidspunkt = skjæringstidspunkt
+                        sykdomstidslinje = this.sykdomstidslinje.tilDto()
                     )
                 }
             }
