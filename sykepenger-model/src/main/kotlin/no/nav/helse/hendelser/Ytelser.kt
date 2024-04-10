@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.INGEN_FORELDREPENGEYTELSE
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -54,7 +55,10 @@ class Ytelser(
     }
 
     private fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode?): Boolean {
-        val foreldrepengerIHalen = foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter)
+        val (foreldrepengerIHalen, hvorforIkke) = foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter)
+        if (hvorforIkke !in listOf(null, INGEN_FORELDREPENGEYTELSE)) {
+            this.info("Legger ikke til foreldrepenger i historikken fordi $hvorforIkke")
+        }
         return foreldrepengerIHalen.also {
             if (it) {
                 this.info("Legger til foreldrepenger i historikken")
