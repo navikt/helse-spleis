@@ -59,6 +59,12 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `6G-begrenset`() {
+        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = 100000.månedlig)
+        assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "6GBegrenset"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 1200000.0)))
+    }
+
+    @Test
     fun `ingen ny arbeidsgiverperiode og sykepengegrunnlag under 2g`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         tilGodkjenning(10.februar, 20.februar, a1, beregnetInntekt = 10000.månedlig)

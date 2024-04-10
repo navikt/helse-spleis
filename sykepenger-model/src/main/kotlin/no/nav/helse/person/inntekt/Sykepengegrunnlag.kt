@@ -450,7 +450,10 @@ internal class Sykepengegrunnlag private constructor(
         builder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
         arbeidsgiverInntektsopplysninger.omregnedeÅrsinntekter(builder)
         if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) {
-            builder.tagSykepengergrunnlagErUnder2G()
+            builder.tagSykepengegrunnlagErUnder2G()
+        }
+        if (begrensning == ER_6G_BEGRENSET) {
+            builder.tagSykepengegrunnlagEr6GBegrenset()
         }
     }
 

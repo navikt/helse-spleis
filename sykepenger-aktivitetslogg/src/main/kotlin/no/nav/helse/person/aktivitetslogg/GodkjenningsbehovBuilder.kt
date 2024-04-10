@@ -82,8 +82,11 @@ class GodkjenningsbehovBuilder(
     fun tagBehandlingsresultat(behandlingsresultat: String) {
         tags.add(behandlingsresultat)
     }
-    fun tagSykepengergrunnlagErUnder2G() {
+    fun tagSykepengegrunnlagErUnder2G() {
         tags.add("SykepengegrunnlagUnder2G")
+    }
+    fun tagSykepengegrunnlagEr6GBegrenset() {
+        tags.add("6GBegrenset")
     }
     fun tagIngenNyArbeidsgiverperiode() {
         tags.add("IngenNyArbeidsgiverperiode")
