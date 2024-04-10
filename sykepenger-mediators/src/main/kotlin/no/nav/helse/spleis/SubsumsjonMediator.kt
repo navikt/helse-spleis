@@ -20,7 +20,7 @@ internal class SubsumsjonMediator(
         private val logg = LoggerFactory.getLogger(PersonMediator::class.java)
     }
 
-    fun finalize(context: MessageContext) {
+    fun ferdigstill(context: MessageContext) {
         val events = jurist.events()
         if (events.isEmpty()) return
         logg.info("som følge av hendelse id=${message.id} sendes ${events.size} subsumsjonsmeldinger på rapid")

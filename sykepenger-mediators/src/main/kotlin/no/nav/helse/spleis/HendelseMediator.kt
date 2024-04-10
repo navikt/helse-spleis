@@ -488,7 +488,7 @@ internal class HendelseMediator(
             person.addObserver(VedtaksperiodeProbe)
             handler(person)
         }
-        finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
+        ferdigstill(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
     private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, aktørId: String, historiskeFolkeregisteridenter: Set<Personidentifikator>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
@@ -504,16 +504,16 @@ internal class HendelseMediator(
         )
     }
 
-    private fun finalize(
+    private fun ferdigstill(
         context: MessageContext,
         personMediator: PersonMediator,
         subsumsjonMediator: SubsumsjonMediator,
         datadelingMediator: DatadelingMediator,
         hendelse: PersonHendelse
     ) {
-        personMediator.finalize(rapidsConnection, context)
-        subsumsjonMediator.finalize(context)
-        datadelingMediator.finalize(context)
+        personMediator.ferdigstill(rapidsConnection, context)
+        subsumsjonMediator.ferdigstill(context)
+        datadelingMediator.ferdigstill(context)
         if (!hendelse.harAktiviteter()) return
         if (hendelse.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")

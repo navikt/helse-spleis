@@ -32,7 +32,7 @@ internal class DatadelingMediatorTest {
     @Test
     fun `datadelingMediator fanger opp nye aktiviteter på hendelsen`() {
         testhendelse.varsel(RV_SØ_1)
-        datadelingMediator.finalize(testRapid)
+        datadelingMediator.ferdigstill(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
         assertNotNull(testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet"))
     }
@@ -41,7 +41,7 @@ internal class DatadelingMediatorTest {
     fun innhold() {
         testhendelse.kontekst(TestKontekst("Person", "Person 1"))
         testhendelse.info("Dette er en infomelding")
-        datadelingMediator.finalize(testRapid)
+        datadelingMediator.ferdigstill(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"][0]
@@ -63,7 +63,7 @@ internal class DatadelingMediatorTest {
         try {
             testhendelse.logiskFeil("Dette er en severe")
         } catch (_: Exception) {}
-        datadelingMediator.finalize(testRapid)
+        datadelingMediator.ferdigstill(testRapid)
 
         assertEquals(1, testRapid.inspektør.antall())
         val aktiviteter = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
@@ -73,7 +73,7 @@ internal class DatadelingMediatorTest {
     @Test
     fun `publiserer behov-aktiviteter`() {
         testhendelse.behov(Aktivitet.Behov.Behovtype.Godkjenning, "melding")
-        datadelingMediator.finalize(testRapid)
+        datadelingMediator.ferdigstill(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
     }
 
@@ -84,7 +84,7 @@ internal class DatadelingMediatorTest {
         testhendelse.varsel(RV_SØ_1)
         testhendelse.funksjonellFeil(RV_VT_1)
         try { testhendelse.logiskFeil("Dette er en infomelding") } catch (_: Exception) {}
-        datadelingMediator.finalize(testRapid)
+        datadelingMediator.ferdigstill(testRapid)
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
         assertEquals("INFO", info[0]["nivå"].asText())

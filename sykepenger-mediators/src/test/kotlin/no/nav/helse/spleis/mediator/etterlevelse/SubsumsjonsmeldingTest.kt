@@ -40,7 +40,7 @@ internal class SubsumsjonsmeldingTest {
     @Test
     fun `en melding på gyldig format`() {
         jurist.`§ 8-17 ledd 2`(1.januar(2018), MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) })
-        subsumsjonMediator.finalize(testRapid)
+        subsumsjonMediator.ferdigstill(testRapid)
         assertSubsumsjonsmelding(testRapid.inspektør.message(0)["subsumsjon"])
     }
 

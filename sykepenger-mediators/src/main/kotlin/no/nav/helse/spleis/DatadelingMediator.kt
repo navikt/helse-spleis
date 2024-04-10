@@ -53,7 +53,7 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
         aktiviteter.add(aktivitetMap.toMap())
     }
 
-    internal fun finalize(context: MessageContext) {
+    internal fun ferdigstill(context: MessageContext) {
         if (aktiviteter.isEmpty()) return
         sikkerlogg.info(
             "Publiserer aktiviteter som følge av hendelse med {}, {}, {}",

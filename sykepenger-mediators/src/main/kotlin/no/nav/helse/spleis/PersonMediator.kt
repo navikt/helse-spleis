@@ -50,7 +50,7 @@ internal class PersonMediator(
         meldinger.fjernVedtaksperiodeVenter()
     }
 
-    fun finalize(rapidsConnection: RapidsConnection, context: MessageContext) {
+    fun ferdigstill(rapidsConnection: RapidsConnection, context: MessageContext) {
         fjernUnødvendigeVedtaksperiodeVenter()
         sendUtgåendeMeldinger(context)
         sendReplays(rapidsConnection)
