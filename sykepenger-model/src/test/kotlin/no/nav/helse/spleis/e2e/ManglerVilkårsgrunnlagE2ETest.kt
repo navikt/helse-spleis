@@ -108,20 +108,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             assertInstanceOf(Dag.Sykedag::class.java, sykdomstidslinjeInspektør[26.januar])
         }
 
-        håndterYtelser(2.vedtaksperiode)
-
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertEquals(31.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertVarsel(Varselkode.RV_IV_8, 2.vedtaksperiode.filter())
-        inspektør.utbetaling(1).inspektør.also { utbetalingInspektør ->
-            utbetalingInspektør.utbetalingstidslinje[23.januar].also { dagen ->
-                assertInstanceOf(Utbetalingsdag.NavDag::class.java, dagen)
-                assertEquals(INGEN, dagen.økonomi.inspektør.aktuellDagsinntekt)
-            }
-            utbetalingInspektør.utbetalingstidslinje[31.januar].also { dagen ->
-                assertInstanceOf(Utbetalingsdag.NavDag::class.java, dagen)
-                assertEquals(INNTEKT, dagen.økonomi.inspektør.aktuellDagsinntekt)
-            }
-        }
     }
 
     @Test

@@ -331,22 +331,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        assertForventetFeil(
-            forklaring = "Stuck. Perioden er 100% opphold og har ikke noe skjæringstidspunkt, da brukes default periode.start, der vi ikke har inntektsopplysninger",
-            nå = {
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-                assertInfo("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
-            },
-            ønsket = {
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-                assertIngenInfo("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
-            }
-        )
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
     }
 
     @Test

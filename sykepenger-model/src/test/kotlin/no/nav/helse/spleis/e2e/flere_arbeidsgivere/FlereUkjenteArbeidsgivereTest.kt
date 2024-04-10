@@ -407,6 +407,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,

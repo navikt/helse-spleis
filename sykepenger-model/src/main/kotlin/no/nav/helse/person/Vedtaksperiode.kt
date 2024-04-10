@@ -1408,7 +1408,7 @@ internal class Vedtaksperiode private constructor(
             if (!harNødvendigInntektForVilkårsprøving(vedtaksperiode, arbeidsgivere)) {
                 return INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
             }
-            if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode))
+            if (arbeidsgivere.trengerInntektsmelding(Aktivitetslogg(), vedtaksperiode))
                 return INNTEKTSMELDING fordi MANGLER_REFUSJONSOPPLYSNINGER_PÅ_ANDRE_ARBEIDSGIVERE
             return null
         }
@@ -1434,7 +1434,7 @@ internal class Vedtaksperiode private constructor(
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving og kan derfor ikke gjenoppta revurdering.")
             if (!harNødvendigInntektForVilkårsprøving(vedtaksperiode, arbeidsgivere))
                 return hendelse.info("Mangler nødvendig inntekt for vilkårsprøving på annen arbeidsgiver og kan derfor ikke gjenoppta revurdering.")
-            if (arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode))
+            if (arbeidsgivere.trengerInntektsmelding(hendelse, vedtaksperiode))
                 return hendelse.info("Trenger inntektsmelding for overlappende periode på annen arbeidsgiver og kan derfor ikke gjenoppta revurdering.")
             return vedtaksperiode.nesteTilstandForAktivRevurdering(hendelse)
         }
@@ -1737,7 +1737,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
             !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> ManglerInntektEllerRefusjon
             !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere
-            arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> TrengerInntektsmelding
+            arbeidsgivere.trengerInntektsmelding(hendelse, vedtaksperiode) -> TrengerInntektsmelding
             vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
             else -> KlarForBeregning
         }
@@ -2384,6 +2384,13 @@ internal class Vedtaksperiode private constructor(
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
         internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
 
+        internal val TRENGER_INNTEKTSMELDING = fun (segSelv: Vedtaksperiode, hendelse: IAktivitetslogg): VedtaksperiodeFilter {
+            return fun (other: Vedtaksperiode): Boolean {
+                return segSelv.periode.overlapperMed(other.periode)
+                        && !other.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(other.skjæringstidspunkt, other.periode, hendelse)
+            }
+        }
+
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val medSammeAGP = MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(segSelv)
@@ -2464,12 +2471,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun Vedtaksperiode.erTidligereEnn(other: Vedtaksperiode): Boolean = this <= other || this.skjæringstidspunkt < other.skjæringstidspunkt
-
-        internal fun List<Vedtaksperiode>.trengerInntektsmelding() = filter {
-            it.tilstand == AvventerInntektsmelding
-        }.filter {
-            it.forventerInntekt()
-        }
 
         internal fun List<Vedtaksperiode>.finnNesteVedtaksperiodeSomTrengerInntektsmelding(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
             val nesteVedtaksperiode = filter { it.skjæringstidspunkt > vedtaksperiode.skjæringstidspunkt }

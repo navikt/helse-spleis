@@ -38,6 +38,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuG
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
+import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_INNTEKTSMELDING
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
@@ -46,7 +47,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.finnVedtaksperioderKnyttetTi
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.trengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -229,10 +229,8 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) = this
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) }
 
-        internal fun Iterable<Arbeidsgiver>.trengerInntektsmelding(periode: Periode) = this
-            .flatMap { it.vedtaksperioder }
-            .filter { it.periode().overlapperMed(periode) }
-            .trengerInntektsmelding()
+        internal fun Iterable<Arbeidsgiver>.trengerInntektsmelding(hendelse: IAktivitetslogg, periode: Vedtaksperiode) = this
+            .nåværendeVedtaksperioder(TRENGER_INNTEKTSMELDING(periode, hendelse))
             .isNotEmpty()
 
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this

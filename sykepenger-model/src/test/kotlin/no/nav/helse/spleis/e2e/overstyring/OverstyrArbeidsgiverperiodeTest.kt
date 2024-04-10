@@ -45,7 +45,7 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
                 ManuellOverskrivingDag(15.januar, Dagtype.Sykedag, 100),
                 ManuellOverskrivingDag(16.januar, Dagtype.Sykedag, 100)
             ))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100)))
 
