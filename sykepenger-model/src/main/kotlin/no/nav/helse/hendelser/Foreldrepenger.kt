@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -48,6 +49,11 @@ class Foreldrepenger(
         val fullstendigOverlapp = foreldrepengeperiode == periode
         val foreldrepengerIHalen = periode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(periode.endInclusive)
         return fullstendigOverlapp || foreldrepengerIHalen
+    }
+
+    internal fun _tmp_loggOmDetErGraderteForeldrepenger(logg: Aktivitetslogg) {
+        // antar at vi allerede vet at vi skal oppdatere historikk, og at vi bare dealer med situasjoner med én ting i lista.
+        foreldrepengeytelse.filter { it.grad < 100 }.forEach { _ -> logg.info("Legger til graderte foreldrepenger") }
     }
 }
 class ForeldrepengerPeriode(internal val periode: Periode, internal val grad: Int)

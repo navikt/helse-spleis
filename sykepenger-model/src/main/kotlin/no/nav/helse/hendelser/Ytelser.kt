@@ -56,7 +56,10 @@ class Ytelser(
     private fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode?): Boolean {
         val foreldrepengerIHalen = foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter)
         return foreldrepengerIHalen.also {
-            if (it) this.info("Legger til foreldrepenger i historikken")
+            if (it) {
+                this.info("Legger til foreldrepenger i historikken")
+                foreldrepenger._tmp_loggOmDetErGraderteForeldrepenger(aktivitetslogg)
+            }
         }
     }
 
