@@ -1683,10 +1683,10 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt: LocalDateTime,
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: List<Arbeidsgiver>
-        ) = tilstand(vedtaksperiode, arbeidsgivere).makstid(tilstandsendringstidspunkt)
+        ) = tilstand(Aktivitetslogg(), vedtaksperiode, arbeidsgivere).makstid(tilstandsendringstidspunkt)
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak? {
-            return tilstand(vedtaksperiode, arbeidsgivere).venteårsak()
+            return tilstand(Aktivitetslogg(), vedtaksperiode, arbeidsgivere).venteårsak()
         }
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {
             vedtaksperiode.vedtaksperiodeVenter(nestemann)
@@ -1709,7 +1709,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: Hendelse
-        ) = tilstand(vedtaksperiode, arbeidsgivere).gjenopptaBehandling(vedtaksperiode, hendelse)
+        ) = tilstand(hendelse, vedtaksperiode, arbeidsgivere).gjenopptaBehandling(vedtaksperiode, hendelse)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmelding)
@@ -1728,13 +1728,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun tilstand(
+            hendelse: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>
         ) = when {
             arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
             !vedtaksperiode.forventerInntekt() -> ForventerIkkeInntekt
             vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
-            !vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøving
+            !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> ManglerInntektEllerRefusjon
             !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> ManglerNødvendigInntektForVilkårsprøvingForAndreArbeidsgivere
             arbeidsgivere.trengerInntektsmelding(vedtaksperiode.periode) -> TrengerInntektsmelding
             vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
@@ -1768,9 +1769,9 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.forkast(hendelse)
             }
         }
-        private data object ManglerNødvendigInntektForVilkårsprøving: Tilstand {
+        private data object ManglerInntektEllerRefusjon: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-                hendelse.info("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
+                hendelse.info("Mangler inntekt og/eller refusjon for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
                 vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
             }
         }

@@ -92,15 +92,16 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
     private val gjelder: Periode? = null
 ) {
-    private fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) =  refusjonsopplysninger ?: listOf(Triple(skjæringstidspunkt, null, inntekt))
+    private fun refusjonsopplysninger(førsteDag: LocalDate) =  refusjonsopplysninger ?: listOf(Triple(førsteDag, null, inntekt))
     internal companion object {
         private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate, inntektsopplysning: (overstyrtArbeidsgiveropplysning: OverstyrtArbeidsgiveropplysning) -> Inntektsopplysning) =
             map {
+                val gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX)
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = it.orgnummer,
-                    gjelder = it.gjelder ?: (skjæringstidspunkt til LocalDate.MAX),
+                    gjelder = gjelder,
                     inntektsopplysning = inntektsopplysning(it),
-                    refusjonsopplysninger = RefusjonsopplysningerBuilder().apply { it.refusjonsopplysninger(skjæringstidspunkt).forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now()) } }.build()
+                    refusjonsopplysninger = RefusjonsopplysningerBuilder().apply { it.refusjonsopplysninger(gjelder.start).forEach { (fom, tom, refusjonsbeløp) -> leggTil(Refusjonsopplysning(meldingsreferanseId, fom, tom, refusjonsbeløp), LocalDateTime.now()) } }.build()
                 )
             }
         internal fun List<OverstyrtArbeidsgiveropplysning>.medSaksbehandlerinntekt(meldingsreferanseId: UUID, skjæringstidspunkt: LocalDate) = tilArbeidsgiverInntektsopplysning(meldingsreferanseId, skjæringstidspunkt) {

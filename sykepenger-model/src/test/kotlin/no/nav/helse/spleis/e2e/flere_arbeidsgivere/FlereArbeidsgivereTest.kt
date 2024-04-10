@@ -201,29 +201,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             ))
         }
         a1 {
-            håndterVilkårsgrunnlag(2.vedtaksperiode,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
-                    a1 to INNTEKT,
-                    a2 to INNTEKT
-                ), 22.januar),
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
-                )
-            )
-            assertForventetFeil(
-                forklaring = "vedtaksperioden til a1 går til vilkårsprøving selv om det ikke er tilstrekkelig refusjonsopplysninger",
-                nå = {
-                    assertThrows<IllegalStateException> {
-                        håndterYtelser(2.vedtaksperiode)
-                    }
-                },
-                ønsket = {
-                    assertDoesNotThrow {
-                        håndterYtelser(2.vedtaksperiode)
-                    }
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 
@@ -301,44 +285,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         listOf(a1).forlengVedtak(1.mars til 31.mars)
 
-        assertForventetFeil("Mangler refusjonsopplysninger etter at out-of-order-perioden har slått sammen skjæringstidspunktene",
-            nå = {
-                a2 {
-                    val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "forventet å finne vilkårsgrunnlag" }
-                    val a2opplysninger = vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør
-                    assertInstanceOf(SkattSykepengegrunnlag::class.java, a2opplysninger.inntektsopplysning)
-                    val refusjonsopplysningerInspektør = a2opplysninger.refusjonsopplysninger.inspektør
-                    assertEquals(0, refusjonsopplysningerInspektør.refusjonsopplysninger.size)
-                }
-            },
-            ønsket = {
-                a2 {
-                    val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "forventet å finne vilkårsgrunnlag" }
-                    val a2opplysninger = vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør
-                    assertInstanceOf(SkattSykepengegrunnlag::class.java, a2opplysninger.inntektsopplysning)
-                    val refusjonsopplysningerInspektør = a2opplysninger.refusjonsopplysninger.inspektør
-                    assertEquals(2, refusjonsopplysningerInspektør.refusjonsopplysninger.size)
-                    refusjonsopplysningerInspektør.refusjonsopplysninger[0].inspektør.also { refusjonsopplysning ->
-                        assertEquals(1.januar til 31.mars, refusjonsopplysning.periode)
-                        assertEquals(INGEN, refusjonsopplysning.beløp)
-                    }
-                    refusjonsopplysningerInspektør.refusjonsopplysninger[1].inspektør.also { refusjonsopplysning ->
-                        assertEquals(1.april til LocalDate.MAX, refusjonsopplysning.periode)
-                        assertEquals(inntekt, refusjonsopplysning.beløp)
-                    }
-                }
-            }
-        )
-
         a2 {
-            assertForventetFeil("Mangler refusjonsopplysninger etter at out-of-order-perioden har slått sammen skjæringstidspunktene",
-                nå = {
-                    assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }
-                },
-                ønsket = {
-                    assertDoesNotThrow { håndterYtelser(1.vedtaksperiode) }
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }
 
