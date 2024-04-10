@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -32,6 +33,15 @@ internal class YtelserRiver(
         message.requireKey("@løsning.${Institusjonsopphold.name}")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse")
         message.interestedIn("@løsning.${Foreldrepenger.name}.Svangerskapsytelse")
+        message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse.fom") { it.asLocalDate() }
+        message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse.tom") { it.asLocalDate() }
+        message.interestedIn("@løsning.${Foreldrepenger.name}.Foreldrepengeytelse.perioder") { perioder ->
+            (perioder as ArrayNode).forEach {
+                it.path("fom").asLocalDate()
+                it.path("tom").asLocalDate()
+                it.path("grad").asInt()
+            }
+        }
         message.requireArray("@løsning.${Pleiepenger.name}") {
             interestedIn("fom") { it.asLocalDate() }
             interestedIn("tom") { it.asLocalDate() }
