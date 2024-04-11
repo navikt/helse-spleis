@@ -938,8 +938,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id,
             behandlingId, periode, hendelseIder, skjæringstidspunkt)
-        val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
-        this.finnArbeidsgiverperiode()?.tags(this.periode, builder, harPeriodeRettFør)
+        arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
         builder.utbetalingId(utbetalingId)
         builder.utbetalingVurdert(vedtakFattetTidspunkt)
         vilkårsgrunnlag.build(builder)

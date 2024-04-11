@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -133,14 +132,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     private val gjennomført get() = NormalArbeidstaker.arbeidsgiverperiodenGjennomført(perioder.flatten().count())
-    internal fun tags(periode: Periode, vedtakFattetBuilder: VedtakFattetBuilder, harPeriodeRettFør: Boolean): VedtakFattetBuilder {
-        // midlertidig frem til alle tags går gjennom utkast_til_vedtak
-        if (fiktiv() || harPeriodeRettFør) return vedtakFattetBuilder
-        if (periode.start < arbeidsgiverperioden.endInclusive) return vedtakFattetBuilder
-        if (!gjennomført) return vedtakFattetBuilder
-        vedtakFattetBuilder.ingenNyArbeidsgiverperiode()
-        return vedtakFattetBuilder
-    }
 
     internal fun tags(periode: Periode, godkjenningsbehovBuilder: GodkjenningsbehovBuilder, harPeriodeRettFør: Boolean) {
         if (fiktiv() || harPeriodeRettFør) return

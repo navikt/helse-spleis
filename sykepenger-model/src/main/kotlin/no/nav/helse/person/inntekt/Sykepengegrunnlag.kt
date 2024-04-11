@@ -398,7 +398,7 @@ internal class Sykepengegrunnlag private constructor(
     internal fun build(builder: VedtakFattetBuilder) {
         val fakta = when (vurdertInfotrygd) {
             true -> VedtakFattetBuilder.FastsattIInfotrygdBuilder(omregnetÅrsinntekt)
-            false -> VedtakFattetBuilder.FastsattISpleisBuilder(omregnetÅrsinntekt, `6G`, begrensning).apply {
+            false -> VedtakFattetBuilder.FastsattISpleisBuilder(omregnetÅrsinntekt, `6G`).apply {
                 arbeidsgiverInntektsopplysninger.build(this)
             }
         }.build()
@@ -408,9 +408,6 @@ internal class Sykepengegrunnlag private constructor(
             .beregningsgrunnlag(this.beregningsgrunnlag)
             .begrensning(this.begrensning)
             .sykepengegrunnlagsfakta(fakta)
-        if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) {
-            builder.sykepengergrunnlagErUnder2G()
-        }
     }
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false

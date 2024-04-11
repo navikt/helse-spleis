@@ -95,14 +95,22 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
     return id
 }
 
-internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, beregnetInntekt: Inntekt = 20000.månedlig) {
+internal fun AbstractEndToEndTest.tilGodkjenning(
+    fom: LocalDate,
+    tom: LocalDate,
+    vararg organisasjonsnummere: String,
+    beregnetInntekt: Inntekt = 20000.månedlig,
+    arbeidsgiverperiode: List<Periode> = listOf(Periode(fom, fom.plusDays(15))),
+    inntektsmeldingId: UUID = UUID.randomUUID()
+) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnummere.forEach { nyPeriode(fom til tom, it) }
     organisasjonsnummere.forEach {
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
+            arbeidsgiverperioder = arbeidsgiverperiode,
             beregnetInntekt = beregnetInntekt,
             orgnummer = it,
+            id = inntektsmeldingId
         )
     }
 

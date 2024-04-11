@@ -649,19 +649,12 @@ interface PersonObserver {
         val utbetalingId: UUID?,
         val sykepengegrunnlagsbegrensning: String,
         val vedtakFattetTidspunkt: LocalDateTime,
-        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?,
-        val tags: Set<Tag>
+        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?
     ) {
         enum class Fastsatt {
             EtterHovedregel,
             EtterSkjønn,
             IInfotrygd
-        }
-
-        enum class Tag {
-            `6GBegrenset`,
-            IngenNyArbeidsgiverperiode,
-            SykepengegrunnlagUnder2G
         }
 
         sealed class Sykepengegrunnlagsfakta {
@@ -674,7 +667,6 @@ interface PersonObserver {
         data class FastsattISpeil(
             override val omregnetÅrsinntekt: Double,
             val `6G`: Double,
-            val tags: Set<Tag>,
             val arbeidsgivere: List<Arbeidsgiver>
         ) : Sykepengegrunnlagsfakta() {
             val skjønnsfastsatt: Double? = arbeidsgivere.mapNotNull { it.skjønnsfastsatt }.takeIf(List<*>::isNotEmpty)?.sum()

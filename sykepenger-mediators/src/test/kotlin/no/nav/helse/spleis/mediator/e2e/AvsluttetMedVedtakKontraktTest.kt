@@ -53,15 +53,13 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
               "fastsatt": "EtterHovedregel",
               "omregnetÅrsinntekt": 372000.0,
               "6G": 561804.0,
-              "tags": [],
               "arbeidsgivere": [
                 {
                   "arbeidsgiver": "987654321",
                   "omregnetÅrsinntekt": 372000.0
                 }
               ]
-            },
-            "tags": []
+            }
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
@@ -106,9 +104,6 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
                 "omregnetÅrsinntekt": 540000.0,
                 "skjønnsfastsatt": 570000.0,
                 "6G": 561804.0,
-                "tags": [
-                  "6GBegrenset"
-                ],
                 "arbeidsgivere": [
                   {
                     "arbeidsgiver": "987654321",
@@ -116,8 +111,7 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
                     "skjønnsfastsatt": 570000.0
                   }
                 ]
-            },
-            "tags": []
+            }
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_utbetalt")
@@ -200,15 +194,13 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
               "fastsatt": "EtterHovedregel",
               "omregnetÅrsinntekt": 372000.0,
               "6G": 561804.0,
-              "tags": [],
               "arbeidsgivere": [
                 {
                   "arbeidsgiver": "987654321",
                   "omregnetÅrsinntekt": 372000.0
                 }
               ]
-            },
-            "tags": []
+            }
         }
         """
         assertVedtakFattet(forventet, forventetUtbetalingEventNavn = "utbetaling_uten_utbetaling")

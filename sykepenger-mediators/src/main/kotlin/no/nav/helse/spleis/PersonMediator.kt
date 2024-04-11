@@ -404,8 +404,7 @@ internal class PersonMediator(
             "grunnlagForSykepengegrunnlagPerArbeidsgiver" to event.omregnetÅrsinntektPerArbeidsgiver,
             "begrensning" to event.sykepengegrunnlagsbegrensning,
             "inntekt" to event.inntekt,
-            "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
-            "tags" to event.tags
+            "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt
         ).apply {
             event.utbetalingId?.let { this["utbetalingId"] = it }
             event.sykepengegrunnlagsfakta?.let {
@@ -414,7 +413,6 @@ internal class PersonMediator(
                         "fastsatt" to it.fastsatt,
                         "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
                         "6G" to it.`6G`,
-                        "tags" to it.tags,
                         "arbeidsgivere" to it.arbeidsgivere.map { arbeidsgiver ->
                             val skjønnsfastsatt = if (arbeidsgiver.skjønnsfastsatt != null) mapOf("skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt) else emptyMap()
                             mapOf(

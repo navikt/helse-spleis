@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -12,21 +11,14 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil
-import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.Tag
-import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.Tag.IngenNyArbeidsgiverperiode
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -60,7 +52,6 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val forventetSykepengegrunnlagsfakta = FastsattISpeil(
             omregnetÅrsinntekt = 372000.0,
             `6G` = 561804.0,
-            tags = emptySet(),
             arbeidsgivere = listOf(FastsattISpeil.Arbeidsgiver(a1, 372000.0, null))
         )
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
@@ -99,7 +90,6 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val forventetSykepengegrunnlagsfakta = FastsattISpeil(
             omregnetÅrsinntekt = 372000.0,
             `6G` = 561804.0,
-            tags = emptySet(),
             arbeidsgivere = listOf(FastsattISpeil.Arbeidsgiver(a1, 372000.0, null))
         )
         assertEquals(forventetSykepengegrunnlagsfakta, event.sykepengegrunnlagsfakta)
@@ -132,7 +122,6 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val forventetSykepengegrunnlagsfakta = FastsattISpeil(
             omregnetÅrsinntekt = 744000.0,
             `6G` = 599148.0,
-            tags = setOf(Tag.`6GBegrenset`),
             arbeidsgivere = listOf(
                 FastsattISpeil.Arbeidsgiver(a1, 372000.0, null),
                 FastsattISpeil.Arbeidsgiver(a2, 372000.0, null),
@@ -178,7 +167,6 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         val forventetSykepengegrunnlagsfakta = FastsattISpeil(
             omregnetÅrsinntekt = 1068000.0,
             `6G` = 599148.0,
-            tags = setOf(Tag.`6GBegrenset`),
             arbeidsgivere = listOf(
                 FastsattISpeil.Arbeidsgiver(a1, 540000.0, 552000.0),
                 FastsattISpeil.Arbeidsgiver(a2, 528000.0, 540000.0),
@@ -224,101 +212,6 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         assertEquals(setOf(søknadId, inntektsmeldingId, overstyringId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
     }
 
-    @Test
-    fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga mindre enn 16 dagers gap`() {
-        nyttVedtak(1.januar, 31.januar)
-        nyttVedtak(10.februar, 28.februar)
-
-        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
-        assertEquals(setOf(IngenNyArbeidsgiverperiode), 2.vedtaksperiode.vedtakFattetEvent.tags)
-    }
-
-    @Test
-    fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga AIG-dager`() {
-        nyttVedtak(1.juni, 30.juni)
-
-        håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
-        håndterInntektsmelding(
-            listOf(1.juni til 16.juni),
-            førsteFraværsdag = 1.august,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
-        )
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        nullstillTilstandsendringer()
-
-        håndterOverstyrTidslinje((1.juli til 31.juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
-        assertEquals(setOf(IngenNyArbeidsgiverperiode), 2.vedtaksperiode.vedtakFattetEvent.tags)
-    }
-
-    @Test
-    fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga mindre enn 16 dagers gap selv om AGP er betalt av nav`() {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()),
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
-        )
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        nyttVedtak(16.februar, 28.februar)
-
-        assertEquals("NNNNNHH NNNNNHH NNSSSHH SSSSSHH SSS???? ??????? ????SHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
-
-        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
-        assertEquals(setOf(IngenNyArbeidsgiverperiode), 2.vedtaksperiode.vedtakFattetEvent.tags)
-    }
-
-    @Test
-    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga Infotrygforlengelse`() {
-        createOvergangFraInfotrygdPerson()
-        forlengVedtak(1.mars, 31.mars)
-
-        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
-    }
-
-    @Test
-    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga Infotrygovergang - revurdering`() {
-        createOvergangFraInfotrygdPerson()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Sykedag, 50)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
-    }
-
-
-    @Test
-    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga forlengelse`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-
-        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
-        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
-    }
-
-    @Test
-    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det er ny AGP`() {
-        nyttVedtak(1.januar, 31.januar)
-        nyttVedtak(1.mars, 31.mars)
-
-        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
-        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
-    }
 
     @Test
     fun `Sender avsluttet uten vedtak ved kort gap til periode med kun ferie`() {
@@ -327,7 +220,6 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Ferie(10.februar, 28.februar))
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        assertEquals(emptySet<Tag>(), 1.vedtaksperiode.vedtakFattetEvent.tags)
         2.vedtaksperiode.assertIngenVedtakFattet()
         assertEquals(10.februar til 28.februar, 2.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode)
     }
@@ -345,32 +237,6 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         assertEquals(1, 2.vedtaksperiode.avsluttetUtenVedtakEventer.size)
         1.vedtaksperiode.assertIngenVedtakFattet()
         2.vedtaksperiode.assertIngenVedtakFattet()
-    }
-
-    @Test
-    fun `Periode med utbetaling etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-        nyttVedtak(15.januar, 31.januar)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-
-        1.vedtaksperiode.assertIngenVedtakFattet()
-        assertEquals(1.januar til 10.januar, 1.vedtaksperiode.avsluttetUtenVedtakEventer.single().periode)
-        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
-    }
-
-    @Test
-    fun `Forlengelse av auu skal ikke tagges med IngenNyArbeidsgiverperiode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
-        val søknadId= håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        val inntektsmeldingId = UUID.randomUUID()
-        nyttVedtak(17.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar), inntektsmeldingId = inntektsmeldingId)
-        assertEquals(emptySet<Tag>(), 2.vedtaksperiode.vedtakFattetEvent.tags)
-        assertEquals(2, 1.vedtaksperiode.avsluttetUtenVedtakEventer.size)
-        assertEquals(setOf(søknadId), 1.vedtaksperiode.avsluttetUtenVedtakEventer.first().hendelseIder)
-        assertEquals(setOf(søknadId, inntektsmeldingId),1.vedtaksperiode.avsluttetUtenVedtakEventer.last().hendelseIder)
-        1.vedtaksperiode.assertIngenVedtakFattet()
     }
 
     @Test

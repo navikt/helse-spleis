@@ -3,22 +3,31 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -85,6 +94,98 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
                 ),
             )
         )
+    }
+
+    @Test
+    fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga AIG-dager`() {
+        nyttVedtak(1.juni, 30.juni)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.august, 31.august, 100.prosent))
+        håndterInntektsmelding(
+            listOf(1.juni til 16.juni),
+            førsteFraværsdag = 1.august,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "FerieEllerAvspasering",
+        )
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje((1.juli til 31.juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertTags(setOf("IngenNyArbeidsgiverperiode"), 2.vedtaksperiode.id(a1))
+    }
+
+    @Test
+    fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga mindre enn 16 dagers gap selv om AGP er betalt av nav`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
+        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        tilGodkjenning(16.februar, 28.februar, a1)
+        assertEquals("NNNNNHH NNNNNHH NNSSSHH SSSSSHH SSS???? ??????? ????SHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+        assertTags(setOf("IngenNyArbeidsgiverperiode"), 2.vedtaksperiode.id(a1))
+    }
+
+    @Test
+    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga Infotrygforlengelse`() {
+        createOvergangFraInfotrygdPerson()
+        forlengTilGodkjenning(1.mars, 31.mars)
+        assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
+    }
+
+    @Test
+    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga Infotrygovergang - revurdering`() {
+        createOvergangFraInfotrygdPerson()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Sykedag, 50)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertIngenTag("IngenNyArbeidsgiverperiode")
+    }
+
+    @Test
+    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga forlengelse`() {
+        tilGodkjenning(1.januar, 31.januar, a1)
+        assertIngenTag("IngenNyArbeidsgiverperiode", 1.vedtaksperiode.id(a1))
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+        forlengTilGodkjenning(1.februar, 28.februar)
+        assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
+    }
+
+    @Test
+    fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det er ny AGP`() {
+        tilGodkjenning(1.januar, 31.januar, a1)
+        assertIngenTag("IngenNyArbeidsgiverperiode", 1.vedtaksperiode.id(a1))
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+        tilGodkjenning(1.mars, 31.mars, a1)
+        assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
+    }
+
+    @Test
+    fun `Periode med utbetaling etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 10.januar, 100.prosent))
+        tilGodkjenning(15.januar, 31.januar, a1)
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+        assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
+    }
+
+    @Test
+    fun `Forlengelse av auu skal ikke tagges med IngenNyArbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
+        val inntektsmeldingId = UUID.randomUUID()
+        tilGodkjenning(17.januar, 31.januar, a1, arbeidsgiverperiode = listOf(1.januar til 16.januar), inntektsmeldingId = inntektsmeldingId)
+        assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
     }
 
     @Test
@@ -268,6 +369,19 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
             )
         )
+    }
+
+    private fun assertTags(tags: Set<String>, vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),) {
+        val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
+        assertTrue(actualtags.containsAll(tags))
+        val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
+        assertEquals(actualtags, utkastTilVedtak.tags)
+    }
+    private fun assertIngenTag(tag: String, vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),) {
+        val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
+        assertFalse(actualtags.contains(tag))
+        val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
+        assertFalse(utkastTilVedtak.tags.contains(tag))
     }
 
     private fun assertGodkjenningsbehov(

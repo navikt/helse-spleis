@@ -10,10 +10,8 @@ import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.FastsattIInfot
 import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil
 import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil.Arbeidsgiver
 import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.Sykepengegrunnlagsfakta
-import no.nav.helse.person.PersonObserver.AvsluttetMedVedtakEvent.Tag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
-import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
 
 internal class VedtakFattetBuilder(
@@ -24,8 +22,7 @@ internal class VedtakFattetBuilder(
     private val behandlingId: UUID,
     private val periode: Periode,
     private val hendelseIder: Set<UUID>,
-    private val skjæringstidspunkt: LocalDate,
-    private val tags: MutableSet<Tag> = mutableSetOf()
+    private val skjæringstidspunkt: LocalDate
 ) {
     private var sykepengegrunnlag =  Inntekt.INGEN
     private var beregningsgrunnlag = Inntekt.INGEN
@@ -38,8 +35,6 @@ internal class VedtakFattetBuilder(
     internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
     internal fun beregningsgrunnlag(beregningsgrunnlag: Inntekt) = apply { this.beregningsgrunnlag = beregningsgrunnlag }
     internal fun begrensning(begrensning: Begrensning) = apply { this.begrensning = begrensning }
-    internal fun ingenNyArbeidsgiverperiode() = apply { tags.add(Tag.IngenNyArbeidsgiverperiode) }
-    internal fun sykepengergrunnlagErUnder2G() = apply { tags.add(Tag.SykepengegrunnlagUnder2G) }
 
     private lateinit var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta
     internal fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) = apply { this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta }
@@ -70,8 +65,7 @@ internal class VedtakFattetBuilder(
                 else -> "VET_IKKE"
             },
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-            tags = tags
+            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta
         )
     }
 
@@ -85,13 +79,10 @@ internal class VedtakFattetBuilder(
     }
     internal class FastsattISpleisBuilder(
         private val omregnetÅrsinntekt: Inntekt,
-        private val `6G`: Inntekt,
-        begrensning: Begrensning
+        private val `6G`: Inntekt
     ) : SykepengegrunnlagsfaktaBuilder() {
-        private val tags: Set<Tag> = begrensning.takeIf { it == ER_6G_BEGRENSET }?.let { setOf(Tag.`6GBegrenset`) } ?: emptySet()
         private lateinit var innrapportertÅrsinntekt: Inntekt
         internal fun innrapportertÅrsinntekt(innrapportertÅrsinntekt: Inntekt) = apply { this.innrapportertÅrsinntekt = innrapportertÅrsinntekt }
-        private val Avviksprosent.avrundet get() = rundTilToDesimaler()
 
         private val arbeidsgivere = mutableListOf<Arbeidsgiver>()
         internal fun arbeidsgiver(arbeidsgiver: String, omregnetÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?) = apply {
@@ -100,7 +91,6 @@ internal class VedtakFattetBuilder(
         override fun build() = FastsattISpeil(
             omregnetÅrsinntekt = omregnetÅrsinntekt.årlig,
             `6G`= `6G`.årlig,
-            tags = tags,
             arbeidsgivere = arbeidsgivere.toList()
         )
     }

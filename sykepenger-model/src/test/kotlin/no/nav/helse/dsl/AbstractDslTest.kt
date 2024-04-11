@@ -26,7 +26,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.Frilans
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
@@ -43,7 +42,6 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -163,14 +161,6 @@ internal abstract class AbstractDslTest {
     }
     protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) {
         testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand)
-    }
-
-    protected fun assertTag(id: UUID, tag: PersonObserver.AvsluttetMedVedtakEvent.Tag) {
-        assertTrue(observatør.avsluttetMedVedtakEvent[id]!!.tags.contains(tag), "Forventet at ${observatør.avsluttetMedVedtakEvent[id]!!.tags} inneholdt $tag")
-    }
-
-    protected fun assertIkkeTag(id: UUID, tag: PersonObserver.AvsluttetMedVedtakEvent.Tag) {
-        assertFalse(observatør.avsluttetMedVedtakEvent[id]!!.tags.contains(tag), "Forventet at ${observatør.avsluttetMedVedtakEvent[id]!!.tags} ikke inneholdt $tag")
     }
 
     protected fun TestPerson.TestArbeidsgiver.assertUtbetalingsbeløp(
