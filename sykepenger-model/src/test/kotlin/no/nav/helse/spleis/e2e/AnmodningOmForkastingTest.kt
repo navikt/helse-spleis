@@ -106,14 +106,14 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertForkastetPeriodeTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         }
 
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(4.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 

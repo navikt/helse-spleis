@@ -31,11 +31,9 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
-import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
-import no.nav.helse.person.Vedtaksperiode.Companion.AuuGruppering.Companion.auuGruppering
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
@@ -124,11 +122,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.tidligsteDato(): LocalDate {
             return mapNotNull { it.sykdomstidslinje().periode()?.start }.minOrNull() ?: LocalDate.now()
-        }
-
-        internal fun List<Arbeidsgiver>.forkastAuu(hendelse: Hendelse, auu: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk) {
-            val alleVedtaksperioder = flatMap { it.vedtaksperioder }
-            alleVedtaksperioder.auuGruppering(auu, infotrygdhistorikk)?.forkast(hendelse, alleVedtaksperioder)
         }
 
         internal fun List<Arbeidsgiver>.igangsettOverstyring(revurdering: Revurderingseventyr) {
@@ -759,10 +752,6 @@ internal class Arbeidsgiver private constructor(
             .merge(sykdomstidslinje(), replace)
     }
 
-    internal fun sykdomstidslinjeUten(sykdomstidslinjer: List<Sykdomstidslinje>) = sykdomstidslinjer.fold(sykdomstidslinje()) { acc, sykdomstidslinje ->
-        acc - sykdomstidslinje
-    }
-
     internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
         val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), null)
         return arbeidsgiverperioder.finn(periode)
@@ -962,40 +951,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
-
-    internal class JsonRestorer private constructor() {
-        internal companion object {
-            internal fun restore(
-                person: Person,
-                organisasjonsnummer: String,
-                id: UUID,
-                inntektshistorikk: Inntektshistorikk,
-                sykdomshistorikk: Sykdomshistorikk,
-                sykmeldingsperioder: Sykmeldingsperioder,
-                vedtaksperioder: MutableList<Vedtaksperiode>,
-                forkastede: MutableList<ForkastetVedtaksperiode>,
-                utbetalinger: List<Utbetaling>,
-                feriepengeutbetalinger: List<Feriepengeutbetaling>,
-                refusjonshistorikk: Refusjonshistorikk,
-                yrkesaktivitet: Yrkesaktivitet,
-                jurist: MaskinellJurist
-            ) = Arbeidsgiver(
-                person,
-                organisasjonsnummer,
-                id,
-                inntektshistorikk,
-                sykdomshistorikk,
-                sykmeldingsperioder,
-                vedtaksperioder,
-                forkastede,
-                utbetalinger.toMutableList(),
-                feriepengeutbetalinger.toMutableList(),
-                refusjonshistorikk,
-                yrkesaktivitet,
-                jurist
-            )
-        }
-    }
 
     internal fun dto() = ArbeidsgiverUtDto(
         id = id,

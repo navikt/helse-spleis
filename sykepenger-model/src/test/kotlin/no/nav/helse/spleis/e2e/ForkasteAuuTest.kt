@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyPeriode
@@ -9,7 +8,6 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -61,7 +59,7 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         }
     }
 
@@ -160,18 +158,12 @@ internal class ForkasteAuuTest: AbstractDslTest() {
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             val nyAgp = inspektør.arbeidsgiver.arbeidsgiverperiode(1.mars til 31.mars)?.toList()?.grupperSammenhengendePerioder()
 
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(5.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertEquals(listOf(
-                1.januar til 1.januar,
-                16.januar til 16.januar,
-                1.februar til 1.februar,
-                15.februar til 15.februar,
-                1.mars til 12.mars
-            ), nyAgp)
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(4.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(5.vedtaksperiode, TIL_INFOTRYGD)
+            assertNull(nyAgp)
         }
     }
 
@@ -211,18 +203,7 @@ internal class ForkasteAuuTest: AbstractDslTest() {
 
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)))
             assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-
-            assertForventetFeil(
-                forklaring = "Skal forkaste forlengelsen, ikke flytte skjøringstidspunktet",
-                nå = {
-                    assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-                    assertEquals(1.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
-                },
-                ønsket = {
-                    assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-                }
-            )
-
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
         }
     }
 }

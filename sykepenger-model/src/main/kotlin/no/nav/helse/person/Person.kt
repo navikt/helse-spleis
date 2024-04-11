@@ -50,7 +50,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeid
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
-import no.nav.helse.person.Arbeidsgiver.Companion.forkastAuu
 import no.nav.helse.person.Arbeidsgiver.Companion.førsteFraværsdager
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -819,7 +818,6 @@ class Person private constructor(
     }
     internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
     internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
-    internal fun forkastAuu(hendelse: Hendelse, auu: Vedtaksperiode) = arbeidsgivere.forkastAuu(hendelse, auu, infotrygdhistorikk)
 
     internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean {
         return infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
