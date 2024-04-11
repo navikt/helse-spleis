@@ -611,4 +611,47 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             }
         }
     }
+
+    @Test
+    fun `korte perioder out of order`() {
+        a1 {
+            håndterSøknad(Sykdom(10.januar, 15.januar, 100.prosent))
+            håndterSøknad(Sykdom(5.januar, 9.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 4.januar, 100.prosent))
+
+            inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(3, behandlinger.size)
+                behandlinger[0].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(10.januar, behandling.skjæringstidspunkt)
+                }
+                behandlinger[1].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(5.januar, behandling.skjæringstidspunkt)
+                }
+                behandlinger[2].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(1.januar, behandling.skjæringstidspunkt)
+                }
+            }
+            inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(2, behandlinger.size)
+                behandlinger[0].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(5.januar, behandling.skjæringstidspunkt)
+                }
+                behandlinger[1].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(1.januar, behandling.skjæringstidspunkt)
+                }
+            }
+            inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(1, behandlinger.size)
+                behandlinger[0].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(1.januar, behandling.skjæringstidspunkt)
+                }
+            }
+        }
+    }
 }

@@ -51,6 +51,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         val avsluttet: LocalDateTime?,
         val kilde: Behandlingkilde
     ) {
+        val skjæringstidspunkt get() = endringer.last().skjæringstidspunkt
+
         internal enum class Behandlingtilstand {
             UBEREGNET, UBEREGNET_OMGJØRING, UBEREGNET_REVURDERING, BEREGNET, BEREGNET_OMGJØRING, BEREGNET_REVURDERING,
             VEDTAK_FATTET, REVURDERT_VEDTAK_AVVIST, VEDTAK_IVERKSATT, AVSLUTTET_UTEN_VEDTAK, ANNULLERT_PERIODE, TIL_INFOTRYGD
