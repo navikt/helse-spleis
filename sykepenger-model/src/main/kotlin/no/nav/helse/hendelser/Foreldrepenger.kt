@@ -6,6 +6,8 @@ import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.FLERE
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.HAR_PERIODE_RETT_ETTER
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.IKKE_I_HALEN
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.INGEN_FORELDREPENGEYTELSE
+import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.YTELSE_STARTER_FØR_VEDTAKSPERIODEN
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -47,9 +49,11 @@ class Foreldrepenger(
 
     internal fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode? = null): Pair<Boolean, HvorforIkkeOppdatereHistorikk?> {
         if (foreldrepengeytelse.isEmpty()) return false to INGEN_FORELDREPENGEYTELSE
-        if (foreldrepengeytelse.size > 1) return false to FLERE_INNSLAG
         if (periodeRettEtter != null) return false to HAR_PERIODE_RETT_ETTER
-        val foreldrepengeperiode = foreldrepengeytelse.first().periode
+        val sammenhengendePerioder = foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder()
+        if (sammenhengendePerioder.size > 1) return false to FLERE_INNSLAG
+        val foreldrepengeperiode = sammenhengendePerioder.single()
+        if (foreldrepengeperiode.start < periode.start) return false to YTELSE_STARTER_FØR_VEDTAKSPERIODEN
         val fullstendigOverlapp = foreldrepengeperiode == periode
         val foreldrepengerIHalen = periode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(periode.endInclusive)
         return if (fullstendigOverlapp || foreldrepengerIHalen) true to null else false to IKKE_I_HALEN
@@ -59,12 +63,13 @@ class Foreldrepenger(
         INGEN_FORELDREPENGEYTELSE,
         FLERE_INNSLAG,
         HAR_PERIODE_RETT_ETTER,
-        IKKE_I_HALEN
+        YTELSE_STARTER_FØR_VEDTAKSPERIODEN,
+        IKKE_I_HALEN,
     }
 
     internal fun _tmp_loggOmDetErGraderteForeldrepenger(logg: Aktivitetslogg) {
-        // antar at vi allerede vet at vi skal oppdatere historikk, og at vi bare dealer med situasjoner med én ting i lista.
-        foreldrepengeytelse.filter { it.grad < 100 }.forEach { _ -> logg.info("Legger til graderte foreldrepenger") }
+        // antar at vi allerede vet at vi skal oppdatere historikk
+        foreldrepengeytelse.any { it.grad < 100 }.let { gradert -> if (gradert) logg.info("Legger til graderte foreldrepenger") }
     }
 }
 class ForeldrepengerPeriode(internal val periode: Periode, internal val grad: Int)

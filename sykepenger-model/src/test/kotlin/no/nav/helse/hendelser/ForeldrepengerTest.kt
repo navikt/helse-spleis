@@ -19,9 +19,16 @@ class ForeldrepengerTest {
     }
 
     @Test
-    fun `foreldrepenger utenfor perioden`() {
+    fun `foreldrepenger før perioden`() {
         val vedtaksperiode = 1.februar til 28.februar
         val foreldrepenger = Foreldrepenger(listOf(ForeldrepengerPeriode(1.januar til 31.januar, 100)))
+        assertFalse(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
+    }
+
+    @Test
+    fun `foreldrepenger før og i perioden`() {
+        val vedtaksperiode = 1.februar til 28.februar
+        val foreldrepenger = Foreldrepenger(listOf(ForeldrepengerPeriode(1.januar til 28.februar, 100)))
         assertFalse(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }
 
@@ -58,6 +65,24 @@ class ForeldrepengerTest {
         val foreldrepenger = Foreldrepenger(listOf(
             ForeldrepengerPeriode(1.januar til 10.januar, 100),
             ForeldrepengerPeriode(20.januar til 31.januar, 100)))
+        assertFalse(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
+    }
+
+    @Test
+    fun `foreldrepenger oppstykket sammenhengende i perioden`() {
+        val vedtaksperiode = 1.januar til 31.januar
+        val foreldrepenger = Foreldrepenger(listOf(
+            ForeldrepengerPeriode(5.januar til 10.januar, 100),
+            ForeldrepengerPeriode(11.januar til 31.januar, 100)))
+        assertTrue(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
+    }
+
+    @Test
+    fun `foreldrepenger oppstykket sammenhengende i og før perioden`() {
+        val vedtaksperiode = 5.januar til 31.januar
+        val foreldrepenger = Foreldrepenger(listOf(
+            ForeldrepengerPeriode(1.januar til 10.januar, 100),
+            ForeldrepengerPeriode(11.januar til 31.januar, 100)))
         assertFalse(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }
 
