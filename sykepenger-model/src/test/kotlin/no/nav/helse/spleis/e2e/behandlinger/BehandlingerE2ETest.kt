@@ -66,7 +66,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(1, behandlinger.single().endringer.size)
+                assertEquals(2, behandlinger.single().endringer.size)
                 assertEquals(Behandlingkilde(meldingsreferanseId = søknadId, innsendt = innsendt, registert = registrert, avsender = Avsender.SYKMELDT), behandlinger.single().kilde)
             }
         }
@@ -317,8 +317,9 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 17.januar, 100.prosent), egenmeldinger = listOf(Arbeidsgiverdag(1.januar, 2.januar)))
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(1, behandlinger.single().endringer.size)
-                assertEquals(1.januar til 17.januar, behandlinger.single().periode)
+                assertEquals(2, behandlinger.single().endringer.size)
+                assertEquals(1.januar til 17.januar, behandlinger.last().periode)
+                assertEquals(1.januar, behandlinger.last().endringer.last().skjæringstidspunkt)
             }
         }
     }
@@ -331,7 +332,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Ferie(19.januar, 20.januar), søknadId = søknad2)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(2, behandlinger.single().endringer.size)
+                assertEquals(3, behandlinger.single().endringer.size)
                 assertEquals(Dokumentsporing.søknad(søknad2), behandlinger.single().endringer.last().dokumentsporing)
             }
         }
@@ -348,7 +349,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(6, behandling.endringer.size)
+                    assertEquals(7, behandling.endringer.size)
                     assertEquals(no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.BEREGNET, behandling.tilstand)
                 }
             }
@@ -371,11 +372,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(4, behandling.endringer.size)
+                    assertEquals(5, behandling.endringer.size)
                     assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[0].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingDager(im), behandling.endringer[1].dokumentsporing)
-                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[2].dokumentsporing)
+                    assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer[1].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingDager(im), behandling.endringer[2].dokumentsporing)
                     assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[3].dokumentsporing)
+                    assertEquals(Dokumentsporing.inntektsmeldingInntekt(im), behandling.endringer[4].dokumentsporing)
                     assertEquals(VEDTAK_FATTET, behandling.tilstand)
                     assertEquals(vedtakFattetTidspunkt, behandling.vedtakFattet)
                     assertNull(behandling.avsluttet)
@@ -400,7 +402,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(4, behandling.endringer.size)
+                    assertEquals(5, behandling.endringer.size)
                 }
                 behandlinger[1].also { behandling ->
                     assertEquals(1, behandling.endringer.size)
@@ -410,7 +412,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 behandlinger[0].also { behandling ->
-                    assertEquals(4, behandling.endringer.size)
+                    assertEquals(5, behandling.endringer.size)
                     assertEquals(VEDTAK_FATTET, behandling.tilstand)
                 }
                 behandlinger[1].also { behandling ->
@@ -479,7 +481,9 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 27.januar, 100.prosent), søknadId = søknad2)
             inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.single().also { behandling ->
                 assertEquals(søknad1, behandling.kilde.meldingsreferanseId)
-                assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer.single().dokumentsporing)
+                assertEquals(2, behandling.endringer.size)
+                assertEquals(Dokumentsporing.søknad(søknad1), behandling.endringer.last().dokumentsporing)
+                assertEquals(3.januar, behandling.endringer.last().skjæringstidspunkt)
             }
             inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.single().also { behandling ->
                 assertEquals(søknad2, behandling.kilde.meldingsreferanseId)

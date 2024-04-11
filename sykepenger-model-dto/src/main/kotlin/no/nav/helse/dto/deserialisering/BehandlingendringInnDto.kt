@@ -1,5 +1,6 @@
 package no.nav.helse.dto.deserialisering
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.DokumentsporingDto
@@ -14,5 +15,6 @@ data class BehandlingendringInnDto(
     val vilkårsgrunnlagId: UUID?,
     val utbetalingId: UUID?,
     val dokumentsporing: DokumentsporingDto,
-    val sykdomstidslinje: SykdomstidslinjeDto
+    val sykdomstidslinje: SykdomstidslinjeDto,
+    val skjæringstidspunkt: LocalDate
 )

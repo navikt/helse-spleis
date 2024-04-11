@@ -73,11 +73,11 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(10.mars til 26.mars),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
+        assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(setOf(1.februar, 10.mars), person.inspektør.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt)
 
         håndterYtelser(2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_IV_8)
+        assertVarsel(Varselkode.RV_OS_2)
     }
 
     @Test
