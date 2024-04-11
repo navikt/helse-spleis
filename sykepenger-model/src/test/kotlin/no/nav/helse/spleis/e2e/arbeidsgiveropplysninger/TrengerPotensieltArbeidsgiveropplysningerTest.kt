@@ -1,17 +1,17 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.spleis.e2e.*
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -58,7 +58,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
         assertTilstand(5.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-        assertEquals(5, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(6, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.size)
 
         val expectedPotensiellForespørsel1 = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
             ORGNUMMER,
@@ -73,15 +73,12 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 9.februar))
         )
 
-        assertEquals(
-            expectedPotensiellForespørsel1,
-            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[3]
-        )
+        assertEquals(expectedPotensiellForespørsel1, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[3])
 
         val expectedPotensiellForespørsel2 = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
-            ORGNUMMER,
-            inspektør.vedtaksperiodeId(5.vedtaksperiode),
-            7.februar,
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = inspektør.vedtaksperiodeId(5.vedtaksperiode),
+            skjæringstidspunkt = 7.februar,
             sykmeldingsperioder = listOf(
                 1.februar til 2.februar,
                 3.februar til 3.februar,
@@ -91,90 +88,83 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 7.februar))
         )
 
-        assertEquals(
-            expectedPotensiellForespørsel2,
-            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last()
+        assertEquals(expectedPotensiellForespørsel2, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[4])
+
+        val expectedPotensiellForespørsel3 = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
+            ORGNUMMER,
+            inspektør.vedtaksperiodeId(4.vedtaksperiode),
+            9.februar,
+            sykmeldingsperioder = listOf(
+                1.februar til 2.februar,
+                3.februar til 3.februar,
+                7.februar til 7.februar,
+                9.februar til 9.februar
+            ),
+            egenmeldingsperioder = emptyList(),
+            førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 9.februar))
         )
+
+        assertEquals(expectedPotensiellForespørsel3, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[5])
     }
 
     @Test
     fun `sender egenmeldingsperioder fra søknader som er knyttet til samme AGP`() {
         håndterSykmelding(Sykmeldingsperiode(5.januar, 16.januar))
         håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(5.januar, 16.januar, 100.prosent),
+            Sykdom(5.januar, 16.januar, 100.prosent),
             egenmeldinger = listOf(
-                Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 4.januar)
+                Arbeidsgiverdag(1.januar, 4.januar)
             )
         )
 
         // Langt gap fra forrige periode
         håndterSykmelding(Sykmeldingsperiode(5.mars, 8.mars))
         håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(5.mars, 8.mars, 100.prosent),
+            Sykdom(5.mars, 8.mars, 100.prosent),
             egenmeldinger = listOf(
-                Søknad.Søknadsperiode.Arbeidsgiverdag(1.mars, 2.mars)
+                Arbeidsgiverdag(1.mars, 2.mars)
             )
         )
 
         // Kort gap fra forrige periode
         håndterSykmelding(Sykmeldingsperiode(14.mars, 16.mars))
         håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(14.mars, 16.mars, 100.prosent),
+            Sykdom(14.mars, 16.mars, 100.prosent),
             egenmeldinger = listOf(
-                Søknad.Søknadsperiode.Arbeidsgiverdag(13.mars, 13.mars)
+                Arbeidsgiverdag(13.mars, 13.mars)
             )
         )
 
         assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         assertEquals(3, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.size)
 
-        assertEquals(
-            listOf(1.januar til 4.januar),
-            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[0].egenmeldingsperioder
-        )
-        assertEquals(
-            listOf(1.mars til 2.mars),
-            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[1].egenmeldingsperioder
-        )
+        assertEquals(listOf(1.januar til 4.januar), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[0].egenmeldingsperioder)
+        assertEquals(listOf(1.mars til 2.mars), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[1].egenmeldingsperioder)
 
         val expectedPotensiellForespørsel = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
             ORGNUMMER,
             inspektør.vedtaksperiodeId(3.vedtaksperiode),
             13.mars,
-            sykmeldingsperioder = listOf(
-                5.mars til 8.mars,
-                14.mars til 16.mars
-            ),
+            sykmeldingsperioder = listOf(5.mars til 8.mars, 14.mars til 16.mars),
             egenmeldingsperioder = listOf(1.mars til 2.mars, 13.mars til 13.mars),
             førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 13.mars))
         )
-        assertEquals(
-            expectedPotensiellForespørsel,
-            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last()
-        )
+        assertEquals(expectedPotensiellForespørsel, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last())
     }
 
     @Test
     fun `Skal ikke sende med egenmeldingsdager etter vedtaksperioden sin potensielle forespørsel`() {
         håndterSykmelding(Sykmeldingsperiode(10.januar, 16.januar))
-        håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(10.januar, 16.januar, 100.prosent),
-            egenmeldinger = listOf(
-                Søknad.Søknadsperiode.Arbeidsgiverdag(9.januar, 9.januar)
-            )
-        )
+        håndterSøknad(Sykdom(10.januar, 16.januar, 100.prosent), egenmeldinger = listOf(Arbeidsgiverdag(9.januar, 9.januar)))
         håndterSykmelding(Sykmeldingsperiode(2.januar, 5.januar))
-        håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(2.januar, 5.januar, 100.prosent),
-            egenmeldinger = listOf(
-                Søknad.Søknadsperiode.Arbeidsgiverdag(1.januar, 1.januar)
-            )
-        )
+        håndterSøknad(Sykdom(2.januar, 5.januar, 100.prosent), egenmeldinger = listOf(Arbeidsgiverdag(1.januar, 1.januar)))
 
-        assertEquals(
-            listOf(1.januar til 1.januar),
-            observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last().egenmeldingsperioder
-        )
+
+        val trengerPotensieltArbeidsgiveropplysningerVedtaksperioder = observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder
+        assertEquals(3, trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(listOf(9.januar til 9.januar), trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[0].egenmeldingsperioder)
+        assertEquals(listOf(1.januar til 1.januar), trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[1].egenmeldingsperioder)
+        assertEquals(listOf(1.januar til 1.januar, 9.januar til 9.januar), trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[2].egenmeldingsperioder)
     }
 
     @Test
@@ -193,7 +183,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
     @Test
     fun `Skal sende med sykmeldingsperiode selv om det er søknad uten sykedager`() {
         håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent),
+            Sykdom(1.januar, 16.januar, 100.prosent),
             Søknad.Søknadsperiode.Ferie(1.januar, 16.januar)
         )
 

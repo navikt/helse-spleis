@@ -136,7 +136,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         }
     }
@@ -189,7 +189,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertTidsnærInntektsopplysning(a1, sykepengegrunnlagFør, sykepengegrunnlagEtter)
             assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(15.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }

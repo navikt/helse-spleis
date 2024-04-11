@@ -117,7 +117,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2,)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstander(
             1.vedtaksperiode,
             START,

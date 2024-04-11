@@ -12,7 +12,6 @@ import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.BehandlingerUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
@@ -248,7 +247,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
         person.sykdomshistorikkEndret(hendelse)
         validering()
-        nyBehandling?.vurderLukkeAutomatisk(arbeidsgiver, hendelse)
     }
 
     fun erUtbetaltPåForskjelligeUtbetalinger(other: Behandlinger): Boolean {
@@ -650,9 +648,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tilstand.håndterEndring(this, arbeidsgiver, hendelse)
         }
 
-        fun vurderLukkeAutomatisk(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
-            return tilstand.vurderLukkeAutomatisk(this, arbeidsgiver, hendelse)
-        }
         private fun håndtereEndring(arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Endring {
             val oppdatertPeriode = hendelse.oppdaterFom(endringer.last().periode)
             val sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(oppdatertPeriode)
@@ -882,7 +877,6 @@ enum class Periodetilstand {
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
-            fun vurderLukkeAutomatisk(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {}
             fun vedtakAvvist(behandling: Behandling, arbeidsgiver: Arbeidsgiver, utbetalingsavgjørelse: Utbetalingsavgjørelse) {
                 error("Kan ikke avvise vedtak for behandling i $this")
             }
@@ -975,17 +969,6 @@ enum class Periodetilstand {
 
                 override fun kanForkastes(behandling: Behandling, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) =
                     behandling.kanForkastingAvKortPeriodeTillates(hendelse, arbeidsgiverUtbetalinger)
-
-                override fun vurderLukkeAutomatisk(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse) {
-                    if (!kanLukkesUtenVedtak(arbeidsgiver, behandling)) return
-                    behandling.avsluttUtenVedtak(arbeidsgiver, hendelse)
-                }
-
-                private fun kanLukkesUtenVedtak(arbeidsgiver: Arbeidsgiver, behandling: Behandling): Boolean {
-                    val arbeidsgiverperiode = arbeidsgiver.arbeidsgiverperiode(behandling.periode) ?: return true
-                    val forventerInntekt = Arbeidsgiverperiode.forventerInntekt(arbeidsgiverperiode, behandling.periode, behandling.sykdomstidslinje(), NullObserver)
-                    return !forventerInntekt
-                }
             }
             data object UberegnetRevurdering : Tilstand by (Uberegnet) {
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Revurdering)

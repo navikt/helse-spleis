@@ -1079,6 +1079,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding) {
         if (skjæringstidspunkt != this.skjæringstidspunkt) return
+        if (!forventerInntekt()) return
         kontekst(inntektsmelding)
         tilstand.håndtertInntektPåSkjæringstidspunktet(this, inntektsmelding)
     }
@@ -1321,12 +1322,19 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
-                    rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding) -> AvventerBlokkerendePeriode
+                    rettFør != null && forrigePeriodeHarFåttInntektsmelding(rettFør) -> AvventerBlokkerendePeriode
                     else -> AvventerInfotrygdHistorikk
                 }
             }
 
             søknad.info("Fullført behandling av søknad")
+        }
+
+        private fun forrigePeriodeHarFåttInntektsmelding(rettFør: Vedtaksperiode): Boolean {
+            if (rettFør.tilstand in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding)) return false
+            // auu-er vil kunne ligge i Avventer blokkerende periode
+            if (rettFør.tilstand == AvventerBlokkerendePeriode && !rettFør.forventerInntekt()) return false
+            return true
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
@@ -1725,6 +1733,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             vedtaksperiode.behandlinger.forkastUtbetaling(revurdering)
+            if (!vedtaksperiode.forventerInntekt()) return
+            if (vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, revurdering)) return
+            vedtaksperiode.tilstand(revurdering, AvventerInntektsmelding)
         }
 
         private fun tilstand(
@@ -2197,14 +2208,15 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
-            if (!vedtaksperiode.forventerInntekt()) return
             vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, revurdering)
-            revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
-            revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
-            revurdering.info(RV_RV_1.varseltekst)
-            if (!vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, revurdering)) {
-                revurdering.info("mangler nødvendige opplysninger fra arbeidsgiver")
-                return vedtaksperiode.tilstand(revurdering, AvventerInntektsmelding)
+            if (vedtaksperiode.forventerInntekt()) {
+                revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
+                revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
+                revurdering.info(RV_RV_1.varseltekst)
+                if (!vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, revurdering)) {
+                    revurdering.info("mangler nødvendige opplysninger fra arbeidsgiver")
+                    return vedtaksperiode.tilstand(revurdering, AvventerInntektsmelding)
+                }
             }
             vedtaksperiode.tilstand(revurdering, AvventerBlokkerendePeriode)
         }

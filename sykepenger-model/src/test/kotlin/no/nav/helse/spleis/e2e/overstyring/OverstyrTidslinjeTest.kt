@@ -86,8 +86,8 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(2.februar til 17.februar),)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -234,7 +234,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
@@ -259,7 +259,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
@@ -286,7 +286,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         assertEquals(1.januar til 9.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(10.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 

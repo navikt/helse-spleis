@@ -103,7 +103,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
             endringer = emptyList(),
             periode = periode,
             tilstand = when (tilstand) {
-                is Behandlinger.Behandling.Tilstand.Uberegnet -> Behandlingtilstand.BEREGNET
+                is Behandlinger.Behandling.Tilstand.Uberegnet -> Behandlingtilstand.UBEREGNET
                 is Behandlinger.Behandling.Tilstand.UberegnetOmgjøring -> Behandlingtilstand.UBEREGNET_OMGJØRING
                 is Behandlinger.Behandling.Tilstand.UberegnetRevurdering -> Behandlingtilstand.UBEREGNET_REVURDERING
                 is Behandlinger.Behandling.Tilstand.Beregnet -> Behandlingtilstand.BEREGNET
