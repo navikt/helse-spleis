@@ -8,8 +8,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: spleis
-  minReplicas: 2
-  maxReplicas: 24
+  minReplicas: 0
+  maxReplicas: 0
   metrics:
     - type: External
       external:
