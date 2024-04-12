@@ -507,6 +507,12 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.ikkeHåndert(person, vedtaksperioder, sykmeldingsperioder, dager)
     }
 
+    internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse) {
+        hendelse.kontekst(this)
+        hendelse.info("Inntektsmelding ferdigbehandlet")
+        håndter(hendelse) { inntektsmeldingFerdigbehandlet(hendelse) }
+    }
+
     internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
         inntektsmelding.fortsettÅBehandle(this)
     }

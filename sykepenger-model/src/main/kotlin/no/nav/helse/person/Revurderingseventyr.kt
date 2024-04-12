@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -62,7 +63,7 @@ class Revurderingseventyr private constructor(
 
     internal fun sendOverstyringIgangsattEvent(person: Person) {
         if (vedtaksperioder.isEmpty()) return
-        hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring)
+        hvorfor.emitOverstyringIgangsattEvent(person, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.meldingsreferanseId())
     }
 
     internal fun loggDersomKorrigerendeSøknad(hendelse: IAktivitetslogg, loggMelding: String) {
@@ -85,13 +86,14 @@ class Revurderingseventyr private constructor(
 
         fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {}
 
-        fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) {
+        fun emitOverstyringIgangsattEvent(person: Person, vedtaksperioder: List<VedtaksperiodeData>, skjæringstidspunkt: LocalDate, periodeForEndring: Periode, meldingsreferanseId: UUID) {
             person.emitOverstyringIgangsattEvent(
                 PersonObserver.OverstyringIgangsatt(
                     årsak = navn(),
                     berørtePerioder = vedtaksperioder,
                     skjæringstidspunkt = skjæringstidspunkt,
-                    periodeForEndring = periodeForEndring
+                    periodeForEndring = periodeForEndring,
+                    meldingsreferanseId = meldingsreferanseId
                 )
             )
         }
@@ -132,7 +134,8 @@ class Revurderingseventyr private constructor(
                 person: Person,
                 vedtaksperioder: List<VedtaksperiodeData>,
                 skjæringstidspunkt: LocalDate,
-                periodeForEndring: Periode
+                periodeForEndring: Periode,
+                meldingsreferanseId: UUID
             ) { /* trenger ikke fortelle om en reberegning */ }
 
             override fun navn() = "REBEREGNING"

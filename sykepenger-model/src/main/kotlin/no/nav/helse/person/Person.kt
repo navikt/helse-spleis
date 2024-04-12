@@ -184,18 +184,19 @@ class Person private constructor(
         registrer(inntektsmelding, "Behandler inntektsmelding")
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(inntektsmelding)
         arbeidsgiver.håndter(inntektsmelding)
+        arbeidsgiver.inntektsmeldingFerdigbehandlet(inntektsmelding)
         håndterGjenoppta(inntektsmelding)
     }
 
     fun håndter(inntektsmelding: InntektsmeldingReplay) {
         registrer(inntektsmelding, "Behandler replay av inntektsmelding")
         finnArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
-        håndterGjenoppta(inntektsmelding)
     }
 
     fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
         registrer(inntektsmeldingReplayUtført, "Behandler inntektsmelding replay utført")
         finnArbeidsgiver(inntektsmeldingReplayUtført).håndter(inntektsmeldingReplayUtført)
+        gjenopptaBehandling(inntektsmeldingReplayUtført)
         håndterGjenoppta(inntektsmeldingReplayUtført)
     }
 

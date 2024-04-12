@@ -294,6 +294,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, inntektsmeldingReplayUtført)
     }
 
+    internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse) {
+        kontekst(hendelse)
+        tilstand.inntektsmeldingFerdigbehandlet(this, hendelse)
+    }
+
     internal fun håndter(dager: DagerFraInntektsmelding) {
         if (!tilstand.skalHåndtereDager(this, dager) || dager.alleredeHåndtert(behandlinger))
             return dager.vurdertTilOgMed(periode.endInclusive)
@@ -1223,6 +1228,7 @@ internal class Vedtaksperiode private constructor(
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>)
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
+        fun inntektsmeldingFerdigbehandlet(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {}
         fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             dager.skalHåndteresAv(vedtaksperiode.periode)
         fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
@@ -1611,7 +1617,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
-            vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
@@ -1621,7 +1626,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             revurdering.hvisIkkeArbeidsgiverperiode { vedtaksperiode.trengerArbeidsgiveropplysninger(revurdering) }
-            vurderOmKanGåVidere(vedtaksperiode, revurdering)
+            vedtaksperiode.person.gjenopptaBehandling(revurdering)
         }
 
         override fun håndter(
@@ -1660,6 +1665,10 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             vurderOmKanGåVidere(vedtaksperiode, inntektsmeldingReplayUtført)
+        }
+
+        override fun inntektsmeldingFerdigbehandlet(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
+            vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {

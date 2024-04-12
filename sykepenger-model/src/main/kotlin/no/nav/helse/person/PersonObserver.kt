@@ -679,7 +679,8 @@ interface PersonObserver {
         val årsak: String,
         val skjæringstidspunkt: LocalDate,
         val periodeForEndring: Periode,
-        val berørtePerioder: List<VedtaksperiodeData>
+        val berørtePerioder: List<VedtaksperiodeData>,
+        val meldingsreferanseId: UUID
     ) {
         val typeEndring get() = if (berørtePerioder.any { it.typeEndring == "REVURDERING" }) "REVURDERING" else "OVERSTYRING"
 

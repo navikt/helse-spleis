@@ -147,12 +147,12 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         """.let { throw IllegalStateException(it) }
     }
 
-    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert()
-    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) = IM.ikkeHåndtert()
-    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) = IM.førSøknad()
+    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert(inntektsmeldingId)
+    override fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) = IM.ikkeHåndtert(inntektsmeldingId)
+    override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
     override fun overstyringIgangsatt(event: PersonObserver.OverstyringIgangsatt) {
         check(event.berørtePerioder.isNotEmpty()) { "Forventet ikke en igangsatt overstyring uten berørte perioder." }
-        if (event.årsak == "KORRIGERT_INNTEKTSMELDING") IM.korrigertInntekt()
+        if (event.årsak == "KORRIGERT_INNTEKTSMELDING") IM.korrigertInntekt(event.meldingsreferanseId)
     }
 
     private fun PersonObserver.VedtaksperiodeVenterEvent.revurderingFeilet() = gjeldendeTilstander[venterPå.vedtaksperiodeId] == REVURDERING_FEILET
@@ -209,23 +209,26 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private class Inntektsmeldinger {
-        private val signaler = mutableListOf<Signal>()
-        fun håndtert() { signaler.add(Signal.HÅNDTERT) }
-        fun ikkeHåndtert() { signaler.add(Signal.IKKE_HÅNDTERT) }
-        fun førSøknad() { signaler.add(Signal.FØR_SØKNAD) }
-        fun korrigertInntekt() { signaler.add(Signal.KORRIGERT_INNTEKT) }
+        private val signaler = mutableMapOf<UUID, MutableList<Signal>>()
+
+        fun håndtert(inntektsmeldingId: UUID) { signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.HÅNDTERT) }
+        fun ikkeHåndtert(inntektsmeldingId: UUID) { signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.IKKE_HÅNDTERT) }
+        fun førSøknad(inntektsmeldingId: UUID) { signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.FØR_SØKNAD) }
+        fun korrigertInntekt(inntektsmeldingId: UUID) { signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.KORRIGERT_INNTEKT) }
         fun behandlingUtført() = signaler.clear()
 
         fun bekreftEntydighåndtering() {
             if (signaler.isEmpty()) return // En behandling uten håndtering av inntektsmeldinger 🤤
-            val unikeSignaler = signaler.toSet()
+            signaler.forEach { (_, signaler) ->
+                val unikeSignaler = signaler.toSet()
 
-            if (Signal.IKKE_HÅNDTERT in signaler) check(unikeSignaler == setOf(Signal.IKKE_HÅNDTERT)) {
-                "Signalet om at inntektsmelding ikke er håndtert er sendt i kombinasjon med konflikterende signaler: $signaler"
-            }
+                if (Signal.IKKE_HÅNDTERT in signaler) check(unikeSignaler == setOf(Signal.IKKE_HÅNDTERT)) {
+                    "Signalet om at inntektsmelding ikke er håndtert er sendt i kombinasjon med konflikterende signaler: $signaler"
+                }
 
-            if (Signal.FØR_SØKNAD in signaler) check(unikeSignaler == setOf(Signal.FØR_SØKNAD)) {
-                "Signalet om at inntektsmelding kom før søknad er sendt i kombinasjon med konflikterende signaler: $signaler"
+                if (Signal.FØR_SØKNAD in signaler) check(unikeSignaler == setOf(Signal.FØR_SØKNAD)) {
+                    "Signalet om at inntektsmelding kom før søknad er sendt i kombinasjon med konflikterende signaler: $signaler"
+                }
             }
         }
 

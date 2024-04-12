@@ -92,7 +92,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
         val behov = testRapid.inspektør.siste("behov")
-        assertBehov(behov, meldingId, "inntektsmelding_replay")
+        assertBehov(behov, null, "inntektsmelding_replay_utført")
     }
 
     private fun assertVedtaksperiodeEndret(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
@@ -135,7 +135,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("hendelser").isArray)
     }
 
-    private fun assertBehov(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
+    private fun assertBehov(melding: JsonNode, originalMeldingId: UUID?, originalMeldingtype: String) {
         assertStandardinformasjon(melding)
         assertSporingsinformasjon(melding, originalMeldingId, originalMeldingtype)
         assertTrue(melding.path("fødselsnummer").asText().isNotEmpty())
@@ -151,8 +151,9 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertDatotid(melding.path("@opprettet").asText())
     }
 
-    private fun assertSporingsinformasjon(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {
+    private fun assertSporingsinformasjon(melding: JsonNode, originalMeldingId: UUID?, originalMeldingtype: String) {
         assertEquals(originalMeldingtype, melding.path("@forårsaket_av").path("event_name").asText())
+        if (originalMeldingId == null) return
         assertEquals(originalMeldingId.toString(), melding.path("@forårsaket_av").path("id").asText())
     }
 
