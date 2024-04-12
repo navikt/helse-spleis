@@ -77,11 +77,6 @@ import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
-import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_GAMMEL_PERIODE_SOM_KAN_FORKASTES
-import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
-import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD_KAN_FORKASTES
-import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
-import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD_KAN_FORKASTES
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
@@ -2192,20 +2187,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
             if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
-            return HJELP fordi hvorforVenter(vedtaksperiode)
-        }
-
-        private fun hvorforVenter(vedtaksperiode: Vedtaksperiode): Venteårsak.Hvorfor {
-            val kanForkastes = vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())
-            val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode()
-            if (vedtaksperiode.person.erFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) {
-                return if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_INFOTRYGD
-            }
-            if (vedtaksperiode.person.førsteDagIAGPErFerieIInfotrygd(vedtaksperiode.periode, arbeidsgiverperiode)) {
-                return if (kanForkastes) VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD_KAN_FORKASTES else VIL_OMGJØRES_PGA_FERIE_I_AGP_I_INFOTRYGD
-            }
-            if (vedtaksperiode.gammelPeriodeSomKanForkastes(Aktivitetslogg()))  return VIL_OMGJØRES_GAMMEL_PERIODE_SOM_KAN_FORKASTES
-            return VIL_OMGJØRES
+            return HJELP fordi VIL_OMGJØRES
         }
 
         override fun venter(vedtaksperiode: Vedtaksperiode, nestemann: Vedtaksperiode) {

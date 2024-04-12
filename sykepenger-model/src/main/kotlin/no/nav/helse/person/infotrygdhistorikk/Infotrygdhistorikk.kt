@@ -4,10 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
+import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
@@ -16,7 +16,6 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
@@ -148,16 +147,6 @@ internal class Infotrygdhistorikk private constructor(
     internal fun harFerieI(periode: Periode): Boolean {
         if (!harHistorikk()) return false
         return siste.harFerieI(periode)
-    }
-
-    fun villeBlittFiktiv(organisasjonsnummer: String, arbeidsgiverperiode: Arbeidsgiverperiode): Boolean {
-        if (!harHistorikk()) return false
-        return siste.villeBlittFiktiv(organisasjonsnummer, arbeidsgiverperiode)
-    }
-
-    fun ingenUtbetalingerMellom(organisasjonsnummer: String, periode: Periode): Boolean {
-        if (!harHistorikk()) return true
-        return siste.ingenUtbetalingerMellom(organisasjonsnummer, periode)
     }
 
     internal fun dto() = InfotrygdhistorikkUtDto(

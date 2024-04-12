@@ -248,7 +248,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         val nyBehandling = behandlinger.last().håndterEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt)?.also {
             leggTilNyBehandling(it)
         }
-        person.sykdomshistorikkEndret(hendelse)
+        person.sykdomshistorikkEndret()
         validering()
     }
 

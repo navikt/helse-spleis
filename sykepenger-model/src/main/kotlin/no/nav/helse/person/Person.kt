@@ -263,7 +263,7 @@ class Person private constructor(
     private fun håndterHistorikkFraInfotrygd(hendelse: Hendelse, oppdatertHistorikk: (infotrygdhistorikk: Infotrygdhistorikk) -> Boolean) {
         hendelse.kontekst(aktivitetslogg, this)
         oppdatertHistorikk(infotrygdhistorikk)
-        sykdomshistorikkEndret(hendelse)
+        sykdomshistorikkEndret()
         arbeidsgivere.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
         val alleVedtaksperioder = arbeidsgivere.vedtaksperioder { true }
         infotrygdhistorikk.overlappendeInfotrygdperioder(this, alleVedtaksperioder)
@@ -663,14 +663,14 @@ class Person private constructor(
 
     internal fun beregnSkjæringstidspunkt() = arbeidsgivere.beregnSkjæringstidspunkt(infotrygdhistorikk)
 
-    internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
+    internal fun sykdomshistorikkEndret() {
         arbeidsgivere.beregnSkjæringstidspunkter(infotrygdhistorikk)
     }
 
     internal fun søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter) {
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
-        sykdomshistorikkEndret(hendelse)
+        sykdomshistorikkEndret()
         ryddOppVilkårsgrunnlag()
         gjenopptaBehandling(hendelse)
     }
@@ -822,13 +822,6 @@ class Person private constructor(
 
     internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean {
         return infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
-    }
-
-    internal fun erFerieIInfotrygd(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
-        return arbeidsgiverperiode?.ferieIInfotrygd(periode, infotrygdhistorikk) == true
-    }
-    internal fun førsteDagIAGPErFerieIInfotrygd(periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
-        return arbeidsgiverperiode?.førsteDagIAGPErFerieIInfotrygd(infotrygdhistorikk) == true
     }
 
     internal fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: PersonObserver.VedtaksperiodeAnnullertEvent) {
