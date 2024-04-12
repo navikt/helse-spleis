@@ -1,13 +1,11 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.FLERE_INNSLAG
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.GRADERT_YTELSE
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.HAR_PERIODE_RETT_ETTER
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.IKKE_I_HALEN
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.INGEN_FORELDREPENGEYTELSE
-import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.YTELSE_STARTER_FØR_VEDTAKSPERIODEN
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -32,9 +30,11 @@ class Foreldrepenger(
         }
     }
 
-    internal fun tilOgMed(dato: LocalDate): Foreldrepenger {
+    internal fun avgrensTil(periode: Periode): Foreldrepenger {
         return Foreldrepenger(foreldrepengeytelse.mapNotNull { foreldrepenger ->
-            if (foreldrepenger.periode.starterEtter(dato.somPeriode())) null else ForeldrepengerPeriode(foreldrepenger.periode.start til minOf(foreldrepenger.periode.endInclusive, dato), foreldrepenger.grad) })
+            if (foreldrepenger.periode.starterEtter(periode)) null
+            else if (periode.starterEtter(foreldrepenger.periode)) null
+            else ForeldrepengerPeriode(foreldrepenger.periode.subset(periode), foreldrepenger.grad) })
     }
 
     internal fun sykdomshistorikkElement(
@@ -53,7 +53,6 @@ class Foreldrepenger(
         val sammenhengendePerioder = foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder()
         if (sammenhengendePerioder.size > 1) return false to FLERE_INNSLAG
         val foreldrepengeperiode = sammenhengendePerioder.single()
-        if (foreldrepengeperiode.start < periode.start) return false to YTELSE_STARTER_FØR_VEDTAKSPERIODEN
         val fullstendigOverlapp = foreldrepengeperiode == periode
         val foreldrepengerIHalen = periode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(periode.endInclusive)
         if (!fullstendigOverlapp && !foreldrepengerIHalen) return false to IKKE_I_HALEN
@@ -65,7 +64,6 @@ class Foreldrepenger(
         INGEN_FORELDREPENGEYTELSE,
         FLERE_INNSLAG,
         HAR_PERIODE_RETT_ETTER,
-        YTELSE_STARTER_FØR_VEDTAKSPERIODEN,
         GRADERT_YTELSE,
         IKKE_I_HALEN,
     }

@@ -77,13 +77,13 @@ class Ytelser(
         return foreldrepenger.sykdomshistorikkElement(meldingsreferanseId(), hendelseskilde)
     }
 
-    internal fun tilOgMed(dato: LocalDate) = Ytelser(
+    internal fun avgrensTil(periode: Periode) = Ytelser(
         meldingsreferanseId = this.meldingsreferanseId(),
         aktørId = this.aktørId,
         fødselsnummer = this.fødselsnummer,
         organisasjonsnummer = this.organisasjonsnummer,
         vedtaksperiodeId = this.vedtaksperiodeId,
-        foreldrepenger = this.foreldrepenger.tilOgMed(dato),
+        foreldrepenger = this.foreldrepenger.avgrensTil(periode),
         svangerskapspenger = this.svangerskapspenger,
         pleiepenger = this.pleiepenger,
         omsorgspenger = this.omsorgspenger,

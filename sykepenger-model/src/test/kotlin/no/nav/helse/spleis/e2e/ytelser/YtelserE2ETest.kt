@@ -359,4 +359,16 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
     }
+
+    @Test
+    fun `Overlapp med foreldrepenger i halen og før perioden begrenses av perioden`() {
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(1.januar til 28.februar, 100)))
+        assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
+        assertEquals(1.februar, inspektør.sykdomstidslinje.førsteDag())
+        assertEquals(28.februar, inspektør.sykdomstidslinje.sisteDag())
+        assertEquals("YYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
+    }
 }

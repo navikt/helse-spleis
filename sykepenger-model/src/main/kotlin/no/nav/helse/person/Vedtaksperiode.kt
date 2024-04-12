@@ -1126,7 +1126,7 @@ internal class Vedtaksperiode private constructor(
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, organisasjonsnummer)
         ytelser.oppdaterHistorikk(periode, arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.periode) {
             oppdaterHistorikk(
-                ytelser.tilOgMed(periode.endInclusive),
+                ytelser.avgrensTil(periode),
                 validering = {})
         }
         val maksimumSykepenger = beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger) ?: return false
