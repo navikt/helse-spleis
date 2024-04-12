@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.ukedager
@@ -191,13 +190,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         // tyder det på at arbeidsgiver tror det er ny arbeidsgiverperiode, men vi har beregnet at det _ikke_ er ny arbeidsgiverperiode.
         if (ukedager(sisteDagAgp, vedtaksperiode.start) > 0) aktivitetslogg.varsel(RV_IM_3)
         return aktivitetslogg
-    }
-
-    private val LocalDate.erUtbetalingsdag get() = utbetalingsdager.any { this in it }
-    internal fun utbetaltIInfotrygd(vedtaksperiode: Periode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
-        val utbetalingsdagerIVedtaksperiode = vedtaksperiode.filter { it.erUtbetalingsdag }
-        if (utbetalingsdagerIVedtaksperiode.isEmpty()) return false
-        return utbetalingsdagerIVedtaksperiode.all { infotrygdhistorikk.harUtbetaltI(it.somPeriode()) }
     }
 
     internal fun sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {

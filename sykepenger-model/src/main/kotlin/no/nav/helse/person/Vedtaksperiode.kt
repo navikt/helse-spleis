@@ -97,7 +97,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad 
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_1
@@ -2228,29 +2227,22 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             if (!vedtaksperiode.forventerInntekt()) return
-            if (forkastPåGrunnAvInfotrygdendring(hendelse, vedtaksperiode, infotrygdhistorikk)) {
-                hendelse.funksjonellFeil(RV_IT_3)
-                vedtaksperiode.forkast(hendelse)
-                return
-            }
-
             vedtaksperiode.behandlinger.sikreNyBehandling(vedtaksperiode.arbeidsgiver, hendelse, vedtaksperiode.person.beregnSkjæringstidspunkt())
-            håndterRevurdering(hendelse) {
+            håndterFørstegangsbehandling(hendelse, vedtaksperiode) {
                 infotrygdhistorikk.valider(hendelse, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
+            }
+            if (hendelse.harFunksjonelleFeilEllerVerre()) {
+                hendelse.info("Forkaster perioden fordi Infotrygdhistorikken ikke validerer")
+                return vedtaksperiode.forkast(hendelse)
+            }
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) {
+                hendelse.info("Forkaster perioden fordi perioden har ikke tilstrekkelig informasjon til utbetaling")
+                return vedtaksperiode.forkast(hendelse)
             }
             hendelse.varsel(RV_IT_38)
             vedtaksperiode.person.igangsettOverstyring(
                 Revurderingseventyr.infotrygdendring(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )
-        }
-
-        private fun utbetaltIInfotrygd(vedtaksperiode: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk) =
-            vedtaksperiode.finnArbeidsgiverperiode()?.utbetaltIInfotrygd(vedtaksperiode.periode, infotrygdhistorikk) == true
-
-        private fun forkastPåGrunnAvInfotrygdendring(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, infotrygdhistorikk: Infotrygdhistorikk): Boolean {
-            if (vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return false // Om vi har info kan vi sende den ut til Saksbehandler uansett
-            if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, hendelse)) return false // Perioden kan ikke forkastes
-            return utbetaltIInfotrygd(vedtaksperiode, infotrygdhistorikk) // Kan forkaste om alt er utbetalt i Infotrygd i sin helhet
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
