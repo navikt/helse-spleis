@@ -60,10 +60,7 @@ class Ytelser(
             this.info("Legger ikke til foreldrepenger i historikken fordi $hvorforIkke")
         }
         return foreldrepengerIHalen.also {
-            if (it) {
-                this.info("Legger til foreldrepenger i historikken")
-                foreldrepenger._tmp_loggOmDetErGraderteForeldrepenger(aktivitetslogg)
-            }
+            if (it) this.info("Legger til foreldrepenger i historikken")
         }
     }
 

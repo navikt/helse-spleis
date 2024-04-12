@@ -3,13 +3,13 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.FLERE_INNSLAG
+import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.GRADERT_YTELSE
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.HAR_PERIODE_RETT_ETTER
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.IKKE_I_HALEN
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.INGEN_FORELDREPENGEYTELSE
 import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.YTELSE_STARTER_FØR_VEDTAKSPERIODEN
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -56,7 +56,9 @@ class Foreldrepenger(
         if (foreldrepengeperiode.start < periode.start) return false to YTELSE_STARTER_FØR_VEDTAKSPERIODEN
         val fullstendigOverlapp = foreldrepengeperiode == periode
         val foreldrepengerIHalen = periode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(periode.endInclusive)
-        return if (fullstendigOverlapp || foreldrepengerIHalen) true to null else false to IKKE_I_HALEN
+        if (!fullstendigOverlapp && !foreldrepengerIHalen) return false to IKKE_I_HALEN
+        if (foreldrepengeytelse.any { it.grad != 100 }) return false to GRADERT_YTELSE
+        return true to null
     }
 
     internal enum class HvorforIkkeOppdatereHistorikk {
@@ -64,12 +66,8 @@ class Foreldrepenger(
         FLERE_INNSLAG,
         HAR_PERIODE_RETT_ETTER,
         YTELSE_STARTER_FØR_VEDTAKSPERIODEN,
+        GRADERT_YTELSE,
         IKKE_I_HALEN,
-    }
-
-    internal fun _tmp_loggOmDetErGraderteForeldrepenger(logg: Aktivitetslogg) {
-        // antar at vi allerede vet at vi skal oppdatere historikk
-        foreldrepengeytelse.any { it.grad < 100 }.let { gradert -> if (gradert) logg.info("Legger til graderte foreldrepenger") }
     }
 }
 class ForeldrepengerPeriode(internal val periode: Periode, internal val grad: Int)

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -23,7 +22,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -35,9 +33,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
-import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -342,6 +338,16 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(1.januar til 31.januar, 100)))
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
+    }
+
+    @Test
+    fun `graderte foreldrepenger i halen`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(30.januar til 31.januar, 50)))
+        assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
     }
 
     @Test
