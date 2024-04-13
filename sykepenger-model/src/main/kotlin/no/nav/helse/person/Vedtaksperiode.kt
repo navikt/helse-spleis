@@ -32,7 +32,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
@@ -432,37 +431,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg) =
         arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, periode, hendelse)
-
-    private fun forkastGammelPeriodeSomIkkeKanForkastes(hendelse: Hendelse): Boolean {
-        if (!gammelPeriodeSomKanForkastes(hendelse)) return false
-        hendelse.info("Forkaster perioden fordi perioden er gammel og ville ikke kunne blitt behandlet om den var sendt inn i dag")
-        person.søppelbøtte(hendelse, MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(this))
-        return true
-    }
-
-    private fun gammelPeriodeSomKanForkastes(hendelse: IAktivitetslogg): Boolean {
-        if (!erGammelPeriode()) return false
-        hendelse.info("Perioden anses å være gammel og potensielt noe vi ikke ønsker å behandle")
-        if (!arbeidsgiver.kanForkastes(this, hendelse)) return false
-        val villeBlittKastetUt = person.vurderOmSøknadIkkeKanHåndteres(hendelse, this, arbeidsgiver)
-        if (!villeBlittKastetUt) {
-            val forNærmeInfotrygdhistorikk = person.erBehandletIInfotrygd(
-                periode.oppdaterFom(
-                    periode.start.minusDays(MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD)
-                )
-            )
-            if (!forNærmeInfotrygdhistorikk) {
-                hendelse.info("Perioden kan behandles ihht. dagens regler")
-                return false
-            }
-            hendelse.info("Perioden er nærmere enn $MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD dager fra en utbetalt periode i Infotrygd")
-        }
-        hendelse.info("Perioden ville ikke blitt behandlet med dagens regler.")
-        return true
-    }
-
-    private val ugunstigPeriodeForNyBehandling = LocalDate.of(2019, 1, 1) til LocalDate.of(2022, 12, 31)
-    private fun erGammelPeriode() = ugunstigPeriodeForNyBehandling.overlapperMed(periode)
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
         if (!behandlinger.kanForkastes(hendelse, arbeidsgiverUtbetalinger)) {
@@ -1571,7 +1539,6 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(180)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-            if (vedtaksperiode.forkastGammelPeriodeSomIkkeKanForkastes(hendelse)) return
             vedtaksperiode.trengerInntektsmeldingReplay()
             vedtaksperiode.trengerInntektsmelding()
         }
@@ -1637,7 +1604,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.forkastGammelPeriodeSomIkkeKanForkastes(påminnelse)) return
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
                 påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
             }

@@ -828,9 +828,6 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent) }
     }
 
-    internal fun vurderOmSøknadIkkeKanHåndteres(hendelse: IAktivitetslogg, vedtaksperiode: Vedtaksperiode, arbeidsgiver: Arbeidsgiver) =
-        arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(hendelse, vedtaksperiode, arbeidsgivere)
-
     fun dto() = PersonUtDto(
         aktørId = aktørId,
         fødselsnummer = personidentifikator.toString(),
