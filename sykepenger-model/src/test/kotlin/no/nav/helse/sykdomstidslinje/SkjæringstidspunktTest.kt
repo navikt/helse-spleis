@@ -153,6 +153,12 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
+    fun `periode starter søndag - har sykdom til fredag før - lørdag er ukjent`() {
+        val skjæringstidspunkt = (5.S + 1.UK + 1.S).sisteSkjæringstidspunkt()
+        assertEquals(1.januar, skjæringstidspunkt)
+    }
+
+    @Test
     fun `ferie i framtiden`() {
         perioder(2.S, 2.opphold, 2.F) { _, _, _ ->
             assertNull(sisteSkjæringstidspunkt())

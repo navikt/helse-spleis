@@ -187,10 +187,16 @@ internal class Sykdomstidslinje private constructor(
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false
-        val fredag = this[dato.minusDays(if (dato.dayOfWeek == DayOfWeek.SATURDAY) 1 else 2)]
-        val mandag = this[dato.plusDays(if (dato.dayOfWeek == DayOfWeek.SATURDAY) 2 else 1)]
-        return (erEnSykedag(fredag) || fredag is Feriedag) && (erEnSykedag(mandag) || mandag is Feriedag)
+        val ukedag = dato.dayOfWeek
+        val fredag = this[dato.minusDays(if (ukedag == DayOfWeek.SATURDAY) 1 else 2)]
+        val mandag = if (dato.dayOfWeek == DayOfWeek.SATURDAY) 3 else 2
+        // hvis dagen er lørdag: søndag og mandag, ellers mandag
+        val haledager = dato.plusDays(1).datesUntil(dato.plusDays(mandag.toLong())).toList()
+        return byggerBroMellomHelg(fredag) && haledager.any { byggerBroMellomHelg(this[it]) }
     }
+
+    private fun byggerBroMellomHelg(dagen: Dag) =
+        (erEnSykedag(dagen) || dagen is Feriedag)
 
     private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
 
