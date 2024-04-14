@@ -6,13 +6,15 @@ import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.ANNULLERT_PERIODE
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.TIL_INFOTRYGD
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.TIL_INFOTRYGD
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.ANNULLERT_PERIODE
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -66,7 +68,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     fun `behandling uten vedtak forkastes`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-            håndterAnmodningOmForkasting(1.vedtaksperiode)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 10.januar, 100.prosent, 500.daglig)))
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
             val forventetBehandlingId = sisteBehandling.id

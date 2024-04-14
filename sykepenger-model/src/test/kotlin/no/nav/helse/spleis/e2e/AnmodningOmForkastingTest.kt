@@ -88,36 +88,6 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Anmodning om å forkaste periode i AUU forkaster alle AUU'er innenfor samme AGP`() {
-        (a1 og a2).forEach { ag -> ag {
-            nyPeriode(1.januar til 4.januar)
-            nyPeriode(6.januar til 9.januar)
-            nyPeriode(10.januar til 13.januar)
-            nyPeriode(1.mars til 31.mars)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        }}
-
-        a1 {
-            nullstillTilstandsendringer()
-            håndterAnmodningOmForkasting(2.vedtaksperiode)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
-            assertForkastetPeriodeTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
-        }
-
-        a2 {
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
-            assertSisteTilstand(4.vedtaksperiode, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
     fun `Forkaster senere periode påvirker ikke pågående revurdering på tidligere periode med samme skjæringstidspunkt`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
