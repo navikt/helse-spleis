@@ -3,12 +3,13 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.INGEN_FORELDREPENGEYTELSE
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
+import no.nav.helse.sykdomstidslinje.merge
 
 class Ytelser(
     meldingsreferanseId: UUID,
@@ -26,6 +27,10 @@ class Ytelser(
     private val dagpenger: Dagpenger,
     private val aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg), SykdomshistorikkHendelse {
+
+    private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
+        foreldrepenger
+    )
 
     companion object {
         internal val Periode.familieYtelserPeriode get() = oppdaterFom(start.minusWeeks(4))
@@ -50,18 +55,11 @@ class Ytelser(
     }
 
     internal fun oppdaterHistorikk(periode: Periode, periodeRettEtter: Periode?, oppdaterHistorikk: () -> Unit) {
-        if (!skalOppdatereHistorikk(periode, periodeRettEtter)) return
+        val skalOppdatereHistorikk = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.all { ytelse ->
+            ytelse.skalOppdatereHistorikk(this, ytelse, periode, periodeRettEtter)
+        }
+        if (!skalOppdatereHistorikk) return
         oppdaterHistorikk()
-    }
-
-    private fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode?): Boolean {
-        val (foreldrepengerIHalen, hvorforIkke) = foreldrepenger.skalOppdatereHistorikk(periode, periodeRettEtter)
-        if (hvorforIkke !in listOf(null, INGEN_FORELDREPENGEYTELSE)) {
-            this.info("Legger ikke til foreldrepenger i historikken fordi $hvorforIkke")
-        }
-        return foreldrepengerIHalen.also {
-            if (it) this.info("Legger til foreldrepenger i historikken")
-        }
     }
 
     override fun dokumentsporing(): Dokumentsporing {
@@ -73,8 +71,11 @@ class Ytelser(
     }
 
     override fun element(): Sykdomshistorikk.Element {
-        val hendelseskilde = SykdomshistorikkHendelse.Hendelseskilde(this::class, meldingsreferanseId(), registrert())
-        return foreldrepenger.sykdomshistorikkElement(meldingsreferanseId(), hendelseskilde)
+        val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.map { ytelse ->
+            ytelse.sykdomstidslinje(meldingsreferanseId(), registrert())
+        }
+        val samletTidslinje = sykdomstidslinjer.merge(beste = default)
+        return Sykdomshistorikk.Element.opprett(meldingsreferanseId(), samletTidslinje)
     }
 
     internal fun avgrensTil(periode: Periode) = Ytelser(

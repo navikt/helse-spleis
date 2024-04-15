@@ -1,22 +1,18 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.FLERE_INNSLAG
-import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.GRADERT_YTELSE
-import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.HAR_PERIODE_RETT_ETTER
-import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.IKKE_I_HALEN
-import no.nav.helse.hendelser.Foreldrepenger.HvorforIkkeOppdatereHistorikk.INGEN_FORELDREPENGEYTELSE
+import no.nav.helse.hendelser.AnnenYtelseSomKanOppdatereHistorikk.Companion.HvorforIkkeOppdatereHistorikk.*
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 class Foreldrepenger(
     private val foreldrepengeytelse: List<ForeldrepengerPeriode>
-) {
+): AnnenYtelseSomKanOppdatereHistorikk() {
     private val perioder get() = foreldrepengeytelse.map { it.periode }
 
     internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
@@ -37,35 +33,25 @@ class Foreldrepenger(
             else ForeldrepengerPeriode(foreldrepenger.periode.subset(periode), foreldrepenger.grad) })
     }
 
-    internal fun sykdomshistorikkElement(
-        meldingsreferanseId: UUID,
-        hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde
-    ): Sykdomshistorikk.Element {
+    override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {
+        val hendelseskilde = SykdomshistorikkHendelse.Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
         val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }
         val sisteDag = foreldrepengeytelse.map { it.periode }.maxOf { it.endInclusive }
         val sykdomstidslinje = Sykdomstidslinje.andreYtelsedager(førsteDag, sisteDag, hendelseskilde, Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
-        return Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
+        return sykdomstidslinje
     }
 
-    internal fun skalOppdatereHistorikk(periode: Periode, periodeRettEtter: Periode? = null): Pair<Boolean, HvorforIkkeOppdatereHistorikk?> {
-        if (foreldrepengeytelse.isEmpty()) return false to INGEN_FORELDREPENGEYTELSE
-        if (periodeRettEtter != null) return false to HAR_PERIODE_RETT_ETTER
+    override fun skalOppdatereHistorikk(vedtaksperiode: Periode, vedtaksperiodeRettEtter: Periode?): Pair<Boolean, Companion.HvorforIkkeOppdatereHistorikk?> {
+        if (foreldrepengeytelse.isEmpty()) return false to INGEN_YTELSE
+        if (vedtaksperiodeRettEtter != null) return false to HAR_VEDTAKSPERIODE_RETT_ETTER
         val sammenhengendePerioder = foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder()
-        if (sammenhengendePerioder.size > 1) return false to FLERE_INNSLAG
+        if (sammenhengendePerioder.size > 1) return false to FLERE_IKKE_SAMMENHENGENDE_INNSLAG
         val foreldrepengeperiode = sammenhengendePerioder.single()
-        val fullstendigOverlapp = foreldrepengeperiode == periode
-        val foreldrepengerIHalen = periode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(periode.endInclusive)
-        if (!fullstendigOverlapp && !foreldrepengerIHalen) return false to IKKE_I_HALEN
+        val fullstendigOverlapp = foreldrepengeperiode == vedtaksperiode
+        val foreldrepengerIHalen = vedtaksperiode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(vedtaksperiode.endInclusive)
+        if (!fullstendigOverlapp && !foreldrepengerIHalen) return false to IKKE_I_HALEN_AV_VEDTAKSPERIODE
         if (foreldrepengeytelse.any { it.grad != 100 }) return false to GRADERT_YTELSE
         return true to null
-    }
-
-    internal enum class HvorforIkkeOppdatereHistorikk {
-        INGEN_FORELDREPENGEYTELSE,
-        FLERE_INNSLAG,
-        HAR_PERIODE_RETT_ETTER,
-        GRADERT_YTELSE,
-        IKKE_I_HALEN,
     }
 }
 class ForeldrepengerPeriode(internal val periode: Periode, internal val grad: Int)
