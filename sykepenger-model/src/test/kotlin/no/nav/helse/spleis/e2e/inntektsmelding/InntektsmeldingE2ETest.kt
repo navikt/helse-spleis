@@ -111,6 +111,27 @@ import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
+    @Test
+    fun `ingen søknad for halen av arbeidsgiverperiode`() {
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(28.januar, 10.februar, 100.prosent))
+        // ingen søknad for perioden 11. januar - 16.januar
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertForventetFeil(
+            forklaring = "vi har ikke søknad for halen av AGP. Burde vi strukket 2.vedtaksperiode tilbake?",
+            nå = {
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            },
+            ønsket = {
+                // om vi strekker perioden tilbake så vil det likevel foreligge nytt skjæringstidspunkt
+                // 28. januar, og da må vi i utgangspunktet ha egen inntekt+refusjonopplysninger
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            }
+        )
+    }
+
 
     @Test
     fun `korrigerer arbeidsgiverperiode etter utbetalt`() {
