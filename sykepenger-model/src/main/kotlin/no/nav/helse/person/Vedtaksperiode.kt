@@ -2634,7 +2634,7 @@ internal class Vedtaksperiode private constructor(
         ))
     }
 
-    internal fun dto() = VedtaksperiodeUtDto(
+    internal fun dto(nestemann: Vedtaksperiode?, arbeidsgivere: List<Arbeidsgiver>) = VedtaksperiodeUtDto(
         id = id,
         tilstand = when (tilstand) {
             Avsluttet -> VedtaksperiodetilstandDto.AVSLUTTET
@@ -2662,6 +2662,7 @@ internal class Vedtaksperiode private constructor(
         sykmeldingFom = this.sykmeldingsperiode.start,
         sykmeldingTom = this.sykmeldingsperiode.endInclusive,
         behandlinger = behandlinger.dto(),
+        venteårsak = nestemann?.let { vedtaksperiodeVenter(it, arbeidsgivere)?.dto() },
         opprettet = opprettet,
         oppdatert = oppdatert
     )

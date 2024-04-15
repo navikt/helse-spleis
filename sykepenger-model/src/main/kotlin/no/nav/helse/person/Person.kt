@@ -831,7 +831,7 @@ class Person private constructor(
         aktørId = aktørId,
         fødselsnummer = personidentifikator.toString(),
         alder = alder.dto(),
-        arbeidsgivere = arbeidsgivere.map { it.dto() },
+        arbeidsgivere = arbeidsgivere.map { it.dto(arbeidsgivere.nestemann(), arbeidsgivere.toList()) },
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.dto(),
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto()

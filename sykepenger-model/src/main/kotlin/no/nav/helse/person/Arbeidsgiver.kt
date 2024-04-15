@@ -958,13 +958,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
 
-    internal fun dto() = ArbeidsgiverUtDto(
+    internal fun dto(nestemann: Vedtaksperiode?, arbeidsgivere: List<Arbeidsgiver>) = ArbeidsgiverUtDto(
         id = id,
         organisasjonsnummer = organisasjonsnummer,
         inntektshistorikk = inntektshistorikk.dto(),
         sykdomshistorikk = sykdomshistorikk.dto(),
         sykmeldingsperioder = sykmeldingsperioder.dto(),
-        vedtaksperioder = vedtaksperioder.map { it.dto() },
+        vedtaksperioder = vedtaksperioder.map { it.dto(nestemann, arbeidsgivere) },
         forkastede = forkastede.map { it.dto() },
         utbetalinger = utbetalinger.map { it.dto() },
         feriepengeutbetalinger = feriepengeutbetalinger.map { it.dto() },

@@ -73,5 +73,5 @@ internal class ForkastetVedtaksperiode(
 
     }
 
-    internal fun dto() = ForkastetVedtaksperiodeUtDto(vedtaksperiode.dto())
+    internal fun dto() = ForkastetVedtaksperiodeUtDto(vedtaksperiode.dto(null, emptyList()))
 }

@@ -60,6 +60,9 @@ import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.dto.VedtaksperiodeVenterDto
+import no.nav.helse.dto.VenterPåDto
+import no.nav.helse.dto.VenteårsakDto
 import no.nav.helse.nesteDag
 import no.nav.helse.person.TilstandType
 
@@ -356,9 +359,27 @@ internal data class SpannerPersonDto(
             val sykmeldingFom: LocalDate,
             val sykmeldingTom: LocalDate,
             val behandlinger: List<BehandlingData>,
+            val venteårsak: VedtaksperiodeVenterDto?,
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime
         ) {
+            data class VedtaksperiodeVenterDto(
+                val ventetSiden: LocalDateTime,
+                val venterTil: LocalDateTime,
+                val venterPå: VenterPåDto,
+            )
+
+            data class VenterPåDto(
+                val vedtaksperiodeId: UUID,
+                val organisasjonsnummer: String,
+                val venteårsak: VenteårsakDto
+            )
+
+            data class VenteårsakDto(
+                val hva: String,
+                val hvorfor: String?
+            )
+
             data class DokumentsporingData(
                 val dokumentId: UUID,
                 val dokumenttype: DokumentTypeData
@@ -893,6 +914,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverD
         VedtaksperiodetilstandDto.TIL_UTBETALING -> TilstandType.TIL_UTBETALING
     },
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
+    venteårsak = venteårsak?.tilPersonData(),
     opprettet = opprettet,
     oppdatert = oppdatert,
     skjæringstidspunkt = skjæringstidspunkt,
@@ -900,6 +922,20 @@ private fun VedtaksperiodeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverD
     tom = tom,
     sykmeldingFom = sykmeldingFom,
     sykmeldingTom = sykmeldingTom
+)
+private fun VedtaksperiodeVenterDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto(
+    ventetSiden = ventetSiden,
+    venterTil = venterTil,
+    venterPå = venterPå.tilPersonData()
+)
+private fun VenterPåDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenterPåDto(
+    vedtaksperiodeId = vedtaksperiodeId,
+    organisasjonsnummer = organisasjonsnummer,
+    venteårsak = venteårsak.tilPersonData()
+)
+private fun VenteårsakDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VenteårsakDto(
+    hva = hva,
+    hvorfor = hvorfor
 )
 private fun BehandlingUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData(
     id = this.id,

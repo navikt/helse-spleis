@@ -3,6 +3,9 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.VedtaksperiodeVenterDto
+import no.nav.helse.dto.VenterPåDto
+import no.nav.helse.dto.VenteårsakDto
 
 internal class VedtaksperiodeVenter private constructor(
     private val vedtaksperiodeId: UUID,
@@ -26,6 +29,12 @@ internal class VedtaksperiodeVenter private constructor(
             venterTil = venterTil,
             venterPå = venterPå.event(),
             hendelser = hendelseIder
+    )
+
+    fun dto() = VedtaksperiodeVenterDto(
+        ventetSiden = ventetSiden,
+        venterTil = venterTil,
+        venterPå = venterPå.dto()
     )
 
     internal class Builder {
@@ -69,6 +78,11 @@ internal class VenterPå(
     private val organisasjonsnummer: String,
     private val venteårsak: Venteårsak
 ) {
+    fun dto() = VenterPåDto(
+        vedtaksperiodeId = vedtaksperiodeId,
+        organisasjonsnummer = organisasjonsnummer,
+        venteårsak = venteårsak.dto()
+    )
     internal fun event() = PersonObserver.VedtaksperiodeVenterEvent.VenterPå(
         vedtaksperiodeId = vedtaksperiodeId,
         skjæringstidspunkt = skjæringstidspunkt,
@@ -83,6 +97,8 @@ internal class Venteårsak private constructor(
     private val hva: Hva,
     private val hvorfor: Hvorfor?,
 ){
+    fun dto() = VenteårsakDto(hva.name, hvorfor?.name)
+
     internal fun event() = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
         hva = hva.name,
         hvorfor = hvorfor?.name
