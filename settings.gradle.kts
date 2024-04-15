@@ -6,7 +6,7 @@ dependencyResolutionManagement {
         create("libs") {
             version("testcontainers", "1.19.3")
             version("rapids-and-rivers", "2024020507581707116327.1c34df474331")
-            version("postgres", "42.7.2")
+            version("postgres", "42.7.3")
             version("hikari", "5.1.0")
             version("kotliquery", "1.9.0")
             version("cloudsql", "1.16.0")
