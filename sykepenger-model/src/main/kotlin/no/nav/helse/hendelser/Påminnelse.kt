@@ -37,9 +37,8 @@ class Påminnelse(
     fun påminnelsestidspunkt() = påminnelsestidspunkt
     fun nestePåminnelsestidspunkt() = nestePåminnelsestidspunkt
 
-    internal fun nåddMakstid(vedtaksperiode: Vedtaksperiode, person: Person): Boolean {
-        val beregnetMakstid = person.makstid(vedtaksperiode, tilstandsendringstidspunkt)
-        return nå >= beregnetMakstid
+    internal fun nåddMakstid(beregnetMakstid: (LocalDateTime) -> LocalDateTime): Boolean {
+        return nå >= beregnetMakstid(tilstandsendringstidspunkt)
     }
 
     internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId

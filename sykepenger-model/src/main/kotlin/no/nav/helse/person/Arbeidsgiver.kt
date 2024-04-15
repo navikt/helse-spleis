@@ -132,7 +132,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) {
             forEach { arbeidsgiver ->
-                arbeidsgiver.vedtaksperioder.venter(nestemann)
+                arbeidsgiver.vedtaksperioder.venter(this, nestemann)
             }
         }
 
@@ -589,9 +589,9 @@ internal class Arbeidsgiver private constructor(
         utbetalinger.forEach { it.håndter(påminnelse) }
     }
 
-    internal fun håndter(påminnelse: Påminnelse): Boolean {
+    internal fun håndter(påminnelse: Påminnelse, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         påminnelse.kontekst(this)
-        return énHarHåndtert(påminnelse, Vedtaksperiode::håndter)
+        return énHarHåndtert(påminnelse) { håndter(it, arbeidsgivere) }
     }
 
     override fun utbetalingUtbetalt(

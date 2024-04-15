@@ -392,7 +392,7 @@ class Person private constructor(
     fun håndter(påminnelse: Påminnelse) {
         try {
             påminnelse.kontekst(aktivitetslogg, this)
-            if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return håndterGjenoppta(påminnelse)
+            if (finnArbeidsgiver(påminnelse).håndter(påminnelse, arbeidsgivere.toList())) return håndterGjenoppta(påminnelse)
         } catch (err: Aktivitetslogg.AktivitetException) {
             påminnelse.funksjonellFeil(RV_AG_1)
         }
@@ -817,8 +817,7 @@ class Person private constructor(
         val event = PersonObserver.VedtaksperiodeOpprettet(vedtaksperiodeId, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
         observers.forEach { it.vedtaksperiodeOpprettet(event) }
     }
-    internal fun venteårsak(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.venteårsak(arbeidsgivere)
-    internal fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) = vedtaksperiode.makstid(tilstandsendringstidspunkt, arbeidsgivere)
+    internal fun makstid(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.makstid(arbeidsgivere)
 
     internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean {
         return infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
