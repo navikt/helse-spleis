@@ -4,7 +4,6 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
-
 val mainClass = "no.nav.helse.opprydding.AppKt"
 
 dependencies {
