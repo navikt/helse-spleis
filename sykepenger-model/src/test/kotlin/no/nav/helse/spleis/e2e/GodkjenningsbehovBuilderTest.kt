@@ -138,6 +138,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         createOvergangFraInfotrygdPerson()
         forlengTilGodkjenning(1.mars, 31.mars)
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
+        assertTags(setOf("InngangsvilkårFraInfotrygd"), 2.vedtaksperiode.id(a1))
     }
 
     @Test
@@ -147,6 +148,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertIngenTag("IngenNyArbeidsgiverperiode")
+        assertTags(setOf("InngangsvilkårFraInfotrygd"))
     }
 
     @Test

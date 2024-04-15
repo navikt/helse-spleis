@@ -55,6 +55,9 @@ class GodkjenningsbehovBuilder(
                 else -> UtbetalingPeriodetype.FØRSTEGANGSBEHANDLING
             }
         }
+        if (erInfotrygd) {
+            tags.add("InngangsvilkårFraInfotrygd")
+        }
     }
     fun utbetalingtype(utbetalingtype: String) = apply {
         this.utbetalingtype = utbetalingtype
