@@ -2626,7 +2626,6 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeFom = this.periode.start,
                 vedtaksperiodeTom = this.periode.endInclusive,
                 vedtaksperiodetilstand = tilstand.type.name,
-                infotrygdhistorikkHendelseId = null,
                 infotrygdperioder = overlappende.map {
                     it.somOverlappendeInfotrygdperiode()
                 }

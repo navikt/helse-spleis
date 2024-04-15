@@ -50,7 +50,6 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
                 vedtaksperiodeFom = 1.januar,
                 vedtaksperiodeTom = 20.januar,
                 vedtaksperiodetilstand = "AVVENTER_INNTEKTSMELDING",
-                infotrygdhistorikkHendelseId = null,
                 infotrygdperioder = listOf(Infotrygdperiode(
                     fom = 17.januar,
                     tom = 31.januar,
@@ -65,7 +64,6 @@ internal class InfotrygdendringE2ETest : AbstractEndToEndTest() {
                 vedtaksperiodeFom = 21.januar,
                 vedtaksperiodeTom = 31.januar,
                 vedtaksperiodetilstand = "AVVENTER_INNTEKTSMELDING",
-                infotrygdhistorikkHendelseId = null,
                 infotrygdperioder = listOf(Infotrygdperiode(
                     fom = 17.januar,
                     tom = 31.januar,

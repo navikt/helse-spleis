@@ -561,7 +561,6 @@ interface PersonObserver {
         val vedtaksperiodeFom: LocalDate,
         val vedtaksperiodeTom: LocalDate,
         val vedtaksperiodetilstand: String,
-        val infotrygdhistorikkHendelseId: String?,
         val infotrygdperioder: List<Infotrygdperiode>
     ) {
         data class Infotrygdperiode(
