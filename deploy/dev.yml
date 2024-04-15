@@ -57,3 +57,5 @@ spec:
     value: earliest
   - name: IDENTBYTTE
     value: "true"
+  - name: SEND_FERIEPENGEOPPDRAG
+    value: "true"
