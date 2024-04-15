@@ -33,11 +33,9 @@ internal class HendelseDao(private val dataSource: () -> DataSource) {
         @Language("PostgreSQL")
         val statement = """
             SELECT melding_type, data FROM melding 
-            WHERE fnr=? AND melding_type IN (
-                'NY_SØKNAD',
-                'SENDT_SØKNAD_NAV', 'SENDT_SØKNAD_FRILANS', 'SENDT_SØKNAD_SELVSTENDIG', 'SENDT_SØKNAD_ARBEIDSGIVER', 'SENDT_SØKNAD_ARBEIDSLEDIG', 
-                'INNTEKTSMELDING'
-            )
+            WHERE fnr=? AND (melding_type = 'NY_SØKNAD' OR melding_type = 'SENDT_SØKNAD_NAV' OR melding_type = 'SENDT_SØKNAD_FRILANS'
+                OR melding_type = 'SENDT_SØKNAD_SELVSTENDIG' OR melding_type = 'SENDT_SØKNAD_ARBEIDSGIVER' OR melding_type = 'SENDT_SØKNAD_ARBEIDSLEDIG' 
+                OR melding_type = 'INNTEKTSMELDING')
         """
         return sessionOf(dataSource()).use { session ->
             session.run(queryOf(statement, fødselsnummer).map { row ->
@@ -131,8 +129,8 @@ internal class HendelseDao(private val dataSource: () -> DataSource) {
         return sessionOf(dataSource()).use { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (${Meldingstype.values().joinToString { "?" }})",
-                    fødselsnummer, *Meldingstype.values().map(Enum<*>::name).toTypedArray()
+                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND (${Meldingstype.entries.joinToString(separator = " OR ") { "melding_type=?" }})",
+                    fødselsnummer, *Meldingstype.entries.map(Enum<*>::name).toTypedArray()
                 ).map {
                     UUID.fromString(it.string("melding_id")) to Pair(
                         it.string("melding_type"),

@@ -91,7 +91,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         val statement = """
             SELECT p.id, p.fnr, p.data FROM person p
             INNER JOIN person_alias pa ON pa.person_id = p.id
-            WHERE pa.fnr IN (${historiskeFolkeregisteridenter.joinToString { "?" }}) 
+            WHERE ${historiskeFolkeregisteridenter.joinToString(separator = " OR ") { "pa.fnr = ?" }} 
             FOR UPDATE
         """
         // forventer én rad tilbake ellers kastes en exception siden vi da kan knytte
@@ -120,7 +120,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         val statement = """
             SELECT p.id, p.data FROM person p
             INNER JOIN person_alias pa ON pa.person_id = p.id
-            WHERE pa.fnr IN (${identer.joinToString { "?" }})
+            WHERE ${identer.joinToString(separator = " OR ") { "pa.fnr = ?" }}
             FOR UPDATE
         """
         // forventer én rad tilbake ellers kastes en exception siden vi da kan knytte

@@ -152,7 +152,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?, ?, ?)",
+                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND (melding_type = ? OR melding_type = ? OR melding_type = ? OR melding_type = ? OR melding_type = ? OR melding_type = ? OR melding_type = ?)",
                     personidentifikator.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name,
                     OVERSTYRINNTEKT.name, VILKÅRSGRUNNLAG.name
                 ).map {
