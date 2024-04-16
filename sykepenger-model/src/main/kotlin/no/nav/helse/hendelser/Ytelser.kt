@@ -26,7 +26,7 @@ class Ytelser(
     private val institusjonsopphold: Institusjonsopphold,
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
-    private val aktivitetslogg: Aktivitetslogg
+    aktivitetslogg: Aktivitetslogg
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg), SykdomshistorikkHendelse {
 
     private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
@@ -85,20 +85,8 @@ class Ytelser(
         return Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje)
     }
 
-    internal fun avgrensTil(periode: Periode) = Ytelser(
-        meldingsreferanseId = this.meldingsreferanseId(),
-        aktørId = this.aktørId,
-        fødselsnummer = this.fødselsnummer,
-        organisasjonsnummer = this.organisasjonsnummer,
-        vedtaksperiodeId = this.vedtaksperiodeId,
-        foreldrepenger = this.foreldrepenger.avgrensTil(periode),
-        svangerskapspenger = this.svangerskapspenger,
-        pleiepenger = this.pleiepenger,
-        omsorgspenger = this.omsorgspenger,
-        opplæringspenger = this.opplæringspenger,
-        institusjonsopphold = this.institusjonsopphold,
-        arbeidsavklaringspenger = this.arbeidsavklaringspenger,
-        dagpenger= this.dagpenger,
-        aktivitetslogg = aktivitetslogg.barn()
-    )
+    internal fun avgrensTil(periode: Periode): Ytelser {
+        sykdomstidslinje = sykdomstidslinje.fraOgMed(periode.start).fremTilOgMed(periode.endInclusive)
+        return this
+    }
 }
