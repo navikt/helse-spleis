@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonHendelse
+import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -293,7 +294,7 @@ internal class TestPerson(
         internal fun håndterYtelser(
             vedtaksperiodeId: UUID,
             foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
-            svangerskapspenger: List<Periode> = emptyList(),
+            svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
             pleiepenger: List<Periode> = emptyList(),
             omsorgspenger: List<Periode> = emptyList(),
             opplæringspenger: List<Periode> = emptyList(),

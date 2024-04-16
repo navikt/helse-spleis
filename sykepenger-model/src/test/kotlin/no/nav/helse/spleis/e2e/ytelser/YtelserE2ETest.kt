@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -125,7 +126,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(3.januar til 20.januar))
+        håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(SvangerskapspengerPeriode(3.januar til 20.januar, 100)))
         assertVarsel(RV_AY_11)
     }
 
@@ -147,7 +148,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode,
             foreldrepenger = listOf(ForeldrepengerPeriode(20.januar til 31.januar, 100)),
-            svangerskapspenger = listOf(20.januar til 31.januar),
+            svangerskapspenger = listOf(SvangerskapspengerPeriode(20.januar til 31.januar, 100)),
             omsorgspenger = listOf(20.januar til 31.januar),
             opplæringspenger = listOf(20.januar til 31.januar),
             pleiepenger = listOf(20.januar til 31.januar)
@@ -162,7 +163,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode,
             foreldrepenger = listOf(ForeldrepengerPeriode(20.januar til 31.januar, 100)),
-            svangerskapspenger = listOf(20.januar til 31.januar),
+            svangerskapspenger = listOf(SvangerskapspengerPeriode(20.januar til 31.januar, 100)),
             omsorgspenger = listOf(20.januar til 31.januar),
             opplæringspenger = listOf(20.januar til 31.januar),
             pleiepenger = listOf(20.januar til 31.januar)
@@ -198,7 +199,13 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
         håndterInntektsmelding(listOf(1.april til 16.april),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(1.februar til 28.februar, 1.mai til 31.mai ))
+        håndterYtelser(
+            1.vedtaksperiode,
+            svangerskapspenger = listOf(
+                SvangerskapspengerPeriode(20.februar til 28.februar, 100),
+                SvangerskapspengerPeriode(1.mai til 31.mai, 100)
+            )
+        )
         assertIngenFunksjonelleFeil()
         assertIngenVarsel(RV_AY_11)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
@@ -232,7 +239,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(
             2.vedtaksperiode,
             foreldrepenger = listOf(ForeldrepengerPeriode(1.februar til 28.februar, 100)),
-            svangerskapspenger = listOf(1.februar til 28.februar),
+            svangerskapspenger = listOf(SvangerskapspengerPeriode(1.februar til 28.februar, 100)),
             pleiepenger = listOf(1.februar til 28.februar),
             omsorgspenger = listOf(1.februar til 28.februar),
             opplæringspenger = listOf(1.februar til 28.februar),
@@ -254,7 +261,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(
             2.vedtaksperiode,
             foreldrepenger = listOf(ForeldrepengerPeriode(1.februar til 28.februar, 100)),
-            svangerskapspenger = listOf(1.februar til 28.februar),
+            svangerskapspenger = listOf(SvangerskapspengerPeriode(1.februar til 28.februar, 100)),
             pleiepenger = listOf(1.februar til 28.februar),
             omsorgspenger = listOf(1.februar til 28.februar),
             opplæringspenger = listOf(1.februar til 28.februar),

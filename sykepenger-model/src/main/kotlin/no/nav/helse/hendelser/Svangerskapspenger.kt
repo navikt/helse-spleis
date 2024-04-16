@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Svangerskapspenger(
-    private val svangerskapsytelse: List<Periode>
+    private val svangerskapsytelse: List<SvangerskapspengerPeriode>
 ) {
 
     internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
@@ -13,8 +13,10 @@ class Svangerskapspenger(
             return false
         }
         val overlappsperiode = if (erForlengelse) sykdomsperiode else sykdomsperiode.familieYtelserPeriode
-        return svangerskapsytelse.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }.also { overlapper ->
+        return svangerskapsytelse.any { ytelse -> ytelse.periode.overlapperMed(overlappsperiode) }.also { overlapper ->
             if (!overlapper) aktivitetslogg.info("Bruker har svangerskapsytelser, men det slår ikke ut på overlappssjekken")
         }
     }
 }
+
+class SvangerskapspengerPeriode(internal val periode: Periode, internal val grad: Int)

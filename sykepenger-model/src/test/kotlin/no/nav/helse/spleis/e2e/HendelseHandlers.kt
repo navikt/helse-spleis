@@ -29,6 +29,7 @@ import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -655,7 +656,7 @@ private fun AbstractPersonTest.finnArbeidsgivere() = person.inspektør.arbeidsgi
 internal fun AbstractEndToEndTest.håndterYtelser(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
-    svangerskapspenger: List<Periode> = emptyList(),
+    svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
     pleiepenger: List<Periode> = emptyList(),
     omsorgspenger: List<Periode> = emptyList(),
     opplæringspenger: List<Periode> = emptyList(),

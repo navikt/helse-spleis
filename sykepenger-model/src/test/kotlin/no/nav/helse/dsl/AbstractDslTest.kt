@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -278,7 +279,7 @@ internal abstract class AbstractDslTest {
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
-        svangerskapspenger: List<Periode> = emptyList(),
+        svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
@@ -410,7 +411,7 @@ protected fun håndterInntektsmeldingPortal(
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
-        svangerskapspenger: List<Periode> = emptyList(),
+        svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
         pleiepenger: List<Periode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
