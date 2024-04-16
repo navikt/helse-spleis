@@ -20,9 +20,9 @@ internal class AvbruttSøknadRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey(
             "@id",
-            "aktørId",
-            "fødselsnummer",
-            "organisasjonsnummer"
+            "aktorId",
+            "fnr",
+            "arbeidsgiver.orgnummer"
         )
         message.require("fom", JsonNode::asLocalDate)
         message.require("tom", JsonNode::asLocalDate)
