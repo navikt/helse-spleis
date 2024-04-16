@@ -9,6 +9,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 
 class Ytelser(
@@ -31,6 +32,16 @@ class Ytelser(
     private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
         foreldrepenger
     )
+
+    private var sykdomstidslinje: Sykdomstidslinje
+
+    init {
+        val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.map { ytelse ->
+            ytelse.sykdomstidslinje(meldingsreferanseId(), registrert())
+        }
+        sykdomstidslinje = sykdomstidslinjer.merge(beste = default)
+    }
+
 
     companion object {
         internal val Periode.familieYtelserPeriode get() = oppdaterFom(start.minusWeeks(4))
@@ -71,11 +82,7 @@ class Ytelser(
     }
 
     override fun element(): Sykdomshistorikk.Element {
-        val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.map { ytelse ->
-            ytelse.sykdomstidslinje(meldingsreferanseId(), registrert())
-        }
-        val samletTidslinje = sykdomstidslinjer.merge(beste = default)
-        return Sykdomshistorikk.Element.opprett(meldingsreferanseId(), samletTidslinje)
+        return Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje)
     }
 
     internal fun avgrensTil(periode: Periode) = Ytelser(

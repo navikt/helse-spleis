@@ -7,6 +7,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 abstract class AnnenYtelseSomKanOppdatereHistorikk {
+
     companion object {
         internal enum class HvorforIkkeOppdatereHistorikk {
             INGEN_YTELSE,

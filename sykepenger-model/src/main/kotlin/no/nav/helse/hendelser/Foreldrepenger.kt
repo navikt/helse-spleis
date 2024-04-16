@@ -34,6 +34,7 @@ class Foreldrepenger(
     }
 
     override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {
+        if (foreldrepengeytelse.isEmpty()) return Sykdomstidslinje()
         val hendelseskilde = SykdomshistorikkHendelse.Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
         val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }
         val sisteDag = foreldrepengeytelse.map { it.periode }.maxOf { it.endInclusive }
