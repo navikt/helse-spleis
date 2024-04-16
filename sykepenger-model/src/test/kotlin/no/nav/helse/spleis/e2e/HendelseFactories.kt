@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.OmsorgspengerPeriode
 import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.OpplæringspengerPeriode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.PleiepengerPeriode
@@ -393,7 +394,7 @@ internal fun AbstractEndToEndTest.ytelser(
     svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
     pleiepenger: List<PleiepengerPeriode> = emptyList(),
     omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
-    opplæringspenger: List<Periode> = emptyList(),
+    opplæringspenger: List<OpplæringspengerPeriode> = emptyList(),
     institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     arbeidsavklaringspenger: List<Periode> = emptyList(),

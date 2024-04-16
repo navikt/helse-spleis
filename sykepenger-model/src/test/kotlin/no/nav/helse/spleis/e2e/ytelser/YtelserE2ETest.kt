@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OmsorgspengerPeriode
+import no.nav.helse.hendelser.OpplæringspengerPeriode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PleiepengerPeriode
 import no.nav.helse.hendelser.SvangerskapspengerPeriode
@@ -152,7 +153,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             foreldrepenger = listOf(ForeldrepengerPeriode(20.januar til 31.januar, 100)),
             svangerskapspenger = listOf(SvangerskapspengerPeriode(20.januar til 31.januar, 100)),
             omsorgspenger = listOf(OmsorgspengerPeriode(20.januar til 31.januar, 100)),
-            opplæringspenger = listOf(20.januar til 31.januar),
+            opplæringspenger = listOf(OpplæringspengerPeriode(20.januar til 31.januar, 100)),
             pleiepenger = listOf(PleiepengerPeriode(20.januar til 31.januar, 100))
         )
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
@@ -167,7 +168,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             foreldrepenger = listOf(ForeldrepengerPeriode(20.januar til 31.januar, 100)),
             svangerskapspenger = listOf(SvangerskapspengerPeriode(20.januar til 31.januar, 100)),
             omsorgspenger = listOf(OmsorgspengerPeriode(20.januar til 31.januar, 100)),
-            opplæringspenger = listOf(20.januar til 31.januar),
+            opplæringspenger = listOf(OpplæringspengerPeriode(20.januar til 31.januar, 100)),
             pleiepenger = listOf(PleiepengerPeriode(20.januar til 31.januar, 100))
         )
         assertIngenVarsler(2.vedtaksperiode.filter())
@@ -244,7 +245,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             svangerskapspenger = listOf(SvangerskapspengerPeriode(1.februar til 28.februar, 100)),
             pleiepenger = listOf(PleiepengerPeriode(1.februar til 28.februar, 100)),
             omsorgspenger = listOf(OmsorgspengerPeriode(1.februar til 28.februar, 100)),
-            opplæringspenger = listOf(1.februar til 28.februar),
+            opplæringspenger = listOf(OpplæringspengerPeriode(1.februar til 28.februar, 100)),
             institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar))
         )
 
@@ -266,7 +267,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
             svangerskapspenger = listOf(SvangerskapspengerPeriode(1.februar til 28.februar, 100)),
             pleiepenger = listOf(PleiepengerPeriode(1.februar til 28.februar, 100)),
             omsorgspenger = listOf(OmsorgspengerPeriode(1.februar til 28.februar, 100)),
-            opplæringspenger = listOf(1.februar til 28.februar),
+            opplæringspenger = listOf(OpplæringspengerPeriode(1.februar til 28.februar, 100)),
             institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
             arbeidsavklaringspenger = listOf(1.februar til 28.februar),
             dagpenger = listOf(1.februar til 28.februar)

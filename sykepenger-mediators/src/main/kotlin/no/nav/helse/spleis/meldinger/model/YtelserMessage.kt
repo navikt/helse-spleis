@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.OmsorgspengerPeriode
 import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.OpplæringspengerPeriode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.PleiepengerPeriode
@@ -65,7 +66,9 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
         })
 
     private val opplæringspenger =
-        Opplæringspenger(packet["@løsning.${Behovtype.Opplæringspenger.name}"].map(::asPeriode))
+        Opplæringspenger(packet["@løsning.${Behovtype.Opplæringspenger.name}"].map {
+            OpplæringspengerPeriode(Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()), it.path("grad").asInt())
+        })
 
     private val institusjonsopphold = Institusjonsopphold(packet["@løsning.${Behovtype.Institusjonsopphold.name}"].map {
         Institusjonsoppholdsperiode(

@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Opplæringspenger(
-    private val perioder: List<Periode>
+    private val perioder: List<OpplæringspengerPeriode>
 ) {
     internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
         if (perioder.isEmpty()) {
@@ -12,8 +12,9 @@ class Opplæringspenger(
             return false
         }
         val overlappsperiode = if (erForlengelse) sykdomsperiode else sykdomsperiode.familieYtelserPeriode
-        return perioder.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }.also { overlapper ->
+        return perioder.any { ytelse -> ytelse.periode.overlapperMed(overlappsperiode) }.also { overlapper ->
             if (!overlapper) aktivitetslogg.info("Bruker har opplæringspengeytelser, men det slår ikke ut på overlappssjekken")
         }
     }
 }
+class OpplæringspengerPeriode(internal val periode: Periode, internal val grad: Int)

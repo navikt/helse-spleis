@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OmsorgspengerPeriode
+import no.nav.helse.hendelser.OpplæringspengerPeriode
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PleiepengerPeriode
@@ -284,7 +285,7 @@ internal abstract class AbstractDslTest {
         svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
         pleiepenger: List<PleiepengerPeriode> = emptyList(),
         omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
-        opplæringspenger: List<Periode> = emptyList(),
+        opplæringspenger: List<OpplæringspengerPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
@@ -416,7 +417,7 @@ protected fun håndterInntektsmeldingPortal(
         svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
         pleiepenger: List<PleiepengerPeriode> = emptyList(),
         omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
-        opplæringspenger: List<Periode> = emptyList(),
+        opplæringspenger: List<OpplæringspengerPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
