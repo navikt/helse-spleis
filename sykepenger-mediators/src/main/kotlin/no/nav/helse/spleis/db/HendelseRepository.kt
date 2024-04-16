@@ -15,6 +15,7 @@ import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
+import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
@@ -138,6 +139,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is GjenopplivVilkårsgrunnlagMessage -> GJENOPPLIV_VILKÅRSGRUNNLAG
         is IdentOpphørtMessage -> IDENT_OPPHØRT
         is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
+        is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
@@ -197,6 +199,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         ANMODNING_OM_FORKASTING,
         GJENOPPLIV_VILKÅRSGRUNNLAG,
         IDENT_OPPHØRT,
-        SKJØNNSMESSIG_FASTSETTELSE
+        SKJØNNSMESSIG_FASTSETTELSE,
+        AVBRUTT_SØKNAD
     }
 }
