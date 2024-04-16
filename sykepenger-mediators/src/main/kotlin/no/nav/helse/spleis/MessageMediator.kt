@@ -9,6 +9,7 @@ import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
+import no.nav.helse.spleis.meldinger.AvbruttSøknadRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
 import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
 import no.nav.helse.spleis.meldinger.GjenopplivVilkårsgrunnlagRiver
@@ -92,6 +93,7 @@ internal class MessageMediator(
             UtbetalingshistorikkEtterInfotrygdendringRiver(it, this)
             DødsmeldingerRiver(it, this)
             ForkastSykmeldingsperioderRiver(it, this)
+            AvbruttSøknadRiver(it, this)
             AnmodningOmForkastingRiver(it, this)
             GjenopplivVilkårsgrunnlagRiver(it, this)
             IdentOpphørtRiver(it, this)

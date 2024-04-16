@@ -100,6 +100,10 @@ object HendelseProbe {
         tell("ForkastSykmeldingsperioder")
     }
 
+    fun onAvbruttSøknad() {
+        tell("AvbruttSøknad")
+    }
+
     private fun tell(navn: String) {
         hendelseCounter.labels(navn).inc()
     }

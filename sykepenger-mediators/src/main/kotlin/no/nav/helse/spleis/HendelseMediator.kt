@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -42,6 +43,7 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
+import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
@@ -428,6 +430,16 @@ internal class HendelseMediator(
             person.håndter(forkastSykmeldingsperioder)
         }
     }
+    override fun behandle(
+        message: AvbruttSøknadMessage,
+        avbruttSøknad: AvbruttSøknad,
+        context: MessageContext
+    ) {
+        hentPersonOgHåndter(message, avbruttSøknad, context) { person ->
+            HendelseProbe.onAvbruttSøknad()
+            person.håndter(avbruttSøknad)
+        }
+    }
 
     override fun behandle(
         message: GjenopplivVilkårsgrunnlagMessage,
@@ -612,6 +624,7 @@ internal interface IHendelseMediator {
     fun behandle(nyPersonidentifikator: Personidentifikator, message: IdentOpphørtMessage, identOpphørt: IdentOpphørt, nyAktørId: String, gamleIdenter: Set<Personidentifikator>, context: MessageContext)
     fun behandle(message: UtbetalingshistorikkEtterInfotrygdendringMessage, utbetalingshistorikkEtterInfotrygdendring: UtbetalingshistorikkEtterInfotrygdendring, context: MessageContext)
     fun behandle(message: ForkastSykmeldingsperioderMessage, forkastSykmeldingsperioder: ForkastSykmeldingsperioder, context: MessageContext)
+    fun behandle(avbruttSøknadMessage: AvbruttSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
     fun behandle(message: GjenopplivVilkårsgrunnlagMessage, gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag, context: MessageContext)
     fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: MessageContext)
 }
