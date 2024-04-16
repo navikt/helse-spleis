@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.ForeldrepengerPeriode
+import no.nav.helse.hendelser.PleiepengerPeriode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.SvangerskapspengerPeriode
@@ -657,7 +658,7 @@ internal fun AbstractEndToEndTest.håndterYtelser(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
     svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
-    pleiepenger: List<Periode> = emptyList(),
+    pleiepenger: List<PleiepengerPeriode> = emptyList(),
     omsorgspenger: List<Periode> = emptyList(),
     opplæringspenger: List<Periode> = emptyList(),
     institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),

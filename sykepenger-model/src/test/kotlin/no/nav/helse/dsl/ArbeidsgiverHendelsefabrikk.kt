@@ -30,6 +30,7 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.ForeldrepengerPeriode
+import no.nav.helse.hendelser.PleiepengerPeriode
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmelding
@@ -288,7 +289,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
         svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
-        pleiepenger: List<Periode> = emptyList(),
+        pleiepenger: List<PleiepengerPeriode> = emptyList(),
         omsorgspenger: List<Periode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
