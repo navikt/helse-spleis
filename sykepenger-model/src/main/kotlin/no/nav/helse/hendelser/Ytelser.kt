@@ -32,16 +32,7 @@ class Ytelser(
     private val YTELSER_SOM_KAN_OPPDATERE_HISTORIKK: List<AnnenYtelseSomKanOppdatereHistorikk> = listOf(
         foreldrepenger
     )
-
-    private var sykdomstidslinje: Sykdomstidslinje
-
-    init {
-        val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.map { ytelse ->
-            ytelse.sykdomstidslinje(meldingsreferanseId(), registrert())
-        }
-        sykdomstidslinje = sykdomstidslinjer.merge(beste = default)
-    }
-
+    private lateinit var sykdomstidslinje: Sykdomstidslinje
 
     companion object {
         internal val Periode.familieYtelserPeriode get() = oppdaterFom(start.minusWeeks(4))
@@ -66,10 +57,12 @@ class Ytelser(
     }
 
     internal fun oppdaterHistorikk(periode: Periode, periodeRettEtter: Periode?, oppdaterHistorikk: () -> Unit) {
-        val skalOppdatereHistorikk = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.all { ytelse ->
-            ytelse.skalOppdatereHistorikk(this, ytelse, periode, periodeRettEtter)
+        val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.mapNotNull { ytelse ->
+            if (!ytelse.skalOppdatereHistorikk(this, ytelse, periode, periodeRettEtter)) null
+            else ytelse.sykdomstidslinje(meldingsreferanseId(), registrert())
         }
-        if (!skalOppdatereHistorikk) return
+        if (sykdomstidslinjer.isEmpty()) return
+        this.sykdomstidslinje = sykdomstidslinjer.merge(beste = default)
         oppdaterHistorikk()
     }
 
