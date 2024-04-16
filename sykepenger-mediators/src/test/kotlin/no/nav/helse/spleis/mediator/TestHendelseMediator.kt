@@ -2,6 +2,7 @@ package no.nav.helse.spleis.mediator
 
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -35,6 +36,7 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
+import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
@@ -398,6 +400,11 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestForkastSykmeldingsperioderMessageVerdi.set(true)
     }
 
+    override fun behandle(
+        avbruttSøknadMessage: AvbruttSøknadMessage,
+        avbruttSøknad: AvbruttSøknad,
+        context: MessageContext
+    ) {}
     override fun behandle(
         message: GjenopplivVilkårsgrunnlagMessage,
         gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag,
