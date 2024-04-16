@@ -12,6 +12,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -156,6 +157,14 @@ class Person private constructor(
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(sykmelding)
         arbeidsgiver.håndter(sykmelding)
         håndterGjenoppta(sykmelding)
+    }
+
+    fun håndter(avbruttSøknad: AvbruttSøknad) {
+        registrer(avbruttSøknad, "Behandler avbrutt søknad")
+        val arbeidsgiver = finnArbeidsgiver(avbruttSøknad)
+        arbeidsgiver.håndter(avbruttSøknad)
+        gjenopptaBehandling(avbruttSøknad)
+        håndterGjenoppta(avbruttSøknad)
     }
 
     fun håndter(forkastSykmeldingsperioder: ForkastSykmeldingsperioder) {

@@ -11,6 +11,7 @@ import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
@@ -453,6 +454,11 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(sykmelding: Sykmelding) {
         håndter(sykmelding, Vedtaksperiode::håndter)
         sykmeldingsperioder.lagre(sykmelding)
+    }
+
+    internal fun håndter(avbruttSøknad: AvbruttSøknad) {
+        avbruttSøknad.kontekst(this)
+        avbruttSøknad.avbryt(sykmeldingsperioder)
     }
 
     internal fun håndter(forkastSykmeldingsperioder: ForkastSykmeldingsperioder) {

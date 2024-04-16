@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
@@ -93,6 +94,19 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
     ).håndter(Person::håndter)
     sykmeldinger[id] = sykeperioder
     return id
+}
+
+internal fun AbstractEndToEndTest.håndterAvbrytSøknad(
+    periode: Periode,
+    orgnummer: String,
+    meldingsreferanseId: UUID = UUID.randomUUID(),
+    fødselsnummer: Personidentifikator = UNG_PERSON_FNR_2018,
+    aktørId: String = AKTØRID) {
+    AvbruttSøknad(periode,
+        meldingsreferanseId,
+        orgnummer,
+        fødselsnummer.toString(),
+        aktørId).håndter(Person::håndter)
 }
 
 internal fun AbstractEndToEndTest.tilGodkjenning(
