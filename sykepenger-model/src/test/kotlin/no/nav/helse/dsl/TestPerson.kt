@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.OmsorgspengerPeriode
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonHendelse
@@ -297,7 +298,7 @@ internal class TestPerson(
             foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
             svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
             pleiepenger: List<PleiepengerPeriode> = emptyList(),
-            omsorgspenger: List<Periode> = emptyList(),
+            omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
             opplæringspenger: List<Periode> = emptyList(),
             institusjonsoppholdsperioder: List<no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
             arbeidsavklaringspenger: List<Periode> = emptyList(),

@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.OmsorgspengerPeriode
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
@@ -182,7 +183,7 @@ internal abstract class AbstractObservableTest {
         foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
         svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
         pleiepenger: List<PleiepengerPeriode> = emptyList(),
-        omsorgspenger: List<Periode> = emptyList(),
+        omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
         opplæringspenger: List<Periode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         orgnummer: String = ORGNUMMER,
