@@ -484,14 +484,14 @@ internal class Arbeidsgiver private constructor(
                 || ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, vedtaksperiode, hendelse)
     }
 
-    internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+    internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
         søknad.kontekst(this)
         søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
-        opprettVedtaksperiodeOgHåndter(søknad, arbeidsgivere)
+        opprettVedtaksperiodeOgHåndter(søknad, arbeidsgivere, infotrygdhistorikk)
     }
 
-    private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
-        håndter(søknad) { håndter(søknad, arbeidsgivere) }
+    private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
+        håndter(søknad) { håndter(søknad, arbeidsgivere, infotrygdhistorikk) }
         if (søknad.noenHarHåndtert() && !søknad.harFunksjonelleFeilEllerVerre()) return
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
@@ -499,7 +499,7 @@ internal class Arbeidsgiver private constructor(
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        vedtaksperiode.håndter(søknad, arbeidsgivere)
+        vedtaksperiode.håndter(søknad, arbeidsgivere, infotrygdhistorikk)
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {

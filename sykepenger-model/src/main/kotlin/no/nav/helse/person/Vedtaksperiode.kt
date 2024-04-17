@@ -232,10 +232,10 @@ internal class Vedtaksperiode private constructor(
         hendelse.vurdertTilOgMed(periode.endInclusive)
     }
 
-    internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+    internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
         håndterSykdomstidslinjeHendelse(søknad) {
             søknadHåndtert(søknad)
-            tilstand.håndter(this, søknad, arbeidsgivere)
+            tilstand.håndter(this, søknad, arbeidsgivere, infotrygdhistorikk)
         }
     }
 
@@ -1188,7 +1188,7 @@ internal class Vedtaksperiode private constructor(
         // venter du på noe?
         fun venter(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>, nestemann: Vedtaksperiode): VedtaksperiodeVenter? = null
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>)
+        fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk)
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
         fun inntektsmeldingFerdigbehandlet(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {}
@@ -1275,13 +1275,14 @@ internal class Vedtaksperiode private constructor(
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
             HJELP.utenBegrunnelse
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
             val harSenereAUU = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(vedtaksperiode)).isNotEmpty()
             if (harSenereUtbetalinger || harSenereAUU) {
                 søknad.varsel(RV_OO_1)
             }
             vedtaksperiode.arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
+            infotrygdhistorikk.valider(søknad, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             vedtaksperiode.håndterSøknad(søknad) {
                 vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
@@ -1349,7 +1350,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.trengerHistorikkFraInfotrygd(påminnelse, vedtaksperiode)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
@@ -1427,7 +1428,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
@@ -1500,7 +1501,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
@@ -1528,7 +1529,7 @@ internal class Vedtaksperiode private constructor(
         }
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
     }
@@ -1587,7 +1588,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
             vedtaksperiode.trengerArbeidsgiveropplysninger(søknad)
         }
@@ -1680,7 +1681,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
@@ -1801,7 +1802,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerBlokkerendePeriode)
         }
 
@@ -1841,7 +1842,7 @@ internal class Vedtaksperiode private constructor(
         ) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode, arbeidsgivere)
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerBlokkerendePeriode)
         }
 
@@ -1913,7 +1914,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(revurdering, AvventerBlokkerendePeriode)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerBlokkerendePeriode)
         }
 
@@ -1978,7 +1979,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
     }
@@ -1999,7 +2000,7 @@ internal class Vedtaksperiode private constructor(
         ) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode, arbeidsgivere)
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerBlokkerendePeriode)
             if (søknad.harFunksjonelleFeilEllerVerre()) return
         }
@@ -2114,7 +2115,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
     }
@@ -2137,7 +2138,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
@@ -2203,7 +2204,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(revurdering, AvventerBlokkerendePeriode)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             søknad.info("Prøver å igangsette revurdering grunnet korrigerende søknad")
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
@@ -2287,7 +2288,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
@@ -2318,7 +2319,7 @@ internal class Vedtaksperiode private constructor(
         ) =
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode, arbeidsgivere)
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             throw IllegalStateException("Kan ikke håndtere søknad mens perioden er i RevurderingFeilet")
         }
 
@@ -2345,7 +2346,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = HJELP.utenBegrunnelse
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>) {
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             throw IllegalStateException("Kan ikke håndtere søknad mens perioden er i TilInfotrygd")
         }
 

@@ -185,7 +185,7 @@ class Person private constructor(
         tidligereBehandlinger(søknad, søknad.periode())
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(søknad)
         søknad.forUng(alder)
-        arbeidsgiver.håndter(søknad, arbeidsgivere.toList())
+        arbeidsgiver.håndter(søknad, arbeidsgivere.toList(), infotrygdhistorikk)
         håndterGjenoppta(søknad)
     }
 

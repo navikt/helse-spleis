@@ -98,7 +98,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
         assertForlengerInfotrygdperiode()
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     private fun assertForlengerInfotrygdperiode() {

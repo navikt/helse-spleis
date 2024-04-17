@@ -56,7 +56,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
     @Test
     fun `Infotrygdhistorikk som ikke medfører utkasting`() {

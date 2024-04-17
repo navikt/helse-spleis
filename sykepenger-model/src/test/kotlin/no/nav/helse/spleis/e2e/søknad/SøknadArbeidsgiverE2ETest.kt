@@ -358,7 +358,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.februar, 18.februar))
         håndterSøknad(Sykdom(3.februar, 18.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 3.februar,)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -383,7 +383,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         )
         håndterSøknad(Sykdom(2.februar, 2.februar, 100.prosent))
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
 
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(6.februar, 6.februar))

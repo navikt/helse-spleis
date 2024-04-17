@@ -45,7 +45,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         )
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
         assertTrue(inspektør.utbetalinger.isEmpty())
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test

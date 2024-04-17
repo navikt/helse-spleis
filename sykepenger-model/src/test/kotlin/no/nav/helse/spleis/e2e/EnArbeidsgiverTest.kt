@@ -503,7 +503,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar,)
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test
