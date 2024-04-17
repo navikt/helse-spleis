@@ -713,6 +713,12 @@ internal class Arbeidsgiver private constructor(
         person.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId)
     }
 
+    override fun utbetalingForkastet(hendelse: IAktivitetslogg, id: UUID) {
+        looper { periode ->
+            periode.utbetalingForkastet(hendelse, id)
+        }
+    }
+
     override fun utbetalingAnnullert(
         id: UUID,
         korrelasjonsId: UUID,

@@ -6,11 +6,11 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
+import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -34,7 +34,6 @@ import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
@@ -232,6 +231,12 @@ class Utbetaling private constructor(
     private fun godkjenn(hendelse: IAktivitetslogg, vurdering: Vurdering) {
         hendelse.kontekst(this)
         tilstand.godkjenn(this, hendelse, vurdering)
+    }
+
+    private fun forkastet(hendelse: IAktivitetslogg) {
+        observers.forEach {
+            it.utbetalingForkastet(hendelse, id)
+        }
     }
 
     private fun tilstand(neste: Tilstand, hendelse: IAktivitetslogg) {
@@ -691,6 +696,9 @@ class Utbetaling private constructor(
     }
     internal object Forkastet : Tilstand {
         override val status = Utbetalingstatus.FORKASTET
+        override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            utbetaling.forkastet(hendelse)
+        }
     }
 
     class Vurdering(

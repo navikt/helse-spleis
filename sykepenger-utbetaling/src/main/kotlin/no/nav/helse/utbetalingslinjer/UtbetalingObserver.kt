@@ -4,9 +4,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 interface UtbetalingObserver {
+    fun utbetalingForkastet(hendelse: IAktivitetslogg, id: UUID)
     fun utbetalingAnnullert(
         id: UUID,
         korrelasjonsId: UUID,

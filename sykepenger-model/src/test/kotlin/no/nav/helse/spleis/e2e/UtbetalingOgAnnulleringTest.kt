@@ -18,6 +18,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -39,6 +40,18 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `annullere senere periode enn perioden til revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(2.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+    }
 
     @Test
     fun `annullere førstegangsbehandling uten utbetaling`() {

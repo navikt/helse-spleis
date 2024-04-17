@@ -397,6 +397,11 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    internal fun utbetalingForkastet(hendelse: IAktivitetslogg, id: UUID) {
+        kontekst(hendelse)
+        tilstand.utbetalingForkastet(this, hendelse, id)
+    }
+
     internal fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag): Boolean {
         if (!overstyrSykepengegrunnlag.erRelevant(skjæringstidspunkt)) return false
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(organisasjonsnummer) != true) return false
@@ -1252,6 +1257,8 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrArbeidsgiveropplysninger) {}
 
+        fun utbetalingForkastet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, utbetalingId: UUID) {}
+
         fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
@@ -2063,6 +2070,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
             GODKJENNING fordi OVERSTYRING_IGANGSATT
+
+        override fun utbetalingForkastet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg, utbetalingId: UUID) {
+            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+        }
 
         override fun venter(
             vedtaksperiode: Vedtaksperiode,
