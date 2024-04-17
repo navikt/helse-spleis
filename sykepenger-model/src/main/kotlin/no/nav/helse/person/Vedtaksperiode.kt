@@ -2235,7 +2235,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             vedtaksperiode.håndterDager(dager)
-            if (dager.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager)
+            if (dager.harFunksjonelleFeilEllerVerre()) {
+                if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, dager)) return vedtaksperiode.forkast(dager)
+                return vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, dager)
+            }
             vedtaksperiode.person.igangsettOverstyring(
                 Revurderingseventyr.arbeidsgiverperiode(dager, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
             )

@@ -687,4 +687,38 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
+
+    @Test
+    fun `korrigert inntektsmelding med funksjonell feil`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+            nyttVedtak(15.januar, 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar), førsteFraværsdag = 15.januar)
+
+            håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 21.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(3, behandlinger.size)
+                behandlinger[0].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                }
+                behandlinger[1].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                }
+                behandlinger[2].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                }
+            }
+            inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(2, behandlinger.size)
+                behandlinger[0].also { behandling ->
+                    assertEquals(VEDTAK_IVERKSATT, behandling.tilstand)
+                }
+                behandlinger[1].also { behandling ->
+                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                }
+            }
+        }
+    }
 }
