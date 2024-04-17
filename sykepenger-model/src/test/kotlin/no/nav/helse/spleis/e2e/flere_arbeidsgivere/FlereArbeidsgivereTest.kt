@@ -561,11 +561,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
 
         a1 {
@@ -578,11 +578,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) // sitter fast her fordi overlappende periode hos arbeidsgiver 1 mangler refusjonsopplysninger
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         }
     }
 
@@ -903,7 +903,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 START,
-                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
@@ -999,7 +998,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 START,
-                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
 
@@ -1159,20 +1157,18 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             )
             assertTilstander(2.vedtaksperiode,
                 START,
-                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING
             )
         }
         a2 {
             assertTilstander(1.vedtaksperiode,
                 START,
-                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_BLOKKERENDE_PERIODE,
                 AVSLUTTET_UTEN_UTBETALING
             )
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 

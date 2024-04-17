@@ -29,7 +29,7 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         assertEquals(1, antallPersoner())
         assertEquals(2, antallPersonalias())
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
-        assertEquals(10, meldinger.size)
+        assertEquals(8, meldinger.size)
         assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
         assertEquals(FNR1, meldinger[1].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[2].path("fødselsnummer").asText())
@@ -38,7 +38,7 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         assertEquals(FNR2, meldinger[5].path("fødselsnummer").asText())
 
         assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
-        assertTilstander(1, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE")
+        assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE")
     }
 
     @Test
@@ -77,10 +77,9 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         assertEquals(2, antallPersonalias())
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
-        assertEquals(4, meldinger.size)
+        assertEquals(3, meldinger.size)
         assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
         assertEquals(FNR1, meldinger[1].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[2].path("fødselsnummer").asText())
-        assertEquals(FNR2, meldinger[3].path("fødselsnummer").asText())
     }
 }

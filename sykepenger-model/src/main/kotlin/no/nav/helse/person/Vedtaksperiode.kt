@@ -38,6 +38,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
+import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerInntektsmelding
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
@@ -1288,7 +1289,8 @@ internal class Vedtaksperiode private constructor(
                 val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
                     rettFør != null && forrigePeriodeHarFåttInntektsmelding(rettFør) -> AvventerBlokkerendePeriode
-                    else -> AvventerInfotrygdHistorikk
+                    !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+                    else -> AvventerInntektsmelding
                 }
             }
 

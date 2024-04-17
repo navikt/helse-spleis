@@ -127,7 +127,6 @@ internal class TestPersonTest : AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 START,
-                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE
             )

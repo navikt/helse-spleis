@@ -254,7 +254,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 2.vedtaksperiode,
                 START,
-                AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING
             )
             assertIngenFunksjonelleFeil()

@@ -44,7 +44,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(Sykdom(1.mars, 15.mars, 100.prosent), orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
         assertTrue(observatør.manglendeInntektsmeldingVedtaksperioder.none { event ->
             søknadId in event.søknadIder
@@ -87,7 +87,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
 
         assertIngenFunksjonelleFeil()
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
         assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
         assertEquals(
             PersonObserver.ManglendeInntektsmeldingEvent(
@@ -132,7 +132,6 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            AVVENTER_INFOTRYGDHISTORIKK,
             AVVENTER_INNTEKTSMELDING,
             AVVENTER_BLOKKERENDE_PERIODE,
         )
