@@ -34,7 +34,6 @@ import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
@@ -106,12 +105,13 @@ class Utbetaling private constructor(
         observers.add(observer)
     }
 
+    fun periode() = periode
     private fun gyldig() = tilstand !in setOf(Ny, Forkastet)
     fun erUbetalt() = tilstand == Ubetalt
     private fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
     private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
-    private fun erInFlight() = tilstand == Overført || annulleringer.any { it.tilstand == Overført }
+    fun erInFlight() = tilstand == Overført || annulleringer.any { it.tilstand == Overført }
     fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     fun erAvvist() = tilstand == IkkeGodkjent
     private fun erAnnullering() = type == ANNULLERING
@@ -207,8 +207,10 @@ class Utbetaling private constructor(
             "Det er gjort forsøk på å annullere en utbetaling som ikke lenger er aktiv"
         }
 
-        check(sisteUtbetalteForUtbetaling === aktiveUtbetalinger.last()) {
-            "Det er ikke tillatt å annullere annen utbetaling enn den som er siste aktive"
+        if (System.getenv("FORBY_ANNULLERINGER_TIDLIGERE_PERIODER")?.toBoolean() == true) {
+            check(sisteUtbetalteForUtbetaling === aktiveUtbetalinger.last()) {
+                "Det er ikke tillatt å annullere annen utbetaling enn den som er siste aktive"
+            }
         }
 
         return sisteUtbetalteForUtbetaling.opphør(hendelse)

@@ -385,9 +385,10 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(hendelse: AnnullerUtbetaling, vedtaksperioder: List<Vedtaksperiode>) {
         kontekst(hendelse)
-        if (!behandlinger.håndterAnnullering(arbeidsgiver, hendelse, vedtaksperioder.map { it.behandlinger })) return
+        val annullering = behandlinger.håndterAnnullering(arbeidsgiver, hendelse, vedtaksperioder.map { it.behandlinger }) ?: return
         hendelse.info("Forkaster denne, og senere perioder, som følge av annullering.")
         forkast(hendelse)
+        person.igangsettOverstyring(Revurderingseventyr.annullering(hendelse, annullering.periode()))
     }
 
     internal fun håndter(påminnelse: Påminnelse, arbeidsgivere: List<Arbeidsgiver>): Boolean {

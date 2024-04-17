@@ -241,9 +241,10 @@ internal class Arbeidsgiver private constructor(
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
         private fun Iterable<Arbeidsgiver>.sistePeriodeSomHarPågåendeUtbetaling() = vedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).maxOrNull()
+        private fun Iterable<Arbeidsgiver>.harPågåeneUtbetaling() = any { it.utbetalinger.any { utbetaling -> utbetaling.erInFlight() } }
         private fun Iterable<Arbeidsgiver>.førsteAuuSomVilUtbetales() = nåværendeVedtaksperioder(AUU_SOM_VIL_UTBETALES).minOrNull()
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(hendelse: Hendelse) {
-            if (sistePeriodeSomHarPågåendeUtbetaling() != null) return hendelse.info("Stopper gjenoppta behandling pga. pågående utbetaling")
+            if (harPågåeneUtbetaling()) return hendelse.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             val periodeSomSkalGjenopptas = periodeSomSkalGjenopptas() ?: return
             checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas)
             periodeSomSkalGjenopptas.gjenopptaBehandling(hendelse, this)
@@ -575,6 +576,7 @@ internal class Arbeidsgiver private constructor(
     private fun håndterUtbetaling(utbetaling: UtbetalingHendelse) {
         utbetalinger.forEach { it.håndter(utbetaling) }
         håndter(utbetaling, Vedtaksperiode::håndter)
+        person.gjenopptaBehandling(utbetaling)
     }
 
     internal fun nyAnnullering(hendelse: AnnullerUtbetaling, utbetalingSomSkalAnnulleres: Utbetaling): Utbetaling? {

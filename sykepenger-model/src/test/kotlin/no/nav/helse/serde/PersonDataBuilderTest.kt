@@ -110,7 +110,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2018))
 
             håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingId)
-
+            håndterUtbetalt()
             håndterSykmelding(Sykmeldingsperiode(1.august, 5.august))
         }
         a2 {

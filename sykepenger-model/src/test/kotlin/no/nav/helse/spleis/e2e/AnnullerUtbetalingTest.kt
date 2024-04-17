@@ -15,9 +15,11 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.assertNotNull
@@ -30,7 +32,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
@@ -150,11 +151,13 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kan ikke annullere hvis noen vedtaksperioder er til utbetaling`() {
+    fun `Kan annullere hvis noen vedtaksperioder er til utbetaling`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
-        assertThrows<IllegalStateException> { håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode)) }
-        assertIngenAnnulleringsbehov()
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
+        sisteBehovErAnnullering(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
 
     private fun Aktivitet.Behov.hentLinjer() =
@@ -313,8 +316,13 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.mars, 26.mars, 100.prosent, 3.mars)
 
         val utbetalingId = inspektør.utbetalingId(1.vedtaksperiode)
-        assertThrows<IllegalStateException> { håndterAnnullerUtbetaling(utbetalingId = utbetalingId) }
-        assertEquals(0, observatør.annulleringer.size)
+        håndterAnnullerUtbetaling(utbetalingId = utbetalingId)
+        sisteBehovErAnnullering(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertVarsel(Varselkode.RV_RV_7, 2.vedtaksperiode.filter())
+        håndterUtbetalt()
+        assertEquals(1, observatør.annulleringer.size)
     }
 
     @Test

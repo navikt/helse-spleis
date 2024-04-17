@@ -47,6 +47,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
         tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
+        håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
@@ -59,6 +60,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(2.vedtaksperiode))
+        håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
     }

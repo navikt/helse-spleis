@@ -6,11 +6,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
 
@@ -20,7 +20,10 @@ internal class AnnullereTidligereUtbetalingE2ETest : AbstractDslTest() {
             nyttVedtak(1.januar, 31.januar)
             val utbetalingId = inspektør.utbetalinger.single().inspektør.utbetalingId
             nyttVedtak(1.mars, 31.mars)
-            assertThrows<IllegalStateException> { håndterAnnullering(utbetalingId) }
+            håndterAnnullering(utbetalingId)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 

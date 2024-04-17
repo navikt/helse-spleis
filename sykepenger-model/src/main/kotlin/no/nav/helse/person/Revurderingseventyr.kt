@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.PersonObserver.OverstyringIgangsatt.VedtaksperiodeData
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Annullering
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
@@ -20,6 +21,7 @@ import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinj
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 
 
 class Revurderingseventyr private constructor(
@@ -42,6 +44,7 @@ class Revurderingseventyr private constructor(
         fun korrigertInntektsmeldingInntektsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
         fun korrigertInntektsmeldingArbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun grunnbeløpsregulering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+        fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
     }
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()
@@ -127,6 +130,12 @@ class Revurderingseventyr private constructor(
         }
         object Grunnbeløpsregulering : RevurderingÅrsak {
             override fun navn() = "GRUNNBELØPSREGULERING"
+        }
+        object Annullering : RevurderingÅrsak {
+            override fun navn() = "ANNULLERING"
+            override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
+                hendelse.varsel(RV_RV_7)
+            }
         }
 
         object Reberegning : RevurderingÅrsak {

@@ -141,12 +141,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør)
     }
 
-    internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Boolean {
-        val annullering = behandlinger.last().annuller(arbeidsgiver, hendelse, this.behandlinger.toList()) ?: return false
+    internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Utbetaling? {
+        val annullering = behandlinger.last().annuller(arbeidsgiver, hendelse, this.behandlinger.toList()) ?: return null
         andreBehandlinger.forEach {
             it.kobleAnnulleringTilAndre(arbeidsgiver, hendelse, annullering)
         }
-        return true
+        return annullering
     }
 
     private fun kobleAnnulleringTilAndre(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, annullering: Utbetaling) {

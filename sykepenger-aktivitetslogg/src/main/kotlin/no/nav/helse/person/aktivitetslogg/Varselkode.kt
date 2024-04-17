@@ -242,6 +242,7 @@ enum class Varselkode(
     RV_RV_4("Revurdering er igangsatt og må fullføres", avviklet = true),
     RV_RV_5("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres", avviklet = true),
     RV_RV_6("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", avviklet = true),
+    RV_RV_7("En tidligere periode er annullert. Den må være utbetalt i Infotrygd før du denne perioden kan behandles."),
 
     // VT: Vedtaksperiodetilstand
     RV_VT_1("Gir opp fordi tilstanden er nådd makstid"),

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.behandlinger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -41,8 +42,13 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
@@ -652,6 +658,33 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                     assertEquals(1.januar, behandling.skjæringstidspunkt)
                 }
             }
+        }
+    }
+
+    @Test
+    fun `annullere tidligere periode`() {
+        a1 {
+            nyttVedtak(1.januar, 25.januar)
+            forlengVedtak(26.januar, 10.februar)
+            nyttVedtak(14.februar, 20.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar)) // samme agp, men nytt skjæringstidspunkt
+
+            nyttVedtak(15.mars, 10.april)
+            nyttVedtak(1.august, 31.august)
+
+            håndterAnnullering(inspektør.utbetalinger(3.vedtaksperiode).single().inspektør.utbetalingId)
+
+            assertVarsel(RV_RV_7, 4.vedtaksperiode.filter())
+            assertVarsel(RV_RV_7, 5.vedtaksperiode.filter())
+
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_REVURDERING)
+            assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
+
+            håndterUtbetalt()
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
 }
