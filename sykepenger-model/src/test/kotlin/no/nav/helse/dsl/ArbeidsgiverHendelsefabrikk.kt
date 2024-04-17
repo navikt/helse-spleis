@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
