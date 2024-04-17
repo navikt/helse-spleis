@@ -127,4 +127,17 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
         melding: String
     ) =
         set(dag, dato, kilde, melding)
+
+    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
+        set(dag, dato, kilde)
+    }
+
+    override fun visitDag(
+        dag: Dag.AndreYtelser,
+        dato: LocalDate,
+        kilde: Hendelseskilde,
+        ytelse: Dag.AndreYtelser.AnnenYtelse
+    ) {
+        set(dag, dato, kilde)
+    }
 }

@@ -390,7 +390,22 @@
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
-                    "dager": [],
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "2b632e9a-5bd4-48cb-b9be-c0a8b51975cb",
+                          "tidsstempel": "2018-03-01T00:00:00"
+                        },
+                        "grad": 100.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-03-01",
+                        "tom": "2018-03-31",
+                        "dato": null
+                      }
+                    ],
                     "periode": {
                       "fom": "2018-03-01",
                       "tom": "2018-03-31"
@@ -412,7 +427,22 @@
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
                   "sykdomstidslinje": {
-                    "dager": [],
+                    "dager": [
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad",
+                          "id": "2b632e9a-5bd4-48cb-b9be-c0a8b51975cb",
+                          "tidsstempel": "2018-03-01T00:00:00"
+                        },
+                        "grad": 100.0,
+                        "other": null,
+                        "melding": null,
+                        "fom": "2018-03-01",
+                        "tom": "2018-03-31",
+                        "dato": null
+                      }
+                    ],
                     "periode": {
                       "fom": "2018-03-01",
                       "tom": "2018-03-31"

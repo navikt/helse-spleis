@@ -167,6 +167,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         bekreftIngenOverlappende()
         bekreftAvsluttetUtenUtbetalingHarLukketBehandling()
         validerSykdomshistorikk()
+        validerSykdomstidslinjePåBehandlinger()
         IM.bekreftEntydighåndtering()
     }
 
@@ -180,6 +181,20 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             }
         }
     }
+
+    private fun validerSykdomstidslinjePåBehandlinger() {
+        arbeidsgivere.forEach { arbeidsgiver ->
+            arbeidsgiver.inspektør.aktiveVedtaksperioder().forEach { vedtaksperiode ->
+                vedtaksperiode.inspektør.behandlinger.forEach { behandling ->
+                    behandling.endringer.filter { it.unormalSykdomstidslinje }.forEach { endring ->
+                        error("Periode på endring: ${endring.periode}, Periode på sykdomstidslinje: ${endring.sykdomstidslinje.periode()}, FørsteIkkeUkjenteDag=${endring.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag}")
+                    }
+                }
+            }
+        }
+    }
+    private val VedtaksperiodeInspektør.Behandling.Behandlingendring.unormalSykdomstidslinje get() =
+        periode.start != sykdomstidslinje.inspektør.førsteIkkeUkjenteDag
 
     private fun bekreftIngenOverlappende() {
         person.inspektør.vedtaksperioder()
