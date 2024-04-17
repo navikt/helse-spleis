@@ -29,6 +29,7 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     internal val problemdagmeldinger = mutableMapOf<LocalDate, String>()
     internal val låstePerioder = mutableListOf<Periode>()
     internal val dagteller = mutableMapOf<KClass<out Dag>, Int>()
+    internal val førsteIkkeUkjenteDag get() = dager.filterNot { (_, b) -> b is UkjentDag }.keys.minOrNull()
 
     init {
         tidslinje.accept(this)

@@ -5,12 +5,15 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class BegrunnelseDtoForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
+internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
 
     @Test
     fun `arbeidsgiverperioden strekker seg over to perioder og inntektsmelding kommer etter søknadene`() {
@@ -38,6 +41,36 @@ internal class BegrunnelseDtoForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest(
                 },
                 ønsket = {
                     assertEquals("NNNNNHH NNNNNHH NNS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `Vedtaksperiode blir strukket med UkjentDag`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+            håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+
+            assertTrue(inspektør.sykdomstidslinje[25.januar] is Dag.SykedagNav)
+            assertEquals(25.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.inspektør.førsteIkkeUkjenteDag)
+
+            assertForventetFeil(
+                forklaring = "Vedtaksperiode blir strukket med UkjentDag",
+                nå = {
+                    (17.januar til 31.januar).let { periode ->
+                        assertEquals(periode, inspektør.periode(2.vedtaksperiode))
+                        assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.periode())
+
+                    }
+                 },
+                ønsket = {
+                    (25.januar til 31.januar).let { periode ->
+                        assertEquals(periode, inspektør.periode(2.vedtaksperiode))
+                        assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.periode())
+
+                    }
                 }
             )
         }
