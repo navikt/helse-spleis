@@ -80,9 +80,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertEquals(13.januar til 26.januar, inspektør(a1).periode(3.vedtaksperiode))
         assertEquals(1.januar til 26.januar, inspektør(a2).periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test

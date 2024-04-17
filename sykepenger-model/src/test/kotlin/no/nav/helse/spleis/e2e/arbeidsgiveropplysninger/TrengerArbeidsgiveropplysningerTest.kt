@@ -39,6 +39,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -75,6 +76,26 @@ import org.junit.jupiter.api.Test
 internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     private val INNTEKT_FLERE_AG = 20000.månedlig
+
+    @Test
+    fun `flere korte perioder - sender ikke ut ny oppdatert forespørsel ved mottak av im`() {
+        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
+        håndterSøknad(Sykdom(6.januar, 7.januar, 100.prosent))
+        håndterSøknad(Sykdom(8.januar, 13.januar, 100.prosent))
+        håndterSøknad(Sykdom(14.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(22.januar, 26.januar, 100.prosent))
+        håndterSøknad(Sykdom(27.januar, 28.januar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(5.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertSisteTilstand(6.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertSisteTilstand(7.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
 
     @Test
     fun `første fraværsdag vi mottar i IM blir feil når det er ferie første dag i sykmeldingsperioden etter kort gap`() {
