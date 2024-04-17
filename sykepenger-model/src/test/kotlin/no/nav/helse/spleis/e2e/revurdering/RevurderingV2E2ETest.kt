@@ -6,7 +6,7 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Dagtype.Feriedag
-import no.nav.helse.hendelser.ForeldrepengerPeriode
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -1009,7 +1009,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `overlappende ytelser ved revurdering skal gi warning, ikke error`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(1.januar til 10.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til 10.januar, 100)))
 
         assertVarsel(RV_AY_5)
         assertIngenFunksjonelleFeil()
@@ -1022,7 +1022,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(1.mars, 31.mars)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(2.februar, Feriedag)))
-        håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(20.januar til 31.januar, 100)))
+        håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)))
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)

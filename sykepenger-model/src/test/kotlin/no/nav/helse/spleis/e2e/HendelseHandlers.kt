@@ -26,13 +26,9 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.ForeldrepengerPeriode
-import no.nav.helse.hendelser.OmsorgspengerPeriode
-import no.nav.helse.hendelser.OpplæringspengerPeriode
-import no.nav.helse.hendelser.PleiepengerPeriode
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -658,11 +654,11 @@ private fun AbstractPersonTest.finnArbeidsgivere() = person.inspektør.arbeidsgi
 
 internal fun AbstractEndToEndTest.håndterYtelser(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-    foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
-    svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
-    pleiepenger: List<PleiepengerPeriode> = emptyList(),
-    omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
-    opplæringspenger: List<OpplæringspengerPeriode> = emptyList(),
+    foreldrepenger: List<GradertPeriode> = emptyList(),
+    svangerskapspenger: List<GradertPeriode> = emptyList(),
+    pleiepenger: List<GradertPeriode> = emptyList(),
+    omsorgspenger: List<GradertPeriode> = emptyList(),
+    opplæringspenger: List<GradertPeriode> = emptyList(),
     institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     arbeidsavklaringspenger: List<Periode> = emptyList(),

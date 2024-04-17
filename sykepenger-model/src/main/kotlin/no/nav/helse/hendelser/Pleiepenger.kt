@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 class Pleiepenger(
-    private val perioder: List<PleiepengerPeriode>
+    private val perioder: List<GradertPeriode>
 ) {
     internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode, erForlengelse: Boolean): Boolean {
         if (perioder.isEmpty()) {
@@ -17,4 +17,3 @@ class Pleiepenger(
         }
     }
 }
-class PleiepengerPeriode(internal val periode: Periode, internal val grad: Int)

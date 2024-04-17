@@ -6,18 +6,14 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
-import no.nav.helse.hendelser.ForeldrepengerPeriode
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.hendelser.Omsorgspenger
-import no.nav.helse.hendelser.OmsorgspengerPeriode
 import no.nav.helse.hendelser.Opplæringspenger
-import no.nav.helse.hendelser.OpplæringspengerPeriode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.PleiepengerPeriode
 import no.nav.helse.hendelser.Svangerskapspenger
-import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -44,31 +40,22 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
     private val foreldrepengerytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Foreldrepengeytelse"]
-        .takeIf(JsonNode::isObject)?.path("perioder")?.map {
-            ForeldrepengerPeriode(Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()), it.path("grad").asInt())
-        } ?: emptyList()
+        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode)?: emptyList()
     private val svangerskapsytelse = packet["@løsning.${Behovtype.Foreldrepenger.name}.Svangerskapsytelse"]
-        .takeIf(JsonNode::isObject)?.path("perioder")?.map {
-            SvangerskapspengerPeriode(Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()), it.path("grad").asInt())
-        } ?: emptyList()
+        .takeIf(JsonNode::isObject)?.path("perioder")?.map(::asGradertPeriode)
+         ?: emptyList()
 
     private val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
     private val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
 
     private val pleiepenger =
-        Pleiepenger(packet["@løsning.${Behovtype.Pleiepenger.name}"].map {
-            PleiepengerPeriode(Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()), it.path("grad").asInt())
-        })
+        Pleiepenger(packet["@løsning.${Behovtype.Pleiepenger.name}"].map(::asGradertPeriode))
 
     private val omsorgspenger =
-        Omsorgspenger(packet["@løsning.${Behovtype.Omsorgspenger.name}"].map {
-            OmsorgspengerPeriode(Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()), it.path("grad").asInt())
-        })
+        Omsorgspenger(packet["@løsning.${Behovtype.Omsorgspenger.name}"].map(::asGradertPeriode))
 
     private val opplæringspenger =
-        Opplæringspenger(packet["@løsning.${Behovtype.Opplæringspenger.name}"].map {
-            OpplæringspengerPeriode(Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()), it.path("grad").asInt())
-        })
+        Opplæringspenger(packet["@løsning.${Behovtype.Opplæringspenger.name}"].map(::asGradertPeriode))
 
     private val institusjonsopphold = Institusjonsopphold(packet["@løsning.${Behovtype.Institusjonsopphold.name}"].map {
         Institusjonsoppholdsperiode(
@@ -121,4 +108,10 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
 
     private fun asDatePair(jsonNode: JsonNode) =
         jsonNode.path("fom").asLocalDate() to jsonNode.path("tom").asLocalDate()
+
+    private fun asGradertPeriode(jsonNode: JsonNode) =
+        GradertPeriode(
+            Periode(jsonNode.path("fom").asLocalDate(), jsonNode.path("tom").asLocalDate()),
+            jsonNode.path("grad").asInt()
+        )
 }

@@ -7,17 +7,13 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.hendelser.ForeldrepengerPeriode
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.OmsorgspengerPeriode
-import no.nav.helse.hendelser.OpplæringspengerPeriode
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.PleiepengerPeriode
-import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -281,11 +277,11 @@ internal abstract class AbstractDslTest {
         this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold) }
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
-        foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
-        svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
-        pleiepenger: List<PleiepengerPeriode> = emptyList(),
-        omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
-        opplæringspenger: List<OpplæringspengerPeriode> = emptyList(),
+        foreldrepenger: List<GradertPeriode> = emptyList(),
+        svangerskapspenger: List<GradertPeriode> = emptyList(),
+        pleiepenger: List<GradertPeriode> = emptyList(),
+        omsorgspenger: List<GradertPeriode> = emptyList(),
+        opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),
@@ -413,11 +409,11 @@ protected fun håndterInntektsmeldingPortal(
         bareÈnArbeidsgiver(a1).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,
-        foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
-        svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
-        pleiepenger: List<PleiepengerPeriode> = emptyList(),
-        omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
-        opplæringspenger: List<OpplæringspengerPeriode> = emptyList(),
+        foreldrepenger: List<GradertPeriode> = emptyList(),
+        svangerskapspenger: List<GradertPeriode> = emptyList(),
+        pleiepenger: List<GradertPeriode> = emptyList(),
+        omsorgspenger: List<GradertPeriode> = emptyList(),
+        opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList(),

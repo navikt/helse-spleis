@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e.ytelser
 
 import no.nav.helse.desember
 import no.nav.helse.februar
-import no.nav.helse.hendelser.OmsorgspengerPeriode
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -58,7 +58,7 @@ internal class OmsorgspengerE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(OmsorgspengerPeriode(1.januar til 31.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(1.januar til 31.januar, 100)))
         assertVarsel(Varselkode.RV_AY_7, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
@@ -69,7 +69,7 @@ internal class OmsorgspengerE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(OmsorgspengerPeriode(1.desember(2017) til 1.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(1.desember(2017) til 1.januar, 100)))
         assertVarsel(Varselkode.RV_AY_7, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
@@ -80,7 +80,7 @@ internal class OmsorgspengerE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(OmsorgspengerPeriode(31.januar til 14.februar, 100)))
+        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(31.januar til 14.februar, 100)))
         assertVarsel(Varselkode.RV_AY_7)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
@@ -91,7 +91,7 @@ internal class OmsorgspengerE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
         håndterInntektsmelding(listOf(3.mars til 18.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(OmsorgspengerPeriode(3.februar til 20.februar, 100)))
+        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
         assertVarsel(Varselkode.RV_AY_7)
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }

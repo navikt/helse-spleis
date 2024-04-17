@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.ForeldrepengerPeriode
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -701,7 +701,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
         håndterYtelser(
             1.vedtaksperiode,
-            foreldrepenger = listOf(ForeldrepengerPeriode(16.januar til 28.januar, 100))
+            foreldrepenger = listOf(GradertPeriode(16.januar til 28.januar, 100))
         )
 
         håndterAnnullerUtbetaling()

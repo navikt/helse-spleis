@@ -11,7 +11,7 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 class Foreldrepenger(
-    private val foreldrepengeytelse: List<ForeldrepengerPeriode>
+    private val foreldrepengeytelse: List<GradertPeriode>
 ): AnnenYtelseSomKanOppdatereHistorikk() {
     private val perioder get() = foreldrepengeytelse.map { it.periode }
 
@@ -24,13 +24,6 @@ class Foreldrepenger(
         return perioder.any { ytelse -> ytelse.overlapperMed(overlappsperiode) }.also { overlapper ->
             if (!overlapper) aktivitetslogg.info("Bruker har foreldrepenger, men det slår ikke ut på overlappsjekken")
         }
-    }
-
-    internal fun avgrensTil(periode: Periode): Foreldrepenger {
-        return Foreldrepenger(foreldrepengeytelse.mapNotNull { foreldrepenger ->
-            if (foreldrepenger.periode.starterEtter(periode)) null
-            else if (periode.starterEtter(foreldrepenger.periode)) null
-            else ForeldrepengerPeriode(foreldrepenger.periode.subset(periode), foreldrepenger.grad) })
     }
 
     override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {
@@ -55,4 +48,3 @@ class Foreldrepenger(
         return true to null
     }
 }
-class ForeldrepengerPeriode(internal val periode: Periode, internal val grad: Int)

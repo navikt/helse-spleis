@@ -5,15 +5,11 @@ import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.ForeldrepengerPeriode
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.OmsorgspengerPeriode
-import no.nav.helse.hendelser.OpplæringspengerPeriode
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.PleiepengerPeriode
-import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -119,7 +115,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
         håndterInntektsmelding(listOf(3.mars til 18.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(3.februar til 20.februar, 100)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(3.februar til 20.februar, 100)))
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
@@ -129,7 +125,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(SvangerskapspengerPeriode(3.januar til 20.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, svangerskapspenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
         assertVarsel(RV_AY_11)
     }
 
@@ -139,7 +135,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
         håndterInntektsmelding(listOf(3.mars til 18.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(3.januar til 20.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
         assertIngenFunksjonelleFeil()
     }
 
@@ -150,11 +146,11 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode,
-            foreldrepenger = listOf(ForeldrepengerPeriode(20.januar til 31.januar, 100)),
-            svangerskapspenger = listOf(SvangerskapspengerPeriode(20.januar til 31.januar, 100)),
-            omsorgspenger = listOf(OmsorgspengerPeriode(20.januar til 31.januar, 100)),
-            opplæringspenger = listOf(OpplæringspengerPeriode(20.januar til 31.januar, 100)),
-            pleiepenger = listOf(PleiepengerPeriode(20.januar til 31.januar, 100))
+            foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            svangerskapspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            omsorgspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            opplæringspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            pleiepenger = listOf(GradertPeriode(20.januar til 31.januar, 100))
         )
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertVarsel(RV_AY_6, 1.vedtaksperiode.filter())
@@ -165,11 +161,11 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode,
-            foreldrepenger = listOf(ForeldrepengerPeriode(20.januar til 31.januar, 100)),
-            svangerskapspenger = listOf(SvangerskapspengerPeriode(20.januar til 31.januar, 100)),
-            omsorgspenger = listOf(OmsorgspengerPeriode(20.januar til 31.januar, 100)),
-            opplæringspenger = listOf(OpplæringspengerPeriode(20.januar til 31.januar, 100)),
-            pleiepenger = listOf(PleiepengerPeriode(20.januar til 31.januar, 100))
+            foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            svangerskapspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            omsorgspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            opplæringspenger = listOf(GradertPeriode(20.januar til 31.januar, 100)),
+            pleiepenger = listOf(GradertPeriode(20.januar til 31.januar, 100))
         )
         assertIngenVarsler(2.vedtaksperiode.filter())
     }
@@ -179,7 +175,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.mars, 19.mars, 100.prosent))
         håndterInntektsmelding(listOf(3.mars til 18.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(OmsorgspengerPeriode(3.januar til 20.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(GradertPeriode(3.januar til 20.januar, 100)))
         assertIngenFunksjonelleFeil()
     }
 
@@ -190,8 +186,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.april til 16.april),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(
-            ForeldrepengerPeriode(1.februar til 28.februar, 100),
-            ForeldrepengerPeriode(1.mai til 31.mai, 100) ))
+            GradertPeriode(1.februar til 28.februar, 100),
+            GradertPeriode(1.mai til 31.mai, 100) ))
         assertIngenFunksjonelleFeil()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
@@ -205,8 +201,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(
             1.vedtaksperiode,
             svangerskapspenger = listOf(
-                SvangerskapspengerPeriode(20.februar til 28.februar, 100),
-                SvangerskapspengerPeriode(1.mai til 31.mai, 100)
+                GradertPeriode(20.februar til 28.februar, 100),
+                GradertPeriode(1.mai til 31.mai, 100)
             )
         )
         assertIngenFunksjonelleFeil()
@@ -241,11 +237,11 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(
             2.vedtaksperiode,
-            foreldrepenger = listOf(ForeldrepengerPeriode(1.februar til 28.februar, 100)),
-            svangerskapspenger = listOf(SvangerskapspengerPeriode(1.februar til 28.februar, 100)),
-            pleiepenger = listOf(PleiepengerPeriode(1.februar til 28.februar, 100)),
-            omsorgspenger = listOf(OmsorgspengerPeriode(1.februar til 28.februar, 100)),
-            opplæringspenger = listOf(OpplæringspengerPeriode(1.februar til 28.februar, 100)),
+            foreldrepenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
+            svangerskapspenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
+            pleiepenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
+            omsorgspenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
+            opplæringspenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
             institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar))
         )
 
@@ -263,11 +259,11 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 95.prosent))
         håndterYtelser(
             2.vedtaksperiode,
-            foreldrepenger = listOf(ForeldrepengerPeriode(1.februar til 28.februar, 100)),
-            svangerskapspenger = listOf(SvangerskapspengerPeriode(1.februar til 28.februar, 100)),
-            pleiepenger = listOf(PleiepengerPeriode(1.februar til 28.februar, 100)),
-            omsorgspenger = listOf(OmsorgspengerPeriode(1.februar til 28.februar, 100)),
-            opplæringspenger = listOf(OpplæringspengerPeriode(1.februar til 28.februar, 100)),
+            foreldrepenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
+            svangerskapspenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
+            pleiepenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
+            omsorgspenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
+            opplæringspenger = listOf(GradertPeriode(1.februar til 28.februar, 100)),
             institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.februar, 28.februar)),
             arbeidsavklaringspenger = listOf(1.februar til 28.februar),
             dagpenger = listOf(1.februar til 28.februar)
@@ -345,7 +341,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(1.januar til 31.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til 31.januar, 100)))
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
     }
@@ -355,7 +351,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(30.januar til 31.januar, 50)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(30.januar til 31.januar, 50)))
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
     }
@@ -365,7 +361,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(1.januar til 10.februar, 100)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til 10.februar, 100)))
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertEquals("YYYYYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
     }
@@ -375,7 +371,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(ForeldrepengerPeriode(1.januar til 28.februar, 100)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til 28.februar, 100)))
         assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
         assertEquals(1.februar, inspektør.sykdomstidslinje.førsteDag())
         assertEquals(28.februar, inspektør.sykdomstidslinje.sisteDag())

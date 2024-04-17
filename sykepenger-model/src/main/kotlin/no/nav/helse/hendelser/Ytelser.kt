@@ -83,3 +83,5 @@ class Ytelser(
         return this
     }
 }
+
+class GradertPeriode(internal val periode: Periode, internal val grad: Int)

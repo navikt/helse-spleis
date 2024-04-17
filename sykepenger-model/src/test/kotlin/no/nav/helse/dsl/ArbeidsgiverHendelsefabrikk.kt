@@ -29,12 +29,8 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.hendelser.ForeldrepengerPeriode
-import no.nav.helse.hendelser.OmsorgspengerPeriode
-import no.nav.helse.hendelser.OpplæringspengerPeriode
-import no.nav.helse.hendelser.PleiepengerPeriode
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Svangerskapspenger
-import no.nav.helse.hendelser.SvangerskapspengerPeriode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -289,11 +285,11 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     internal fun lagYtelser(
         vedtaksperiodeId: UUID,
-        foreldrepenger: List<ForeldrepengerPeriode> = emptyList(),
-        svangerskapspenger: List<SvangerskapspengerPeriode> = emptyList(),
-        pleiepenger: List<PleiepengerPeriode> = emptyList(),
-        omsorgspenger: List<OmsorgspengerPeriode> = emptyList(),
-        opplæringspenger: List<OpplæringspengerPeriode> = emptyList(),
+        foreldrepenger: List<GradertPeriode> = emptyList(),
+        svangerskapspenger: List<GradertPeriode> = emptyList(),
+        pleiepenger: List<GradertPeriode> = emptyList(),
+        omsorgspenger: List<GradertPeriode> = emptyList(),
+        opplæringspenger: List<GradertPeriode> = emptyList(),
         institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
         arbeidsavklaringspenger: List<Periode> = emptyList(),
         dagpenger: List<Periode> = emptyList()
