@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.AnnenYtelseSomKanOppdatereHistorikk.Companion.HvorforIkkeOppdatereHistorikk.*
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -28,6 +27,7 @@ class Foreldrepenger(
 
     override fun sykdomstidslinje(meldingsreferanseId: UUID, registrert: LocalDateTime): Sykdomstidslinje {
         if (foreldrepengeytelse.isEmpty()) return Sykdomstidslinje()
+        require(foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder().size == 1) {"Ikke trygt å kalle sykdomstidslinjen til ${this.javaClass.simpleName} når det er huller i ytelser"}
         val hendelseskilde = SykdomshistorikkHendelse.Hendelseskilde(Ytelser::class, meldingsreferanseId, registrert)
         val førsteDag = foreldrepengeytelse.map { it.periode }.minOf { it.start }
         val sisteDag = foreldrepengeytelse.map { it.periode }.maxOf { it.endInclusive }
@@ -36,15 +36,6 @@ class Foreldrepenger(
     }
 
     override fun skalOppdatereHistorikk(vedtaksperiode: Periode, vedtaksperiodeRettEtter: Periode?): Pair<Boolean, Companion.HvorforIkkeOppdatereHistorikk?> {
-        if (foreldrepengeytelse.isEmpty()) return false to INGEN_YTELSE
-        if (vedtaksperiodeRettEtter != null) return false to HAR_VEDTAKSPERIODE_RETT_ETTER
-        val sammenhengendePerioder = foreldrepengeytelse.map { it.periode }.grupperSammenhengendePerioder()
-        if (sammenhengendePerioder.size > 1) return false to FLERE_IKKE_SAMMENHENGENDE_INNSLAG
-        val foreldrepengeperiode = sammenhengendePerioder.single()
-        val fullstendigOverlapp = foreldrepengeperiode == vedtaksperiode
-        val foreldrepengerIHalen = vedtaksperiode.overlapperMed(foreldrepengeperiode) && foreldrepengeperiode.slutterEtter(vedtaksperiode.endInclusive)
-        if (!fullstendigOverlapp && !foreldrepengerIHalen) return false to IKKE_I_HALEN_AV_VEDTAKSPERIODE
-        if (foreldrepengeytelse.any { it.grad != 100 }) return false to GRADERT_YTELSE
-        return true to null
+        return foreldrepengeytelse.skalOppdatereHistorikkIHalen(vedtaksperiode, vedtaksperiodeRettEtter)
     }
 }
