@@ -161,6 +161,8 @@ internal class TestPerson(
             mottatt: LocalDateTime? = null
         ) = arbeidsgiverHendelsefabrikk.lagSykmelding(*sykmeldingsperiode).håndter(Person::håndter)
 
+        internal fun håndterAvbruttSøknad(sykmeldingsperiode: Periode) = arbeidsgiverHendelsefabrikk.lagAvbruttSøknad(sykmeldingsperiode).håndter(Person::håndter)
+
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,
             egenmeldinger: List<Søknad.Søknadsperiode.Arbeidsgiverdag> = emptyList(),

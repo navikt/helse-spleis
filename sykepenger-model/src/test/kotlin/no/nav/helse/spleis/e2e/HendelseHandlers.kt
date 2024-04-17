@@ -47,6 +47,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
+import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
@@ -105,6 +106,19 @@ internal fun AbstractEndToEndTest.håndterAvbrytSøknad(
     AvbruttSøknad(periode,
         meldingsreferanseId,
         orgnummer,
+        fødselsnummer.toString(),
+        aktørId).håndter(Person::håndter)
+}
+
+internal fun AbstractEndToEndTest.håndterAvbrytArbeidsledigSøknad(
+    periode: Periode,
+    orgnummer: String,
+    meldingsreferanseId: UUID = UUID.randomUUID(),
+    fødselsnummer: Personidentifikator = UNG_PERSON_FNR_2018,
+    aktørId: String = AKTØRID) {
+    AvbruttSøknad(periode,
+        meldingsreferanseId,
+        Arbeidsledig,
         fødselsnummer.toString(),
         aktørId).håndter(Person::håndter)
 }

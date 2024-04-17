@@ -30,6 +30,8 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.ForeldrepengerPeriode
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -128,6 +130,9 @@ internal class ArbeidsgiverHendelsefabrikk(
             søknader.add(this)
         }
     }
+
+    fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
+        AvbruttSøknad(sykmeldingsperiode, UUID.randomUUID(), organisasjonsnummer, personidentifikator.toString(), aktørId)
 
     internal fun lagInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
@@ -508,4 +513,6 @@ internal class ArbeidsgiverHendelsefabrikk(
         PersonHendelsefabrikk(aktørId, personidentifikator).lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, listOf(
             OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, "forklaring", null, emptyList())
         ), meldingsreferanseId = hendelseId)
+
+
 }
