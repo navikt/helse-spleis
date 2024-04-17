@@ -930,6 +930,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         )
         assertTrue(im in observatør.inntektsmeldingHåndtert.map { it.first })
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
         assertEquals(22.januar til 11.februar, inspektør.periode(1.vedtaksperiode))
         assertEquals("UUUUUGG UUUUUGG SSSSSHH SSSSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterVilkårsgrunnlag(1.vedtaksperiode)

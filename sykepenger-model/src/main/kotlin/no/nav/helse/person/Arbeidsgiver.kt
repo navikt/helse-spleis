@@ -581,6 +581,7 @@ internal class Arbeidsgiver private constructor(
         val annullering = utbetalingSomSkalAnnulleres.annuller(hendelse, utbetalinger.toList()) ?: return null
         nyUtbetaling(hendelse, annullering)
         annullering.håndter(hendelse)
+        looper { vedtaksperiode -> vedtaksperiode.nyAnnullering(hendelse, annullering) }
         return annullering
     }
 
@@ -711,12 +712,6 @@ internal class Arbeidsgiver private constructor(
 
     override fun nyVedtaksperiodeUtbetaling(utbetalingId: UUID, vedtaksperiodeId: UUID) {
         person.nyVedtaksperiodeUtbetaling(organisasjonsnummer, utbetalingId, vedtaksperiodeId)
-    }
-
-    override fun utbetalingForkastet(hendelse: IAktivitetslogg, id: UUID) {
-        looper { periode ->
-            periode.utbetalingForkastet(hendelse, id)
-        }
     }
 
     override fun utbetalingAnnullert(

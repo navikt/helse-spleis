@@ -14,6 +14,7 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -40,6 +41,15 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `annullere senere periode enn perioden til godkjenning`() {
+        nyttVedtak(1.mars, 31.mars)
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
 
     @Test
     fun `annullere senere periode enn perioden til revurdering`() {
