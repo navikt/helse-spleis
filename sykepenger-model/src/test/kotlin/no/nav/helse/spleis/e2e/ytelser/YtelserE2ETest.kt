@@ -2,8 +2,10 @@ package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -52,13 +54,39 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.søndag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class YtelserE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Foreldrepenger i halen flytter skjæringstidspunkt`() {
+        nyttVedtak(1.januar, søndag(28.januar))
+        // Saksbehandler overstyrer i snuten
+        håndterOverstyrTidslinje((1.januar til fredag(26.januar)).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        assertEquals(27.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+        assertForventetFeil(
+            forklaring = "Burde ikke forslå andre ytelser i halen om det flytter skjæringstidspunktet",
+            nå = {
+                assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til søndag(28.januar), 100))) }
+            },
+            ønsket = {
+                håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til søndag(28.januar), 100)))
+                assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.SykHelgedag)
+                assertTrue(inspektør.sykdomstidslinje[28.januar] is Dag.SykHelgedag)
+                assertEquals(27.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            }
+        )
+    }
 
     @Test
     fun `perioden får warnings dersom bruker har fått Dagpenger innenfor 4 uker før skjæringstidspunkt`() {
