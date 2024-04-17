@@ -49,10 +49,8 @@ internal class Infotrygdhistorikk private constructor(
         return siste.valider(aktivitetslogg, periode, orgnummer)
     }
 
-    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate): Boolean {
-        if (harHistorikk()) return false
+    internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {
         oppfrisk(aktivitetslogg, tidligsteDato)
-        return true
     }
 
     internal fun oppfrisk(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate) {

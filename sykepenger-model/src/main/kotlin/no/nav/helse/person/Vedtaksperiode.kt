@@ -1310,7 +1310,7 @@ internal class Vedtaksperiode private constructor(
     internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
         override val type = AVVENTER_INFOTRYGDHISTORIKK
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-            vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse, vedtaksperiode)
+            vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse)
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = null
@@ -1319,7 +1319,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: Hendelse
         ) {
-            vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse, vedtaksperiode)
+            vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse)
         }
 
         override fun håndter(
@@ -1349,7 +1349,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.person.trengerHistorikkFraInfotrygd(påminnelse, vedtaksperiode)
+            vedtaksperiode.person.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {

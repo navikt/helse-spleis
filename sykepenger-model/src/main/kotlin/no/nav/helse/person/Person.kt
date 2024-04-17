@@ -142,6 +142,7 @@ class Person private constructor(
         emptyList<Person>(),
         regler = regler
     )
+
     constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
@@ -570,7 +571,7 @@ class Person private constructor(
     }
 
     internal fun emitOverlappendeInfotrygdperioder(event: PersonObserver.OverlappendeInfotrygdperioder) {
-        observers.forEach {it.overlappendeInfotrygdperioder(event)}
+        observers.forEach { it.overlappendeInfotrygdperioder(event) }
     }
 
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
@@ -582,20 +583,12 @@ class Person private constructor(
 
     internal fun skjæringstidspunkter() =
         Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, infotrygdhistorikk)
+
     internal fun skjæringstidspunkt(arbeidsgiver: Arbeidsgiver, sykdomstidslinje: Sykdomstidslinje, periode: Periode) =
         Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, arbeidsgiver, sykdomstidslinje, periode, infotrygdhistorikk)
 
-    internal fun trengerHistorikkFraInfotrygd(hendelse: Hendelse, vedtaksperiode: Vedtaksperiode) {
-        if (trengerHistorikkFraInfotrygd(hendelse)) return hendelse.info("Må oppfriske Infotrygdhistorikken")
-        hendelse.info("Trenger ikke oppfriske Infotrygdhistorikken, bruker lagret historikk")
-        vedtaksperiode.håndterHistorikkFraInfotrygd(
-            hendelse = hendelse,
-            infotrygdhistorikk = infotrygdhistorikk
-        )
-    }
-
-    private fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg): Boolean {
-        return infotrygdhistorikk.oppfriskNødvendig(hendelse, arbeidsgivere.tidligsteDato())
+    internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg) {
+        infotrygdhistorikk.oppfriskNødvendig(hendelse, arbeidsgivere.tidligsteDato())
     }
 
     internal fun accept(visitor: PersonVisitor) {
