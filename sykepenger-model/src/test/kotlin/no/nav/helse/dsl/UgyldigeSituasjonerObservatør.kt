@@ -16,6 +16,7 @@ import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.sykdomstidslinje.Dag
 
 internal class UgyldigeSituasjonerObservatør(private val person: Person): PersonObserver, AktivitetsloggObserver {
 
@@ -186,9 +187,17 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.inspektør.aktiveVedtaksperioder().forEach { vedtaksperiode ->
                 vedtaksperiode.inspektør.behandlinger.forEach { behandling ->
-                    behandling.endringer.filter { it.unormalSykdomstidslinje }.forEach { endring ->
-                        // TODO: Få denne sjekken inn når vi har fikset de to casene som fremproviserer unormale sykdomstidslinjer
-                        //error("Periode på endring: ${endring.periode}, Periode på sykdomstidslinje: ${endring.sykdomstidslinje.periode()}, FørsteIkkeUkjenteDag=${endring.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag}")
+                    behandling.endringer
+                        .filter { it.unormalSykdomstidslinje }
+                        .filterNot { it.førsteIkkeUkjenteDagErSykedagNav } // Inntektsmeldingen driver selvfølgelig å lager noen ukjente dager i snuten når første fraværsdag blir SykedagNav 🫠
+                        .forEach { endring ->
+                            error("""
+                                - Nå har det skjedd noe sprøtt.. sykdomstidslinjen starter med UkjentDag.. er du helt sikker på at det er så lurt?
+                                Sykdomstidslinje: ${endring.sykdomstidslinje.toShortString()}
+                                Periode på sykdomstidslinje: ${endring.sykdomstidslinje.periode()}
+                                FørsteIkkeUkjenteDag=${endring.sykdomstidslinje.inspektør.førsteIkkeUkjenteDag}
+                                Periode på endring: ${endring.periode}
+                            """)
                     }
                 }
             }
@@ -196,6 +205,9 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
     private val VedtaksperiodeInspektør.Behandling.Behandlingendring.unormalSykdomstidslinje get() =
         periode.start != sykdomstidslinje.inspektør.førsteIkkeUkjenteDag
+
+    private val VedtaksperiodeInspektør.Behandling.Behandlingendring.førsteIkkeUkjenteDagErSykedagNav get() =
+        sykdomstidslinje.inspektør.dager[sykdomstidslinje.inspektør.førsteIkkeUkjenteDag] is Dag.SykedagNav
 
     private fun bekreftIngenOverlappende() {
         person.inspektør.vedtaksperioder()
