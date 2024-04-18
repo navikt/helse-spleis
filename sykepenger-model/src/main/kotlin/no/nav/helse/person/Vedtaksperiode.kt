@@ -1293,10 +1293,10 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk.valider(søknad, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
             vedtaksperiode.håndterSøknad(søknad) {
                 vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
-                val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
-                    rettFør != null && forrigePeriodeHarFåttInntektsmelding(rettFør) -> AvventerBlokkerendePeriode
                     !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+                    periodeRettFørHarFåttInntektsmelding(vedtaksperiode) -> AvventerBlokkerendePeriode
+                    periodeRettEtterHarFåttInntektsmelding(vedtaksperiode, søknad) -> AvventerBlokkerendePeriode
                     else -> AvventerInntektsmelding
                 }
             }
@@ -1304,11 +1304,19 @@ internal class Vedtaksperiode private constructor(
             søknad.info("Fullført behandling av søknad")
         }
 
-        private fun forrigePeriodeHarFåttInntektsmelding(rettFør: Vedtaksperiode): Boolean {
+        private fun periodeRettFørHarFåttInntektsmelding(vedtaksperiode: Vedtaksperiode): Boolean {
+            val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) ?: return false
             if (rettFør.tilstand in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding)) return false
             // auu-er vil kunne ligge i Avventer blokkerende periode
             if (rettFør.tilstand == AvventerBlokkerendePeriode && !rettFør.forventerInntekt()) return false
             return true
+        }
+
+        private fun periodeRettEtterHarFåttInntektsmelding(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
+            if (vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode) == null) return false
+            // antagelse at om vi har en periode rett etter oss, og vi har tilstrekkelig informasjon til utbetaling, så har vi endt
+            // opp med å gjenbruke tidsnære opplysninger og trenger derfor ikke egen IM
+            return vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
