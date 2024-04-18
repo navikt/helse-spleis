@@ -363,6 +363,27 @@ internal data class SpannerPersonDto(
             val opprettet: LocalDateTime,
             val oppdatert: LocalDateTime
         ) {
+            enum class TilstandType {
+                AVVENTER_HISTORIKK,
+                AVVENTER_GODKJENNING,
+                AVVENTER_SIMULERING,
+                TIL_UTBETALING,
+                TIL_INFOTRYGD,
+                AVSLUTTET,
+                AVSLUTTET_UTEN_UTBETALING,
+                REVURDERING_FEILET,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING
+            }
+
             data class VedtaksperiodeVenterDto(
                 val ventetSiden: LocalDateTime,
                 val venterTil: LocalDateTime,
@@ -894,24 +915,24 @@ private fun ForkastetVedtaksperiodeUtDto.tilPersonData() = SpannerPersonDto.Arbe
 private fun VedtaksperiodeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData(
     id = id,
     tilstand = when (tilstand) {
-        VedtaksperiodetilstandDto.AVSLUTTET -> TilstandType.AVSLUTTET
-        VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> TilstandType.AVSLUTTET_UTEN_UTBETALING
-        VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> TilstandType.AVVENTER_GODKJENNING
-        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> TilstandType.AVVENTER_GODKJENNING_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> TilstandType.AVVENTER_HISTORIKK
-        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> TilstandType.AVVENTER_HISTORIKK_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> TilstandType.AVVENTER_INFOTRYGDHISTORIKK
-        VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> TilstandType.AVVENTER_INNTEKTSMELDING
-        VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> TilstandType.AVVENTER_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> TilstandType.AVVENTER_SIMULERING
-        VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> TilstandType.AVVENTER_SIMULERING_REVURDERING
-        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> TilstandType.AVVENTER_VILKÅRSPRØVING
-        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-        VedtaksperiodetilstandDto.REVURDERING_FEILET -> TilstandType.REVURDERING_FEILET
-        VedtaksperiodetilstandDto.START -> TilstandType.START
-        VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilstandType.TIL_INFOTRYGD
-        VedtaksperiodetilstandDto.TIL_UTBETALING -> TilstandType.TIL_UTBETALING
+        VedtaksperiodetilstandDto.AVSLUTTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET
+        VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVSLUTTET_UTEN_UTBETALING
+        VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_GODKJENNING
+        VedtaksperiodetilstandDto.AVVENTER_GODKJENNING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_HISTORIKK
+        VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
+        VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_INNTEKTSMELDING
+        VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING
+        VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING_REVURDERING
+        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING
+        VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+        VedtaksperiodetilstandDto.REVURDERING_FEILET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.REVURDERING_FEILET
+        VedtaksperiodetilstandDto.START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.START
+        VedtaksperiodetilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_INFOTRYGD
+        VedtaksperiodetilstandDto.TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_UTBETALING
     },
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
     venteårsak = venteårsak?.tilPersonData(),
