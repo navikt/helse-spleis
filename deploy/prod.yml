@@ -65,5 +65,3 @@ spec:
     value: none
   - name: SEND_FERIEPENGEOPPDRAG
     value: "false"
-  - name: FORBY_ANNULLERINGER_TIDLIGERE_PERIODER
-    value: "false"

@@ -6,11 +6,11 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
+import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -205,12 +205,6 @@ class Utbetaling private constructor(
 
         val sisteUtbetalteForUtbetaling = checkNotNull(aktiveUtbetalinger.singleOrNull { it.hørerSammen(this) }) {
             "Det er gjort forsøk på å annullere en utbetaling som ikke lenger er aktiv"
-        }
-
-        if (System.getenv("FORBY_ANNULLERINGER_TIDLIGERE_PERIODER")?.toBoolean() == true) {
-            check(sisteUtbetalteForUtbetaling === aktiveUtbetalinger.last()) {
-                "Det er ikke tillatt å annullere annen utbetaling enn den som er siste aktive"
-            }
         }
 
         return sisteUtbetalteForUtbetaling.opphør(hendelse)
@@ -829,7 +823,7 @@ class Utbetaling private constructor(
         maksdato = this.maksdato,
         forbrukteSykedager = this.forbrukteSykedager,
         gjenståendeSykedager = this.gjenståendeSykedager,
-        annulleringer = this.annulleringer.mapNotNull { it.id },
+        annulleringer = this.annulleringer.map { it.id },
         vurdering = this.vurdering?.dto(),
         overføringstidspunkt = overføringstidspunkt,
         avstemmingsnøkkel = avstemmingsnøkkel,
