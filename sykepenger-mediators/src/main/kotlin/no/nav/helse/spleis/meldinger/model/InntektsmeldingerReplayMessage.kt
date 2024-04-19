@@ -27,21 +27,29 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
 
     private val aktivitetslogg = Aktivitetslogg()
 
-    private val inntektsmeldinger = packet["inntektsmeldinger"].map { inntektsmelding -> inntektsmeldingReplay(
-        inntektsmelding.path("internDokumentId").asText().toUUID(),
-        inntektsmelding.path("inntektsmelding")
-    ) }
+    private val inntektsmeldinger = mutableListOf<Inntektsmelding>()
+
+    private val inntektsmeldingerReplay = InntektsmeldingerReplay(
+        meldingsreferanseId = id,
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        aktivitetslogg = aktivitetslogg,
+        vedtaksperiodeId = vedtaksperiodeId,
+        inntektsmeldinger = inntektsmeldinger
+    )
+
+    init {
+        packet["inntektsmeldinger"].forEach { inntektsmelding ->
+            inntektsmeldinger.add(inntektsmeldingReplay(
+                inntektsmelding.path("internDokumentId").asText().toUUID(),
+                inntektsmelding.path("inntektsmelding")
+            ))
+        }
+    }
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
-        mediator.behandle(this, InntektsmeldingerReplay(
-            meldingsreferanseId = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            aktivitetslogg = aktivitetslogg,
-            vedtaksperiodeId = vedtaksperiodeId,
-            inntektsmeldinger = inntektsmeldinger
-        ), context)
+        mediator.behandle(this, inntektsmeldingerReplay, context)
     }
 
     private fun inntektsmeldingReplay(internDokumentId: UUID, packet: JsonNode): Inntektsmelding {
@@ -84,7 +92,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
             mottatt = mottatt,
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = aktivitetslogg.barn()
         )
     }
 }
