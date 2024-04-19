@@ -71,9 +71,12 @@ internal class MessageMediator(
             SendtSelvstendigSøknaderRiver(it, this)
             SendtArbeidsledigSøknaderRiver(it, this)
             InntektsmeldingerRiver(it, this)
-            InntektsmeldingReplayRiver(it, this)
-            InntektsmeldingReplayUtførtRiver(it, this)
-            if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") InntektsmeldingerReplayRiver(it, this)
+            if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
+                InntektsmeldingerReplayRiver(it, this)
+            } else {
+                InntektsmeldingReplayRiver(it, this)
+                InntektsmeldingReplayUtførtRiver(it, this)
+            }
             UtbetalingshistorikkRiver(it, this)
             UtbetalingshistorikkForFeriepengerRiver(it, this)
             YtelserRiver(it, this)
