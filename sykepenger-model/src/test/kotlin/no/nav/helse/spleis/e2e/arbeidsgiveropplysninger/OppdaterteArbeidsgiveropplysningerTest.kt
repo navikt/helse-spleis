@@ -53,7 +53,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = listOf(1.januar til 1.januar),
             førsteFraværsdager = listOf(
-                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar)
+                PersonObserver.FørsteFraværsdag(a1, 1.januar)
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
@@ -85,7 +85,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(5.januar til 31.januar),
             egenmeldingsperioder = listOf(1.januar til 2.januar),
             førsteFraværsdager = listOf(
-                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 5.januar)
+                PersonObserver.FørsteFraværsdag(a1, 5.januar)
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
@@ -137,8 +137,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = emptyList(),
             førsteFraværsdager = listOf(
-                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 2.januar),
-                mapOf("organisasjonsnummer" to a2, "førsteFraværsdag" to 1.januar)
+                PersonObserver.FørsteFraværsdag(a1, 2.januar),
+                PersonObserver.FørsteFraværsdag(a2, 1.januar)
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(forslag = null),
@@ -164,7 +164,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
     @Test
     fun `oppdaterte opplysninger for mars når ag2 tetter gapet`() {
         nyPeriode(1.januar til 31.januar, a1)
-        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
                 a1 to INNTEKT,
@@ -198,8 +198,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                 sykmeldingsperioder = listOf(1.mars til 31.mars),
                 egenmeldingsperioder = emptyList(),
                 førsteFraværsdager = listOf(
-                    mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar),
-                    mapOf("organisasjonsnummer" to a2, "førsteFraværsdag" to 1.februar)
+                    PersonObserver.FørsteFraværsdag(a1, 1.januar),
+                    PersonObserver.FørsteFraværsdag(a2, 1.februar)
                 ),
                 forespurteOpplysninger = listOf(
                     PersonObserver.FastsattInntekt(INNTEKT),
@@ -239,7 +239,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                     skjæringstidspunkt = 10.februar,
                     sykmeldingsperioder = listOf(10.februar til 10.mars),
                     egenmeldingsperioder = emptyList(),
-                    førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 10.februar)),
+                    førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 10.februar)),
                     forespurteOpplysninger = listOf(
                         PersonObserver.Inntekt(forslag = null),
                         PersonObserver.Refusjon(forslag = emptyList())
@@ -258,7 +258,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                     sykmeldingsperioder = listOf(10.februar til 10.mars),
                     egenmeldingsperioder = emptyList(),
                     førsteFraværsdager = listOf(
-                        mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 10.februar),
+                        PersonObserver.FørsteFraværsdag(ORGNUMMER, 10.februar),
                     ),
                     forespurteOpplysninger = listOf(
                         PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),

@@ -39,7 +39,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -105,7 +104,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().let { event ->
             assertEquals(listOf(12.februar til 28.februar), event.sykmeldingsperioder)
             assertEquals(13.februar, event.skjæringstidspunkt)
-            assertEquals(listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 13.februar)), event.førsteFraværsdager)
+            assertEquals(listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 13.februar)), event.førsteFraværsdager)
             assertFalse(event.forespurteOpplysninger.any { it is PersonObserver.Arbeidsgiverperiode })
         }
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -405,8 +404,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             sykmeldingsperioder = listOf(2.januar til 31.januar),
             egenmeldingsperioder = emptyList(),
             førsteFraværsdager = listOf(
-                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar),
-                mapOf("organisasjonsnummer" to a2, "førsteFraværsdag" to 2.januar)
+                PersonObserver.FørsteFraværsdag(a1, 1.januar),
+                PersonObserver.FørsteFraværsdag(a2, 2.januar)
             ),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(null),
@@ -890,9 +889,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             skjæringstidspunkt = 1.januar,
             sykmeldingsperioder = listOf(2.januar til 17.januar),
             egenmeldingsperioder = listOf(1.januar til 1.januar),
-            førsteFraværsdager = listOf(
-                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar),
-            ),
+            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 1.januar)),
             forespurteOpplysninger = listOf(
                 PersonObserver.Inntekt(null),
                 PersonObserver.Refusjon(forslag = emptyList()),

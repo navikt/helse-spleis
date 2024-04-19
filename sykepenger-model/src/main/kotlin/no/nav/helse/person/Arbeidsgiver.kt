@@ -168,12 +168,8 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.førsteFraværsdager(skjæringstidspunkt: LocalDate) =
             mapNotNull { arbeidsgiver ->
-                val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
-                if (førsteFraværsdag != null) return@mapNotNull mapOf(
-                    "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
-                    "førsteFraværsdag" to førsteFraværsdag
-                )
-                null
+                val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt) ?: return@mapNotNull null
+                PersonObserver.FørsteFraværsdag(arbeidsgiver.organisasjonsnummer, førsteFraværsdag)
             }
 
         internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>) =

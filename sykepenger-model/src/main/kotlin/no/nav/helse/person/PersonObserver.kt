@@ -133,7 +133,7 @@ interface PersonObserver {
         val skjæringstidspunkt: LocalDate,
         val sykmeldingsperioder: List<Periode>,
         val egenmeldingsperioder: List<Periode>,
-        val førsteFraværsdager: List<Map<String, Any>>,
+        val førsteFraværsdager: List<FørsteFraværsdag>,
         val forespurteOpplysninger: List<ForespurtOpplysning>
     ) {
         fun toJsonMap(): Map<String, Any> =
@@ -153,7 +153,12 @@ interface PersonObserver {
                         "tom" to it.endInclusive
                     )
                 },
-                "førsteFraværsdager" to førsteFraværsdager,
+                "førsteFraværsdager" to førsteFraværsdager.map {
+                    mapOf(
+                        "organisasjonsnummer" to it.organisasjonsnummer,
+                        "førsteFraværsdag" to it.førsteFraværsdag
+                    )
+                },
                 "forespurteOpplysninger" to forespurteOpplysninger.toJsonMap()
             )
     }
@@ -164,7 +169,7 @@ interface PersonObserver {
         val skjæringstidspunkt: LocalDate,
         val sykmeldingsperioder: List<Periode>,
         val egenmeldingsperioder: List<Periode>,
-        val førsteFraværsdager: List<Map<String, Any>>
+        val førsteFraværsdager: List<FørsteFraværsdag>
     ) {
         fun toJsonMap(): Map<String, Any> =
             mapOf(
@@ -183,7 +188,12 @@ interface PersonObserver {
                         "tom" to it.endInclusive
                     )
                 },
-                "førsteFraværsdager" to førsteFraværsdager
+                "førsteFraværsdager" to førsteFraværsdager.map {
+                    mapOf(
+                        "organisasjonsnummer" to it.organisasjonsnummer,
+                        "førsteFraværsdag" to it.førsteFraværsdag
+                    )
+                }
             )
     }
 
@@ -211,6 +221,10 @@ interface PersonObserver {
             )
     }
 
+    data class FørsteFraværsdag(
+        val organisasjonsnummer: String,
+        val førsteFraværsdag: LocalDate
+    )
     sealed class ForespurtOpplysning {
 
         companion object {

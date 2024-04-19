@@ -34,7 +34,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             1.januar,
             sykmeldingsperioder = listOf(1.januar til 16.januar),
             egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 1.januar))
+            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 1.januar))
         )
 
         assertEquals(
@@ -70,7 +70,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
                 9.februar til 9.februar
             ),
             egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 9.februar))
+            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 9.februar))
         )
 
         assertEquals(expectedPotensiellForespørsel1, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[3])
@@ -85,7 +85,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
                 7.februar til 7.februar
             ),
             egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 7.februar))
+            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 7.februar))
         )
 
         assertEquals(expectedPotensiellForespørsel2, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[4])
@@ -101,7 +101,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
                 9.februar til 9.februar
             ),
             egenmeldingsperioder = emptyList(),
-            førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 9.februar))
+            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 9.februar))
         )
 
         assertEquals(expectedPotensiellForespørsel3, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[5])
@@ -147,7 +147,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
             13.mars,
             sykmeldingsperioder = listOf(5.mars til 8.mars, 14.mars til 16.mars),
             egenmeldingsperioder = listOf(1.mars til 2.mars, 13.mars til 13.mars),
-            førsteFraværsdager = listOf(mapOf("organisasjonsnummer" to ORGNUMMER, "førsteFraværsdag" to 13.mars))
+            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 13.mars))
         )
         assertEquals(expectedPotensiellForespørsel, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last())
     }
@@ -174,8 +174,8 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
 
         assertEquals(
             listOf(
-                mapOf("organisasjonsnummer" to a1, "førsteFraværsdag" to 1.januar),
-                mapOf("organisasjonsnummer" to a2, "førsteFraværsdag" to 2.januar),
+                PersonObserver.FørsteFraværsdag(a1, 1.januar),
+                PersonObserver.FørsteFraværsdag(a2, 2.januar)
             ), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last().førsteFraværsdager
         )
     }
