@@ -421,32 +421,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `InntektsmeldingReplay blir ikke stoppet av duplikatsjekk`() {
-        val hendelseRepository: HendelseRepository = mockk(relaxed = true)
-        MessageMediator(
-            rapidsConnection = testRapid,
-            hendelseRepository = hendelseRepository,
-            hendelseMediator = TestHendelseMediator()
-        )
-
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        )
-
-        val (meldingId, inntektsmelding) = sendInntektsmelding(
-            listOf(Periode(fom = 1.januar, tom = 16.januar)),
-            førsteFraværsdag = 1.januar
-        )
-        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
-        sendInntektsmeldingReplay(
-            vedtaksperiodeIndeks = 0,
-            inntektsmelding = inntektsmelding
-        )
-        verify(exactly = 2) { hendelseRepository.markerSomBehandlet(meldingId) }
-    }
-
-    @Test
     fun `delvis refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(

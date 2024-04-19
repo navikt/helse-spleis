@@ -92,7 +92,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         )
         val behov = testRapid.inspektør.siste("behov")
-        assertBehov(behov, null, "inntektsmelding_replay_utført")
+        assertBehov(behov, null, "inntektsmeldinger_replay")
     }
 
     private fun assertVedtaksperiodeEndret(melding: JsonNode, originalMeldingId: UUID, originalMeldingtype: String) {

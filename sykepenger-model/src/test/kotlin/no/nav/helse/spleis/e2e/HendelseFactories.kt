@@ -152,20 +152,6 @@ internal fun AbstractEndToEndTest.søknad(
     hendelselogg = this
 }
 
-internal fun AbstractEndToEndTest.inntektsmeldingReplay(
-    inntektsmelding: Inntektsmelding,
-    vedtaksperiodeId: UUID
-): InntektsmeldingReplay {
-    return InntektsmeldingReplay(
-        wrapped = inntektsmelding,
-        vedtaksperiodeId = vedtaksperiodeId,
-        innsendt = inntektsmelding.innsendt(),
-        registrert = inntektsmelding.registrert()
-    ).apply {
-        hendelselogg = this
-    }
-}
-
 internal fun AbstractEndToEndTest.inntektsmelding(
     id: UUID = UUID.randomUUID(),
     arbeidsgiverperioder: List<Periode>,
@@ -180,7 +166,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
-    val inntektsmeldinggenerator = {
+    val inntektsmeldinggenerator = { aktivitetslogg: Aktivitetslogg ->
         ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagInntektsmelding(
             id = id,
             refusjon = refusjon,
@@ -190,13 +176,14 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            aktivitetslogg = aktivitetslogg
         )
     }
     inntektsmeldinger[id] = LocalDateTime.now() to inntektsmeldinggenerator
     inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
-    return inntektsmeldinggenerator().apply { hendelselogg = this }
+    return inntektsmeldinggenerator(Aktivitetslogg()).apply { hendelselogg = this }
 }
 
 internal fun AbstractEndToEndTest.inntektsmeldingPortal(
@@ -214,7 +201,7 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     harFlereInntektsmeldinger: Boolean = false
 ): Inntektsmelding {
-    val inntektsmeldinggenerator = {
+    val inntektsmeldinggenerator = { aktivitetslogg: Aktivitetslogg ->
         ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagPortalinntektsmelding(
             id = id,
             refusjon = refusjon,
@@ -225,13 +212,14 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            harFlereInntektsmeldinger = harFlereInntektsmeldinger
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            aktivitetslogg = aktivitetslogg
         )
     }
     inntektsmeldinger[id] = LocalDateTime.now() to inntektsmeldinggenerator
     inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
-    return inntektsmeldinggenerator().apply { hendelselogg = this }
+    return inntektsmeldinggenerator(Aktivitetslogg()).apply { hendelselogg = this }
 }
 
 internal fun AbstractEndToEndTest.vilkårsgrunnlag(

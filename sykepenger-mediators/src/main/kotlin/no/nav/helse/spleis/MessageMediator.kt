@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import java.sql.SQLException
+import no.nav.helse.SPILL_AV_IM_DISABLED
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -71,11 +72,11 @@ internal class MessageMediator(
             SendtSelvstendigSøknaderRiver(it, this)
             SendtArbeidsledigSøknaderRiver(it, this)
             InntektsmeldingerRiver(it, this)
-            if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
-                InntektsmeldingerReplayRiver(it, this)
-            } else {
+            if (SPILL_AV_IM_DISABLED) {
                 InntektsmeldingReplayRiver(it, this)
                 InntektsmeldingReplayUtførtRiver(it, this)
+            } else {
+                InntektsmeldingerReplayRiver(it, this)
             }
             UtbetalingshistorikkRiver(it, this)
             UtbetalingshistorikkForFeriepengerRiver(it, this)

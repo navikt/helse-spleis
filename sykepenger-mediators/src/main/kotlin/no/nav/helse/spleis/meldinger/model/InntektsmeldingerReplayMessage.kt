@@ -44,7 +44,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
         ), context)
     }
 
-    private fun inntektsmeldingReplay(internDokumentId: UUID, packet: JsonNode): InntektsmeldingReplay {
+    private fun inntektsmeldingReplay(internDokumentId: UUID, packet: JsonNode): Inntektsmelding {
         val refusjon = Inntektsmelding.Refusjon(
             beløp = packet.path("refusjon").path("beloepPrMnd").takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
             opphørsdato = packet.path("refusjon").path("opphoersdato").asOptionalLocalDate(),
@@ -68,28 +68,23 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
         val avsendersystem = packet.path("avsenderSystem").tilAvsendersystem()
         val inntektsdato = packet.path("inntektsdato").asOptionalLocalDate()
 
-        return InntektsmeldingReplay(
-            wrapped = Inntektsmelding(
-                meldingsreferanseId = internDokumentId,
-                refusjon = refusjon,
-                orgnummer = orgnummer,
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
-                førsteFraværsdag = førsteFraværsdag,
-                inntektsdato = inntektsdato,
-                beregnetInntekt = beregnetInntekt.månedlig,
-                arbeidsgiverperioder = arbeidsgiverperioder,
-                arbeidsforholdId = arbeidsforholdId,
-                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
-                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-                harFlereInntektsmeldinger = harFlereInntektsmeldinger,
-                avsendersystem = avsendersystem,
-                mottatt = mottatt,
-                aktivitetslogg = aktivitetslogg
-            ),
-            vedtaksperiodeId = vedtaksperiodeId,
-            innsendt = mottatt,
-            registrert = opprettet
+        return Inntektsmelding(
+            meldingsreferanseId = internDokumentId,
+            refusjon = refusjon,
+            orgnummer = orgnummer,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            førsteFraværsdag = førsteFraværsdag,
+            inntektsdato = inntektsdato,
+            beregnetInntekt = beregnetInntekt.månedlig,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            arbeidsforholdId = arbeidsforholdId,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+            harFlereInntektsmeldinger = harFlereInntektsmeldinger,
+            avsendersystem = avsendersystem,
+            mottatt = mottatt,
+            aktivitetslogg = aktivitetslogg
         )
     }
 }

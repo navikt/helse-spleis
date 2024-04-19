@@ -27,6 +27,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -52,6 +53,8 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -442,18 +445,26 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     return id
 }
 
-private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: String, block: () -> Unit) {
+private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: String, aktivitetslogg: Aktivitetslogg = Aktivitetslogg(), block: () -> Unit) {
     observatør.replayInntektsmeldinger { block() }.forEach { vedtaksperiodeId ->
-        inntektsmeldinger
-            .mapValues { (_, gen) -> gen.first to gen.second() }
+        val imReplays = inntektsmeldinger
+            .mapValues { (_, gen) -> gen.first to gen.second(aktivitetslogg.barn()) }
             .filterValues { (_, im) -> im.organisasjonsnummer() == orgnummer }
             .filterValues { (_, im) -> im.aktuellForReplay(inspektør(orgnummer).vedtaksperioder(vedtaksperiodeId).sammenhengendePeriode)}
             .entries
             .sortedBy { (_, value) -> value.first }
-            .forEach { (id, _) ->
-                håndterInntektsmeldingReplay(id, vedtaksperiodeId)
+            .map { (_, im) ->
+                im.second
             }
-        håndterInntektsmeldingReplayUtført(vedtaksperiodeId, orgnummer)
+        InntektsmeldingerReplay(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = "aktør",
+            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
+            organisasjonsnummer = orgnummer,
+            aktivitetslogg = aktivitetslogg,
+            vedtaksperiodeId = vedtaksperiodeId,
+            inntektsmeldinger = imReplays
+        ).håndter(Person::håndter)
         observatør.kvitterInntektsmeldingReplay(vedtaksperiodeId)
     }
 }
@@ -520,15 +531,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Innte
         førReplay()
     }
     return inntektsmelding.meldingsreferanseId()
-}
-
-private fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
-    inntektsmeldingId: UUID,
-    vedtaksperiodeId: UUID
-) {
-    val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId]?.second ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
-    inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
-        .håndter(Person::håndter)
 }
 
 private fun AbstractEndToEndTest.håndterInntektsmeldingReplayUtført(vedtaksperiodeId: UUID, orgnummer: String) {

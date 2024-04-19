@@ -12,6 +12,7 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.BeforeEach
@@ -27,7 +28,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     internal lateinit var hendelselogg: PersonHendelse
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknadsperiode>>>()
-    internal val inntektsmeldinger = mutableMapOf<UUID, Pair<LocalDateTime, () -> Inntektsmelding>>()
+    internal val inntektsmeldinger = mutableMapOf<UUID, Pair<LocalDateTime, (Aktivitetslogg) -> Inntektsmelding>>()
     internal val inntekter = mutableMapOf<UUID, Inntekt>()
 
     @BeforeEach

@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
+import no.nav.helse.SPILL_AV_IM_DISABLED
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -21,6 +23,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.PersonMediator.Pakke.Companion.fjernVedtaksperiodeVenter
 import no.nav.helse.spleis.PersonMediator.Pakke.Companion.loggAntallVedtaksperioderVenter
 import no.nav.helse.spleis.db.HendelseRepository
@@ -113,7 +116,7 @@ internal class PersonMediator(
             },
             "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode
         )))
-        hendelseRepository.finnInntektsmeldinger(personidentifikator)
+        val replays = hendelseRepository.finnInntektsmeldinger(personidentifikator)
             .filter { it.path("virksomhetsnummer").asText() == organisasjonsnummer }
             .filter { inntektsmelding ->
                 val førsteFraværsdag = inntektsmelding.path("foersteFravaersdag").asOptionalLocalDate()
@@ -121,8 +124,15 @@ internal class PersonMediator(
                 val arbeidsgiverperioder = inntektsmelding.path("arbeidsgiverperioder").map(::asPeriode).periode()
                 Inntektsmelding.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperioder, redusertUtbetaling)
             }
-            .forEach { inntektsmelding -> createReplayMessage(inntektsmelding, vedtaksperiodeId) }
-        createReplayUtførtMessage(personidentifikator, aktørId, organisasjonsnummer, vedtaksperiodeId)
+            .map { inntektsmelding -> inntektsmelding.path("@id").asText().toUUID() to inntektsmelding }
+
+        if (SPILL_AV_IM_DISABLED) {
+            replays.forEach { (_, inntektsmelding) -> createReplayMessage(inntektsmelding, vedtaksperiodeId) }
+            createReplayUtførtMessage(personidentifikator, aktørId, organisasjonsnummer, vedtaksperiodeId)
+            return
+        }
+
+        createInntektsmeldingerReplayMessage(personidentifikator, aktørId, organisasjonsnummer, vedtaksperiodeId, replays)
     }
 
     override fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {
@@ -144,6 +154,21 @@ internal class PersonMediator(
         message.put("@event_name", "inntektsmelding_replay")
         message.put("vedtaksperiodeId", "$vedtaksperiodeId")
         replays.add(vedtaksperiodeId to message.toString())
+    }
+
+    private fun createInntektsmeldingerReplayMessage(fødselsnummer: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, replays: List<Pair<UUID, JsonNode>>) {
+        this.replays.add(vedtaksperiodeId to JsonMessage.newMessage("inntektsmeldinger_replay", mapOf(
+            "fødselsnummer" to fødselsnummer.toString(),
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "inntektsmeldinger" to replays.map { (internDokumentId, jsonNode) ->
+                mapOf(
+                    "internDokumentId" to internDokumentId,
+                    "inntektsmelding" to objectMapper.convertValue<Map<String, Any?>>(jsonNode)
+                )
+            }
+        )).toJson())
     }
 
     override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {

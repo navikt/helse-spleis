@@ -31,6 +31,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -60,7 +61,7 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
-    private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
+    private val inntektsmeldinger = mutableMapOf<UUID, (Aktivitetslogg) -> Inntektsmelding>()
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
@@ -146,7 +147,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
-        val inntektsmeldinggenerator = {
+        val inntektsmeldinggenerator = { aktivitetslogg: Aktivitetslogg ->
             Inntektsmelding(
                 meldingsreferanseId = id,
                 refusjon = refusjon,
@@ -167,7 +168,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator
-        return inntektsmeldinggenerator()
+        return inntektsmeldinggenerator(aktivitetslogg)
     }
 
     internal fun lagPortalinntektsmelding(
@@ -184,7 +185,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         harFlereInntektsmeldinger: Boolean = false,
         mottatt: LocalDateTime = LocalDateTime.now()
     ): Inntektsmelding {
-        val inntektsmeldinggenerator = {
+        val inntektsmeldinggenerator = { aktivitetslogg: Aktivitetslogg ->
             Inntektsmelding(
                 meldingsreferanseId = id,
                 refusjon = refusjon,
@@ -205,20 +206,22 @@ internal class ArbeidsgiverHendelsefabrikk(
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator
-        return inntektsmeldinggenerator()
+        return inntektsmeldinggenerator(aktivitetslogg)
     }
 
-    internal fun lagInntektsmeldingReplay(vedtaksperiodeId: UUID, sammenhengendePeriode: Periode) =
-        inntektsmeldinger.mapNotNull { (_, gen) ->
-            val inntektsmelding = gen()
-            if (!inntektsmelding.aktuellForReplay(sammenhengendePeriode)) null
-            else InntektsmeldingReplay(
-                wrapped = inntektsmelding,
-                vedtaksperiodeId = vedtaksperiodeId,
-                innsendt = inntektsmelding.innsendt(),
-                registrert = inntektsmelding.registrert()
-            )
-        }
+    internal fun lagInntektsmeldingReplay(vedtaksperiodeId: UUID, sammenhengendePeriode: Periode, aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
+        InntektsmeldingerReplay(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = personidentifikator.toString(),
+            organisasjonsnummer = organisasjonsnummer,
+            aktivitetslogg = aktivitetslogg,
+            vedtaksperiodeId = vedtaksperiodeId,
+            inntektsmeldinger = inntektsmeldinger.mapNotNull { (_, gen) ->
+                val inntektsmelding = gen(aktivitetslogg.barn())
+                if (inntektsmelding.aktuellForReplay(sammenhengendePeriode)) inntektsmelding else null
+            }
+        )
 
     internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
         InntektsmeldingReplayUtført(UUID.randomUUID(), personidentifikator.toString(), aktørId, organisasjonsnummer, vedtaksperiodeId)

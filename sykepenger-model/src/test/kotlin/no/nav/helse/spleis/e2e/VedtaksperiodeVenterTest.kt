@@ -14,6 +14,9 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.VenterPå
+import no.nav.helse.person.Venteårsak
+import no.nav.helse.person.Venteårsak.Hva
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -26,13 +29,32 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             val søknadIdJanuar = UUID.randomUUID()
             nyPeriode(1.januar til 31.januar, søknadId = søknadIdJanuar)
 
-            assertEquals(2, observatør.vedtaksperiodeVenter.size)
+            assertVenterPå(listOf(
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING
+            ))
             val søknadIdMars = UUID.randomUUID()
             nyPeriode(1.mars til 31.mars, søknadId = søknadIdMars)
-            assertEquals(6, observatør.vedtaksperiodeVenter.size)
+            assertVenterPå(listOf(
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                2.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                2.vedtaksperiode to Hva.INNTEKTSMELDING
+            ))
 
             val inntektsmeldingIdMars = håndterInntektsmelding(listOf(1.mars til 16.mars))
-            assertEquals(8, observatør.vedtaksperiodeVenter.size)
+            assertVenterPå(listOf(
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                2.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                2.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                2.vedtaksperiode to Hva.INNTEKTSMELDING
+            ))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val venterTil = inspektør(1.vedtaksperiode).oppdatert.plusDays(180)
@@ -93,11 +115,18 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
         a2 {
             val søknadId = UUID.randomUUID()
             nyPeriode(1.januar til 31.januar, søknadId = søknadId)
-            assertEquals(2, observatør.vedtaksperiodeVenter.size)
+            assertVenterPå(listOf(
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING
+            ))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            assertEquals(3, observatør.vedtaksperiodeVenter.size)
+            assertVenterPå(listOf(
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.INNTEKTSMELDING,
+                1.vedtaksperiode to Hva.SØKNAD
+            ))
 
             val forventet = PersonObserver.VedtaksperiodeVenterEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
@@ -181,5 +210,11 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             assertEquals(1.vedtaksperiode, marsVenter.venterPå.vedtaksperiodeId)
             assertEquals(januarVenterTil, marsVenter.venterTil)
         }
+    }
+
+    private fun assertVenterPå(expected: List<Pair<UUID, Hva>>) {
+        val actual = observatør.vedtaksperiodeVenter.map { it.vedtaksperiodeId to it.venterPå.venteårsak.hva }
+        assertEquals(expected.map { it.first to it.second.toString() }, actual)
+        assertEquals(expected.size, observatør.vedtaksperiodeVenter.size)
     }
 }

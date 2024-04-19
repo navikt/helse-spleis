@@ -11,20 +11,15 @@ class InntektsmeldingerReplay(
     organisasjonsnummer: String,
     aktivitetslogg: Aktivitetslogg,
     private val vedtaksperiodeId: UUID,
-    private val inntektsmeldinger: List<InntektsmeldingReplay>
+    private val inntektsmeldinger: List<Inntektsmelding>
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
     internal fun erRelevant(other: UUID) = other == vedtaksperiodeId
 
     internal fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
-        info("Replayer inntektsmelding for vedtaksperiode $vedtaksperiodeId og påfølgende som overlapper")
+        info("Replayer inntektsmeldinger for vedtaksperiode $vedtaksperiodeId og påfølgende som overlapper")
         inntektsmeldinger.forEach {
-            it.fortsettÅBehandle(arbeidsgiver)
+            arbeidsgiver.håndter(it, vedtaksperiodeId)
         }
-    }
-
-    override fun venter(block: () -> Unit) {
-        // Kan potensielt replayes veldig mange inntektsmeldinger. Ønsker ikke å sende ut
-        // vedtaksperiode_venter etter hver enkelt. Gjøres heller for InntektsmeldingReplayUtført
     }
 }

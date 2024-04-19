@@ -361,17 +361,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
         }
     }
 
-    protected fun sendInntektsmeldingReplay(
-        vedtaksperiodeIndeks: Int = 0,
-        inntektsmelding: String
-    ) {
-        val (_, message) = meldingsfabrikk.lagInnteksmeldingReplay(
-            vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            inntektsmelding = inntektsmelding
-        )
-        testRapid.sendTestMessage(message)
-    }
-
     protected fun sendNyUtbetalingpåminnelse(utbetalingIndeks: Int, status: Utbetalingstatus = Utbetalingstatus.IKKE_UTBETALT) {
         val utbetalingId = testRapid.inspektør.utbetalingId(utbetalingIndeks)
         val (_, message) = meldingsfabrikk.lagUtbetalingpåminnelse(utbetalingId, status)

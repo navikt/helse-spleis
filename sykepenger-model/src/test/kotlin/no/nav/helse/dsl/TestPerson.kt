@@ -268,10 +268,8 @@ internal class TestPerson(
         private fun håndterInntektsmeldingReplay(vedtaksperiodeId: UUID, sammenhengendePeriode: Periode) {
 
             behovsamler.bekreftOgKvitterReplay(vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(vedtaksperiodeId, sammenhengendePeriode).forEach { replay ->
-                replay.håndter(Person::håndter)
-            }
-            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplayUtført(vedtaksperiodeId).håndter(Person::håndter)
+            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(vedtaksperiodeId, sammenhengendePeriode)
+                .håndter(Person::håndter)
         }
 
         internal fun håndterVilkårsgrunnlag(
