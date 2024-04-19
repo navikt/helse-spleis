@@ -26,6 +26,7 @@ import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
+import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
@@ -140,6 +141,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is IdentOpphørtMessage -> IDENT_OPPHØRT
         is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
         is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
+        is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
@@ -200,6 +202,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         GJENOPPLIV_VILKÅRSGRUNNLAG,
         IDENT_OPPHØRT,
         SKJØNNSMESSIG_FASTSETTELSE,
-        AVBRUTT_SØKNAD
+        AVBRUTT_SØKNAD,
+        INNTEKTSMELDINGER_REPLAY
     }
 }
