@@ -698,26 +698,18 @@ internal class Vedtaksperiode private constructor(
 
         val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
 
-
-        // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-        val sykmeldingsperioderForArbeidsgiverperiode =
-            vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
-                .map { it.sykmeldingsperiode }
-        // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
-        val sykmeldingsperioderForInntekt = listOf(sykmeldingsperiode)
-
-        val sykdomstidslinjeKnyttetTilArbeidsgiverperiode =
-            arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
-                .map { it.sykdomstidslinje }
-                .merge()
-
         val forespurteOpplysninger = listOfNotNull(
             forespurtInntekt(fastsattInntekt),
             forespurtFastsattInntekt(fastsattInntekt),
             forespurtRefusjon(fastsattInntekt),
             forespurtArbeidsgiverperiode(arbeidsgiverperiode)
         )
-
+        val vedtaksperioder = when {
+            // For å beregne riktig arbeidsgiverperiode/første fraværsdag
+            PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
+            // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
+            else -> listOf(this)
+        }
         val førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
 
         person.trengerArbeidsgiveropplysninger(
@@ -725,8 +717,8 @@ internal class Vedtaksperiode private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = id,
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykmeldingsperioder = if (PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger) sykmeldingsperioderForArbeidsgiverperiode else sykmeldingsperioderForInntekt,
-                egenmeldingsperioder = sykdomstidslinjeKnyttetTilArbeidsgiverperiode.egenmeldingerFraSøknad(),
+                sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
+                egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
                 førsteFraværsdager = førsteFraværsdager,
                 forespurteOpplysninger = forespurteOpplysninger
             )
@@ -742,8 +734,8 @@ internal class Vedtaksperiode private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = id,
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykmeldingsperioder = vedtaksperioder.map { it.sykmeldingsperiode },
-                egenmeldingsperioder = vedtaksperioder.map { it.sykdomstidslinje }.merge().egenmeldingerFraSøknad(),
+                sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
+                egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
                 førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
             )
         )
@@ -755,8 +747,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
         if (arbeidsgiverperiode == null) return listOf(this)
-        return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
-            .filter { it.sykmeldingsperiode.start <= periode().endInclusive }
+        return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it <= this  }
     }
 
     private fun trengerIkkeArbeidsgiveropplysninger() {
@@ -814,7 +805,7 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiverperiode != null && arbeidsgiverperiode.forventerArbeidsgiverperiodeopplysning(periode)
             && harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode)
 
-    private fun harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
+    private fun harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) =
         arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
             .all { it.behandlinger.trengerArbeidsgiverperiode() }
 
@@ -2468,6 +2459,13 @@ internal class Vedtaksperiode private constructor(
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
             it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt(NullObserver)
+        }
+
+        private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
+            return vedtaksperioder.map { it.sykmeldingsperiode }
+        }
+        private fun egenmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
+            return vedtaksperioder.map { it.sykdomstidslinje }.merge().egenmeldingerFraSøknad()
         }
 
         internal fun List<Vedtaksperiode>.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt: (Periode) -> LocalDate) {

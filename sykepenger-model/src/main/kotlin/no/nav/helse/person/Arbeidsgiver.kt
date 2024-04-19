@@ -767,14 +767,14 @@ internal class Arbeidsgiver private constructor(
             .merge(sykdomstidslinje(), replace)
     }
 
-    internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), null)
+    private fun arbeidsgiverperiode(periode: Periode, sykdomstidslinje: Sykdomstidslinje): Arbeidsgiverperiode? {
+        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje, null)
         return arbeidsgiverperioder.finn(periode)
     }
-    internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode, sykdomstidslinje: Sykdomstidslinje): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinjeInkludertForkastet(sykdomstidslinje), null)
-        return arbeidsgiverperioder.finn(periode)
-    }
+    internal fun arbeidsgiverperiode(periode: Periode) =
+        arbeidsgiverperiode(periode, sykdomstidslinje())
+    internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode, sykdomstidslinje: Sykdomstidslinje) =
+        arbeidsgiverperiode(periode, sykdomstidslinjeInkludertForkastet(sykdomstidslinje))
 
     /**
      * Finner alle vedtaksperioder som tilstøter vedtaksperioden
@@ -948,11 +948,8 @@ internal class Arbeidsgiver private constructor(
     internal fun kanForkastes(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
         vedtaksperiode.kanForkastes(utbetalinger, hendelse)
 
-    fun vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
-        if (arbeidsgiverperiode == null) return emptyList()
-        return vedtaksperioder.filter {
-            arbeidsgiverperiode.hørerTil(it.periode())
-        }
+    fun vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode): List<Vedtaksperiode> {
+        return vedtaksperioder.filter { it.periode() in arbeidsgiverperiode }
     }
 
     internal fun finnNesteVedtaksperiodeSomTrengerInntektsmelding(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? = vedtaksperioder.finnNesteVedtaksperiodeSomTrengerInntektsmelding(vedtaksperiode)
