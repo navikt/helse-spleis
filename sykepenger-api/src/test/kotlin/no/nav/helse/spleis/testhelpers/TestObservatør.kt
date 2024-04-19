@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.IdInnhenter
@@ -38,7 +39,11 @@ internal class TestObservatør : PersonObserver {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
-        sammenhengendePeriode: Periode
+        sammenhengendePeriode: Periode,
+        sykmeldingsperioder: List<Periode>,
+        egenmeldingsperioder: List<Periode>,
+        førsteFraværsdager: List<FørsteFraværsdag>,
+        trengerArbeidsgiverperiode: Boolean
     ) {
         ventendeReplays.add(organisasjonsnummer to vedtaksperiodeId)
     }

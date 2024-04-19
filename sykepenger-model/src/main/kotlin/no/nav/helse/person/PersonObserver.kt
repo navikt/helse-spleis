@@ -722,7 +722,18 @@ interface PersonObserver {
         val behandlingId: UUID
     )
 
-    fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {}
+    fun inntektsmeldingReplay(
+        personidentifikator: Personidentifikator,
+        aktørId: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        sammenhengendePeriode: Periode,
+        sykmeldingsperioder: List<Periode>,
+        egenmeldingsperioder: List<Periode>,
+        førsteFraværsdager: List<FørsteFraværsdag>,
+        trengerArbeidsgiverperiode: Boolean
+    ) {}
     fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}

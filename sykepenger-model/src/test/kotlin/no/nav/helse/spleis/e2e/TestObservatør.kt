@@ -8,6 +8,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.fail
@@ -159,7 +160,18 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         arbeidsgiveropplysningerKorrigert.add(event)
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {
+    override fun inntektsmeldingReplay(
+        personidentifikator: Personidentifikator,
+        aktørId: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        sammenhengendePeriode: Periode,
+        sykmeldingsperioder: List<Periode>,
+        egenmeldingsperioder: List<Periode>,
+        førsteFraværsdager: List<FørsteFraværsdag>,
+        trengerArbeidsgiverperiode: Boolean
+    ) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 

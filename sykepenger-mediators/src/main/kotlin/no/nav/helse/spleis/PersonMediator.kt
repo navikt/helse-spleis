@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -76,7 +77,42 @@ internal class PersonMediator(
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {
+    override fun inntektsmeldingReplay(
+        personidentifikator: Personidentifikator,
+        aktørId: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        sammenhengendePeriode: Periode,
+        sykmeldingsperioder: List<Periode>,
+        egenmeldingsperioder: List<Periode>,
+        førsteFraværsdager: List<FørsteFraværsdag>,
+        trengerArbeidsgiverperiode: Boolean
+    ) {
+        queueMessage(JsonMessage.newMessage("trenger_inntektsmelding_replay", mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "sykmeldingsperioder" to sykmeldingsperioder.map {
+                mapOf(
+                    "fom" to it.start,
+                    "tom" to it.endInclusive
+                )
+            },
+            "egenmeldingsperioder" to egenmeldingsperioder.map {
+                mapOf(
+                    "fom" to it.start,
+                    "tom" to it.endInclusive
+                )
+            },
+            "førsteFraværsdager" to førsteFraværsdager.map {
+                mapOf(
+                    "organisasjonsnummer" to it.organisasjonsnummer,
+                    "førsteFraværsdag" to it.førsteFraværsdag
+                )
+            },
+            "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode
+        )))
         hendelseRepository.finnInntektsmeldinger(personidentifikator)
             .filter { it.path("virksomhetsnummer").asText() == organisasjonsnummer }
             .filter { inntektsmelding ->

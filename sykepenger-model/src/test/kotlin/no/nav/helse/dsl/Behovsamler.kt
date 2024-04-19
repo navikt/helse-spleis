@@ -8,6 +8,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.Assertions.assertTrue
 
@@ -93,7 +94,18 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         }
     }
 
-    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, sammenhengendePeriode: Periode) {
+    override fun inntektsmeldingReplay(
+        personidentifikator: Personidentifikator,
+        aktørId: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        sammenhengendePeriode: Periode,
+        sykmeldingsperioder: List<Periode>,
+        egenmeldingsperioder: List<Periode>,
+        førsteFraværsdager: List<FørsteFraværsdag>,
+        trengerArbeidsgiverperiode: Boolean
+    ) {
         replays.add(vedtaksperiodeId)
     }
 

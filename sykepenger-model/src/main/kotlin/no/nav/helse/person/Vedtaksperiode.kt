@@ -799,7 +799,26 @@ internal class Vedtaksperiode private constructor(
         .periode())
 
     private fun trengerInntektsmeldingReplay() {
-        person.inntektsmeldingReplay(id, skjæringstidspunkt, organisasjonsnummer, sammenhengendePeriode)
+        val arbeidsgiverperiode = finnArbeidsgiverperiode()
+        val trengerArbeidsgiverperiode = trengerArbeidsgiverperiode(arbeidsgiverperiode)
+        val vedtaksperioder = when {
+            // For å beregne riktig arbeidsgiverperiode/første fraværsdag
+            trengerArbeidsgiverperiode -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
+            // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
+            else -> listOf(this)
+        }
+        val førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
+
+        person.inntektsmeldingReplay(
+            vedtaksperiodeId = id,
+            skjæringstidspunkt = skjæringstidspunkt,
+            organisasjonsnummer = organisasjonsnummer,
+            sammenhengendePeriode = sammenhengendePeriode,
+            sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
+            egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
+            førsteFraværsdager = førsteFraværsdager,
+            trengerArbeidsgiverperiode = trengerArbeidsgiverperiode
+        )
     }
 
     private fun emitVedtaksperiodeVenter(vedtaksperiodeVenter: VedtaksperiodeVenter) {
