@@ -17,6 +17,7 @@ import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
 import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingReplayUtførtRiver
+import no.nav.helse.spleis.meldinger.InntektsmeldingReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
@@ -70,8 +71,9 @@ internal class MessageMediator(
             SendtSelvstendigSøknaderRiver(it, this)
             SendtArbeidsledigSøknaderRiver(it, this)
             InntektsmeldingerRiver(it, this)
-            InntektsmeldingerReplayRiver(it, this)
+            InntektsmeldingReplayRiver(it, this)
             InntektsmeldingReplayUtførtRiver(it, this)
+            if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") InntektsmeldingerReplayRiver(it, this)
             UtbetalingshistorikkRiver(it, this)
             UtbetalingshistorikkForFeriepengerRiver(it, this)
             YtelserRiver(it, this)

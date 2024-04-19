@@ -1,21 +1,65 @@
 package no.nav.helse.spleis.meldinger
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
+import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 
 internal open class InntektsmeldingerReplayRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
-) : InntektsmeldingerRiver(rapidsConnection, messageMediator) {
-    override val eventName = "inntektsmelding_replay"
-    override val riverName = "Inntektsmelding Replay"
+) : HendelseRiver(rapidsConnection, messageMediator) {
+    override val eventName = "inntektsmeldinger_replay"
+    override val riverName = "Inntektsmeldinger Replay"
 
     override fun validate(message: JsonMessage) {
-        super.validate(message)
+        message.requireKey("fødselsnummer", "aktørId", "organisasjonsnummer")
         message.requireKey("vedtaksperiodeId")
+        message.requireArray("inntektsmeldinger") {
+            require("internDokumentId") { it.asText().toUUID() }
+            requireKey(
+                "inntektsmelding.inntektsmeldingId",
+                "inntektsmelding.arbeidstakerFnr",
+                "inntektsmelding.arbeidstakerAktorId",
+                "inntektsmelding.virksomhetsnummer",
+                "inntektsmelding.arbeidsgivertype",
+                "inntektsmelding.beregnetInntekt",
+                "inntektsmelding.status",
+                "inntektsmelding.arkivreferanse"
+            )
+            requireArray("inntektsmelding.arbeidsgiverperioder") {
+                require("fom", JsonNode::asLocalDate)
+                require("tom", JsonNode::asLocalDate)
+            }
+            requireArray("inntektsmelding.ferieperioder") {
+                require("fom", JsonNode::asLocalDate)
+                require("tom", JsonNode::asLocalDate)
+            }
+            requireArray("inntektsmelding.endringIRefusjoner") {
+                require("endringsdato", JsonNode::asLocalDate)
+                requireKey("beloep")
+            }
+            require("inntektsmelding.mottattDato", JsonNode::asLocalDateTime)
+            interestedIn("inntektsmelding.fødselsdato", JsonNode::asLocalDate)
+            interestedIn("inntektsmelding.dødsdato", JsonNode::asLocalDate)
+            interestedIn("inntektsmelding.foersteFravaersdag", JsonNode::asLocalDate)
+            interestedIn("inntektsmelding.refusjon.opphoersdato", JsonNode::asLocalDate)
+            interestedIn(
+                "inntektsmelding.refusjon.beloepPrMnd",
+                "inntektsmelding.arbeidsforholdId",
+                "inntektsmelding.begrunnelseForReduksjonEllerIkkeUtbetalt",
+                "inntektsmelding.opphoerAvNaturalytelser",
+                "inntektsmelding.harFlereInntektsmeldinger",
+                "inntektsmelding.historiskeFolkeregisteridenter",
+                "inntektsmelding.avsenderSystem",
+                "inntektsmelding.inntektsdato"
+            )
+        }
     }
 
-    override fun createMessage(packet: JsonMessage) = InntektsmeldingReplayMessage(packet)
+    override fun createMessage(packet: JsonMessage) = InntektsmeldingerReplayMessage(packet)
 }

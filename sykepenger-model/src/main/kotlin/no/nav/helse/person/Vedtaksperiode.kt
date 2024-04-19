@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplayUtført
+import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -283,7 +284,13 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
         if (!inntektsmeldingReplayUtført.erRelevant(this.id)) return
         kontekst(inntektsmeldingReplayUtført)
-        tilstand.håndter(this, inntektsmeldingReplayUtført)
+        tilstand.replayUtført(this, inntektsmeldingReplayUtført)
+    }
+
+    internal fun håndter(replays: InntektsmeldingerReplay) {
+        if (!replays.erRelevant(this.id)) return
+        kontekst(replays)
+        tilstand.replayUtført(this, replays)
     }
 
     internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse) {
@@ -1161,7 +1168,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk)
 
-        fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {}
+        fun replayUtført(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {}
         fun inntektsmeldingFerdigbehandlet(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {}
         fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             dager.skalHåndteresAv(vedtaksperiode.periode)
@@ -1607,14 +1614,14 @@ internal class Vedtaksperiode private constructor(
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-            if (vedtaksperiode.trengerArbeidsgiveropplysninger(inntektsmeldingReplayUtført)) {
+        override fun replayUtført(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
+            if (vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)) {
                 // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
                     it.trengerIkkeArbeidsgiveropplysninger()
                 }
             }
-            vurderOmKanGåVidere(vedtaksperiode, inntektsmeldingReplayUtført)
+            vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
         override fun inntektsmeldingFerdigbehandlet(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
