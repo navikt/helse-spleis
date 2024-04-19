@@ -55,18 +55,18 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
                 )
             }
         )
-        val arbeidsforholdId = packet["arbeidsforholdId"].takeIf(JsonNode::isTextual)?.asText()
-        val orgnummer = packet["virksomhetsnummer"].asText()
-        val aktørId = packet["arbeidstakerAktorId"].asText()
-        val mottatt = packet["mottattDato"].asLocalDateTime()
-        val førsteFraværsdag = packet["foersteFravaersdag"].asOptionalLocalDate()
-        val beregnetInntekt = packet["beregnetInntekt"].asDouble()
-        val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
-        val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
-        val harOpphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].size() > 0
-        val harFlereInntektsmeldinger = packet["harFlereInntektsmeldinger"].asBoolean(false)
-        val avsendersystem = packet["avsenderSystem"].tilAvsendersystem()
-        val inntektsdato = packet["inntektsdato"].asOptionalLocalDate()
+        val arbeidsforholdId = packet.path("arbeidsforholdId").takeIf(JsonNode::isTextual)?.asText()
+        val orgnummer = packet.path("virksomhetsnummer").asText()
+        val aktørId = packet.path("arbeidstakerAktorId").asText()
+        val mottatt = packet.path("mottattDato").asLocalDateTime()
+        val førsteFraværsdag = packet.path("foersteFravaersdag").asOptionalLocalDate()
+        val beregnetInntekt = packet.path("beregnetInntekt").asDouble()
+        val arbeidsgiverperioder = packet.path("arbeidsgiverperioder").map(::asPeriode)
+        val begrunnelseForReduksjonEllerIkkeUtbetalt = packet.path("begrunnelseForReduksjonEllerIkkeUtbetalt").takeIf(JsonNode::isTextual)?.asText()
+        val harOpphørAvNaturalytelser = packet.path("opphoerAvNaturalytelser").size() > 0
+        val harFlereInntektsmeldinger = packet.path("harFlereInntektsmeldinger").asBoolean(false)
+        val avsendersystem = packet.path("avsenderSystem").tilAvsendersystem()
+        val inntektsdato = packet.path("inntektsdato").asOptionalLocalDate()
 
         return InntektsmeldingReplay(
             wrapped = Inntektsmelding(
