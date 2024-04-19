@@ -636,6 +636,9 @@ class Person private constructor(
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
     internal fun førsteFraværsdager(skjæringstidspunkt: LocalDate) = arbeidsgivere.førsteFraværsdager(skjæringstidspunkt)
 
+    internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode) =
+        vilkårsgrunnlagHistorikk.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode)
+
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
 

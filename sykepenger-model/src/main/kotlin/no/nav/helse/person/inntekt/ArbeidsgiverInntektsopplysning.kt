@@ -12,6 +12,7 @@ import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -180,12 +181,26 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
             singleOrNull{it.gjelder(organisasjonsnummer)}?.refusjonsopplysninger ?: Refusjonsopplysninger()
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.inntekt(organisasjonsnummer: String) =
-            firstOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.fastsattÅrsinntekt()
+        internal fun List<ArbeidsgiverInntektsopplysning>.forespurtInntektOgRefusjonsopplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, periode: Periode): Triple<PersonObserver.FastsattInntekt, PersonObserver.Refusjon, PersonObserver.Inntektsdata?>? {
+            val fastsattOpplysning = singleOrNull { it.gjelder(organisasjonsnummer) } ?: return null
+            val inntekt = PersonObserver.FastsattInntekt(fastsattOpplysning.fastsattÅrsinntekt(skjæringstidspunkt))
+            val forslag = inntektforslag(skjæringstidspunkt, fastsattOpplysning)
+            val refusjon = PersonObserver.Refusjon(forslag = fastsattOpplysning.refusjonsopplysninger.overlappendeEllerSenereRefusjonsopplysninger(periode))
+            return Triple(inntekt, refusjon, forslag)
+        }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
-            firstOrNull { it.gjelder(organisasjonsnummer) }?.inntektsopplysning?.inntektsdata(skjæringstidspunkt)
-
+        private fun inntektforslag(skjæringstidspunkt: LocalDate, arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning): PersonObserver.Inntektsdata? {
+            val originalInntektsopplysning = arbeidsgiverInntektsopplysning.inntektsopplysning.omregnetÅrsinntekt()
+            val type = when (originalInntektsopplysning) {
+                is no.nav.helse.person.inntekt.Inntektsmelding -> PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
+                is Saksbehandler -> PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
+                else -> return null
+            }
+            return PersonObserver.Inntektsdata(
+                skjæringstidspunkt = skjæringstidspunkt,
+                kilde = type,
+                beløp = originalInntektsopplysning.fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig })
+        }
 
         private fun List<ArbeidsgiverInntektsopplysning>.finnEndredeInntektsopplysninger(forrige: List<ArbeidsgiverInntektsopplysning>): List<ArbeidsgiverInntektsopplysning> {
             val forrigeInntektsopplysninger = forrige.map { it.inntektsopplysning }

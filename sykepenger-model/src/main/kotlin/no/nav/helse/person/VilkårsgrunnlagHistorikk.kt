@@ -32,14 +32,12 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_8
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
 
@@ -82,6 +80,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, sykefraværstilfeller) ?: return
         if (nyttInnslag == sisteInnlag()) return
         historikk.add(0, nyttInnslag)
+    }
+
+    internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode): List<PersonObserver.ForespurtOpplysning> {
+        return sisteInnlag()?.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode) ?: listOf(
+            PersonObserver.Inntekt(forslag = null),
+            PersonObserver.Refusjon(forslag = emptyList())
+        )
     }
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
@@ -130,6 +135,32 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun add(skjæringstidspunkt: LocalDate, vilkårsgrunnlagElement: VilkårsgrunnlagElement) {
             vilkårsgrunnlag[skjæringstidspunkt] = vilkårsgrunnlagElement
+        }
+
+        internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, periode: Periode): List<PersonObserver.ForespurtOpplysning>? {
+            val fastsatteOpplysninger = vilkårsgrunnlagFor(skjæringstidspunkt)
+                ?.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, periode)
+
+            if (fastsatteOpplysninger != null) {
+                val (fastsattInntekt, fastsattRefusjon) = fastsatteOpplysninger
+                return listOf(fastsattInntekt, fastsattRefusjon)
+            }
+
+            // om arbeidsgiveren ikke har noen fastsatte opplysninger på skjæringstidspunktet så foreslår
+            // vi inntekt og refusjon fra forrige skjæringstidspunkt arbeidsgiveren er representert
+            val forrigeFastsatteOpplysning = vilkårsgrunnlag
+                .keys
+                .filter { it < skjæringstidspunkt }
+                .sortedDescending()
+                .firstNotNullOfOrNull {
+                    vilkårsgrunnlagFor(it)?.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, periode)
+                } ?: return null
+
+            val (_, refusjonForslag, inntektForslag) = forrigeFastsatteOpplysning
+            return listOf(
+                PersonObserver.Inntekt(forslag = inntektForslag),
+                PersonObserver.Refusjon(forslag = refusjonForslag.forslag)
+            )
         }
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
@@ -246,8 +277,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
 
-        internal fun inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
-            sykepengegrunnlag.inntektsdata(skjæringstidspunkt, organisasjonsnummer)
+        internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode) =
+            sykepengegrunnlag.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, periode)
 
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode,  periode: Periode, subsumsjonObserver: SubsumsjonObserver): List<Utbetalingstidslinje> {
             return tidslinjer
@@ -343,12 +374,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun refusjonsopplysninger(organisasjonsnummer: String) =
             sykepengegrunnlag.refusjonsopplysninger(organisasjonsnummer)
-
-        internal fun inntekt(organisasjonsnummer: String): Inntekt? =
-            sykepengegrunnlag.inntekt(organisasjonsnummer)
-
-        internal fun overlappendeEllerSenereRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode): List<Refusjonsopplysning> =
-            refusjonsopplysninger(organisasjonsnummer).overlappendeEllerSenereRefusjonsopplysninger(periode)
 
         internal fun lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,

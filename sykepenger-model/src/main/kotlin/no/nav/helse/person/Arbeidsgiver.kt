@@ -44,7 +44,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.finnNesteVedtaksperiodeSomTrengerInntektsmelding
-import no.nav.helse.person.Vedtaksperiode.Companion.finnVedtaksperioderKnyttetTilSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
@@ -953,9 +952,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun finnNesteVedtaksperiodeSomTrengerInntektsmelding(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? = vedtaksperioder.finnNesteVedtaksperiodeSomTrengerInntektsmelding(vedtaksperiode)
-
-    internal fun vedtaksperioderKnyttetTilSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
-        vedtaksperioder.finnVedtaksperioderKnyttetTilSkjæringstidspunkt(skjæringstidspunkt)
 
     fun vedtaksperioderKnyttetTilArbeidsgiverperiodeInkludertForkastede(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
         if (arbeidsgiverperiode == null) return emptyList()

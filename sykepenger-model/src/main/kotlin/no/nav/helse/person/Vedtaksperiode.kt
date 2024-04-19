@@ -129,7 +129,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
-import no.nav.helse.økonomi.Inntekt
 
 internal class Vedtaksperiode private constructor(
     private val person: Person,
@@ -696,14 +695,9 @@ internal class Vedtaksperiode private constructor(
         if (harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return false
         if (!arbeidsgiverperiode.forventerOpplysninger(periode)) return false
 
-        val fastsattInntekt = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntekt(arbeidsgiver.organisasjonsnummer())
+        val forespurtInntektOgRefusjon = person.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode)
+        val forespurteOpplysninger = forespurtInntektOgRefusjon + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
 
-        val forespurteOpplysninger = listOfNotNull(
-            forespurtInntekt(fastsattInntekt),
-            forespurtFastsattInntekt(fastsattInntekt),
-            forespurtRefusjon(fastsattInntekt),
-            forespurtArbeidsgiverperiode(arbeidsgiverperiode)
-        )
         val vedtaksperioder = when {
             // For å beregne riktig arbeidsgiverperiode/første fraværsdag
             PersonObserver.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
@@ -757,45 +751,6 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiodeId = id
             )
         )
-    }
-
-    private fun forrigeSkjæringstidspunktMedVilkårsgrunnlagFor(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) = person.skjæringstidspunkter()
-        .filter { it < skjæringstidspunkt }
-        .filter { arbeidsgiver
-            .vedtaksperioderKnyttetTilSkjæringstidspunkt(it)
-            .any { vedtaksperiode -> vedtaksperiode.tilstand != AvsluttetUtenUtbetaling }
-        }
-        .maxOrNull()
-
-    private fun forespurtInntekt(fastsattInntekt: Inntekt?): PersonObserver.Inntekt? {
-        if (fastsattInntekt != null) return null
-        val inntektForrigeSkjæringstidspunkt = forrigeSkjæringstidspunktMedVilkårsgrunnlagFor(arbeidsgiver, skjæringstidspunkt)
-            ?.let { person.vilkårsgrunnlagFor(it)?.inntektsdata(it, organisasjonsnummer) }
-
-        return PersonObserver.Inntekt(forslag = inntektForrigeSkjæringstidspunkt)
-    }
-
-    private fun forespurtFastsattInntekt(fastsattInntekt: Inntekt?): PersonObserver.FastsattInntekt? =
-        fastsattInntekt?.let(PersonObserver::FastsattInntekt)
-
-    private fun forespurtRefusjon(fastsattInntekt: Inntekt?): PersonObserver.Refusjon {
-        if (fastsattInntekt != null) {
-            val refusjonsopplysninger = person
-                .vilkårsgrunnlagFor(skjæringstidspunkt)
-                ?.overlappendeEllerSenereRefusjonsopplysninger(arbeidsgiver.organisasjonsnummer(), periode())
-                .orEmpty()
-            return PersonObserver.Refusjon(forslag = refusjonsopplysninger)
-
-        } else {
-            val forrigeSkjæringstidspunkt = forrigeSkjæringstidspunktMedVilkårsgrunnlagFor(arbeidsgiver, skjæringstidspunkt)
-
-            val refusjonsopplysninger = forrigeSkjæringstidspunkt?.let { person
-                .vilkårsgrunnlagFor(forrigeSkjæringstidspunkt)
-                ?.overlappendeEllerSenereRefusjonsopplysninger(arbeidsgiver.organisasjonsnummer(), periode())
-            } ?: emptyList()
-
-            return PersonObserver.Refusjon(forslag = refusjonsopplysninger)
-        }
     }
 
     private fun forespurtArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode?) =
@@ -2498,8 +2453,6 @@ internal class Vedtaksperiode private constructor(
             if (nesteVedtaksperiode?.tilstand != AvventerInntektsmelding) return null
             return nesteVedtaksperiode
         }
-
-        internal fun List<Vedtaksperiode>.finnVedtaksperioderKnyttetTilSkjæringstidspunkt(skjæringstidspunktet: LocalDate) = filter { it.skjæringstidspunkt == skjæringstidspunktet }
 
         internal fun Iterable<Vedtaksperiode>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) {
             check(this.filterNot { it == periodeSomSkalGjenopptas }.none(HAR_AVVENTENDE_GODKJENNING)) {

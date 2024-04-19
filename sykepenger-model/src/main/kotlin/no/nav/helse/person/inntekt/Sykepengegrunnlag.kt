@@ -33,10 +33,9 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deak
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.forespurtInntektOgRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inntektsdata
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
@@ -291,9 +290,6 @@ internal class Sykepengegrunnlag private constructor(
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
         arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
 
-    internal fun inntekt(organisasjonsnummer: String): Inntekt? =
-        arbeidsgiverInntektsopplysninger.inntekt(organisasjonsnummer)
-
     internal fun nyeArbeidsgiverInntektsopplysninger(
         person: Person,
         inntektsmelding: Inntektsmelding,
@@ -476,8 +472,8 @@ internal class Sykepengegrunnlag private constructor(
         }
     }
 
-    internal fun inntektsdata(skjæringstidspunkt: LocalDate, organisasjonsnummer: String) =
-        arbeidsgiverInntektsopplysninger.inntektsdata(skjæringstidspunkt, organisasjonsnummer)
+    internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode) =
+        arbeidsgiverInntektsopplysninger.forespurtInntektOgRefusjonsopplysninger(skjæringstidspunkt, organisasjonsnummer, periode)
 
     internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
         arbeidsgiverInntektsopplysninger.firstNotNullOfOrNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }

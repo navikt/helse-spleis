@@ -4,14 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.SubsumsjonObserver
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -31,16 +30,6 @@ sealed class Inntektsopplysning protected constructor(
     internal fun overstyresAv(ny: Inntektsopplysning): Inntektsopplysning {
         if (!kanOverstyresAv(ny)) return this
         return blirOverstyrtAv(ny)
-    }
-
-    internal fun inntektsdata(skjæringstidspunkt: LocalDate): PersonObserver.Inntektsdata? {
-        val originalInntektsopplysning = omregnetÅrsinntekt()
-        val type = when(originalInntektsopplysning) {
-            is Inntektsmelding -> PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
-            is Saksbehandler -> PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
-            else -> null
-        }
-        return type?.let { PersonObserver.Inntektsdata(skjæringstidspunkt, type, originalInntektsopplysning.beløp.reflection { _, månedlig, _, _ -> månedlig }) }
     }
 
     protected abstract fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning
