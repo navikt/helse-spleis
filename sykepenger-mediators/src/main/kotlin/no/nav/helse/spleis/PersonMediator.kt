@@ -157,6 +157,8 @@ internal class PersonMediator(
     }
 
     private fun createInntektsmeldingerReplayMessage(fødselsnummer: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, replays: List<Pair<UUID, JsonNode>>) {
+        if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") return
+
         this.replays.add(vedtaksperiodeId to JsonMessage.newMessage("inntektsmeldinger_replay", mapOf(
             "fødselsnummer" to fødselsnummer.toString(),
             "aktørId" to aktørId,
