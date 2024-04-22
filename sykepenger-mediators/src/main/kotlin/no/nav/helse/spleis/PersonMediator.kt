@@ -2,7 +2,6 @@ package no.nav.helse.spleis
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -10,7 +9,6 @@ import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
-import no.nav.helse.SPILL_AV_IM_DISABLED
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -134,23 +132,6 @@ internal class PersonMediator(
 
     override fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {
         replays.removeIf { it.first == vedtaksperiodeId }
-    }
-
-    private fun createReplayUtførtMessage(fødselsnummer: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID) {
-        replays.add(vedtaksperiodeId to JsonMessage.newMessage("inntektsmelding_replay_utført", mapOf(
-            "fødselsnummer" to fødselsnummer.toString(),
-            "aktørId" to aktørId,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to "$vedtaksperiodeId"
-        )).toJson())
-    }
-
-    private fun createReplayMessage(message: JsonNode, vedtaksperiodeId: UUID) {
-        message as ObjectNode
-        message.put("@replay", true)
-        message.put("@event_name", "inntektsmelding_replay")
-        message.put("vedtaksperiodeId", "$vedtaksperiodeId")
-        replays.add(vedtaksperiodeId to message.toString())
     }
 
     private fun createInntektsmeldingerReplayMessage(fødselsnummer: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, replays: List<Pair<UUID, JsonNode>>) {
