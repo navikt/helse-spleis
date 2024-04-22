@@ -848,8 +848,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnVedtaksperiodeFør(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.indexOf(vedtaksperiode)
-            .takeIf { index -> index > 0 }
+            .takeUnless { index -> index == 0 }
             ?.let { vedtaksperioder[it - 1] }
+
+    internal fun finnVedtaksperiodeEtter(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.indexOf(vedtaksperiode)
+            .takeUnless { index -> index == vedtaksperioder.lastIndex }
+            ?.let { vedtaksperioder[it + 1] }
 
     internal fun finnVedtaksperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other ->

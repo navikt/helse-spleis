@@ -562,30 +562,13 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse, validering: () -> Unit) {
-        val rettEtterFørEndring = arbeidsgiver.finnVedtaksperiodeRettEtter(this)
-
-        oppdaterHistorikk(hendelse as SykdomshistorikkHendelse, validering)
-
-        lagreTidsnæreopplysninger(hendelse)
-        val periodeEtter = rettEtterFørEndring ?: arbeidsgiver.finnVedtaksperiodeRettEtter(this)
-        periodeEtter?.lagreTidsnæreopplysninger(hendelse)
+        val periodeFør = arbeidsgiver.finnVedtaksperiodeFør(this)
+        val periodeEtter = arbeidsgiver.finnVedtaksperiodeEtter(this)
+        behandlinger.håndterEndringOgLagreTidsnæreOpplysninger(person, arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), periodeFør?.behandlinger, periodeEtter?.behandlinger, periodeEtter?.aktivitetsloggkopi(hendelse), validering)
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse, validering: () -> Unit) {
         behandlinger.håndterEndring(person, arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), validering)
-    }
-
-    private fun lagreTidsnæreopplysninger(hendelse: Hendelse) {
-        val periodeFør = arbeidsgiver.finnVedtaksperiodeFør(this)?.takeUnless { it.erVedtaksperiodeRettFør(this) }
-        val oppholdsperiodeMellom = periodeFør?.sykdomstidslinje?.oppholdsperiodeMellom(this.sykdomstidslinje)
-
-        behandlinger.lagreTidsnæreInntekter(
-            arbeidsgiver,
-            person.beregnSkjæringstidspunkt(),
-            hendelse,
-            aktivitetsloggkopi(hendelse),
-            oppholdsperiodeMellom
-        )
     }
 
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
