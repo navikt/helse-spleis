@@ -429,7 +429,9 @@ internal class TestMessageFactory(
         mottattDato = LocalDateTime.now(),
         begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
         naerRelasjon = null,
-        avsenderSystem = avsenderSystem
+        avsenderSystem = avsenderSystem,
+        innsenderTelefon = "12345678",
+        innsenderFulltNavn = "SPLEIS MEDIATOR"
     )
 
     fun lagInnteksmelding(

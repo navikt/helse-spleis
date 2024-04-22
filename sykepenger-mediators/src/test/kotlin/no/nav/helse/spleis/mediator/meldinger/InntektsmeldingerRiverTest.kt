@@ -50,7 +50,9 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now(),
         naerRelasjon = null,
-        avsenderSystem = AvsenderSystem("NAV_NO", "1.0")
+        avsenderSystem = AvsenderSystem("NAV_NO", "1.0"),
+        innsenderFulltNavn = "SPLEIS MEDIATOR",
+        innsenderTelefon = "tlfnr"
     ).asObjectNode()
     private val ValidInntektsmeldingUtenRefusjon = Inntektsmeldingkontrakt(
         inntektsmeldingId = UUID.randomUUID().toString(),
@@ -72,7 +74,9 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         ferieperioder = listOf(Periode(fom = LocalDate.now(), tom = LocalDate.now())),
         foersteFravaersdag = LocalDate.now(),
         mottattDato = LocalDateTime.now(),
-        naerRelasjon = null
+        naerRelasjon = null,
+        innsenderTelefon = "tlfnr",
+        innsenderFulltNavn = "SPLEIS MEDIATOR"
     ).asObjectNode().toJson()
 
     private val ValidInntektsmeldingJson = ValidInntektsmelding.toJson()

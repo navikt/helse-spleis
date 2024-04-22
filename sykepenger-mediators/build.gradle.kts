@@ -7,7 +7,7 @@ plugins {
 val mainClass = "no.nav.helse.AppKt"
 
 val tbdLibsVersion = "2024.02.09-10.44-24d5802f"
-val innteksmeldingKontraktVersion = "2023.06.20-08-54-d1c6c"
+val tbdSpillAvImMatchingVersion = "2024.04.22-12.35-eaadb096"
 val syfokafkaVersion = "2024.02.14-18.01-3523e4c2"
 val mockkVersion = "1.13.9"
 val jsonSchemaValidatorVersion = "1.0.70"
@@ -26,7 +26,7 @@ dependencies {
     }
     testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
     testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
-    testImplementation("no.nav.sykepenger.kontrakter:inntektsmelding-kontrakt:$innteksmeldingKontraktVersion")
+    testImplementation("com.github.navikt.spill_av_im:matching:$tbdSpillAvImMatchingVersion")
     testImplementation("no.nav.helse.flex:sykepengesoknad-kafka:$syfokafkaVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")

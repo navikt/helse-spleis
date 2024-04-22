@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import com.zaxxer.hikari.HikariDataSource
 import java.time.LocalDate
@@ -40,6 +42,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
+import no.nav.helse.spill_av_im.Forespørsel
+import no.nav.helse.spill_av_im.FørsteFraværsdag
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRepository
@@ -65,6 +69,7 @@ import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.AfterEach
@@ -698,6 +703,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
             private val log = LoggerFactory.getLogger(InntektsmeldingerReplayObserver::class.java)
             private val objectMapper = jacksonObjectMapper()
                 .registerModule(JavaTimeModule())
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
 
@@ -721,7 +727,20 @@ internal abstract class AbstractEndToEndMediatorTest() {
             val aktørId = node.path("aktørId").textValue()
             val orgnr = node.path("organisasjonsnummer").textValue()
             val vedtaksperiodeId = node.path("vedtaksperiodeId").textValue().toUUID()
-            val replayMessage = lagInntektsmeldingerReplayMessage(fnr, aktørId, orgnr, vedtaksperiodeId)
+            val forespørsel = Forespørsel(
+                fnr = fnr,
+                aktørId = aktørId,
+                orgnr = orgnr,
+                vedtaksperiodeId = vedtaksperiodeId,
+                skjæringstidspunkt = node.path("skjæringstidspunkt").asLocalDate(),
+                førsteFraværsdager = node.path("førsteFraværsdager").map { FørsteFraværsdag(it.path("organisasjonsnummer").textValue(), it.path("førsteFraværsdag").asLocalDate()) },
+                sykmeldingsperioder = node.path("sykmeldingsperioder").map { no.nav.helse.spill_av_im.Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
+                egenmeldinger = node.path("egenmeldinger").map { no.nav.helse.spill_av_im.Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
+                harForespurtArbeidsgiverperiode = node.path("trengerArbeidsgiverperiode").booleanValue()
+            )
+
+            val replayMessage = lagInntektsmeldingerReplayMessage(forespørsel)
+
 
             log.info("lager inntektsmeldinger_replay-melding for {}", kv("vedtaksperiodeId", vedtaksperiodeId))
             testRapid.sendTestMessage(replayMessage.toJson())
@@ -734,22 +753,24 @@ internal abstract class AbstractEndToEndMediatorTest() {
                 }.asList)
             }
 
-        private fun lagInntektsmeldingerReplayMessage(personidentifikator: String, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID): JsonMessage {
-            // replayer alle inntektsmeldinger som ikke er hånderte
-            // Om det i fremtiden trengs mer nøyaktig filtrering på dato og sånn så bør vi
-            // tilby et lite bibliotek i helse-spill-av som tilbyr en filtreringsfunksjon (basert på den filtreringen som skjer der)
-            val replays = finnInntektsmeldinger(personidentifikator)
-                .filter { it.path("virksomhetsnummer").asText() == organisasjonsnummer }
+        private fun lagInntektsmeldingerReplayMessage(forespørsel: Forespørsel): JsonMessage {
+            // replayer alle inntektsmeldinger som ikke er hånderte og som kan være relevante
+            val replays = finnInntektsmeldinger(forespørsel.fnr)
+                .filter { it.path("virksomhetsnummer").asText() == forespørsel.orgnr }
                 .filterNot { inntektsmelding ->
                     inntektsmelding.path("@id").textValue().toUUID() in håndterteInntektsmeldinger
+                }
+                .filter { node ->
+                    val im = objectMapper.treeToValue<Inntektsmelding>(node)
+                    forespørsel.erInntektsmeldingRelevant(im)
                 }
                 .map { inntektsmelding -> inntektsmelding.path("@id").asText().toUUID() to inntektsmelding }
 
             return JsonMessage.newMessage("inntektsmeldinger_replay", mapOf(
-                "fødselsnummer" to personidentifikator,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "fødselsnummer" to forespørsel.fnr,
+                "aktørId" to forespørsel.aktørId,
+                "organisasjonsnummer" to forespørsel.orgnr,
+                "vedtaksperiodeId" to "${forespørsel.vedtaksperiodeId}",
                 "inntektsmeldinger" to replays.map { (internDokumentId, jsonNode) ->
                     mapOf(
                         "internDokumentId" to internDokumentId,
