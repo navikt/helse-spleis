@@ -116,6 +116,9 @@ internal class PersonMediator(
             },
             "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode
         )))
+
+        if (System.getenv("NAIS_CLUSTER_NAME")?.lowercase() in setOf("dev-gcp", "prod-gcp")) return
+
         val replays = hendelseRepository.finnInntektsmeldinger(personidentifikator)
             .filter { it.path("virksomhetsnummer").asText() == organisasjonsnummer }
             .filter { inntektsmelding ->
@@ -125,12 +128,6 @@ internal class PersonMediator(
                 Inntektsmelding.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperioder, redusertUtbetaling)
             }
             .map { inntektsmelding -> inntektsmelding.path("@id").asText().toUUID() to inntektsmelding }
-
-        if (SPILL_AV_IM_DISABLED) {
-            replays.forEach { (_, inntektsmelding) -> createReplayMessage(inntektsmelding, vedtaksperiodeId) }
-            createReplayUtførtMessage(personidentifikator, aktørId, organisasjonsnummer, vedtaksperiodeId)
-            return
-        }
 
         createInntektsmeldingerReplayMessage(personidentifikator, aktørId, organisasjonsnummer, vedtaksperiodeId, replays)
     }
@@ -157,8 +154,6 @@ internal class PersonMediator(
     }
 
     private fun createInntektsmeldingerReplayMessage(fødselsnummer: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, replays: List<Pair<UUID, JsonNode>>) {
-        if (System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") return
-
         this.replays.add(vedtaksperiodeId to JsonMessage.newMessage("inntektsmeldinger_replay", mapOf(
             "fødselsnummer" to fødselsnummer.toString(),
             "aktørId" to aktørId,
