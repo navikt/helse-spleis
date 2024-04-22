@@ -10,12 +10,16 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
+import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     private val behov = mutableListOf<Behov>()
     private val tilstander = mutableMapOf<UUID, TilstandType>()
-    private val replays = mutableSetOf<UUID>()
+    private val replays = mutableSetOf<Forespørsel>()
+    private val hånderteInntektsmeldinger = mutableSetOf<UUID>()
+
+    internal fun håndterteInntektsmeldinger() = hånderteInntektsmeldinger.toSet()
 
     internal fun registrerBehov(aktivitetslogg: IAktivitetslogg) {
         val nyeBehov = aktivitetslogg.behov().takeUnless { it.isEmpty() } ?: return
@@ -35,7 +39,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         return behovtyper.all { behovtype -> behovtype in behover }
     }
 
-    internal fun <R> fangInntektsmeldingReplay(block: () -> R, behandleReplays: (Set<UUID>) -> Unit): R {
+    internal fun <R> fangInntektsmeldingReplay(block: () -> R, behandleReplays: (Set<Forespørsel>) -> Unit): R {
         val før = replays.toSet()
         val retval = block()
         behandleReplays(replays.toSet() - før)
@@ -48,9 +52,9 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     }
 
     internal fun harBedtOmReplay(vedtaksperiodeId: UUID) =
-        replays.contains(vedtaksperiodeId)
+        replays.any { it.vedtaksperiodeId == vedtaksperiodeId }
     internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
-        assertTrue(replays.remove(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}"}
+        assertTrue(replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}"}
     }
 
     internal fun bekreftBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) {
@@ -81,7 +85,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         log.log("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
         behov.removeAll { behov -> vedtaksperiodeId == behov.vedtaksperiodeId }
         log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
-        if (replays.remove(vedtaksperiodeId)) {
+        if (replays.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }) {
             log.log("-> Vedtaksperioden ba om replay, men det ble ikke utført")
         }
     }
@@ -100,14 +104,28 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
-        sammenhengendePeriode: Periode,
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
         trengerArbeidsgiverperiode: Boolean,
         erPotensiellForespørsel: Boolean
     ) {
-        replays.add(vedtaksperiodeId)
+        replays.add(Forespørsel(
+            fnr = personidentifikator.toString(),
+            aktørId = aktørId,
+            orgnr = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
+            sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+            egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+            harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
+            erPotensiellForespørsel = erPotensiellForespørsel
+        ))
+    }
+
+    override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        hånderteInntektsmeldinger.add(inntektsmeldingId)
     }
 
     override fun vedtaksperiodeEndret(

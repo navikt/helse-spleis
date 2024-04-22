@@ -39,7 +39,6 @@ internal class TestObservatør : PersonObserver {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
-        sammenhengendePeriode: Periode,
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,

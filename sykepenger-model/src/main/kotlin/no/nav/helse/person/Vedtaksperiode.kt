@@ -794,10 +794,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal val sammenhengendePeriode get() = checkNotNull(arbeidsgiver.finnSammenhengendeVedtaksperioder(this)
-        .map { it.periode }
-        .periode())
-
     private fun trengerInntektsmeldingReplay() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
         val trengerArbeidsgiverperiode = trengerArbeidsgiverperiode(arbeidsgiverperiode)
@@ -813,7 +809,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiodeId = id,
             skjæringstidspunkt = skjæringstidspunkt,
             organisasjonsnummer = organisasjonsnummer,
-            sammenhengendePeriode = sammenhengendePeriode,
             sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
             egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
             førsteFraværsdager = førsteFraværsdager,

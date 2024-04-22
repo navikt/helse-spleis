@@ -10,8 +10,8 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Behandlinger
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -49,15 +49,6 @@ class Inntektsmelding(
     aktivitetslogg = aktivitetslogg
 ) {
     companion object {
-        fun aktuellForReplay(sammenhengendePeriode: Periode, førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode?, redusertUtbetaling: Boolean) : Boolean {
-            if (arbeidsgiverperiode == null) return redusertUtbetaling && førsteFraværsdag in sammenhengendePeriode // dersom IM har oppgitt reduksjon, og AGP er tom, da benyttes første fraværsdag som en nødløsning (TM)
-            if (arbeidsgiverperiode.overlapperMed(sammenhengendePeriode)) return true
-            if (arbeidsgiverperiode.erRettFør(sammenhengendePeriode)) return true // arbeidsgiverperiode f.eks. slutter på fredag & søknaden starter på mandag
-            if (sammenhengendePeriode.erRettFør(arbeidsgiverperiode)) return true // om f.eks. søknad slutter på fredag og arbedisgiverperiode starter på mandag
-            if (førsteFraværsdag in sammenhengendePeriode) return true
-            return false
-        }
-
         private fun inntektdato(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, inntektsdato: LocalDate?): LocalDate {
             if (inntektsdato != null) return inntektsdato
             if (førsteFraværsdag != null && (arbeidsgiverperioder.isEmpty() || førsteFraværsdag > arbeidsgiverperioder.last().endInclusive.nesteDag)) return førsteFraværsdag
@@ -89,10 +80,6 @@ class Inntektsmelding(
     private var håndtertInntekt = false
     private val beregnetInntektsdato = inntektdato(førsteFraværsdag, this.arbeidsgiverperioder, this.inntektsdato)
     private val dokumentsporing = Dokumentsporing.inntektsmeldingInntekt(meldingsreferanseId())
-    internal fun aktuellForReplay(sammenhengendePeriode: Periode): Boolean {
-        if (erPortalinntektsmelding()) return false
-        return Companion.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperiode, !begrunnelseForReduksjonEllerIkkeUtbetalt.isNullOrBlank())
-    }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, alternativInntektsdato: LocalDate) {
         if (alternativInntektsdato == this.beregnetInntektsdato) return

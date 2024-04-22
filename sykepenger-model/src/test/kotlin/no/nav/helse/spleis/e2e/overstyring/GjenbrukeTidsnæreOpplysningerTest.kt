@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
@@ -70,16 +71,27 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
 
             håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
-            håndterVilkårsgrunnlag(2.vedtaksperiode)
-            håndterYtelser(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
-                assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[1.januar])
-                assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[2.januar])
-            }
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+            assertForventetFeil(
+                forklaring = "tidsnære opplysninger lagres på første periode etter 1.januar - 2.januar, som er auu uten vilkårsgrunnlag på behandlingen sin",
+                nå = {
+                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                },
+                ønsket = {
+                    håndterVilkårsgrunnlag(2.vedtaksperiode)
+                    håndterYtelser(2.vedtaksperiode)
+                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+                    inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
+                        assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[1.januar])
+                        assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[2.januar])
+                    }
+                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                    assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                }
+            )
         }
     }
 

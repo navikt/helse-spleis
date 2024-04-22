@@ -11,6 +11,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
+import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.fail
 
 internal class TestObservatør(person: Person? = null) : PersonObserver {
@@ -55,9 +56,9 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     private val forkastedeEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeForkastetEvent>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
-    val inntektsmeldingReplayEventer = mutableListOf<UUID>()
+    val inntektsmeldingReplayEventer = mutableListOf<Forespørsel>()
 
-    internal fun replayInntektsmeldinger(block: () -> Unit): Set<UUID> {
+    internal fun replayInntektsmeldinger(block: () -> Unit): Set<Forespørsel> {
         val replaysFør = inntektsmeldingReplayEventer.toSet()
         block()
         return inntektsmeldingReplayEventer.toSet() - replaysFør
@@ -71,9 +72,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun sisteVedtaksperiodeId(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
     fun sisteVedtaksperiodeIdOrNull(orgnummer: String) = vedtaksperioder[orgnummer]?.last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
-    fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer
     fun kvitterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
-        inntektsmeldingReplayEventer.remove(vedtaksperiodeId)
+        inntektsmeldingReplayEventer.removeAll { it.vedtaksperiodeId == vedtaksperiodeId }
     }
 
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
@@ -166,14 +166,24 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
-        sammenhengendePeriode: Periode,
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
         trengerArbeidsgiverperiode: Boolean,
         erPotensiellForespørsel: Boolean
     ) {
-        inntektsmeldingReplayEventer.add(vedtaksperiodeId)
+        inntektsmeldingReplayEventer.add(Forespørsel(
+            fnr = personidentifikator.toString(),
+            aktørId = aktørId,
+            orgnr = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            førsteFraværsdager = førsteFraværsdager.map { no.nav.helse.spill_av_im.FørsteFraværsdag(it.organisasjonsnummer, it.førsteFraværsdag) },
+            sykmeldingsperioder = sykmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+            egenmeldinger = egenmeldingsperioder.map { no.nav.helse.spill_av_im.Periode(it.start, it.endInclusive) },
+            harForespurtArbeidsgiverperiode = trengerArbeidsgiverperiode,
+            erPotensiellForespørsel = erPotensiellForespørsel
+        ))
     }
 
     override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {

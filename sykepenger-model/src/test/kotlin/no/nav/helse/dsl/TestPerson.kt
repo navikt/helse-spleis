@@ -52,6 +52,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
@@ -200,8 +201,8 @@ internal class TestPerson(
                     }
                 }
             }) { vedtaksperioderSomHarBedtOmReplay ->
-                vedtaksperioderSomHarBedtOmReplay.forEach { vedtaksperiodeId ->
-                    håndterInntektsmeldingReplay(vedtaksperiodeId, inspektør.vedtaksperioder(vedtaksperiodeId).sammenhengendePeriode)
+                vedtaksperioderSomHarBedtOmReplay.forEach { forespørsel ->
+                    håndterInntektsmeldingReplay(forespørsel)
                 }
             }
 
@@ -265,10 +266,10 @@ internal class TestPerson(
         internal fun håndterAnmodningOmForkasting(vedtaksperiodeId: UUID) =
             arbeidsgiverHendelsefabrikk.lagAnmodningOmForkasting(vedtaksperiodeId).håndter(Person::håndter)
 
-        private fun håndterInntektsmeldingReplay(vedtaksperiodeId: UUID, sammenhengendePeriode: Periode) {
-
-            behovsamler.bekreftOgKvitterReplay(vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(vedtaksperiodeId, sammenhengendePeriode)
+        private fun håndterInntektsmeldingReplay(forespørsel: Forespørsel) {
+            val håndterteInntektsmeldinger = behovsamler.håndterteInntektsmeldinger()
+            behovsamler.bekreftOgKvitterReplay(forespørsel.vedtaksperiodeId)
+            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(forespørsel, håndterteInntektsmeldinger)
                 .håndter(Person::håndter)
         }
 

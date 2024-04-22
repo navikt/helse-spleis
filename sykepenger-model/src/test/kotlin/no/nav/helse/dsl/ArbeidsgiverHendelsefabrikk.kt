@@ -1,5 +1,6 @@
 package no.nav.helse.dsl
 
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.Temporal
@@ -42,13 +43,20 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.spill_av_im.Forespørsel
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
+import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.AvsenderSystem
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.Status
 
 
 internal class ArbeidsgiverHendelsefabrikk(
@@ -59,7 +67,7 @@ internal class ArbeidsgiverHendelsefabrikk(
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
-    private val inntektsmeldinger = mutableMapOf<UUID, (Aktivitetslogg) -> Inntektsmelding>()
+    private val inntektsmeldinger = mutableMapOf<UUID, AbstractEndToEndTest.InnsendtInntektsmelding>()
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
@@ -165,7 +173,39 @@ internal class ArbeidsgiverHendelsefabrikk(
                 aktivitetslogg = aktivitetslogg
             )
         }
-        inntektsmeldinger[id] = inntektsmeldinggenerator
+        val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
+            inntektsmeldingId = UUID.randomUUID().toString(),
+            arbeidstakerFnr = personidentifikator.toString(),
+            arbeidstakerAktorId = aktørId,
+            virksomhetsnummer = organisasjonsnummer,
+            arbeidsgiverFnr = null,
+            arbeidsgiverAktorId = null,
+            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+            arbeidsforholdId = null,
+            beregnetInntekt = BigDecimal.valueOf(beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig }),
+            refusjon = Refusjon(BigDecimal.valueOf(beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig }), null),
+            endringIRefusjoner = emptyList(),
+            opphoerAvNaturalytelser = emptyList(),
+            gjenopptakelseNaturalytelser = emptyList(),
+            arbeidsgiverperioder = arbeidsgiverperioder.map {
+                no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
+            },
+            status = Status.GYLDIG,
+            arkivreferanse = "",
+            ferieperioder = emptyList(),
+            foersteFravaersdag = førsteFraværsdag,
+            mottattDato = LocalDateTime.now(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            naerRelasjon = null,
+            avsenderSystem = AvsenderSystem("SpleisModell"),
+            innsenderTelefon = "tlfnr",
+            innsenderFulltNavn = "SPLEIS Modell"
+        )
+        inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(
+            tidspunkt = LocalDateTime.now(),
+            generator = inntektsmeldinggenerator,
+            inntektsmeldingkontrakt = kontrakten
+        )
         return inntektsmeldinggenerator(aktivitetslogg)
     }
 
@@ -203,22 +243,54 @@ internal class ArbeidsgiverHendelsefabrikk(
                 aktivitetslogg = aktivitetslogg
             )
         }
-        inntektsmeldinger[id] = inntektsmeldinggenerator
+        val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
+            inntektsmeldingId = UUID.randomUUID().toString(),
+            arbeidstakerFnr = personidentifikator.toString(),
+            arbeidstakerAktorId = aktørId,
+            virksomhetsnummer = organisasjonsnummer,
+            arbeidsgiverFnr = null,
+            arbeidsgiverAktorId = null,
+            arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+            arbeidsforholdId = null,
+            beregnetInntekt = BigDecimal.valueOf(beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig }),
+            refusjon = Refusjon(BigDecimal.valueOf(beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig }), null),
+            endringIRefusjoner = emptyList(),
+            opphoerAvNaturalytelser = emptyList(),
+            gjenopptakelseNaturalytelser = emptyList(),
+            arbeidsgiverperioder = arbeidsgiverperioder.map {
+                no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
+            },
+            status = Status.GYLDIG,
+            arkivreferanse = "",
+            ferieperioder = emptyList(),
+            foersteFravaersdag = førsteFraværsdag,
+            mottattDato = LocalDateTime.now(),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+            naerRelasjon = null,
+            avsenderSystem = AvsenderSystem("NAV_NO"),
+            innsenderTelefon = "tlfnr",
+            innsenderFulltNavn = "SPLEIS Modell"
+        )
+        inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(
+            tidspunkt = LocalDateTime.now(),
+            generator = inntektsmeldinggenerator,
+            inntektsmeldingkontrakt = kontrakten
+        )
         return inntektsmeldinggenerator(aktivitetslogg)
     }
 
-    internal fun lagInntektsmeldingReplay(vedtaksperiodeId: UUID, sammenhengendePeriode: Periode, aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
+    internal fun lagInntektsmeldingReplay(forespørsel: Forespørsel, håndterteInntektsmeldinger: Set<UUID>, aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
         InntektsmeldingerReplay(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = aktørId,
             fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             aktivitetslogg = aktivitetslogg,
-            vedtaksperiodeId = vedtaksperiodeId,
-            inntektsmeldinger = inntektsmeldinger.mapNotNull { (_, gen) ->
-                val inntektsmelding = gen(aktivitetslogg.barn())
-                if (inntektsmelding.aktuellForReplay(sammenhengendePeriode)) inntektsmelding else null
-            }
+            vedtaksperiodeId = forespørsel.vedtaksperiodeId,
+            inntektsmeldinger = inntektsmeldinger
+                .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
+                .map { (_, im) -> im.generator(aktivitetslogg.barn()) }
+                .filterNot { it.meldingsreferanseId() in håndterteInntektsmeldinger }
         )
 
     internal fun lagUtbetalingshistorikk(

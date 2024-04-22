@@ -32,7 +32,6 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
@@ -44,7 +43,6 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(inntektsmelding)
         assertEquals(listOf(21.januar), inspektør.inntektInspektør.innteksdatoer) // Lagrer alltid på oppgitt innteksdato
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
-        assertTrue(inntektsmelding.aktuellForReplay(1.januar til 31.januar))
         assertEquals(listOf(1.januar, 21.januar), inspektør.inntektInspektør.innteksdatoer) // Replayer IM. Nå som personen er syk 21.januar lagres den både på 21.januar og alternativ inntektsdato (1.januar)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -58,7 +56,6 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(inntektsmelding)
         assertEquals(listOf(25.januar), inspektør.inntektInspektør.innteksdatoer) // lagrer alltid på inntektsdato i IM
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-        assertTrue(inntektsmelding.aktuellForReplay(25.januar til 31.januar))
         assertEquals(listOf(25.januar), inspektør.inntektInspektør.innteksdatoer)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
@@ -73,7 +70,6 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(listOf(13.februar, 1.januar), inspektør.inntektInspektør.innteksdatoer)
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
 
-        assertTrue(inntektsmelding.aktuellForReplay(12.februar til 28.februar))
         assertEquals(listOf(12.februar, 13.februar, 1.januar), inspektør.inntektInspektør.innteksdatoer) // Lagrer nå på alternativ inntektsdato nå som vi har søknad
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
     }

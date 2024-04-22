@@ -28,7 +28,7 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     internal lateinit var hendelselogg: PersonHendelse
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, Boolean, Array<out Søknadsperiode>>>()
-    internal val inntektsmeldinger = mutableMapOf<UUID, Pair<LocalDateTime, (Aktivitetslogg) -> Inntektsmelding>>()
+    internal val inntektsmeldinger = mutableMapOf<UUID, InnsendtInntektsmelding>()
     internal val inntekter = mutableMapOf<UUID, Inntekt>()
 
     @BeforeEach
@@ -69,4 +69,10 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
         infix fun somEtterfulgtAv(f: ()->Unit) = Hendelser(f)
     }
     fun hendelsene(f:()->Unit) = Hendelser(f)
+
+    data class InnsendtInntektsmelding(
+        val tidspunkt: LocalDateTime,
+        val generator: (Aktivitetslogg) -> Inntektsmelding,
+        val inntektsmeldingkontrakt: no.nav.inntektsmeldingkontrakt.Inntektsmelding
+    )
 }

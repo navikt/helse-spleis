@@ -7,14 +7,18 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.PersonHendelsefabrikk
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidstakerHendelse
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -23,10 +27,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -53,7 +53,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -76,7 +75,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.fail
 
 
 internal fun AbstractEndToEndTest.håndterSykmelding(
@@ -445,27 +443,24 @@ internal fun AbstractEndToEndTest.håndterSøknad(
 }
 
 private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: String, aktivitetslogg: Aktivitetslogg = Aktivitetslogg(), block: () -> Unit) {
-    observatør.replayInntektsmeldinger { block() }.forEach { vedtaksperiodeId ->
+    observatør.replayInntektsmeldinger { block() }.forEach { forespørsel ->
         val imReplays = inntektsmeldinger
-            .mapValues { (_, gen) -> gen.first to gen.second(aktivitetslogg.barn()) }
-            .filterValues { (_, im) -> im.meldingsreferanseId() !in observatør.inntektsmeldingHåndtert.map(Pair<*, *>::first) }
-            .filterValues { (_, im) -> im.organisasjonsnummer() == orgnummer }
-            .filterValues { (_, im) -> im.aktuellForReplay(inspektør(orgnummer).vedtaksperioder(vedtaksperiodeId).sammenhengendePeriode)}
             .entries
-            .sortedBy { (_, value) -> value.first }
-            .map { (_, im) ->
-                im.second
-            }
+            .sortedBy { it.value.tidspunkt }
+            .filter { forespørsel.erInntektsmeldingRelevant(it.value.inntektsmeldingkontrakt) }
+            .map { it.value.generator(aktivitetslogg.barn()) }
+            .filter { im -> im.meldingsreferanseId() !in observatør.inntektsmeldingHåndtert.map(Pair<*, *>::first) }
+            .filter { im -> im.organisasjonsnummer() == orgnummer }
         InntektsmeldingerReplay(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "aktør",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = orgnummer,
             aktivitetslogg = aktivitetslogg,
-            vedtaksperiodeId = vedtaksperiodeId,
+            vedtaksperiodeId = forespørsel.vedtaksperiodeId,
             inntektsmeldinger = imReplays
         ).håndter(Person::håndter)
-        observatør.kvitterInntektsmeldingReplay(vedtaksperiodeId)
+        observatør.kvitterInntektsmeldingReplay(forespørsel.vedtaksperiodeId)
     }
 }
 

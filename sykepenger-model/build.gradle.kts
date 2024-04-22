@@ -1,4 +1,5 @@
 val jsonassertVersion = "1.5.0"
+val tbdSpillAvImMatchingVersion = "2024.04.22-15.08-c7e3d08c"
 
 dependencies {
     // bruker "api" sånn at avhengigheten blir kopiert ut til konsumenter av denne modulen
@@ -12,6 +13,7 @@ dependencies {
     testImplementation(kotlin("reflect"))
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))
     testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
+    testImplementation("com.github.navikt.spill_av_im:matching:$tbdSpillAvImMatchingVersion")
 
     testImplementation(project(":sykepenger-serde"))
     implementation(libs.bundles.logging) {

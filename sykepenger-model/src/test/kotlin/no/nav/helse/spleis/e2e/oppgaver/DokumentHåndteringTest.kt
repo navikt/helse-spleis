@@ -60,9 +60,10 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val søknad2 = håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertEquals(setOf(søknad1, inntektsmelding), inspektør.hendelseIder(1.vedtaksperiode))
 
+        assertEquals(setOf(søknad1, inntektsmelding), inspektør.hendelseIder(1.vedtaksperiode))
         assertEquals(setOf(søknad2, inntektsmelding), inspektør.hendelseIder(2.vedtaksperiode))
+        assertEquals(2.vedtaksperiode.id(ORGNUMMER), observatør.inntektsmeldingHåndtert.single().second)
     }
 
     @Test

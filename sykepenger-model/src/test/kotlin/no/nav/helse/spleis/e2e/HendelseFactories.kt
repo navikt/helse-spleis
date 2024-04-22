@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -57,6 +58,10 @@ import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt
+import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.AvsenderSystem
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.Status
 
 internal fun AbstractEndToEndTest.utbetaling(
     fagsystemId: String,
@@ -179,7 +184,35 @@ internal fun AbstractEndToEndTest.inntektsmelding(
             aktivitetslogg = aktivitetslogg
         )
     }
-    inntektsmeldinger[id] = LocalDateTime.now() to inntektsmeldinggenerator
+    val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
+        inntektsmeldingId = UUID.randomUUID().toString(),
+        arbeidstakerFnr = fnr.toString(),
+        arbeidstakerAktorId = AKTØRID,
+        virksomhetsnummer = orgnummer,
+        arbeidsgiverFnr = null,
+        arbeidsgiverAktorId = null,
+        arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+        arbeidsforholdId = null,
+        beregnetInntekt = BigDecimal.valueOf(beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig }),
+        refusjon = Refusjon(BigDecimal.valueOf(beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig }), null),
+        endringIRefusjoner = emptyList(),
+        opphoerAvNaturalytelser = emptyList(),
+        gjenopptakelseNaturalytelser = emptyList(),
+        arbeidsgiverperioder = arbeidsgiverperioder.map {
+            no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
+        },
+        status = Status.GYLDIG,
+        arkivreferanse = "",
+        ferieperioder = emptyList(),
+        foersteFravaersdag = førsteFraværsdag,
+        mottattDato = LocalDateTime.now(),
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        naerRelasjon = null,
+        avsenderSystem = AvsenderSystem("SpleisModell"),
+        innsenderTelefon = "tlfnr",
+        innsenderFulltNavn = "SPLEIS Modell"
+    )
+    inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(LocalDateTime.now(), inntektsmeldinggenerator, kontrakten)
     inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return inntektsmeldinggenerator(Aktivitetslogg()).apply { hendelselogg = this }
@@ -215,7 +248,35 @@ internal fun AbstractEndToEndTest.inntektsmeldingPortal(
             aktivitetslogg = aktivitetslogg
         )
     }
-    inntektsmeldinger[id] = LocalDateTime.now() to inntektsmeldinggenerator
+    val kontrakten = no.nav.inntektsmeldingkontrakt.Inntektsmelding(
+        inntektsmeldingId = UUID.randomUUID().toString(),
+        arbeidstakerFnr = fnr.toString(),
+        arbeidstakerAktorId = AKTØRID,
+        virksomhetsnummer = orgnummer,
+        arbeidsgiverFnr = null,
+        arbeidsgiverAktorId = null,
+        arbeidsgivertype = Arbeidsgivertype.VIRKSOMHET,
+        arbeidsforholdId = null,
+        beregnetInntekt = BigDecimal.valueOf(beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig }),
+        refusjon = Refusjon(BigDecimal.valueOf(beregnetInntekt.reflection { _, månedlig, _, _ -> månedlig }), null),
+        endringIRefusjoner = emptyList(),
+        opphoerAvNaturalytelser = emptyList(),
+        gjenopptakelseNaturalytelser = emptyList(),
+        arbeidsgiverperioder = arbeidsgiverperioder.map {
+            no.nav.inntektsmeldingkontrakt.Periode(it.start, it.endInclusive)
+        },
+        status = Status.GYLDIG,
+        arkivreferanse = "",
+        ferieperioder = emptyList(),
+        foersteFravaersdag = førsteFraværsdag,
+        mottattDato = LocalDateTime.now(),
+        begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+        naerRelasjon = null,
+        avsenderSystem = AvsenderSystem("NAV_NO"),
+        innsenderTelefon = "tlfnr",
+        innsenderFulltNavn = "SPLEIS Modell"
+    )
+    inntektsmeldinger[id] = AbstractEndToEndTest.InnsendtInntektsmelding(LocalDateTime.now(), inntektsmeldinggenerator, kontrakten)
     inntekter[id] = beregnetInntekt
     EtterspurtBehov.fjern(ikkeBesvarteBehov, orgnummer, Aktivitet.Behov.Behovtype.Sykepengehistorikk)
     return inntektsmeldinggenerator(Aktivitetslogg()).apply { hendelselogg = this }
