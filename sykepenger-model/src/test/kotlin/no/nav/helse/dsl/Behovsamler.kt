@@ -104,7 +104,8 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
+        trengerArbeidsgiverperiode: Boolean,
+        erPotensiellForespørsel: Boolean
     ) {
         replays.add(vedtaksperiodeId)
     }

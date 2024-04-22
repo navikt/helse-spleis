@@ -732,7 +732,8 @@ interface PersonObserver {
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
+        trengerArbeidsgiverperiode: Boolean,
+        erPotensiellForespørsel: Boolean
     ) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}

@@ -58,7 +58,8 @@ internal class PersonMediator(
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
+        trengerArbeidsgiverperiode: Boolean,
+        erPotensiellForespørsel: Boolean
     ) {
         queueMessage(JsonMessage.newMessage("trenger_inntektsmelding_replay", mapOf(
             "organisasjonsnummer" to organisasjonsnummer,
@@ -82,7 +83,8 @@ internal class PersonMediator(
                     "førsteFraværsdag" to it.førsteFraværsdag
                 )
             },
-            "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode
+            "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode,
+            "potensiellForespørsel" to erPotensiellForespørsel
         )))
     }
 

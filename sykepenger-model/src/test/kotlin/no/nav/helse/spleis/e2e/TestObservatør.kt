@@ -170,7 +170,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
+        trengerArbeidsgiverperiode: Boolean,
+        erPotensiellForespørsel: Boolean
     ) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }

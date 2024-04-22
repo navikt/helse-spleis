@@ -43,7 +43,8 @@ internal class TestObservatør : PersonObserver {
         sykmeldingsperioder: List<Periode>,
         egenmeldingsperioder: List<Periode>,
         førsteFraværsdager: List<FørsteFraværsdag>,
-        trengerArbeidsgiverperiode: Boolean
+        trengerArbeidsgiverperiode: Boolean,
+        erPotensiellForespørsel: Boolean
     ) {
         ventendeReplays.add(organisasjonsnummer to vedtaksperiodeId)
     }
