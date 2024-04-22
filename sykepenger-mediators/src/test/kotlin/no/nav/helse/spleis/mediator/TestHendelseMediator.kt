@@ -10,8 +10,6 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingReplay
-import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -48,8 +46,6 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
@@ -88,7 +84,6 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestSendtSøknadSelvstendig get() = lestSendtSøknadSelvstendigVerdi.get()
     val lestSendtSøknadArbeidsledig get() = lestSendtSøknadArbeidsledigVerdi.get()
     val lestInntektsmelding get() = lestInntektsmeldingVerdi.get()
-    val lestInntektsmeldingReplay get() = lestInntektsmeldingReplayVerdi.get()
     val lestDødsmelding get() = lestDødsmeldingVerdi.get()
     val lestPåminnelse get() = lestPåminnelseVerdi.get()
     val lestPersonpåminnelse get() = lestPersonpåminnelseVerdi.get()
@@ -286,10 +281,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         context: MessageContext
     ) {}
 
-    override fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext) {
-        lestInntektsmeldingReplayVerdi.set(true)
-    }
-
     override fun behandle(message: DødsmeldingMessage, dødsmelding: Dødsmelding, context: MessageContext) {
         lestDødsmeldingVerdi.set(true)
     }
@@ -300,12 +291,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         identOpphørt: IdentOpphørt,
         nyAktørId: String,
         gamleIdenter: Set<Personidentifikator>,
-        context: MessageContext
-    ) {}
-
-    override fun behandle(
-        message: InntektsmeldingReplayUtførtMessage,
-        replayUtført: InntektsmeldingReplayUtført,
         context: MessageContext
     ) {}
 

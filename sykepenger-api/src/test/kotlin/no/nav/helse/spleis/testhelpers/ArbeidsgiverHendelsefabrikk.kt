@@ -16,7 +16,7 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingReplayUtført
+import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -196,7 +196,7 @@ internal class ArbeidsgiverHendelsefabrikk(
     }
 
     internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
-        InntektsmeldingReplayUtført(UUID.randomUUID(), personidentifikator.toString(), aktørId, organisasjonsnummer, vedtaksperiodeId)
+        InntektsmeldingerReplay(UUID.randomUUID(), personidentifikator.toString(), aktørId, organisasjonsnummer, Aktivitetslogg(), vedtaksperiodeId, emptyList())
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,

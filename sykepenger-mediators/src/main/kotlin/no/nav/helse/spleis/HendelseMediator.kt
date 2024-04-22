@@ -11,8 +11,6 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingReplay
-import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -48,15 +46,13 @@ import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
+import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayUtførtMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
@@ -236,23 +232,6 @@ internal class HendelseMediator(
         hentPersonOgHåndter(message, replays, context) { person ->
             HendelseProbe.onInntektsmeldingReplay()
             person.håndter(replays)
-        }
-    }
-
-    override fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext) {
-        hentPersonOgHåndter(message, inntektsmelding, context) { person ->
-            HendelseProbe.onInntektsmeldingReplay()
-            person.håndter(inntektsmelding)
-        }
-    }
-
-    override fun behandle(
-        message: InntektsmeldingReplayUtførtMessage,
-        replayUtført: InntektsmeldingReplayUtført,
-        context: MessageContext
-    ) {
-        hentPersonOgHåndter(message, replayUtført, context) { person ->
-            person.håndter(replayUtført)
         }
     }
 
@@ -620,8 +599,6 @@ internal interface IHendelseMediator {
     )
     fun behandle(personopplysninger: Personopplysninger, message: InntektsmeldingMessage, inntektsmelding: Inntektsmelding, context: MessageContext)
     fun behandle(message: InntektsmeldingerReplayMessage, replays: InntektsmeldingerReplay, context: MessageContext)
-    fun behandle(message: InntektsmeldingReplayMessage, inntektsmelding: InntektsmeldingReplay, context: MessageContext)
-    fun behandle(message: InntektsmeldingReplayUtførtMessage, replayUtført: InntektsmeldingReplayUtført, context: MessageContext)
     fun behandle(message: UtbetalingpåminnelseMessage, påminnelse: Utbetalingpåminnelse, context: MessageContext)
     fun behandle(message: PåminnelseMessage, påminnelse: Påminnelse, context: MessageContext)
     fun behandle(message: PersonPåminnelseMessage, påminnelse: PersonPåminnelse, context: MessageContext)

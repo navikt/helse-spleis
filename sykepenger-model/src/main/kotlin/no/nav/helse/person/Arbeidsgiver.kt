@@ -15,8 +15,6 @@ import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingReplay
-import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -520,15 +518,6 @@ internal class Arbeidsgiver private constructor(
         hendelse.kontekst(this)
         hendelse.info("Inntektsmelding ferdigbehandlet")
         håndter(hendelse) { inntektsmeldingFerdigbehandlet(hendelse) }
-    }
-
-    internal fun håndter(inntektsmelding: InntektsmeldingReplay) {
-        inntektsmelding.fortsettÅBehandle(this)
-    }
-
-    internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-        inntektsmeldingReplayUtført.kontekst(this)
-        håndter(inntektsmeldingReplayUtført) { håndter(inntektsmeldingReplayUtført) }
     }
 
     internal fun håndterHistorikkFraInfotrygd(

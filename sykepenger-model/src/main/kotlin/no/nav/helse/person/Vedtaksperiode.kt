@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
@@ -279,12 +278,6 @@ internal class Vedtaksperiode private constructor(
         if (!arbeidsgiver.kanForkastes(this, anmodningOmForkasting)) return anmodningOmForkasting.info("Kan ikke etterkomme anmodning om forkasting")
         anmodningOmForkasting.info("Etterkommer anmodning om forkasting")
         forkast(anmodningOmForkasting)
-    }
-
-    internal fun håndter(inntektsmeldingReplayUtført: InntektsmeldingReplayUtført) {
-        if (!inntektsmeldingReplayUtført.erRelevant(this.id)) return
-        kontekst(inntektsmeldingReplayUtført)
-        tilstand.replayUtført(this, inntektsmeldingReplayUtført)
     }
 
     internal fun håndter(replays: InntektsmeldingerReplay) {

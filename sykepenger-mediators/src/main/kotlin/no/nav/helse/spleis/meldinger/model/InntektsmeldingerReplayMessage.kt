@@ -3,7 +3,6 @@ package no.nav.helse.spleis.meldinger.model
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.rapids_rivers.JsonMessage

@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingReplayUtført
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -531,10 +530,6 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(inntektsmelding: Innte
         førReplay()
     }
     return inntektsmelding.meldingsreferanseId()
-}
-
-private fun AbstractEndToEndTest.håndterInntektsmeldingReplayUtført(vedtaksperiodeId: UUID, orgnummer: String) {
-    InntektsmeldingReplayUtført(UUID.randomUUID(), UNG_PERSON_FNR_2018.toString(), "aktør", orgnummer, vedtaksperiodeId).håndter(Person::håndter)
 }
 
 internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =
