@@ -1,7 +1,6 @@
 package no.nav.helse.spleis
 
 import java.sql.SQLException
-import no.nav.helse.SPILL_AV_IM_DISABLED
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -17,8 +16,6 @@ import no.nav.helse.spleis.meldinger.GjenopplivVilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.GrunnbeløpsreguleringRiver
 import no.nav.helse.spleis.meldinger.IdentOpphørtRiver
 import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
-import no.nav.helse.spleis.meldinger.InntektsmeldingReplayUtførtRiver
-import no.nav.helse.spleis.meldinger.InntektsmeldingReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
@@ -72,12 +69,7 @@ internal class MessageMediator(
             SendtSelvstendigSøknaderRiver(it, this)
             SendtArbeidsledigSøknaderRiver(it, this)
             InntektsmeldingerRiver(it, this)
-            if (SPILL_AV_IM_DISABLED) {
-                InntektsmeldingReplayRiver(it, this)
-                InntektsmeldingReplayUtførtRiver(it, this)
-            } else {
-                InntektsmeldingerReplayRiver(it, this)
-            }
+            InntektsmeldingerReplayRiver(it, this)
             UtbetalingshistorikkRiver(it, this)
             UtbetalingshistorikkForFeriepengerRiver(it, this)
             YtelserRiver(it, this)
