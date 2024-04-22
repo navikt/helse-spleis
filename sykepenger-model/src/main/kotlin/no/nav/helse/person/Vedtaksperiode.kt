@@ -1549,7 +1549,6 @@ internal class Vedtaksperiode private constructor(
                 "hæ?! vedtaksperiodens behandling er ikke uberegnet!"
             }
             vedtaksperiode.trengerIkkeInntektsmelding()
-            vedtaksperiode.person.trengerIkkeInntektsmeldingReplay(vedtaksperiode.id)
         }
 
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {

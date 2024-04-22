@@ -1,17 +1,13 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver
@@ -19,23 +15,15 @@ import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.asOptionalLocalDate
-import no.nav.helse.rapids_rivers.toUUID
-import no.nav.helse.spleis.PersonMediator.Pakke.Companion.fjernVedtaksperiodeVenter
 import no.nav.helse.spleis.PersonMediator.Pakke.Companion.loggAntallVedtaksperioderVenter
-import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
-import no.nav.helse.spleis.meldinger.model.asPeriode
 import org.slf4j.LoggerFactory
 
 internal class PersonMediator(
     private val message: HendelseMessage,
-    private val hendelse: PersonHendelse,
-    private val hendelseRepository: HendelseRepository
+    private val hendelse: PersonHendelse
 ) : PersonObserver {
     private val meldinger = mutableListOf<Pakke>()
-    private val replays = mutableListOf<Pair<UUID, String>>()
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val logg = LoggerFactory.getLogger(PersonMediator::class.java)
@@ -44,18 +32,8 @@ internal class PersonMediator(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    private fun fjernUnødvendigeVedtaksperiodeVenter() {
-        if (replays.isEmpty()) return
-        // Ettersom det kommer til å bli replayet inntektsmelding(er)
-        // fjernes eventene vedtaksperiode_venter som er køet opp
-        // ettersom vi vil sende ut ferskere eventer etter InntektsmeldingReplayUtført
-        meldinger.fjernVedtaksperiodeVenter()
-    }
-
-    fun ferdigstill(rapidsConnection: RapidsConnection, context: MessageContext) {
-        fjernUnødvendigeVedtaksperiodeVenter()
+    fun ferdigstill(context: MessageContext) {
         sendUtgåendeMeldinger(context)
-        sendReplays(rapidsConnection)
     }
 
     private fun sendUtgåendeMeldinger(context: MessageContext) {
@@ -63,14 +41,6 @@ internal class PersonMediator(
         meldinger.loggAntallVedtaksperioderVenter()
         message.logOutgoingMessages(sikkerLogg, meldinger.size)
         meldinger.forEach { pakke -> pakke.publish(context) }
-    }
-
-    private fun sendReplays(rapidsConnection: RapidsConnection) {
-        if (replays.isEmpty()) return
-        message.logReplays(sikkerLogg, replays.size)
-        replays.forEach { (_, melding) ->
-            rapidsConnection.queueReplayMessage(hendelse.fødselsnummer(), melding)
-        }
     }
 
     private fun queueMessage(fødselsnummer: String, message: String) {
@@ -114,39 +84,6 @@ internal class PersonMediator(
             },
             "trengerArbeidsgiverperiode" to trengerArbeidsgiverperiode
         )))
-
-        if (System.getenv("NAIS_CLUSTER_NAME")?.lowercase() in setOf("dev-gcp", "prod-gcp")) return
-
-        val replays = hendelseRepository.finnInntektsmeldinger(personidentifikator)
-            .filter { it.path("virksomhetsnummer").asText() == organisasjonsnummer }
-            .filter { inntektsmelding ->
-                val førsteFraværsdag = inntektsmelding.path("foersteFravaersdag").asOptionalLocalDate()
-                val redusertUtbetaling = inntektsmelding.path("begrunnelseForReduksjonEllerIkkeUtbetalt").asText().isNotBlank()
-                val arbeidsgiverperioder = inntektsmelding.path("arbeidsgiverperioder").map(::asPeriode).periode()
-                Inntektsmelding.aktuellForReplay(sammenhengendePeriode, førsteFraværsdag, arbeidsgiverperioder, redusertUtbetaling)
-            }
-            .map { inntektsmelding -> inntektsmelding.path("@id").asText().toUUID() to inntektsmelding }
-
-        createInntektsmeldingerReplayMessage(personidentifikator, aktørId, organisasjonsnummer, vedtaksperiodeId, replays)
-    }
-
-    override fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {
-        replays.removeIf { it.first == vedtaksperiodeId }
-    }
-
-    private fun createInntektsmeldingerReplayMessage(fødselsnummer: Personidentifikator, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID, replays: List<Pair<UUID, JsonNode>>) {
-        this.replays.add(vedtaksperiodeId to JsonMessage.newMessage("inntektsmeldinger_replay", mapOf(
-            "fødselsnummer" to fødselsnummer.toString(),
-            "aktørId" to aktørId,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to "$vedtaksperiodeId",
-            "inntektsmeldinger" to replays.map { (internDokumentId, jsonNode) ->
-                mapOf(
-                    "internDokumentId" to internDokumentId,
-                    "inntektsmelding" to objectMapper.convertValue<Map<String, Any?>>(jsonNode)
-                )
-            }
-        )).toJson())
     }
 
     override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {
@@ -552,9 +489,6 @@ internal class PersonMediator(
         companion object {
             private const val VedtaksperiodeVenter = "vedtaksperiode_venter"
 
-            fun MutableList<Pakke>.fjernVedtaksperiodeVenter() {
-                removeIf { it.eventName == VedtaksperiodeVenter }
-            }
             fun List<Pakke>.loggAntallVedtaksperioderVenter() {
                 val antall = filter { it.eventName == VedtaksperiodeVenter }.takeUnless { it.isEmpty() }?.size ?: return
                 sikkerLogg.info("Sender $antall vedtaksperiode_venter eventer", keyValue("fødselsnummer", first().fødselsnummer))

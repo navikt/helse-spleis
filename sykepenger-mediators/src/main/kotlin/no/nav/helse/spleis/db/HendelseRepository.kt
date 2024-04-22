@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.db
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -12,15 +11,46 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.ANMODNING_OM_FORKASTING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.AVBRUTT_SØKNAD
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.DØDSMELDING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.FORKAST_SYKMELDINGSPERIODER
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GJENOPPLIV_VILKÅRSGRUNNLAG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.IDENT_OPPHØRT
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDINGER_REPLAY
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_ARBEIDSLEDIG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_FRILANS
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_SELVSTENDIG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSFORHOLD
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSGIVEROPPLYSNINGER
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRINNTEKT
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSLEDIG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_FRILANS
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_SELVSTENDIG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SKJØNNSMESSIG_FASTSETTELSE
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_ETTER_IT_ENDRING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSHISTORIKK_FOR_FERIEPENGER
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
+import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
@@ -66,18 +96,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     fun lagreMelding(melding: HendelseMessage) {
         melding.lagreMelding(this)
     }
-
-    internal fun finnInntektsmeldinger(fnr: Personidentifikator): List<JsonNode> =
-        sessionOf(dataSource).use { session ->
-            session.run(
-                queryOf(
-                    "SELECT data FROM melding WHERE fnr = ? AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC",
-                    fnr.toLong()
-                )
-                    .map { objectMapper.readTree(it.string("data")) }
-                    .asList
-            )
-        }
 
     internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: UUID, json: String) {
         val meldingtype = meldingstype(melding) ?: return

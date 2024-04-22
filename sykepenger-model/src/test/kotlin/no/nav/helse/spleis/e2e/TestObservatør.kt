@@ -175,10 +175,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 
-    override fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {
-        inntektsmeldingReplayEventer.remove(vedtaksperiodeId)
-    }
-
     override fun annullering(event: PersonObserver.UtbetalingAnnullertEvent) {
         annulleringer.add(event)
     }

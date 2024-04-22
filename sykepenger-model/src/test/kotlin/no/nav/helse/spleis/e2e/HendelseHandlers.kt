@@ -448,6 +448,7 @@ private fun AbstractEndToEndTest.håndterOgReplayInntektsmeldinger(orgnummer: St
     observatør.replayInntektsmeldinger { block() }.forEach { vedtaksperiodeId ->
         val imReplays = inntektsmeldinger
             .mapValues { (_, gen) -> gen.first to gen.second(aktivitetslogg.barn()) }
+            .filterValues { (_, im) -> im.meldingsreferanseId() !in observatør.inntektsmeldingHåndtert.map(Pair<*, *>::first) }
             .filterValues { (_, im) -> im.organisasjonsnummer() == orgnummer }
             .filterValues { (_, im) -> im.aktuellForReplay(inspektør(orgnummer).vedtaksperioder(vedtaksperiodeId).sammenhengendePeriode)}
             .entries

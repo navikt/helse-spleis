@@ -24,7 +24,6 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val rapidsConnection = RapidApplication.create(env)
 
     private val hendelseMediator = HendelseMediator(
-        rapidsConnection = rapidsConnection,
         hendelseRepository = hendelseRepository,
         personDao = personDao,
         versjonAvKode = versjonAvKode(env),

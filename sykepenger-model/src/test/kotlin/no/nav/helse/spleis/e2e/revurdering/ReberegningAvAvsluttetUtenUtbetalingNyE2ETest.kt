@@ -100,17 +100,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
         håndterInntektsmelding(listOf(10.januar til 25.januar))
         håndterSøknad(Sykdom(10.januar, 28.januar, 100.prosent), Ferie(10.januar, 28.januar))
-        assertForventetFeil(
-            forklaring = "Selv om søknaden i out of order opplyser om ferie hele perioden, har arbeidsgiver opplyst om egenmeldingsdager. Det gjør at perioden i februar vil utbetales",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test

@@ -25,6 +25,11 @@ internal class TestRapid : RapidsConnection() {
 
     private val messages = mutableListOf<Pair<String?, String>>()
     internal val inspektør get() = RapidInspektør(messages.toList())
+    private val observers = mutableListOf<TestRapidObserver>()
+
+    internal fun observer(observer: TestRapidObserver) {
+        observers.add(observer)
+    }
 
     internal fun reset() {
         messages.clear()
@@ -39,10 +44,12 @@ internal class TestRapid : RapidsConnection() {
 
     override fun publish(message: String) {
         messages.add(null to message)
+        observers.forEach { it.onMessagePublish(message) }
     }
 
     override fun publish(key: String, message: String) {
         messages.add(key to message)
+        observers.forEach { it.onMessagePublish(message) }
     }
 
     override fun rapidName(): String {
@@ -184,5 +191,9 @@ internal class TestRapid : RapidsConnection() {
         fun varsel(vedtaksperiodeId: UUID, varselkode: Varselkode) = varsler.finn(vedtaksperiodeId, varselkode)
         fun varsler() = varsler
         fun varsler(vedtaksperiodeId: UUID) = varsler.finn(vedtaksperiodeId)
+    }
+
+    internal interface TestRapidObserver {
+        fun onMessagePublish(message: String)
     }
 }

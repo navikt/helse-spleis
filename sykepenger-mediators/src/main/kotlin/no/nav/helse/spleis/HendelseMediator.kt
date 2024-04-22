@@ -36,7 +36,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
@@ -85,7 +84,6 @@ import org.slf4j.LoggerFactory
 // Acts like a GoF Mediator to forward messages to observers
 // Uses GoF Observer pattern to notify events
 internal class HendelseMediator(
-    private val rapidsConnection: RapidsConnection,
     private val hendelseRepository: HendelseRepository,
     private val personDao: PersonDao,
     private val versjonAvKode: String,
@@ -491,7 +489,7 @@ internal class HendelseMediator(
         handler: (Person) -> Unit
     ) {
         val jurist = MaskinellJurist()
-        val personMediator = PersonMediator(message, hendelse, hendelseRepository)
+        val personMediator = PersonMediator(message, hendelse)
         val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
         person(personidentifikator, message, hendelse.aktørId(), historiskeFolkeregisteridenter, jurist, personopplysninger) { person  ->
@@ -522,7 +520,7 @@ internal class HendelseMediator(
         datadelingMediator: DatadelingMediator,
         hendelse: PersonHendelse
     ) {
-        personMediator.ferdigstill(rapidsConnection, context)
+        personMediator.ferdigstill(context)
         subsumsjonMediator.ferdigstill(context)
         datadelingMediator.ferdigstill(context)
         if (!hendelse.harAktiviteter()) return

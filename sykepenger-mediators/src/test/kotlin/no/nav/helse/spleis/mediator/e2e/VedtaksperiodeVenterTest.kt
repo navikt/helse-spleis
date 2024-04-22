@@ -17,19 +17,19 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(0)
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        assertAntallOgSisteÅrsak(1, "INNTEKTSMELDING")
+        assertAntallOgSisteÅrsak(2, "INNTEKTSMELDING")
         sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        assertAntallOgSisteÅrsak(1)
+        assertAntallOgSisteÅrsak(2)
         sendVilkårsgrunnlag(0)
-        assertAntallOgSisteÅrsak(2, "BEREGNING")
+        assertAntallOgSisteÅrsak(3, "BEREGNING")
         sendYtelser(0)
-        assertAntallOgSisteÅrsak(3, "UTBETALING")
+        assertAntallOgSisteÅrsak(4, "UTBETALING")
         sendSimulering(0, OK)
-        assertAntallOgSisteÅrsak(4, "GODKJENNING")
+        assertAntallOgSisteÅrsak(5, "GODKJENNING")
         sendUtbetalingsgodkjenning(0)
-        assertAntallOgSisteÅrsak(5, "UTBETALING")
+        assertAntallOgSisteÅrsak(6, "UTBETALING")
         sendUtbetaling()
-        assertAntallOgSisteÅrsak(5)
+        assertAntallOgSisteÅrsak(6)
     }
 
     @Test
@@ -39,9 +39,9 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(0)
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
-        assertAntallOgSisteÅrsak(0) // Står i AVVENTER_VILKÅRSPRØVING som ikke implementerer venter
+        assertAntallOgSisteÅrsak(1) // Står i AVVENTER_VILKÅRSPRØVING som ikke implementerer venter
         sendVilkårsgrunnlag(0)
-        assertAntallOgSisteÅrsak(1, "BEREGNING")
+        assertAntallOgSisteÅrsak(2, "BEREGNING")
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100))
         assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter)
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.mars, tom = 31.mars, sykmeldingsgrad = 100)))
-        assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter + 1, "INNTEKTSMELDING")
+        assertAntallOgSisteÅrsak(antallVedtaksperiodeVenter + 2, "INNTEKTSMELDING")
     }
 
     @Test

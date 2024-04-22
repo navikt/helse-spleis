@@ -513,12 +513,6 @@ class Person private constructor(
         }
     }
 
-    internal fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {
-        observers.forEach {
-            it.trengerIkkeInntektsmeldingReplay(vedtaksperiodeId)
-        }
-    }
-
     internal fun trengerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
         observers.forEach { it.manglerInntektsmelding(event) }
     }

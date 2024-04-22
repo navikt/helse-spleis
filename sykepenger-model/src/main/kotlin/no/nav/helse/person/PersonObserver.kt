@@ -734,7 +734,6 @@ interface PersonObserver {
         førsteFraværsdager: List<FørsteFraværsdag>,
         trengerArbeidsgiverperiode: Boolean
     ) {}
-    fun trengerIkkeInntektsmeldingReplay(vedtaksperiodeId: UUID) {}
     fun vedtaksperiodeOpprettet(event: VedtaksperiodeOpprettet) {}
     fun vedtaksperiodePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(vedtaksperiodeId: UUID, organisasjonsnummer: String, nåværendeTilstand: TilstandType) {}

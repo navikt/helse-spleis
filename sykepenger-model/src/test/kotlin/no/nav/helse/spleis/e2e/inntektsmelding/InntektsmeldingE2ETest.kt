@@ -234,17 +234,17 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 3.februar,
             beregnetInntekt = im2Inntekt
         )
-        assertEquals(17.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(1.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
         // Nå replayes IM1:
         //      -> Nå overlapper IM1 allikevel og strekker perioden tilbake til 1/1
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertEquals(17.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertEquals(1.januar til 2.februar, inspektør.periode(1.vedtaksperiode))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         // Legger inntekt fra IM1 til grunn
-        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
-        assertInntektForDato(im2Inntekt, 17.januar, inspektør)
+        assertInntektForDato(im1Inntekt, 1.januar, inspektør)
     }
 
     @Test
@@ -291,8 +291,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             assertTrue(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(20.mars.somPeriode()))
         }
 
-        assertEquals(listOf(1.mars til 6.mars, 10.mars til 19.mars), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+        assertEquals(listOf(5.mars til 20.mars), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -2111,21 +2111,18 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertForventetFeil(
             forklaring = "Januar perioden håndterer også dager fra inntektsmeldingen ettersom den er rett før/ en del av sammenhengende periode",
             nå = {
-                assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-
-                assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             },
             ønsket = {
                 assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
                 assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
                 assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-
-                assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
             }
         )
     }

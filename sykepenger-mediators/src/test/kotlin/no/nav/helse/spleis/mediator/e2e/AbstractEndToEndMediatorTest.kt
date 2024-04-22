@@ -1,13 +1,19 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.convertValue
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.test_support.TestDataSource
-import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
@@ -31,6 +37,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.HendelseMediator
@@ -66,6 +73,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.slf4j.LoggerFactory
 
 internal abstract class AbstractEndToEndMediatorTest() {
     internal companion object {
@@ -88,7 +96,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
 
         testRapid = TestRapid()
         hendelseMediator = HendelseMediator(
-            rapidsConnection = testRapid,
             hendelseRepository = HendelseRepository(dataSource.ds),
             personDao = PersonDao(dataSource.ds, STØTTER_IDENTBYTTE = true),
             versjonAvKode = "test-versjon",
@@ -100,6 +107,8 @@ internal abstract class AbstractEndToEndMediatorTest() {
             hendelseMediator = hendelseMediator,
             hendelseRepository = HendelseRepository(dataSource.ds)
         )
+
+        testRapid.observer(InntektsmeldingerReplayObserver(testRapid, dataSource.ds))
     }
 
     @AfterEach
@@ -682,14 +691,72 @@ internal abstract class AbstractEndToEndMediatorTest() {
     protected fun assertIngenVarsler() {
         assertEquals(emptyList<Varsel>(), testRapid.inspektør.varsler())
     }
-}
 
-internal fun createHikariConfig(jdbcUrl: String) =
-    HikariConfig().apply {
-        this.jdbcUrl = jdbcUrl
-        maximumPoolSize = 3
-        minimumIdle = 1
-        idleTimeout = 10001
-        connectionTimeout = 1000
-        maxLifetime = 30001
+    private class InntektsmeldingerReplayObserver(private val testRapid: TestRapid, private val dataSource: HikariDataSource)
+        : TestRapid.TestRapidObserver {
+        private companion object {
+            private val log = LoggerFactory.getLogger(InntektsmeldingerReplayObserver::class.java)
+            private val objectMapper = jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        }
+
+        private val håndterteInntektsmeldinger = mutableListOf<UUID>()
+
+        override fun onMessagePublish(message: String) {
+            val node = objectMapper.readTree(message)
+            when (node.path("@event_name").asText()) {
+                "trenger_inntektsmelding_replay" -> håndterInntektsmeldingReplay(node)
+                "inntektsmelding_håndtert" -> håndterInntektsmeldingHåndtert(node)
+            }
+        }
+
+        private fun håndterInntektsmeldingHåndtert(node: JsonNode) {
+            val inntektsmeldingId = node.path("inntektsmeldingId").textValue().toUUID()
+            håndterteInntektsmeldinger.add(inntektsmeldingId)
+        }
+
+        private fun håndterInntektsmeldingReplay(node: JsonNode) {
+            val fnr = node.path("fødselsnummer").textValue()
+            val aktørId = node.path("aktørId").textValue()
+            val orgnr = node.path("organisasjonsnummer").textValue()
+            val vedtaksperiodeId = node.path("vedtaksperiodeId").textValue().toUUID()
+            val replayMessage = lagInntektsmeldingerReplayMessage(fnr, aktørId, orgnr, vedtaksperiodeId)
+
+            log.info("lager inntektsmeldinger_replay-melding for {}", kv("vedtaksperiodeId", vedtaksperiodeId))
+            testRapid.sendTestMessage(replayMessage.toJson())
+        }
+
+        private fun finnInntektsmeldinger(fnr: String): List<JsonNode> =
+            sessionOf(dataSource).use { session ->
+                session.run(queryOf("SELECT data FROM melding WHERE fnr = ? AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC", fnr.toLong()).map {
+                    objectMapper.readTree(it.string("data"))
+                }.asList)
+            }
+
+        private fun lagInntektsmeldingerReplayMessage(personidentifikator: String, aktørId: String, organisasjonsnummer: String, vedtaksperiodeId: UUID): JsonMessage {
+            // replayer alle inntektsmeldinger som ikke er hånderte
+            // Om det i fremtiden trengs mer nøyaktig filtrering på dato og sånn så bør vi
+            // tilby et lite bibliotek i helse-spill-av som tilbyr en filtreringsfunksjon (basert på den filtreringen som skjer der)
+            val replays = finnInntektsmeldinger(personidentifikator)
+                .filter { it.path("virksomhetsnummer").asText() == organisasjonsnummer }
+                .filterNot { inntektsmelding ->
+                    inntektsmelding.path("@id").textValue().toUUID() in håndterteInntektsmeldinger
+                }
+                .map { inntektsmelding -> inntektsmelding.path("@id").asText().toUUID() to inntektsmelding }
+
+            return JsonMessage.newMessage("inntektsmeldinger_replay", mapOf(
+                "fødselsnummer" to personidentifikator,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to "$vedtaksperiodeId",
+                "inntektsmeldinger" to replays.map { (internDokumentId, jsonNode) ->
+                    mapOf(
+                        "internDokumentId" to internDokumentId,
+                        "inntektsmelding" to objectMapper.convertValue<Map<String, Any?>>(jsonNode)
+                    )
+                }
+            ))
+        }
     }
+}
