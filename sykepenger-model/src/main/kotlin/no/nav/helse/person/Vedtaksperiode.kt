@@ -1235,17 +1235,16 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.arbeidsgiver.vurderOmSøknadIkkeKanHåndteres(søknad, vedtaksperiode, arbeidsgivere)
             infotrygdhistorikk.valider(søknad, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
-            vedtaksperiode.håndterSøknad(søknad) {
-                vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
-                when {
-                    !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-                    periodeRettFørHarFåttInntektsmelding(vedtaksperiode) -> AvventerBlokkerendePeriode
-                    periodeRettEtterHarFåttInntektsmelding(vedtaksperiode, søknad) -> AvventerBlokkerendePeriode
-                    else -> AvventerInntektsmelding
-                }
-            }
-
+            vedtaksperiode.håndterSøknad(søknad)
             søknad.info("Fullført behandling av søknad")
+            vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.nyPeriode(søknad, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
+            if (søknad.harFunksjonelleFeilEllerVerre()) return
+            vedtaksperiode.tilstand(søknad, when {
+                !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
+                periodeRettFørHarFåttInntektsmelding(vedtaksperiode) -> AvventerBlokkerendePeriode
+                periodeRettEtterHarFåttInntektsmelding(vedtaksperiode, søknad) -> AvventerBlokkerendePeriode
+                else -> AvventerInntektsmelding
+            })
         }
 
         private fun periodeRettFørHarFåttInntektsmelding(vedtaksperiode: Vedtaksperiode): Boolean {

@@ -51,6 +51,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
@@ -657,6 +658,45 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                     assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
                     assertEquals(1.januar, behandling.skjæringstidspunkt)
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `tilbakedatert søknad forlenger forkastet periode`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
+
+            håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(
+                ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT)
+            ))
+
+            nyttVedtak(1.mars, 31.mars)
+            forlengVedtak(1.april, 30.april)
+
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+            assertTilstand(4.vedtaksperiode, TIL_INFOTRYGD)
+            inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(2, behandlinger.size)
+                behandlinger[0].also { behandling ->
+                    assertEquals(VEDTAK_IVERKSATT, behandling.tilstand)
+                }
+                behandlinger[1].also { behandling ->
+                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                }
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            }
+            inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(2, behandlinger.size)
+                behandlinger[0].also { behandling ->
+                    assertEquals(VEDTAK_IVERKSATT, behandling.tilstand)
+                }
+                behandlinger[1].also { behandling ->
+                    assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                }
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
             }
         }
     }

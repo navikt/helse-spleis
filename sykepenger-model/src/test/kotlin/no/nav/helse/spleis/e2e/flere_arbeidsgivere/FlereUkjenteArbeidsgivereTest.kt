@@ -113,14 +113,14 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet",
         )
         nullstillTilstandsendringer()
-        nyPeriode(1.mars til 20.mars, a2)
+        val søknad = håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), orgnummer = a2)
 
         assertTrue(inspektør(a2).periodeErForkastet(1.vedtaksperiode)) {
             "Om dette ikke lengre stemmer så kan testen slettes. Det finnes en tilsvarende test som sjekker 'ikke forkaster'-scenario."
         }
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
-        assertEquals(2, overstyringerIgangsatt.size)
+        assertEquals(3, overstyringerIgangsatt.size)
 
         overstyringerIgangsatt.first().also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
@@ -136,7 +136,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), event)
         }
 
-        overstyringerIgangsatt.last().also { event ->
+        overstyringerIgangsatt[1].also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
                 årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
                 skjæringstidspunkt = 1.januar,
@@ -147,6 +147,18 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
                     VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
                 ),
                 meldingsreferanseId = im1
+            ), event)
+        }
+
+        overstyringerIgangsatt.last().also { event ->
+            assertEquals(PersonObserver.OverstyringIgangsatt(
+                årsak = "NY_PERIODE",
+                skjæringstidspunkt = 1.januar,
+                periodeForEndring = 1.mars til 20.mars,
+                berørtePerioder = listOf(
+                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
+                ),
+                meldingsreferanseId = søknad
             ), event)
         }
 
