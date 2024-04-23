@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -24,6 +25,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingkilde
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.ANNULLERT_PERIODE
@@ -41,8 +43,11 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -61,6 +66,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class BehandlingerE2ETest : AbstractDslTest() {
 
@@ -699,6 +705,92 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
             }
         }
+    }
+
+    @Test
+    fun `tilbakedatert søknad lapper lager sammenheng mellom to perioder hos samme ag`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+
+        a1 {
+            nyPeriode(2.februar til 28.februar)
+        }
+        a2 {
+            nyPeriode(1.februar til 28.februar)
+        }
+        a1 {
+            // tilbakedatert periode lapper hullet mellom vedtaksperiodene hos a1
+            nyPeriode(1.februar.somPeriode())
+
+            assertForventetFeil(
+                forklaring = "vedtaksperiode 2 blir stående i feil tilstand",
+                nå = {
+                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+                },
+                ønsket = {
+                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+                }
+            )
+
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        assertForventetFeil(
+            forklaring = "det sprenger siden vedtaksperiode 2 står i AvIM, og den får en utbetaling på seg " +
+                    "fordi den er klar for utbetaling siden de har inntekt og refusjon",
+            nå = {
+                a2 {
+                    håndterYtelser(2.vedtaksperiode)
+                    håndterSimulering(2.vedtaksperiode)
+                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+                    assertThrows<IllegalStateException> {
+                        håndterUtbetalt()
+                    }
+                }
+            },
+            ønsket = {
+                a2 {
+                    håndterYtelser(2.vedtaksperiode)
+                    håndterSimulering(2.vedtaksperiode)
+                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+                    håndterUtbetalt()
+                }
+                a1 {
+                    håndterYtelser(2.vedtaksperiode)
+                    håndterSimulering(2.vedtaksperiode)
+                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+                    håndterUtbetalt()
+
+                    inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+                        assertEquals(1, behandlinger.size)
+                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                    }
+                    inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
+                        assertEquals(1, behandlinger.size)
+                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                    }
+                    inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
+                        assertEquals(1, behandlinger.size)
+                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                    }
+                }
+                a2 {
+                    inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+                        assertEquals(1, behandlinger.size)
+                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                    }
+                    inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
+                        assertEquals(1, behandlinger.size)
+                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+                    }
+                }
+            }
+        )
     }
 
     @Test
