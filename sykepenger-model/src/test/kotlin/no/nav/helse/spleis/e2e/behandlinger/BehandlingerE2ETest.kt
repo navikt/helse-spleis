@@ -721,76 +721,50 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             // tilbakedatert periode lapper hullet mellom vedtaksperiodene hos a1
             nyPeriode(1.februar.somPeriode())
 
-            assertForventetFeil(
-                forklaring = "vedtaksperiode 2 blir stående i feil tilstand",
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
 
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
             håndterUtbetalt()
         }
-        assertForventetFeil(
-            forklaring = "det sprenger siden vedtaksperiode 2 står i AvIM, og den får en utbetaling på seg " +
-                    "fordi den er klar for utbetaling siden de har inntekt og refusjon",
-            nå = {
-                a2 {
-                    håndterYtelser(2.vedtaksperiode)
-                    håndterSimulering(2.vedtaksperiode)
-                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                    assertThrows<IllegalStateException> {
-                        håndterUtbetalt()
-                    }
-                }
-            },
-            ønsket = {
-                a2 {
-                    håndterYtelser(2.vedtaksperiode)
-                    håndterSimulering(2.vedtaksperiode)
-                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                    håndterUtbetalt()
-                }
-                a1 {
-                    håndterYtelser(2.vedtaksperiode)
-                    håndterSimulering(2.vedtaksperiode)
-                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                    håndterUtbetalt()
+        a2 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
 
-                    inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                        assertEquals(1, behandlinger.size)
-                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
-                    }
-                    inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
-                        assertEquals(1, behandlinger.size)
-                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
-                    }
-                    inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
-                        assertEquals(1, behandlinger.size)
-                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
-                    }
-                }
-                a2 {
-                    inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                        assertEquals(1, behandlinger.size)
-                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
-                    }
-                    inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
-                        assertEquals(1, behandlinger.size)
-                        assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
-                    }
-                }
+            inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(1, behandlinger.size)
+                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
             }
-        )
+            inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(1, behandlinger.size)
+                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+            }
+            inspektør(3.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(1, behandlinger.size)
+                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+            }
+        }
+        a2 {
+            inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(1, behandlinger.size)
+                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+            }
+            inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
+                assertEquals(1, behandlinger.size)
+                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
+            }
+        }
     }
 
     @Test

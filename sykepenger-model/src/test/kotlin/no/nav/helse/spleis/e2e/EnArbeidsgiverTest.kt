@@ -248,7 +248,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
         utbetalPeriode(2.vedtaksperiode)
