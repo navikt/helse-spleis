@@ -14,7 +14,6 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harOverlappendeUtbetaling
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
@@ -201,12 +200,6 @@ class InfotrygdhistorikkElement private constructor(
             vedtaksperiode.overlappendeInfotrygdperioder(result, this.perioder)
         }
         person.emitOverlappendeInfotrygdperioder(event)
-    }
-
-    fun loggOverlappendeUtbetaling(utbetaling: Utbetaling, aktørId: String, fnr: String, vedtaksperiodeId: UUID) {
-        if (perioder.harOverlappendeUtbetaling(utbetaling)) {
-            utbetaling.loggOverlappendeInfotrygdUtbetaling(aktørId, fnr, vedtaksperiodeId)
-        }
     }
 }
 

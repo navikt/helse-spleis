@@ -59,10 +59,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     private val observatører = mutableListOf<BehandlingObserver>()
 
-    internal fun loggOverlappendeUtbetalingerMedInfotrygd(person: Person, vedtaksperiodeId: UUID) {
-        person.loggOverlappendeUtbetalingerMedInfotrygd(siste, vedtaksperiodeId)
-    }
-
     internal fun initiellBehandling(sykmeldingsperiode: Periode, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, søknad: Søknad) {
         check(behandlinger.isEmpty())
         val behandling = Behandling.nyBehandling(this.observatører, sykdomstidslinje, dokumentsporing, sykmeldingsperiode, søknad)

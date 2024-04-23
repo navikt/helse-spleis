@@ -78,7 +78,6 @@ import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -849,9 +848,5 @@ class Person private constructor(
         infotrygdhistorikk = infotrygdhistorikk.dto(),
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto()
     )
-
-    fun loggOverlappendeUtbetalingerMedInfotrygd(siste: Utbetaling?, vedtaksperiodeId: UUID) {
-        infotrygdhistorikk.loggOverlappendeUtbetaling(siste!!, aktørId, personidentifikator.toString(), vedtaksperiodeId)
-    }
 }
 

@@ -11,7 +11,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
@@ -80,11 +79,5 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
             .any {
                 it.periode.erRettFør(other)
             }
-
-        internal fun List<Infotrygdperiode>.harOverlappendeUtbetaling(utbetaling: Utbetaling): Boolean {
-            return this.filterIsInstance<Utbetalingsperiode>().any { infotrygdUtbetaling ->
-                 utbetaling.overlapperMedUtbetaling(infotrygdUtbetaling.periode)
-            }
-        }
     }
 }
