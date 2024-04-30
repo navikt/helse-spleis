@@ -1,0 +1,1 @@
+create index if not exists uferdig_arbeid_idx on arbeidstabell(arbeid_id) where arbeid_startet is null;
