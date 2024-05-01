@@ -68,6 +68,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -1305,6 +1306,61 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
         }
+    }
+
+    @Test
+    fun `inntektsmelding for ag2 strekker perioden tilbake til å bli først`() {
+        a1 {
+            nyPeriode(3.januar til 18.januar)
+            nyPeriode(19.januar til 31.januar)
+        }
+
+        a2 {
+            håndterInntektsmelding(listOf(3.januar til 18.januar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null), førsteFraværsdag = 3.januar)
+            nyPeriode(1.februar til 28.februar)
+        }
+
+        a1 {
+            håndterInntektsmelding(listOf(3.januar til 18.januar))
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+        }
+
+        val errorMessage = try {
+            a2 {
+                håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 1.februar, beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null), begrunnelseForReduksjonEllerIkkeUtbetalt = "TidligereVirksomhet")
+                håndterYtelser(1.vedtaksperiode)
+                håndterSimulering(1.vedtaksperiode)
+            }
+            null
+        } catch (err: IllegalStateException) {
+            err.message
+        }
+
+        assertForventetFeil(
+            forklaring = "Arbeidsgiver a2 sender inntektsmelding før søknad som gjør at vi lagrer inntekten i inntekthistorikken. " +
+                    "Da arbeidsgiver a1 vilkårsprøver så plukkes denne inntekten opp fordi" +
+                    "a2 har en søknad for skjæringstidspunktet som skal utbetales." +
+                    "Senere sender a2 inntektsmelding med begrunnelse siden det er overgang til nytt orgnr." +
+
+                    "Når vi oppdaterer vilkårsgrunnlaget med nye opplysninger kommer vi frem til at 'periode for endring'" +
+                    "starter 1. februar siden inntekten er ellers lik, og vi mener da at det er et brudd i refusjonsopplysningene med ny refusjons-fra-og-med-dato 1.februar." +
+                    "Som følge at av periode for endring er 1. februar så melder ikke a1-perioden (som er til godkjenning) seg på overstyringen og blir stående i Avventer godkjenning." +
+                    "Dette på tross av at a2-perioden har blitt STRUKKET TILBAKE som følge av at den har håndtert egenmeldingsdagene fra inntektsmeldingen, og er nå FØRST til å gå videre" +
+
+                    "TIL REFLEKSJON: Burde vi sendt ut overstyringIgangsatt som følge av at vedtaksperioder håndterer DAGER i AvventerInntektsmelding?",
+            nå = {
+                assertEquals("Ugyldig situasjon! Flere perioder til godkjenning samtidig", errorMessage)
+                a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING) }
+                a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
+            },
+            ønsket = {
+                assertNull(errorMessage)
+                a1 { assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
+                a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING) }
+            }
+        )
     }
 
     @Test
