@@ -218,8 +218,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `teit revurdering ved avsendersystem NAV på im`() {
         nyttVedtak(1.januar(2016), 31.januar(2016), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true, orgnummer = a1)
-        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true, orgnummer = a2)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, orgnummer = a2)
         assertForventetFeil(
             forklaring = "teit revurdering på to år eldre periode med annen arbeidsgiver",
