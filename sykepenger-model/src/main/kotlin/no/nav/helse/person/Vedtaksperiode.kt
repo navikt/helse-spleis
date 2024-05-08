@@ -676,7 +676,8 @@ internal class Vedtaksperiode private constructor(
 
     internal fun harNødvendigRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger, hendelse: IAktivitetslogg): Boolean {
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
-        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
+        return if (behandlinger.erFørstegangsvurdering()) Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
+        else Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerRevurdering(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
     }
 
     private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg): Boolean {

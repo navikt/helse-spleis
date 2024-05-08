@@ -85,6 +85,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
+    internal fun erFørstegangsvurdering() = behandlinger.none { it.erFattetVedtak() }
     internal fun erAvsluttet() = behandlinger.last().erAvsluttet()
     internal fun erAvvist() = siste?.erAvvist() == true
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true

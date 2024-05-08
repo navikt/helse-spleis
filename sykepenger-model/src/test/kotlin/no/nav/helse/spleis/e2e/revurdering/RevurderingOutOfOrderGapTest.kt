@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -47,7 +46,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -93,7 +91,7 @@ import org.junit.jupiter.api.Test
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Arbeidsgiver med kort gap mellom sykefravær blir sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`() {
+    fun `Arbeidsgiver med kort gap mellom sykefravær blir forsøkt sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet`() {
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, orgnummer = a1)
         håndterVilkårsgrunnlagMedGhost(1.vedtaksperiode, skjæringstidspunkt = 1.januar, arbeidsgiver = a1, ghost = a2)
@@ -122,16 +120,16 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
 
-        assertForventetFeil(
-            forklaring = "Arbeidsgiver med kort gap mellom sykefravær blir sklitaklet av annen arbeidsgiver som tetter gapet og flytter skjæringstidspunktet - mangler refusjonsopplysninger etter revurdering",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-                assertInfo("Mangler refusjonsopplysninger på orgnummer 987654321 for periodene [25-01-2018 til 26-01-2018, 29-01-2018 til 31-01-2018]")
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
     }
 
     @Test
