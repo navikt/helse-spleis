@@ -311,23 +311,22 @@ internal class Arbeidsgiver private constructor(
     private fun skalInngåISykepengegrunnlaget(skjæringstidspunkt: LocalDate) =
         vedtaksperioder.any(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
 
-    private fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
-        if (!trengerRefusjonsopplysninger(skjæringstidspunkt, periode)) return true
-        val arbeidsgiverperiode = arbeidsgiverperiode(periode) ?: return false
+    private fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) : Boolean {
+        if (!trengerRefusjonsopplysninger(skjæringstidspunkt, vedtaksperiode.periode())) return true
         val refusjonsopplysninger = when (val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             null -> refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
             else -> vilkårsgrunnlag.refusjonsopplysninger(organisasjonsnummer)
         }
-        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
+        return vedtaksperiode.harNødvendigRefusjonsopplysninger(refusjonsopplysninger, hendelse)
     }
 
     private fun trengerRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) =
         vedtaksperioder.any(TRENGER_REFUSJONSOPPLYSNINGER(skjæringstidspunkt, periode))
 
-    internal fun harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg): Boolean {
+    internal fun harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
         val harNødvendigInntektForVilkårsprøving = harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
         if (!harNødvendigInntektForVilkårsprøving) hendelse.info("Mangler inntekt for vilkårsprøving på $skjæringstidspunkt for $organisasjonsnummer")
-        return harNødvendigInntektForVilkårsprøving && harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse)
+        return harNødvendigInntektForVilkårsprøving && harNødvendigRefusjonsopplysninger(skjæringstidspunkt, vedtaksperiode, hendelse)
     }
 
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
