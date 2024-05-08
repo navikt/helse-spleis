@@ -791,7 +791,7 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
         val skjæringstidspunkt = person.skjæringstidspunkt(inntektsdato.somPeriode())
-        if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode)) {
+        if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode, forkastede)) {
             return inntektsmelding.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
         }
         finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {

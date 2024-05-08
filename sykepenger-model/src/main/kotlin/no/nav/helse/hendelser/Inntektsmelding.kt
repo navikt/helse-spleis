@@ -12,6 +12,8 @@ import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.ForkastetVedtaksperiode.Companion.erForkastet
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -178,7 +180,13 @@ class Inntektsmelding(
     private fun håndtertNå() = håndtertInntekt
     internal fun jurist(jurist: MaskinellJurist) = jurist.medInntektsmelding(this.meldingsreferanseId())
 
-    internal fun skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode: Periode?): Boolean {
+    internal fun skalOppdatereVilkårsgrunnlag(
+        sykdomstidslinjeperiode: Periode?,
+        forkastede: List<ForkastetVedtaksperiode>
+    ): Boolean {
+        if (vedtaksperiodeId != null && forkastede.erForkastet(vedtaksperiodeId)) return false.also {
+            info("Vi har bedt om arbeidsgiveropplysninger, men perioden er forkastet")
+        }
         if (erPortalinntektsmelding()) return true // inntektmelding fra portal, vi har bedt om IM og forventer IM
         if (sykdomstidslinjeperiode == null) return false // har ikke noe sykdom for arbeidsgiveren
         return beregnetInntektsdato in sykdomstidslinjeperiode

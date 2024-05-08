@@ -216,37 +216,21 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `teit revurdering ved avsendersystem NAV på im`() {
+    fun `Forkaster søknaden på direkten med etterfølgende svar fra portal`() {
         nyttVedtak(1.januar(2016), 31.januar(2016), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true, orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
-        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "teit revurdering på to år eldre periode med annen arbeidsgiver",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-            }
-        )
+        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, vedtaksperiodeId = inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.id, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
     @Test
-    fun `teit revurdering ved avsendersystem NAV på im 2`() {
+    fun `Håndterer ikke inntektsmelding fra portal`() {
         nyttVedtak(1.januar(2016), 31.januar(2016), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, harOpphørAvNaturalytelser = true, orgnummer = a2)
+        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, harOpphørAvNaturalytelser = true, vedtaksperiodeId = inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.id, orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertForventetFeil(
-            forklaring = "teit revurdering på to år eldre periode med annen arbeidsgiver",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
     @Test
