@@ -5,17 +5,52 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
+
+    @Test
+    fun `Omgjøring av overlappende periode med nytt skjæringstidspunkt`() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag), ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterSøknad(Sykdom(31.januar, 15.februar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertEquals(31.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            håndterInntektsmelding(listOf(31.januar til 15.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertEquals(
+                """Arbeidsgiver a2 mangler i sykepengegrunnlaget ved utbetaling av 2018-01-31. 
+                Arbeidsgiveren må være i sykepengegrunnlaget for å legge til utbetalingsopplysninger. 
+                Arbeidsgiverne i sykepengegrunlaget er [a1]""",
+                assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }.message
+            )
+        }
+    }
 
     @Test
     fun `saksbehandler flytter arbeidsgiver på skjæringstidspunktet som tilkommen`() {
