@@ -116,6 +116,7 @@ internal class RestApiTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             harFlereInntektsmeldinger = false,
             avsendersystem = null,
+            vedtaksperiodeId = UUID.randomUUID(),
             mottatt = LocalDateTime.now()
         )
         val person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())

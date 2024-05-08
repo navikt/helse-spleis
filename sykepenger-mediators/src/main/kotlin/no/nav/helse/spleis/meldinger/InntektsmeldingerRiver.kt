@@ -47,7 +47,8 @@ internal open class InntektsmeldingerRiver(
             "harFlereInntektsmeldinger",
             "historiskeFolkeregisteridenter",
             "avsenderSystem",
-            "inntektsdato"
+            "inntektsdato",
+            "vedtaksperiodeId"
         )
     }
 

@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
@@ -517,6 +518,7 @@ internal class InntektsmeldingTest {
         refusjonBeløp: Inntekt = 1000.månedlig,
         beregnetInntekt: Inntekt = 1000.månedlig,
         inntektsdato: LocalDate,
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
@@ -528,6 +530,7 @@ internal class InntektsmeldingTest {
             refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
             førsteFraværsdag = førsteFraværsdag,
             inntektsdato = inntektsdato,
+            vedtaksperiodeId = vedtaksperiodeId,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = arbeidsforholdId,

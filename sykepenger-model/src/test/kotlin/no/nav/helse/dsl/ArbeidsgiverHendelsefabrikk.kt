@@ -169,6 +169,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = Inntektsmelding.Avsendersystem.LPS,
+                vedtaksperiodeId = null,
                 mottatt = mottatt,
                 aktivitetslogg = aktivitetslogg
             )
@@ -214,6 +215,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         beregnetInntekt: Inntekt,
         førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
         inntektsdato: LocalDate,
+        vedtaksperiodeId: UUID,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
@@ -239,6 +241,7 @@ internal class ArbeidsgiverHendelsefabrikk(
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 harFlereInntektsmeldinger = harFlereInntektsmeldinger,
                 avsendersystem = Inntektsmelding.Avsendersystem.NAV_NO,
+                vedtaksperiodeId = vedtaksperiodeId,
                 mottatt = mottatt,
                 aktivitetslogg = aktivitetslogg
             )

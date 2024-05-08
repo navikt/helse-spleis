@@ -29,6 +29,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -237,6 +238,7 @@ internal class TestPerson(
             beregnetInntekt: Inntekt = INNTEKT,
             førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
             inntektsdato: LocalDate,
+            vedtaksperiodeId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.id,
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
             harOpphørAvNaturalytelser: Boolean = false,
             arbeidsforholdId: String? = null,
@@ -250,6 +252,7 @@ internal class TestPerson(
                 beregnetInntekt,
                 førsteFraværsdag,
                 inntektsdato,
+                vedtaksperiodeId,
                 refusjon,
                 harOpphørAvNaturalytelser,
                 arbeidsforholdId,

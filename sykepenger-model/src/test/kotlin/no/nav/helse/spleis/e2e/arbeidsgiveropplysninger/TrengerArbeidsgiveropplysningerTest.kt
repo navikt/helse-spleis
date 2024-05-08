@@ -114,7 +114,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `replayer ikke portalinnsendt inntektsmelding`() {
-        håndterInntektsmeldingPortal(listOf(1.januar til 5.januar, 10.januar til 20.januar), inntektsdato = 10.januar)
+        håndterInntektsmeldingPortal(listOf(1.januar til 5.januar, 10.januar til 20.januar), inntektsdato = 10.januar, vedtaksperiodeId = UUID.randomUUID())
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
 
         assertForventetFeil(

@@ -88,6 +88,8 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         listOf(OpphoerAvNaturalytelse(ELEKTRONISKKOMMUNIKASJON, LocalDate.now(), BigDecimal(589.00))).toJsonNode()
     ).toJson()
 
+    private val ValidInntektsmeldingMedVedtaksperiodeId = ValidInntektsmelding.put("vedtaksperiodeId", UUID.randomUUID().toString()).toJson()
+
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         InntektsmeldingerRiver(rapidsConnection, mediator)
     }
@@ -104,6 +106,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingJson)
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
+        assertNoErrors(ValidInntektsmeldingMedVedtaksperiodeId)
     }
     private fun ObjectNode.toJson(): String = put("fødselsdato", "$fødselsdato").toString()
 }

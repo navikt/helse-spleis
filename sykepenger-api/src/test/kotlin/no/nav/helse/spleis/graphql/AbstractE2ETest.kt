@@ -187,6 +187,7 @@ internal abstract class AbstractE2ETest {
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         inntektdato: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
         beregnetInntekt: Inntekt = INNTEKT,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null),
@@ -198,6 +199,7 @@ internal abstract class AbstractE2ETest {
             beregnetInntekt = beregnetInntekt,
             førsteFraværsdag = inntektdato,
             inntektsdato = inntektdato,
+            vedtaksperiodeId = vedtaksperiodeId,
             refusjon = refusjon,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             id = meldingsreferanseId

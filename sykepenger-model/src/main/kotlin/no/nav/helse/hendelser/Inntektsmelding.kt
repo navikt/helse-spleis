@@ -39,6 +39,7 @@ class Inntektsmelding(
     harOpphørAvNaturalytelser: Boolean = false,
     harFlereInntektsmeldinger: Boolean,
     private val avsendersystem: Avsendersystem?,
+    private val vedtaksperiodeId: UUID?,
     private val mottatt: LocalDateTime,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : ArbeidstakerHendelse(

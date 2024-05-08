@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -29,6 +30,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
         }
     )
     private val arbeidsforholdId = packet["arbeidsforholdId"].takeIf(JsonNode::isTextual)?.asText()
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
     private val orgnummer = packet["virksomhetsnummer"].asText()
     private val aktørId = packet["arbeidstakerAktorId"].asText()
     private val fødselsdato = packet["fødselsdato"].asOptionalLocalDate() ?: tilFødselsnummer(fødselsnummer).fødselsdato
@@ -61,6 +63,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
             harFlereInntektsmeldinger = harFlereInntektsmeldinger,
             avsendersystem = avsendersystem,
+            vedtaksperiodeId = vedtaksperiodeId,
             mottatt = mottatt
         )
 
