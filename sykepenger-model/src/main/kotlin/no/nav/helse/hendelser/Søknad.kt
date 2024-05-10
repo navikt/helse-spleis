@@ -34,6 +34,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
@@ -42,7 +43,7 @@ class Søknad(
     meldingsreferanseId: UUID,
     fnr: String,
     aktørId: String,
-    orgnummer: String,
+    private val orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: Boolean,
     private val ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean,
@@ -113,7 +114,7 @@ class Søknad(
     internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagElement?, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         valider(subsumsjonObserver)
         validerInntektskilder(vilkårsgrunnlag)
-        søknadstype.valider(this, vilkårsgrunnlag)
+        søknadstype.valider(this, vilkårsgrunnlag, orgnummer, sykdomstidslinje.periode())
         return this
     }
 
@@ -196,10 +197,18 @@ class Søknad(
     }
 
     class Søknadstype(private val type: String) {
-        internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
+        internal fun valider(
+            aktivitetslogg: IAktivitetslogg,
+            vilkårsgrunnlag: VilkårsgrunnlagElement?,
+            orgnummer: String,
+            periode: Periode?
+        ) {
             if (this == Arbeidstaker) return
             if (this != Arbeidsledig) return aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
             if (vilkårsgrunnlag == null) return aktivitetslogg.funksjonellFeil(`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`)
+            if (vilkårsgrunnlag.refusjonsopplysninger(orgnummer).overlappendeEllerSenereRefusjonsopplysninger(periode).all { it.beløp() == Inntekt.INGEN }) {
+                return aktivitetslogg.info("Arbeidsledigsøknad lagt til grunn og vi har ikke registrert refusjon i søknadstidsrommet")
+            }
             aktivitetslogg.varsel(`Arbeidsledigsøknad er lagt til grunn`)
         }
         override fun equals(other: Any?): Boolean {

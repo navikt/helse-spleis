@@ -225,11 +225,13 @@ class Refusjonsopplysning(
             return nyeUlik.firstOrNull()?.fom ?: nye.firstOrNull()?.fom
         }
 
-        internal fun overlappendeEllerSenereRefusjonsopplysninger(periode: Periode): List<Refusjonsopplysning> =
-            validerteRefusjonsopplysninger.filter {
+        internal fun overlappendeEllerSenereRefusjonsopplysninger(periode: Periode?): List<Refusjonsopplysning> {
+            if (periode == null) return emptyList()
+            return validerteRefusjonsopplysninger.filter {
                 val refusjonsperiode = Periode(it.fom, it.tom ?: LocalDate.MAX)
                 periode.overlapperMed(refusjonsperiode) || refusjonsperiode.starterEtter(periode)
             }
+        }
 
         internal companion object {
             private fun List<Refusjonsopplysning>.overlapper() = map { it.periode }.overlapper()
