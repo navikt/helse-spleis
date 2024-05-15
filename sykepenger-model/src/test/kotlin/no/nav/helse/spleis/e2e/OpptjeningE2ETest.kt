@@ -1,7 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import java.time.YearMonth
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -15,8 +18,10 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -113,6 +118,32 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
+    }
+
+    @Test
+    fun `Har ikke pensjonsgivende inntekt måneden før skjæringstidspunkt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+            inntekter = listOf(
+                ArbeidsgiverInntekt(a1, (0..2).map {
+                    val yearMonth = YearMonth.from(inspektør(a1).skjæringstidspunkt(1.vedtaksperiode)).minusMonths(3L - it)
+                    ArbeidsgiverInntekt.MånedligInntekt(
+                        yearMonth = yearMonth,
+                        type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                        inntekt = Inntekt.INGEN,
+                        fordel = "fordel",
+                        beskrivelse = "beskrivelse"
+                    )
+                })
+            ), arbeidsforhold = emptyList()
+        ))
+
+        assertForventetFeil(
+            forklaring = "Her skal det være varsel",
+            nå = { assertIngenVarsel(RV_OV_3, 1.vedtaksperiode.filter(a1)) },
+            ønsket = { assertVarsel(RV_OV_3, 1.vedtaksperiode.filter()) })
     }
 
     private fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {
