@@ -161,6 +161,7 @@ enum class Varselkode(
     // VV: Opptjeningsvurdering
     RV_OV_1("Perioden er avslått på grunn av manglende opptjening"),
     RV_OV_2("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige", avviklet = true),
+    RV_OV_3("Det er ikke registrert inntekt i måneden før skjæringstidspunktet"),
 
     // MV: Medlemskapsvurdering
     RV_MV_1("Vurder lovvalg og medlemskap", avviklet = true),
