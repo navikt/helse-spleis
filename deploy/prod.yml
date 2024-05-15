@@ -40,7 +40,7 @@ spec:
         diskSize: 250
         diskType: SSD
         name: spleis2
-        tier: db-custom-64-65536
+        tier: db-custom-4-8960
         retainedBackups: 14
         databases:
           - name: spleis
