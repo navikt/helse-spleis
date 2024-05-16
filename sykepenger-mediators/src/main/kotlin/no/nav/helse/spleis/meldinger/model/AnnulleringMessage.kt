@@ -1,21 +1,22 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.util.UUID
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.IHendelseMediator
 
-internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal class AnnulleringMessage(
+    packet: JsonMessage,
+    private val aktørId: String,
+    override val fødselsnummer: String,
+    private val organisasjonsnummer: String,
+    private val fagsystemId: String?,
+    private val utbetalingId: UUID?,
+    private val saksbehandler: Saksbehandler
+) : HendelseMessage(packet) {
 
-    private val aktørId = packet["aktørId"].asText()
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val fagsystemId = packet["fagsystemId"].takeUnless(JsonNode::isMissingOrNull)?.asText()?.trim()
-    private val utbetalingId = packet["utbetalingId"].takeUnless(JsonNode::isMissingOrNull)?.asText()?.trim()?.toUUID()
-    private val saksbehandler = Saksbehandler.fraJson(packet["saksbehandler"])
     private val annullerUtbetaling
         get() = AnnullerUtbetaling(
             id,
@@ -33,7 +34,7 @@ internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet)
         mediator.behandle(this, annullerUtbetaling, context)
     }
 
-    private class Saksbehandler(
+    internal class Saksbehandler(
         val epostadresse: String,
         val ident: String,
     ) {
