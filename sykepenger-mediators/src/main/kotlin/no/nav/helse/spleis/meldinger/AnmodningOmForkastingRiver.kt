@@ -18,7 +18,7 @@ internal open class AnmodningOmForkastingRiver(
     override val riverName = "anmodningOmForkasting"
 }
 
-internal class AnmodningOmForkastingMessagefabrikk: Meldingsfabrikk<AnmodningOmForkastingMessage>() {
+internal class AnmodningOmForkastingMessagefabrikk: Meldingsfabrikk<AnmodningOmForkastingMessage> {
     override fun validate(message: JsonMessage) {
         message.requireKey(
             "organisasjonsnummer",

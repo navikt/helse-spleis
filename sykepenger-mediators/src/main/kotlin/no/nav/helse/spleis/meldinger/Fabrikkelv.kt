@@ -17,7 +17,7 @@ internal abstract class Fabrikkelv<in F: Meldingsfabrikk<T>, T : HendelseMessage
     override fun createMessage(packet: JsonMessage) = fabrikk.lagMelding(packet)
 }
 
-internal abstract class Meldingsfabrikk<out T : HendelseMessage> {
-    abstract fun validate(message: JsonMessage)
-    abstract fun lagMelding(message: JsonMessage): T
+internal interface Meldingsfabrikk<out T : HendelseMessage> {
+    fun validate(message: JsonMessage)
+    fun lagMelding(message: JsonMessage): T
 }
