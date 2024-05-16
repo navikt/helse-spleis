@@ -6,14 +6,14 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
 
-// Understands a JSON message representing a Påminnelse
-internal class AnmodningOmForkastingMessage(packet: JsonMessage) : HendelseMessage(packet) {
-
-    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().let { UUID.fromString(it) }
-    private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val aktørId = packet["aktørId"].asText()
-    override val fødselsnummer: String = packet["fødselsnummer"].asText()
-    private val force = packet["force"].takeIf { it.isBoolean }?.asBoolean() ?: false
+internal class AnmodningOmForkastingMessage(
+    packet: JsonMessage,
+    vedtaksperiodeId: UUID,
+    organisasjonsnummer: String,
+    aktørId: String,
+    override val fødselsnummer: String,
+    force: Boolean
+) : HendelseMessage(packet) {
 
     private val anmodning = AnmodningOmForkasting(
         meldingsreferanseId = id,
