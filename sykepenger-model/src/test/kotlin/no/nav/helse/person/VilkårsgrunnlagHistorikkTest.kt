@@ -7,7 +7,7 @@ import no.nav.helse.desember
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Medlemskapsvurdering

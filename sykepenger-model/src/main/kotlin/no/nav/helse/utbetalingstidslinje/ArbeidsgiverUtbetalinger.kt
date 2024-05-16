@@ -5,12 +5,12 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 
 internal class ArbeidsgiverUtbetalinger(
     regler: ArbeidsgiverRegler,
     alder: Alder,
-    private val arbeidsgivere: (Periode, SubsumsjonObserver, IAktivitetslogg) -> Map<Arbeidsgiver, Utbetalingstidslinje>,
+    private val arbeidsgivere: (Periode, Subsumsjonslogg, IAktivitetslogg) -> Map<Arbeidsgiver, Utbetalingstidslinje>,
     infotrygdUtbetalingstidslinje: Utbetalingstidslinje,
     vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ) {
@@ -27,16 +27,16 @@ internal class ArbeidsgiverUtbetalinger(
         beregningsperiode: Periode,
         vedtaksperiode: Periode,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonslogg: Subsumsjonslogg
     ): Pair<Maksdatosituasjon, Map<Arbeidsgiver, Utbetalingstidslinje>> {
-        val arbeidsgivertidslinjer = arbeidsgivere(beregningsperiode, subsumsjonObserver, aktivitetslogg)
+        val arbeidsgivertidslinjer = arbeidsgivere(beregningsperiode, subsumsjonslogg, aktivitetslogg)
         val tidslinjerPerArbeidsgiver = filtere.fold(arbeidsgivertidslinjer) { tidslinjer, filter ->
             val input = tidslinjer.entries.map { (key, value) -> key to value }
-            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, vedtaksperiode, aktivitetslogg, subsumsjonObserver)
+            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, vedtaksperiode, aktivitetslogg, subsumsjonslogg)
             input.zip(result) { (arbeidsgiver, _), utbetalingstidslinje ->
                 arbeidsgiver to utbetalingstidslinje
             }.toMap()
         }
-        return maksimumSykepengedagerfilter.maksimumSykepenger(vedtaksperiode, subsumsjonObserver) to tidslinjerPerArbeidsgiver
+        return maksimumSykepengedagerfilter.maksimumSykepenger(vedtaksperiode, subsumsjonslogg) to tidslinjerPerArbeidsgiver
     }
 }

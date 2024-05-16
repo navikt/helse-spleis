@@ -8,7 +8,7 @@ import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsgiver
@@ -69,7 +69,7 @@ class Saksbehandler internal constructor(
     override fun erSamme(other: Inntektsopplysning) =
         other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp
 
-    override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
+    override fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
         if(subsumsjon == null) return
         requireNotNull(forklaring) { "Det skal være en forklaring fra saksbehandler ved overstyring av inntekt" }
         if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
@@ -77,7 +77,7 @@ class Saksbehandler internal constructor(
             && subsumsjon.bokstav == Bokstav.BOKSTAV_B.ref.toString()
         ) {
             requireNotNull(startdatoArbeidsforhold) { "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken" }
-            subsumsjonObserver.`§ 8-28 ledd 3 bokstav b`(
+            subsumsjonslogg.`§ 8-28 ledd 3 bokstav b`(
                 organisasjonsnummer = organisasjonsnummer,
                 startdatoArbeidsforhold = startdatoArbeidsforhold,
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
@@ -90,7 +90,7 @@ class Saksbehandler internal constructor(
             && subsumsjon.ledd == Ledd.LEDD_3.nummer
             && subsumsjon.bokstav == Bokstav.BOKSTAV_C.ref.toString()
         ) {
-            subsumsjonObserver.`§ 8-28 ledd 3 bokstav c`(
+            subsumsjonslogg.`§ 8-28 ledd 3 bokstav c`(
                 organisasjonsnummer = organisasjonsnummer,
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
@@ -99,7 +99,7 @@ class Saksbehandler internal constructor(
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer) {
-            subsumsjonObserver.`§ 8-28 ledd 5`(
+            subsumsjonslogg.`§ 8-28 ledd 5`(
                 organisasjonsnummer = organisasjonsnummer,
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,

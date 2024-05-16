@@ -25,7 +25,7 @@ import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode

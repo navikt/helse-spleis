@@ -20,7 +20,7 @@ internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligni
         sammenligningsgrunnlag.accept(this)
     }
 
-    fun build() = SubsumsjonObserver.SammenligningsgrunnlagDTO(sammenligningsgrunnlag, inntekter)
+    fun build() = Subsumsjonslogg.SammenligningsgrunnlagDTO(sammenligningsgrunnlag, inntekter)
 
     override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
         this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
@@ -56,6 +56,6 @@ internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligni
     }
 
     companion object {
-        internal fun Sammenligningsgrunnlag.subsumsjonsformat(): SubsumsjonObserver.SammenligningsgrunnlagDTO = SammenligningsgrunnlagBuilder(this).build()
+        internal fun Sammenligningsgrunnlag.subsumsjonsformat(): Subsumsjonslogg.SammenligningsgrunnlagDTO = SammenligningsgrunnlagBuilder(this).build()
     }
 }

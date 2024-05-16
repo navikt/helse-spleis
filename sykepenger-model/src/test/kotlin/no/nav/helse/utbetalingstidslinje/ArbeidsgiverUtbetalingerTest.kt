@@ -8,7 +8,7 @@ import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -85,7 +85,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 1000.månedlig.sykepengegrunnlag,
-            opptjening = Opptjening.nyOpptjening(emptyList(), 1.januar, SubsumsjonObserver.NullObserver),
+            opptjening = Opptjening.nyOpptjening(emptyList(), 1.januar, Subsumsjonslogg.NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
@@ -321,7 +321,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                                 Arbeidsforhold(1.januar.minusYears(1), null, false)
                             )
                         )
-                    ), 1.januar, SubsumsjonObserver.NullObserver
+                    ), 1.januar, Subsumsjonslogg.NullObserver
                 ),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
@@ -354,7 +354,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             arbeidsgiverTidslinje.periode(),
             arbeidsgiverTidslinje.periode(),
             aktivitetslogg,
-            SubsumsjonObserver.NullObserver
+            Subsumsjonslogg.NullObserver
         )
         maksdato = maksimumSykepenger.maksdato
         gjenståendeSykedager = maksimumSykepenger.gjenståendeDager

@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
@@ -50,16 +50,16 @@ internal class Opptjening private constructor(
 
     internal fun opptjeningFom() = opptjeningsperiode.start
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)
-    internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver): Opptjening {
-        return hendelse.overstyr(this, subsumsjonObserver)
+    internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg): Opptjening {
+        return hendelse.overstyr(this, subsumsjonslogg)
     }
 
-    internal fun deaktiver(orgnummer: String, subsumsjonObserver: SubsumsjonObserver): Opptjening {
-        return Opptjening.nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt, subsumsjonObserver)
+    internal fun deaktiver(orgnummer: String, subsumsjonslogg: Subsumsjonslogg): Opptjening {
+        return Opptjening.nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt, subsumsjonslogg)
     }
 
-    internal fun aktiver(orgnummer: String, subsumsjonObserver: SubsumsjonObserver): Opptjening {
-        return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, subsumsjonObserver)
+    internal fun aktiver(orgnummer: String, subsumsjonslogg: Subsumsjonslogg): Opptjening {
+        return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, subsumsjonslogg)
     }
 
     internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforhold>) {
@@ -213,13 +213,13 @@ internal class Opptjening private constructor(
         }
 
 
-        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
+        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg): Opptjening {
             val opptjeningsperiode = grunnlag.opptjeningsperiode(skjæringstidspunkt)
             val arbeidsforhold = grunnlag.inngårIOpptjening(opptjeningsperiode)
 
             val opptjening = Opptjening(skjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
             val arbeidsforholdForJurist = arbeidsforhold.arbeidsforholdForJurist()
-            subsumsjonObserver.`§ 8-2 ledd 1`(
+            subsumsjonslogg.`§ 8-2 ledd 1`(
                 oppfylt = opptjening.erOppfylt(),
                 skjæringstidspunkt = skjæringstidspunkt,
                 tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,

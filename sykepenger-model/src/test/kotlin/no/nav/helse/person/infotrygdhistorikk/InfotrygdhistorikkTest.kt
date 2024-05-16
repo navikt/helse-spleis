@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -341,10 +341,10 @@ internal class InfotrygdhistorikkTest {
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-                subsumsjonObserver = SubsumsjonObserver.NullObserver
+                subsumsjonslogg = Subsumsjonslogg.NullObserver
             ), beregningsperiode = 1.januar til 31.januar
         )
-        val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result() }
+        val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, Subsumsjonslogg.NullObserver).let { builder.result() }
         assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
     }
 
@@ -363,10 +363,10 @@ internal class InfotrygdhistorikkTest {
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-                subsumsjonObserver = SubsumsjonObserver.NullObserver
+                subsumsjonslogg = Subsumsjonslogg.NullObserver
             ), beregningsperiode = 1.februar til 28.februar
         )
-        val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver).let { builder.result()}
+        val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, Subsumsjonslogg.NullObserver).let { builder.result()}
         assertEquals(1.februar til 28.februar, utbetalingstidslinje.periode())
     }
 

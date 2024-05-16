@@ -9,7 +9,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
@@ -895,13 +895,13 @@ internal class Arbeidsgiver private constructor(
         regler: ArbeidsgiverRegler,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
         infotrygdhistorikk: Infotrygdhistorikk,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonslogg: Subsumsjonslogg
     ): Utbetalingstidslinje {
         val inntekter = Inntekter(
             hendelse = hendelse,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = regler,
-            subsumsjonObserver = subsumsjonObserver,
+            subsumsjonslogg = subsumsjonslogg,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperioder = vedtaksperioder
         )
@@ -909,7 +909,7 @@ internal class Arbeidsgiver private constructor(
         val sykdomstidslinje = ghosttidslinje.merge(sykdomstidslinje(), replace)
         if (sykdomstidslinje.count() == 0) return Utbetalingstidslinje()
         val builder = UtbetalingstidslinjeBuilder(inntekter, periode)
-        infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
+        infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonslogg)
         return builder.result()
     }
 

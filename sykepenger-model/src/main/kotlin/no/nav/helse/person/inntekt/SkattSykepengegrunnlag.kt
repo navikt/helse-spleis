@@ -3,7 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
@@ -94,15 +94,15 @@ internal class SkattSykepengegrunnlag private constructor(
         return ny.overstyrer(this)
     }
 
-    override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
-        subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
+    override fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
+        subsumsjonslogg.`§ 8-28 ledd 3 bokstav a`(
             organisasjonsnummer = organisasjonsnummer,
             skjæringstidspunkt = dato,
             inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
             grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
             grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
         )
-        subsumsjonObserver.`§ 8-29`(
+        subsumsjonslogg.`§ 8-29`(
             skjæringstidspunkt = dato,
             grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
             inntektsopplysninger = inntektsopplysninger.subsumsjonsformat(),
@@ -111,12 +111,12 @@ internal class SkattSykepengegrunnlag private constructor(
     }
 
     override fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjonslogg: Subsumsjonslogg,
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean
     ) = apply {
-        subsumsjonObserver.`§ 8-15`(
+        subsumsjonslogg.`§ 8-15`(
             skjæringstidspunkt = dato,
             organisasjonsnummer = organisasjonsnummer,
             inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),

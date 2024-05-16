@@ -9,8 +9,8 @@ import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -44,7 +44,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.properties.Delegates
@@ -350,7 +349,7 @@ internal class SykepengegrunnlagTest {
             arbeidsgiverInntektsopplysninger = inntekter,
             skjæringstidspunkt = skjæringstidspunkt,
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            subsumsjonObserver = NullObserver
+            subsumsjonslogg = NullObserver
         )
         assertEquals(a1Inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(a1Inntekt, sykepengegrunnlag.inspektør.beregningsgrunnlag)
@@ -856,7 +855,7 @@ internal class SykepengegrunnlagTest {
         )
     }
 
-    private class MinsteinntektSubsumsjonObservatør : SubsumsjonObserver {
+    private class MinsteinntektSubsumsjonObservatør : Subsumsjonslogg {
         var `§ 8-3 ledd 2 punktum 1` by Delegates.notNull<Boolean>()
         var `§ 8-51 ledd 2` by Delegates.notNull<Boolean>()
 

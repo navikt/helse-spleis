@@ -5,7 +5,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F

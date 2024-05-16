@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InfotrygdhistorikkVisitor
@@ -115,11 +115,11 @@ internal class Infotrygdhistorikk private constructor(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
         builder: ArbeidsgiverperiodeMediator,
-        subsumsjonObserver: SubsumsjonObserver?,
+        subsumsjonslogg: Subsumsjonslogg?,
         hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonObserver)
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonslogg)
         if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeBuilder)
         siste.build(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder, hendelseskilde)
     }
@@ -128,11 +128,11 @@ internal class Infotrygdhistorikk private constructor(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
         builder: ArbeidsgiverperiodeMediator,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonslogg: Subsumsjonslogg
     ) {
         val infotrygdkilde = SykdomshistorikkHendelse.Hendelseskilde("Infotrygdhistorikk", UUID.randomUUID(), LocalDateTime.now())
         val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder(organisasjonsnummer), infotrygdkilde) else builder
-        build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonObserver, infotrygdkilde)
+        build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonslogg, infotrygdkilde)
     }
 
 

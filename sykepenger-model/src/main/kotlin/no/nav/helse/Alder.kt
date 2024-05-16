@@ -3,7 +3,7 @@ package no.nav.helse
 import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.til
 import no.nav.helse.dto.AlderDto
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -71,7 +71,7 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
         periodeTom: LocalDate,
         beregningsgrunnlagÅrlig: Double,
         minimumInntektÅrlig: Double,
-        jurist: SubsumsjonObserver
+        jurist: Subsumsjonslogg
     ) {
         jurist.`§ 8-51 ledd 2`(
             oppfylt = oppfylt,

@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -170,7 +170,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
             override fun overstyrArbeidsforhold(
                 hendelse: OverstyrArbeidsforhold,
-                subsumsjonObserver: SubsumsjonObserver
+                subsumsjonslogg: Subsumsjonslogg
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata {
                 throw IllegalStateException()
             }
@@ -179,7 +179,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 hendelse: IAktivitetslogg,
                 sykepengegrunnlag: Sykepengegrunnlag,
                 opptjening: Opptjening?,
-                subsumsjonObserver: SubsumsjonObserver,
+                subsumsjonslogg: Subsumsjonslogg,
                 nyttSkjæringstidspunkt: LocalDate?
             ): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
                 throw IllegalStateException()

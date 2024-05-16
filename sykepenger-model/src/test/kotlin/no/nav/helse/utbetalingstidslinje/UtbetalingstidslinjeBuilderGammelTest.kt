@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
@@ -893,10 +893,10 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonObserver = SubsumsjonObserver.NullObserver
+            subsumsjonslogg = Subsumsjonslogg.NullObserver
         )
         val builder = UtbetalingstidslinjeBuilder(inntekter, this.periode()!!)
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, SubsumsjonObserver.NullObserver)
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, Subsumsjonslogg.NullObserver)
         val dekoratør = Infotrygddekoratør(teller, arbeidsgiverperiodeBuilder, betalteInfotrygddager)
         this.accept(dekoratør)
         tidslinje = builder.result()

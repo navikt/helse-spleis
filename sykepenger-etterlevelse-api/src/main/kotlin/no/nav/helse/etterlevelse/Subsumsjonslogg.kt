@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.Year
 import java.util.SortedSet
 
-interface SubsumsjonObserver {
+interface Subsumsjonslogg {
 
     /**
      * Vurdering av opptjeningstid
@@ -497,6 +497,6 @@ interface SubsumsjonObserver {
     )
 
     companion object {
-        val NullObserver = object : SubsumsjonObserver {}
+        val NullObserver = object : Subsumsjonslogg {}
     }
 }

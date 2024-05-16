@@ -3,7 +3,7 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
@@ -74,12 +74,12 @@ class ArbeidsgiverInntektsopplysning(
 
     private fun rullTilbake() = ArbeidsgiverInntektsopplysning(this.orgnummer, gjelder = this.gjelder, this.inntektsopplysning.omregnetÅrsinntekt(), refusjonsopplysninger)
 
-    private fun subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening?) {
-        inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, opptjening?.startdatoFor(orgnummer))
+    private fun subsummer(subsumsjonslogg: Subsumsjonslogg, opptjening: Opptjening?) {
+        inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonslogg, orgnummer, opptjening?.startdatoFor(orgnummer))
     }
 
-    private fun deaktiver(forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver): ArbeidsgiverInntektsopplysning {
-        inntektsopplysning.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, oppfylt)
+    private fun deaktiver(forklaring: String, oppfylt: Boolean, subsumsjonslogg: Subsumsjonslogg): ArbeidsgiverInntektsopplysning {
+        inntektsopplysning.subsumerArbeidsforhold(subsumsjonslogg, orgnummer, forklaring, oppfylt)
         return this
     }
 
@@ -132,32 +132,32 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.finn(orgnummer: String) = firstOrNull { it.gjelder(orgnummer) }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.deaktiver(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
-            this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonObserver)
+        internal fun List<ArbeidsgiverInntektsopplysning>.deaktiver(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg) =
+            this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonslogg)
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.aktiver(aktiveres: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
-            val (deaktiverte, aktiverte) = this.fjernInntekt(aktiveres, orgnummer, forklaring, false, subsumsjonObserver)
+        internal fun List<ArbeidsgiverInntektsopplysning>.aktiver(aktiveres: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
+            val (deaktiverte, aktiverte) = this.fjernInntekt(aktiveres, orgnummer, forklaring, false, subsumsjonslogg)
             // Om inntektene i sykepengegrunnlaget var skjønnsmessig fastsatt før aktivering sikrer vi at alle "rulles tilbake" slik at vi ikke lager et sykepengegrunnlag med mix av SkjønnsmessigFastsatt & andre inntektstyper.
             return deaktiverte to aktiverte.map { ArbeidsgiverInntektsopplysning(it.orgnummer, it.gjelder, it.inntektsopplysning.omregnetÅrsinntekt(), it.refusjonsopplysninger) }
         }
 
         // flytter inntekt for *orgnummer* fra *this* til *deaktiverte*
         // aktive.deaktiver(deaktiverte, orgnummer) er direkte motsetning til deaktiverte.deaktiver(aktive, orgnummer)
-        private fun List<ArbeidsgiverInntektsopplysning>.fjernInntekt(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
+        private fun List<ArbeidsgiverInntektsopplysning>.fjernInntekt(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, oppfylt: Boolean, subsumsjonslogg: Subsumsjonslogg): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
             val inntektsopplysning = checkNotNull(this.singleOrNull { it.orgnummer == orgnummer }) {
                 "Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til"
-            }.deaktiver(forklaring, oppfylt, subsumsjonObserver)
+            }.deaktiver(forklaring, oppfylt, subsumsjonslogg)
             val aktive = this.filterNot { it === inntektsopplysning }
             return aktive to (deaktiverte + listOfNotNull(inntektsopplysning))
         }
 
         // overskriver eksisterende verdier i *this* med verdier fra *other*,
         // og ignorerer ting i *other* som ikke finnes i *this*
-        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening?, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver): List<ArbeidsgiverInntektsopplysning> {
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening?, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonslogg: Subsumsjonslogg): List<ArbeidsgiverInntektsopplysning> {
             val omregnetÅrsinntekt = map { it.inntektsopplysning }
             val endringen = this
                 .map { inntekt -> inntekt.overstyr(other) }
-                .also { it.subsummer(subsumsjonObserver, opptjening, this) }
+                .also { it.subsummer(subsumsjonslogg, opptjening, this) }
             val omregnetÅrsinntektEtterpå = endringen.map { it.inntektsopplysning }
             if (Inntektsopplysning.erOmregnetÅrsinntektEndret(omregnetÅrsinntekt, omregnetÅrsinntektEtterpå)) return endringen.map { it.rullTilbake() }
             return endringen
@@ -206,10 +206,10 @@ class ArbeidsgiverInntektsopplysning(
             val forrigeInntektsopplysninger = forrige.map { it.inntektsopplysning }
             return filterNot { it.inntektsopplysning in forrigeInntektsopplysninger }
         }
-        internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null, forrige: List<ArbeidsgiverInntektsopplysning>) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonslogg: Subsumsjonslogg, opptjening: Opptjening? = null, forrige: List<ArbeidsgiverInntektsopplysning>) {
             val endredeInntektsopplysninger = finnEndredeInntektsopplysninger(forrige)
             if (endredeInntektsopplysninger.isEmpty()) return
-            endredeInntektsopplysninger.forEach { it.subsummer(subsumsjonObserver, opptjening) }
+            endredeInntektsopplysninger.forEach { it.subsummer(subsumsjonslogg, opptjening) }
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder.FastsattISpleisBuilder) {
@@ -236,7 +236,7 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.totalOmregnetÅrsinntekt(skjæringstidspunkt: LocalDate) =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc, skjæringstidspunkt) }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
+        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonslogg: Subsumsjonslogg): Økonomi? {
             val arbeidsgiverInntektsopplysning = singleOrNull { it.orgnummer == organisasjonsnummer } ?: return null
             val inntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt(dato)
             val beregningsgrunnlag = arbeidsgiverInntektsopplysning.beregningsgrunnlag(skjæringstidspunkt)
@@ -244,7 +244,7 @@ class ArbeidsgiverInntektsopplysning(
             return økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
                 beregningsgrunnlag = beregningsgrunnlag,
-                dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
+                dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonslogg),
                 `6G` = `6G`,
                 refusjonsbeløp = refusjonsbeløp
             )
@@ -256,7 +256,7 @@ class ArbeidsgiverInntektsopplysning(
                 Arbeidsgiverne i sykepengegrunlaget er ${map { it.orgnummer }}"""
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+        internal fun List<ArbeidsgiverInntektsopplysning>.medUtbetalingsopplysninger(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonslogg: Subsumsjonslogg): Økonomi {
             val arbeidsgiverInntektsopplysning = arbeidsgiverInntektsopplysning(organisasjonsnummer, dato)
             val inntekt = arbeidsgiverInntektsopplysning.fastsattÅrsinntekt(dato)
             val beregningsgrunnlag = arbeidsgiverInntektsopplysning.beregningsgrunnlag(skjæringstidspunkt)
@@ -266,7 +266,7 @@ class ArbeidsgiverInntektsopplysning(
             return økonomi.inntekt(
                 aktuellDagsinntekt = inntekt,
                 beregningsgrunnlag = beregningsgrunnlag,
-                dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
+                dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonslogg),
                 `6G` = `6G`,
                 refusjonsbeløp = refusjonsbeløp
             )

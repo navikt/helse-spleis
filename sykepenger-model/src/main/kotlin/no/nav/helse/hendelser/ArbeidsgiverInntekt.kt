@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -43,7 +43,7 @@ class ArbeidsgiverInntekt(
             skjæringstidspunkt: LocalDate,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             meldingsreferanseId: UUID,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonslogg: Subsumsjonslogg
         ): Sykepengegrunnlag {
             val rapporterteInntekter = this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
             // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
@@ -53,7 +53,7 @@ class ArbeidsgiverInntekt(
                 skjæringstidspunkt,
                 sammenligningsgrunnlag,
                 inntekterMedOpptjening,
-                subsumsjonObserver
+                subsumsjonslogg
             )
         }
 

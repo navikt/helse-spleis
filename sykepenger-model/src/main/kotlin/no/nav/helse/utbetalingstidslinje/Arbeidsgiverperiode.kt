@@ -4,7 +4,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -64,10 +64,10 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal fun forventerInntekt(
         periode: Periode,
         sykdomstidslinje: Sykdomstidslinje,
-        subsumsjonObserver: SubsumsjonObserver?
+        subsumsjonslogg: Subsumsjonslogg?
     ): Boolean {
         if (!dekkesAvArbeidsgiver(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode)
-        subsumsjonObserver?.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
+        subsumsjonslogg?.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
         return false
     }
 
@@ -206,9 +206,9 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             periode: Periode,
             sykdomstidslinje: Sykdomstidslinje,
-            subsumsjonObserver: SubsumsjonObserver?
+            subsumsjonslogg: Subsumsjonslogg?
         ) =
-            arbeidsgiverperiode?.forventerInntekt(periode, sykdomstidslinje, subsumsjonObserver) ?: false
+            arbeidsgiverperiode?.forventerInntekt(periode, sykdomstidslinje, subsumsjonslogg) ?: false
 
         internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode in arbeidsgiverperiode

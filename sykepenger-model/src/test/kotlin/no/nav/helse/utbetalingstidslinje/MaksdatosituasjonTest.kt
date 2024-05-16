@@ -8,7 +8,7 @@ import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -176,7 +176,7 @@ internal class MaksdatosituasjonTest {
         return situasjon
     }
 
-    private class FangeHjemmebestemmelse : SubsumsjonObserver {
+    private class FangeHjemmebestemmelse : Subsumsjonslogg {
         lateinit var hjemmel: Hjemmelbegrunnelse
         override fun `§ 8-12 ledd 1 punktum 1`(
             periode: ClosedRange<LocalDate>,

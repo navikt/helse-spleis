@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -90,9 +90,9 @@ class Inntektsmelding(
         info("Lagrer inntekt på alternativ inntektsdato $alternativInntektsdato")
     }
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonObserver: SubsumsjonObserver): LocalDate {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
-        subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
+        subsumsjonslogg.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
         inntektshistorikk.leggTil(Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt))
         return beregnetInntektsdato
     }

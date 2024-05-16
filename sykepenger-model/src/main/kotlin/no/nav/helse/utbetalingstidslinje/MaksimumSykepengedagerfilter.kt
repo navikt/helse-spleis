@@ -2,8 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -31,16 +31,16 @@ internal class MaksimumSykepengedagerfilter(
     private val avvisteDager get() = begrunnelserForAvvisteDager.values.flatten().toSet()
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
-    private var subsumsjonObserver: SubsumsjonObserver = NullObserver
+    private var subsumsjonslogg: Subsumsjonslogg = NullObserver
 
     private val tidslinjegrunnlagsubsumsjon by lazy { tidslinjegrunnlag.subsumsjonsformat() }
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
 
     private val maksdatoer = mutableMapOf<LocalDate, Maksdatosituasjon>()
 
-    internal fun maksimumSykepenger(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Maksdatosituasjon {
+    internal fun maksimumSykepenger(periode: Periode, subsumsjonslogg: Subsumsjonslogg): Maksdatosituasjon {
         val maksimumSykepenger = maksdatoer.getValue(periode.endInclusive)
-        maksimumSykepenger.vurderMaksdatobestemmelse(subsumsjonObserver, periode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, avvisteDager)
+        maksimumSykepenger.vurderMaksdatobestemmelse(subsumsjonslogg, periode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, avvisteDager)
         return maksimumSykepenger
     }
 
@@ -54,9 +54,9 @@ internal class MaksimumSykepengedagerfilter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonslogg: Subsumsjonslogg
     ): List<Utbetalingstidslinje> {
-        this.subsumsjonObserver = subsumsjonObserver
+        this.subsumsjonslogg = subsumsjonslogg
         tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje)
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
         beregnetTidslinje.accept(this)
@@ -175,7 +175,7 @@ internal class MaksimumSykepengedagerfilter(
     private fun håndterBetalbarDag(dagen: LocalDate) {
         var situasjon = checkNotNull(this.teller)
         situasjon = situasjon.inkrementer(dagen)
-        situasjon.vurderHarTilstrekkeligOpphold(subsumsjonObserver, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
+        situasjon.vurderHarTilstrekkeligOpphold(subsumsjonslogg, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
         when {
             situasjon.erDagerUnder67ÅrForbrukte() -> state(State.Karantene(Begrunnelse.SykepengedagerOppbrukt))
             situasjon.erDagerOver67ÅrForbrukte() -> state(State.Karantene(Begrunnelse.SykepengedagerOppbruktOver67))
@@ -184,7 +184,7 @@ internal class MaksimumSykepengedagerfilter(
         this.teller = situasjon
     }
     private fun tilstrekkeligOppholdNådd(dagen: LocalDate): Boolean {
-        return checkNotNull(this.teller).maksdatoFor(dagen).vurderHarTilstrekkeligOpphold(subsumsjonObserver, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
+        return checkNotNull(this.teller).maksdatoFor(dagen).vurderHarTilstrekkeligOpphold(subsumsjonslogg, opphold, TILSTREKKELIG_OPPHOLD_I_SYKEDAGER, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
     }
 
     private interface State {

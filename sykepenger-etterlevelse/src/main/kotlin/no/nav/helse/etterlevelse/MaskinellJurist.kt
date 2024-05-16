@@ -46,7 +46,7 @@ class MaskinellJurist private constructor(
     private val parent: MaskinellJurist?,
     private val kontekster: Map<String, KontekstType>,
     vedtaksperiode: ClosedRange<LocalDate>? = null
-) : SubsumsjonObserver {
+) : Subsumsjonslogg {
 
     private val periode: () -> ClosedRange<LocalDate>
 

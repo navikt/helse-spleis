@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -109,10 +109,10 @@ internal abstract class HistorieTest {
             organisasjonsnummer = orgnr,
             vilkårsgrunnlagHistorikk = inntektsdatoer.associateWith { Inntektsmelding(it, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()) }.somVilkårsgrunnlagHistorikk(orgnr),
             regler = regler,
-            subsumsjonObserver = SubsumsjonObserver.NullObserver
+            subsumsjonslogg = Subsumsjonslogg.NullObserver
         )
         val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(inntekter, sykdomstidslinje.periode()!!)
-        return infotrygdhistorikk.buildUtbetalingstidslinje(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, SubsumsjonObserver.NullObserver).let { utbetalingstidslinjebuilder.result() }
+        return infotrygdhistorikk.buildUtbetalingstidslinje(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, Subsumsjonslogg.NullObserver).let { utbetalingstidslinjebuilder.result() }
     }
 
     protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(fom, fom), arbeidsgiverSykdomstidslinje.values.toList())

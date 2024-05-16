@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -191,7 +191,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
     }
 
-    private class Subsumsjonobservatør : SubsumsjonObserver {
+    private class Subsumsjonobservatør : Subsumsjonslogg {
         var subsumsjoner = 0
         var `§ 8-17 første ledd bokstav a - ikke oppfylt` = 0
         var `§ 8-17 første ledd bokstav a - oppfylt` = 0

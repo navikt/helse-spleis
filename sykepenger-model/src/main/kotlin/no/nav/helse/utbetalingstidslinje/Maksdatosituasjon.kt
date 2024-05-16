@@ -5,7 +5,7 @@ import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
@@ -71,14 +71,14 @@ internal class Maksdatosituasjon(
     internal fun erDagerOver67ÅrForbrukte() = gjenståendeSykepengedagerOver67 == 0
 
     internal fun vurderMaksdatobestemmelse(
-        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjonslogg: Subsumsjonslogg,
         periode: Periode,
         tidslinjegrunnlagsubsumsjon: List<List<Tidslinjedag>>,
         beregnetTidslinjesubsumsjon: List<Tidslinjedag>,
         avvisteDager: Set<LocalDate>
     ) {
         hjemmelsbegrunnelse.sporHjemmel(
-            subsumsjonObserver,
+            subsumsjonslogg,
             periode,
             tidslinjegrunnlagsubsumsjon,
             beregnetTidslinjesubsumsjon,
@@ -87,9 +87,9 @@ internal class Maksdatosituasjon(
         )
     }
 
-    fun vurderHarTilstrekkeligOpphold(subsumsjonObserver: SubsumsjonObserver, opphold: Int, tilstrekkeligOpphold: Int, tidslinjegrunnlagsubsumsjon: List<List<Tidslinjedag>>, beregnetTidslinjesubsumsjon: List<Tidslinjedag>): Boolean {
+    fun vurderHarTilstrekkeligOpphold(subsumsjonslogg: Subsumsjonslogg, opphold: Int, tilstrekkeligOpphold: Int, tidslinjegrunnlagsubsumsjon: List<List<Tidslinjedag>>, beregnetTidslinjesubsumsjon: List<Tidslinjedag>): Boolean {
         val harTilstrekkeligOpphold = opphold >= tilstrekkeligOpphold
-        subsumsjonObserver.`§ 8-12 ledd 2`(
+        subsumsjonslogg.`§ 8-12 ledd 2`(
             oppfylt = harTilstrekkeligOpphold,
             dato = dato,
             gjenståendeSykepengedager = gjenståendeSykepengedagerUnder67,
@@ -101,8 +101,8 @@ internal class Maksdatosituasjon(
         return harTilstrekkeligOpphold
     }
 
-    private fun førFylte70(subsumsjonObserver: SubsumsjonObserver, periode: Periode, utfallTom: LocalDate = periode.endInclusive) {
-        subsumsjonObserver.`§ 8-3 ledd 1 punktum 2`(
+    private fun førFylte70(subsumsjonslogg: Subsumsjonslogg, periode: Periode, utfallTom: LocalDate = periode.endInclusive) {
+        subsumsjonslogg.`§ 8-3 ledd 1 punktum 2`(
             oppfylt = true,
             syttiårsdagen = syttiårsdagen,
             utfallFom = periode.start,
@@ -129,7 +129,7 @@ internal class Maksdatosituasjon(
 
     private fun interface Maksdatobestemmelse {
         fun sporHjemmel(
-            subsumsjonObserver: SubsumsjonObserver,
+            subsumsjonslogg: Subsumsjonslogg,
             periode: Periode,
             tidslinjegrunnlagsubsumsjon: List<List<Tidslinjedag>>,
             beregnetTidslinjesubsumsjon: List<Tidslinjedag>,

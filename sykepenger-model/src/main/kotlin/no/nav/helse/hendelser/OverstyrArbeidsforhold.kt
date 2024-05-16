@@ -4,8 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -32,15 +31,15 @@ class OverstyrArbeidsforhold(
     override fun innsendt() = opprettet
 
 
-    internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+    internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
         return overstyrteArbeidsforhold.fold(sykepengegrunnlag, ) { acc, overstyring ->
-            overstyring.overstyr(acc, subsumsjonObserver)
+            overstyring.overstyr(acc, subsumsjonslogg)
         }
     }
 
-    internal fun overstyr(opptjening: Opptjening, subsumsjonObserver: SubsumsjonObserver): Opptjening {
+    internal fun overstyr(opptjening: Opptjening, subsumsjonslogg: Subsumsjonslogg): Opptjening {
         return overstyrteArbeidsforhold.fold(opptjening, ) { acc, overstyring ->
-            overstyring.overstyr(acc, subsumsjonObserver)
+            overstyring.overstyr(acc, subsumsjonslogg)
         }
     }
 
@@ -49,14 +48,14 @@ class OverstyrArbeidsforhold(
         private val deaktivert: Boolean,
         private val forklaring: String
     ) {
-        internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver) = when (deaktivert) {
-            true -> sykepengegrunnlag.deaktiver(orgnummer, forklaring, subsumsjonObserver)
-            else -> sykepengegrunnlag.aktiver(orgnummer, forklaring, subsumsjonObserver)
+        internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonslogg: Subsumsjonslogg) = when (deaktivert) {
+            true -> sykepengegrunnlag.deaktiver(orgnummer, forklaring, subsumsjonslogg)
+            else -> sykepengegrunnlag.aktiver(orgnummer, forklaring, subsumsjonslogg)
         }
 
-        internal fun overstyr(opptjening: Opptjening, subsumsjonObserver: SubsumsjonObserver) = when (deaktivert) {
-            true -> opptjening.deaktiver(orgnummer, subsumsjonObserver)
-            else -> opptjening.aktiver(orgnummer, subsumsjonObserver)
+        internal fun overstyr(opptjening: Opptjening, subsumsjonslogg: Subsumsjonslogg) = when (deaktivert) {
+            true -> opptjening.deaktiver(orgnummer, subsumsjonslogg)
+            else -> opptjening.aktiver(orgnummer, subsumsjonslogg)
         }
     }
 }

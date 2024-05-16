@@ -2,7 +2,7 @@ package no.nav.helse.økonomi
 
 import java.math.BigDecimal
 import java.math.MathContext
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.dto.ProsentdelDto
 import kotlin.math.roundToInt
 
@@ -23,8 +23,8 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         internal fun ratio(a: Double, b: Double) =
             Prosentdel(if (a < b) a.toBigDecimal(mc).divide(b.toBigDecimal(mc), mc) else SIKKER_BRØK)
 
-        fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, block: SubsumsjonObserver.(Double) -> Unit) {
-            subsumsjonObserver.block(GRENSE.toDouble())
+        fun subsumsjon(subsumsjonslogg: Subsumsjonslogg, block: Subsumsjonslogg.(Double) -> Unit) {
+            subsumsjonslogg.block(GRENSE.toDouble())
         }
 
         internal fun Collection<Pair<Prosentdel, Double>>.average(total: Double): Prosentdel {

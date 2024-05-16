@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -36,17 +36,17 @@ class Vilkårsgrunnlag(
         return false
     }
 
-    private fun opptjening(subsumsjonObserver: SubsumsjonObserver): Opptjening {
+    private fun opptjening(subsumsjonslogg: Subsumsjonslogg): Opptjening {
         return Opptjening.nyOpptjening(
             grunnlag = opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
                 Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
             },
             skjæringstidspunkt = skjæringstidspunkt,
-            subsumsjonObserver = subsumsjonObserver
+            subsumsjonslogg = subsumsjonslogg
         )
     }
 
-    internal fun avklarSykepengegrunnlag(person: Person, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+    internal fun avklarSykepengegrunnlag(person: Person, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
         val rapporterteArbeidsforhold = opptjeningsgrunnlag.mapValues { (_, ansattPerioder) ->
             SkattSykepengegrunnlag(
                 hendelseId = meldingsreferanseId(),
@@ -55,14 +55,14 @@ class Vilkårsgrunnlag(
                 ansattPerioder = ansattPerioder.map { it.somAnsattPeriode() }
             )
         }
-        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, Sammenligningsgrunnlag(emptyList()), meldingsreferanseId(), subsumsjonObserver)
+        return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, Sammenligningsgrunnlag(emptyList()), meldingsreferanseId(), subsumsjonslogg)
     }
 
-    internal fun valider(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+    internal fun valider(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         val sykepengegrunnlagOk = sykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.valider(this)
         arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
-        val opptjening = opptjening(subsumsjonObserver)
+        val opptjening = opptjening(subsumsjonslogg)
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(

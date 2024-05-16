@@ -5,7 +5,7 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til

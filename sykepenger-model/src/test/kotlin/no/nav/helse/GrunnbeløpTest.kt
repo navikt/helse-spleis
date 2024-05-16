@@ -3,7 +3,7 @@ package no.nav.helse
 import java.time.LocalDate
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -152,7 +152,7 @@ internal class GrunnbeløpTest {
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
-            subsumsjonObserver = MaskinellJurist()
+            subsumsjonslogg = MaskinellJurist()
         )
     )
 
@@ -166,7 +166,7 @@ internal class GrunnbeløpTest {
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
-            subsumsjonObserver = MaskinellJurist()
+            subsumsjonslogg = MaskinellJurist()
         )
     )
 
@@ -179,7 +179,7 @@ internal class GrunnbeløpTest {
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
-            subsumsjonObserver = MaskinellJurist()
+            subsumsjonslogg = MaskinellJurist()
         )
     )
 
@@ -189,12 +189,12 @@ internal class GrunnbeløpTest {
 
     private fun Grunnbeløp.oppfyllerMinsteInntekt(dato: LocalDate, inntekt: Inntekt) =
         inntekt >= minsteinntekt(dato)
-    private fun Grunnbeløp.Companion.validerMinsteInntekt(skjæringstidspunkt: LocalDate, inntekt: Inntekt, alder: Alder, subsumsjonObserver: SubsumsjonObserver): Begrunnelse? {
+    private fun Grunnbeløp.Companion.validerMinsteInntekt(skjæringstidspunkt: LocalDate, inntekt: Inntekt, alder: Alder, subsumsjonslogg: Subsumsjonslogg): Begrunnelse? {
         val gjeldendeGrense = if(alder.forhøyetInntektskrav(skjæringstidspunkt)) `2G` else halvG
         val oppfylt = gjeldendeGrense.oppfyllerMinsteInntekt(skjæringstidspunkt, inntekt)
 
         if (alder.forhøyetInntektskrav(skjæringstidspunkt)) {
-            subsumsjonObserver.`§ 8-51 ledd 2`(
+            subsumsjonslogg.`§ 8-51 ledd 2`(
                 oppfylt = oppfylt,
                 skjæringstidspunkt = skjæringstidspunkt,
                 alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
@@ -203,7 +203,7 @@ internal class GrunnbeløpTest {
             if (oppfylt) return null
             return Begrunnelse.MinimumInntektOver67
         }
-        subsumsjonObserver.`§ 8-3 ledd 2 punktum 1`(
+        subsumsjonslogg.`§ 8-3 ledd 2 punktum 1`(
             oppfylt = oppfylt,
             skjæringstidspunkt = skjæringstidspunkt,
             beregningsgrunnlagÅrlig = inntekt.reflection { årlig, _, _, _ -> årlig },

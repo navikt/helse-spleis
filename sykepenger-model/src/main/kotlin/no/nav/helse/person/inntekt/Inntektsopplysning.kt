@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -70,15 +70,15 @@ sealed class Inntektsopplysning protected constructor(
 
     protected abstract fun erSamme(other: Inntektsopplysning): Boolean
 
-    internal open fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) { }
+    internal open fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) { }
 
     internal open fun subsumerArbeidsforhold(
-        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjonslogg: Subsumsjonslogg,
         organisasjonsnummer: String,
         forklaring: String,
         oppfylt: Boolean
     ) = apply {
-        subsumsjonObserver.`§ 8-15`(
+        subsumsjonslogg.`§ 8-15`(
             skjæringstidspunkt = dato,
             organisasjonsnummer = organisasjonsnummer,
             inntekterSisteTreMåneder = emptyList(),

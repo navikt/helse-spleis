@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding

@@ -1,7 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.desember
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
@@ -39,7 +39,7 @@ internal class ArbeidsgiverperiodeTest {
     @Test
     fun `Nav betaler arbeidsgiverperioden`() {
         val agp = agp(1.januar til 16.januar).utbetalingsdag(1.januar)
-        assertTrue(agp.forventerInntekt(1.januar til 16.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+        assertTrue(agp.forventerInntekt(1.januar til 16.januar, Sykdomstidslinje(), Subsumsjonslogg.NullObserver))
         assertTrue(agp.forventerOpplysninger(1.januar til 16.januar))
         assertFalse(agp.forventerOpplysninger(20.desember(2017) til 31.desember(2017)))
         assertTrue(agp.forventerOpplysninger(20.desember(2017) til 1.januar))
@@ -88,9 +88,9 @@ internal class ArbeidsgiverperiodeTest {
     @Test
     fun `ingen utbetaling dersom perioden er innenfor arbeidsgiverperioden eller før det utbetales noe`() {
         agp(1.januar til 16.januar).utbetalingsdag(23.januar).also { agp ->
-            assertFalse(agp.forventerInntekt(31.desember(2017) til 5.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
-            assertFalse(agp.forventerInntekt(15.januar til 22.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
-            assertTrue(agp.forventerInntekt(15.januar til 23.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertFalse(agp.forventerInntekt(31.desember(2017) til 5.januar, Sykdomstidslinje(), Subsumsjonslogg.NullObserver))
+            assertFalse(agp.forventerInntekt(15.januar til 22.januar, Sykdomstidslinje(), Subsumsjonslogg.NullObserver))
+            assertTrue(agp.forventerInntekt(15.januar til 23.januar, Sykdomstidslinje(), Subsumsjonslogg.NullObserver))
             assertFalse(agp.forventerOpplysninger(31.desember(2017) til 5.januar))
             assertFalse(agp.forventerOpplysninger(15.januar til 22.januar))
             assertTrue(agp.forventerOpplysninger(15.januar til 23.januar))
@@ -113,7 +113,7 @@ internal class ArbeidsgiverperiodeTest {
     fun `forventer opplysninger fra arbeidsgiver etter periode med opphold i helg`() {
         agp(1.januar til 16.januar).utbetalingsdag(17.januar).utbetalingsdag(18.januar).utbetalingsdag(fredag den 19.januar).oppholdsdag(lørdag den 20.januar).utbetalingsdag(mandag den 22.januar).also { agp ->
             assertTrue(agp.forventerOpplysninger(17.januar til 20.januar))
-            assertFalse(agp.forventerInntekt(20.januar til 21.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertFalse(agp.forventerInntekt(20.januar til 21.januar, Sykdomstidslinje(), Subsumsjonslogg.NullObserver))
             assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
             assertTrue(agp.forventerOpplysninger(22.januar til 23.januar))
         }
@@ -123,7 +123,7 @@ internal class ArbeidsgiverperiodeTest {
     fun `forventer ikke opplysninger fra arbeidsgiver etter periode med kun helg`() {
         agp(1.januar til 16.januar).utbetalingsdag(17.januar).utbetalingsdag(18.januar).utbetalingsdag(fredag den 19.januar).utbetalingsdag(mandag den 22.januar).also { agp ->
             assertTrue(agp.forventerOpplysninger(17.januar til 20.januar))
-            assertTrue(agp.forventerInntekt(lørdag den 20.januar til (søndag den 21.januar), Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertTrue(agp.forventerInntekt(lørdag den 20.januar til (søndag den 21.januar), Sykdomstidslinje(), Subsumsjonslogg.NullObserver))
             assertFalse(agp.forventerOpplysninger(lørdag den 20.januar til (søndag den 21.januar)))
             assertFalse(agp.forventerOpplysninger(20.januar til 21.januar))
             assertFalse(agp.forventerOpplysninger(22.januar til 23.januar))

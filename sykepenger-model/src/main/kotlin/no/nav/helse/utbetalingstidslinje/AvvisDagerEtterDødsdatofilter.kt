@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 
 internal class AvvisDagerEtterDødsdatofilter(
     private val alder: Alder,
@@ -14,7 +14,7 @@ internal class AvvisDagerEtterDødsdatofilter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonslogg: Subsumsjonslogg
     ): List<Utbetalingstidslinje> {
         val avvisteTidslinjer = alder.avvisDager(tidslinjer)
 

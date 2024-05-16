@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -71,7 +71,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(11, inspektør.arbeidsgiverperiodedagNavTeller)
         assertEquals(1, perioder.size)
         val arbeidsgiverperiode = perioder.first()
-        assertTrue(arbeidsgiverperiode.forventerInntekt(1.januar til 15.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+        assertTrue(arbeidsgiverperiode.forventerInntekt(1.januar til 15.januar, Sykdomstidslinje(), Subsumsjonslogg.NullObserver))
         assertEquals(1.januar til 15.januar, perioder.first())
     }
 
@@ -633,12 +633,12 @@ internal class UtbetalingstidslinjeBuilderTest {
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonObserver = SubsumsjonObserver.NullObserver
+            subsumsjonslogg = Subsumsjonslogg.NullObserver
         )
         val builder = UtbetalingstidslinjeBuilder(inntekter, tidslinje.periode() ?: LocalDate.MIN.somPeriode())
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller,
-            Komposittmediator(periodebuilder, builder), SubsumsjonObserver.NullObserver)
+            Komposittmediator(periodebuilder, builder), Subsumsjonslogg.NullObserver)
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
         utbetalingstidslinje = builder.result()
         inspektør = utbetalingstidslinje.inspektør

@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.avklarSykepengegrunnlag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
@@ -28,9 +28,9 @@ class InntektForSykepengegrunnlag(
         skjæringstidspunkt: LocalDate,
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         meldingsreferanseId: UUID,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonslogg: Subsumsjonslogg
     ) =
-        inntekter.avklarSykepengegrunnlag(hendelse, person, rapporterteArbeidsforhold, skjæringstidspunkt, sammenligningsgrunnlag, meldingsreferanseId, subsumsjonObserver)
+        inntekter.avklarSykepengegrunnlag(hendelse, person, rapporterteArbeidsforhold, skjæringstidspunkt, sammenligningsgrunnlag, meldingsreferanseId, subsumsjonslogg)
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

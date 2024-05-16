@@ -15,7 +15,7 @@ import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
@@ -352,7 +352,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             skjæringstidspunkt = 1.januar,
             økonomi = Økonomi.sykdomsgrad(100.prosent),
             regler = NormalArbeidstaker,
-            subsumsjonObserver = NullObserver,
+            subsumsjonslogg = NullObserver,
         )
         assertNotNull(økonomi)
         assertEquals(Inntekt.INGEN, økonomi.inspektør.dekningsgrunnlag)

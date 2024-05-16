@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -111,21 +111,21 @@ class Søknad(
 
     internal fun delvisOverlappende(other: Periode) = other.delvisOverlappMed(sykdomsperiode)
 
-    internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagElement?, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        valider(subsumsjonObserver)
+    internal fun valider(vilkårsgrunnlag: VilkårsgrunnlagElement?, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
+        valider(subsumsjonslogg)
         validerInntektskilder(vilkårsgrunnlag)
         søknadstype.valider(this, vilkårsgrunnlag, orgnummer, sykdomstidslinje.periode())
         return this
     }
 
-    private fun valider(subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
+    private fun valider(subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
+        perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonslogg) }
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
         merknaderFraSykmelding.forEach { it.valider(this) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {
-            subsumsjonObserver.`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager)
+            subsumsjonslogg.`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager)
             varsel(RV_SØ_2)
         }
         if (arbeidUtenforNorge) {
@@ -258,7 +258,7 @@ class Søknad(
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(varselkode)
         }
 
-        internal open fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonObserver: SubsumsjonObserver) {}
+        internal open fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonslogg: Subsumsjonslogg) {}
 
         class Sykdom(
             fom: LocalDate,
@@ -321,8 +321,8 @@ class Søknad(
                 søknad.varsel(RV_SØ_8)
             }
 
-            override fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonObserver: SubsumsjonObserver) {
-                subsumsjonObserver.`§ 8-9 ledd 1`(false, periode, søknadsperioder)
+            override fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonslogg: Subsumsjonslogg) {
+                subsumsjonslogg.`§ 8-9 ledd 1`(false, periode, søknadsperioder)
             }
 
             private fun alleUtlandsdagerErFerie(søknad:Søknad):Boolean {

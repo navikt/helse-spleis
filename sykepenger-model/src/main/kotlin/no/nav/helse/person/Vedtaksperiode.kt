@@ -8,8 +8,8 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.SubsumsjonObserver
-import no.nav.helse.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender
@@ -960,8 +960,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun finnArbeidsgiverperiodeHensyntarForkastede() = arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode, sykdomstidslinje)
 
-    private fun forventerInntekt(subsumsjonObserver: SubsumsjonObserver = jurist): Boolean {
-        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, subsumsjonObserver)
+    private fun forventerInntekt(subsumsjonslogg: Subsumsjonslogg = jurist): Boolean {
+        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, subsumsjonslogg)
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {

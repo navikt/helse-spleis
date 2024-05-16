@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.etterlevelse.SubsumsjonObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -26,7 +26,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder) = sykepengegrunnlag(alder, 
 internal fun Inntekt.sykepengegrunnlag(skjæringstidspunkt: LocalDate) =
     sykepengegrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, AbstractPersonTest.ORGNUMMER, skjæringstidspunkt)
 
-internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver = SubsumsjonObserver.NullObserver, skattInntekt: Inntekt? = null, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
+internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.NullObserver, skattInntekt: Inntekt? = null, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
     Sykepengegrunnlag(
         alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
@@ -43,7 +43,7 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
             val innteker = (1L..12L).map { Skatteopplysning(meldingsreferanseId, skattInntekt, skjæringstidspunkt.yearMonth.minusMonths(it), LØNNSINNTEKT, "", "") }
             listOf(ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(orgnr, innteker))
         } ?: emptyList()),
-        subsumsjonObserver = subsumsjonObserver
+        subsumsjonslogg = subsumsjonslogg
     )
 internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
     Sykepengegrunnlag.ferdigSykepengegrunnlag(
