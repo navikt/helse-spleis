@@ -5,7 +5,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("testcontainers", "1.19.3")
-            version("rapids-and-rivers", "2024020507581707116327.1c34df474331")
+            version("rapids-and-rivers", "2024052210261716366380.edbfb26e544b")
             version("postgres", "42.7.3")
             version("hikari", "5.1.0")
             version("kotliquery", "1.9.0")
@@ -13,7 +13,7 @@ dependencyResolutionManagement {
             version("flyway", "10.5.0")
             version("logback", "1.4.14")
             version("logstash", "7.4")
-            version("jackson", "2.16.1")
+            version("jackson", "2.17.1")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
 

@@ -1,7 +1,7 @@
 import java.io.PrintWriter
 
 plugins {
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "2.0.0"
 }
 
 val junitJupiterVersion = "5.10.2"
