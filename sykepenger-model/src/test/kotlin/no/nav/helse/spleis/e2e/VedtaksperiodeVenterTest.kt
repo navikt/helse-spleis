@@ -14,8 +14,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.VenterPå
-import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.Venteårsak.Hva
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,7 +38,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             // Dermed er ikke gitt at `vedtaksperiodeId == venterPå.vedtaksperiodeId` er ensbetydende med at det er den perioden vi "venterPå" - det betyr bare at vi er "nestemann"
             assertEquals(1.vedtaksperiode, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
             assertEquals("INNTEKTSMELDING", vedtaksperiodeVenter.venterPå.venteårsak.hva)
-            assertEquals("MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE", vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
+            assertEquals("MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE", vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
         }
     }
 
