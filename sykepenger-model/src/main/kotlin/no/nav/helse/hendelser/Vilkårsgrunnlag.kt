@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -28,6 +29,7 @@ class Vilkårsgrunnlag(
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
     private val opptjeningsgrunnlag = arbeidsforhold.opptjeningsgrunnlag()
+    private val harInntektMånedenFørSkjæringstidspunkt = inntektsvurderingForSykepengegrunnlag.harInntektI(YearMonth.from(skjæringstidspunkt).minusMonths(1))
 
     internal fun erRelevant(other: UUID, skjæringstidspunktVedtaksperiode: LocalDate): Boolean {
         if (other.toString() != vedtaksperiodeId) return false
@@ -42,6 +44,7 @@ class Vilkårsgrunnlag(
                 Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
             },
             skjæringstidspunkt = skjæringstidspunkt,
+            harInntektMånedenFørSkjæringstidspunkt = harInntektMånedenFørSkjæringstidspunkt,
             subsumsjonslogg = subsumsjonslogg
         )
     }
@@ -63,7 +66,8 @@ class Vilkårsgrunnlag(
         inntektsvurderingForSykepengegrunnlag.valider(this)
         arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
         val opptjening = opptjening(subsumsjonslogg)
-        val opptjeningvurderingOk = opptjening.valider(this)
+        opptjening.validerInntektMånedenFørSkjæringstidspunkt(this)
+        val opptjeningvurderingOk = opptjening.validerOpptjeningsdager(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,

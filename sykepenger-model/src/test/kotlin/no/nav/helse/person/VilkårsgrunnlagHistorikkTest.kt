@@ -68,7 +68,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-                opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt, NullObserver),
+                opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt, true, NullObserver),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = UUID.randomUUID(),
@@ -96,7 +96,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = gammeltSkjæringstidspunkt,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt, NullObserver),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -119,7 +119,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -136,7 +136,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR, skjæringstidspunkt, skjæringstidspunkt),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -159,7 +159,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -168,7 +168,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 3.januar,
             sykepengegrunnlag = inntekt2.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 3.januar, NullObserver),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 3.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -184,7 +184,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
@@ -201,7 +201,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -218,7 +218,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag("et annet orgnr"),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
+            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),

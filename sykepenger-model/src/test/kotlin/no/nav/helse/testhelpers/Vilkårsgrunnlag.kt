@@ -16,7 +16,7 @@ internal fun Map<LocalDate, Inntektsopplysning>.somVilkårsgrunnlagHistorikk(org
         vilkårsgrunnlagHistorikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = inntektsopplysning.inspektør.beløp.sykepengegrunnlag(orgnr = organisasjonsnummer, skjæringstidspunkt = skjæringstidspunkt, virkningstidspunkt = skjæringstidspunkt),
-            opptjening = Opptjening.gjenopprett(skjæringstidspunkt, emptyList(), 1.januar til 31.januar),
+            opptjening = Opptjening.gjenopprett(skjæringstidspunkt, null, emptyList(), 1.januar til 31.januar),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),

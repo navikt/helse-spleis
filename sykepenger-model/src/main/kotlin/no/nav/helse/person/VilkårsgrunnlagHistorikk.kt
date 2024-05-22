@@ -535,7 +535,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             val foreløpigAvvist = sykepengegrunnlag.avvis(tidslinjer, skjæringstidspunktperiode, periode, subsumsjonslogg)
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-            if (!opptjening.erOppfylt()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+            if (!opptjening.harTilstrekkeligAntallOpptjeningsdager()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
             return Utbetalingstidslinje.avvis(foreløpigAvvist, listOf(skjæringstidspunktperiode), begrunnelser)
         }
 
@@ -560,7 +560,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             nyttSkjæringstidspunkt: LocalDate?
         ): VilkårsgrunnlagElement {
             val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
-            val opptjeningOk = opptjening?.valider(hendelse)
+            val opptjeningOk = opptjening?.validerOpptjeningsdager(hendelse)
             return Grunnlagsdata(
                 skjæringstidspunkt = nyttSkjæringstidspunkt ?: skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,

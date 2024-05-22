@@ -85,7 +85,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 1000.månedlig.sykepengegrunnlag,
-            opptjening = Opptjening.nyOpptjening(emptyList(), 1.januar, Subsumsjonslogg.NullObserver),
+            opptjening = Opptjening.nyOpptjening(emptyList(), 1.januar, true, Subsumsjonslogg.NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
@@ -321,7 +321,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                                 Arbeidsforhold(1.januar.minusYears(1), null, false)
                             )
                         )
-                    ), 1.januar, Subsumsjonslogg.NullObserver
+                    ), 1.januar, true, Subsumsjonslogg.NullObserver
                 ),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,

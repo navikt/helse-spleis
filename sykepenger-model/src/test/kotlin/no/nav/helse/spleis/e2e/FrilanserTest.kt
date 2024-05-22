@@ -150,7 +150,7 @@ internal class FrilanserTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 orgnummer = a1,
-                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 10000.månedlig, a2 to 100.månedlig), 1.januar),
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to 10000.månedlig, a2 to 100.månedlig), 1.mars),
                 arbeidsforhold = arbeidsforhold
             )
             håndterYtelser(1.vedtaksperiode)

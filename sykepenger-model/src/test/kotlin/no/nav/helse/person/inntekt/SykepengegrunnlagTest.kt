@@ -554,7 +554,7 @@ internal class SykepengegrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, NullObserver)
+        ), skjæringstidspunkt, true, NullObserver)
 
         Aktivitetslogg().also { aktivitetslogg ->
             sykepengegrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
@@ -713,7 +713,7 @@ internal class SykepengegrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, NullObserver)
+        ), skjæringstidspunkt, true, NullObserver)
         val opptjeningMedA2 = Opptjening.nyOpptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
                 Arbeidsforhold(
@@ -729,7 +729,7 @@ internal class SykepengegrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, NullObserver)
+        ), skjæringstidspunkt, true, NullObserver)
 
         Aktivitetslogg().also { aktivitetslogg ->
             sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningUtenA2)

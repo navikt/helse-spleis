@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -75,7 +74,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 31.desember(2017), ansattTom = null, Arbeidsforholdtype.ORDINÆRT))
         val grunnlagsdata = person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
         assertEquals(1, grunnlagsdata.opptjening.opptjeningsdager())
-        assertEquals(false, grunnlagsdata.opptjening.erOppfylt())
+        assertEquals(false, grunnlagsdata.opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertVarsel(RV_OV_1, 1.vedtaksperiode.filter(orgnummer = a1))
     }
 
@@ -140,10 +139,11 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
             ), arbeidsforhold = emptyList()
         ))
 
-        assertForventetFeil(
-            forklaring = "Her skal det være varsel",
-            nå = { assertIngenVarsel(RV_OV_3, 1.vedtaksperiode.filter(a1)) },
-            ønsket = { assertVarsel(RV_OV_3, 1.vedtaksperiode.filter()) })
+        assertVarsel(RV_OV_3, 1.vedtaksperiode.filter())
+
+        håndterYtelser()
+
+        assertEquals(0, inspektør.utbetalinger.single().inspektør.utbetalingstidslinje.inspektør.avvistDagTeller)
     }
 
     private fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {

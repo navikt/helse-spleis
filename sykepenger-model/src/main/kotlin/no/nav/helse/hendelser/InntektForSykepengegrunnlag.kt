@@ -7,6 +7,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.avklarSykepengegrunnlag
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektI
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_3
@@ -54,6 +55,10 @@ class InntektForSykepengegrunnlag(
                 it.erFrilanser && inntekter.harInntektFor(arbeidsforhold.orgnummer, månedFørSkjæringstidspunkt)
             }
         }
+    }
+
+    internal fun harInntektI(måned: YearMonth): Boolean {
+        return inntekter.harInntektI(måned)
     }
 
     class Arbeidsforhold(

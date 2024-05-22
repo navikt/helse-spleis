@@ -148,7 +148,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                     )
                 ), skjæringstidspunkt, Sammenligningsgrunnlag(emptyList()), MaskinellJurist()
             ),
-            opptjening = Opptjening.nyOpptjening(opptjening, 1.januar, MaskinellJurist()),
+            opptjening = Opptjening.nyOpptjening(opptjening, 1.januar, true, MaskinellJurist()),
             medlemskapstatus = when (erMedlem) {
                 true -> Medlemskapsvurdering.Medlemskapstatus.Ja
                 false -> Medlemskapsvurdering.Medlemskapstatus.Nei

@@ -77,7 +77,7 @@ internal class OpptjeningTest {
         val arbeidsforhold = listOf(Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(
             Arbeidsforhold(1.januar, null, false)
         )))
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars, MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars, true, MaskinellJurist())
         assertNull(opptjening.startdatoFor("a2"))
     }
 
@@ -86,7 +86,7 @@ internal class OpptjeningTest {
         val arbeidsforhold = listOf(Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(
             Arbeidsforhold(1.januar, null, true)
         )))
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars, MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars, true, MaskinellJurist())
         assertEquals(28.februar, opptjening.startdatoFor("a1"))
     }
 
@@ -96,16 +96,16 @@ internal class OpptjeningTest {
             Arbeidsforhold(1.februar, null, false),
             Arbeidsforhold(1.januar, 31.januar, false),
         )))
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars, MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.mars, true, MaskinellJurist())
         assertEquals(1.januar, opptjening.startdatoFor("a1"))
     }
 
     @Test
     fun `Tom liste med arbeidsforhold betyr at du ikke oppfyller opptjeningskrav`() {
         val arbeidsforhold = emptyList<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>()
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar, MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar, true, MaskinellJurist())
 
-        assertFalse(opptjening.erOppfylt())
+        assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
 
     @Test
@@ -122,9 +122,9 @@ internal class OpptjeningTest {
                 )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 2.januar, MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 2.januar, true, MaskinellJurist())
 
-        assertFalse(opptjening.erOppfylt())
+        assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
 
     @Test
@@ -141,9 +141,9 @@ internal class OpptjeningTest {
                 )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(27), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(27), true, MaskinellJurist())
 
-        assertFalse(opptjening.erOppfylt())
+        assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
 
     @Test
@@ -160,9 +160,9 @@ internal class OpptjeningTest {
                 )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), true, MaskinellJurist())
 
-        assertTrue(opptjening.erOppfylt())
+        assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
 
     @Test
@@ -179,9 +179,9 @@ internal class OpptjeningTest {
                 )
             )
         )
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), true, MaskinellJurist())
 
-        assertFalse(opptjening.erOppfylt())
+        assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
 
     @Test
@@ -205,9 +205,9 @@ internal class OpptjeningTest {
             )
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), true, MaskinellJurist())
 
-        assertFalse(opptjening.erOppfylt())
+        assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
 
     @Test
@@ -226,9 +226,9 @@ internal class OpptjeningTest {
             )
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), true, MaskinellJurist())
 
-        assertTrue(opptjening.erOppfylt())
+        assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
 
     @Test
@@ -241,9 +241,9 @@ internal class OpptjeningTest {
             ))
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar.plusDays(28), true, MaskinellJurist())
 
-        assertTrue(opptjening.erOppfylt())
+        assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
     }
 
     @Test
@@ -253,9 +253,9 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 2.mai(2022), true, MaskinellJurist())
 
-        assertTrue(opptjening.erOppfylt())
+        assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertEquals(1.oktober(2017), opptjening.opptjeningFom())
     }
 
@@ -266,9 +266,9 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 3.mai(2022), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 3.mai(2022), true, MaskinellJurist())
 
-        assertTrue(opptjening.erOppfylt())
+        assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertEquals(1.oktober(2017), opptjening.opptjeningFom())
     }
 
@@ -279,9 +279,9 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)))
         )
 
-        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, tirsdag den 3.mai(2022), MaskinellJurist())
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, tirsdag den 3.mai(2022), true, MaskinellJurist())
 
-        assertFalse(opptjening.erOppfylt())
+        assertFalse(opptjening.harTilstrekkeligAntallOpptjeningsdager())
         assertEquals(2.mai(2022), opptjening.opptjeningFom())
     }
 
@@ -294,7 +294,7 @@ internal class OpptjeningTest {
                 listOf(Arbeidsforhold(4.desember(2017), 31.januar, deaktivert = false))
             )
         )
-        Opptjening.nyOpptjening(arbeidsforhold, 1.januar, jurist)
+        Opptjening.nyOpptjening(arbeidsforhold, 1.januar, true, jurist)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = Paragraf.PARAGRAF_8_2,
@@ -324,7 +324,7 @@ internal class OpptjeningTest {
                 listOf(Arbeidsforhold(5.desember(2017), 31.januar, deaktivert = false))
             )
         )
-        Opptjening.nyOpptjening(arbeidsforhold, 1.januar, jurist)
+        Opptjening.nyOpptjening(arbeidsforhold, 1.januar, true, jurist)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = Paragraf.PARAGRAF_8_2,
@@ -343,5 +343,20 @@ internal class OpptjeningTest {
             ),
             output = mapOf("antallOpptjeningsdager" to 27)
         )
+    }
+
+    @Test
+    fun `Har ikke inntekt måneden før skjæringstidspunkt`() {
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("orgnummer", listOf(
+                Arbeidsforhold(ansattFom = EPOCH, ansattTom = null, deaktivert = false),
+            ))
+        )
+
+        val opptjening = Opptjening.nyOpptjening(arbeidsforhold, 1.januar, false, MaskinellJurist())
+
+        assertTrue(opptjening.harTilstrekkeligAntallOpptjeningsdager())
+        assertFalse(opptjening.harInntektMånedenFørSkjæringstidspunkt()!!)
+        assertTrue(opptjening.erOppfylt())
     }
 }

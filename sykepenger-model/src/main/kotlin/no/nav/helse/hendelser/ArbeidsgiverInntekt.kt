@@ -60,6 +60,9 @@ class ArbeidsgiverInntekt(
         internal fun List<ArbeidsgiverInntekt>.harInntektFor(orgnummer: String, måned: YearMonth) =
             this.any { it.arbeidsgiver == orgnummer && it.inntekter.harInntektFor(måned) }
 
+        internal fun List<ArbeidsgiverInntekt>.harInntektI(måned: YearMonth) =
+            this.any { it.inntekter.harInntektFor(måned) }
+
         internal fun List<ArbeidsgiverInntekt>.antallMåneder() =
             MånedligInntekt.antallMåneder(flatMap { it.inntekter })
     }
@@ -81,7 +84,7 @@ class ArbeidsgiverInntekt(
         )
 
         companion object {
-            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned }
+            internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN}
 
             internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
                 if (inntekter.isEmpty()) return 0
