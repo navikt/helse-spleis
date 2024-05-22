@@ -24,6 +24,27 @@ import org.junit.jupiter.api.Test
 internal class VedtaksperiodeVenterTest: AbstractDslTest() {
 
     @Test
+    fun `venterPå burde kanskje vært navgitt nestemann`() {
+        a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
+            // Her skulle man kanskje tro at "venterPå" pekte på A2 sin vedtaksperiode som _ikke_ har fått inntektsmelding, ettersom det er den vi faktisk venter på.
+            // Men ettersom det er A1 som vil bli behandlet først når vi har fått IM fra begge (nestemann) så er den dens informasjon som ligger i "venterPå" -
+            // med en "hvorfor"-verdi som hinter til at det egentlig er en annen periode vi reelt sett venter på 🫠
+            // Dermed er ikke gitt at `vedtaksperiodeId == venterPå.vedtaksperiodeId` er ensbetydende med at det er den perioden vi "venterPå" - det betyr bare at vi er "nestemann"
+            assertEquals(1.vedtaksperiode, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
+            assertEquals("INNTEKTSMELDING", vedtaksperiodeVenter.venterPå.venteårsak.hva)
+            assertEquals("MANGLER_INNTEKT_FOR_VILKÅRSPRØVING_PÅ_ANDRE_ARBEIDSGIVERE", vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
+        }
+    }
+
+    @Test
     fun `Venter på tidligere periode som ikke har fått inntektsmelding`(){
         a1 {
             val søknadIdJanuar = UUID.randomUUID()
