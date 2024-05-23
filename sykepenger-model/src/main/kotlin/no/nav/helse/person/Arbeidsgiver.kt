@@ -222,16 +222,6 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) = this
             .any { arbeidsgiver -> arbeidsgiver.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) }
 
-        /* krever inntekt for alle vedtaksperioder som deler skjæringstidspunkt,
-            men tillater at det ikke er inntekt for perioder innenfor arbeidsgiverperioden/uten utbetaling
-         */
-        internal fun Iterable<Arbeidsgiver>.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) = this
-            .all { arbeidsgiver -> arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) }
-
-        internal fun Iterable<Arbeidsgiver>.trengerInntektsmelding(hendelse: IAktivitetslogg, periode: Vedtaksperiode) = this
-            .nåværendeVedtaksperioder(TRENGER_INNTEKTSMELDING(periode, hendelse))
-            .isNotEmpty()
-
         internal fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektsmelding(hendelse: IAktivitetslogg, periode: Vedtaksperiode) = this
             .nåværendeVedtaksperioder(TRENGER_INNTEKTSMELDING(periode, hendelse))
             .førstePeriode()
