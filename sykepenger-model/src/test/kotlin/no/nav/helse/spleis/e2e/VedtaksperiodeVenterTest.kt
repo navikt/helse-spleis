@@ -1,12 +1,17 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate.EPOCH
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -14,13 +19,67 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.Venteårsak.Hva
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeVenterTest: AbstractDslTest() {
+
+    @Test
+    fun `Vedtaksperiode som revurderes som følge av søknad fra ghost skal peke på at den venter på perioden til ghosten`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT),
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
+            assertEquals(1.vedtaksperiode, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
+            assertEquals("a2", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
+            assertEquals("INNTEKTSMELDING", vedtaksperiodeVenter.venterPå.venteårsak.hva)
+            assertNull(vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
+        }
+        val a2VedtaksperiodeId = a2 { 1.vedtaksperiode }
+
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+            val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
+            assertEquals("INNTEKTSMELDING", vedtaksperiodeVenter.venterPå.venteårsak.hva)
+
+            assertForventetFeil(
+                forklaring = "Per i dag antar vi alltid at det er nestemann vi venter på i AvventerRevurdering",
+                nå = {
+                    assertEquals("a1", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
+                    assertEquals(1.vedtaksperiode, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
+                    assertEquals("MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE", vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
+                },
+                ønsket = {
+                    assertEquals("a2", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
+                    assertEquals(a2VedtaksperiodeId, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
+                    assertNull(vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
+                }
+            )
+        }
+    }
 
     @Test
     fun `Vedtaksperioden vi venter på kan være en annen enn den som er nestemann til behandling`() {
