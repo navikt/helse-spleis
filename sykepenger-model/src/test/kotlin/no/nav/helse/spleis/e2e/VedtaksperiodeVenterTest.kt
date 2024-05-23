@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate.EPOCH
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
@@ -64,20 +63,9 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
             val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
             assertEquals("INNTEKTSMELDING", vedtaksperiodeVenter.venterPå.venteårsak.hva)
-
-            assertForventetFeil(
-                forklaring = "Per i dag antar vi alltid at det er nestemann vi venter på i AvventerRevurdering",
-                nå = {
-                    assertEquals("a1", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
-                    assertEquals(1.vedtaksperiode, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
-                    assertEquals("MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE", vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
-                },
-                ønsket = {
-                    assertEquals("a2", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
-                    assertEquals(a2VedtaksperiodeId, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
-                    assertNull(vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
-                }
-            )
+            assertEquals("a2", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
+            assertEquals(a2VedtaksperiodeId, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
+            assertNull(vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
         }
     }
 
