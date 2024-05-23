@@ -595,6 +595,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                   ],
                   "vedtaksperiodeId": "00000000-0000-0000-0000-000000000000",
                   "beregningId": "00000000-0000-0000-0000-000000000000",
+                  "behandlingId": "00000000-0000-0000-0000-000000000000",
                   "forbrukteSykedager": 10,
                   "gjenstaendeSykedager": 238,
                   "hendelser": [
