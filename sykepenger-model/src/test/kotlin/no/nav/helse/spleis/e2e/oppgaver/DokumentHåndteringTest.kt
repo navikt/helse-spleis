@@ -5,6 +5,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -119,7 +120,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
         inntektsmeldingFørSøknadEvent.let {
             assertEquals(id, it.inntektsmeldingId)
-            assertEquals(listOf(1.januar til 16.januar), it.overlappendeSykmeldingsperioder)
+            assertEquals(listOf(1.januar til 16.januar), it.relevanteSykmeldingsperioder)
         }
     }
 
@@ -132,7 +133,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
         inntektsmeldingFørSøknadEvent.let {
             assertEquals(id, it.inntektsmeldingId)
-            assertEquals(listOf(20.januar til 20.januar), it.overlappendeSykmeldingsperioder)
+            assertEquals(listOf(20.januar til 20.januar), it.relevanteSykmeldingsperioder)
         }
     }
 
@@ -142,13 +143,39 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
         val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
-        val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
-        assertEquals(id, inntektsmelding)
+        val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
+        inntektsmeldingFørSøknadEvent.let {
+            assertEquals(id, it.inntektsmeldingId)
+            assertEquals(listOf(17.januar til 31.januar), it.relevanteSykmeldingsperioder)
+        }
+    }
+
+    @Test
+    fun `Inntektsmelding før forlengelse-søknad - auu er litt lang`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 31.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
+        val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
+        inntektsmeldingFørSøknadEvent.let {
+            assertEquals(id, it.inntektsmeldingId)
+            assertEquals(listOf(1.februar til 28.februar), it.relevanteSykmeldingsperioder)
+        }
     }
 
     @Test
     fun `Inntektsmelding ikke håndtert`() {
         val id = håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
+        assertEquals(id, inntektsmelding)
+    }
+
+    @Test
+    fun `Inntektsmelding ikke håndtert - lang periode mellom auu og sykmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
+        val id = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
         val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
         assertEquals(id, inntektsmelding)
     }

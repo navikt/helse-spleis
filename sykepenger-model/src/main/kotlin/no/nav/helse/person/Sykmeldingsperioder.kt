@@ -31,6 +31,9 @@ internal class Sykmeldingsperioder(
     internal fun overlappendePerioder(dager: DagerFraInntektsmelding) =
         dager.overlappendeSykmeldingsperioder(perioder)
 
+    internal fun perioderInnenfor16Dager(dager: DagerFraInntektsmelding) =
+        dager.perioderInnenfor16Dager(perioder)
+
     internal fun dto() = SykmeldingsperioderDto(perioder = this.perioder.map { it.dto() })
 
     internal companion object {

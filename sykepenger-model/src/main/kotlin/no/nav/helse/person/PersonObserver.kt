@@ -103,7 +103,7 @@ interface PersonObserver {
     }
     data class InntektsmeldingFørSøknadEvent(
         val inntektsmeldingId: UUID,
-        val overlappendeSykmeldingsperioder: List<Periode>,
+        val relevanteSykmeldingsperioder: List<Periode>,
         val organisasjonsnummer: String
     )
 

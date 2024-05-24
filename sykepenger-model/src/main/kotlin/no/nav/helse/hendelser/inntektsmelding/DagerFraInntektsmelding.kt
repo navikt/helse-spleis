@@ -19,6 +19,7 @@ import no.nav.helse.nesteDag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.påvirkerArbeidsgiverperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -264,6 +265,17 @@ internal class DagerFraInntektsmelding(
     fun overlappendeSykmeldingsperioder(sykmeldingsperioder: List<Periode>): List<Periode> {
         if (overlappsperiode == null) return emptyList()
         return sykmeldingsperioder.mapNotNull { it.overlappendePeriode(overlappsperiode) }
+    }
+
+    fun perioderInnenfor16Dager(sykmeldingsperioder: List<Periode>): List<Periode> {
+        if (overlappsperiode == null) return emptyList()
+        return sykmeldingsperioder.mapNotNull { sykmeldingsperiode ->
+            val erRettFør = overlappsperiode.erRettFør(sykmeldingsperiode)
+            if (erRettFør) return@mapNotNull sykmeldingsperiode
+            val dagerMellom =
+                overlappsperiode.periodeMellom(sykmeldingsperiode.start)?.count() ?: return@mapNotNull null
+            if (dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD) sykmeldingsperiode else null
+        }
     }
 
     private fun validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp: Arbeidsgiverperiode?) {

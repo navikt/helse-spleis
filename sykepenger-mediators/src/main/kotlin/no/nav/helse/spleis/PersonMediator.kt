@@ -90,7 +90,7 @@ internal class PersonMediator(
     override fun inntektsmeldingFørSøknad(event: PersonObserver.InntektsmeldingFørSøknadEvent) {
         queueMessage(JsonMessage.newMessage("inntektsmelding_før_søknad", mapOf(
             "inntektsmeldingId" to event.inntektsmeldingId,
-            "overlappende_sykmeldingsperioder" to event.overlappendeSykmeldingsperioder.map { periode ->
+            "relevante_sykmeldingsperioder" to event.relevanteSykmeldingsperioder.map { periode ->
                 mapOf(
                     "fom" to periode.start,
                     "tom" to periode.endInclusive

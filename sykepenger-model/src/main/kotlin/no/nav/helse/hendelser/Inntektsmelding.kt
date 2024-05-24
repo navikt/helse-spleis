@@ -170,10 +170,10 @@ class Inntektsmelding(
     internal fun ikkeHåndert(person: Person, vedtaksperioder: List<Vedtaksperiode>, sykmeldingsperioder: Sykmeldingsperioder, dager: DagerFraInntektsmelding) {
         if (håndtertNå()) return
         info("Inntektsmelding ikke håndtert")
-        val overlappendeSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager)
-        if (overlappendeSykmeldingsperioder.isNotEmpty()) {
-            person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId(), overlappendeSykmeldingsperioder, organisasjonsnummer)
-            return info("Inntektsmelding overlapper med sykmeldingsperioder $overlappendeSykmeldingsperioder")
+        val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
+        if (relevanteSykmeldingsperioder.isNotEmpty()) {
+            person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId(), relevanteSykmeldingsperioder, organisasjonsnummer)
+            return info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
         }
         person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
     }
