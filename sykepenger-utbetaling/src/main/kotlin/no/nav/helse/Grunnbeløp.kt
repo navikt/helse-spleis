@@ -10,6 +10,7 @@ import kotlin.math.roundToInt
 
 class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
+        124028.årlig.gyldigFra(1.mai(2024), gyldigSomMinsteinntektKrav = 3.juni(2024)),
         118620.årlig.gyldigFra(1.mai(2023), gyldigSomMinsteinntektKrav = 29.mai(2023)),
         111477.årlig.gyldigFra(1.mai(2022), gyldigSomMinsteinntektKrav = 23.mai(2022)),
         106399.årlig.gyldigFra(1.mai(2021), gyldigSomMinsteinntektKrav = 24.mai(2021) ),
