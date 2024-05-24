@@ -36,8 +36,9 @@ import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDeta
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
-import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_INNTEKTSMELDING
+import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
+import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPENDE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
@@ -224,7 +225,11 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektsmelding(hendelse: IAktivitetslogg, periode: Vedtaksperiode) = this
             .nåværendeVedtaksperioder(TRENGER_INNTEKTSMELDING(periode, hendelse))
-            .førstePeriode()
+            .førstePeriode() ?: error("Fant ingen perioder som trenger inntektsmelding.")
+
+        internal fun Iterable<Arbeidsgiver>.harOverlappendePerioderSomManglerTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg, periode: Vedtaksperiode) = this
+            .nåværendeVedtaksperioder(OVERLAPPENDE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING(periode, hendelse))
+            .isNotEmpty()
 
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }

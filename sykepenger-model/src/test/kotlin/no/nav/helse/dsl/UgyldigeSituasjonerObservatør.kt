@@ -141,7 +141,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         if (event.revurderingFeilet()) return // For tester som ender opp i revurdering feilet er det riktig at vi trenger hjelp 🛟
         if (event.auuVilOmgjøres()) return // For tester som ikke lar en AUU gå videre i livet 🛟
         """
-        Har du endret/opprettet en vedtaksperiodetilstand uten å vurdre konsekvensene av 'venteårsak'? 
+        Har du endret/opprettet en vedtaksperiodetilstand uten å vurdere konsekvensene av 'venteårsak'? 
         Eller har du klart å skriv en test vi ikke støtter? 
         ${event.tilstander()}
         $event

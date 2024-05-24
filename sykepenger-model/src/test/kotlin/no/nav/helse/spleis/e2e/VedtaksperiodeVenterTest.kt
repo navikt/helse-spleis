@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate.EPOCH
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
@@ -23,11 +22,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.Venteårsak.Hva
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class VedtaksperiodeVenterTest: AbstractDslTest() {
 
@@ -42,21 +39,13 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
         val a1Vedtaksperiode2 = a1 { 2.vedtaksperiode }
         a2 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            assertForventetFeil(
-                forklaring = "na",
-                nå = { assertThrows<IllegalStateException> { håndterInntektsmelding(listOf(1.januar til 16.januar)) } },
-                ønsket = {
-                    assertDoesNotThrow {
-                        håndterInntektsmelding(listOf(1.januar til 16.januar))
-                        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                        val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
-                        assertEquals(a1Vedtaksperiode2, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
-                        assertEquals("a1", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
-                        assertEquals("INNTEKTSMELDING", vedtaksperiodeVenter.venterPå.venteårsak.hva)
-                        assertNull(vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
-                    }
-                }
-            )
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
+            assertEquals(a1Vedtaksperiode2, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
+            assertEquals("a1", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
+            assertEquals("INNTEKTSMELDING", vedtaksperiodeVenter.venterPå.venteårsak.hva)
+            assertNull(vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
         }
     }
 
