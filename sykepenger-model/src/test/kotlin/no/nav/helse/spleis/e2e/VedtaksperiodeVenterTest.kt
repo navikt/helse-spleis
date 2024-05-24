@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate.EPOCH
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
@@ -9,7 +10,7 @@ import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -22,11 +23,42 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.Venteårsak.Hva
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class VedtaksperiodeVenterTest: AbstractDslTest() {
+
+    @Test
+    fun `Vedtaksperioden vi venter på skal ikke være en auu`() {
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+            håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+        val a1Vedtaksperiode2 = a1 { 2.vedtaksperiode }
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            assertForventetFeil(
+                forklaring = "na",
+                nå = { assertThrows<IllegalStateException> { håndterInntektsmelding(listOf(1.januar til 16.januar)) } },
+                ønsket = {
+                    assertDoesNotThrow {
+                        håndterInntektsmelding(listOf(1.januar til 16.januar))
+                        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                        val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
+                        assertEquals(a1Vedtaksperiode2, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
+                        assertEquals("a1", vedtaksperiodeVenter.venterPå.organisasjonsnummer)
+                        assertEquals("INNTEKTSMELDING", vedtaksperiodeVenter.venterPå.venteårsak.hva)
+                        assertNull(vedtaksperiodeVenter.venterPå.venteårsak.hvorfor)
+                    }
+                }
+            )
+        }
+    }
 
     @Test
     fun `Vedtaksperiode som revurderes som følge av søknad fra ghost skal peke på at den venter på perioden til ghosten`() {
@@ -37,8 +69,8 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, EPOCH, type = ORDINÆRT),
+                    Arbeidsforhold(a1, EPOCH, type = ORDINÆRT),
+                    Arbeidsforhold(a2, EPOCH, type = ORDINÆRT),
                 )
             )
             håndterYtelser(1.vedtaksperiode)
