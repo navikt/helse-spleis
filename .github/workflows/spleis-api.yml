@@ -12,6 +12,7 @@ on:
     - 'sykepenger-primitiver-dto/**'
     - 'sykepenger-serde/**'
     - 'sykepenger-utbetaling-dto/**'
+    - 'sykepenger-utbetaling/**'
     - 'build.gradle.kts'
     - 'settings.gradle.kts'
     - '.github/workflows/**'
