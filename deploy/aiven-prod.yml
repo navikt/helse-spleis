@@ -203,6 +203,9 @@ spec:
           application: speaker-backend
           access: readwrite
         - team: tbd
+          application: speaker-endringer-formidler
+          access: readwrite
+        - team: tbd
           application: spre-styringsinfo
           access: readwrite
         - team: tbd
