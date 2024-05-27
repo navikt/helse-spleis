@@ -325,6 +325,7 @@ internal class PersonMediator(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "behandlingId" to event.behandlingId,
+            "søknadIder" to event.søknadIder,
             "type" to event.type,
             "fom" to event.fom,
             "tom" to event.tom,
