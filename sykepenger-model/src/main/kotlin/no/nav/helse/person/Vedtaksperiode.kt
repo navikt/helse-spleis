@@ -904,13 +904,15 @@ internal class Vedtaksperiode private constructor(
         innsendt: LocalDateTime,
         registert: LocalDateTime,
         avsender: Avsender,
-        type: PersonObserver.BehandlingOpprettetEvent.Type
+        type: PersonObserver.BehandlingOpprettetEvent.Type,
+        søknadIder: Set<UUID>
     ) {
         val event = PersonObserver.BehandlingOpprettetEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = this.id,
+            søknadIder = behandlinger.søknadIder() + søknadIder,
             behandlingId = id,
             fom = periode.start,
             tom = periode.endInclusive,

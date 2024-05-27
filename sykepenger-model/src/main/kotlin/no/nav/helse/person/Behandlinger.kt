@@ -809,7 +809,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         private fun emitNyBehandlingOpprettet(type: PersonObserver.BehandlingOpprettetEvent.Type) {
             check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
-            observatører.forEach { it.nyBehandling(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type) }
+            observatører.forEach { it.nyBehandling(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type, endringer.dokumentsporing.søknadIder()) }
         }
 
         internal fun forkastetBehandling(hendelse: Hendelse) {
@@ -877,7 +877,7 @@ enum class Periodetilstand {
 
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
-            val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.reduce(Set<Dokumentsporing>::plus)
+            val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
 
             fun nyBehandling(observatører: List<BehandlingObserver>, sykdomstidslinje: Sykdomstidslinje, dokumentsporing: Dokumentsporing, sykmeldingsperiode: Periode, søknad: Søknad) =
                 Behandling(

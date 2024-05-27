@@ -37,7 +37,8 @@ internal interface BehandlingObserver {
         innsendt: LocalDateTime,
         registert: LocalDateTime,
         avsender: Avsender,
-        type: PersonObserver.BehandlingOpprettetEvent.Type
+        type: PersonObserver.BehandlingOpprettetEvent.Type,
+        søknadIder: Set<UUID>
     )
 
     fun utkastTilVedtak(

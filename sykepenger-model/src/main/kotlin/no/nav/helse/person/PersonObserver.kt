@@ -620,6 +620,7 @@ interface PersonObserver {
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
+        val søknadIder: Set<UUID>,
         val fom: LocalDate,
         val tom: LocalDate,
         val type: Type,

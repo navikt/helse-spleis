@@ -37,6 +37,7 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
                     aktørId = "42",
                     organisasjonsnummer = a1,
                     vedtaksperiodeId = 1.vedtaksperiode,
+                    søknadIder = setOf(søknadId),
                     behandlingId = behandlingId,
                     type = PersonObserver.BehandlingOpprettetEvent.Type.Søknad,
                     fom = 1.januar,
