@@ -25,6 +25,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     private val gjeldendeBehandlingstatus = mutableMapOf<UUID, Behandlingstatus>()
     private val arbeidsgivere get() = arbeidsgivereMap.values
     private val IM = Inntektsmeldinger()
+    private val søknader = mutableMapOf<UUID, UUID?>() // SøknadId -> VedtaksperiodeId
 
     private val behandlingOpprettetEventer = mutableListOf<PersonObserver.BehandlingOpprettetEvent>()
     private val behandlingLukketEventer = mutableListOf<PersonObserver.BehandlingLukketEvent>()
@@ -136,7 +137,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         IM.behandlingUtført()
     }
 
+    override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
+        søknader[søknadId] = null // VedtaksperiodeId her
+    }
+
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
+        sjekkUgyldigeVentesituasjoner(event)
+        sjekkSøknadIdEierskap(event.vedtaksperiodeId, event.hendelser)
+    }
+
+    private fun sjekkUgyldigeVentesituasjoner(event: PersonObserver.VedtaksperiodeVenterEvent) {
         if (event.venterPå.venteårsak.hva != "HJELP") return // Om vi venter på noe annet enn hjelp er det OK 👍
         if (event.revurderingFeilet()) return // For tester som ender opp i revurdering feilet er det riktig at vi trenger hjelp 🛟
         if (event.auuVilOmgjøres()) return // For tester som ikke lar en AUU gå videre i livet 🛟
@@ -146,6 +156,15 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         ${event.tilstander()}
         $event
         """.let { throw IllegalStateException(it) }
+    }
+
+    private fun sjekkSøknadIdEierskap(vedtaksperiodeId: UUID, hendelseIder: Set<UUID>) {
+        val søknadIder = hendelseIder.intersect(søknader.keys)
+        søknadIder.forEach { søknadId ->
+            val eier = søknader[søknadId]
+            if (eier == null) søknader[søknadId] = vedtaksperiodeId
+            else check(eier == vedtaksperiodeId) { "Både vedtaksperiode $eier og $vedtaksperiodeId peker på søknaden $søknadId" }
+        }
     }
 
     override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) = IM.håndtert(inntektsmeldingId)
