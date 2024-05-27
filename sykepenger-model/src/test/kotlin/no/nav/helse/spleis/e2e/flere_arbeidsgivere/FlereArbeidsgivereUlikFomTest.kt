@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -32,6 +33,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
@@ -76,8 +78,37 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Går videre til vilkårsprøving selv om vi mangler IM fra en arbeidsgiver`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 31.mars, 100.prosent), orgnummer = a3)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
+
+        assertForventetFeil(
+            forklaring = """
+                Vedtaksperioden går videre til vilkårsprøving fordi alle overlappende vedtaksperioder har tilstrekkelig informasjon til utbetaling.
+                Vi har en vedtaksperiode som ikke overlapper med perioden som beregner utbetalinger, men en periode på samme skjæringstidspunkt innenfor beregningsperioden.
+                Om vi venter på alle overlappende perioder eller samme skjæringstidspunkt er det andre tester som slutter å fungere.
+                """,
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
+                håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+                assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode, orgnummer = a1) }
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+            }
+        )
+    }
 
     @Test
     fun `kort periode hos en ag2 forkaster utbetaling`() {
