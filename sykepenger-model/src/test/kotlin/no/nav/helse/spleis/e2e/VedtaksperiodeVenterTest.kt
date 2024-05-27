@@ -7,6 +7,7 @@ import no.nav.helse.dsl.TestPerson.Companion.AKTØRID
 import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
@@ -24,9 +25,29 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VedtaksperiodeVenterTest: AbstractDslTest() {
+
+    @Test
+    fun `Korrigerte søknader kommer i vedtaksperiode_venter`() {
+        a1 {
+            tilGodkjenning(1.januar, 31.januar, 100.prosent)
+            val søknadId1 = observatør.behandlingOpprettetEventer.single().søknadIder.single()
+            val behandlingId = observatør.behandlingOpprettetEventer.single().behandlingId
+            val søknadId2 = UUID.randomUUID()
+            val søknadId3 = UUID.randomUUID()
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent), søknadId = søknadId2)
+            val hendelseIderEtterSøknad2 = observatør.vedtaksperiodeVenter.last { it.behandlingId == behandlingId }.hendelser
+            assertTrue(hendelseIderEtterSøknad2.containsAll(setOf(søknadId1, søknadId2)))
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 70.prosent), søknadId = søknadId3)
+            val hendelseIderEtterSøknad3 = observatør.vedtaksperiodeVenter.last { it.behandlingId == behandlingId }.hendelser
+            assertTrue(hendelseIderEtterSøknad3.containsAll(setOf(søknadId1, søknadId2, søknadId3)))
+        }
+    }
 
     @Test
     fun `Vedtaksperioden vi venter på skal ikke være en auu`() {
