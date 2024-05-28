@@ -16,6 +16,20 @@ import no.nav.helse.hendelser.til
 // 2018 har blitt valgt fordi det starter på en mandag og er ikke et skuddår
 private const val startår = 2018
 private val mandagsfrø = LocalDate.of(startår, 1, 1) // fredet variabel
+
+val januar: Periode = 1.januar til 31.januar
+val februar: Periode = 1.februar til 28.februar
+val mars: Periode = 1.mars til 31.mars
+val april: Periode = 1.april til 30.april
+val mai: Periode = 1.mai til 31.mai
+val juni: Periode = 1.juni til 30.juni
+val juli: Periode = 1.juli til 31.juli
+val august: Periode = 1.august til 31.august
+val september: Periode = 1.september til 30.september
+val oktober: Periode = 1.oktober til 31.oktober
+val  november: Periode = 1.november til 30.november
+val desember: Periode = 1.desember til 31.desember
+
 val Int.mandag get() = mandagsfrø.plusWeeks(this.toLong() - 1)
 val Int.tirsdag get() = this.mandag.plusDays(1)
 val Int.onsdag get() = this.mandag.plusDays(2)
