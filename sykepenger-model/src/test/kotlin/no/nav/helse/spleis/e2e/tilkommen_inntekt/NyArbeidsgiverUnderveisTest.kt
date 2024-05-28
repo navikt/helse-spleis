@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import java.time.LocalDate
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -68,6 +69,54 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         a2 {
             håndterYtelser(1.vedtaksperiode)
             assertEquals(349.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+        }
+    }
+
+    @Test
+    fun `Bytter arbeidsgiver underveis i sykefravær`() = Toggle.TilkommenInntekt.enable {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        }
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, gjelder = 1.januar til 31.januar, forklaring = "Noe")))
+        }
+        a2 {
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.find { it.gjelder(a2) }
+                assertEquals(1.februar, inntektA2!!.inspektør.gjelder.start)
+                assertEquals(10000.månedlig, inntektA2.inspektør.inntektsopplysning.inspektør.beløp)
+                val inntektA1 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.find { it.gjelder(a1) }
+                assertEquals(1.januar, inntektA1!!.inspektør.gjelder.start)
+                assertEquals(INNTEKT, inntektA1.inspektør.inntektsopplysning.inspektør.beløp)
+                assertEquals(INNTEKT, sykepengegrunnlagInspektør.sykepengegrunnlag)
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            assertEquals(0, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            assertEquals(462.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+            assertForventetFeil(
+                forklaring = "Lurer på om personen skal ha restpotten her?",
+                nå = {
+                    assertEquals(0.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
+                },
+                ønsket = {
+                    assertEquals(969.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
+
+                }
+            )
         }
     }
 
