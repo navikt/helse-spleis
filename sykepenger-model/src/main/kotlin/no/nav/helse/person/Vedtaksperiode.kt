@@ -71,6 +71,7 @@ import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.Venteårsak.Hvorfor.HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
@@ -1402,7 +1403,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun tilstand(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg): Tilstand {
             return when {
-                !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse) -> TrengerInntektsmelding
+                !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse) -> TrengerInntektsmelding(vedtaksperiode)
                 arbeidsgivere.harOverlappendePerioderSomManglerTilstrekkeligInformasjonTilUtbetaling(hendelse, vedtaksperiode) -> TrengerInntektsmeldingAndreArbeidsgivere(arbeidsgivere.førstePeriodeSomTrengerInntektsmelding(hendelse, vedtaksperiode), arbeidsgivere.toList())
                 vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
                 else -> KlarForBeregning
@@ -1415,7 +1416,8 @@ internal class Vedtaksperiode private constructor(
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse)
         }
 
-        private data object TrengerInntektsmelding: Tilstand {
+        private data class TrengerInntektsmelding(private val vedtaksperiode: Vedtaksperiode): Tilstand {
+            override fun venterPå() = vedtaksperiode
             override fun venteårsak() = INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Trenger inntektsmelding for perioden etter igangsatt revurdering")
@@ -1720,7 +1722,7 @@ internal class Vedtaksperiode private constructor(
                 arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
                 !vedtaksperiode.forventerInntekt() -> ForventerIkkeInntekt
                 vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
-                !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse) -> TrengerInntektsmelding
+                !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse) -> TrengerInntektsmelding(vedtaksperiode)
                 arbeidsgivere.harOverlappendePerioderSomManglerTilstrekkeligInformasjonTilUtbetaling(hendelse, vedtaksperiode) -> TrengerInntektsmeldingAndreArbeidsgivere(arbeidsgivere.førstePeriodeSomTrengerInntektsmelding(hendelse, vedtaksperiode), arbeidsgivere.toList())
                 vedtaksperiode.vilkårsgrunnlag == null -> KlarForVilkårsprøving
                 else -> KlarForBeregning
@@ -1751,7 +1753,9 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.forkast(hendelse)
             }
         }
-        private data object TrengerInntektsmelding: Tilstand {
+        private data class TrengerInntektsmelding(private val vedtaksperiode: Vedtaksperiode): Tilstand {
+            override fun venteårsak() = INNTEKTSMELDING fordi SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
+            override fun venterPå() = vedtaksperiode
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Mangler inntekt og/eller refusjon for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
                 vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
