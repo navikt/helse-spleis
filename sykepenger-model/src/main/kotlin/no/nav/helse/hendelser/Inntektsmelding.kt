@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
@@ -113,10 +114,11 @@ class Inntektsmelding(
         // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
         // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
         val startskudd = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) skjæringstidspunkt else beregnetInntektsdato
+        val inntektGjelder = if (Toggle.TilkommenInntekt.disabled) skjæringstidspunkt til LocalDate.MAX else beregnetInntektsdato til LocalDate.MAX
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,
-                skjæringstidspunkt til LocalDate.MAX,
+                inntektGjelder,
                 Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt),
                 refusjonshistorikk.refusjonsopplysninger(startskudd, this)
             )

@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -16,6 +18,8 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,6 +27,49 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
+
+    @Test
+    fun `Ny arbeidsgiver underveis happy case`() = Toggle.TilkommenInntekt.enable {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        }
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        }
+        a2 {
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.find { it.gjelder(a2) }
+                assertEquals(1.februar, inntektA2!!.inspektør.gjelder.start)
+                assertEquals(10000.månedlig, inntektA2.inspektør.inntektsopplysning.inspektør.beløp)
+                val inntektA1 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.find { it.gjelder(a1) }
+                assertEquals(1.januar, inntektA1!!.inspektør.gjelder.start)
+                assertEquals(INNTEKT, inntektA1.inspektør.inntektsopplysning.inspektør.beløp)
+                assertEquals(INNTEKT, sykepengegrunnlagInspektør.sykepengegrunnlag)
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            assertEquals(0, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(1082.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            assertEquals(349.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
+        }
+    }
 
     @Test
     fun `Omgjøring av overlappende periode med nytt skjæringstidspunkt`() {

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
@@ -428,7 +429,7 @@ internal class Vedtaksperiode private constructor(
         ?.takeIf { it.forventerInntekt() } != null
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
-        person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
+        person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) && Toggle.TilkommenInntekt.disabled
 
     private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg) =
         arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, this, hendelse)

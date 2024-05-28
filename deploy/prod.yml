@@ -63,3 +63,5 @@ spec:
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
     value: none
+  - name: TILKOMMEN_INNTEKT
+    value: "false"
