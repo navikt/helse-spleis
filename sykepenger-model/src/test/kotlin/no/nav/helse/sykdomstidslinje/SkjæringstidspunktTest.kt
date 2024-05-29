@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.perioder
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.A
@@ -118,7 +119,7 @@ internal class SkjæringstidspunktTest {
         perioder(2.S, 2.F, 2.AIG, 2.S) { _, _, _, periode4 ->
             assertFørsteDagErSkjæringstidspunkt(periode4, this)
         }
-        perioder(2.S, 2.YF, 2.F, 2.S) { _, _, _, periode4 ->
+        perioder(2.S, 2.YF, 2.F, 2.S) { a, b, c, periode4 ->
             assertFørsteDagErSkjæringstidspunkt(periode4, this)
         }
         perioder(2.S, 2.F, 2.YF, 2.S) { _, _, _, periode4 ->
@@ -385,6 +386,24 @@ internal class SkjæringstidspunktTest {
     fun `Sykedager Nav`(){
         val tidslinje = 5.N
         assertFørsteDagErSkjæringstidspunkt(tidslinje)
+    }
+
+    @Test
+    fun `andre ytelser etter andre ytelser etter sykedag skal bruke skjæringstidspunktet for de første sykedagene`() {
+        val tidslinje = 31.S + 28.YF + 31.YF
+        assertSkjæringstidspunkt(1.januar, mars, tidslinje)
+    }
+
+    @Test
+    fun `sykedag etter andre ytelser etter sykedag skal få nytt skjæringstidspunkt`() {
+        val tidslinje = 31.S + 28.YF + 31.S
+        assertSkjæringstidspunkt(1.mars, 1.januar til 31.mars, tidslinje)
+    }
+
+    @Test
+    fun `andre ytelser etter sykdom skal bruke sykdommens skjæringstidspunkt` () {
+        val tidslinje = 31.S + 28.YF
+        assertSkjæringstidspunkt(1.januar, februar, tidslinje)
     }
 
     private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate?, periode: Periode, vararg tidslinje: Sykdomstidslinje) {

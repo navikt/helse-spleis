@@ -113,6 +113,8 @@ internal sealed class Dag(
 
     internal open fun accept(visitor: SykdomstidslinjeDagVisitor) {}
 
+    internal operator fun compareTo(other: Dag) = this.dato.compareTo(other.dato)
+
     internal class UkjentDag(
         dato: LocalDate,
         kilde: Hendelseskilde

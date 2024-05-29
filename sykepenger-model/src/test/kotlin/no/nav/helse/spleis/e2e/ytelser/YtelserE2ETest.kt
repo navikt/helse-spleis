@@ -24,6 +24,8 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -52,6 +54,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.manuellForeldrepengedag
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag
@@ -404,5 +407,34 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         assertEquals(1.februar, inspektør.sykdomstidslinje.førsteDag())
         assertEquals(28.februar, inspektør.sykdomstidslinje.sisteDag())
         assertEquals("YYYY YYYYYYY YYYYYYY YYYYYYY YYY", inspektør.sykdomstidslinje.toShortString())
+    }
+
+    /*
+    ønsker å gjenbruke inntektsopplysninger, når det er en sammenhengende periode med andre ytelser
+    mellom denne perioden og en periode der vi har inntektsopplysninger
+
+    eller, altså, en periode med bare andre ytelser burde ikke trenge inntekter, men så lenge vi ikke får lov til
+    å gå videre med ingenting, så må vi heller late som om inntektsmeldingen vi fikk en gang i hine hårde dager
+    gjelder for oss også.
+
+    det vil altså si, i tilfelle andre ytelser så skal det potensielt _enorme_ gapet mellom siste sykedag og denne
+    perioden, om det gapet bare er fyllt opp av andre ytelser, _ikke_ regnes som et gap mtp inntektsmelding. men det er
+    et gap mtp nytt skjæringstidspunkt, om det skulle komme en ny sykedag
+     */
+    @Test
+    fun `Overstyr til andre ytelser i andre pølse, og så kommer det en tredje -- Da vil vi gjenbruke inntektsmelding`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        håndterOverstyrTidslinje(februar.map { manuellForeldrepengedag(it) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        nyPeriode(mars)
+        håndterOverstyrTidslinje(mars.map { manuellForeldrepengedag(it) })
+
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 }

@@ -177,13 +177,15 @@ internal class Sykdomstidslinje private constructor(
         return !erGyldigHelgegap(dato)
     }
 
-    private fun erOppholdsdagtype(dato: LocalDate) = when (this[dato]) {
+    private fun erOppholdsdagtype(dato: LocalDate) = when (val dagen = this[dato]) {
         is Arbeidsdag,
         is FriskHelgedag,
-        is ArbeidIkkeGjenopptattDag,
-        is AndreYtelser -> true
+        is ArbeidIkkeGjenopptattDag -> true
+        is AndreYtelser -> detFinnesEnSykedagEtter(dagen)
         else -> false
     }
+
+    private fun detFinnesEnSykedagEtter(dag: Dag) = this.filter { it > dag }.any { erEnSykedag(it) }
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false
