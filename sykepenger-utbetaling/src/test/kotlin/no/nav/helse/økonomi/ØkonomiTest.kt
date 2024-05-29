@@ -521,6 +521,16 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `Tilkommen inntekt - fordeler personbeløp ved avsluttet arbeidsforhold`() {
+        val `6G` = `6G`.beløp(1.januar)
+        val a = 0.prosent.sykdomsgrad.inntekt(INGEN, beregningsgrunnlag = 31000.månedlig, `6G`= `6G`)
+        val b = 100.prosent.sykdomsgrad.inntekt(10000.månedlig, beregningsgrunnlag = INGEN, `6G` = `6G`)
+        val betalte = listOf(a, b).betal()
+        assertUtbetaling(betalte[0], 0.0, 0.0)
+        assertUtbetaling(betalte[1], 462.0, 969.0)
+    }
+
+    @Test
     fun `fordeling mellom arbeidsgivere mde ulik inntekt og refusjon`() {
         val a = 100.prosent.sykdomsgrad.inntekt(
             30000.månedlig,

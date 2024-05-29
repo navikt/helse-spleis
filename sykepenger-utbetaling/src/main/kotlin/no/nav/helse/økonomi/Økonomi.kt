@@ -7,6 +7,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 class Økonomi private constructor(
@@ -25,6 +26,7 @@ class Økonomi private constructor(
     companion object {
         private val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
         private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         fun sykdomsgrad(grad: Prosentdel) =
             Økonomi(grad)
@@ -72,7 +74,35 @@ class Økonomi private constructor(
             val fordelingRefusjon = fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.kopierMed(arbeidsgiverbeløp = inntekt) }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(fordelingRefusjon)
             val fordelingPerson = fordel(fordelingRefusjon, total - totalArbeidsgiverrefusjon, sykepengegrunnlag - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.kopierMed(personbeløp = inntekt) }, personBeløp)
-            return fordelingPerson.map { økonomi -> økonomi.kopierMed(er6GBegrenset = er6GBegrenset) }
+            val totalPersonbeløp = totalPerson(fordelingPerson)
+            val restbeløp = sykepengegrunnlag - totalArbeidsgiverrefusjon - totalPersonbeløp
+            val restfordeling = restfordeling(fordelingPerson, restbeløp)
+            return restfordeling.map { økonomi -> økonomi.kopierMed(er6GBegrenset = er6GBegrenset) }
+        }
+
+        private fun restfordeling(økonomiList: List<Økonomi>, grense: Inntekt): List<Økonomi> {
+            // På grunn av ulike avrundinger mellom arbeidsgiverrefusjon og sykepengegrunnlag kan det oppstå
+            // differanse på 1 krone som da ville vært dumt å fordele på personbeløp
+            // TODO: Finn en måte å fordele denne ene kronen på arbeidsgivere
+            if (grense == 1.daglig) return økonomiList.also {
+                sikkerlogg.info("Restbeløp på 1 krone")
+            }
+            var budsjett = grense
+            var list = økonomiList
+            // Fordeler 1 krone per arbeidsforhold som skal ha en utbetaling uansett frem til hele potten er fordelt
+            while (budsjett > INGEN) {
+                list = list.map {
+                    val personbeløp = personBeløp(it)
+                    if (budsjett > INGEN && (arbeidsgiverBeløp(it) > INGEN || personbeløp > INGEN)) {
+                        budsjett -= 1.daglig
+                        it.kopierMed(personbeløp = personbeløp + 1.daglig)
+                    } else {
+                        it
+                    }
+                }
+            }
+            return list
+
         }
 
         private fun fordel(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {

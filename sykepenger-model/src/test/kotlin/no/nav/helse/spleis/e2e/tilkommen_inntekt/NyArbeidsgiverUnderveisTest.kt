@@ -94,6 +94,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                 assertEquals(10000.månedlig, inntektA2.inspektør.inntektsopplysning.inspektør.beløp)
                 val inntektA1 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.find { it.gjelder(a1) }
                 assertEquals(1.januar, inntektA1!!.inspektør.gjelder.start)
+                assertEquals(31.januar, inntektA1.inspektør.gjelder.endInclusive)
                 assertEquals(INNTEKT, inntektA1.inspektør.inntektsopplysning.inspektør.beløp)
                 assertEquals(INNTEKT, sykepengegrunnlagInspektør.sykepengegrunnlag)
             }
@@ -107,16 +108,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         a2 {
             håndterYtelser(1.vedtaksperiode)
             assertEquals(462.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.arbeidsgiverbeløp)
-            assertForventetFeil(
-                forklaring = "Lurer på om personen skal ha restpotten her?",
-                nå = {
-                    assertEquals(0.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
-                },
-                ønsket = {
-                    assertEquals(969.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
-
-                }
-            )
+            assertEquals(969.daglig, inspektør.utbetalinger.last().inspektør.utbetalingstidslinje[1.februar].økonomi.inspektør.personbeløp)
         }
     }
 
