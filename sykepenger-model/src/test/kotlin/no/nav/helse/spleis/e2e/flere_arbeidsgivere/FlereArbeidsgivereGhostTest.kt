@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterspurtBehov
@@ -31,11 +30,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
@@ -53,6 +53,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
@@ -87,7 +88,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektsmeldingInntekt
@@ -129,7 +129,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(10.februar, inspektør(ghost).vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
 
         nullstillTilstandsendringer()
+
+        observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåVedtaksperiodeId = 1.vedtaksperiode.id(ghost), venterPåOrgnr = ghost, venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING)
+
         assertEquals(1.januar, inspektør(ghost).vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = ghost)
@@ -158,12 +162,16 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             håndterInntektsmelding(listOf(mandag den 29.januar til 13.februar), orgnummer = a2)
         }
         // IM replayes, og ettersom 27. og 28 blir friskedager pga. IM beregnes skjæringstidspunktet til 29.januar. Når A1 sin søknad kommer dekker den "hullet" med sykdom slik at skjæringstidspunktet blir 1.januar
+        observatør.vedtaksperiodeVenter.clear()
         assertInfoSomFølgeAv("Fant ikke vilkårsgrunnlag på skjæringstidspunkt 2018-01-29") {
             håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a2)
         }
+        observatør.assertVenter(2.vedtaksperiode.id(a2), venterPåHva = INNTEKTSMELDING)
 
         assertEquals(29.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
+        observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a1)
+        observatør.assertVenter(3.vedtaksperiode.id(a1), venterPåVedtaksperiodeId = 2.vedtaksperiode.id(a2), venterPåOrgnr = a2, venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING)
         assertEquals(1.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
 
         val ghostRefusjonsopplysinger = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == a2 }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger

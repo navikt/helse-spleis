@@ -26,9 +26,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -186,7 +189,9 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         nullstillTilstandsendringer()
+        observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(25.januar, 31.januar))
+        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -198,6 +203,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
+        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING) // Nå har den fått gjennoppta behandling og fått til AvventerInntektsmelding
     }
 
     @Test

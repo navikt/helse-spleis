@@ -25,9 +25,10 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
@@ -36,6 +37,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -365,6 +367,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+        observatør.assertVenter(2.vedtaksperiode.id(a2), venterPåVedtaksperiodeId = 3.vedtaksperiode.id(a1), venterPåOrgnr = a1, venterPåHva = INNTEKTSMELDING, fordi = MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER)
     }
 
     @Test

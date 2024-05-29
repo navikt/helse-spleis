@@ -15,12 +15,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
@@ -99,7 +99,9 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             assertInstanceOf(Dag.UkjentDag::class.java, sykdomstidslinjeInspektør[30.januar])
         }
 
+        observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(10.januar, 26.januar, 100.prosent))
+        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER)
 
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[4.januar])
@@ -108,6 +110,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             assertInstanceOf(Dag.Sykedag::class.java, sykdomstidslinjeInspektør[26.januar])
         }
 
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertEquals(31.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
@@ -182,12 +185,5 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-    }
-
-
-    private companion object {
-        private fun assertIllegalStateException(melding: String, block: () -> Unit) {
-            assertEquals(melding, assertThrows<IllegalStateException>(melding) { block() }.message)
-        }
     }
 }

@@ -21,6 +21,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.Venteårsak.Hva
+import no.nav.helse.person.Venteårsak.Hvorfor
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -323,5 +324,21 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
         val actual = observatør.vedtaksperiodeVenter.map { it.vedtaksperiodeId to it.venterPå.venteårsak.hva }
         assertEquals(expected.map { it.first to it.second.toString() }, actual)
         assertEquals(expected.size, observatør.vedtaksperiodeVenter.size)
+    }
+
+    internal companion object {
+        internal fun TestObservatør.assertVenter(venterVedtaksperiodeId: UUID, venterPåVedtaksperiodeId: UUID = venterVedtaksperiodeId, venterPåOrgnr: String? = null, venterPåHva: Hva, fordi: Hvorfor? = null) {
+            vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva, fordi)
+            if (venterVedtaksperiodeId == venterPåVedtaksperiodeId) return
+            // Om periode A venter på en annen periode B så burde også B vente på B (vente på seg selv)
+            vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterPåVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva, fordi)
+        }
+
+        private fun PersonObserver.VedtaksperiodeVenterEvent.VenterPå.assertVenterPå(venterPåVedtaksperiodeId: UUID, venterPåOrgnr: String?, venterPåHva: Hva, fordi: Hvorfor?) {
+            venterPåOrgnr?.let { assertEquals(it, this.organisasjonsnummer) }
+            assertEquals(venterPåVedtaksperiodeId, this.vedtaksperiodeId)
+            assertEquals(venterPåHva.name, this.venteårsak.hva)
+            assertEquals(fordi?.name, this.venteårsak.hvorfor)
+        }
     }
 }

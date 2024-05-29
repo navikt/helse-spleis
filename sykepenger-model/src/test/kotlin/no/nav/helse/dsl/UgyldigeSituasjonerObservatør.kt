@@ -137,7 +137,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
-        søknader[søknadId] = null // VedtaksperiodeId her
+        søknader[søknadId] = null
     }
 
     override fun vedtaksperiodeVenter(event: PersonObserver.VedtaksperiodeVenterEvent) {
@@ -146,6 +146,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun sjekkUgyldigeVentesituasjoner(event: PersonObserver.VedtaksperiodeVenterEvent) {
+        // En linje å kommentere inn om man kjeder seg 🫠
+        //if (event.trengerNyInntektsmeldingEtterFlyttetSkjæringstidspunkt()) error("vedtaksperiode på ${event.organisasjonsnummer} venter på ${event.venterPå}")
         if (event.venterPå.venteårsak.hva != "HJELP") return // Om vi venter på noe annet enn hjelp er det OK 👍
         if (event.revurderingFeilet()) return // For tester som ender opp i revurdering feilet er det riktig at vi trenger hjelp 🛟
         """
@@ -174,6 +176,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun PersonObserver.VedtaksperiodeVenterEvent.revurderingFeilet() = gjeldendeTilstander[venterPå.vedtaksperiodeId] == REVURDERING_FEILET
+    private fun PersonObserver.VedtaksperiodeVenterEvent.trengerNyInntektsmeldingEtterFlyttetSkjæringstidspunkt() = venterPå.venteårsak.hva == "INNTEKTSMELDING" && venterPå.venteårsak.hvorfor != null
     private fun PersonObserver.VedtaksperiodeVenterEvent.tilstander() = when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
         true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp! 😱"
         false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger hjelp! 😱"

@@ -35,11 +35,14 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -70,7 +73,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
+            observatør.vedtaksperiodeVenter.clear()
             håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
+            observatør.assertVenter(2.vedtaksperiode, venterPåHva = INNTEKTSMELDING, fordi = MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER)
 
             assertForventetFeil(
                 forklaring = "tidsnære opplysninger lagres på første periode etter 1.januar - 2.januar, som er auu uten vilkårsgrunnlag på behandlingen sin",

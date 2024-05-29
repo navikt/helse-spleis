@@ -49,11 +49,14 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.testhelpers.assertNotNull
@@ -67,13 +70,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
@@ -194,6 +193,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             nyPeriode(24.januar til 31.januar)
+            observatør.vedtaksperiodeVenter.clear()
             håndterInntektsmelding(listOf(
                 8.januar til onsdag den 17.januar,
                 // nå blir helgen 20. januar - 21.januar tolket som frisk,
@@ -204,6 +204,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            observatør.assertVenter(3.vedtaksperiode, venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING)
+
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

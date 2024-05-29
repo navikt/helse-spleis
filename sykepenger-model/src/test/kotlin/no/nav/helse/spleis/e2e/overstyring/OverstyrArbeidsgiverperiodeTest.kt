@@ -17,6 +17,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
+import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -40,10 +43,12 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             assertEquals(17.januar til 15.februar, inspektør.periode(1.vedtaksperiode))
             // drar agp tilbake to dager, men glemmer å omgjøre 1. februar til sykdom
+            observatør.vedtaksperiodeVenter.clear()
             håndterOverstyrTidslinje(listOf(
                 ManuellOverskrivingDag(15.januar, Dagtype.Sykedag, 100),
                 ManuellOverskrivingDag(16.januar, Dagtype.Sykedag, 100)
             ))
+            observatør.assertVenter(1.vedtaksperiode, venterPåHva = INNTEKTSMELDING, fordi = MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER)
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100)))
