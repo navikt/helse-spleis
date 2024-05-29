@@ -441,7 +441,7 @@ internal class Sykepengegrunnlag private constructor(
     internal fun byggGodkjenningsbehov(builder: GodkjenningsbehovBuilder) {
         builder.inntektskilde(inntektskilde())
         builder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
-        arbeidsgiverInntektsopplysninger.omregnedeÅrsinntekter(builder)
+        arbeidsgiverInntektsopplysninger.omregnedeÅrsinntekter(skjæringstidspunkt, builder)
         if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) {
             builder.tagSykepengegrunnlagErUnder2G()
         }

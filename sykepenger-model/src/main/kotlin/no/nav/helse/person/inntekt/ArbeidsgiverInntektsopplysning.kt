@@ -55,6 +55,11 @@ class ArbeidsgiverInntektsopplysning(
         return inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
     }
 
+    private fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, builder: GodkjenningsbehovBuilder) {
+        if (this.gjelder.start > skjæringstidspunkt) return
+        builder.omregnedeÅrsinntekter(orgnummer, inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig })
+    }
+
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
 
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
@@ -312,9 +317,9 @@ class ArbeidsgiverInntektsopplysning(
             }
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(builder: GodkjenningsbehovBuilder) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(skjæringstidspunkt: LocalDate, builder: GodkjenningsbehovBuilder) {
             builder.orgnummereMedRelevanteArbeidsforhold(this.map { it.orgnummer }.toSet())
-            this.forEach{it.inntektsopplysning.omregnetÅrsinntekt(builder, it.orgnummer)}
+            this.forEach { it.omregnetÅrsinntekt(skjæringstidspunkt, builder) }
         }
 
         internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): ArbeidsgiverInntektsopplysning {

@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
@@ -107,10 +106,6 @@ sealed class Inntektsopplysning protected constructor(
         orgnummer: String,
         saksbehandlerOverstyring: OverstyrArbeidsgiveropplysninger
     ) {}
-
-    internal fun omregnetÅrsinntekt(builder: GodkjenningsbehovBuilder, orgnummer: String) {
-        builder.omregnedeÅrsinntekter(orgnummer, omregnetÅrsinntekt().beløp.reflection { årlig, _, _, _ -> årlig })
-    }
 
     internal companion object {
         internal fun erOmregnetÅrsinntektEndret(før: Inntektsopplysning, etter: Inntektsopplysning) =
