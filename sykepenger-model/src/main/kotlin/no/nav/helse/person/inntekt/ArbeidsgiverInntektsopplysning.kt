@@ -75,7 +75,11 @@ class ArbeidsgiverInntektsopplysning(
     }
 
     private fun overstyrer(gammel: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
-        return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, gjelder = this.gjelder, inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning), refusjonsopplysninger = gammel.refusjonsopplysninger.merge(this.refusjonsopplysninger))
+        val nyGjelder = when (this.inntektsopplysning) {
+            is Saksbehandler -> this.gjelder
+            else -> gammel.gjelder
+        }
+        return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, gjelder = nyGjelder, inntektsopplysning = gammel.inntektsopplysning.overstyresAv(this.inntektsopplysning), refusjonsopplysninger = gammel.refusjonsopplysninger.merge(this.refusjonsopplysninger))
     }
 
     private fun rullTilbake() = ArbeidsgiverInntektsopplysning(this.orgnummer, gjelder = this.gjelder, this.inntektsopplysning.omregnetÅrsinntekt(), refusjonsopplysninger)
