@@ -61,8 +61,8 @@ class Inntektsmelding(
     }
 
     init {
-        val ingenInntektsdatoUtenomPortal = inntektsdato == null && avsendersystem != Avsendersystem.NAV_NO
-        val inntektsdatoKunHvisPortal = inntektsdato != null && avsendersystem == Avsendersystem.NAV_NO
+        val ingenInntektsdatoUtenomPortal = inntektsdato == null && !erPortalinntektsmelding()
+        val inntektsdatoKunHvisPortal = inntektsdato != null && erPortalinntektsmelding()
         check(ingenInntektsdatoUtenomPortal || inntektsdatoKunHvisPortal) {
             "Om avsendersystem er NAV_NO må inntektsdato være satt og motsatt! inntektsdato=$inntektsdato, avsendersystem=$avsendersystem"
         }
@@ -132,6 +132,7 @@ class Inntektsmelding(
 
     enum class Avsendersystem {
         NAV_NO,
+        NAV_NO_SELVBESTEMT,
         ALTINN,
         LPS
     }
@@ -194,5 +195,5 @@ class Inntektsmelding(
         return beregnetInntektsdato in sykdomstidslinjeperiode
     }
 
-    private fun erPortalinntektsmelding() = avsendersystem == Avsendersystem.NAV_NO
+    private fun erPortalinntektsmelding() = avsendersystem == Avsendersystem.NAV_NO || avsendersystem == Avsendersystem.NAV_NO_SELVBESTEMT
 }

@@ -76,6 +76,7 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             val navn = path("navn").takeUnless { it.isMissingOrNull() }?.asText() ?: return null
             return when (navn) {
                 "NAV_NO" -> Inntektsmelding.Avsendersystem.NAV_NO
+                "NAV_NO_SELVBESTEMT" -> Inntektsmelding.Avsendersystem.NAV_NO_SELVBESTEMT
                 "AltinnPortal" -> Inntektsmelding.Avsendersystem.ALTINN
                 else -> Inntektsmelding.Avsendersystem.LPS
             }
