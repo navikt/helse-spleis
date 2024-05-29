@@ -99,6 +99,8 @@ internal sealed class Dag(
 
     internal fun erHelg() = dato.erHelg()
 
+    internal fun erEtter(kanskjeFør: LocalDate) = this.dato > kanskjeFør
+
     internal fun problem(other: Dag, melding: String = "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}."): Dag =
         ProblemDag(dato, kilde, other.kilde, melding)
 
@@ -112,8 +114,6 @@ internal sealed class Dag(
     override fun toString() = "${this::class.java.simpleName} ($dato) $kilde"
 
     internal open fun accept(visitor: SykdomstidslinjeDagVisitor) {}
-
-    internal operator fun compareTo(other: Dag) = this.dato.compareTo(other.dato)
 
     internal class UkjentDag(
         dato: LocalDate,
