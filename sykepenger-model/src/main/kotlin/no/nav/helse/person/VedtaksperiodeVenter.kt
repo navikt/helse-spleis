@@ -115,9 +115,8 @@ internal class Venteårsak private constructor(
     }
 
     enum class Hvorfor {
-        MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER, // TODO: SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING hadde vært et bedre navn
+        SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING, // Om vi fikser lagring av tidsnære inntektsopplysninger skal dette være en umulighet
         SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING,
-        HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE, // TODO: Denne er litt smør på flesk sammen med hva = SØKNAD. Slette?
         OVERSTYRING_IGANGSATT,
         VIL_OMGJØRES
     }

@@ -48,7 +48,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_2
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_22
@@ -2131,7 +2131,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER)
+        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertForventetFeil(

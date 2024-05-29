@@ -38,7 +38,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Overlapper med foreldrepenger`
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OO_2
@@ -1053,7 +1053,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         // 5.mars (påfølgende mandag)-20.mars er akkurat 16 dager
         observatør.vedtaksperiodeVenter.clear()
         nyPeriode(10.februar til 2.mars, a2)
-        observatør.assertVenter(1.vedtaksperiode.id(a2), venterPåHva = INNTEKTSMELDING, fordi = MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER)
+        observatør.assertVenter(1.vedtaksperiode.id(a2), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a2)

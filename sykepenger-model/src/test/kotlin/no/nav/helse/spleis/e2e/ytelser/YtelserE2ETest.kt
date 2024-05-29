@@ -28,7 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
@@ -368,7 +368,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-        observatør.assertVenter(2.vedtaksperiode.id(a2), venterPåVedtaksperiodeId = 3.vedtaksperiode.id(a1), venterPåOrgnr = a1, venterPåHva = INNTEKTSMELDING, fordi = MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER)
+        observatør.assertVenter(2.vedtaksperiode.id(a2), venterPåVedtaksperiodeId = 3.vedtaksperiode.id(a1), venterPåOrgnr = a1, venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
     }
 
     @Test

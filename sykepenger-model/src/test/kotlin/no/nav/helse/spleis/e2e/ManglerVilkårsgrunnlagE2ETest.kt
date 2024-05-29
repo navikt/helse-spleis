@@ -16,7 +16,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -101,7 +101,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(10.januar, 26.januar, 100.prosent))
-        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER)
+        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
 
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[4.januar])

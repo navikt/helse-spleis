@@ -68,8 +68,7 @@ import no.nav.helse.person.Venteårsak.Hva.HJELP
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
-import no.nav.helse.person.Venteårsak.Hvorfor.HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
-import no.nav.helse.person.Venteårsak.Hvorfor.MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
+import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
@@ -1418,7 +1417,7 @@ internal class Vedtaksperiode private constructor(
 
         private data class TrengerInntektsmelding(private val vedtaksperiode: Vedtaksperiode): Tilstand {
             override fun venterPå() = vedtaksperiode
-            override fun venteårsak() = INNTEKTSMELDING fordi MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_SAMME_ARBEIDSGIVER
+            override fun venteårsak() = INNTEKTSMELDING fordi SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Trenger inntektsmelding for perioden etter igangsatt revurdering")
             }
@@ -1736,7 +1735,7 @@ internal class Vedtaksperiode private constructor(
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse)
         }
         private data object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
-            override fun venteårsak() = SØKNAD fordi HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE
+            override fun venteårsak() = SØKNAD.utenBegrunnelse
             override fun makstid(tilstandsendringstidspunkt: LocalDateTime) = tilstandsendringstidspunkt.plusDays(90)
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")

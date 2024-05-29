@@ -216,7 +216,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     }
 
     @Test
-    fun HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE(){
+    fun `Venter på søknad på annen arbeidsgiver`(){
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         }
@@ -252,7 +252,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
                     organisasjonsnummer = a2,
                     venteårsak = PersonObserver.VedtaksperiodeVenterEvent.Venteårsak(
                         hva = "SØKNAD",
-                        hvorfor = "HAR_SYKMELDING_SOM_OVERLAPPER_PÅ_ANDRE_ARBEIDSGIVERE"
+                        hvorfor = null
                     )
                 )
             )
