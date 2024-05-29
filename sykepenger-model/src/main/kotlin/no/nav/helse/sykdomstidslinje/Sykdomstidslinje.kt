@@ -51,7 +51,7 @@ internal class Sykdomstidslinje private constructor(
     // Støtte for at perioden er lengre enn vi har dager for (Map-et er sparse)
     private val periode: Periode? = periode ?: if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
 
-    private val sisteSykedag get() = lastOrNull { erEnSykedag(it) }
+    private val sisteSykedag = lastOrNull { erEnSykedag(it) }
 
     internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())
 
@@ -187,7 +187,7 @@ internal class Sykdomstidslinje private constructor(
         else -> false
     }
 
-    private fun detFinnesEnSykedagEtter(dato: LocalDate) = sisteSykedag != null && sisteSykedag!!.erEtter(dato)
+    private fun detFinnesEnSykedagEtter(dato: LocalDate) = sisteSykedag != null && sisteSykedag.erEtter(dato)
 
     private fun erGyldigHelgegap(dato: LocalDate): Boolean {
         if (!dato.erHelg()) return false
