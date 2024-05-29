@@ -167,16 +167,17 @@ class ArbeidsgiverInntektsopplysning(
             val omregnetÅrsinntekt = map { it.inntektsopplysning }
             val endringen = this
                 .map { inntekt -> inntekt.overstyr(other) }
-                .also { it.subsummer(subsumsjonslogg, opptjening, this) }.toMutableList()
+                .also { it.subsummer(subsumsjonslogg, opptjening, this) }
+                .toMutableList()
             val nyeInntektsopplysningerAnnetOrgnummer = other.mapNotNull { inntekt ->
                 if (this.any { it.gjelder(inntekt.orgnummer) }) null
                 else inntekt
             }
-            val omregnetÅrsinntektEtterpå = endringen.map { it.inntektsopplysning }
-            if (Inntektsopplysning.erOmregnetÅrsinntektEndret(omregnetÅrsinntekt, omregnetÅrsinntektEtterpå)) return endringen.map { it.rullTilbake() }
             if (Toggle.TilkommenInntekt.enabled) {
                 endringen.addAll(nyeInntektsopplysningerAnnetOrgnummer)
             }
+            val omregnetÅrsinntektEtterpå = endringen.map { it.inntektsopplysning }
+            if (Inntektsopplysning.erOmregnetÅrsinntektEndret(omregnetÅrsinntekt, omregnetÅrsinntektEtterpå)) return endringen.map { it.rullTilbake() }
             return endringen
         }
 

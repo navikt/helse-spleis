@@ -20,6 +20,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
+import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -142,6 +143,33 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
                 val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }
                 assertInstanceOf(SkattSykepengegrunnlag::class.java, inntektA2.inspektør.inntektsopplysning)
                 assertEquals(1.januar til LocalDate.MAX, inntektA2.inspektør.gjelder )
+            }
+        }
+    }
+    @Test
+    fun `tilkommen inntekt etter skjønnsmessig fastsettelse`() = Toggle.TilkommenInntekt.enable {
+        a1 {
+            nyttVedtak(1.januar, 31.januar, 100.prosent)
+            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 1000.månedlig)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                val inntektA1 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a1) }
+                val inntektA2 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a2) }
+                assertInstanceOf(Inntektsmelding::class.java, inntektA1.inspektør.inntektsopplysning)
+                assertEquals(1.januar til LocalDate.MAX, inntektA1.inspektør.gjelder )
+                assertInstanceOf(Inntektsmelding::class.java, inntektA2.inspektør.inntektsopplysning)
+                assertEquals(1.februar til LocalDate.MAX, inntektA2.inspektør.gjelder )
             }
         }
     }
