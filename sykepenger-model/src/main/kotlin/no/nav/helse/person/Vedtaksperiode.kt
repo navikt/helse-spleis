@@ -1718,8 +1718,8 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>
         ): Tilstand {
             return when {
-                arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
                 !vedtaksperiode.forventerInntekt() -> ForventerIkkeInntekt
+                arbeidsgivere.avventerSøknad(vedtaksperiode.periode) -> AvventerTidligereEllerOverlappendeSøknad
                 vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
                 !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse) -> TrengerInntektsmelding(vedtaksperiode)
                 arbeidsgivere.harOverlappendePerioderSomManglerTilstrekkeligInformasjonTilUtbetaling(hendelse, vedtaksperiode) -> TrengerInntektsmeldingAndreArbeidsgivere(arbeidsgivere.førstePeriodeSomTrengerInntektsmelding(hendelse, vedtaksperiode), arbeidsgivere.toList())
