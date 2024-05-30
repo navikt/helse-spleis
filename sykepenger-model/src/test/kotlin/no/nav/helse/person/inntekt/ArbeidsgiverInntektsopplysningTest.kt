@@ -79,11 +79,11 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         assertEquals(original, original.overstyrInntekter(skjæringstidspunkt, opptjening, listOf(a1Overstyrt, a1Overstyrt), NullObserver)) { "kan ikke velge mellom inntekter for samme orgnr" }
 
-        assertEquals(emptyList<ArbeidsgiverInntektsopplysning>(), emptyList<ArbeidsgiverInntektsopplysning>().overstyrInntekter(skjæringstidspunkt, opptjening, new, NullObserver))
+        assertEquals(new, emptyList<ArbeidsgiverInntektsopplysning>().overstyrInntekter(skjæringstidspunkt, opptjening, new, NullObserver))
         assertEquals(original, original.overstyrInntekter(skjæringstidspunkt, opptjening, emptyList(), NullObserver))
         assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(skjæringstidspunkt, opptjening, new, NullObserver))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
-        assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(skjæringstidspunkt, opptjening, forMange, NullObserver)) { "skal ikke kunne legge til inntekter som ikke finnes fra før" }
+        assertEquals(listOf(a1Overstyrt, a2Opplysning, a3Overstyrt), original.overstyrInntekter(skjæringstidspunkt, opptjening, forMange, NullObserver))
     }
 
     @Test

@@ -490,8 +490,8 @@ internal class SykepengegrunnlagTest {
 
         val resultat = overstyring.resultat()
         assertNotNull(resultat)
-        assertEquals(2, resultat.size)
-        assertTrue(resultat.none{ it.inspektør.orgnummer == "a3" })
+        assertEquals(3, resultat.size)
+        assertTrue(resultat.any { it.inspektør.orgnummer == "a3" } )
     }
 
     @Test

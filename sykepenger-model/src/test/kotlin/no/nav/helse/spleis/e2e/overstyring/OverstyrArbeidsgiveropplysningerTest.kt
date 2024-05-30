@@ -591,7 +591,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             arbeidsgiveropplysninger = listOf(
                 OverstyrtArbeidsgiveropplysning(
                     orgnummer = a1,
-                    inntekt = INNTEKT * 1.25,
+                    inntekt = nyInntekt,
                     forklaring = "er i sykepengegrunnlaget",
                     subsumsjon = null,
                     refusjonsopplysninger = listOf(
@@ -612,9 +612,13 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
         assertNotNull(vilkårsgrunnlag)
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
-        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(nyInntekt, it.inntektsopplysning.inspektør.beløp)
+            assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
+        }
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(nyInntekt, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }

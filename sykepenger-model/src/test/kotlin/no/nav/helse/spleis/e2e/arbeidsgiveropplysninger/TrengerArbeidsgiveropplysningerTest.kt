@@ -31,14 +31,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -69,7 +67,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
@@ -346,22 +343,6 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             PersonObserver.Refusjon(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INNTEKT_FLERE_AG)))
         )
         assertEquals(expectedForespurteOpplysninger, actualForespurteOpplysninger)
-    }
-
-    @Test
-    fun `ber om inntekt for a2 når søknad for a2 kommer inn etter fattet vedtak for a1`() {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
-        nyPeriode(1.januar til 31.januar, a2)
-
-        assertForventetFeil(
-            forklaring = "Støtter ikke å legge til ny arbeidsgiver i eksisterende vilkårsgrunnlag",
-            nå = {
-                assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD, orgnummer = a2)
-            },
-            ønsket = {
-                fail("""\_(ツ)_/¯""")
-            }
-        )
     }
 
     @Test
