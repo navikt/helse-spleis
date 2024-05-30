@@ -267,7 +267,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `har overlappende avslutta vedtaksperiode på annen arbeidsgiver`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a2)
-        val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
+        val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
@@ -323,7 +323,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `har en periode rett før på annen arbeidsgiver`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a2)
-        val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
