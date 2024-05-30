@@ -49,7 +49,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Venteårsak
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
+import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -76,6 +78,33 @@ import org.junit.jupiter.api.Test
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `En AUU som åpnes opp, men vil tilbake til AUU bør ikke trenge å vente på en eventuell overlappende søknad`() {
+        a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar)) }
+        a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar)) }
+
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+            nullstillTilstandsendringer()
+            observatør.vedtaksperiodeVenter.clear()
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+            assertForventetFeil(
+                forklaring = "En AUU som åpnes opp, men vil tilbake til AUU bør ikke trenge å vente på en eventuell overlappende søknad",
+                nå = {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
+                    assertEquals("SØKNAD", observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == 1.vedtaksperiode}.venterPå.venteårsak.hva)
+                },
+                ønsket = {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+                    assertEquals(0, observatør.vedtaksperiodeVenter.size)
+                }
+            )
+        }
+    }
 
     @Test
     fun `tre arbeidsgivere med flere perioder som overlapper`() {
