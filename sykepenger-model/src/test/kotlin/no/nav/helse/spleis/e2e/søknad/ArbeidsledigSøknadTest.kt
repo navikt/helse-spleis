@@ -58,14 +58,4 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
-
-    @Test
-    fun `støtter ikke arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt hvor arbeidsgiver ikke inngår i sykepengegrunnlaget`() {
-        (a1 og a2).nyeVedtak(1.januar til 31.januar)
-        a3 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
-            assertFunksjonellFeil(Varselkode.RV_SV_2, 1.vedtaksperiode.filter())
-        }
-    }
 }
