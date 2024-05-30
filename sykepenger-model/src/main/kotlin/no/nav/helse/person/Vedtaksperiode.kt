@@ -2682,7 +2682,7 @@ internal class Vedtaksperiode private constructor(
         sykmeldingFom = this.sykmeldingsperiode.start,
         sykmeldingTom = this.sykmeldingsperiode.endInclusive,
         behandlinger = behandlinger.dto(),
-        venteårsak = nestemann?.let { vedtaksperiodeVenter(it, arbeidsgivere)?.dto() },
+        venteårsak = null,
         opprettet = opprettet,
         oppdatert = oppdatert
     )
