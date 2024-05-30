@@ -49,9 +49,10 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
-        val omregnedeÅrsinntekterFraGodkjenningsbehov = omregnedeÅrsinntekter(1.vedtaksperiode, a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        val omregnedeÅrsinntekterFraGodkjenningsbehov = omregnedeÅrsinntekter(2.vedtaksperiode, a1)
         assertEquals(listOf(OmregnetÅrsinntektFraGodkjenningsbehov(a1, INNTEKT)), omregnedeÅrsinntekterFraGodkjenningsbehov)
     }
 

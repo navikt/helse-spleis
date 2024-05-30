@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
@@ -44,7 +45,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         }
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         }
         a2 {
@@ -61,9 +62,6 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a1 {
-            håndterYtelser(1.vedtaksperiode)
-            assertEquals(0, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -87,8 +85,8 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         }
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, gjelder = 1.januar til 31.januar, forklaring = "Noe")))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
         a2 {
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
@@ -160,8 +158,6 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         a2 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
-        }
-        a1 {
             håndterYtelser(1.vedtaksperiode)
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)

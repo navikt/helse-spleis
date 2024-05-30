@@ -303,7 +303,8 @@ class ArbeidsgiverInntektsopplysning(
             val endringsDatoer = this.mapNotNull { ny ->
                 val gammel = other.singleOrNull { it.orgnummer == ny.orgnummer }
                 when {
-                    (gammel == null || ny.inntektsopplysning != gammel.inntektsopplysning) -> skjæringstidspunkt
+                    gammel == null -> ny.gjelder.start
+                    ny.inntektsopplysning != gammel.inntektsopplysning -> minOf(ny.gjelder.start, gammel.gjelder.start)
                     else -> ny.refusjonsopplysninger.finnFørsteDatoForEndring(gammel.refusjonsopplysninger)
                 }
             }
