@@ -33,6 +33,9 @@ class ArbeidsgiverInntektsopplysning(
     private val inntektsopplysning: Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
+    private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) =
+        skjæringstidspunkt == gjelder.start
+
     private fun fastsattÅrsinntekt(acc: Inntekt, skjæringstidspunkt: LocalDate): Inntekt {
         return acc + beregningsgrunnlag(skjæringstidspunkt)
     }
@@ -46,17 +49,17 @@ class ArbeidsgiverInntektsopplysning(
     }
 
     private fun beregningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
-        if (this.gjelder.start > skjæringstidspunkt) return INGEN
+        if (!gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return INGEN
         return inntektsopplysning.fastsattÅrsinntekt()
     }
 
     private fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
-        if (this.gjelder.start > skjæringstidspunkt) return INGEN
+        if (!gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return INGEN
         return inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
     }
 
     private fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, builder: GodkjenningsbehovBuilder) {
-        if (this.gjelder.start > skjæringstidspunkt) return
+        if (!gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return
         builder.omregnedeÅrsinntekter(orgnummer, inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig })
     }
 
