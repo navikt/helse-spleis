@@ -356,16 +356,6 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ber om inntektsmelding i AvventerInntektsmelding og sier ifra at vi ikke trenger når vi forlater tilstanden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
-        assertEquals(0, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
-    }
-
-    @Test
     fun `To perioder med gap, den siste venter på at den første skal bli ferdig - dersom den første blir forkastet skal den siste perioden forkastes`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai))
@@ -519,17 +509,6 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `sender trenger_ikke_inntektsmelding ved forkastelse av vedtaksperiode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-
-        forkastAlle(hendelselogg)
-        assertEquals(
-            1.januar til 31.januar,
-            observatør.trengerIkkeInntektsmeldingVedtaksperioder.map { it.fom til it.tom }.single())
     }
 
     @Test

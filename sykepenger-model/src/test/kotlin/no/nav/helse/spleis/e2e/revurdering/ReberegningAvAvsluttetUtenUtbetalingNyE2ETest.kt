@@ -1,13 +1,9 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
-import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -17,7 +13,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -26,7 +21,6 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -81,15 +75,12 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.søndag
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.til
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -128,7 +119,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar))
         håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(9.februar, 20.februar))
-        val søknadId = håndterSøknad(Sykdom(9.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(9.februar, 20.februar, 100.prosent))
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(10.januar til 25.januar),)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
@@ -136,7 +127,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertTrue((21.januar til 25.januar).all {
             inspektør.sykdomstidslinje[it] is Dag.UkjentDag
         })
-        assertNull(observatør.manglendeInntektsmeldingVedtaksperioder.singleOrNull { it.søknadIder == setOf(søknadId) })
     }
 
     @Test
@@ -409,7 +399,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
-        assertEquals(0, observatør.manglendeInntektsmeldingVedtaksperioder.size)
 
         assertTrue(inspektør.sykdomstidslinje[21.januar] is Dag.FriskHelgedag)
         assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.FriskHelgedag)
@@ -550,10 +539,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(23.januar, 25.januar))
-        val søknadId1 = håndterSøknad(Sykdom(23.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(23.januar, 25.januar, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 29.januar))
-        val søknadId2 = håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(5.januar til 20.januar),)
@@ -561,9 +550,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
         assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
-        assertEquals(setOf(søknadId1), observatør.manglendeInntektsmeldingVedtaksperioder.first().søknadIder)
-        assertEquals(setOf(søknadId2), observatør.manglendeInntektsmeldingVedtaksperioder.last().søknadIder)
     }
 
     @Test
@@ -1190,7 +1176,4 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertFunksjonellFeil(RV_IM_8, 1.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
-
-    private fun TestArbeidsgiverInspektør.inntektISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = ORGNUMMER) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning.inspektør.beløp
 }

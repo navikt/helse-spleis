@@ -20,8 +20,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     }
     internal val tilstandsendringer = person?.inspektør?.sisteVedtaksperiodeTilstander()?.mapValues { mutableListOf(it.value) }?.toMutableMap() ?: mutableMapOf()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
-    val manglendeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.ManglendeInntektsmeldingEvent>()
-    val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeInntektsmeldingEvent>()
     val trengerArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerArbeidsgiveropplysningerEvent>()
     val trengerPotensieltArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent>()
     val trengerIkkeArbeidsgiveropplysningerVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent>()
@@ -134,14 +132,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     internal fun nullstillTilstandsendringer() {
         tilstandsendringer.replaceAll { _, value -> mutableListOf(value.last()) }
-    }
-
-    override fun manglerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        manglendeInntektsmeldingVedtaksperioder.add(event)
-    }
-
-    override fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
-        trengerIkkeInntektsmeldingVedtaksperioder.add(event)
     }
 
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {

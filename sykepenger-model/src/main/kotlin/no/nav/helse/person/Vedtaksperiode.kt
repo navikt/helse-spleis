@@ -750,36 +750,6 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
             .all { it.behandlinger.trengerArbeidsgiverperiode() }
 
-    private fun trengerInntektsmelding() {
-        if (!forventerInntekt()) return
-        if (arbeidsgiver.finnVedtaksperiodeRettFør(this) != null) return
-        this.person.trengerInntektsmelding(
-            PersonObserver.ManglendeInntektsmeldingEvent(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = id,
-                fom = this.periode.start,
-                tom = this.periode.endInclusive,
-                søknadIder = behandlinger.søknadIder()
-            )
-        )
-    }
-
-    private fun trengerIkkeInntektsmelding() {
-        this.person.trengerIkkeInntektsmelding(
-            PersonObserver.TrengerIkkeInntektsmeldingEvent(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = id,
-                fom = this.periode.start,
-                tom = this.periode.endInclusive,
-                søknadIder = behandlinger.søknadIder()
-            )
-        )
-    }
-
     private fun trengerInntektsmeldingReplay() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
         val trengerArbeidsgiverperiode = trengerArbeidsgiverperiode(arbeidsgiverperiode)
@@ -1332,10 +1302,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.behandlinger.forkastUtbetaling(hendelse)
-            if (!vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt)) {
-                hendelse.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding")
-                vedtaksperiode.trengerInntektsmelding()
-            }
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
@@ -1383,10 +1349,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt)) {
-                påminnelse.info("Varsler arbeidsgiver at vi har behov for inntektsmelding.")
-                vedtaksperiode.trengerInntektsmelding()
-            }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
@@ -1394,10 +1356,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
-        }
-
-        override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerIkkeInntektsmelding()
         }
 
         private fun tilstand(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg): Tilstand {
@@ -1535,7 +1493,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
-            vedtaksperiode.trengerInntektsmelding()
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1556,7 +1513,6 @@ internal class Vedtaksperiode private constructor(
             check(vedtaksperiode.behandlinger.harIkkeUtbetaling()) {
                 "hæ?! vedtaksperiodens behandling er ikke uberegnet!"
             }
-            vedtaksperiode.trengerIkkeInntektsmelding()
         }
 
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding): Boolean {

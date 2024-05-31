@@ -512,14 +512,6 @@ class Person private constructor(
         }
     }
 
-    internal fun trengerInntektsmelding(event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        observers.forEach { it.manglerInntektsmelding(event) }
-    }
-
-    internal fun trengerIkkeInntektsmelding(event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
-        observers.forEach { it.trengerIkkeInntektsmelding(event) }
-    }
-
     internal fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         observers.forEach { it.trengerArbeidsgiveropplysninger(event) }
     }

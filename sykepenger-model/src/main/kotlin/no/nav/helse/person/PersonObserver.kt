@@ -107,26 +107,6 @@ interface PersonObserver {
         val organisasjonsnummer: String
     )
 
-    data class ManglendeInntektsmeldingEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
-        val organisasjonsnummer: String,
-        val vedtaksperiodeId: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val søknadIder: Set<UUID>
-    )
-
-    data class TrengerIkkeInntektsmeldingEvent(
-        val fødselsnummer: String,
-        val aktørId: String,
-        val organisasjonsnummer: String,
-        val vedtaksperiodeId: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val søknadIder: Set<UUID>
-    )
-
     data class TrengerArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID,
@@ -742,8 +722,6 @@ interface PersonObserver {
     fun vedtaksperiodeVenter(event: VedtaksperiodeVenterEvent) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
-    fun manglerInntektsmelding(event: ManglendeInntektsmeldingEvent) {}
-    fun trengerIkkeInntektsmelding(event: TrengerIkkeInntektsmeldingEvent) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
     fun trengerPotensieltArbeidsgiveropplysninger(event: TrengerPotensieltArbeidsgiveropplysningerEvent) {}
     fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}

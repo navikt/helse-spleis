@@ -1218,23 +1218,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ber ikke om ny IM hvis det bare er helg mellom to perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 26.januar))
-        håndterSøknad(Sykdom(1.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 31.januar))
-        håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent))
-
-        assertFalse(29.januar til 31.januar in observatør.manglendeInntektsmeldingVedtaksperioder.map { it.fom til it.tom })
-    }
-
-    @Test
     fun `legger ved inntektsmeldingId på vedtaksperiode_endret-event for forlengende vedtaksperioder`() {
         val inntektsmeldingId = UUID.randomUUID()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
