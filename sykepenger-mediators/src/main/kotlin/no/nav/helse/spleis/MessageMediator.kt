@@ -46,6 +46,8 @@ import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
+import kotlin.time.DurationUnit
+import kotlin.time.measureTime
 
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,
@@ -109,17 +111,29 @@ internal class MessageMediator(
 
     override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
         try {
-            messageRecognized = true
-            message.logRecognized(log, sikkerLogg)
-            hendelseRepository.lagreMelding(message)
+            measureTime {
+                messageRecognized = true
+                message.logRecognized(log, sikkerLogg)
+                hendelseRepository.lagreMelding(message)
 
-            if (message.skalDuplikatsjekkes && hendelseRepository.erBehandlet(message.id)) {
-                message.logDuplikat(sikkerLogg)
-                return
+                if (message.skalDuplikatsjekkes && hendelseRepository.erBehandlet(message.id)) {
+                    message.logDuplikat(sikkerLogg)
+                    return
+                }
+
+                hendelseMediator.behandle(message, context)
+                hendelseRepository.markerSomBehandlet(message.id)
+            }.also { result ->
+                val antallSekunder = result.toDouble(DurationUnit.SECONDS)
+                val label = when {
+                    antallSekunder < 1.0 -> "under ett sekund"
+                    antallSekunder <= 2.0 -> "mer enn ett sekund"
+                    antallSekunder <= 5.0 -> "mer enn to sekunder"
+                    antallSekunder <= 10.0 -> "mer enn fem sekunder"
+                    else -> "mer enn 10 sekunder"
+                }
+                sikkerLogg.info("brukte $label ($antallSekunder s) på å prosessere meldingen")
             }
-
-            hendelseMediator.behandle(message, context)
-            hendelseRepository.markerSomBehandlet(message.id)
         } catch (err: DeserializationException) {
             severeErrorHandler(err, message)
         } catch (err: JsonMigrationException) {
