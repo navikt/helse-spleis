@@ -4,7 +4,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.3"
 }
 
-val tbdLibsVersion = "2024.02.09-10.44-24d5802f"
+val tbdLibsVersion = "2024.05.31-08.02-2c3441c1"
 val spekematVersion = "2024.03.07-12.49-d2ad6319"
 val micrometerRegistryPrometheusVersion = "1.12.3"
 val ktorVersion = "2.3.7"
@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-serde"))
     implementation("com.github.navikt.tbd-libs:azure-token-client-default:$tbdLibsVersion")
+    implementation("com.github.navikt.tbd-libs:spurtedu-client:$tbdLibsVersion")
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")

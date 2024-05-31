@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.navikt.tbd_libs.azure.AzureTokenProvider
+import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
@@ -52,11 +52,11 @@ fun main() {
         // gjentatte kall til getDataSource() vil til slutt tømme databasen for tilkoblinger
         config.dataSourceConfiguration.getDataSource()
     }
-    val app = createApp(config.ktorConfig, config.azureConfig, config.spekematClient, config.azureClient, config.spurteDuClient, { dataSource })
+    val app = createApp(config.ktorConfig, config.azureConfig, config.spekematClient, config.spurteDuClient, { dataSource })
     app.start(wait = true)
 }
 
-internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, spekematClient: SpekematClient, azureClient: AzureTokenProvider?, spurteDuClient: SpurteDuClient?, dataSourceProvider: () -> DataSource, collectorRegistry: CollectorRegistry = CollectorRegistry()) =
+internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, spekematClient: SpekematClient, spurteDuClient: SpurteDuClient?, dataSourceProvider: () -> DataSource, collectorRegistry: CollectorRegistry = CollectorRegistry()) =
     embeddedServer(
         factory = Netty,
         environment = applicationEngineEnvironment {
@@ -64,7 +64,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, sp
             log = logg
             module {
                 azureAdAppAuthentication(azureConfig)
-                lagApplikasjonsmodul(spekematClient, azureClient, spurteDuClient, dataSourceProvider, collectorRegistry)
+                lagApplikasjonsmodul(spekematClient, spurteDuClient, dataSourceProvider, collectorRegistry)
             }
         },
         configure = {
@@ -74,7 +74,6 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, sp
 
 internal fun Application.lagApplikasjonsmodul(
     spekematClient: SpekematClient,
-    azureClient: AzureTokenProvider?,
     spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
     collectorRegistry: CollectorRegistry
@@ -98,7 +97,7 @@ internal fun Application.lagApplikasjonsmodul(
     val hendelseDao = HendelseDao(dataSourceProvider)
     val personDao = PersonDao(dataSourceProvider)
 
-    spannerApi(hendelseDao, personDao, spurteDuClient, azureClient)
+    spannerApi(hendelseDao, personDao, spurteDuClient)
     sporingApi(hendelseDao, personDao)
     installGraphQLApi(spekematClient, hendelseDao, personDao)
 }

@@ -5,6 +5,7 @@ import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.azure.createAzureTokenClientFromEnvironment
+import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
 import io.ktor.server.auth.jwt.JWTAuthenticationProvider
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.engine.ApplicationEngineEnvironmentBuilder
@@ -14,7 +15,6 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.time.Duration
 import no.nav.helse.spleis.SpekematClient
-import no.nav.helse.spleis.SpurteDuClient
 import no.nav.helse.spleis.objectMapper
 
 internal class ApplicationConfiguration(env: Map<String, String> = System.getenv()) {
@@ -29,7 +29,10 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
     )
 
     internal val azureClient = createAzureTokenClientFromEnvironment(env)
-    internal val spurteDuClient = SpurteDuClient(objectMapper)
+    internal val spurteDuClient = SpurteDuClient(
+        objectMapper = objectMapper,
+        tokenProvider = azureClient
+    )
     internal val spekematClient = SpekematClient(
         tokenProvider = azureClient,
         objectMapper = objectMapper,

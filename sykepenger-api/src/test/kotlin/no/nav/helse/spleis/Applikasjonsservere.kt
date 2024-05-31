@@ -97,7 +97,7 @@ internal class Applikasjonsservere(private val poolSize: Int) {
         private val registry = CollectorRegistry()
         private val spekematClient = mockk<SpekematClient>()
         private val app =
-            createApp(KtorConfig(httpPort = randomPort), azureConfig, spekematClient, null, null, { testDataSource.ds }, registry)
+            createApp(KtorConfig(httpPort = randomPort), azureConfig, spekematClient, null, { testDataSource.ds }, registry)
         private val client = lagHttpklient(randomPort)
         private val testContext = BlackboxTestContext(client, issuer)
 

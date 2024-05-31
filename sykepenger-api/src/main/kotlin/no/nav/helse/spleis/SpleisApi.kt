@@ -1,7 +1,7 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.core.JsonParseException
-import com.github.navikt.tbd_libs.azure.AzureTokenProvider
+import com.github.navikt.tbd_libs.spurtedu.SpurteDuClient
 import io.ktor.http.ContentType
 import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.server.application.Application
@@ -27,12 +27,12 @@ import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.spanner.tilSpannerPersonDto
 import no.nav.helse.spleis.sporing.serializePersonForSporing
 
-internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao, spurteDuClient: SpurteDuClient?, azureClient: AzureTokenProvider?) {
+internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao, spurteDuClient: SpurteDuClient?) {
     routing {
         authenticate {
             get("/api/person-json/{maskertId?}") {
                 withContext(Dispatchers.IO) {
-                    val ident = fnr(personDao, spurteDuClient, azureClient)
+                    val ident = fnr(personDao, spurteDuClient)
                     val serialisertPerson = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(ident) }
                     val person = Person.gjenopprett(MaskinellJurist(), dto)
@@ -76,22 +76,21 @@ internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonD
     }
 }
 
-private fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao, spurteDuClient: SpurteDuClient? = null, azureClient: AzureTokenProvider? = null): Long {
+private fun PipelineContext<Unit, ApplicationCall>.fnr(personDao: PersonDao, spurteDuClient: SpurteDuClient? = null): Long {
     val maskertId = call.parameters["maskertId"]
-    val (fnr, aktorid) = call.identFraSpurteDu(spurteDuClient, azureClient, maskertId) ?: call.identFraRequest()
+    val (fnr, aktorid) = call.identFraSpurteDu(spurteDuClient, maskertId) ?: call.identFraRequest()
     return fnr(personDao, fnr, aktorid) ?: throw BadRequestException("Mangler fnr eller aktorId i headers")
 }
 
-private fun ApplicationCall.identFraSpurteDu(spurteDuClient: SpurteDuClient?, azureClient: AzureTokenProvider?, maskertId: String?): Pair<Long?, Long?>? {
-    if (spurteDuClient == null || azureClient == null || maskertId == null) return null
+private fun ApplicationCall.identFraSpurteDu(spurteDuClient: SpurteDuClient?, maskertId: String?): Pair<Long?, Long?>? {
+    if (spurteDuClient == null || maskertId == null) return null
     val id = try {
         UUID.fromString(maskertId)
     } catch (err: Exception) {
         return null
     }
     val token = bearerToken ?: return null
-    val obo = azureClient.onBehalfOfToken("api://${System.getenv("NAIS_CLUSTER_NAME")}.tbd.spurtedu/.default", token)
-    val tekstinnhold = spurteDuClient.utveksleSpurteDu(obo.token, id.toString()) ?: return null
+    val tekstinnhold = spurteDuClient.vis(id, token).text
     return try {
         val node = objectMapper.readTree(tekstinnhold)
         val ident = node.path("ident").asLong()

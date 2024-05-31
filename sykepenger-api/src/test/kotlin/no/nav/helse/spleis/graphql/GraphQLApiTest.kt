@@ -784,7 +784,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         }
                     }
                     val dataSource = testDataSource.ds
-                    lagApplikasjonsmodul(spekematClient, null, null, { dataSource }, CollectorRegistry())
+                    lagApplikasjonsmodul(spekematClient, null, { dataSource }, CollectorRegistry())
                 }
                 startApplication()
 
