@@ -3,7 +3,7 @@ package no.nav.helse.dto.serialisering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.VedtaksperiodeVenterDto
+import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 
 data class VedtaksperiodeUtDto(
@@ -15,7 +15,7 @@ data class VedtaksperiodeUtDto(
     val sykmeldingFom: LocalDate,
     val sykmeldingTom: LocalDate,
     val behandlinger: BehandlingerUtDto,
-    val venteårsak: VedtaksperiodeVenterDto?,
+    val venteårsak: LazyVedtaksperiodeVenterDto,
     val opprettet: LocalDateTime,
     var oppdatert: LocalDateTime
 )

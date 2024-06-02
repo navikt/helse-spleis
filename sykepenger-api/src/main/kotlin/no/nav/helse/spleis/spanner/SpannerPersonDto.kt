@@ -64,7 +64,6 @@ import no.nav.helse.dto.VedtaksperiodeVenterDto
 import no.nav.helse.dto.VenterPåDto
 import no.nav.helse.dto.VenteårsakDto
 import no.nav.helse.nesteDag
-import no.nav.helse.person.TilstandType
 
 internal data class SpannerPersonDto(
     val aktørId: String,
@@ -935,7 +934,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverD
         VedtaksperiodetilstandDto.TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_UTBETALING
     },
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
-    venteårsak = venteårsak?.tilPersonData(),
+    venteårsak = venteårsak.value?.tilPersonData(),
     opprettet = opprettet,
     oppdatert = oppdatert,
     skjæringstidspunkt = skjæringstidspunkt,

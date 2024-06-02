@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Toggle
+import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
@@ -2635,7 +2636,7 @@ internal class Vedtaksperiode private constructor(
         sykmeldingFom = this.sykmeldingsperiode.start,
         sykmeldingTom = this.sykmeldingsperiode.endInclusive,
         behandlinger = behandlinger.dto(),
-        venteårsak = null,
+        venteårsak = LazyVedtaksperiodeVenterDto { nestemann?.let { tilstand.venter(this, arbeidsgivere, it)?.dto() } },
         opprettet = opprettet,
         oppdatert = oppdatert
     )
