@@ -1359,7 +1359,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun tilstand(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg): Tilstand {
             if (!vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)) return TrengerInntektsmelding(vedtaksperiode)
-            val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = arbeidsgivere.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse, vedtaksperiode)
+            val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = arbeidsgivere.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse, vedtaksperiode, vedtaksperiode.organisasjonsnummer)
             if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null) return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver, arbeidsgivere.toList())
             if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
             return KlarForBeregning
@@ -1675,7 +1675,7 @@ internal class Vedtaksperiode private constructor(
             if (arbeidsgivere.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) return ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
             if (!vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)) return TrengerInntektsmelding(vedtaksperiode)
-            val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = arbeidsgivere.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse, vedtaksperiode)
+            val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = arbeidsgivere.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse, vedtaksperiode, vedtaksperiode.organisasjonsnummer)
             if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null) return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver, arbeidsgivere.toList())
             if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
             return KlarForBeregning
@@ -2323,16 +2323,6 @@ internal class Vedtaksperiode private constructor(
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
         internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
 
-        internal val RELEVANTE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE = fun (segSelv: Vedtaksperiode, hendelse: IAktivitetslogg): VedtaksperiodeFilter {
-            return fun (other: Vedtaksperiode): Boolean {
-                if (segSelv.organisasjonsnummer == other.organisasjonsnummer) return false
-                if (other.tilstand.erFerdigBehandlet) return false
-                val relevant = segSelv.skjæringstidspunkt == other.skjæringstidspunkt || segSelv.periode.overlapperMed(other.periode)
-                if (!relevant) return false
-                return !other.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(other.skjæringstidspunkt, other, hendelse)
-            }
-        }
-
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val medSammeAGP = MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(segSelv)
@@ -2351,7 +2341,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val HAR_PÅGÅENDE_UTBETALINGER: VedtaksperiodeFilter = { it.behandlinger.utbetales() }
-        internal val FORVENTER_INNTEKT: VedtaksperiodeFilter = { it.forventerInntekt() }
 
         private val HAR_AVVENTENDE_GODKJENNING: VedtaksperiodeFilter = {
             it.tilstand == AvventerGodkjenning || it.tilstand == AvventerGodkjenningRevurdering
@@ -2362,6 +2351,21 @@ internal class Vedtaksperiode private constructor(
         internal val OVERLAPPER_MED = { other: Vedtaksperiode ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.periode.overlapperMed(other.periode) }
         }
+
+        private fun Vedtaksperiode.manglerTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg, cache: MutableMap<UUID, Boolean>)
+            = cache.computeIfAbsent(id) { !harTilstrekkeligInformasjonTilUtbetaling(hendelse) }
+
+        internal val OVERLAPPER_OG_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING = { other: Vedtaksperiode, hendelse: IAktivitetslogg, cache: MutableMap<UUID, Boolean> ->
+            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.periode.overlapperMed(other.periode) && vedtaksperiode.manglerTilstrekkeligInformasjonTilUtbetaling(hendelse, cache) }
+        }
+
+        internal fun Iterable<Vedtaksperiode>.førstePeriodeSomTrengerInntektsmelding(hendelse: IAktivitetslogg, other: Vedtaksperiode, champion: Vedtaksperiode?, cache: MutableMap<UUID, Boolean>) =
+            firstOrNull {
+                !it.tilstand.erFerdigBehandlet &&                                                                       // Ikke ferdig behandlet (slipper med det også å bruke forventerInntekt)
+                (it.skjæringstidspunkt == other.skjæringstidspunkt || it.periode.overlapperMed(other.periode)) &&       // Må overlappe eller ha samme skjæringstidspunkt
+                (champion == null || it.erTidligereEnn(champion)) &&                                                    // Må være en tidligere periode enn den vi ev. allerede har funnet på annen arbeidsgiver
+                it.manglerTilstrekkeligInformasjonTilUtbetaling(hendelse, cache)                                        // Mangler tilstrekkelig informasjon til utbetaling
+            }
 
         internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }
@@ -2413,10 +2417,9 @@ internal class Vedtaksperiode private constructor(
         }
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
-
         private fun Vedtaksperiode.erTidligereEnn(other: Vedtaksperiode): Boolean = this <= other || this.skjæringstidspunkt < other.skjæringstidspunkt
 
-        internal fun Iterable<Vedtaksperiode>.førstePeriode(): Vedtaksperiode? {
+        private fun Iterable<Vedtaksperiode>.førstePeriode(): Vedtaksperiode? {
             var minste: Vedtaksperiode? = null
             this
                 .forEach { vedtaksperiode ->

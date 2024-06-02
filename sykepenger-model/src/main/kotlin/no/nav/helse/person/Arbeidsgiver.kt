@@ -34,18 +34,16 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.slåSammenSykdomstidslinjer
 import no.nav.helse.person.PersonObserver.UtbetalingEndretEvent.OppdragEventDetaljer
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
-import no.nav.helse.person.Vedtaksperiode.Companion.FORVENTER_INNTEKT
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
-import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_MED
-import no.nav.helse.person.Vedtaksperiode.Companion.RELEVANTE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
+import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_OG_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
+import no.nav.helse.person.Vedtaksperiode.Companion.førstePeriodeSomTrengerInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.finnNesteVedtaksperiodeSomTrengerInntektsmelding
-import no.nav.helse.person.Vedtaksperiode.Companion.førstePeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
@@ -224,10 +222,20 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) = this
             .any { arbeidsgiver -> arbeidsgiver.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) }
 
-        internal fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse: IAktivitetslogg, periode: Vedtaksperiode): Vedtaksperiode? {
-            val relevante = vedtaksperioder(RELEVANTE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE(periode, hendelse))
-            if (relevante.none(OVERLAPPER_MED(periode))) return null // Det er kun om vi har overlappende periode på andre arbeidsgivere som mangler tilstrekkelig informasjon til utbetaling vi stopper opp
-            return relevante.filter(FORVENTER_INNTEKT).førstePeriode() // ... men det er ikke nødvendigvis den perioden som er den første som trenger inntektsmelding (les: AUU)
+        internal fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse: IAktivitetslogg, periode: Vedtaksperiode, organisasjonsnummer: String): Vedtaksperiode? {
+            val manglerTilstrekkeligInformasjonTilUtbetalingCache = mutableMapOf<UUID, Boolean>()
+            val overlappSomManglerTilstrekkeligInformasjonTilUtbetaling = any { arbeidsgiver ->
+                arbeidsgiver.vedtaksperioder.any(OVERLAPPER_OG_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING(periode, hendelse, manglerTilstrekkeligInformasjonTilUtbetalingCache))
+            }
+            if (!overlappSomManglerTilstrekkeligInformasjonTilUtbetaling) return null
+
+            var champion: Vedtaksperiode? = null
+            filterNot { it.organisasjonsnummer == organisasjonsnummer }.forEach { arbeidsgiver ->
+                arbeidsgiver.vedtaksperioder.førstePeriodeSomTrengerInntektsmelding(hendelse, periode, champion, manglerTilstrekkeligInformasjonTilUtbetalingCache)?.let {
+                    champion = it
+                }
+            }
+            return champion
         }
 
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
