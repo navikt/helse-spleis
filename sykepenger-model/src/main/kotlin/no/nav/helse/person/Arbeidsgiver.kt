@@ -224,7 +224,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse: IAktivitetslogg, periode: Vedtaksperiode, organisasjonsnummer: String): Vedtaksperiode? {
             val manglerTilstrekkeligInformasjonTilUtbetalingCache = mutableMapOf<UUID, Boolean>()
-            val overlappSomManglerTilstrekkeligInformasjonTilUtbetaling = any { arbeidsgiver ->
+            val overlappSomManglerTilstrekkeligInformasjonTilUtbetaling = filterNot { it.organisasjonsnummer == organisasjonsnummer }.any { arbeidsgiver ->
                 arbeidsgiver.vedtaksperioder.any(OVERLAPPER_OG_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING(periode, hendelse, manglerTilstrekkeligInformasjonTilUtbetalingCache))
             }
             if (!overlappSomManglerTilstrekkeligInformasjonTilUtbetaling) return null
