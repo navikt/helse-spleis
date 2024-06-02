@@ -2340,6 +2340,16 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        internal val RELEVANTE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE = fun (segSelv: Vedtaksperiode, hendelse: IAktivitetslogg): VedtaksperiodeFilter {
+            return fun (other: Vedtaksperiode): Boolean {
+                if (segSelv.organisasjonsnummer == other.organisasjonsnummer) return false
+                if (other.tilstand.erFerdigBehandlet) return false
+                val relevant = segSelv.skjæringstidspunkt == other.skjæringstidspunkt || segSelv.periode.overlapperMed(other.periode)
+                if (!relevant) return false
+                return !other.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(other.skjæringstidspunkt, other, hendelse)
+            }
+        }
+
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             val medSammeAGP = MED_SAMME_AGP_OG_SKJÆRINGSTIDSPUNKT(segSelv)
@@ -2358,14 +2368,15 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val HAR_PÅGÅENDE_UTBETALINGER: VedtaksperiodeFilter = { it.behandlinger.utbetales() }
+        internal val FORVENTER_INNTEKT: VedtaksperiodeFilter = { it.forventerInntekt() }
 
-        internal val HAR_AVVENTENDE_GODKJENNING: VedtaksperiodeFilter = {
+        private val HAR_AVVENTENDE_GODKJENNING: VedtaksperiodeFilter = {
             it.tilstand == AvventerGodkjenning || it.tilstand == AvventerGodkjenningRevurdering
         }
 
         private val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
 
-        private val OVERLAPPER_MED = { other: Vedtaksperiode ->
+        internal val OVERLAPPER_MED = { other: Vedtaksperiode ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.periode.overlapperMed(other.periode) }
         }
 
