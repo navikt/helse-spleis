@@ -37,9 +37,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.FORVENTER_INNTEKT
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
-import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_INNTEKTSMELDING
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
-import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPENDE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING
 import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_MED
 import no.nav.helse.person.Vedtaksperiode.Companion.RELEVANTE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE
 import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
@@ -225,14 +223,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) = this
             .any { arbeidsgiver -> arbeidsgiver.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) }
-
-        internal fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektsmelding(hendelse: IAktivitetslogg, periode: Vedtaksperiode) = this
-            .nåværendeVedtaksperioder(TRENGER_INNTEKTSMELDING(periode, hendelse))
-            .førstePeriode() ?: error("Fant ingen perioder som trenger inntektsmelding.")
-
-        internal fun Iterable<Arbeidsgiver>.harOverlappendePerioderSomManglerTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg, periode: Vedtaksperiode) = this
-            .nåværendeVedtaksperioder(OVERLAPPENDE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING(periode, hendelse))
-            .isNotEmpty()
 
         internal fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse: IAktivitetslogg, periode: Vedtaksperiode): Vedtaksperiode? {
             val relevante = vedtaksperioder(RELEVANTE_PERIODER_SOM_MANGLER_TILSTREKKELIG_INFORMASJON_TIL_UTBETALING_ANDRE_ARBEIDSGIVERE(periode, hendelse))
