@@ -571,7 +571,6 @@ internal class Vedtaksperiode private constructor(
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
         oppdaterHistorikk(søknad) {
             søknad.valider(vilkårsgrunnlag, jurist)
-            if (manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) søknad.funksjonellFeil(RV_SV_2)
         }
         if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
         nesteTilstand()?.also { tilstand(søknad, it) }
