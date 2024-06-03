@@ -63,7 +63,7 @@ internal class InntektsmeldingerReplayMessage(packet: JsonMessage) : HendelseMes
             }
         )
         val arbeidsforholdId = packet.path("arbeidsforholdId").takeIf(JsonNode::isTextual)?.asText()
-        val vedtaksperiodeId = packet["vedtaksperiodeId"].takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
+        val vedtaksperiodeId = packet.path("vedtaksperiodeId").takeIf(JsonNode::isTextual)?.asText()?.let { UUID.fromString(it) }
         val orgnummer = packet.path("virksomhetsnummer").asText()
         val aktørId = packet.path("arbeidstakerAktorId").asText()
         val mottatt = packet.path("mottattDato").asLocalDateTime()
