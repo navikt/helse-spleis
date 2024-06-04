@@ -650,7 +650,7 @@ internal class Vedtaksperiode private constructor(
         person.lagreVilkårsgrunnlag(grunnlagsdata)
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) return forkast(vilkårsgrunnlag)
-        sendOppdatertForespørselOmArbeidsgiveropplysninger(vilkårsgrunnlag)
+        arbeidsgiver.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(this, vilkårsgrunnlag)
         tilstand(vilkårsgrunnlag, nesteTilstand)
     }
 
@@ -726,10 +726,6 @@ internal class Vedtaksperiode private constructor(
                 førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
             )
         )
-    }
-
-    private fun sendOppdatertForespørselOmArbeidsgiveropplysninger(hendelse: IAktivitetslogg) {
-        arbeidsgiver.finnNesteVedtaksperiodeSomTrengerInntektsmelding(this)?.trengerArbeidsgiveropplysninger(hendelse)
     }
 
     private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
@@ -1528,11 +1524,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {
             vedtaksperiode.håndterDager(dager)
             if (dager.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(dager)
-            if (vedtaksperiode .sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
+            if (vedtaksperiode.sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
                 dager.info("Det er egenmeldingsdager fra søknaden på sykdomstidlinjen, selv etter at inntektsmeldingen har oppdatert historikken. Undersøk hvorfor inntektsmeldingen ikke har overskrevet disse. Da er kanskje denne aktørId-en til hjelp: ${vedtaksperiode.aktørId}.")
             }
-            if (vedtaksperiode.forventerInntekt()) return
-            vedtaksperiode.tilstand(dager, AvsluttetUtenUtbetaling)
+            vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.arbeidsgiverperiode(dager, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
@@ -2437,13 +2432,12 @@ internal class Vedtaksperiode private constructor(
             filter(IKKE_FERDIG_BEHANDLET).førstePeriode()
 
 
-        internal fun List<Vedtaksperiode>.finnNesteVedtaksperiodeSomTrengerInntektsmelding(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
-            val nesteVedtaksperiode = filter { it.skjæringstidspunkt > vedtaksperiode.skjæringstidspunkt }
-                .sorted()
-                .firstOrNull { it.tilstand != AvsluttetUtenUtbetaling }
-
-            if (nesteVedtaksperiode?.tilstand != AvventerInntektsmelding) return null
-            return nesteVedtaksperiode
+        internal fun List<Vedtaksperiode>.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            val nestePeriode = this
+                .firstOrNull { it.skjæringstidspunkt > vedtaksperiode.skjæringstidspunkt && it.forventerInntekt() }
+                ?.takeIf { it.tilstand == AvventerInntektsmelding }
+                ?: return
+            nestePeriode.trengerArbeidsgiveropplysninger(hendelse)
         }
 
         internal fun Iterable<Vedtaksperiode>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) {

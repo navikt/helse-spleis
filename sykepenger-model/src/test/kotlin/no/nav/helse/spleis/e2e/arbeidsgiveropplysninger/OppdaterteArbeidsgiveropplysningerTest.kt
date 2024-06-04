@@ -284,6 +284,8 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
         assertEquals(5, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
