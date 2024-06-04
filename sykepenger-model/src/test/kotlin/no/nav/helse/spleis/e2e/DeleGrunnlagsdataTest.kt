@@ -117,7 +117,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))

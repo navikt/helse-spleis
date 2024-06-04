@@ -1491,7 +1491,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -1512,7 +1512,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 3.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -1836,8 +1836,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
         assertVarsel(RV_IM_24, 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 3.vedtaksperiode.filter())
         assertEquals(1.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
     }
     @Test

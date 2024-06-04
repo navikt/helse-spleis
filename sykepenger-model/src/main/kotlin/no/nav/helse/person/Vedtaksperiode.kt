@@ -241,7 +241,7 @@ internal class Vedtaksperiode private constructor(
             tilstand.håndter(this, hendelse)
             val arbeidsgiverperiodeEtterOverstyring = arbeidsgiver.arbeidsgiverperiode(periode())
             if (arbeidsgiverperiodeFørOverstyring != arbeidsgiverperiodeEtterOverstyring) {
-                behandlinger.sisteInntektsmeldingId()?.let {
+                behandlinger.sisteInntektsmeldingDagerId()?.let {
                     person.arbeidsgiveropplysningerKorrigert(
                         PersonObserver.ArbeidsgiveropplysningerKorrigertEvent(
                             korrigerendeInntektsopplysningId = hendelse.meldingsreferanseId(),
@@ -600,8 +600,15 @@ internal class Vedtaksperiode private constructor(
         person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode))
     }
 
+    private fun håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse: Inntektsmelding) {
+        val harHåndtertInntektTidligere = behandlinger.harHåndtertInntektTidligere()
+        if (inntektsmeldingHåndtert(hendelse)) return
+        if (!harHåndtertInntektTidligere) return
+        hendelse.varsel(RV_IM_4)
+    }
+
     private fun håndterKorrigerendeInntektsmelding(dager: DagerFraInntektsmelding) {
-        val korrigertInntektsmeldingId = behandlinger.sisteInntektsmeldingId()
+        val korrigertInntektsmeldingId = behandlinger.sisteInntektsmeldingDagerId()
         val opprinneligAgp = finnArbeidsgiverperiode()
         if (dager.erKorrigeringForGammel(opprinneligAgp)) {
             håndterDagerUtenEndring(dager)
@@ -748,7 +755,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun harIkkeFåttOpplysningerOmArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) =
         arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode)
-            .all { it.behandlinger.trengerArbeidsgiverperiode() }
+            .none { it.behandlinger.harHåndtertDagerTidligere() }
 
     private fun trengerInntektsmeldingReplay() {
         val arbeidsgiverperiode = finnArbeidsgiverperiode()
@@ -1637,8 +1644,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
-            if (vedtaksperiode.inntektsmeldingHåndtert(hendelse)) return
-            hendelse.varsel(RV_IM_4)
+            vedtaksperiode.håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse)
         }
 
         override fun gjenopptaBehandling(
@@ -1754,8 +1760,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
-            if (vedtaksperiode.inntektsmeldingHåndtert(hendelse)) return
-            hendelse.varsel(RV_IM_4)
+            vedtaksperiode.håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {

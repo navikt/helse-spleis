@@ -29,7 +29,8 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.varEllerErRettFør
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
-import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
+import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingDagerId
+import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingInntektId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.Dokumentsporing.Companion.toJsonList
@@ -225,7 +226,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun dokumentsporing() = behandlinger.dokumentsporing.ider()
 
     internal fun søknadIder() = behandlinger.dokumentsporing.søknadIder()
-    internal fun sisteInntektsmeldingId() = behandlinger.dokumentsporing.sisteInntektsmeldingId()
+    internal fun sisteInntektsmeldingDagerId() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId()
+    internal fun harHåndtertDagerTidligere() = behandlinger.dokumentsporing.sisteInntektsmeldingDagerId() != null
+    internal fun harHåndtertInntektTidligere() = behandlinger.dokumentsporing.sisteInntektsmeldingInntektId() != null
 
     internal fun oppdaterDokumentsporing(dokument: Dokumentsporing): Boolean {
         return behandlinger.last().oppdaterDokumentsporing(dokument)
@@ -276,8 +279,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     fun erUtbetaltPåForskjelligeUtbetalinger(other: Behandlinger): Boolean {
         return this.behandlinger.erUtbetaltPåForskjelligeUtbetalinger(other.behandlinger)
     }
-
-    internal fun trengerArbeidsgiverperiode() = behandlinger.dokumentsporing.sisteInntektsmeldingId() == null
 
     internal class Behandlingkilde(
         val meldingsreferanseId: UUID,

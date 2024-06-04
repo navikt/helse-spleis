@@ -25,7 +25,8 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
         internal fun Iterable<Dokumentsporing>.toJsonList() = map { it.id to it.dokumentType.name }
         internal fun Iterable<Dokumentsporing>.ider() = map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.dokumentType == DokumentType.Søknad }.map { it.id }.toSet()
-        internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id
+        internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingDagerId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id
+        internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingInntektId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingInntekt }?.id
 
         internal fun Iterable<Dokumentsporing>.tilSubsumsjonsformat() = associate {
             it.id to when (it.dokumentType) {
