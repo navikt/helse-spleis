@@ -155,8 +155,8 @@ internal class RefusjonshistorikkTest {
     @Test
     fun `Finner riktig refusjon for periode med samme arbeidsgiverperiode men nytt skjæringstidspunkt - gap`() {
         // Gjelder når vi finner refusjon ut ifra tilstøtende eller 16 dagers gap
-        val refusjon1 = refusjon(18.desember(2017) til 2.januar)
-        val refusjon2 = refusjon(31.desember(2017) til 15.januar)
+        val refusjon1 = refusjon(18.desember(2017) til 2.januar, tidsstempel = 2.januar.atStartOfDay())
+        val refusjon2 = refusjon(31.desember(2017) til 15.januar, tidsstempel = 15.januar.atStartOfDay())
         val refusjonshistorikk = Refusjonshistorikk()
         val aktivitetslogg = Aktivitetslogg()
         refusjonshistorikk.leggTilRefusjon(refusjon1)
