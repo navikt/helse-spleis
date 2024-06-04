@@ -16,6 +16,7 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.erForkastet
 import no.nav.helse.person.Person
+import no.nav.helse.person.Person.Companion.kandidatForTilkommenInntekt
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -114,7 +115,8 @@ class Inntektsmelding(
         // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
         // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
         val startskudd = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) skjæringstidspunkt else beregnetInntektsdato
-        val inntektGjelder = if (Toggle.TilkommenInntekt.disabled) skjæringstidspunkt til LocalDate.MAX else beregnetInntektsdato til LocalDate.MAX
+        val inntektGjelder = if (fødselsnummer.kandidatForTilkommenInntekt()) beregnetInntektsdato til LocalDate.MAX else skjæringstidspunkt til LocalDate.MAX
+        if (inntektGjelder.start != skjæringstidspunkt) this.info("Legger til arbeidsgiverinntektsopplysning som ikke gjelder fom skjæringstidspunkt")
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,

@@ -124,7 +124,15 @@ class Person private constructor(
             return person
         }
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
+        fun String.kandidatForTilkommenInntekt(): Boolean {
+            if (Toggle.TilkommenInntekt.enabled) return true
+            val fødselsdag = this.substring(0, 1).toInt()
+            return fødselsdag in 1..15
+        }
     }
+
+    fun kandidatForTilkommenInntekt() = personidentifikator.toString().kandidatForTilkommenInntekt()
 
     internal constructor(
         aktørId: String,

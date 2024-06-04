@@ -397,7 +397,7 @@ internal class SykepengegrunnlagTest {
         overstyring.leggTilInntekt(endretOpplysning)
 
         val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1Inntektsopplysning, a1EndretRefusjonsopplysninger)
-        assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
+        assertEquals(listOf(forventetOpplysning, a2Opplysning) to false, overstyring.resultat())
     }
     @Test
     fun `overstyre inntekt og refusjon - endrer kun inntekt`() {
@@ -425,7 +425,7 @@ internal class SykepengegrunnlagTest {
         overstyring.leggTilInntekt(endretOpplysning)
 
         val forventetOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, a1EndretInntektsopplysning, a1Refusjonsopplysninger)
-        assertEquals(listOf(forventetOpplysning, a2Opplysning), overstyring.resultat())
+        assertEquals(listOf(forventetOpplysning, a2Opplysning) to false, overstyring.resultat())
     }
     @Test
     fun `overstyre inntekt og refusjon - forsøker å endre Infotrygd-inntekt`() {
@@ -488,7 +488,7 @@ internal class SykepengegrunnlagTest {
         overstyring.leggTilInntekt(endretOpplysningA1)
 
 
-        val resultat = overstyring.resultat()
+        val (resultat, _) = overstyring.resultat(kandidatForTilkommenInntekt = true)
         assertNotNull(resultat)
         assertEquals(3, resultat.size)
         assertTrue(resultat.any { it.inspektør.orgnummer == "a3" } )

@@ -40,6 +40,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver
+import no.nav.helse.person.Person.Companion.kandidatForTilkommenInntekt
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -428,8 +429,12 @@ internal class Vedtaksperiode private constructor(
         .finnVedtaksperiodeRettFør(this)
         ?.takeIf { it.forventerInntekt() } != null
 
-    private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
-        person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) && Toggle.TilkommenInntekt.disabled
+    private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
+        if (fødselsnummer.kandidatForTilkommenInntekt()) {
+            return false
+        }
+        return person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
+    }
 
     private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg) =
         arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt, this, hendelse)

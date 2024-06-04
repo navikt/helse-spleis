@@ -167,16 +167,24 @@ class ArbeidsgiverInntektsopplysning(
 
         // overskriver eksisterende verdier i *this* med verdier fra *other*,
         // og legger til ting i *other* som ikke finnes i *this* som tilkommet inntekter
-        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(skjæringstidspunkt: LocalDate, opptjening: Opptjening?, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonslogg: Subsumsjonslogg): List<ArbeidsgiverInntektsopplysning> {
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(
+            skjæringstidspunkt: LocalDate,
+            opptjening: Opptjening?,
+            other: List<ArbeidsgiverInntektsopplysning>,
+            subsumsjonslogg: Subsumsjonslogg,
+            kandidatForTilkommenInntekt: Boolean
+        ): Pair<List<ArbeidsgiverInntektsopplysning>, Boolean> {
             val tilkommetInntekter = other
                 .filter { inntekt -> none { it.gjelder(inntekt.orgnummer) } }
-                .takeIf { Toggle.TilkommenInntekt.enabled } ?: emptyList()
+                .takeIf { kandidatForTilkommenInntekt } ?: emptyList()
             val endringen = this
                 .map { inntekt -> inntekt.overstyr(other) }
                 .also { it.subsummer(subsumsjonslogg, opptjening, this) }
                 .plus(tilkommetInntekter)
-            if (erOmregnetÅrsinntektEndret(skjæringstidspunkt, this, endringen)) return endringen.map { it.rullTilbake() }
-            return endringen
+            if (erOmregnetÅrsinntektEndret(skjæringstidspunkt, this, endringen)) {
+                return endringen.map { it.rullTilbake() } to tilkommetInntekter.isNotEmpty()
+            }
+            return endringen to tilkommetInntekter.isNotEmpty()
         }
 
         private fun erOmregnetÅrsinntektEndret(skjæringstidspunkt: LocalDate, før: List<ArbeidsgiverInntektsopplysning>, etter: List<ArbeidsgiverInntektsopplysning>): Boolean {

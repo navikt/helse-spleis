@@ -184,6 +184,7 @@ enum class Varselkode(
     RV_SV_2("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget"),
     RV_SV_3("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg", avviklet = true),
     RV_SV_4("Brukeren har flere inntekter de siste tre måneder. Kontroller om brukeren har flere arbeidsforhold eller andre ytelser på sykmeldingstidspunktet som påvirker utbetalingen.", avviklet = true),
+    RV_SV_5("Det har tilkommet nye inntekter"),
 
     // AY: Andre ytelser
     RV_AY_3("Bruker har mottatt AAP innenfor 6 måneder før skjæringstidspunktet. Kontroller at brukeren har rett til sykepenger"),
