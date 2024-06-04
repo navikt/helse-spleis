@@ -19,6 +19,7 @@ import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.UK
+import no.nav.helse.testhelpers.YF
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.tirsdag
@@ -73,6 +74,14 @@ internal class SykdomstidslinjeTest {
         assertTrue((1.S + 1.UK).erRettFør(2.UK + 1.F))
         assertFalse(1.S.erRettFør(1.A + 5.S))
         assertFalse((1.S + 1.A).erRettFør(1.S))
+    }
+
+    @Test
+    fun `er rett før for andre ytelser`(){
+        assertTrue(1.S.erRettFør(1.YF))
+        assertTrue(1.YF.erRettFør(1.YF))
+        assertFalse(1.YF.erRettFør(1.YF + 1.S))
+        assertFalse(1.YF.erRettFør(1.S))
     }
 
     @Test

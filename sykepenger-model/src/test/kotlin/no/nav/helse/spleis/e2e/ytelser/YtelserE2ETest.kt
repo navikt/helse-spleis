@@ -23,10 +23,13 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -44,6 +47,7 @@ import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
+import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
@@ -437,8 +441,13 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         nyPeriode(mars)
+        assertEquals(1.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         håndterOverstyrTidslinje(mars.map { manuellForeldrepengedag(it) })
 
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 }

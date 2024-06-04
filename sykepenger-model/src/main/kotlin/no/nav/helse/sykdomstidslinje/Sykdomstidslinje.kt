@@ -164,10 +164,12 @@ internal class Sykdomstidslinje private constructor(
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
-        return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagArbeidsdag() && !other.erFørsteDagArbeidsdag()
+        if (!this.sisteDag().erRettFør(other.førsteDag())) return false
+        val sammenslått = this + other
+        if (sammenslått.erOppholdsdagtype(this.periode!!.endInclusive)) return false
+        if (sammenslått.erOppholdsdagtype(other.periode!!.start)) return false
+        return true
     }
-    private fun erFørsteDagArbeidsdag() = this.dager.keys.firstOrNull()?.let(::erOppholdsdagtype) ?: true
-    private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erOppholdsdagtype) ?: true
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
     private fun førsteOppholdsdag(etter: LocalDate) = periode?.firstOrNull { it > etter && erOppholdsdag(it) }
