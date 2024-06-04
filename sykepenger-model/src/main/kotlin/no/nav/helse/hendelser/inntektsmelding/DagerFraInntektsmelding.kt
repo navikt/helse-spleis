@@ -64,7 +64,6 @@ internal class DagerFraInntektsmelding(
     internal val kilde = Hendelseskilde("Inntektsmelding", meldingsreferanseId(), mottatt)
     private val dokumentsporing = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId())
     private val begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt.takeUnless { it.isNullOrBlank() }
-    private val arbeidsdager = mutableSetOf<LocalDate>()
     private val arbeidsgiverperiode = arbeidsgiverperioder.periode()
     private val overlappsperiode = when {
         // første fraværsdag er oppgitt etter arbeidsgiverperioden
@@ -73,12 +72,12 @@ internal class DagerFraInntektsmelding(
         førsteFraværsdag?.forrigeDag == arbeidsgiverperiode.endInclusive -> arbeidsgiverperiode.oppdaterTom(arbeidsgiverperiode.endInclusive.nesteDag)
         else -> arbeidsgiverperiode
     }
-    private val alleDager get() = (opprinneligPeriode?: emptySet()) + arbeidsdager
-    private val håndterteDager get() = alleDager - gjenståendeDager
-
     private val sykdomstidslinje = lagSykdomstidslinje()
     private val opprinneligPeriode = sykdomstidslinje.periode()
+
+    private val arbeidsdager = mutableSetOf<LocalDate>()
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
+    private val håndterteDager = mutableSetOf<LocalDate>()
 
     private val ignorerDager: Boolean get() {
         if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return false
@@ -192,6 +191,8 @@ internal class DagerFraInntektsmelding(
         val periode = håndterDagerFør(vedtaksperiode) ?: return null
         if (periode.start != vedtaksperiode.start) info("Perioden ble strukket tilbake fra ${vedtaksperiode.start} til ${periode.start} (${ChronoUnit.DAYS.between(periode.start, vedtaksperiode.start)} dager)")
         val sykdomstidslinje = samletSykdomstidslinje(periode)
+
+        håndterteDager.addAll(gjenståendeDager.filter { it in periode })
         gjenståendeDager.removeAll(periode)
         return BitAvInntektsmelding(meldingsreferanseId(), sykdomstidslinje, this, innsendt(), registrert(), navn())
     }
