@@ -517,7 +517,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
-                val hendelser = behandling.dokumentsporing.toJsonList()
+                val hendelser = behandling.dokumentsporing.ider()
                 val builder = GodkjenningsbehovBuilder(
                     erForlengelse,
                     kanForkastes,

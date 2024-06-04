@@ -14,7 +14,7 @@ class GodkjenningsbehovBuilder(
     periode: ClosedRange<LocalDate>,
     private val behandlingId: UUID,
     private val perioderMedSammeSkjæringstidspunkt: List<PeriodeMedSammeSkjæringstidspunkt>,
-    private val hendelser: List<Pair<UUID, String>>
+    private val hendelser: Set<UUID>
 ) {
     private val tags: MutableSet<String> = mutableSetOf()
     private lateinit var skjæringstidspunkt: LocalDate

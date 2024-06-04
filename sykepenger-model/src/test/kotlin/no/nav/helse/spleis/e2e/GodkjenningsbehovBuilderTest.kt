@@ -385,11 +385,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertGodkjenningsbehov(
-            hendelser = listOf(
-                Pair(søknadId, "Søknad"),
-                Pair(inntektsmeldingId, "InntektsmeldingDager"),
-                Pair(inntektsmeldingId, "InntektsmeldingInntekt")
-            ),
+            hendelser = setOf(søknadId, inntektsmeldingId),
             tags = setOf("Førstegangsbehandling")
         )
     }
@@ -413,7 +409,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         periodeFom: LocalDate = 1.januar,
         periodeTom: LocalDate = 31.januar,
         vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),
-        hendelser: List<Pair<UUID, String>>? = null,
+        hendelser: Set<UUID>? = null,
         orgnummere: Set<String> = setOf(a1),
         kanAvvises: Boolean = true,
         periodeType: String = "FØRSTEGANGSBEHANDLING",
@@ -441,7 +437,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         val actualPerioderMedSammeSkjæringstidspunkt = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
 
         if (hendelser != null) {
-            val actualHendelser = hentFelt<List<UUID>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "hendelser")!!
+            val actualHendelser = hentFelt<Set<UUID>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "hendelser")!!
             assertEquals(hendelser, actualHendelser)
         }
 
