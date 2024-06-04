@@ -146,7 +146,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
         håndterVilkårsgrunnlag()
 
         generasjoner {
-            assertEquals(3, size)
+            assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) medTilstand ForberederGodkjenning medHendelser setOf(søknad2, inntektsmelding1)
@@ -155,11 +155,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
             1.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) medTilstand IngenUtbetaling medHendelser setOf(søknad2, inntektsmelding1)
-                uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1)
-            }
-            2.generasjon {
-                assertEquals(2, size)
-                uberegnetPeriode(0) medTilstand IngenUtbetaling medHendelser setOf(søknad2)
                 uberegnetPeriode(1) medTilstand IngenUtbetaling medHendelser setOf(søknad1, inntektsmelding1)
             }
         }

@@ -45,6 +45,11 @@ class Revurderingseventyr private constructor(
         fun korrigertInntektsmeldingArbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun grunnbeløpsregulering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
         fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
+
+        fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
+            b == null || (a != null && a.periodeForEndring.start <= b.periodeForEndring.start) -> a
+            else -> b
+        }
     }
 
     private val vedtaksperioder = mutableListOf<VedtaksperiodeData>()

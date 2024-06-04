@@ -723,11 +723,15 @@ class Person private constructor(
         skjæringstidspunkt: LocalDate,
         inntektsmelding: Inntektsmelding,
         subsumsjonslogg: Subsumsjonslogg
-    ) {
-        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return inntektsmelding.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
+    ): Revurderingseventyr? {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
+        if (grunnlag == null) {
+            inntektsmelding.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
+            return null
+        }
         val (nyttGrunnlag, eventyr) = grunnlag.nyeArbeidsgiverInntektsopplysninger(this, inntektsmelding, subsumsjonslogg)
         nyttVilkårsgrunnlag(inntektsmelding, nyttGrunnlag)
-        igangsettOverstyring(eventyr)
+        return eventyr
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(

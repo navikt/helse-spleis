@@ -515,7 +515,8 @@ internal class Arbeidsgiver private constructor(
         val dager = inntektsmelding.dager()
         håndter(inntektsmelding) { håndter(dager) }
 
-        addInntektsmelding(inntektsmelding)
+        val dagoverstyring = dager.revurderingseventyr()
+        addInntektsmelding(inntektsmelding, dagoverstyring)
 
         inntektsmelding.ikkeHåndert(person, vedtaksperioder, sykmeldingsperioder, dager)
     }
@@ -792,18 +793,23 @@ internal class Arbeidsgiver private constructor(
         return sammenhengendePerioder
     }
 
-    private fun addInntektsmelding(inntektsmelding: Inntektsmelding) {
+    private fun addInntektsmelding(inntektsmelding: Inntektsmelding, dagoverstyring: Revurderingseventyr?) {
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, inntektsmelding.jurist(jurist))
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
         val skjæringstidspunkt = person.skjæringstidspunkt(inntektsdato.somPeriode())
+
         if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode, forkastede)) {
-            return inntektsmelding.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
+            inntektsmelding.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
+            if (dagoverstyring == null) return
+            return person.igangsettOverstyring(dagoverstyring)
         }
         finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
             inntektsmelding.addInntekt(inntektshistorikk, it)
         }
-        person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, jurist)
+        val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, jurist)
+        val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, dagoverstyring)
+        if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(overstyringFraInntektsmelding)
         håndter(inntektsmelding) { håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }
     }
 

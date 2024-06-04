@@ -86,24 +86,9 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(inntektA2, a2Inspektør.inntektsopplysning.inspektør.beløp)
 
         val overstyringerIgangsatt = observatør.overstyringIgangsatt
-        assertEquals(5, overstyringerIgangsatt.size)
+        assertEquals(3, overstyringerIgangsatt.size)
 
         overstyringerIgangsatt[0].also { event ->
-            assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE",
-                skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.januar til 31.januar,
-                berørtePerioder = listOf(
-                    VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), 1.februar til 28.februar, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a2, 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, "REVURDERING")
-                ),
-                meldingsreferanseId = im1
-            ), event)
-        }
-
-        overstyringerIgangsatt[1].also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
                 årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
                 skjæringstidspunkt = 1.januar,
@@ -118,7 +103,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), event)
         }
 
-        overstyringerIgangsatt[2].also { event ->
+        overstyringerIgangsatt[1].also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
                 årsak = "NY_PERIODE",
                 skjæringstidspunkt = 1.januar,
@@ -130,19 +115,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
             ), event)
         }
 
-        overstyringerIgangsatt[3].also { event ->
-            assertEquals(PersonObserver.OverstyringIgangsatt(
-                årsak = "ARBEIDSGIVERPERIODE",
-                skjæringstidspunkt = 1.januar,
-                periodeForEndring = 1.mars til 20.mars,
-                berørtePerioder = listOf(
-                    VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING")
-                ),
-                meldingsreferanseId = im2
-            ), event)
-        }
-
-        overstyringerIgangsatt[4].also { event ->
+        overstyringerIgangsatt[2].also { event ->
             assertEquals(PersonObserver.OverstyringIgangsatt(
                 årsak = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER",
                 skjæringstidspunkt = 1.januar,

@@ -70,7 +70,6 @@ import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
-import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
@@ -635,15 +634,6 @@ internal class Vedtaksperiode private constructor(
                 )
             }
         }
-        person.igangsettOverstyring(
-            Revurderingseventyr.korrigertInntektsmeldingArbeidsgiverperiode(
-                dager,
-                skjæringstidspunkt = skjæringstidspunkt,
-                periodeForEndring = periode
-            )
-        )
-        // setter kontekst tilbake siden igangsettelsen over kan endre på kontekstene
-        kontekst(dager)
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
@@ -1549,7 +1539,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.sykdomstidslinje.egenmeldingerFraSøknad().isNotEmpty()) {
                 dager.info("Det er egenmeldingsdager fra søknaden på sykdomstidlinjen, selv etter at inntektsmeldingen har oppdatert historikken. Undersøk hvorfor inntektsmeldingen ikke har overskrevet disse. Da er kanskje denne aktørId-en til hjelp: ${vedtaksperiode.aktørId}.")
             }
-            vedtaksperiode.person.igangsettOverstyring(Revurderingseventyr.arbeidsgiverperiode(dager, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode))
         }
 
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
@@ -1684,11 +1673,21 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.etterkomAnmodningOmForkasting(anmodningOmForkasting)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse, infotrygdhistorikk: Infotrygdhistorikk) {
+            // todo: infotrygdendringer burde nok kommet inn som revurderingseventyr istedenfor.. ?
+            if (!trengerInntektsmelding(vedtaksperiode, hendelse)) return
+            vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
+        }
+
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             vedtaksperiode.behandlinger.forkastUtbetaling(revurdering)
-            if (!vedtaksperiode.forventerInntekt()) return
-            if (vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, revurdering)) return
+            if (!trengerInntektsmelding(vedtaksperiode, revurdering)) return
             vedtaksperiode.tilstand(revurdering, AvventerInntektsmelding)
+        }
+
+        private fun trengerInntektsmelding(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
+            if (!vedtaksperiode.forventerInntekt()) return false
+            return !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)
         }
 
         private fun tilstand(
@@ -1696,10 +1695,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>
         ): Tilstand {
-            if (!vedtaksperiode.forventerInntekt()) return ForventerIkkeInntekt
+            val forventerInntekt = vedtaksperiode.forventerInntekt()
+
+            check(!forventerInntekt || vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)) {
+                "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling!"
+            }
+
+            if (!forventerInntekt) return ForventerIkkeInntekt
             if (arbeidsgivere.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) return ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
-            if (!vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)) return TrengerInntektsmelding(vedtaksperiode)
             val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = arbeidsgivere.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse, vedtaksperiode, vedtaksperiode.organisasjonsnummer)
             if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null) return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver, arbeidsgivere.toList())
             if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
@@ -1726,14 +1730,6 @@ internal class Vedtaksperiode private constructor(
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.funksjonellFeil(RV_SV_2)
                 vedtaksperiode.forkast(hendelse)
-            }
-        }
-        private data class TrengerInntektsmelding(private val vedtaksperiode: Vedtaksperiode): Tilstand {
-            override fun venteårsak() = INNTEKTSMELDING fordi SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
-            override fun venterPå() = vedtaksperiode
-            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-                hendelse.info("Mangler inntekt og/eller refusjon for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg")
-                vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
             }
         }
 
@@ -2203,9 +2199,6 @@ internal class Vedtaksperiode private constructor(
                 if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, dager)) return vedtaksperiode.forkast(dager)
                 return vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, dager)
             }
-            vedtaksperiode.person.igangsettOverstyring(
-                Revurderingseventyr.arbeidsgiverperiode(dager, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)
-            )
         }
 
         override fun håndter(

@@ -14,6 +14,9 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.spill_av_im.Forespørsel
 import org.junit.jupiter.api.fail
 
+internal typealias InntektsmeldingId = UUID
+internal typealias VedtaksperiodeId = UUID
+
 internal class TestObservatør(person: Person? = null) : PersonObserver {
     init {
         person?.addObserver(this)
@@ -37,8 +40,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val overstyringIgangsatt = mutableListOf<PersonObserver.OverstyringIgangsatt>()
     val vedtaksperiodeVenter = mutableListOf<PersonObserver.VedtaksperiodeVenterEvent>()
     val inntektsmeldingFørSøknad = mutableListOf<PersonObserver.InntektsmeldingFørSøknadEvent>()
-    val inntektsmeldingIkkeHåndtert = mutableListOf<UUID>()
-    val inntektsmeldingHåndtert = mutableListOf<Pair<UUID, UUID>>()
+    val inntektsmeldingIkkeHåndtert = mutableListOf<InntektsmeldingId>()
+    val inntektsmeldingHåndtert = mutableListOf<Pair<InntektsmeldingId, VedtaksperiodeId>>()
     val søknadHåndtert = mutableListOf<Pair<UUID, UUID>>()
     val vedtaksperiodeAnnullertEventer = mutableListOf<PersonObserver.VedtaksperiodeAnnullertEvent>()
     val vedtaksperiodeOpprettetEventer = mutableListOf<PersonObserver.VedtaksperiodeOpprettet>()

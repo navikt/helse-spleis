@@ -16,8 +16,9 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Behandlinger
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.Revurderingseventyr
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD
 import no.nav.helse.person.Vedtaksperiode.Companion.påvirkerArbeidsgiverperiode
@@ -300,6 +301,11 @@ internal class DagerFraInntektsmelding(
     internal fun harPeriodeInnenfor16Dager(vedtaksperioder: List<Vedtaksperiode>): Boolean {
         val periode = sykdomstidslinje.periode() ?: return false
         return vedtaksperioder.påvirkerArbeidsgiverperiode(periode)
+    }
+
+    fun revurderingseventyr(): Revurderingseventyr? {
+        val dagene = håndterteDager.omsluttendePeriode ?: return null
+        return Revurderingseventyr.arbeidsgiverperiode(this, dagene.start, dagene)
     }
 
     internal class BitAvInntektsmelding(
