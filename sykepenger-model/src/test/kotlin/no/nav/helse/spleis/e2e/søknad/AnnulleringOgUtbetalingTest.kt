@@ -202,6 +202,8 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         nyttVedtak(1.mars, 31.mars)
 
+        assertEquals(2, inspektør.utbetalinger.size)
+
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

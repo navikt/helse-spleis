@@ -271,7 +271,8 @@ class Person private constructor(
         utbetalingshistorikkEtterInfotrygdendring.oppdaterHistorikk(it)
     }
 
-    fun håndter(utbetalingshistorikk: Utbetalingshistorikk) = håndterHistorikkFraInfotrygd(utbetalingshistorikk) {
+    fun håndter(utbetalingshistorikk: Utbetalingshistorikk) =
+        håndterHistorikkFraInfotrygd(utbetalingshistorikk) {
         utbetalingshistorikk.oppdaterHistorikk(it)
     }
 

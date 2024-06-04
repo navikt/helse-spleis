@@ -130,13 +130,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåVedtaksperiodeId = 1.vedtaksperiode.id(ghost), venterPåOrgnr = ghost, venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING)
 
         assertEquals(1.januar, inspektør(ghost).vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = ghost)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_INNTEKTSMELDING, orgnummer = ghost)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
     }
 
@@ -169,16 +167,14 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         observatør.assertVenter(2.vedtaksperiode.id(a2), venterPåHva = INNTEKTSMELDING)
 
         assertEquals(29.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
-        observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(lørdag den 27.januar, 20.februar, 100.prosent), orgnummer = a1)
-        observatør.assertVenter(3.vedtaksperiode.id(a1), venterPåVedtaksperiodeId = 2.vedtaksperiode.id(a2), venterPåOrgnr = a2, venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING)
         assertEquals(1.januar, inspektør(a2).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
 
         val ghostRefusjonsopplysinger = inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == a2 }.inspektør.refusjonsopplysninger.inspektør.refusjonsopplysninger
         assertEquals(emptyList<Refusjonsopplysning>(), ghostRefusjonsopplysinger)
 
         assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
     }
 
     @Test

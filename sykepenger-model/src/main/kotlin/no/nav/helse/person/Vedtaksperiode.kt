@@ -1087,6 +1087,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverstyringIgangsattFørstegangsvurdering(revurdering: Revurderingseventyr) {
         revurdering.inngåSomEndring(this, periode)
+        behandlinger.forkastUtbetaling(revurdering)
+        if (!harTilstrekkeligInformasjonTilUtbetaling(revurdering)) return tilstand(revurdering, AvventerInntektsmelding)
         tilstand(revurdering, AvventerBlokkerendePeriode)
     }
 
@@ -1623,7 +1625,6 @@ internal class Vedtaksperiode private constructor(
     internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.behandlinger.forkastUtbetaling(hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
@@ -2015,7 +2016,9 @@ internal class Vedtaksperiode private constructor(
             hendelse: Hendelse,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            if (vedtaksperiode.behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
+            if (!vedtaksperiode.behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return
+            vedtaksperiode.behandlinger.forkastUtbetaling(hendelse)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
         }
