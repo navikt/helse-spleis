@@ -26,13 +26,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -177,6 +175,43 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `korrigerende søknad som lager nytt skjæringstidspunkt på tidligere forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
+
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+    }
+
+    @Test
     fun `nytt skjæringstidspunkt på forlengelse etter friskmelding på førstegangsbehandling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -189,12 +224,10 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         nullstillTilstandsendringer()
-        observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(25.januar, 31.januar))
-        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -202,8 +235,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
-        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING) // Nå har den fått gjennoppta behandling og fått til AvventerInntektsmelding
+        assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test

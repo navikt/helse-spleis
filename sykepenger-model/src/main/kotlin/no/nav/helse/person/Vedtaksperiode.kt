@@ -583,6 +583,7 @@ internal class Vedtaksperiode private constructor(
         }
         søknad.info("Håndterer overlappende søknad")
         håndterSøknad(søknad) { nesteTilstand }
+        person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode))
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
@@ -1533,7 +1534,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
-            vedtaksperiode.trengerArbeidsgiveropplysninger(søknad)
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {

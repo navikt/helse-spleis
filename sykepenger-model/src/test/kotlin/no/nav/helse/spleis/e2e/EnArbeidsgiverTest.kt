@@ -23,11 +23,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -422,46 +419,6 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-    }
-
-    @Test
-    fun `overlappende søknad fører til gap til neste periode -- skal kaste ut alle sammenhengende perioder`() {
-        // Dette burde det være mye lettere å støtte med ny tilstandsmaskin
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-
-        observatør.vedtaksperiodeVenter.clear()
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
-        observatør.assertVenter(3.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_FØRSTEGANGSVURDERING)
-
-        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-
-        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET)
-        assertTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test
