@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -21,6 +22,7 @@ import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.somPersonidentifikator
@@ -73,6 +75,38 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     fun `6G-begrenset`() {
         tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = 100000.månedlig)
         assertGodkjenningsbehov(tags = setOf("Arbeidsgiverutbetaling", "6GBegrenset"), omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 1200000.0)))
+    }
+
+    @Test
+    fun `Tilkommen inntekt`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            beregnetInntekt = 10000.månedlig,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            orgnummer = a2
+        )
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertGodkjenningsbehov(
+            tags = setOf("TilkommenInntekt"),
+            periodeFom = 1.februar,
+            periodeTom = 28.februar,
+            periodeType = "FORLENGELSE",
+            førstegangsbehandling = false,
+            inntektskilde = "FLERE_ARBEIDSGIVERE",
+            orgnummere = setOf(a1, a2),
+            behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1),
+            perioderMedSammeSkjæringstidspunkt = listOf(
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+            )
+        )
     }
 
     @Test

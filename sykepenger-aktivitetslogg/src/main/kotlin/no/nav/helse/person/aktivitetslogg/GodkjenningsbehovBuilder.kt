@@ -96,6 +96,10 @@ class GodkjenningsbehovBuilder(
         tags.add("IngenNyArbeidsgiverperiode")
     }
 
+    fun tagTilkommenInntekt() {
+        tags.add("TilkommenInntekt")
+    }
+
     fun omregnedeÅrsinntekter(orgnummer: String, omregnetÅrsinntekt: Double) = apply {
         omregnedeÅrsinntekter.add(mapOf("organisasjonsnummer" to orgnummer, "beløp" to omregnetÅrsinntekt))
     }

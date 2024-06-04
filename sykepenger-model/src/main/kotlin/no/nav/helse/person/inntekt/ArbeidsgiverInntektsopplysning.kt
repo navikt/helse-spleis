@@ -2,7 +2,6 @@ package no.nav.helse.person.inntekt
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -340,6 +339,12 @@ class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(skjæringstidspunkt: LocalDate, builder: GodkjenningsbehovBuilder) {
             builder.orgnummereMedRelevanteArbeidsforhold(this.map { it.orgnummer }.toSet())
             this.forEach { it.omregnetÅrsinntekt(skjæringstidspunkt, builder) }
+        }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.tilkomneInntekter(skjæringstidspunkt: LocalDate, builder: GodkjenningsbehovBuilder) {
+            if (any { it.gjelder.start > skjæringstidspunkt }) {
+                builder.tagTilkommenInntekt()
+            }
         }
 
         internal fun gjenopprett(dto: ArbeidsgiverInntektsopplysningInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): ArbeidsgiverInntektsopplysning {

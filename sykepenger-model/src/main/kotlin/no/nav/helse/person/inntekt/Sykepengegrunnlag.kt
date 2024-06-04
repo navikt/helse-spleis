@@ -47,6 +47,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.over
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.tilkomneInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -446,6 +447,7 @@ internal class Sykepengegrunnlag private constructor(
         builder.inntektskilde(inntektskilde())
         builder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
         arbeidsgiverInntektsopplysninger.omregnedeÅrsinntekter(skjæringstidspunkt, builder)
+        arbeidsgiverInntektsopplysninger.tilkomneInntekter(skjæringstidspunkt, builder)
         if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) {
             builder.tagSykepengegrunnlagErUnder2G()
         } else if (begrensning == ER_6G_BEGRENSET) {
