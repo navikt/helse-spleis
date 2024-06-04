@@ -1,12 +1,14 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -373,6 +375,25 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `legger til hendelses ID'er og dokumenttype på godkjenningsbehovet` () {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertGodkjenningsbehov(
+            hendelser = listOf(
+                Pair(søknadId, "Søknad"),
+                Pair(inntektsmeldingId, "InntektsmeldingDager"),
+                Pair(inntektsmeldingId, "InntektsmeldingInntekt")
+            ),
+            tags = setOf("Førstegangsbehandling")
+        )
+    }
+
     private fun assertTags(tags: Set<String>, vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         assertTrue(actualtags.containsAll(tags))
@@ -392,6 +413,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         periodeFom: LocalDate = 1.januar,
         periodeTom: LocalDate = 31.januar,
         vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),
+        hendelser: List<Pair<UUID, String>>? = null,
         orgnummere: Set<String> = setOf(a1),
         kanAvvises: Boolean = true,
         periodeType: String = "FØRSTEGANGSBEHANDLING",
@@ -417,6 +439,11 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         val actualOmregnedeÅrsinntekter = hentFelt<List<Map<String, String>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "omregnedeÅrsinntekter")!!
         val actualBehandlingId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
         val actualPerioderMedSammeSkjæringstidspunkt = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
+
+        if (hendelser != null) {
+            val actualHendelser = hentFelt<List<UUID>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "hendelser")!!
+            assertEquals(hendelser, actualHendelser)
+        }
 
         assertTrue(actualtags.containsAll(tags))
         assertEquals(skjæringstidspunkt.toString(), actualSkjæringstidspunkt)

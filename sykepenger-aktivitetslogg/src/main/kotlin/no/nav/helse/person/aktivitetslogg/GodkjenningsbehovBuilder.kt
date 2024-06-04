@@ -13,7 +13,8 @@ class GodkjenningsbehovBuilder(
     private val kanAvvises: Boolean,
     periode: ClosedRange<LocalDate>,
     private val behandlingId: UUID,
-    private val perioderMedSammeSkjæringstidspunkt: List<PeriodeMedSammeSkjæringstidspunkt>
+    private val perioderMedSammeSkjæringstidspunkt: List<PeriodeMedSammeSkjæringstidspunkt>,
+    private val hendelser: List<Pair<UUID, String>>
 ) {
     private val tags: MutableSet<String> = mutableSetOf()
     private lateinit var skjæringstidspunkt: LocalDate
@@ -113,6 +114,7 @@ class GodkjenningsbehovBuilder(
         "kanAvvises" to kanAvvises,
         "omregnedeÅrsinntekter" to omregnedeÅrsinntekter,
         "behandlingId" to behandlingId.toString(),
+        "hendelser" to hendelser,
         "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
             mapOf(
                 "vedtaksperiodeId" to it.vedtaksperiodeId.toString(),

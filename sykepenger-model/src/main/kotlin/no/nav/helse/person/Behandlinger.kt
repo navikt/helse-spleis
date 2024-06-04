@@ -32,6 +32,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
+import no.nav.helse.person.Dokumentsporing.Companion.toJsonList
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
@@ -515,9 +516,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
-                val builder = GodkjenningsbehovBuilder(erForlengelse, kanForkastes, periode, behandling.id, perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, behandlingId, periode) ->
-                    PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, behandlingId, periode)
-                })
+                val hendelser = behandling.dokumentsporing.toJsonList()
+                val builder = GodkjenningsbehovBuilder(
+                    erForlengelse,
+                    kanForkastes,
+                    periode,
+                    behandling.id,
+                    perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, behandlingId, periode) ->
+                        PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, behandlingId, periode)
+                    },
+                    hendelser
+                )
                 grunnlagsdata.byggGodkjenningsbehov(builder)
                 utbetaling.byggGodkjenningsbehov(hendelse, periode, builder)
                 arbeidsgiverperiode?.tags(this.periode, builder, harPeriodeRettFør)
