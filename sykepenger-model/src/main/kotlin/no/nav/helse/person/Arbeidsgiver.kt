@@ -37,7 +37,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
-import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
@@ -317,16 +316,12 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.any(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
 
     internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) : Boolean {
-        if (!trengerRefusjonsopplysninger(skjæringstidspunkt, vedtaksperiode.periode())) return true
         val refusjonsopplysninger = when (val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             null -> refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
             else -> vilkårsgrunnlag.refusjonsopplysninger(organisasjonsnummer)
         }
         return vedtaksperiode.harNødvendigRefusjonsopplysninger(refusjonsopplysninger, hendelse)
     }
-
-    private fun trengerRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) =
-        vedtaksperioder.any(TRENGER_REFUSJONSOPPLYSNINGER(skjæringstidspunkt, periode))
 
     internal fun harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
         val harNødvendigInntektForVilkårsprøving = harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
