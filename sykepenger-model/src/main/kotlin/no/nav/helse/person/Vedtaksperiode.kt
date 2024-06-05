@@ -1662,7 +1662,7 @@ internal class Vedtaksperiode private constructor(
         ) = tilstand(hendelse, vedtaksperiode, arbeidsgivere).gjenopptaBehandling(vedtaksperiode, hendelse)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmelding)
+            if (påminnelse.skalReberegnes() || trengerInntektsmelding(vedtaksperiode, påminnelse)) return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmelding)
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
                 påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
             }
