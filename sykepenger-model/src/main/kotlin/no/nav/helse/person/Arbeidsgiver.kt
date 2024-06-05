@@ -191,16 +191,6 @@ internal class Arbeidsgiver private constructor(
             return infotrygdhistorikk.skjæringstidspunkt(periode, sykdomstidslinjer)
         }
 
-        internal fun Iterable<Arbeidsgiver>.validerVilkårsgrunnlag(
-            aktivitetslogg: IAktivitetslogg,
-            vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
-            organisasjonsnummer: String,
-            skjæringstidspunkt: LocalDate
-        ) {
-            val relevanteArbeidsgivere = medSkjæringstidspunkt(skjæringstidspunkt).map { it.organisasjonsnummer }
-            vilkårsgrunnlag.valider(aktivitetslogg, organisasjonsnummer, relevanteArbeidsgivere)
-        }
-
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             aktørId: String,
             personidentifikator: Personidentifikator,
@@ -214,9 +204,6 @@ internal class Arbeidsgiver private constructor(
                 utbetalingshistorikkForFeriepenger
             ) }
         }
-
-        private fun Iterable<Arbeidsgiver>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = this
-            .filter { arbeidsgiver -> arbeidsgiver.skalInngåISykepengegrunnlaget(skjæringstidspunkt) }
 
         private fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektTilVilkårsprøving(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
             return this
@@ -301,16 +288,9 @@ internal class Arbeidsgiver private constructor(
         for eksempel i saker hvor man var syk på én arbeidsgiver på skjæringstidspunktet, også blir man
         etterhvert syk fra ny arbeidsgiver (f.eks. jobb-bytte)
      */
-    internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) == false
-
-    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) : Boolean {
-        if (!skalInngåISykepengegrunnlaget(skjæringstidspunkt)) return true
+    private fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) : Boolean {
         return harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) ?: kanBeregneSykepengegrunnlag(skjæringstidspunkt)
     }
-
-    private fun skalInngåISykepengegrunnlaget(skjæringstidspunkt: LocalDate) =
-        vedtaksperioder.any(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
 
     internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) : Boolean {
         val refusjonsopplysninger = when (val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)) {

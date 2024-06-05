@@ -267,7 +267,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
-        internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>) = true
+        internal open fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String) = true
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = sykepengegrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
@@ -501,8 +501,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
         }
 
-        override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, organisasjonsnummerRelevanteArbeidsgivere: List<String>): Boolean {
-            sykepengegrunnlag.sjekkForNyeArbeidsgivere(aktivitetslogg, organisasjonsnummerRelevanteArbeidsgivere)
+        override fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String): Boolean {
             sykepengegrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, organisasjonsnummer)
             return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }

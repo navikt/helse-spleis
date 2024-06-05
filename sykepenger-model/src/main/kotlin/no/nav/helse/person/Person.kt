@@ -58,7 +58,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
-import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
@@ -829,16 +828,6 @@ class Person private constructor(
     private fun ryddOppVilkårsgrunnlag() {
         val skjæringstidspunkter = arbeidsgivere.aktiveSkjæringstidspunkter()
         vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter)
-    }
-
-    internal fun valider(
-        aktivitetslogg: IAktivitetslogg,
-        vilkårsgrunnlag: VilkårsgrunnlagElement,
-        organisasjonsnummer: String,
-        skjæringstidspunkt: LocalDate
-    ): Boolean {
-        arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt)
-        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     internal fun nyVedtaksperiodeUtbetaling(organisasjonsnummer: String, utbetalingId: UUID, vedtaksperiodeId: UUID) {

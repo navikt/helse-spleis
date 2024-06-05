@@ -429,7 +429,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
         if (fødselsnummer.kandidatForTilkommenInntekt()) return false
-        return arbeidsgiver.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
+        return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer) == true
     }
 
     private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg): Boolean {
@@ -1009,7 +1009,7 @@ internal class Vedtaksperiode private constructor(
     private fun kalkulerUtbetalinger(aktivitetslogg: IAktivitetslogg, ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
         val vilkårsgrunnlag = requireNotNull(vilkårsgrunnlag)
         aktivitetslogg.kontekst(vilkårsgrunnlag)
-        person.valider(aktivitetslogg, vilkårsgrunnlag, organisasjonsnummer, skjæringstidspunkt)
+        vilkårsgrunnlag.valider(aktivitetslogg, organisasjonsnummer)
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, organisasjonsnummer)
         ytelser.oppdaterHistorikk(periode, arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.periode) {
             oppdaterHistorikk(
