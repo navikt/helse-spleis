@@ -28,7 +28,7 @@ internal class InntektsmeldingReplayTest: AbstractEndToEndMediatorTest() {
         ), 12.februar(2024), orgnummer = a1)
         assertTilstand(0, "AVSLUTTET_UTEN_UTBETALING")
         assertTilstand(1, "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstand(2, "AVVENTER_INNTEKTSMELDING")
+        assertTilstand(2, "AVVENTER_HISTORIKK")
     }
 
     @Test

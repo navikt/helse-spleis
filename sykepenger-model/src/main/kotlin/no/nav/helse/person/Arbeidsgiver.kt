@@ -284,34 +284,11 @@ internal class Arbeidsgiver private constructor(
 
     private fun erSammeYrkesaktivitet(yrkesaktivitet: Yrkesaktivitet) = this.yrkesaktivitet == yrkesaktivitet
 
-    /* hvorvidt arbeidsgiver ikke inngår i sykepengegrunnlaget som er på et vilkårsgrunnlag,
-        for eksempel i saker hvor man var syk på én arbeidsgiver på skjæringstidspunktet, også blir man
-        etterhvert syk fra ny arbeidsgiver (f.eks. jobb-bytte)
-     */
-    private fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) : Boolean {
-        return harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) ?: kanBeregneSykepengegrunnlag(skjæringstidspunkt)
-    }
-
-    internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) : Boolean {
-        val refusjonsopplysninger = when (val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)) {
-            null -> refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
-            else -> vilkårsgrunnlag.refusjonsopplysninger(organisasjonsnummer)
-        }
-        return vedtaksperiode.harNødvendigRefusjonsopplysninger(refusjonsopplysninger, hendelse)
-    }
-
-    internal fun harTilstrekkeligInformasjonTilUtbetaling(skjæringstidspunkt: LocalDate, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
-        val harNødvendigInntektForVilkårsprøving = harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
-        if (!harNødvendigInntektForVilkårsprøving) hendelse.info("Mangler inntekt for vilkårsprøving på $skjæringstidspunkt for $organisasjonsnummer")
-        return harNødvendigInntektForVilkårsprøving && harNødvendigRefusjonsopplysninger(skjæringstidspunkt, vedtaksperiode, hendelse)
-    }
-
-    private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-        person.vilkårsgrunnlagFor(skjæringstidspunkt)?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
+    internal fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = avklarSykepengegrunnlag(skjæringstidspunkt) != null
 
-    private fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
+    internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         return yrkesaktivitet.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
     }

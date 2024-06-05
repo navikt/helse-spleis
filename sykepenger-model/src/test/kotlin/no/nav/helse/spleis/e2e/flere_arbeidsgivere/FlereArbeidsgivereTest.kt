@@ -42,6 +42,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
@@ -215,28 +216,22 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrTidslinje((7.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Arbeidsdag) })
         }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+        }
 
-        assertForventetFeil(
-            forklaring = "vi burde ha refusjonsopplysninger her",
-            nå = {
-                a1 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                }
-                a2 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                }
-            },
-            ønsket = {
-                a1 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                }
-                a2 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                }
-            }
-        )
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
     }
 
     @Test
