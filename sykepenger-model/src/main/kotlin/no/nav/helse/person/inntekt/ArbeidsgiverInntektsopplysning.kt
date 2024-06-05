@@ -253,6 +253,16 @@ class ArbeidsgiverInntektsopplysning(
             }
         }
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: GodkjenningsbehovBuilder.FastsattISpleisBuilder) {
+            forEach { arbeidsgiver ->
+                builder.arbeidsgiver(
+                    arbeidsgiver = arbeidsgiver.orgnummer,
+                    omregnetÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+                    skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig } else null
+                )
+            }
+        }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer } != null
 
