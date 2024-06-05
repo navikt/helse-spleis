@@ -1365,7 +1365,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun tilstand(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg): Tilstand {
-            if (!vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)) return TrengerInntektsmelding(vedtaksperiode)
+            if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) return TrengerInntektsmelding(vedtaksperiode)
             val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = arbeidsgivere.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(hendelse, vedtaksperiode, vedtaksperiode.organisasjonsnummer)
             if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null) return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver, arbeidsgivere.toList())
             if (vedtaksperiode.vilkårsgrunnlag == null) return KlarForVilkårsprøving
@@ -1687,7 +1687,7 @@ internal class Vedtaksperiode private constructor(
 
         private fun trengerInntektsmelding(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
             if (!vedtaksperiode.forventerInntekt()) return false
-            return !vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)
+            return !vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)
         }
 
         private fun tilstand(
@@ -1697,7 +1697,7 @@ internal class Vedtaksperiode private constructor(
         ): Tilstand {
             val forventerInntekt = vedtaksperiode.forventerInntekt()
 
-            check(!forventerInntekt || vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)) {
+            check(!forventerInntekt || vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(hendelse)) {
                 "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling!"
             }
 
@@ -2180,7 +2180,7 @@ internal class Vedtaksperiode private constructor(
                 revurdering.inngåSomEndring(vedtaksperiode, vedtaksperiode.periode)
                 revurdering.loggDersomKorrigerendeSøknad(revurdering, "Startet omgjøring grunnet korrigerende søknad")
                 revurdering.info(RV_RV_1.varseltekst)
-                if (!vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, revurdering)) {
+                if (!vedtaksperiode.harTilstrekkeligInformasjonTilUtbetaling(revurdering)) {
                     revurdering.info("mangler nødvendige opplysninger fra arbeidsgiver")
                     return vedtaksperiode.tilstand(revurdering, AvventerInntektsmelding)
                 }
