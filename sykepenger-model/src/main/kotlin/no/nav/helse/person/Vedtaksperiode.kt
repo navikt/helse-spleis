@@ -428,10 +428,8 @@ internal class Vedtaksperiode private constructor(
         ?.takeIf { it.forventerInntekt() } != null
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
-        if (fødselsnummer.kandidatForTilkommenInntekt()) {
-            return false
-        }
-        return person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
+        if (fødselsnummer.kandidatForTilkommenInntekt()) return false
+        return arbeidsgiver.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
     }
 
     private fun harTilstrekkeligInformasjonTilUtbetaling(hendelse: IAktivitetslogg): Boolean {
@@ -1572,12 +1570,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
-                påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
-            }
-            if (påminnelse.skalReberegnes()) {
-                return vurderOmKanGåVidere(vedtaksperiode, påminnelse)
-            }
+            if (påminnelse.skalReberegnes()) return vurderOmKanGåVidere(vedtaksperiode, påminnelse)
             vedtaksperiode.trengerArbeidsgiveropplysninger(påminnelse)
         }
 
@@ -1667,9 +1660,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.skalReberegnes() || vedtaksperiode.manglerTilstrekkeligInformasjonTilUtbetaling(påminnelse)) return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmelding)
-            if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) {
-                påminnelse.info("Mangler nødvendig inntekt ved tidligere beregnet sykepengegrunnlag")
-            }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
