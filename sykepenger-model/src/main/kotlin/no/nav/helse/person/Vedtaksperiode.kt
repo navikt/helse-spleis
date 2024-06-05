@@ -1697,9 +1697,9 @@ internal class Vedtaksperiode private constructor(
         ): Tilstand {
             val forventerInntekt = vedtaksperiode.forventerInntekt()
 
-            /*check(!forventerInntekt || vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)) {
+            check(!forventerInntekt || vedtaksperiode.arbeidsgiver.harTilstrekkeligInformasjonTilUtbetaling(vedtaksperiode.skjæringstidspunkt, vedtaksperiode, hendelse)) {
                 "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling!"
-            }*/
+            }
 
             if (!forventerInntekt) return ForventerIkkeInntekt
             if (arbeidsgivere.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
