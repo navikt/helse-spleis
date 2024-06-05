@@ -228,47 +228,24 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar)
         nyPeriode(10.februar til 10.mars)
 
-        val im = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertForventetFeil(
-            forklaring = "ønsker å sende ut en oppdatert forespørsel for andre vedtaksperiode med oppdatert forrige inntekt",
-            nå = {
-                assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-                val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                    organisasjonsnummer = ORGNUMMER,
-                    vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
-                    skjæringstidspunkt = 10.februar,
-                    sykmeldingsperioder = listOf(10.februar til 10.mars),
-                    egenmeldingsperioder = emptyList(),
-                    førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 10.februar)),
-                    forespurteOpplysninger = listOf(
-                        PersonObserver.Inntekt(forslag = null),
-                        PersonObserver.Refusjon(forslag = emptyList())
-                    )
-                )
+        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-                assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())
-            },
-            ønsket = {
-                assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-
-                val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                    organisasjonsnummer = ORGNUMMER,
-                    vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
-                    skjæringstidspunkt = 10.februar,
-                    sykmeldingsperioder = listOf(10.februar til 10.mars),
-                    egenmeldingsperioder = emptyList(),
-                    førsteFraværsdager = listOf(
-                        PersonObserver.FørsteFraværsdag(ORGNUMMER, 10.februar),
-                    ),
-                    forespurteOpplysninger = listOf(
-                        PersonObserver.Inntekt(forslag = PersonObserver.Inntektsdata(1.januar, PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING, 31000.0)),
-                        PersonObserver.Refusjon(forslag = listOf(Refusjonsopplysning(im, 1.januar, null, INNTEKT))),
-                        PersonObserver.Arbeidsgiverperiode
-                    )
-                )
-                assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())
-            }
+        assertEquals(3, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+            organisasjonsnummer = ORGNUMMER,
+            vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+            skjæringstidspunkt = 10.februar,
+            sykmeldingsperioder = listOf(10.februar til 10.mars),
+            egenmeldingsperioder = emptyList(),
+            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 10.februar)),
+            forespurteOpplysninger = listOf(
+                PersonObserver.Inntekt(forslag = null),
+                PersonObserver.Refusjon(forslag = emptyList())
+            )
         )
+
+        assertEquals(expectedForespørsel, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last())
     }
 
     @Test
@@ -284,11 +261,11 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         val im = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
-        assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(6, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
-        assertEquals(5, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(7, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val oppdatertForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
 
         assertEquals(4.vedtaksperiode.id(ORGNUMMER), oppdatertForespørsel.vedtaksperiodeId)

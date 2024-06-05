@@ -62,7 +62,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             )
 
             val meldinger = testRapid.inspektør.meldinger("trenger_opplysninger_fra_arbeidsgiver")
-            Assertions.assertEquals(4, meldinger.size)
+            Assertions.assertEquals(5, meldinger.size)
             val trengerOpplysningerEvent = testRapid.inspektør.siste("trenger_opplysninger_fra_arbeidsgiver")
 
             val faktiskResultat = trengerOpplysningerEvent.json(

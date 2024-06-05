@@ -80,11 +80,6 @@ class Revurderingseventyr private constructor(
         }
     }
 
-    internal fun hvisIkkeArbeidsgiverperiode(block: () -> Unit) {
-        if (hvorfor == Arbeidsgiverperiode) return
-        block()
-    }
-
     private enum class TypeEndring {
         ENDRING,
         REVURDERING
