@@ -82,7 +82,7 @@ import org.junit.jupiter.api.assertThrows
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Går videre til vilkårsprøving selv om vi mangler IM fra en arbeidsgiver`() {
+    fun `Går ikke videre til vilkårsprøving om vi mangler IM fra en arbeidsgiver`() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 31.mars, 100.prosent), orgnummer = a3)
@@ -91,22 +91,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
-
-        assertForventetFeil(
-            forklaring = """
-                Vedtaksperioden går videre til vilkårsprøving fordi alle overlappende vedtaksperioder har tilstrekkelig informasjon til utbetaling.
-                Vi har en vedtaksperiode som ikke overlapper med perioden som beregner utbetalinger, men en periode på samme skjæringstidspunkt innenfor beregningsperioden.
-                Om vi venter på alle overlappende perioder eller samme skjæringstidspunkt er det andre tester som slutter å fungere.
-                """,
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, orgnummer = a1)
-                håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
-                assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode, orgnummer = a1) }
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
     }
 
     @Test
