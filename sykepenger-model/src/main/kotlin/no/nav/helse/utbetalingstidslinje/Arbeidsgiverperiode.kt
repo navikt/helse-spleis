@@ -4,7 +4,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.periode
@@ -61,14 +60,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     operator fun contains(periode: Periode) =
         innflytelseperioden.overlapperMed(periode)
 
-    internal fun forventerInntekt(
-        periode: Periode,
-        sykdomstidslinje: Sykdomstidslinje,
-        subsumsjonslogg: Subsumsjonslogg?
-    ): Boolean {
-        if (!dekkesAvArbeidsgiver(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode)
-        subsumsjonslogg?.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
-        return false
+    internal fun forventerInntekt(periode: Periode): Boolean {
+        return !dekkesAvArbeidsgiver(periode) && erFørsteUtbetalingsdagFørEllerLik(periode)
     }
 
     /* forventer opplysninger fra arbeidsgiver om første utbetalingsdag etter agp eller opphold er i perioden */
@@ -202,13 +195,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal companion object {
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 
-        internal fun forventerInntekt(
-            arbeidsgiverperiode: Arbeidsgiverperiode?,
-            periode: Periode,
-            sykdomstidslinje: Sykdomstidslinje,
-            subsumsjonslogg: Subsumsjonslogg?
-        ) =
-            arbeidsgiverperiode?.forventerInntekt(periode, sykdomstidslinje, subsumsjonslogg) ?: false
+        internal fun forventerInntekt(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode) =
+            arbeidsgiverperiode?.forventerInntekt(periode) ?: false
 
         internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode in arbeidsgiverperiode

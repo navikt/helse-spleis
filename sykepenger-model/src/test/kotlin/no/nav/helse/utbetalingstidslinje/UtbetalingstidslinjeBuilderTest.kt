@@ -71,7 +71,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(11, inspektør.arbeidsgiverperiodedagNavTeller)
         assertEquals(1, perioder.size)
         val arbeidsgiverperiode = perioder.first()
-        assertTrue(arbeidsgiverperiode.forventerInntekt(1.januar til 15.januar, Sykdomstidslinje(), Subsumsjonslogg.NullObserver))
+        assertTrue(arbeidsgiverperiode.forventerInntekt(1.januar til 15.januar))
         assertEquals(1.januar til 15.januar, perioder.first())
     }
 

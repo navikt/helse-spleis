@@ -48,6 +48,8 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
@@ -1412,6 +1414,24 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             output = mapOf("perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar)))
+        )
+    }
+
+    @Test
+    fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er påstartet`() {
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), Arbeid(1.januar, 10.januar))
+        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+        SubsumsjonInspektør(jurist).assertFlereIkkeOppfylt(
+            antall = 1,
+            lovverk = "folketrygdloven",
+            paragraf = PARAGRAF_8_17,
+            ledd = 1.ledd,
+            bokstav = BOKSTAV_A,
+            versjon = 1.januar(2018),
+            input = mapOf(
+                "sykdomstidslinje" to emptyList<Any>()
+            ),
+            output = mapOf("perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 10.januar)))
         )
     }
 

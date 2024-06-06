@@ -67,7 +67,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(5.S + 5.F + 10.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar))
     }
 
     @Test
@@ -75,7 +75,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(5.S + 5.AIG + 10.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar))
     }
 
     @Test
@@ -91,7 +91,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(5.S + 5.F + 5.A + 11.S + 1.F + 13.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 10.januar, 16.januar til 21.januar), perioder.first())
-        assertTrue(perioder.first().forventerInntekt(22.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertTrue(perioder.first().forventerInntekt(22.januar til 31.januar))
     }
 
     @Test
@@ -99,7 +99,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(5.S + 5.AIG + 5.A + 11.S + 1.AIG + 13.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 5.januar, 16.januar til 26.januar), perioder.first())
-        assertTrue(perioder.first().forventerInntekt(29.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertTrue(perioder.first().forventerInntekt(29.januar til 31.januar))
     }
 
     @Test
@@ -107,7 +107,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(16.S + 15.A)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertFalse(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertFalse(perioder.first().forventerInntekt(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
 
@@ -116,9 +116,9 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(17.S + 15.A)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar, Sykdomstidslinje(), NullObserver))
-        assertFalse(perioder.first().forventerInntekt(18.januar til 31.januar, Sykdomstidslinje(), NullObserver))
-        assertFalse(perioder.first().forventerInntekt(19.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertTrue(perioder.first().forventerInntekt(17.januar til 31.januar))
+        assertFalse(perioder.first().forventerInntekt(18.januar til 31.januar))
+        assertFalse(perioder.first().forventerInntekt(19.januar til 31.januar))
     }
 
     @Test
@@ -127,7 +127,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         assertEquals(2, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
         assertEquals(listOf(4.februar til 19.februar), perioder.last())
-        assertFalse(perioder.first().forventerInntekt(18.januar til 31.januar, Sykdomstidslinje(), NullObserver))
+        assertFalse(perioder.first().forventerInntekt(18.januar til 31.januar))
     }
 
 

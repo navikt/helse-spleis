@@ -9,8 +9,6 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender
@@ -448,7 +446,7 @@ internal class Vedtaksperiode private constructor(
         harNødvendigeRefusjonsopplysningerstrategi: (skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String) -> Boolean
     ): Boolean {
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
-        if (!arbeidsgiverperiode.forventerInntekt(periode, Sykdomstidslinje(), null)) return false
+        if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
         return !harTilstrekkeligInformasjonTilUtbetaling(arbeidsgiverperiode, hendelse, harNødvendigeRefusjonsopplysningerstrategi)
     }
 
@@ -825,6 +823,9 @@ internal class Vedtaksperiode private constructor(
         periode: Periode,
         dokumentsporing: Set<UUID>
     ) {
+        if (finnArbeidsgiverperiode()?.dekkesAvArbeidsgiver(periode) != false) {
+            jurist.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode, sykdomstidslinje.subsumsjonsformat())
+        }
         person.avsluttetUtenVedtak(PersonObserver.AvsluttetUtenVedtakEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -952,8 +953,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun finnArbeidsgiverperiodeHensyntarForkastede() = arbeidsgiver.arbeidsgiverperiodeInkludertForkastet(periode, sykdomstidslinje)
 
-    private fun forventerInntekt(subsumsjonslogg: Subsumsjonslogg = jurist): Boolean {
-        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, subsumsjonslogg)
+    private fun forventerInntekt(): Boolean {
+        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode)
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
@@ -1067,7 +1068,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun erKandidatForUtbetaling(periodeSomBeregner: Vedtaksperiode, skjæringstidspunktet: LocalDate): Boolean {
         if (this === periodeSomBeregner) return true
-        if (!forventerInntekt(NullObserver)) return false
+        if (!forventerInntekt()) return false
         return this.periode.overlapperMed(periodeSomBeregner.periode) && skjæringstidspunktet == this.skjæringstidspunkt && !this.tilstand.erFerdigBehandlet
     }
 
@@ -2179,7 +2180,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>): Venteårsak {
-            if (!vedtaksperiode.forventerInntekt(NullObserver)) return HJELP.utenBegrunnelse
+            if (!vedtaksperiode.forventerInntekt()) return HJELP.utenBegrunnelse
             return HJELP fordi VIL_OMGJØRES
         }
 
@@ -2188,7 +2189,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: List<Arbeidsgiver>,
             nestemann: Vedtaksperiode
         ) =
-            if (!vedtaksperiode.forventerInntekt(NullObserver)) null
+            if (!vedtaksperiode.forventerInntekt()) null
             else vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode, arbeidsgivere)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, anmodningOmForkasting: AnmodningOmForkasting) {
@@ -2247,7 +2248,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!vedtaksperiode.forventerInntekt(NullObserver)) return påminnelse.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
+            if (!vedtaksperiode.forventerInntekt()) return påminnelse.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
             påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
                 vedtaksperiode.person.igangsettOverstyring(it)
@@ -2452,7 +2453,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val AUU_SOM_VIL_UTBETALES: VedtaksperiodeFilter = {
-            it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt(NullObserver)
+            it.tilstand == AvsluttetUtenUtbetaling && it.forventerInntekt()
         }
 
         private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
