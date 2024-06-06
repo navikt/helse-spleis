@@ -141,7 +141,7 @@ class UtbetalingshistorikkForFeriepenger(
             Tom("", { false });
 
             companion object {
-                fun finn(kode: String) = values().firstOrNull { it.kode.trim() == kode.trim() } ?: Tom
+                fun finn(kode: String) = entries.firstOrNull { it.kode.trim() == kode.trim() } ?: Tom
             }
         }
     }

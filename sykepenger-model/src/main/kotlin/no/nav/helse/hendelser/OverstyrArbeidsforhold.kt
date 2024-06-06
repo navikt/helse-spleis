@@ -32,13 +32,13 @@ class OverstyrArbeidsforhold(
 
 
     internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
-        return overstyrteArbeidsforhold.fold(sykepengegrunnlag, ) { acc, overstyring ->
+        return overstyrteArbeidsforhold.fold(sykepengegrunnlag) { acc, overstyring ->
             overstyring.overstyr(acc, subsumsjonslogg)
         }
     }
 
     internal fun overstyr(opptjening: Opptjening, subsumsjonslogg: Subsumsjonslogg): Opptjening {
-        return overstyrteArbeidsforhold.fold(opptjening, ) { acc, overstyring ->
+        return overstyrteArbeidsforhold.fold(opptjening) { acc, overstyring ->
             overstyring.overstyr(acc, subsumsjonslogg)
         }
     }

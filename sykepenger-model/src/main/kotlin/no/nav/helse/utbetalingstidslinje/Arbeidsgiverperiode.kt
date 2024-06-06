@@ -38,13 +38,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
     internal fun fiktiv() = perioder.isEmpty() // Arbeidsperioden er gjennomført i Infotrygd
 
-    internal fun villeBlittFiktiv(perioderUtbetaltInfotrygd: List<Periode>): Boolean {
-        if (perioder.isEmpty()) return true
-        if (perioderUtbetaltInfotrygd.any { it.overlapperMed(arbeidsgiverperioden) }) return true
-        if (utbetalingsdager.isEmpty()) return false
-        return perioderUtbetaltInfotrygd.any { utbetalingsdager.first() in it }
-    }
-
     internal fun periode(sisteDag: LocalDate) = førsteKjente til sisteDag
 
     internal fun kjentDag(dagen: LocalDate) {

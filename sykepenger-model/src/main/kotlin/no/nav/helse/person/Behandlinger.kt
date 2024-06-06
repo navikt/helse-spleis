@@ -33,7 +33,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingDagerId
 import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingInntektId
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
-import no.nav.helse.person.Dokumentsporing.Companion.toJsonList
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
@@ -87,7 +86,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
-    internal fun erFørstegangsvurdering() = behandlinger.none { it.erFattetVedtak() }
     internal fun erAvsluttet() = behandlinger.last().erAvsluttet()
     internal fun erAvvist() = siste?.erAvvist() == true
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true

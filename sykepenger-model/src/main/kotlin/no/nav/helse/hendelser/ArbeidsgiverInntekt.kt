@@ -9,7 +9,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
@@ -27,12 +26,6 @@ class ArbeidsgiverInntekt(
             inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) },
             ansattPerioder = emptyList(),
             tidsstempel = LocalDateTime.now()
-        )
-
-    internal fun tilSammenligningsgrunnlag(meldingsreferanseId: UUID) =
-        ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
-            orgnummer = arbeidsgiver,
-            inntektsopplysninger = inntekter.map { it.somInntekt(meldingsreferanseId) }
         )
 
     internal companion object {

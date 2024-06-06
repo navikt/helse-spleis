@@ -2,9 +2,9 @@ package no.nav.helse.person
 
 import java.util.Objects
 import java.util.UUID
-import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
+import no.nav.helse.etterlevelse.KontekstType
 
 class Dokumentsporing private constructor(private val id: UUID, private val dokumentType: DokumentType) {
 
@@ -22,7 +22,6 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
         internal fun grunnbeløpendring(id: UUID) = Dokumentsporing(id, DokumentType.SkjønnsmessigFastsettelse) // TODO: bytte DokumentType
         internal fun andreYtelser(id: UUID) = Dokumentsporing(id, DokumentType.AndreYtelser)
 
-        internal fun Iterable<Dokumentsporing>.toJsonList() = map { it.id to it.dokumentType }
         internal fun Iterable<Dokumentsporing>.ider() = map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.dokumentType == DokumentType.Søknad }.map { it.id }.toSet()
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingDagerId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id

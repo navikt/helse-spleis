@@ -33,7 +33,7 @@ enum class Dagtype {
     Foreldrepengerdag, AAPdag, Omsorgspengerdag, Pleiepengerdag, Svangerskapspengerdag, Opplaringspengerdag, Dagpengerdag;
 
     companion object {
-        val gyldigeTyper = Dagtype.values().map { it.name }
+        val gyldigeTyper = entries.map { it.name }
         val String.dagtype get() = Dagtype.valueOf(this)
     }
 }
