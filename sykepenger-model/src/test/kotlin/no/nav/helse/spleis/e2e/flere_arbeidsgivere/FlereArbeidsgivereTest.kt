@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -14,8 +15,10 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.fredag
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -40,6 +43,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
@@ -169,6 +173,70 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { assertEquals(1, inspektør.utbetalinger.size) }
         a2 { assertEquals(1, inspektør.utbetalinger.size) }
         a3 { assertEquals(1, inspektør.utbetalinger.size) }
+    }
+
+    @Test
+    fun `mangler refusjonsopplysninger etter overstyring av saksbehander - ikke fravær`() {
+        a1 {
+            nyPeriode(7.januar til 31.januar)
+            nyPeriode(1.februar til 28.februar)
+        }
+        a2 {
+            nyPeriode(1.februar til 28.februar)
+        }
+        a1 {
+            håndterInntektsmelding(listOf(7.januar til 22.januar))
+        }
+        a2 {
+            håndterInntektsmelding(listOf(7.januar til 22.januar), førsteFraværsdag = 1.februar)
+            // denne inntektsmeldingen lagrer refusjonsopplysninger uten første fraværsdag. Uten denne IMen så er testen useless
+            håndterInntektsmelding(listOf(7.januar til 22.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+        }
+
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+
+        a1 {
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrTidslinje((7.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Arbeidsdag) })
+        }
+
+        assertForventetFeil(
+            forklaring = "vi burde ha refusjonsopplysninger her",
+            nå = {
+                a1 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                }
+                a2 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                }
+            },
+            ønsket = {
+                a1 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                }
+                a2 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                }
+            }
+        )
     }
 
     @Test
