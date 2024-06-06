@@ -429,7 +429,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
         if (fødselsnummer.kandidatForTilkommenInntekt()) return false
-        return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer) == true
+        return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer) == false
     }
 
     private fun måInnhenteInntektEllerFørInntektsmelding(hendelse: IAktivitetslogg): Boolean {
