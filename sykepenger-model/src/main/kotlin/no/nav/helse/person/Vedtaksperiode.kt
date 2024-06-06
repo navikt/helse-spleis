@@ -69,7 +69,6 @@ import no.nav.helse.person.Venteårsak.Hva.UTBETALING
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -1310,12 +1309,7 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onSuccess {
-                    if (vedtaksperiode.vilkårsgrunnlag is InfotrygdVilkårsgrunnlag) {
-                        info("Oppdaget at perioden startet i infotrygd")
-                        vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
-                    } else {
-                        vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
-                    }
+                    vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
                 }
             }
         }
