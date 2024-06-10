@@ -235,6 +235,26 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
+    fun `Skal kanskje ikke være varsel om tilkommen inntekt her`() {
+        a1 {
+            nyPeriode(1.januar til 16.januar)
+        }
+        a2 {
+            nyPeriode(1.januar til 16.januar)
+        }
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "oink")
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+        }
+        a2 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "voff")
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertVarsel(Varselkode.RV_SV_5) // Det har tilkommet nye inntekter - teit eller ikke?
+        }
+    }
+
+    @Test
     fun `mangler refusjonsopplysninger etter at skjæringstidspunktet flyttes`() {
         a1 {
             nyPeriode(3.januar til onsdag den 17.januar)
