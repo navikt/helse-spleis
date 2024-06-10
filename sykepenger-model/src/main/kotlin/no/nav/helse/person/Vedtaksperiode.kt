@@ -1108,6 +1108,14 @@ internal class Vedtaksperiode private constructor(
         tilstand(revurdering, AvventerBlokkerendePeriode)
     }
 
+    private fun periodeRettFørHarFåttInntektsmelding(): Boolean {
+        val rettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) ?: return false
+        if (rettFør.tilstand in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding)) return false
+        // auu-er vil kunne ligge i Avventer blokkerende periode
+        if (rettFør.tilstand == AvventerBlokkerendePeriode && !rettFør.forventerInntekt()) return false
+        return true
+    }
+
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -1251,18 +1259,10 @@ internal class Vedtaksperiode private constructor(
             if (søknad.harFunksjonelleFeilEllerVerre()) return
             vedtaksperiode.tilstand(søknad, when {
                 !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-                periodeRettFørHarFåttInntektsmelding(vedtaksperiode) -> AvventerBlokkerendePeriode
+                vedtaksperiode.periodeRettFørHarFåttInntektsmelding() -> AvventerBlokkerendePeriode
                 periodeRettEtterHarFåttInntektsmelding(vedtaksperiode, søknad) -> AvventerBlokkerendePeriode
                 else -> AvventerInntektsmelding
             })
-        }
-
-        private fun periodeRettFørHarFåttInntektsmelding(vedtaksperiode: Vedtaksperiode): Boolean {
-            val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) ?: return false
-            if (rettFør.tilstand in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding)) return false
-            // auu-er vil kunne ligge i Avventer blokkerende periode
-            if (rettFør.tilstand == AvventerBlokkerendePeriode && !rettFør.forventerInntekt()) return false
-            return true
         }
 
         private fun periodeRettEtterHarFåttInntektsmelding(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
@@ -1598,6 +1598,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.periodeRettFørHarFåttInntektsmelding()) {
+                påminnelse.info("Periode ser ut til å feilaktig vente på inntektsmelding. ")
+                if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
+            }
             if (påminnelse.skalReberegnes()) return vurderOmKanGåVidere(vedtaksperiode, påminnelse)
             vedtaksperiode.trengerArbeidsgiveropplysninger(påminnelse)
         }
