@@ -2,15 +2,21 @@ package no.nav.helse.dsl
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dto.BehandlingtilstandDto.VEDTAK_FATTET
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.inspectors.VedtaksperiodeInspektør
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.TIL_INFOTRYGD
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.VEDTAK_IVERKSATT
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
-import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Vedtaksperiode.Avsluttet
+import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
+import no.nav.helse.person.Vedtaksperiode.TilInfotrygd
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -184,7 +190,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     internal fun bekreftIngenUgyldigeSituasjoner() {
         bekreftIngenOverlappende()
-        bekreftAvsluttetUtenUtbetalingHarLukketBehandling()
         validerSykdomshistorikk()
         validerSykdomstidslinjePåBehandlinger()
         IM.bekreftEntydighåndtering()
@@ -238,18 +243,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
                         "For Arbeidsgiver $orgnr overlapper Vedtaksperiode ${inspektør.id} (${inspektør.periode}) og Vedtaksperiode ${nåværende.id} (${nåværende.periode}) med hverandre!"
                     }
                     nåværende = inspektør
-                }
-            }
-    }
-
-    private fun bekreftAvsluttetUtenUtbetalingHarLukketBehandling() {
-        person.inspektør.vedtaksperioder()
-            .flatMap { (_, perioder) -> perioder }
-            .map { it.inspektør }
-            .filter { it.tilstand == Vedtaksperiode.AvsluttetUtenUtbetaling }
-            .all {
-                it.behandlinger.last().let { sisteBehandling ->
-                    sisteBehandling.avsluttet != null && sisteBehandling.tilstand == VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
                 }
             }
     }
