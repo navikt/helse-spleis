@@ -226,6 +226,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         }
     }
 
+    private fun VedtaksperiodeInspektør.Behandling.gyldigTilInfotrygd() = tilstand == TIL_INFOTRYGD && avsluttet != null && vedtakFattet == null
+    private fun VedtaksperiodeInspektør.Behandling.gyldigAvsluttetUtenUtbetaling() = tilstand == AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
+    private fun VedtaksperiodeInspektør.Behandling.gyldigAvsluttet() = tilstand == VEDTAK_IVERKSATT && avsluttet != null && vedtakFattet != null
+    private val VedtaksperiodeInspektør.Behandling.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
     private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.inspektør.aktiveVedtaksperioder()
@@ -234,14 +238,14 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
                 .mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.inspektør.behandlinger.last() }}
                 .forEach { (tilstand, sisteBehandlinger) ->
                     when (tilstand) {
-                        TilInfotrygd -> sisteBehandlinger.filter { it.tilstand != TIL_INFOTRYGD }.let { check(it.isEmpty()) {
-                            "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.tilstand }}}"}
+                        TilInfotrygd -> sisteBehandlinger.filterNot { it.gyldigTilInfotrygd() }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
                         }
-                        AvsluttetUtenUtbetaling -> sisteBehandlinger.filter { it.tilstand != AVSLUTTET_UTEN_VEDTAK }.let { check(it.isEmpty()) {
-                            "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.tilstand }}}"}
+                        AvsluttetUtenUtbetaling -> sisteBehandlinger.filterNot { it.gyldigAvsluttetUtenUtbetaling() }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
                         }
-                        Avsluttet -> sisteBehandlinger.filter { it.tilstand != VEDTAK_IVERKSATT }.let { check(it.isEmpty()) {
-                            "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.tilstand }}}"}
+                        Avsluttet -> sisteBehandlinger.filterNot { it.gyldigAvsluttet() }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"}
                         }
                         else -> error("Svært snedig at perioder i ${tilstand::class.simpleName} er ferdig behandlet")
                     }
