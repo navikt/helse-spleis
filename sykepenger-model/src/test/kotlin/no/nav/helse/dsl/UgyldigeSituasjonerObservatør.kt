@@ -2,7 +2,6 @@ package no.nav.helse.dsl
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dto.BehandlingtilstandDto.VEDTAK_FATTET
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.inspectors.VedtaksperiodeInspektør
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
@@ -182,7 +181,6 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private fun PersonObserver.VedtaksperiodeVenterEvent.revurderingFeilet() = gjeldendeTilstander[venterPå.vedtaksperiodeId] == REVURDERING_FEILET
-    private fun PersonObserver.VedtaksperiodeVenterEvent.trengerNyInntektsmeldingEtterFlyttetSkjæringstidspunkt() = venterPå.venteårsak.hva == "INNTEKTSMELDING" && venterPå.venteårsak.hvorfor != null
     private fun PersonObserver.VedtaksperiodeVenterEvent.tilstander() = when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
         true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp! 😱"
         false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger hjelp! 😱"
@@ -192,6 +190,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         bekreftIngenOverlappende()
         validerSykdomshistorikk()
         validerSykdomstidslinjePåBehandlinger()
+        //validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
         IM.bekreftEntydighåndtering()
     }
 
@@ -226,6 +225,30 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             }
         }
     }
+
+    private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
+        arbeidsgivere.forEach { arbeidsgiver ->
+            arbeidsgiver.inspektør.aktiveVedtaksperioder()
+                .filter { it.inspektør.tilstand.erFerdigBehandlet }
+                .groupBy { it.inspektør.tilstand }
+                .mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.inspektør.behandlinger.last() }}
+                .forEach { (tilstand, sisteBehandlinger) ->
+                    when (tilstand) {
+                        TilInfotrygd -> sisteBehandlinger.filter { it.tilstand != TIL_INFOTRYGD }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.tilstand }}}"}
+                        }
+                        AvsluttetUtenUtbetaling -> sisteBehandlinger.filter { it.tilstand != AVSLUTTET_UTEN_VEDTAK }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.tilstand }}}"}
+                        }
+                        Avsluttet -> sisteBehandlinger.filter { it.tilstand != VEDTAK_IVERKSATT }.let { check(it.isEmpty()) {
+                            "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.tilstand }}}"}
+                        }
+                        else -> error("Svært snedig at perioder i ${tilstand::class.simpleName} er ferdig behandlet")
+                    }
+                }
+        }
+    }
+
     private val VedtaksperiodeInspektør.Behandling.Behandlingendring.unormalSykdomstidslinje get() =
         periode.start != sykdomstidslinje.inspektør.førsteIkkeUkjenteDag
 
