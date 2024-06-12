@@ -317,7 +317,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDager(dager: DagerFraInntektsmelding) {
-        val hendelse = dager.bitAvInntektsmelding(periode) ?: dager.tomBitAvInntektsmelding()
+        val hendelse = dager.bitAvInntektsmelding(periode) ?: dager.tomBitAvInntektsmelding(periode)
         håndterDager(hendelse) {
             dager.valider(periode)
             dager.validerArbeidsgiverperiode(periode, finnArbeidsgiverperiode())
@@ -325,7 +325,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterDagerUtenEndring(dager: DagerFraInntektsmelding) {
-        val hendelse = dager.tomBitAvInntektsmelding()
+        val hendelse = dager.tomBitAvInntektsmelding(periode)
         håndterDager(hendelse) {
             dager.valider(periode, finnArbeidsgiverperiode())
         }

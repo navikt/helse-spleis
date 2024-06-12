@@ -188,17 +188,23 @@ internal class DagerFraInntektsmelding(
     internal fun harBlittHåndtertAv(periode: Periode) = håndterteDager.any { it in periode }
 
     internal fun bitAvInntektsmelding(vedtaksperiode: Periode): BitAvInntektsmelding? {
+        val sykdomstidslinje = håndterDager(vedtaksperiode) ?: return null
+        return BitAvInntektsmelding(meldingsreferanseId(), sykdomstidslinje, this, innsendt(), registrert(), navn())
+    }
+
+    internal fun tomBitAvInntektsmelding(vedtaksperiode: Periode): BitAvInntektsmelding {
+        val sykdomstidslinje = håndterDager(vedtaksperiode)
+        return BitAvInntektsmelding(meldingsreferanseId(), Sykdomstidslinje(), this, innsendt(), registrert(), navn())
+    }
+
+    private fun håndterDager(vedtaksperiode: Periode): Sykdomstidslinje? {
         val periode = håndterDagerFør(vedtaksperiode) ?: return null
         if (periode.start != vedtaksperiode.start) info("Perioden ble strukket tilbake fra ${vedtaksperiode.start} til ${periode.start} (${ChronoUnit.DAYS.between(periode.start, vedtaksperiode.start)} dager)")
         val sykdomstidslinje = samletSykdomstidslinje(periode)
 
         håndterteDager.addAll(gjenståendeDager.filter { it in periode })
         gjenståendeDager.removeAll(periode)
-        return BitAvInntektsmelding(meldingsreferanseId(), sykdomstidslinje, this, innsendt(), registrert(), navn())
-    }
-
-    internal fun tomBitAvInntektsmelding(): BitAvInntektsmelding {
-        return BitAvInntektsmelding(meldingsreferanseId(), Sykdomstidslinje(), this, innsendt(), registrert(), navn())
+        return sykdomstidslinje
     }
 
     private fun samletSykdomstidslinje(periode: Periode) =

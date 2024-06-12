@@ -474,14 +474,17 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             assertFalse(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
+                assertEquals(VEDTAK_IVERKSATT, behandlinger.single().tilstand)
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
-                behandlinger.last().also { sisteBehandling ->
-                    assertEquals(inntektsmeldingId, sisteBehandling.kilde.meldingsreferanseId)
-                    assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteBehandling.endringer.single().dokumentsporing)
-                }
+                val sisteBehandling = behandlinger.last()
+                assertEquals(inntektsmeldingId, sisteBehandling.kilde.meldingsreferanseId)
+                assertEquals(Dokumentsporing.inntektsmeldingDager(inntektsmeldingId), sisteBehandling.endringer.single().dokumentsporing)
+                assertEquals(UBEREGNET_REVURDERING, sisteBehandling.tilstand)
             }
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 

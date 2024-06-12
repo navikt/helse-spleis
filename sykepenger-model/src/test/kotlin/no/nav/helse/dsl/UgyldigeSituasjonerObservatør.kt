@@ -190,7 +190,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         bekreftIngenOverlappende()
         validerSykdomshistorikk()
         validerSykdomstidslinjePåBehandlinger()
-        //validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
+        validerTilstandPåSisteBehandlingForFerdigbehandledePerioder()
         IM.bekreftEntydighåndtering()
     }
 
