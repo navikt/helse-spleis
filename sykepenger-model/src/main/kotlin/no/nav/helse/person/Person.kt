@@ -82,10 +82,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilderBuilder
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
-import kotlin.time.DurationUnit
-import kotlin.time.measureTime
 
 class Person private constructor(
     private var aktørId: String,
@@ -121,7 +118,6 @@ class Person private constructor(
             arbeidsgivere.addAll(dto.arbeidsgivere.map { Arbeidsgiver.gjenopprett(person, alder, dto.aktørId, dto.fødselsnummer, it, personJurist, grunnlagsdataMap) })
             return person
         }
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
         fun String.kandidatForTilkommenInntekt(): Boolean {
             if (Toggle.TilkommenInntekt.enabled) return true
@@ -798,21 +794,10 @@ class Person private constructor(
     }
 
     private fun håndterVedtaksperiodeVenter(hendelse: Hendelse) {
-        val tidsbruk = measureTime {
-            hendelse.venter {
-                val nestemann = arbeidsgivere.nestemann() ?: return@venter
-                arbeidsgivere.venter(nestemann)
-            }
+        hendelse.venter {
+            val nestemann = arbeidsgivere.nestemann() ?: return@venter
+            arbeidsgivere.venter(nestemann)
         }
-        val antallSekunder = tidsbruk.toDouble(DurationUnit.SECONDS)
-        val label = when {
-            antallSekunder < 1.0 -> "under ett sekund"
-            antallSekunder <= 2.0 -> "mer enn ett sekund"
-            antallSekunder <= 5.0 -> "mer enn to sekunder"
-            antallSekunder <= 10.0 -> "mer enn fem sekunder"
-            else -> "mer enn 10 sekunder"
-        }
-        sikkerLogg.info("brukte $label ($antallSekunder s) på å håndtere vedtaksperiode venter")
     }
 
     private fun behandlingUtført() {
