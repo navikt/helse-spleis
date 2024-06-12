@@ -46,6 +46,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
+import no.nav.helse.person.Vedtaksperiode.Companion.validerTilstand
 import no.nav.helse.person.Vedtaksperiode.Companion.venter
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -173,6 +174,8 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>) =
             mapNotNull { arbeidsgiver -> arbeidsgiver.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger[arbeidsgiver.organisasjonsnummer], aktivitetslogg) }
+
+        internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse) = forEach { it.vedtaksperioder.validerTilstand(hendelse) }
 
         internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))

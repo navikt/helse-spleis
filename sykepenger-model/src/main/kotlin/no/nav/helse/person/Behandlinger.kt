@@ -100,6 +100,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         behandlinger.last().behandlingVenter(builder)
     }
 
+    internal fun validerFerdigBehandlet(hendelse: Hendelse) = behandlinger.last().validerFerdigBehandlet(hendelse)
+
     internal fun gjelderIkkeFor(hendelse: Utbetalingsavgjørelse) = siste?.gjelderFor(hendelse) != true
 
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
@@ -865,23 +867,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return tillaterOverlappendeUtbetalingerForkasting(hendelse, arbeidsgiverUtbetalinger)
         }
 
-        /*
-enum class Periodetilstand {
-    TilUtbetaling,
-    TilAnnullering,
-    Utbetalt,
-    Annullert,
-    AnnulleringFeilet,
-    RevurderingFeilet,
-    ForberederGodkjenning,
-    ManglerInformasjon,
-    UtbetaltVenterPåAnnenPeriode,
-    VenterPåAnnenPeriode,
-    TilGodkjenning,
-    IngenUtbetaling,
-    TilInfotrygd;
-}
-         */
+        internal fun validerFerdigBehandlet(hendelse: Hendelse) = tilstand.validerFerdigBehandlet(this, hendelse)
+        private fun valideringFeilet(hendelse: Hendelse, feil: String) {
+            // Om de er hendelsen vi håndterer nå som har skapt situasjonen feiler vi fremfor å gå videre.
+            if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId()) error(feil)
+            // Om det er krøll fra tidligere logger vi bare
+            else hendelse.info(feil)
+        }
 
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
@@ -984,9 +976,7 @@ enum class Periodetilstand {
                 behandling.tilstand(TilInfotrygd, hendelse)
                 return null
             }
-            fun beregnSkjæringstidspunkt(behandling: Behandling, beregnSkjæringstidspunkt: (Periode) -> LocalDate) {
-
-            }
+            fun beregnSkjæringstidspunkt(behandling: Behandling, beregnSkjæringstidspunkt: (Periode) -> LocalDate) {}
             fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: (Periode) -> LocalDate): Behandling? {
                 error("Har ikke implementert håndtering av endring i $this")
             }
@@ -1005,29 +995,21 @@ enum class Periodetilstand {
             fun utenUtbetaling(behandling: Behandling, hendelse: IAktivitetslogg) {
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
             }
-            fun utbetaling(
-                behandling: Behandling,
-                vedtaksperiodeSomLagerUtbetaling: UUID,
-                fødselsnummer: String,
-                arbeidsgiver: Arbeidsgiver,
-                grunnlagsdata: VilkårsgrunnlagElement,
-                hendelse: IAktivitetslogg,
-                maksimumSykepenger: Maksdatosituasjon,
-                utbetalingstidslinje: Utbetalingstidslinje
-            ): Utbetalingstidslinje {
+            fun utbetaling(behandling: Behandling, vedtaksperiodeSomLagerUtbetaling: UUID, fødselsnummer: String, arbeidsgiver: Arbeidsgiver, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg, maksimumSykepenger: Maksdatosituasjon, utbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
                 error("Støtter ikke å opprette utbetaling i $this")
             }
-
             fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing): Boolean {
                 error("Støtter ikke å oppdatere dokumentsporing med $dokument i $this")
             }
-
             fun kanForkastes(behandling: Behandling, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean
             fun sikreNyBehandling(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: Hendelse, beregnSkjæringstidspunkt: (Periode) -> LocalDate): Behandling? {
                 return null
             }
             fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean = false
             fun håndterUtbetalinghendelse(behandling: Behandling, hendelse: UtbetalingHendelse) = false
+            fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse) {
+                behandling.valideringFeilet(hendelse, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${this::class.simpleName}")
+            }
 
             data object Uberegnet : Tilstand {
                 override fun behandlingOpprettet(behandling: Behandling) = behandling.emitNyBehandlingOpprettet(PersonObserver.BehandlingOpprettetEvent.Type.Søknad)
@@ -1290,6 +1272,11 @@ enum class Periodetilstand {
                 override fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: (Periode) -> LocalDate): Behandling {
                     return behandling.nyBehandlingMedEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, UberegnetOmgjøring)
                 }
+
+                override fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse) {
+                    if (behandling.avsluttet != null && behandling.vedtakFattet == null) return
+                    behandling.valideringFeilet(hendelse, "Behandling ${behandling.id} er ferdig behandlet i tilstand AvsluttetUtenVedtak, men med uventede tidsstempler.")
+                }
             }
             data object VedtakIverksatt : Tilstand {
                 override fun entering(behandling: Behandling, hendelse: IAktivitetslogg) {
@@ -1314,6 +1301,11 @@ enum class Periodetilstand {
 
                 override fun håndterEndring(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: (Periode) -> LocalDate) =
                     behandling.nyBehandlingMedEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, UberegnetRevurdering)
+
+                override fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse) {
+                    if (behandling.avsluttet != null && behandling.vedtakFattet != null) return
+                    behandling.valideringFeilet(hendelse, "Behandling ${behandling.id} er ferdig behandlet i tilstand VedtakIverksatt, men med uventede tidsstempler.")
+                }
             }
             data object AnnullertPeriode : Tilstand {
                 override fun entering(behandling: Behandling, hendelse: IAktivitetslogg) {
@@ -1342,6 +1334,11 @@ enum class Periodetilstand {
                 }
                 override fun kanForkastes(behandling: Behandling, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
                     error("forventer ikke å forkaste en periode som allerde er i $this")
+                }
+
+                override fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse) {
+                    if (behandling.avsluttet != null && behandling.vedtakFattet == null) return
+                    behandling.valideringFeilet(hendelse, "Behandling ${behandling.id} er ferdig behandlet i tiltand TilInfotrygd, men med uventede tidsstempler.")
                 }
             }
         }

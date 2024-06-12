@@ -58,6 +58,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
+import no.nav.helse.person.Arbeidsgiver.Companion.validerTilstand
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
@@ -789,6 +790,7 @@ class Person private constructor(
             gjenopptaBehandlingNy = false
             arbeidsgivere.gjenopptaBehandling(hendelse)
         }
+        arbeidsgivere.validerTilstand(hendelse)
         håndterVedtaksperiodeVenter(hendelse)
         behandlingUtført()
     }

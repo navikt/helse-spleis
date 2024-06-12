@@ -224,6 +224,11 @@ internal class Vedtaksperiode private constructor(
         hendelse.vurdertTilOgMed(periode.endInclusive)
     }
 
+    private fun validerTilstand(hendelse: Hendelse) {
+        if (!tilstand.erFerdigBehandlet) return
+        behandlinger.validerFerdigBehandlet(hendelse)
+    }
+
     internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
         håndterSykdomstidslinjeHendelse(søknad) {
             søknadHåndtert(søknad)
@@ -2506,6 +2511,8 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
+
+        internal fun List<Vedtaksperiode>.validerTilstand(hendelse: Hendelse) = forEach { it.validerTilstand(hendelse) }
 
         internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
             forkastede
