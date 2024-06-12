@@ -6,7 +6,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
-import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
@@ -126,7 +125,7 @@ internal class DagerFraInntektsmelding(
 
     private fun arbeidsgiverperiodeNavSkalUtbetale(): List<Periode> {
         if (arbeidsgiverperiode != null && (førsteFraværsdag == null || førsteFraværsdag in arbeidsgiverperiode)) return arbeidsgiverperioder
-        return listOfNotNull(førsteFraværsdag?.førsteArbeidsdag()?.somPeriode())
+        return listOfNotNull(førsteFraværsdag?.somPeriode())
     }
 
     private fun arbeidsgiverdager(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)

@@ -3,13 +3,12 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
+import no.nav.helse.den
 import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -18,10 +17,12 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
+import no.nav.helse.lørdag
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
@@ -70,6 +71,7 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.SykedagNav
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.til
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -156,13 +158,13 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         nyPeriode(20.januar til 30.januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            førsteFraværsdag = 20.januar,
+            førsteFraværsdag = lørdag den 20.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel",
         )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
-        assertEquals("SSSSSHH SSSSSHH SU???HH NSSSSHH SS", inspektør.sykdomstidslinje.toShortString())
+        assertEquals("SSSSSHH SSSSSHH SU???HH SSSSSHH SS", inspektør.sykdomstidslinje.toShortString())
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertVarsel(RV_IM_8, 2.vedtaksperiode.filter())
     }
@@ -200,44 +202,28 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
     fun `ingen oppgitt agp og første fraværsdag i helg`() {
-        nyPeriode(6.januar til 20.januar)
+        nyPeriode(lørdag den 6.januar til 20.januar)
+        nullstillTilstandsendringer()
         håndterInntektsmelding(
             emptyList(),
-            førsteFraværsdag = 6.januar,
+            førsteFraværsdag = lørdag den 6.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "foo",
-        ) // 6.januar lørdag
-        assertEquals("HH NSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        )
+        assertEquals("HH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
     fun `ingen oppgitt agp og første fraværsdag i helg -- første fraværsdag er siste dag i perioden`() {
-        nyPeriode(1.januar til 6.januar)
+        nyPeriode(1.januar til lørdag den 6.januar)
+        nullstillTilstandsendringer()
         håndterInntektsmelding(
             emptyList(),
-            førsteFraværsdag = 6.januar,
+            førsteFraværsdag = lørdag den 6.januar,
             begrunnelseForReduksjonEllerIkkeUtbetalt = "foo",
-        ) // 6.januar lørdag
-        assertForventetFeil(
-            forklaring = "NAV skal utbetale",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-            }
         )
-    }
-
-    @Test
-    fun `ingen oppgitt agp og første fraværsdag i helg -- første fraværsdag er første og siste dag i perioden`() {
-        nyPeriode(6.januar til 6.januar)
-        håndterInntektsmelding(
-            emptyList(),
-            førsteFraværsdag = 6.januar,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = "foo",
-        ) // 6.januar lørdag
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+        assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
     }
 
     @Test
