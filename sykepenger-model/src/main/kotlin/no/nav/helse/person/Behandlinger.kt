@@ -870,8 +870,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         internal fun validerFerdigBehandlet(hendelse: Hendelse) = tilstand.validerFerdigBehandlet(this, hendelse)
         private fun valideringFeilet(hendelse: Hendelse, feil: String) {
             // Om de er hendelsen vi håndterer nå som har skapt situasjonen feiler vi fremfor å gå videre.
-            //if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId()) error(feil)
-            if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId()) hendelse.info("Ny ugyldig behandling på en ferdig behandlet vedtaksperiode: $feil")
+            if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId()) error(feil)
             // Om det er krøll fra tidligere logger vi bare
             else hendelse.info("Eksisterende ugyldig behandling på en ferdig behandlet vedtaksperiode: $feil")
         }
