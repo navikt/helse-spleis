@@ -447,4 +447,28 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
+
+    @Test
+    fun `periode med arbeid i snuten som får omslukende ytelser blir stuck i AVVENTER_HISTORIKK`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(2.januar til 17.januar))
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+
+        assertForventetFeil(
+            forklaring =
+                    "Saken sitter fast i AVVENTER_HISTORIKK fordi den ikke klarer å beregne utbetaling" +
+                    "når vilkårsgrunnlaget ligger på skjæringstidspunktet 2. januar, " +
+                    "mens foreldrepengene flytter skjæringstidspunktet tilbake til 1. januar",
+            ønsket = {
+                håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(31.desember(2017) til 1.februar, 100)))
+                assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            },
+            nå = {
+                assertThrows<IllegalStateException> {
+                    håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(31.desember(2017) til 1.februar, 100)))
+                }
+            }
+        )
+    }
 }
