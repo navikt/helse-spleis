@@ -23,6 +23,7 @@ spec:
             {{ range .Alerts -}}
             *Beskrivelse:* {{ .Annotations.beskrivelse }}{{ "\n" }}
             *Detaljer:* {{ .Annotations.detaljer }}
+            {{ end }}
           color: |-
             {{ if eq .Status "firing" -}}
               {{ if eq .CommonLabels.severity "warning" -}}
