@@ -2,7 +2,7 @@ name: Deploy alerts
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - '.github/workflows/alerts.yml'
       - 'deploy/prod-alertmanagerconfig.yml'
