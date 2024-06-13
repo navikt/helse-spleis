@@ -4,7 +4,7 @@ metadata:
   name: team-spleiselaget-alerts-slack
   namespace: tbd
   labels:
-    team: spleiselaget
+    team: tbd
     alertmanagerConfig: team-spleiselaget-alerts-slack
 spec:
   receivers:
