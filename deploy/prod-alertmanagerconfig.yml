@@ -14,11 +14,11 @@ spec:
             key: apiUrl
             name: slack-webhook
           channel: "#team-spleiselaget-alerts"
-          iconEmoji: ":gull_scream:"
-          username: "Viggo Velferdsvenn"
+          iconEmoji: ":viggo:"
+          username: "viggo"
           sendResolved: true
           title: |-
-            [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+            [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .Annotations.navn }}
           text: >-
             {{ range .Alerts -}}
             *Beskrivelse:* {{ .Annotations.beskrivelse }}{{ "\n" }}
