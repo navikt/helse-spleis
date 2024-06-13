@@ -1009,7 +1009,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun tillaterNyBehandling(behandling: Behandling, other: Behandling): Boolean = false
             fun håndterUtbetalinghendelse(behandling: Behandling, hendelse: UtbetalingHendelse) = false
             fun validerFerdigBehandlet(behandling: Behandling, hendelse: Hendelse) {
-                behandling.valideringFeilet(hendelse, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${this::class.simpleName}")
+                behandling.valideringFeilet(hendelse, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
             }
 
             data object Uberegnet : Tilstand {
