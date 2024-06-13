@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -35,7 +36,7 @@ class Foreldrepenger(
         return sykdomstidslinje
     }
 
-    override fun skalOppdatereHistorikk(vedtaksperiode: Periode, vedtaksperiodeRettEtter: Periode?): Pair<Boolean, Companion.HvorforIkkeOppdatereHistorikk?> {
-        return foreldrepengeytelse.skalOppdatereHistorikkIHalen(vedtaksperiode, vedtaksperiodeRettEtter)
+    override fun skalOppdatereHistorikk(vedtaksperiode: Periode, skjæringstidspunkt: LocalDate, vedtaksperiodeRettEtter: Periode?): Pair<Boolean, Companion.HvorforIkkeOppdatereHistorikk?> {
+        return foreldrepengeytelse.skalOppdatereHistorikkIHalen(vedtaksperiode, skjæringstidspunkt, vedtaksperiodeRettEtter)
     }
 }

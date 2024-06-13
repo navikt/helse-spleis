@@ -1041,7 +1041,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg.kontekst(vilkårsgrunnlag)
         vilkårsgrunnlag.valider(aktivitetslogg, organisasjonsnummer)
         infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, organisasjonsnummer)
-        ytelser.oppdaterHistorikk(periode, arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.periode) {
+        ytelser.oppdaterHistorikk(periode, skjæringstidspunkt, arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.periode) {
             oppdaterHistorikk(
                 ytelser.avgrensTil(periode),
                 validering = {})

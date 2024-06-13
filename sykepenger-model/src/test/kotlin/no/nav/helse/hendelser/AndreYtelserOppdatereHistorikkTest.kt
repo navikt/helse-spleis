@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -8,8 +9,13 @@ import org.junit.jupiter.api.Test
 
 class AndreYtelserOppdatereHistorikkTest {
 
-    private fun skalOppdatereHistorikk(ytelse: AnnenYtelseSomKanOppdatereHistorikk, periode: Periode, periodeRettEtter: Periode? = null): Boolean {
-        return ytelse.skalOppdatereHistorikk(Aktivitetslogg(), ytelse, periode, periodeRettEtter)
+    private fun skalOppdatereHistorikk(
+        ytelse: AnnenYtelseSomKanOppdatereHistorikk,
+        periode: Periode,
+        periodeRettEtter: Periode? = null,
+        skjæringstidspunkt: LocalDate = periode.start,
+    ): Boolean {
+        return ytelse.skalOppdatereHistorikk(Aktivitetslogg(), ytelse, periode, skjæringstidspunkt, periodeRettEtter)
     }
 
     @Test
@@ -39,6 +45,21 @@ class AndreYtelserOppdatereHistorikkTest {
         val foreldrepenger = Foreldrepenger(listOf(GradertPeriode(20.januar til 31.januar, 100)))
         assertTrue(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode))
     }
+
+    @Test
+    fun `foreldrepenger i halen av perioden, med skjæringstidspunkt midt i perioden`() {
+        val vedtaksperiode = 1.januar til 31.januar
+        val foreldrepenger = Foreldrepenger(listOf(GradertPeriode(10.januar til 31.januar, 100)))
+        assertFalse(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode, skjæringstidspunkt = 15.januar))
+    }
+
+    @Test
+    fun `foreldrepenger i halen av perioden med start lik skjæringstidspunkt`() {
+        val vedtaksperiode = 1.januar til 31.januar
+        val foreldrepenger = Foreldrepenger(listOf(GradertPeriode(15.januar til 31.januar, 100)))
+        assertTrue(skalOppdatereHistorikk(foreldrepenger, vedtaksperiode, skjæringstidspunkt = 15.januar))
+    }
+
     @Test
     fun `foreldrepenger i snuten av perioden`() {
         val vedtaksperiode = 1.januar til 31.januar

@@ -56,9 +56,14 @@ class Ytelser(
         return !harFunksjonelleFeilEllerVerre()
     }
 
-    internal fun oppdaterHistorikk(periode: Periode, periodeRettEtter: Periode?, oppdaterHistorikk: () -> Unit) {
+    internal fun oppdaterHistorikk(
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        periodeRettEtter: Periode?,
+        oppdaterHistorikk: () -> Unit
+    ) {
         val sykdomstidslinjer = YTELSER_SOM_KAN_OPPDATERE_HISTORIKK.mapNotNull { ytelse ->
-            if (!ytelse.skalOppdatereHistorikk(this, ytelse, periode, periodeRettEtter)) null
+            if (!ytelse.skalOppdatereHistorikk(this, ytelse, periode, skjæringstidspunkt, periodeRettEtter)) null
             else ytelse.sykdomstidslinje(meldingsreferanseId(), registrert())
         }
         if (sykdomstidslinjer.isEmpty()) return

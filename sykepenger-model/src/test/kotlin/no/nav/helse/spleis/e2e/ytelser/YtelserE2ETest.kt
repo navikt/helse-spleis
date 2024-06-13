@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
@@ -69,30 +68,21 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class YtelserE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `Foreldrepenger i halen flytter skjæringstidspunkt`() {
+    fun `Foreldrepenger i halen klemrer ikke vekk skjæringstidspunkt`() {
         nyttVedtak(1.januar, søndag(28.januar))
         // Saksbehandler overstyrer i snuten
         håndterOverstyrTidslinje((1.januar til fredag(26.januar)).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         assertEquals(27.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
 
-        assertForventetFeil(
-            forklaring = "Burde ikke forslå andre ytelser i halen om det flytter skjæringstidspunktet",
-            nå = {
-                assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til søndag(28.januar), 100))) }
-            },
-            ønsket = {
-                håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til søndag(28.januar), 100)))
-                assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.SykHelgedag)
-                assertTrue(inspektør.sykdomstidslinje[28.januar] is Dag.SykHelgedag)
-                assertEquals(27.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            }
-        )
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til søndag(28.januar), 100)))
+        assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.SykHelgedag)
+        assertTrue(inspektør.sykdomstidslinje[28.januar] is Dag.SykHelgedag)
+        assertEquals(27.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
     }
 
     @Test
@@ -449,26 +439,13 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode med arbeid i snuten som får omslukende ytelser blir stuck i AVVENTER_HISTORIKK`() {
+    fun `periode med arbeid i snuten som får omslukende ytelser`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(2.januar til 17.januar))
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-
-        assertForventetFeil(
-            forklaring =
-                    "Saken sitter fast i AVVENTER_HISTORIKK fordi den ikke klarer å beregne utbetaling" +
-                    "når vilkårsgrunnlaget ligger på skjæringstidspunktet 2. januar, " +
-                    "mens foreldrepengene flytter skjæringstidspunktet tilbake til 1. januar",
-            ønsket = {
-                håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(31.desember(2017) til 1.februar, 100)))
-                assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            },
-            nå = {
-                assertThrows<IllegalStateException> {
-                    håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(31.desember(2017) til 1.februar, 100)))
-                }
-            }
-        )
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(31.desember(2017) til 1.februar, 100)))
+        assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+        assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 }
