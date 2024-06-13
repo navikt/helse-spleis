@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -18,7 +17,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeidsgiverdag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
@@ -40,23 +38,19 @@ import no.nav.helse.juli
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
@@ -66,9 +60,18 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class BehandlingerE2ETest : AbstractDslTest() {
+
+    @Test
+    fun `auu som får innteksmelding med arbeidsgiverperiode langt tilbake i tid`() {
+        a1 {
+            håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent))
+            // Denne feiler i UgyldigeSituasjonerObservatør
+            // - Disse 1 periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: [tilstand=UBEREGNET_OMGJØRING, avsluttet=null, vedtakFattet=null]}
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
+        }
+    }
 
     @Test
     fun `ny periode har en behandling`() {
@@ -523,7 +526,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(Dokumentsporing.søknad(overlappende), behandling.endringer.single().dokumentsporing)
             }
             assertFunksjonellFeil(Varselkode.`Mottatt søknad som delvis overlapper`, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TilstandType.TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 
