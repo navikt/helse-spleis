@@ -53,7 +53,7 @@ spec:
     groupBy:
       - alertname
     matchers:
-      - name: "team-spleiselaget-alerts"
+      - name: "team_spleiselaget_alerts"
         matchType: "="
         value: "slack"
     groupInterval: 10s

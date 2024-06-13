@@ -13,6 +13,8 @@ on:
       - 'README.md'
       - 'LICENSE'
       - 'CODEOWNERS'
+      - '.github/workflows/alerts.yml'
+      - 'deploy/prod-alertmanagerconfig.yml'
     branches:
       - master
 
