@@ -64,12 +64,18 @@ import org.junit.jupiter.api.Test
 internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
-    fun `auu som får innteksmelding med arbeidsgiverperiode langt tilbake i tid`() {
+    fun `auu som får innteksmelding med arbeidsgiverperiode langt tilbake i tid men allikevel skal validere inntektsmelding fordi den har første fraværsdag`() {
         a1 {
             håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent))
-            // Denne feiler i UgyldigeSituasjonerObservatør
-            // - Disse 1 periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: [tilstand=UBEREGNET_OMGJØRING, avsluttet=null, vedtakFattet=null]}
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
+            nullstillTilstandsendringer()
+            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
+            inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.let {
+                assertEquals(2, it.size)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, it[0].tilstand)
+                assertEquals(AVSLUTTET_UTEN_VEDTAK, it[1].tilstand)
+                assertEquals(inntektsmeldingId, it[1].kilde.meldingsreferanseId)
+            }
         }
     }
 
@@ -806,12 +812,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             nyttVedtak(15.januar, 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 21.januar), førsteFraværsdag = 15.januar)
 
-            håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 21.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
+            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 10.januar, 15.januar til 21.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
-                assertEquals(3, behandlinger.size)
+                assertEquals(4, behandlinger.size)
                 behandlinger[0].also { behandling ->
                     assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
                 }
@@ -821,6 +827,10 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 behandlinger[2].also { behandling ->
                     assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
                 }
+                behandlinger[3].also { behandling ->
+                    assertEquals(AVSLUTTET_UTEN_VEDTAK, behandling.tilstand)
+                    assertEquals(inntektsmeldingId, behandling.kilde.meldingsreferanseId)
+                }
             }
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
@@ -829,6 +839,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 }
                 behandlinger[1].also { behandling ->
                     assertEquals(UBEREGNET_REVURDERING, behandling.tilstand)
+                    assertEquals(inntektsmeldingId, behandling.kilde.meldingsreferanseId)
                 }
             }
         }

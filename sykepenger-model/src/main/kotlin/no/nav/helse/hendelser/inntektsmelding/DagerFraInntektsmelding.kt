@@ -78,13 +78,13 @@ internal class DagerFraInntektsmelding(
     private val arbeidsdager = mutableSetOf<LocalDate>()
     private val gjenståendeDager = opprinneligPeriode?.toMutableSet() ?: mutableSetOf()
     private val håndterteDager = mutableSetOf<LocalDate>()
-
     private val ignorerDager: Boolean get() {
         if (begrunnelseForReduksjonEllerIkkeUtbetalt == null) return false
         if (begrunnelseForReduksjonEllerIkkeUtbetalt in ikkeStøttedeBegrunnelserForReduksjon) return true
         if (hulleteArbeidsgiverperiode()) return true
         return false
     }
+    private var harValidert: Periode? = null
 
     private fun lagSykdomstidslinje(): Sykdomstidslinje {
         return tidslinjeForArbeidsgiverperioden() ?: tidslinjeForFørsteFraværsdag()
@@ -169,7 +169,9 @@ internal class DagerFraInntektsmelding(
     }
 
     private fun tomSykdomstidslinjeMenSkalValidere(periode: Periode) =
-        (opprinneligPeriode == null && skalValideresAv(periode))
+        (opprinneligPeriode == null && skalValideresAv(periode)).also { if (it) {
+            harValidert = periode
+        }}
 
     // om vedtaksperioden ikke direkte overlapper med gjenståendeDager, men gjenståendeDager er ikke tom, og vedtaksperioden overlapper
     // med første fraværsdag, betyr det at inntektsmeldingen informerer om egenmeldinger vi ikke har søknad for.
@@ -193,7 +195,7 @@ internal class DagerFraInntektsmelding(
     }
 
     internal fun tomBitAvInntektsmelding(vedtaksperiode: Periode): BitAvInntektsmelding {
-        val sykdomstidslinje = håndterDager(vedtaksperiode)
+        håndterDager(vedtaksperiode)
         return BitAvInntektsmelding(meldingsreferanseId(), Sykdomstidslinje(), this, innsendt(), registrert(), navn())
     }
 
@@ -309,7 +311,7 @@ internal class DagerFraInntektsmelding(
     }
 
     fun revurderingseventyr(): Revurderingseventyr? {
-        val dagene = håndterteDager.omsluttendePeriode ?: return null
+        val dagene = håndterteDager.omsluttendePeriode ?: harValidert ?: return null
         return Revurderingseventyr.arbeidsgiverperiode(this, dagene.start, dagene)
     }
 
