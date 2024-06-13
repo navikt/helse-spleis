@@ -243,8 +243,9 @@ class ArbeidsgiverInntektsopplysning(
             endredeInntektsopplysninger.forEach { it.subsummer(subsumsjonslogg, opptjening) }
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder.FastsattISpleisBuilder) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder.FastsattISpleisBuilder, skjæringstidspunkt: LocalDate) {
             forEach { arbeidsgiver ->
+                if (!arbeidsgiver.gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return@forEach
                 builder.arbeidsgiver(
                     arbeidsgiver = arbeidsgiver.orgnummer,
                     omregnetÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt(),
@@ -253,8 +254,9 @@ class ArbeidsgiverInntektsopplysning(
             }
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: GodkjenningsbehovBuilder.FastsattISpleisBuilder) {
+        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: GodkjenningsbehovBuilder.FastsattISpleisBuilder, skjæringstidspunkt: LocalDate) {
             forEach { arbeidsgiver ->
+                if (!arbeidsgiver.gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return@forEach
                 builder.arbeidsgiver(
                     arbeidsgiver = arbeidsgiver.orgnummer,
                     omregnetÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },

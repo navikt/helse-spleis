@@ -391,7 +391,7 @@ internal class Sykepengegrunnlag private constructor(
         val fakta = when (vurdertInfotrygd) {
             true -> VedtakFattetBuilder.FastsattIInfotrygdBuilder(omregnetÅrsinntekt)
             false -> VedtakFattetBuilder.FastsattISpleisBuilder(omregnetÅrsinntekt, `6G`).apply {
-                arbeidsgiverInntektsopplysninger.build(this)
+                arbeidsgiverInntektsopplysninger.build(this, skjæringstidspunkt)
             }
         }.build()
         // TODO: alt sykepengegrunnlagrelatert burde kanskje vært inni én fakta-ting
@@ -409,7 +409,7 @@ internal class Sykepengegrunnlag private constructor(
                 omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
                 `6G`.reflection { årlig, _, _, _ -> årlig }
             ).apply {
-                arbeidsgiverInntektsopplysninger.build(this)
+                arbeidsgiverInntektsopplysninger.build(this, skjæringstidspunkt)
             }
         }.build()
         builder.sykepengegrunnlagsfakta(fakta)

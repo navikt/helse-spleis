@@ -22,6 +22,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
@@ -125,6 +126,39 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
             arbeidsgivere = listOf(
                 FastsattISpeil.Arbeidsgiver(a1, 372000.0, null),
                 FastsattISpeil.Arbeidsgiver(a2, 372000.0, null),
+            )
+        )
+        assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)
+    }
+
+    @Test
+    fun `sender vedtak fattet ved tilkommen inntekt`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            beregnetInntekt = 10000.månedlig,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            orgnummer = a2
+        )
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+
+        assertEquals(2, observatør.avsluttetMedVedtakEvent.size)
+
+        val a1Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.last { it.organisasjonsnummer == a1 }.sykepengegrunnlagsfakta
+        val a2Sykepengegrunnlagsfakta = observatør.avsluttetMedVedtakEvent.values.lastOrNull { it.organisasjonsnummer == a2 }?.sykepengegrunnlagsfakta
+
+        assertNull(a2Sykepengegrunnlagsfakta)
+
+        val forventetSykepengegrunnlagsfakta = FastsattISpeil(
+            omregnetÅrsinntekt = 372000.0,
+            `6G` = 561804.0,
+            arbeidsgivere = listOf(
+                FastsattISpeil.Arbeidsgiver(a1, 372000.0, null),
             )
         )
         assertEquals(forventetSykepengegrunnlagsfakta, a1Sykepengegrunnlagsfakta)

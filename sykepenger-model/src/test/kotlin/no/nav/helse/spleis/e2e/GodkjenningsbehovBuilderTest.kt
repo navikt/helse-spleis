@@ -155,10 +155,6 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
                     mapOf(
                         "arbeidsgiver" to a1,
                         "omregnetÅrsinntekt" to 372000.0
-                    ),
-                    mapOf(
-                        "arbeidsgiver" to a2,
-                        "omregnetÅrsinntekt" to 120000.0
                     )
                 )
             )
