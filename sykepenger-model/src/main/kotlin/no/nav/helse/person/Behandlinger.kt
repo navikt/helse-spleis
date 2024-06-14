@@ -924,6 +924,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
 
         internal fun validerFerdigBehandlet(hendelse: Hendelse) = tilstand.validerFerdigBehandlet(this, hendelse)
+
         private fun valideringFeilet(hendelse: Hendelse, feil: String) {
             // Om de er hendelsen vi håndterer nå som har skapt situasjonen feiler vi fremfor å gå videre.
             if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId()) error(feil)

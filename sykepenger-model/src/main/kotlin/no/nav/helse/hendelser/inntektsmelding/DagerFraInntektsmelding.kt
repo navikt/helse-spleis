@@ -204,7 +204,7 @@ internal class DagerFraInntektsmelding(
         if (periode.start != vedtaksperiode.start) info("Perioden ble strukket tilbake fra ${vedtaksperiode.start} til ${periode.start} (${ChronoUnit.DAYS.between(periode.start, vedtaksperiode.start)} dager)")
         val sykdomstidslinje = samletSykdomstidslinje(periode)
 
-        håndterteDager.addAll(gjenståendeDager.filter { it in periode })
+        håndterteDager.addAll(periode.toList())
         gjenståendeDager.removeAll(periode)
         return sykdomstidslinje
     }
@@ -218,7 +218,6 @@ internal class DagerFraInntektsmelding(
         leggTilArbeidsdagerFør(vedtaksperiode.start)
         val gjenståendePeriode = gjenståendeDager.omsluttendePeriode ?: return null
         val periode = vedtaksperiode.oppdaterFom(gjenståendePeriode)
-        if (!periode.overlapperMed(gjenståendePeriode)) return null
         return periode
     }
 

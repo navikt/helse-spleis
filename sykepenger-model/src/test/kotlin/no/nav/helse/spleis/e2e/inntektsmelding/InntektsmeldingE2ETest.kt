@@ -23,6 +23,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -131,6 +132,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             }
         )
+    }
+
+    @Test
+    fun `tom arbeidsgiverperiode og første fraværsdag dagen efter`() {
+        nyPeriode(1.januar til 15.januar)
+        håndterInntektsmelding(listOf(), førsteFraværsdag = 16.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+        assertEquals(2, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.size)
+        assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.first().tilstand)
+        assertEquals(AVSLUTTET_UTEN_VEDTAK, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().tilstand)
     }
 
 

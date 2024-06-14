@@ -245,7 +245,7 @@ internal class InntektsmeldingMatchingTest {
         assertEquals(1.januar til 30.januar, dager.håndter(vedtaksperiode))
         assertFalse(dager.harBlittHåndtertAv(31.desember(2017).somPeriode()))
         assertTrue(dager.harBlittHåndtertAv(1.januar til 14.januar))
-        assertFalse(dager.harBlittHåndtertAv(31.januar.somPeriode()))
+        assertTrue(dager.harBlittHåndtertAv(31.januar.somPeriode()))
     }
 
     private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? {
