@@ -10,3 +10,5 @@ gradle.properties
 testressurser/
 *.dtmp
 **/*noCommit*
+.kotlin/
+
