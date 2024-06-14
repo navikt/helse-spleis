@@ -18,5 +18,6 @@ data class BehandlingendringUtDto(
     val utbetalingId: UUID?,
     val utbetalingstatus: UtbetalingTilstandDto?,
     val dokumentsporing: DokumentsporingDto,
-    val sykdomstidslinje: SykdomstidslinjeDto
+    val sykdomstidslinje: SykdomstidslinjeDto,
+    val arbeidsgiverperioder: List<PeriodeDto>
 )

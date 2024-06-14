@@ -63,7 +63,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
             val periode: Periode,
             val dokumentsporing: Dokumentsporing,
             val skjæringstidspunkt: LocalDate,
-            val sykdomstidslinje: Sykdomstidslinje
+            val sykdomstidslinje: Sykdomstidslinje,
+            val arbeidsgiverperiode: List<Periode>
         )
 
         data class Behandlingkilde(
@@ -139,11 +140,12 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         utbetaling: Utbetaling?,
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiverperiode: List<Periode>
     ) {
         val sisteBehandling = this.behandlinger.last()
         this.behandlinger[this.behandlinger.lastIndex] = sisteBehandling.copy(
-            endringer = sisteBehandling.endringer.plus(Behandling.Behandlingendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing, skjæringstidspunkt, sykdomstidslinje))
+            endringer = sisteBehandling.endringer.plus(Behandling.Behandlingendring(grunnlagsdata, utbetaling, sykdomstidslinje.periode()!!, dokumentsporing, skjæringstidspunkt, sykdomstidslinje, arbeidsgiverperiode))
         )
         val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId ?: return
         val utbetalingId = utbetaling!!.inspektør.utbetalingId

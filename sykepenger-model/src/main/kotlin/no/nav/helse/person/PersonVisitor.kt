@@ -341,7 +341,8 @@ internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         utbetaling: Utbetaling?,
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiverperiode: List<Periode>
     ) {}
     fun postVisitBehandlingendring(
         id: UUID,
@@ -352,7 +353,8 @@ internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         utbetaling: Utbetaling?,
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
+        arbeidsgiverperiode: List<Periode>
     ) {}
     fun visitBehandlingkilde(
         meldingsreferanseId: UUID,

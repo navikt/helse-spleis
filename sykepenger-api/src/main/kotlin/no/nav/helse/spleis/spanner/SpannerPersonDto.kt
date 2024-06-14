@@ -453,7 +453,8 @@ internal data class SpannerPersonDto(
                     val utbetalingstatus: UtbetalingData.UtbetalingstatusData?,
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
-                    val dokumentsporing: DokumentsporingData
+                    val dokumentsporing: DokumentsporingData,
+                    val arbeidsgiverperiode: List<PeriodeData>
                 )
             }
             data class DataForSimuleringData(
@@ -1001,7 +1002,8 @@ private fun BehandlingendringUtDto.tilPersonData() = SpannerPersonDto.Arbeidsgiv
     skjæringstidspunkt = this.skjæringstidspunkt,
     vilkårsgrunnlagId = vilkårsgrunnlagId,
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
-    dokumentsporing = dokumentsporing.tilPersonData()
+    dokumentsporing = dokumentsporing.tilPersonData(),
+    arbeidsgiverperiode = arbeidsgiverperioder.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
 )
 private fun DokumentsporingDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(
     dokumentId = this.id,

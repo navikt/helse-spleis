@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -62,6 +63,7 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.historiskSykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -141,7 +143,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
-            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt(infotrygdhistorikk)) }
+            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt(infotrygdhistorikk), it.beregnArbeidsgiverperiode()) }
         }
 
         internal fun List<Arbeidsgiver>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
@@ -713,6 +715,16 @@ internal class Arbeidsgiver private constructor(
         return  forkastede
             .slåSammenSykdomstidslinjer(sykdomstidslinje)
             .merge(sykdomstidslinje(), replace)
+    }
+
+    internal fun migrerArbeidsgiverperiode(): (vedtaksperiode: Periode, historiskTidsstempel: LocalDateTime) -> List<Periode> {
+        return { vedtaksperiode: Periode, historiskTidsstempel: LocalDateTime ->
+            person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikk.historiskSykdomstidslinje(historiskTidsstempel), null).finn(vedtaksperiode)?.grupperSammenhengendePerioder() ?: emptyList()
+        }
+    }
+
+    internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
+        person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), null).finn(vedtaksperiode)?.grupperSammenhengendePerioder() ?: emptyList()
     }
 
     private fun arbeidsgiverperiode(periode: Periode, sykdomstidslinje: Sykdomstidslinje): Arbeidsgiverperiode? {
