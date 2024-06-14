@@ -706,11 +706,14 @@ internal class Vedtaksperiode private constructor(
         medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
 
-    private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg): Boolean {
+    private fun sjekkTrengerArbeidsgiveropplysninger(hendelse:IAktivitetslogg): Boolean {
         if (!måInnhenteInntektEllerRefusjon(hendelse)) return false
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
-        if (!arbeidsgiverperiode.forventerOpplysninger(periode)) return false
+        return arbeidsgiverperiode.forventerOpplysninger(periode)
+    }
 
+    private fun sendTrengerArbeidsgiveropplysninger() {
+        val arbeidsgiverperiode = checkNotNull ( finnArbeidsgiverperiode() ) { "Må ha arbeidsgiverperiode før vi sier dette." }
         val forespurtInntektOgRefusjon = person.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode)
         val forespurteOpplysninger = forespurtInntektOgRefusjon + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
 
@@ -733,7 +736,6 @@ internal class Vedtaksperiode private constructor(
                 forespurteOpplysninger = forespurteOpplysninger
             )
         )
-        return true
     }
 
     private fun trengerPotensieltArbeidsgiveropplysninger() {
@@ -1586,7 +1588,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
             vurderOmKanGåVidere(vedtaksperiode, revurdering)
-            if (vedtaksperiode.tilstand == AvventerInntektsmelding) vedtaksperiode.trengerArbeidsgiveropplysninger(revurdering)
+            if (vedtaksperiode.tilstand == AvventerInntektsmelding && vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(revurdering)) {
+                vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
+            }
         }
 
         override fun håndter(
@@ -1608,7 +1612,9 @@ internal class Vedtaksperiode private constructor(
                 if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
             }
             if (påminnelse.skalReberegnes()) return vurderOmKanGåVidere(vedtaksperiode, påminnelse)
-            vedtaksperiode.trengerArbeidsgiveropplysninger(påminnelse)
+            if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(påminnelse)) {
+                vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
+            }
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: Hendelse) {
@@ -1616,7 +1622,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun replayUtført(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
-            if (vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)) {
+            if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(hendelse)) {
+                vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
                 // ved out-of-order gir vi beskjed om at vi ikke trenger arbeidsgiveropplysninger for den seneste perioden lenger
                 vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.also {
                     it.trengerIkkeArbeidsgiveropplysninger()
@@ -2495,7 +2502,9 @@ internal class Vedtaksperiode private constructor(
                 .firstOrNull { it.skjæringstidspunkt > vedtaksperiode.skjæringstidspunkt && it.forventerInntekt() }
                 ?.takeIf { it.tilstand == AvventerInntektsmelding }
                 ?: return
-            nestePeriode.trengerArbeidsgiveropplysninger(hendelse)
+            if (nestePeriode.sjekkTrengerArbeidsgiveropplysninger(hendelse)) {
+                nestePeriode.sendTrengerArbeidsgiveropplysninger()
+            }
         }
 
         internal fun Iterable<Vedtaksperiode>.checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas: Vedtaksperiode) {
