@@ -17,4 +17,3 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: deploy/prod-alertmanagerconfig.yml
-          PRINT_PAYLOAD: true
