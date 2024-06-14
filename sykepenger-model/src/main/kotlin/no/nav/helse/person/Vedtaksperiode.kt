@@ -434,7 +434,7 @@ internal class Vedtaksperiode private constructor(
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer) == false
     }
 
-    private fun måInnhenteInntektEllerFørInntektsmelding(hendelse: IAktivitetslogg): Boolean {
+    private fun måInnhenteInntektEllerRefusjonFørInntektsmelding(hendelse: IAktivitetslogg): Boolean {
         return måInnhenteInntektEllerRefusjon(hendelse, Arbeidsgiverperiode::harNødvendigeRefusjonsopplysninger)
     }
 
@@ -1287,7 +1287,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun måInnhenteInntektEllerRefusjon(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
-            vedtaksperiode.måInnhenteInntektEllerFørInntektsmelding(hendelse)
+            vedtaksperiode.måInnhenteInntektEllerRefusjonFørInntektsmelding(hendelse)
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = null
         override fun gjenopptaBehandling(
@@ -1542,7 +1542,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun måInnhenteInntektEllerRefusjon(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) =
-            vedtaksperiode.måInnhenteInntektEllerFørInntektsmelding(hendelse)
+            vedtaksperiode.måInnhenteInntektEllerRefusjonFørInntektsmelding(hendelse)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.revurderTidslinje(hendelse)
