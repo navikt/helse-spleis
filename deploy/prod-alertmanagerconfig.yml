@@ -16,7 +16,12 @@ spec:
           channel: "#team-spleiselaget-alerts"
           iconEmoji: ":viggo:"
           username: "viggo"
-          sendResolved: true
+          sendResolved: |-
+            {{ if eq .CommonLabels.severity "info" }}
+              false
+            {{ else }}
+              true
+            {{ end }}
           title: |-
             [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
           text: >-
@@ -56,4 +61,4 @@ spec:
     groupInterval: 10s
     groupWait: 5s
     receiver: team-spleiselaget-alerts-receiver
-    repeatInterval: 2m
+    repeatInterval: 30m
