@@ -16,7 +16,7 @@ spec:
           channel: "#team-spleiselaget-alerts"
           iconEmoji: ":viggo:"
           username: "viggo"
-          sendResolved: {{ ne (eq .CommonLabels.severity "info") }}
+          sendResolved: {{ not (eq .CommonLabels.severity "info") }}
           title: |-
             [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
           text: >-
