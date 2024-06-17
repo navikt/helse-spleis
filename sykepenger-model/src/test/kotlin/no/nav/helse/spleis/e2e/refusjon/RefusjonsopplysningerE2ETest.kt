@@ -1,13 +1,18 @@
 package no.nav.helse.spleis.e2e.refusjon
 
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
+import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.forlengVedtak
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.i
@@ -15,11 +20,14 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.september
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -109,6 +117,89 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(null, null, emptyList()), beregnetInntekt = INNTEKT)
             assertEquals(1, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
             assertEquals(listOf(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, INGEN)), inspektør.refusjonsopplysningerFraRefusjonshistorikk(1.januar).inspektør.refusjonsopplysninger)
+        }
+    }
+
+    @Test
+    fun `godtar refusjonsopplysninger selv med oppholdsdager i snuten`() {
+        listOf(a1, a2).nyeVedtak(1.desember(2017) til 28.desember(2017))
+
+        a2 {
+            forlengVedtak(fom = 29.desember(2017), tom = 10.januar)
+        }
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 1.januar))
+            håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar)
+        }
+        a2 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        }
+        a1 {
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        }
+    }
+
+
+    @Test
+    fun `godtar refusjonsopplysninger selv med oppholdsdager i snuten take two`() {
+        listOf(a1, a2).nyeVedtak(1.desember(2017) til 28.desember(2017))
+
+        a2 {
+            forlengVedtak(fom = 29.desember(2017), tom = 10.januar)
+        }
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 1.januar))
+            håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), førsteFraværsdag = 2.januar)
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        }
+        a1 {
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        }
+    }
+
+
+    @Test
+    fun `godtar refusjonsopplysninger selv med oppholdsdager i snuten men hva med egenmeldinger da`() {
+        listOf(a1, a2).nyeVedtak(1.desember(2017) til 28.desember(2017), inntekt = INNTEKT)
+
+        a2 {
+            forlengVedtak(fom = 29.desember(2017), tom = 10.januar)
+        }
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar))
+            håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(fom = 29.desember(2017), tom = 29.desember(2017))))
+            håndterInntektsmeldingPortal(førsteFraværsdag = 2.januar, arbeidsgiverperioder = emptyList(), inntektsdato = 1.desember(2017))
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        }
+        a1 {
+            assertForventetFeil("vet ikke",
+                nå = {
+                    assertIngenVarsler(2.vedtaksperiode.filter())
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+                },
+                ønsket = {
+                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+                })
         }
     }
 

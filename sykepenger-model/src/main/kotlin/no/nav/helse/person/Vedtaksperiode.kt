@@ -1114,7 +1114,7 @@ internal class Vedtaksperiode private constructor(
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
-        val harNødvendigeRefusjonsopplysningerStrategi get(): (LocalDate, Periode, Refusjonsopplysninger, Arbeidsgiverperiode, IAktivitetslogg, String) -> Boolean = Arbeidsgiverperiode.Companion::harNødvendigeRefusjonsopplysningerRevurdering
+        val harNødvendigeRefusjonsopplysningerStrategi get(): (LocalDate, Periode, Refusjonsopplysninger, Arbeidsgiverperiode, IAktivitetslogg, String) -> Boolean = Arbeidsgiverperiode.Companion::harNødvendigeRefusjonsopplysningerEtterInntektsmelding
 
         fun håndterRevurdering(hendelse: Hendelse, block: () -> Unit) {
             if (hendelse !is PersonHendelse) return block()

@@ -177,9 +177,9 @@ class Refusjonsopplysning(
 
         override fun toString() = validerteRefusjonsopplysninger.toString()
 
-        private fun hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager: LocalDate?) = when (sisteOppholdsdagFørUtbetalingsdager) {
+        private fun hensyntattSisteOppholdagFørPerioden(sisteOppholdsdagFørPerioden: LocalDate?) = when (sisteOppholdsdagFørPerioden) {
             null -> this
-            else -> Refusjonsopplysninger(validerteRefusjonsopplysninger.mapNotNull { it.begrensTil(sisteOppholdsdagFørUtbetalingsdager )})
+            else -> Refusjonsopplysninger(validerteRefusjonsopplysninger.mapNotNull { it.begrensTil(sisteOppholdsdagFørPerioden )})
         }
 
         private fun harNødvendigRefusjonsopplysninger(
@@ -201,10 +201,10 @@ class Refusjonsopplysning(
         internal fun harNødvendigRefusjonsopplysninger(
             skjæringstidspunkt: LocalDate,
             utbetalingsdager: List<LocalDate>,
-            sisteOppholdsdagFørUtbetalingsdager: LocalDate?,
+            sisteOppholdsdagFørPerioden: LocalDate?,
             hendelse: IAktivitetslogg,
             organisasjonsnummer: String
-        ) = hensyntattSisteOppholdagFørUtbetalingsdager(sisteOppholdsdagFørUtbetalingsdager).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, hendelse, organisasjonsnummer)
+        ) = hensyntattSisteOppholdagFørPerioden(sisteOppholdsdagFørPerioden).harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, hendelse, organisasjonsnummer)
         internal fun refusjonsbeløpOrNull(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
 
         private fun førsteRefusjonsopplysning() = validerteRefusjonsopplysninger.minByOrNull { it.fom }
