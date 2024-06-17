@@ -107,51 +107,55 @@ class GodkjenningsbehovBuilder(
         omregnedeÅrsinntekter.add(mapOf("organisasjonsnummer" to orgnummer, "beløp" to omregnetÅrsinntekt))
     }
 
-    fun build() = mapOf(
-        "periodeFom" to periodeFom.toString(),
-        "periodeTom" to periodeTom.toString(),
-        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-        "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
-        "periodetype" to periodetype.name,
-        "førstegangsbehandling" to førstegangsbehandling,
-        "utbetalingtype" to utbetalingtype,
-        "inntektskilde" to inntektskilde.name,
-        "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
-        "tags" to tags,
-        "kanAvvises" to kanAvvises,
-        "omregnedeÅrsinntekter" to omregnedeÅrsinntekter,
-        "behandlingId" to behandlingId.toString(),
-        "hendelser" to hendelser,
-        "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
-            mapOf(
-                "vedtaksperiodeId" to it.vedtaksperiodeId.toString(),
-                "behandlingId" to it.behandlingId.toString(),
-                "fom" to it.periode.start.toString(),
-                "tom" to it.periode.endInclusive.toString()
-            )
-        },
-        "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {
-            is FastsattIInfotrygd -> mapOf(
-                "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt,
-                "fastsatt" to sykepengegrunnlagsfakta.fastsatt.name
-            )
-            is FastsattISpeil -> mutableMapOf(
-                "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt,
-                "6G" to (sykepengegrunnlagsfakta as FastsattISpeil).`6G`,
-                "fastsatt" to sykepengegrunnlagsfakta.fastsatt.name,
-                "arbeidsgivere" to (sykepengegrunnlagsfakta as FastsattISpeil).arbeidsgivere.map {
-                    mutableMapOf(
-                        "arbeidsgiver" to it.arbeidsgiver,
-                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                    ).apply {
-                        compute("skjønnsfastsatt") { _, _ -> it.skjønnsfastsatt }
-                    }
-                },
-            ).apply {
-                compute("skjønnsfastsatt") { _, _ -> (sykepengegrunnlagsfakta as FastsattISpeil).skjønnsfastsatt}
+    fun build(): Map<String, Any> {
+        check(omregnedeÅrsinntekter.isNotEmpty()) {"Forventet ikke at omregnede årsinntekter er en tom liste ved godkjenningsbehov"}
+        return mapOf(
+            "periodeFom" to periodeFom.toString(),
+            "periodeTom" to periodeTom.toString(),
+            "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+            "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
+            "periodetype" to periodetype.name,
+            "førstegangsbehandling" to førstegangsbehandling,
+            "utbetalingtype" to utbetalingtype,
+            "inntektskilde" to inntektskilde.name,
+            "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
+            "tags" to tags,
+            "kanAvvises" to kanAvvises,
+            "omregnedeÅrsinntekter" to omregnedeÅrsinntekter,
+            "behandlingId" to behandlingId.toString(),
+            "hendelser" to hendelser,
+            "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
+                mapOf(
+                    "vedtaksperiodeId" to it.vedtaksperiodeId.toString(),
+                    "behandlingId" to it.behandlingId.toString(),
+                    "fom" to it.periode.start.toString(),
+                    "tom" to it.periode.endInclusive.toString()
+                )
+            },
+            "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {
+                is FastsattIInfotrygd -> mapOf(
+                    "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt,
+                    "fastsatt" to sykepengegrunnlagsfakta.fastsatt.name
+                )
+
+                is FastsattISpeil -> mutableMapOf(
+                    "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt,
+                    "6G" to (sykepengegrunnlagsfakta as FastsattISpeil).`6G`,
+                    "fastsatt" to sykepengegrunnlagsfakta.fastsatt.name,
+                    "arbeidsgivere" to (sykepengegrunnlagsfakta as FastsattISpeil).arbeidsgivere.map {
+                        mutableMapOf(
+                            "arbeidsgiver" to it.arbeidsgiver,
+                            "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                        ).apply {
+                            compute("skjønnsfastsatt") { _, _ -> it.skjønnsfastsatt }
+                        }
+                    },
+                ).apply {
+                    compute("skjønnsfastsatt") { _, _ -> (sykepengegrunnlagsfakta as FastsattISpeil).skjønnsfastsatt}
+                }
             }
-        }
-    )
+        )
+    }
 
     fun tags() = tags.toSet()
 
