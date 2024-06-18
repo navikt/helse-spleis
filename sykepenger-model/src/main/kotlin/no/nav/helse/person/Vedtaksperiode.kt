@@ -1546,7 +1546,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.vedtaksperiodeVenter(vedtaksperiode, arbeidsgivere)
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (vedtaksperiode.id == UUID.fromString("0a02c690-5e9a-4996-b708-69708deb81d4")) return
             check(vedtaksperiode.behandlinger.harIkkeUtbetaling()) {
                 "hæ?! vedtaksperiodens behandling er ikke uberegnet!"
             }
