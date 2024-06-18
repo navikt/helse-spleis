@@ -1106,6 +1106,7 @@ internal class Vedtaksperiode private constructor(
         if (rettFør.tilstand in setOf(AvsluttetUtenUtbetaling, AvventerInfotrygdHistorikk, AvventerInntektsmelding)) return false
         // auu-er vil kunne ligge i Avventer blokkerende periode
         if (rettFør.tilstand == AvventerBlokkerendePeriode && !rettFør.forventerInntekt()) return false
+        if (rettFør.skjæringstidspunkt != this.skjæringstidspunkt) return false
         return true
     }
 

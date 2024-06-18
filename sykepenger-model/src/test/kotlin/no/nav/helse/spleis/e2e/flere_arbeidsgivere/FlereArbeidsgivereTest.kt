@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -42,9 +41,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
@@ -366,6 +363,19 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+    }
+
+    @Test
+    fun `Periode med snutete egenmeldinger som har sklidd gjennom på forlengelse`() {
+        listOf(a1, a2).nyeVedtak(januar)
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
+            håndterSøknad(Sykdom(3.februar, 28.februar, 100.prosent), egenmeldinger = listOf(Arbeidsgiverdag(1.februar, 1.februar)))
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }
 
