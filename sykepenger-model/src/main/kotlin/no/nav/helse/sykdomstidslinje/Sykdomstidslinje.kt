@@ -464,6 +464,11 @@ internal class Sykdomstidslinje private constructor(
         periode = periode?.dto(),
         låstePerioder = låstePerioder.map { it.dto() }
     )
+
+    internal fun utenProblemdager(): Sykdomstidslinje {
+        return Sykdomstidslinje(this.dager.filter { (_, dag) -> dag !is ProblemDag }.toSortedMap(), this.periode)
+    }
+
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =
