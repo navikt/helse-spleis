@@ -390,14 +390,9 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(påminnelse: Påminnelse, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         if (!påminnelse.erRelevant(id)) return false
         kontekst(påminnelse)
-        påminnelse.loggGjenbrukbareOpplysninger()
+        tilstand.arbeidsgiveropplysningerStrategi.loggGjenbrukbareOpplysninger(this, påminnelse)
         tilstand.påminnelse(this, påminnelse, arbeidsgivere)
         return true
-    }
-
-    private fun IAktivitetslogg.loggGjenbrukbareOpplysninger() {
-        if (behandlinger.harGjenbrukbareOpplysninger(organisasjonsnummer)) return info("Har gjenbrukbare opplysninger")
-        info("Mangler gjenbrukbare opplysninger")
     }
 
     internal fun nyAnnullering(hendelse: IAktivitetslogg, annullering: Utbetaling) {
@@ -1101,6 +1096,7 @@ internal class Vedtaksperiode private constructor(
         internal fun måInnhenteInntektEllerRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) = !harInntekt(vedtaksperiode) || !harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, hendelse)
         abstract fun harInntekt(vedtaksperiode: Vedtaksperiode): Boolean
         abstract fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg): Boolean
+        open fun loggGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
         // Inntekt vi har uten å måtte lagre noe tilbake i historikken på arbeidsgiver.
         protected fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
             // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
@@ -1125,6 +1121,12 @@ internal class Vedtaksperiode private constructor(
         override fun harInntekt(vedtaksperiode: Vedtaksperiode) = harEksisterendeInntekt(vedtaksperiode) // Dette skal på sikt sjekke OR harGjenbrukbarInntekt
         override fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
             Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, eksisterendeRefusjonsopplysninger(vedtaksperiode), arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
+        override fun loggGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return
+            if (harEksisterendeInntekt(vedtaksperiode) && harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, hendelse)) return
+            if (vedtaksperiode.behandlinger.harGjenbrukbareOpplysninger(vedtaksperiode.organisasjonsnummer)) return hendelse.info("Her har vi gjenbrukbare opplysninger")
+            hendelse.info("Her mangler vi gjenbrukbare opplysninger")
+        }
     }
 
     // Gang of four State pattern
