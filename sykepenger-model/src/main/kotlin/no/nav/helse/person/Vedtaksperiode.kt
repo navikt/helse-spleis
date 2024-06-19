@@ -110,7 +110,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
@@ -443,25 +442,7 @@ internal class Vedtaksperiode private constructor(
     private fun måInnhenteInntektEllerRefusjon(hendelse: IAktivitetslogg): Boolean {
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
         if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
-        return !harTilstrekkeligInformasjonTilUtbetaling(arbeidsgiverperiode, hendelse, this.tilstand)
-    }
-
-    private fun harTilstrekkeligInformasjonTilUtbetaling(
-        arbeidsgiverperiode: Arbeidsgiverperiode,
-        hendelse: IAktivitetslogg,
-        tilstand: Vedtaksperiodetilstand
-    ): Boolean {
-        val element = vilkårsgrunnlag
-
-        // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag. hvis det finnes et
-        // så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
-        if (element == null && !arbeidsgiver.kanBeregneSykepengegrunnlag(skjæringstidspunkt)) return false
-
-        val refusjonsopplysninger = when (element) {
-            null -> arbeidsgiver.refusjonsopplysninger(skjæringstidspunkt)
-            else -> element.refusjonsopplysninger(organisasjonsnummer)
-        }
-        return tilstand.harNødvendigeRefusjonsopplysningerStrategi(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
+        return tilstand.arbeidsgiveropplysningerStrategi.måInnhenteInntektEllerRefusjon(this, arbeidsgiverperiode, hendelse)
     }
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
@@ -1116,12 +1097,42 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    internal sealed class ArbeidsgiveropplysningerStrategi {
+        internal fun måInnhenteInntektEllerRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) = !harInntekt(vedtaksperiode) || !harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, hendelse)
+        abstract fun harInntekt(vedtaksperiode: Vedtaksperiode): Boolean
+        abstract fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg): Boolean
+        // Inntekt vi har uten å måtte lagre noe tilbake i historikken på arbeidsgiver.
+        protected fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
+            // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
+            // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
+            val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag
+            return vilkårsgrunnlag != null || vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt)
+        }
+        // Refusjonsopplysningene vi har uten å måtte lagre noe tilbake i historikken på arbeidsgiver.
+        protected fun eksisterendeRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode) = when (val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag) {
+            null -> vedtaksperiode.arbeidsgiver.refusjonsopplysninger(vedtaksperiode.skjæringstidspunkt)
+            else -> vilkårsgrunnlag.refusjonsopplysninger(vedtaksperiode.organisasjonsnummer)
+        }
+    }
+
+    private data object FørInntektsmelding: ArbeidsgiveropplysningerStrategi() {
+        override fun harInntekt(vedtaksperiode: Vedtaksperiode) = harEksisterendeInntekt(vedtaksperiode)
+        override fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
+            Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, eksisterendeRefusjonsopplysninger(vedtaksperiode), arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
+    }
+
+    private data object EtterInntektsmelding: ArbeidsgiveropplysningerStrategi() {
+        override fun harInntekt(vedtaksperiode: Vedtaksperiode) = harEksisterendeInntekt(vedtaksperiode) // Dette skal på sikt sjekke OR harGjenbrukbarInntekt
+        override fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
+            Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, eksisterendeRefusjonsopplysninger(vedtaksperiode), arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
+    }
+
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
 
-        val harNødvendigeRefusjonsopplysningerStrategi get(): (LocalDate, Periode, Refusjonsopplysninger, Arbeidsgiverperiode, IAktivitetslogg, String) -> Boolean = Arbeidsgiverperiode.Companion::harNødvendigeRefusjonsopplysningerEtterInntektsmelding
+        val arbeidsgiveropplysningerStrategi: ArbeidsgiveropplysningerStrategi get() = EtterInntektsmelding
 
         fun håndterRevurdering(hendelse: Hendelse, block: () -> Unit) {
             if (hendelse !is PersonHendelse) return block()
@@ -1281,7 +1292,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse)
         }
 
-        override val harNødvendigeRefusjonsopplysningerStrategi get() = Arbeidsgiverperiode.Companion::harNødvendigeRefusjonsopplysninger
+        override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) = null
         override fun gjenopptaBehandling(
@@ -1531,7 +1542,7 @@ internal class Vedtaksperiode private constructor(
         ): LocalDateTime =
             tilstandsendringstidspunkt.plusDays(180)
 
-        override val harNødvendigeRefusjonsopplysningerStrategi get() = Arbeidsgiverperiode.Companion::harNødvendigeRefusjonsopplysninger
+        override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
