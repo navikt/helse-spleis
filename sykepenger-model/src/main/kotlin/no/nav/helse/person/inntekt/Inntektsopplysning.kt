@@ -16,7 +16,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.hendelser.Inntektsmelding as InntektsmeldingHendelse
 
-sealed class Inntektsopplysning protected constructor(
+sealed class Inntektsopplysning(
     protected val id: UUID,
     protected val hendelseId: UUID,
     protected val dato: LocalDate,
@@ -86,7 +86,9 @@ sealed class Inntektsopplysning protected constructor(
         )
     }
 
-    internal open fun lagreTidsnærInntekt(
+    internal open fun gjenbrukbarInntekt(beløp: Inntekt? = null): Inntektsmelding? = null
+
+    internal fun lagreTidsnærInntekt(
         skjæringstidspunkt: LocalDate,
         arbeidsgiver: Arbeidsgiver,
         hendelse: IAktivitetslogg,
@@ -94,7 +96,18 @@ sealed class Inntektsopplysning protected constructor(
         refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
         orgnummer: String,
         beløp: Inntekt? = null
-    ) {}
+    ) {
+        val gjenbrukbarInntekt = gjenbrukbarInntekt(beløp) ?: return
+        if (refusjonsopplysninger.erTom) return
+        arbeidsgiver.lagreTidsnærInntektsmelding(
+            skjæringstidspunkt = skjæringstidspunkt,
+            orgnummer = orgnummer,
+            inntektsmelding = gjenbrukbarInntekt,
+            refusjonsopplysninger = refusjonsopplysninger,
+            hendelse = hendelse,
+            oppholdsperiodeMellom = oppholdsperiodeMellom
+        )
+    }
 
     internal open fun arbeidsgiveropplysningerKorrigert(
         person: Person,

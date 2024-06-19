@@ -8,7 +8,6 @@ import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
@@ -16,7 +15,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.økonomi.Inntekt
 
-internal class Inntektsmelding(
+class Inntektsmelding internal constructor(
     id: UUID,
     dato: LocalDate,
     hendelseId: UUID,
@@ -29,26 +28,7 @@ internal class Inntektsmelding(
         accept(visitor as InntektsmeldingVisitor)
     }
 
-    override fun lagreTidsnærInntekt(
-        skjæringstidspunkt: LocalDate,
-        arbeidsgiver: Arbeidsgiver,
-        hendelse: IAktivitetslogg,
-        oppholdsperiodeMellom: Periode?,
-        refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
-        orgnummer: String,
-        beløp: Inntekt?
-    ) {
-        arbeidsgiver.lagreTidsnærInntektsmelding(
-            skjæringstidspunkt,
-            orgnummer,
-            beløp?.let {
-                Inntektsmelding(dato, hendelseId, it, tidsstempel)
-            }?: this,
-            refusjonsopplysninger,
-            hendelse,
-            oppholdsperiodeMellom
-        )
-    }
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, tidsstempel) }?: this
 
     internal fun accept(visitor: InntektsmeldingVisitor) {
         visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)

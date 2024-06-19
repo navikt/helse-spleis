@@ -9,10 +9,7 @@ import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 
 class Saksbehandler internal constructor(
@@ -33,25 +30,7 @@ class Saksbehandler internal constructor(
         visitor.postVisitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
     }
 
-    override fun lagreTidsnærInntekt(
-        skjæringstidspunkt: LocalDate,
-        arbeidsgiver: Arbeidsgiver,
-        hendelse: IAktivitetslogg,
-        oppholdsperiodeMellom: Periode?,
-        refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
-        orgnummer: String,
-        beløp: Inntekt?
-    ) {
-        overstyrtInntekt?.lagreTidsnærInntekt(
-            skjæringstidspunkt,
-            arbeidsgiver,
-            hendelse,
-            oppholdsperiodeMellom,
-            refusjonsopplysninger,
-            orgnummer,
-            beløp ?: this.beløp
-        )
-    }
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) = overstyrtInntekt?.gjenbrukbarInntekt(beløp ?: this.beløp)
 
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)

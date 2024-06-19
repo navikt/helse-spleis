@@ -5,9 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.økonomi.Inntekt
 
 class SkjønnsmessigFastsatt internal constructor(
@@ -30,17 +27,7 @@ class SkjønnsmessigFastsatt internal constructor(
         return checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.omregnetÅrsinntekt()
     }
 
-    override fun lagreTidsnærInntekt(
-        skjæringstidspunkt: LocalDate,
-        arbeidsgiver: Arbeidsgiver,
-        hendelse: IAktivitetslogg,
-        oppholdsperiodeMellom: Periode?,
-        refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
-        orgnummer: String,
-        beløp: Inntekt?
-    ) {
-        checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.lagreTidsnærInntekt(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom, refusjonsopplysninger, orgnummer, beløp)
-    }
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) = checkNotNull(overstyrtInntekt) { "overstyrt inntekt kan ikke være null" }.gjenbrukbarInntekt(beløp)
 
     override fun blirOverstyrtAv(ny: Inntektsopplysning): Inntektsopplysning {
         return ny.overstyrer(this)
