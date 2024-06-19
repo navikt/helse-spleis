@@ -891,6 +891,50 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertIngenVarsel(RV_IV_7)
         }
     }
+
+    @Test
+    fun `gjenbruker den underliggende inntektsmeldingen ved skjønnsmessig fastsatt`() {
+        a1 {
+            // Planke
+            håndterSøknad(Sykdom(8.januar, 31.januar, 100.prosent))
+            val innteksmeldingId = håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            inntektsopplysning(8.januar).let {
+                assertEquals(INNTEKT, it.inspektør.beløp)
+                assertEquals(innteksmeldingId, it.inspektør.hendelseId)
+            }
+
+            // Skjønnsmessig fastsetter
+            val skjønnsmessigId = UUID.randomUUID()
+            håndterSkjønnsmessigFastsettelse(8.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.25)), meldingsreferanseId = skjønnsmessigId)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            inntektsopplysning(8.januar).let {
+                assertEquals(INNTEKT * 1.25, it.inspektør.beløp)
+                assertEquals(skjønnsmessigId, it.inspektør.hendelseId)
+            }
+
+            // Flytter skjæringstidspunkt ved å legge til sykdomsdager i snuten
+            håndterOverstyrTidslinje((1.januar til 7.januar).map { manuellSykedag(it) })
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            inntektsopplysning(1.januar).let {
+                assertEquals(INNTEKT, it.inspektør.beløp)
+                assertEquals(innteksmeldingId, it.inspektør.hendelseId)
+            }
+        }
+    }
+
     @Test
     fun `gjenbruker den siste saksbehandlerinntekten om det er overstyrt mange ganger`() {
         a1 {
