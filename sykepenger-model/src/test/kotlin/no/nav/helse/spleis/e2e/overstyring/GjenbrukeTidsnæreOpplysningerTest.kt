@@ -8,6 +8,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -43,6 +44,7 @@ import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
+import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -889,6 +891,62 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertIngenVarsel(RV_IV_7)
         }
     }
+    @Test
+    fun `gjenbruker den siste saksbehandlerinntekten om det er overstyrt mange ganger`() {
+        a1 {
+            // Planke
+            håndterSøknad(Sykdom(8.januar, 31.januar, 100.prosent))
+            val innteksmeldingId = håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            inntektsopplysning(8.januar).let {
+                assertEquals(INNTEKT, it.inspektør.beløp)
+                assertEquals(innteksmeldingId, it.inspektør.hendelseId)
+            }
+
+            // Overstyrer en gang
+            val overstyring1Id = UUID.randomUUID()
+            val overstyring1Inntekt = INNTEKT * 1.05
+            håndterOverstyrArbeidsgiveropplysninger(8.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, overstyring1Inntekt, forklaring = "ja takk")), meldingsreferanseId = overstyring1Id)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            inntektsopplysning(8.januar).let {
+                assertEquals(overstyring1Inntekt, it.inspektør.beløp)
+                assertEquals(overstyring1Id, it.inspektør.hendelseId)
+            }
+
+            // Overstyrer en gang til
+            val overstyring2Id = UUID.randomUUID()
+            val overstyring2Inntekt = INNTEKT * 1.10
+            håndterOverstyrArbeidsgiveropplysninger(8.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, overstyring2Inntekt, forklaring = "ja takk")), meldingsreferanseId = overstyring2Id)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            inntektsopplysning(8.januar).let {
+                assertEquals(overstyring2Inntekt, it.inspektør.beløp)
+                assertEquals(overstyring2Id, it.inspektør.hendelseId)
+            }
+
+            // Flytter skjæringstidspunkt ved å legge til sykdomsdager i snuten
+            håndterOverstyrTidslinje((1.januar til 7.januar).map { manuellSykedag(it) })
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            inntektsopplysning(1.januar).let {
+                assertEquals(overstyring2Inntekt, it.inspektør.beløp)
+                assertEquals(innteksmeldingId, it.inspektør.hendelseId)
+            }
+        }
+    }
 
     private fun assertTidsnærInntektsopplysning(orgnummer: String, sykepengegrunnlagFør: Sykepengegrunnlag, sykepengegrunnlagEtter: Sykepengegrunnlag) {
         val inntektsopplysningerFørEndring = sykepengegrunnlagFør.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(orgnummer)
@@ -911,6 +969,9 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             inntektsopplysningerEtterEndring.inspektør.inntektsopplysning::class
         )
     }
+
+    private fun TestPerson.TestArbeidsgiver.inntektsopplysning(skjæringstidspunkt: LocalDate) =
+        inspektør.vilkårsgrunnlag(skjæringstidspunkt)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.singleOrNull { it.inspektør.orgnummer == this.orgnummer }?.inspektør?.inntektsopplysning ?: error("Forventet å finne inntektsopplysning for ${this.orgnummer} på $skjæringstidspunkt")
 
     private fun TestPerson.TestArbeidsgiver.assertSykdomstidslinjedag(dato: LocalDate, dagtype: KClass<out Dag>, kommerFra: KClass<out SykdomstidslinjeHendelse>) {
         val dagen = inspektør.sykdomstidslinje[dato]
