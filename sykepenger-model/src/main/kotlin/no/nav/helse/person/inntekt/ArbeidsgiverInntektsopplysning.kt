@@ -330,6 +330,9 @@ class ArbeidsgiverInntektsopplysning(
             return endringsDatoer.minOrNull() ?: skjæringstidspunkt
         }
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
+            singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.gjenbrukbarInntekt() != null
+
         internal fun List<ArbeidsgiverInntektsopplysning>.lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
             arbeidsgiver: Arbeidsgiver,

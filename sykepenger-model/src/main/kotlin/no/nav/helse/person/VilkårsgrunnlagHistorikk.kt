@@ -380,6 +380,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun refusjonsopplysninger(organisasjonsnummer: String) =
             sykepengegrunnlag.refusjonsopplysninger(organisasjonsnummer)
 
+        internal fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
+            sykepengegrunnlag.harGjenbrukbareOpplysninger(organisasjonsnummer)
+
         internal fun lagreTidsnæreInntekter(
             skjæringstidspunkt: LocalDate,
             arbeidsgiver: Arbeidsgiver,

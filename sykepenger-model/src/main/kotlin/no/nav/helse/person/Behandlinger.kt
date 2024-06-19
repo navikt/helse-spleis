@@ -23,6 +23,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.avvist
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
+import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbareOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.jurist
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreTidsnæreOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.varEllerErRettFør
@@ -257,6 +258,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         // lagrer opplysninger for neste periode, om endringen har flyttet dens skjæringstidspunkt
         periodeEtter.lagreTidsnæreopplysninger(arbeidsgiver, hendelse, periodeEtterAktivitetslogg!!, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, this)
     }
+
+    internal fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
+        behandlinger.harGjenbrukbareOpplysninger(organisasjonsnummer)
 
     private fun lagreTidsnæreopplysninger(
         arbeidsgiver: Arbeidsgiver,
@@ -971,6 +975,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             private fun List<Behandling>.forrigeVilkårsgrunnlag(): VilkårsgrunnlagElement? {
                 return this.asReversed().firstNotNullOfOrNull { behandling ->
                     behandling.endringer.asReversed().firstNotNullOfOrNull { endring -> endring.grunnlagsdata }
+                }
+            }
+
+            internal fun List<Behandling>.harGjenbrukbareOpplysninger(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) != null
+            private fun List<Behandling>.forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? {
+                return this.asReversed().firstNotNullOfOrNull { behandling ->
+                    behandling.endringer.asReversed().firstNotNullOfOrNull { endring ->
+                        val vilkårsgrunnlag = endring.grunnlagsdata?.takeIf { it.harGjenbrukbareOpplysninger(organisasjonsnummer) }
+                        if (vilkårsgrunnlag != null) endring to vilkårsgrunnlag
+                        else null
+                    }
                 }
             }
 

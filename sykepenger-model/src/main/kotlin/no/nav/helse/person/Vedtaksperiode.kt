@@ -391,8 +391,14 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(påminnelse: Påminnelse, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         if (!påminnelse.erRelevant(id)) return false
         kontekst(påminnelse)
+        påminnelse.loggGjenbrukbareOpplysninger()
         tilstand.påminnelse(this, påminnelse, arbeidsgivere)
         return true
+    }
+
+    private fun IAktivitetslogg.loggGjenbrukbareOpplysninger() {
+        if (behandlinger.harGjenbrukbareOpplysninger(organisasjonsnummer)) return info("Har gjenbrukbare opplysninger")
+        info("Mangler gjenbrukbare opplysninger")
     }
 
     internal fun nyAnnullering(hendelse: IAktivitetslogg, annullering: Utbetaling) {
