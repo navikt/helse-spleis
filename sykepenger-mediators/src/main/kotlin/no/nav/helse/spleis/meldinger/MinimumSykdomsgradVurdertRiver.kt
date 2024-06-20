@@ -13,7 +13,7 @@ internal class MinimumSykdomsgradVurdertRiver(
     override val riverName = "minimum_sykdomsgrad_vurdert"
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("@id", "fødselsnummer")
+        message.requireKey("@id", "fødselsnummer", "aktørId")
         message.requireArray("har_tapt_tilstrekkelig_arbeidstid")
         message.requireArray("har_ikke_tapt_tilstrekkelig_arbeidstid")
     }

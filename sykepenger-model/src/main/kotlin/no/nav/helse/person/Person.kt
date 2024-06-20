@@ -231,6 +231,11 @@ class Person private constructor(
         håndterGjenoppta(gjenopplivVilkårsgrunnlag)
     }
 
+    fun håndter(melding: MinimumSykdomsgradsvurderingMelding) {
+        melding.apply(this.minimumSykdomsgradsvurdering)
+        this.igangsettOverstyring(Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()))
+    }
+
     private fun tidligereBehandlinger(hendelse: ArbeidstakerHendelse, periode: Periode) {
         val cutoff = periode.start.minusMonths(6)
         val andreBehandledeVedtaksperioder = tidligereBehandlinger.flatMap { it.vedtaksperioderEtter(cutoff) }
@@ -859,8 +864,6 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto()
     )
 
-    fun håndter(minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding) {
-        TODO("Not yet implemented")
-    }
+
 }
 

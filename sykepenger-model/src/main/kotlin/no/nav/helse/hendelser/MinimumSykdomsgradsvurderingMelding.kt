@@ -14,11 +14,26 @@ class MinimumSykdomsgradsvurderingMelding(
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String
-): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()) {
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()) {
 
     internal fun apply(vurdering: MinimumSykdomsgradsvurdering) {
         vurdering.leggTil(perioderMedTilstrekkeligTaptArbeidstid)
         vurdering.trekkFra(perioderUtenTilstrekkeligTaptArbeidstid)
+    }
+
+
+    internal fun periodeForEndring(): Periode {
+        val alle = perioderMedTilstrekkeligTaptArbeidstid + perioderUtenTilstrekkeligTaptArbeidstid
+        return Periode(alle.minOf { it.start }, alle.maxOf { it.endInclusive })
+    }
+
+    fun valider(): Boolean {
+        if (perioderMedTilstrekkeligTaptArbeidstid.isEmpty() && perioderUtenTilstrekkeligTaptArbeidstid.isEmpty()) return false
+        if (perioderMedTilstrekkeligTaptArbeidstid.containsAll(perioderUtenTilstrekkeligTaptArbeidstid) && perioderUtenTilstrekkeligTaptArbeidstid.containsAll(
+                perioderMedTilstrekkeligTaptArbeidstid
+            )
+        ) return false
+        return true
     }
 
 }

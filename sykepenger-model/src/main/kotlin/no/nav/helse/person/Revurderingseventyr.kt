@@ -14,6 +14,7 @@ import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Grunnbeløpsreg
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingArbeidsgiverperiode
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingInntektsopplysninger
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
+import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.MinimumSykdomsgradVurdert
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.NyPeriode
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Reberegning
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.SkjønssmessigFastsettelse
@@ -45,6 +46,7 @@ class Revurderingseventyr private constructor(
         fun korrigertInntektsmeldingArbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun grunnbeløpsregulering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
         fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
+        fun minimumSykdomsgradVurdert(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(MinimumSykdomsgradVurdert, periode.start, periode, hendelse)
 
         fun tidligsteEventyr(a: Revurderingseventyr?, b: Revurderingseventyr?) = when {
             b == null || (a != null && a.periodeForEndring.start <= b.periodeForEndring.start) -> a
@@ -136,6 +138,10 @@ class Revurderingseventyr private constructor(
             override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
                 hendelse.varsel(RV_RV_7)
             }
+        }
+
+        object MinimumSykdomsgradVurdert : RevurderingÅrsak {
+            override fun navn(): String = "MINIMUM_SYKDOMSGRAD_VURDERT"
         }
 
         object Reberegning : RevurderingÅrsak {

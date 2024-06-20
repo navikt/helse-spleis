@@ -465,8 +465,10 @@ internal class HendelseMediator(
         minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
         context: MessageContext
     ) {
-        hentPersonOgHåndter(message, minimumSykdomsgradsvurdering, context) { person ->
-            person.håndter(minimumSykdomsgradsvurdering)
+        if (minimumSykdomsgradsvurdering.valider()) {
+            hentPersonOgHåndter(message, minimumSykdomsgradsvurdering, context) { person ->
+                person.håndter(minimumSykdomsgradsvurdering)
+            }
         }
     }
 
