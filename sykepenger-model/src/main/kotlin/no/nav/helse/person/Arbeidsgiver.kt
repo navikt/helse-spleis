@@ -62,6 +62,7 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
+import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -137,8 +138,8 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk) = { periode: Periode ->
-            infotrygdhistorikk.skjæringstidspunkt(periode, map(Arbeidsgiver::sykdomstidslinje))
+        internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk):() -> Skjæringstidspunkt = {
+            infotrygdhistorikk.skjæringstidspunkt(map(Arbeidsgiver::sykdomstidslinje))
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
@@ -741,7 +742,7 @@ internal class Arbeidsgiver private constructor(
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, inntektsmelding.jurist(jurist))
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
-        val skjæringstidspunkt = person.beregnSkjæringstidspunkt()(inntektsdato.somPeriode())
+        val skjæringstidspunkt = person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato.somPeriode(), null)
 
         if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode, forkastede)) {
             inntektsmelding.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
@@ -838,12 +839,12 @@ internal class Arbeidsgiver private constructor(
         val førstePeriodeMedUtbetaling = vedtaksperioder.firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
             ?: vedtaksperioder.firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             ?: return null
-        return sykdomstidslinje().subset(førstePeriodeMedUtbetaling.periode().oppdaterFom(skjæringstidspunkt)).sisteSkjæringstidspunkt()
+        return sykdomstidslinje().sisteSkjæringstidspunkt(førstePeriodeMedUtbetaling.periode())
     }
 
     private fun finnAlternativInntektsdato(inntektsdato: LocalDate, skjæringstidspunkt: LocalDate): LocalDate? {
         if (inntektsdato <= skjæringstidspunkt) return null
-        return sykdomstidslinje().sisteSkjæringstidspunktTidligereEnn(inntektsdato)?.takeUnless { it == inntektsdato }
+        return sykdomstidslinje().sisteSkjæringstidspunkt(inntektsdato.somPeriode())?.takeUnless { it == inntektsdato }
     }
 
     internal fun beregnUtbetalingstidslinje(

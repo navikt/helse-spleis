@@ -212,26 +212,9 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
-    fun `bare ferie - tidligere sykdom`() {
-        perioder(2.S, 1.A, 14.F) { _, _, _ ->
-            assertNull(sisteSkjæringstidspunkt())
-        }
-        perioder(2.S, 1.AIG, 14.F) { _, _, _ ->
-            assertNull(sisteSkjæringstidspunkt())
-        }
-    }
-
-    @Test
     fun `periode starter søndag - har sykdom til fredag før - lørdag er ukjent`() {
         val skjæringstidspunkt = (5.S + 1.UK + 1.S).sisteSkjæringstidspunkt()
         assertEquals(1.januar, skjæringstidspunkt)
-    }
-
-    @Test
-    fun `ferie i framtiden`() {
-        perioder(2.S, 2.opphold, 2.F) { _, _, _ ->
-            assertNull(sisteSkjæringstidspunkt())
-        }
     }
 
     @Test
@@ -446,7 +429,7 @@ internal class SkjæringstidspunktTest {
         val tidslinje = 7.S + 2.opphold + 3.S + 5.opphold + 3.F
         assertSkjæringstidspunkt(1.januar, 1.januar til 7.januar, tidslinje)
         assertSkjæringstidspunkt(10.januar, 10. januar til 12.januar, tidslinje)
-        assertSkjæringstidspunkt(null, 18.januar til 20.januar, tidslinje)
+        assertSkjæringstidspunkt(18.januar, 18.januar til 20.januar, tidslinje)
         assertSkjæringstidspunkt(10.januar, 1.januar til 20.januar, tidslinje)
     }
 
@@ -475,7 +458,7 @@ internal class SkjæringstidspunktTest {
     }
 
     private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate?, periode: Periode, vararg tidslinje: Sykdomstidslinje) {
-        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, Sykdomstidslinje.samletTidslinje(tidslinje.toList())))
+        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinje.toList()).beregnSkjæringstidspunkt(periode, null))
     }
 
     private fun assertSkjæringstidspunkt(

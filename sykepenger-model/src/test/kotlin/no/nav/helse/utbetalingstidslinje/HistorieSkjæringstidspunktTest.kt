@@ -23,7 +23,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     fun `infotrygd - gap - spleis`() {
         historie(utbetaling(1.februar, 27.februar))
         addSykdomshistorikk(AG1, sykedager(1.mars, 31.mars))
-        assertEquals(1.februar, skjæringstidspunkt(28.februar))
+        assertEquals(28.februar, skjæringstidspunkt(28.februar))
         assertEquals(1.mars, skjæringstidspunkt(31.mars))
     }
 
@@ -31,7 +31,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
     fun `infotrygd - gap - infotrygdTilBbruker - spleis`() {
         historie(utbetaling(1.januar, 31.januar), utbetaling(2.februar, 28.februar))
         addSykdomshistorikk(AG1, sykedager(1.mars, 31.mars))
-        assertEquals(1.januar, skjæringstidspunkt(1.februar))
+        assertEquals(1.februar, skjæringstidspunkt(1.februar))
         assertEquals(2.februar, skjæringstidspunkt(28.februar))
         assertEquals(2.februar, skjæringstidspunkt(31.mars))
     }

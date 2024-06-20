@@ -19,16 +19,21 @@ import no.nav.helse.hendelser.Periode
  */
 internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomstidslinje) {
 
+    fun beregnSkjæringstidspunktOrNull(vedtaksperiode: Periode, sykdomsperiode: Periode?): LocalDate? {
+        return finnSkjæringstidspunkt(vedtaksperiode, sykdomsperiode)?.skjæringstidspunkt
+    }
     fun beregnSkjæringstidspunkt(vedtaksperiode: Periode, sykdomsperiode: Periode?): LocalDate {
-        if (personsykdomstidslinje.count() == 0) return vedtaksperiode.start
+        return beregnSkjæringstidspunktOrNull(vedtaksperiode, sykdomsperiode) ?: vedtaksperiode.start
+    }
 
+    private fun finnSkjæringstidspunkt(vedtaksperiode: Periode, sykdomsperiode: Periode?): Søkekontekst? {
+        if (personsykdomstidslinje.count() == 0) return null
         // sykdomsperioden er den perioden som ikke er friskmeldt
         val søkeperiode = sykdomsperiode ?: vedtaksperiode
-
         return søkEtterSkjæringstidspunkt(søkeperiode)
     }
 
-    private fun søkEtterSkjæringstidspunkt(søkeperiode: Periode): LocalDate {
+    private fun søkEtterSkjæringstidspunkt(søkeperiode: Periode): Søkekontekst {
         return traverserTidslinjenBaklengs(søkeperiode) { søkekontekst, dagen, dato ->
             when (dagen) {
                 is Dag.AndreYtelser -> søkekontekst.andreYtelser(dato)
@@ -58,21 +63,20 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
         }
     }
 
-    private fun traverserTidslinjenBaklengs(søkeperiode: Periode, looper: (Søkekontekst, Dag, LocalDate) -> Søkekontekst): LocalDate {
+    private fun traverserTidslinjenBaklengs(søkeperiode: Periode, looper: (Søkekontekst, Dag, LocalDate) -> Søkekontekst): Søkekontekst {
         var gjeldendeDag = minOf(søkeperiode.endInclusive, personsykdomstidslinje.sisteDag())
-        // default-situasjon: vi faller alltid tilbake til vedtaksperiodens fom som mulig skjæringstidspunkt
-        var søkekontekst = Søkekontekst(Søketilstand.HarIkkeFunnetSkjæringstidspunkt, søkeperiode.start)
+        var søkekontekst = Søkekontekst(Søketilstand.HarIkkeFunnetSkjæringstidspunkt, null)
         while (gjeldendeDag >= personsykdomstidslinje.førsteDag() && søkekontekst.skalFortsetteÅSøke()) {
             val dagen = personsykdomstidslinje[gjeldendeDag]
             søkekontekst = looper(søkekontekst, dagen, gjeldendeDag)
             gjeldendeDag = gjeldendeDag.minusDays(1L)
         }
-        return søkekontekst.skjæringstidspunkt
+        return søkekontekst
     }
 
     private data class Søkekontekst(
         val tilstand: Søketilstand,
-        val skjæringstidspunkt: LocalDate
+        val skjæringstidspunkt: LocalDate?
     ) {
         fun skalFortsetteÅSøke() = tilstand != Søketilstand.HarSkjæringstidspunkt
         fun avsluttSøk() = copy(tilstand = Søketilstand.HarSkjæringstidspunkt)
@@ -84,7 +88,6 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
             dagen <= søkeperiode.start -> avsluttSøk()
             else -> tilstand.oppholdsdag(this)
         }
-
         fun andreYtelser(dagen: LocalDate): Søkekontekst = tilstand.andreYtelser(this, dagen)
         fun potensieltSkjæringstidspunkt(dagen: LocalDate): Søkekontekst = tilstand.potensieltSkjæringstidspunkt(this, dagen)
         fun potensieltGyldigOppholdsperiode(dagen: LocalDate): Søkekontekst = tilstand.potensieltGyldigOppholdsperiode(this, dagen)
@@ -95,7 +98,6 @@ internal class Skjæringstidspunkt(private val personsykdomstidslinje: Sykdomsti
         fun potensieltSkjæringstidspunkt(kontekst: Søkekontekst, dagen: LocalDate): Søkekontekst = kontekst.copy(tilstand = HarPotensieltSkjæringstidspunkt, skjæringstidspunkt = dagen)
         // en dag som potensielt kan bygge bro mellom to sykdomsperioder (ferie, andre ytelser)
         fun potensieltGyldigOppholdsperiode(kontekst: Søkekontekst, dagen: LocalDate) = kontekst.copy(tilstand = PotensieltGyldigOppholdsperiodeMellomSykdomsperioder)
-
         fun andreYtelser(kontekst: Søkekontekst, dagen: LocalDate) = kontekst.copy(tilstand = AndreYtelser)
 
         data object HarIkkeFunnetSkjæringstidspunkt : Søketilstand {

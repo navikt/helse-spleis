@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit.DAYS
 import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
@@ -40,8 +39,6 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
-import org.slf4j.LoggerFactory
-import kotlin.math.absoluteValue
 
 internal class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
@@ -51,8 +48,6 @@ internal class Sykdomstidslinje private constructor(
 
     // Støtte for at perioden er lengre enn vi har dager for (Map-et er sparse)
     private val periode: Periode? = periode ?: if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
-
-    private val sisteSykedag = lastOrNull { erEnSykedag(it) }
 
     internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())
 
@@ -93,7 +88,6 @@ internal class Sykdomstidslinje private constructor(
     internal fun fremTilOgMed(dato: LocalDate) =
         if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
 
-    private fun fjernDagerFørSisteOppholdsdagFør(dato: LocalDate) = sisteOppholdsdag(før = dato)?.let { sisteOppholdsdag -> fraOgMed(sisteOppholdsdag) } ?: this
 
     private fun kuttEtterSisteSykedag(): Sykdomstidslinje = periode
         ?.findLast { erEnSykedag(this[it]) }
@@ -133,66 +127,16 @@ internal class Sykdomstidslinje private constructor(
         override fun next() = this@Sykdomstidslinje[periodeIterator?.next() ?: throw NoSuchElementException()]
     }
 
-    internal fun sisteSkjæringstidspunktTidligereEnn(kuttdato: LocalDate) =
-        fremTilOgMed(kuttdato)
-            .kuttEtterSisteSykedag()
-            .sisteSkjæringstidspunkt()
-
-    internal fun sisteSkjæringstidspunkt(): LocalDate? {
-        val sisteOppholdsdag = sisteOppholdsdag()
-        if (sisteOppholdsdag != null && sisteDag() > sisteOppholdsdag) return fraOgMed(sisteOppholdsdag).finnSkjæringstidspunkt()
-        return kuttEtterSisteSykedag().finnSkjæringstidspunkt()
+    internal fun sisteSkjæringstidspunkt(periode: Periode? = null): LocalDate? {
+        val søkeperiode = periode ?: this.periode ?: return null
+        return Skjæringstidspunkt(this).beregnSkjæringstidspunktOrNull(søkeperiode, null)
     }
-
-    private fun finnSkjæringstidspunkt(): LocalDate? {
-        val sisteOppholdsdag = sisteOppholdsdag() ?: return førsteSykedag()
-        return førsteSykedagEtterEllerLik(sisteOppholdsdag)
-    }
-
-    private fun førsteSykedagEtterEllerLik(dato: LocalDate) =
-        periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
         if (!this.sisteDag().erRettFør(other.førsteDag())) return false
         val sammenslått = this + other
-        if (sammenslått.erOppholdsdagtype(this.periode!!.endInclusive)) return false
-        if (sammenslått.erOppholdsdagtype(other.periode!!.start)) return false
-        return true
+        return sammenslått.sisteSkjæringstidspunkt(other.periode) == sammenslått.sisteSkjæringstidspunkt(this.periode)
     }
-
-    private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
-    private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }
-
-    private fun erOppholdsdag(dato: LocalDate): Boolean {
-        if (erOppholdsdagtype(dato)) return true
-        if (this[dato] !is UkjentDag) return false
-        return !erGyldigHelgegap(dato)
-    }
-
-    private fun erOppholdsdagtype(dato: LocalDate) = when (this[dato]) {
-        is Arbeidsdag,
-        is FriskHelgedag,
-        is ArbeidIkkeGjenopptattDag -> true
-        is AndreYtelser -> detFinnesEnSykedagEtter(dato)
-        else -> false
-    }
-
-    private fun detFinnesEnSykedagEtter(dato: LocalDate) = sisteSykedag != null && sisteSykedag.erEtter(dato)
-
-    private fun erGyldigHelgegap(dato: LocalDate): Boolean {
-        if (!dato.erHelg()) return false
-        val ukedag = dato.dayOfWeek
-        val fredag = this[dato.minusDays(if (ukedag == DayOfWeek.SATURDAY) 1 else 2)]
-        val mandag = if (dato.dayOfWeek == DayOfWeek.SATURDAY) 3 else 2
-        // hvis dagen er lørdag: søndag og mandag, ellers mandag
-        val haledager = dato.plusDays(1).datesUntil(dato.plusDays(mandag.toLong())).toList()
-        return byggerBroMellomHelg(fredag) && haledager.any { byggerBroMellomHelg(this[it]) }
-    }
-
-    private fun byggerBroMellomHelg(dagen: Dag) =
-        (erEnSykedag(dagen) || dagen is Feriedag)
-
-    private fun førsteSykedag() = dager.entries.firstOrNull { erEnSykedag(it.value) }?.key
 
     internal fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSykdomstidslinje(this, låstePerioder)
@@ -253,24 +197,10 @@ internal class Sykdomstidslinje private constructor(
         private fun erEnSykedag(it: Dag) =
             it is Sykedag || it is SykHelgedag || it is Arbeidsgiverdag || it is ArbeidsgiverHelgedag || it is ForeldetSykedag || it is SykedagNav
 
-        internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinje: Sykdomstidslinje) = tidslinje
-            .fremTilOgMed(periode.endInclusive)
-            .fjernDagerFørSisteOppholdsdagFør(periode.start)
-            .sisteSkjæringstidspunktTidligereEnn(periode.endInclusive)
+        internal fun beregnSkjæringstidspunkt(tidslinjer: List<Sykdomstidslinje>) =
+            Skjæringstidspunkt(samletTidslinje(tidslinjer))
 
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        internal fun beregnSkjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>): LocalDate {
-            val samletTidslinje = samletTidslinje(tidslinjer)
-            val skjæringstidspunkt = sisteRelevanteSkjæringstidspunktForPerioden(periode, samletTidslinje) ?: periode.start
-            val nySkjæringstidspunktBeregning = Skjæringstidspunkt(samletTidslinje).beregnSkjæringstidspunkt(periode, null)
-            if (skjæringstidspunkt != nySkjæringstidspunktBeregning && samletTidslinje[periode.start] !is Arbeidsdag) {
-                val flyttet = DAYS.between(skjæringstidspunkt, nySkjæringstidspunktBeregning).absoluteValue
-                sikkerlogg.info("Skjæringstidspunkt=$skjæringstidspunkt, nyBeregning=$nySkjæringstidspunktBeregning (Flyttet $flyttet dager)")
-            }
-            return skjæringstidspunkt
-        }
-
-        internal fun samletTidslinje(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
+        private fun samletTidslinje(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
             .map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først
             .merge(sammenhengendeSykdom)
 

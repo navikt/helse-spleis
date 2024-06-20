@@ -19,7 +19,6 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
@@ -260,8 +259,8 @@ internal class InfotrygdhistorikkTest {
             ArbeidsgiverUtbetalingsperiode("ag1", 16.januar,  20.januar, 100.prosent, 25000.månedlig),
             ArbeidsgiverUtbetalingsperiode("ag1", 1.februar,  28.februar, 100.prosent, 25000.månedlig)
         )))
-        assertEquals(5.januar, Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(5.januar til 31.januar, historikk.sykdomstidslinje(emptyList())))
-        assertEquals(1.januar, Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(1.januar til 31.januar, historikk.sykdomstidslinje(listOf(2.S, 3.S))))
+        assertEquals(5.januar, historikk.skjæringstidspunkt(emptyList()).beregnSkjæringstidspunkt(5.januar til 31.januar, null))
+        assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).beregnSkjæringstidspunkt(1.januar til 31.januar, null))
     }
 
     @Test
