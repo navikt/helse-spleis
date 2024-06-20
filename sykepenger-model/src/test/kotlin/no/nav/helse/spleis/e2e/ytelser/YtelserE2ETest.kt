@@ -358,6 +358,8 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
+        assertEquals(26.januar, inspektør(a1).skjæringstidspunkt(3.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(2.vedtaksperiode))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
     }

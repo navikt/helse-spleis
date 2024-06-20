@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -8,13 +9,13 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -29,6 +30,31 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
+
+    @Test
+    fun `skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mai, 31.mai, 100.prosent))
+
+        håndterOverstyrTidslinje((1.februar til 31.mars).map { manuellForeldrepengedag(it) })
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+
+        assertForventetFeil(
+            forklaring = "skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle",
+            ønsket = {
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+            },
+            nå = {
+                assertEquals(1.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+            }
+        )
+    }
 
     @Test
     fun `periode med bare ferie - tidligere sykdom`() {
@@ -72,6 +98,10 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
+
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(24.februar, inspektør(a1).skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -138,6 +168,10 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
         håndterUtbetalt(orgnummer = a1)
+
+        assertEquals(1.januar, inspektør(a1).skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(23.februar, inspektør(a1).skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
