@@ -25,6 +25,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbareOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.jurist
+import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbareOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreTidsnæreOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.varEllerErRettFør
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
@@ -261,6 +262,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
         behandlinger.harGjenbrukbareOpplysninger(organisasjonsnummer)
+
+    internal fun lagreGjenbrukbareOpplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg) =
+        behandlinger.lagreGjenbrukbareOpplysninger(skjæringstidspunkt, organisasjonsnummer, arbeidsgiver, hendelse)
 
     private fun lagreTidsnæreopplysninger(
         arbeidsgiver: Arbeidsgiver,
@@ -979,6 +983,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             internal fun List<Behandling>.harGjenbrukbareOpplysninger(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) != null
+            internal fun List<Behandling>.lagreGjenbrukbareOpplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg) {
+                val (forrigeEndring, vilkårsgrunnlag) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) ?: return
+                val sisteEndring = last().endringer.last()
+                val oppholdsperiodeMellom = forrigeEndring.oppholdsperiodeMellom(sisteEndring)
+                // Herfra bruker vi "gammel" løype - kanskje noe kan skrus på fra det punktet her om en skulle skru på dette
+                vilkårsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
+            }
             private fun List<Behandling>.forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? {
                 return this.asReversed().firstNotNullOfOrNull { behandling ->
                     behandling.endringer.asReversed().firstNotNullOfOrNull { endring ->
