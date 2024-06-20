@@ -232,8 +232,10 @@ class Person private constructor(
     }
 
     fun håndter(melding: MinimumSykdomsgradsvurderingMelding) {
-        melding.apply(this.minimumSykdomsgradsvurdering)
+        melding.oppdater(this.minimumSykdomsgradsvurdering)
         this.igangsettOverstyring(Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()))
+        gjenopptaBehandling(melding)
+        håndterGjenoppta(melding)
     }
 
     private fun tidligereBehandlinger(hendelse: ArbeidstakerHendelse, periode: Periode) {

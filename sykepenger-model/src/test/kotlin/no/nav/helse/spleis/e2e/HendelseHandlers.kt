@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -830,6 +831,19 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
         listOf(OverstyrtArbeidsgiveropplysning(orgnummer, inntekt, forklaring, subsumsjon, emptyList(), gjelder)),
         meldingsreferanseId
     )
+}
+
+internal fun AbstractEndToEndTest.håndterMinimumSykdomsgradVurdert(
+    perioderMedMinimumSykdomsgradVurdertOK: List<Periode>,
+    perioderMedMinimumSykdomsgradVurdertIkkeOK: List<Periode> = emptyList()
+) {
+    MinimumSykdomsgradsvurderingMelding(
+        perioderMedMinimumSykdomsgradVurdertOK.toSet(),
+        perioderMedMinimumSykdomsgradVurdertIkkeOK.toSet(),
+        UUID.randomUUID(),
+        UNG_PERSON_FNR_2018.toString(),
+        AKTØRID
+    ).håndter(Person::håndter)
 }
 
 internal fun AbstractEndToEndTest.håndterOverstyrArbeidsgiveropplysninger(

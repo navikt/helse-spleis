@@ -9,28 +9,28 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
  * tross < 20% tapt inntekt
  */
 class MinimumSykdomsgradsvurderingMelding(
-    private val perioderMedTilstrekkeligTaptArbeidstid: Set<Periode>,
-    private val perioderUtenTilstrekkeligTaptArbeidstid: Set<Periode>,
+    private val perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
+    private val perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode>,
     meldingsreferanseId: UUID,
     fødselsnummer: String,
     aktørId: String
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()) {
 
-    internal fun apply(vurdering: MinimumSykdomsgradsvurdering) {
-        vurdering.leggTil(perioderMedTilstrekkeligTaptArbeidstid)
-        vurdering.trekkFra(perioderUtenTilstrekkeligTaptArbeidstid)
+    internal fun oppdater(vurdering: MinimumSykdomsgradsvurdering) {
+        vurdering.leggTil(perioderMedMinimumSykdomsgradVurdertOK)
+        vurdering.trekkFra(perioderMedMinimumSykdomsgradVurdertIkkeOK)
     }
 
 
     internal fun periodeForEndring(): Periode {
-        val alle = perioderMedTilstrekkeligTaptArbeidstid + perioderUtenTilstrekkeligTaptArbeidstid
+        val alle = perioderMedMinimumSykdomsgradVurdertOK + perioderMedMinimumSykdomsgradVurdertIkkeOK
         return Periode(alle.minOf { it.start }, alle.maxOf { it.endInclusive })
     }
 
     fun valider(): Boolean {
-        if (perioderMedTilstrekkeligTaptArbeidstid.isEmpty() && perioderUtenTilstrekkeligTaptArbeidstid.isEmpty()) return false
-        if (perioderMedTilstrekkeligTaptArbeidstid.containsAll(perioderUtenTilstrekkeligTaptArbeidstid) && perioderUtenTilstrekkeligTaptArbeidstid.containsAll(
-                perioderMedTilstrekkeligTaptArbeidstid
+        if (perioderMedMinimumSykdomsgradVurdertOK.isEmpty() && perioderMedMinimumSykdomsgradVurdertIkkeOK.isEmpty()) return false
+        if (perioderMedMinimumSykdomsgradVurdertOK.containsAll(perioderMedMinimumSykdomsgradVurdertIkkeOK) && perioderMedMinimumSykdomsgradVurdertIkkeOK.containsAll(
+                perioderMedMinimumSykdomsgradVurdertOK
             )
         ) return false
         return true

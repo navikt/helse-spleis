@@ -15,8 +15,8 @@ internal class MinimumSykdomsgradVurdertMessage(packet: JsonMessage) : HendelseM
         mediator.behandle(
             this,
             MinimumSykdomsgradsvurderingMelding(
-                perioderMedTilstrekkeligTaptArbeidstid = harTaptTilstrekkeligArbeidstid.toSet(),
-                perioderUtenTilstrekkeligTaptArbeidstid = harIkkeTaptTilstrekkeligArbeidstid.toSet(),
+                perioderMedMinimumSykdomsgradVurdertOK = harTaptTilstrekkeligArbeidstid.toSet(),
+                perioderMedMinimumSykdomsgradVurdertIkkeOK = harIkkeTaptTilstrekkeligArbeidstid.toSet(),
                 meldingsreferanseId = this.id,
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId
