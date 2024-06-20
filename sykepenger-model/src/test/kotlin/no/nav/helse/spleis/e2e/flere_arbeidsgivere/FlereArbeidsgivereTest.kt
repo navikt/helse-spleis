@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -232,7 +233,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Skal kanskje ikke være varsel om tilkommen inntekt her`() {
+    fun `Skal kanskje ikke være varsel om tilkommen inntekt her`() = Toggle.TilkommenInntekt.enable {
         a1 {
             nyPeriode(1.januar til 16.januar)
         }

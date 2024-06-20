@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -135,7 +136,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes ikke`() {
+    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes ikke`() = Toggle.TilkommenInntekt.enable {
         val inntektA1 = INNTEKT + 500.daglig
 
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)

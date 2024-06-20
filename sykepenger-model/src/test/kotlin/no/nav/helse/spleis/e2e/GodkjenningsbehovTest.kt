@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
@@ -43,7 +44,7 @@ import org.junit.jupiter.api.Test
 internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Tilkommen inntekt`() {
+    fun `Tilkommen inntekt`() = Toggle.TilkommenInntekt.enable {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)

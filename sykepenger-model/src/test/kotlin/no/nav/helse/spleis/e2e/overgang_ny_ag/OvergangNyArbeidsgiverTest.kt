@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.overgang_ny_ag
 
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp.Companion.`6G`
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -31,7 +32,7 @@ import org.junit.jupiter.api.Test
 internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
 
     @Test
-    fun `overgang til ny arbeidsgiver - innenfor agp - reduksjon oppgitt`() {
+    fun `overgang til ny arbeidsgiver - innenfor agp - reduksjon oppgitt`() = Toggle.TilkommenInntekt.enable {
         // Inntektsmelding-signal corner case
         a1 {
             nyttVedtak(1.januar, 31.januar)
@@ -44,7 +45,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `overgang til ny arbeidsgiver - utenfor agp`() {
+    fun `overgang til ny arbeidsgiver - utenfor agp`() = Toggle.TilkommenInntekt.enable {
         val inntektA1 = 50000.månedlig
         val inntektA2 = 30000.månedlig
         val forventetSykepengegrunnlag = `6G`.beløp(1.januar)

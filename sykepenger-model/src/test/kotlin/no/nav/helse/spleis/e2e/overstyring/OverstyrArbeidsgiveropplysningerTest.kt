@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -582,7 +583,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrer arbeidsgiver som ikke er i sykepengegrunnlaget`() {
+    fun `overstyrer arbeidsgiver som ikke er i sykepengegrunnlaget`() = Toggle.TilkommenInntekt.enable {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         val nyInntekt = INNTEKT * 1.25
 

@@ -99,7 +99,11 @@ class Person private constructor(
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
     companion object {
-        fun gjenopprett(jurist: MaskinellJurist, dto: PersonInnDto, tidligereBehandlinger: List<Person> = emptyList()): Person {
+        fun gjenopprett(
+            jurist: MaskinellJurist,
+            dto: PersonInnDto,
+            tidligereBehandlinger: List<Person> = emptyList()
+        ): Person {
             val personJurist = jurist.medFødselsnummer(dto.fødselsnummer)
             val arbeidsgivere = mutableListOf<Arbeidsgiver>()
             val grunnlagsdataMap = mutableMapOf<UUID, VilkårsgrunnlagElement>()
@@ -112,22 +116,30 @@ class Person private constructor(
                 aktivitetslogg = Aktivitetslogg(),
                 opprettet = dto.opprettet,
                 infotrygdhistorikk = Infotrygdhistorikk.gjenopprett(dto.infotrygdhistorikk),
-                vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk.gjenopprett(alder, dto.vilkårsgrunnlagHistorikk, grunnlagsdataMap),
+                vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk.gjenopprett(
+                    alder,
+                    dto.vilkårsgrunnlagHistorikk,
+                    grunnlagsdataMap
+                ),
                 jurist = personJurist,
                 tidligereBehandlinger = tidligereBehandlinger
             )
-            arbeidsgivere.addAll(dto.arbeidsgivere.map { Arbeidsgiver.gjenopprett(person, alder, dto.aktørId, dto.fødselsnummer, it, personJurist, grunnlagsdataMap) })
+            arbeidsgivere.addAll(dto.arbeidsgivere.map {
+                Arbeidsgiver.gjenopprett(
+                    person,
+                    alder,
+                    dto.aktørId,
+                    dto.fødselsnummer,
+                    it,
+                    personJurist,
+                    grunnlagsdataMap
+                )
+            })
             return person
-        }
-
-        fun String.kandidatForTilkommenInntekt(): Boolean {
-            if (Toggle.TilkommenInntekt.enabled) return true
-            val fødselsdag = this.substring(0, 1).toInt()
-            return fødselsdag in 1..15
         }
     }
 
-    fun kandidatForTilkommenInntekt() = personidentifikator.toString().kandidatForTilkommenInntekt()
+    fun kandidatForTilkommenInntekt() = Toggle.TilkommenInntekt.enabled
 
     internal constructor(
         aktørId: String,
