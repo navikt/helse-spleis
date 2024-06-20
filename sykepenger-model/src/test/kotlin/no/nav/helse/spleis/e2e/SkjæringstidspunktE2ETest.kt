@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -44,16 +43,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje((1.februar til 31.mars).map { manuellForeldrepengedag(it) })
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-
-        assertForventetFeil(
-            forklaring = "skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle",
-            ønsket = {
-                assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-            },
-            nå = {
-                assertEquals(1.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-            }
-        )
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
     }
 
     @Test

@@ -66,7 +66,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
         )
 
         assertEquals(1.januar, skjæringstidspunkt(1.januar))
-        assertEquals(2.januar, skjæringstidspunkt(21.januar))
+        assertEquals(2.januar, skjæringstidspunkt(22.januar))
         assertEquals(2.januar, skjæringstidspunkt(31.januar))
     }
 
@@ -79,7 +79,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
         )
 
         assertEquals(1.januar, skjæringstidspunkt(1.januar))
-        assertEquals(2.januar, skjæringstidspunkt(21.januar))
+        assertEquals(2.januar, skjæringstidspunkt(22.januar))
         assertEquals(2.januar, skjæringstidspunkt(31.januar))
     }
 
