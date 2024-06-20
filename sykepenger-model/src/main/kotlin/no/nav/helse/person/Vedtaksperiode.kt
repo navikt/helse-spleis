@@ -1123,6 +1123,7 @@ internal class Vedtaksperiode private constructor(
             Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, eksisterendeRefusjonsopplysninger(vedtaksperiode), arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
         override fun loggGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return
+            if (!arbeidsgiverperiode.forventerInntekt(vedtaksperiode.periode)) return
             if (harEksisterendeInntekt(vedtaksperiode) && harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, hendelse)) return
             if (vedtaksperiode.behandlinger.harGjenbrukbareOpplysninger(vedtaksperiode.organisasjonsnummer)) return hendelse.info("Her har vi gjenbrukbare opplysninger")
             hendelse.info("Her mangler vi gjenbrukbare opplysninger")
