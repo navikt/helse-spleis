@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -39,6 +40,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
+import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
@@ -458,6 +460,14 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(
+        message: MinimumSykdomsgradVurdertMessage,
+        minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
+        context: MessageContext
+    ) {
+        TODO("Not yet implemented")
+    }
+
     private fun <Hendelse : PersonHendelse> opprettPersonOgHåndter(
         personopplysninger: Personopplysninger,
         message: HendelseMessage,
@@ -624,4 +634,5 @@ internal interface IHendelseMediator {
     fun behandle(avbruttArbeidsledigSøknadMessage: AvbruttArbeidsledigSøknadMessage, avbruttSøknad: AvbruttSøknad, context: MessageContext)
     fun behandle(message: GjenopplivVilkårsgrunnlagMessage, gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag, context: MessageContext)
     fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: MessageContext)
+    fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: MessageContext)
 }
