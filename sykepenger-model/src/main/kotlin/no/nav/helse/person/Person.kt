@@ -96,7 +96,8 @@ class Person private constructor(
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val jurist: MaskinellJurist,
     private val tidligereBehandlinger: List<Person> = emptyList(),
-    private val regler: ArbeidsgiverRegler = NormalArbeidstaker
+    private val regler: ArbeidsgiverRegler = NormalArbeidstaker,
+    private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering()
 ) : Aktivitetskontekst {
     companion object {
         fun gjenopprett(
