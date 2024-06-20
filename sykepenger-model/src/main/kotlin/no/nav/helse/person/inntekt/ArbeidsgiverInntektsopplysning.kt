@@ -337,14 +337,14 @@ class ArbeidsgiverInntektsopplysning(
             skjæringstidspunkt: LocalDate,
             arbeidsgiver: Arbeidsgiver,
             hendelse: IAktivitetslogg,
-            oppholdsperiodeMellom: Periode?
+            nyArbeidsgiverperiode: Boolean
         ) {
             this.forEach {
                 it.inntektsopplysning.lagreTidsnærInntekt(
                     skjæringstidspunkt,
                     arbeidsgiver,
                     hendelse,
-                    oppholdsperiodeMellom,
+                    nyArbeidsgiverperiode,
                     it.refusjonsopplysninger,
                     it.orgnummer
                 )

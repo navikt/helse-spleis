@@ -78,7 +78,7 @@ class Inntektsmelding internal constructor(
     internal fun kopierTidsnærOpplysning(
         nyDato: LocalDate,
         hendelse: IAktivitetslogg,
-        oppholdsperiodeMellom: Periode?,
+        nyArbeidsgiverperiode: Boolean,
         inntektshistorikk: Inntektshistorikk
     ) {
         if (nyDato == this.dato) return
@@ -86,9 +86,8 @@ class Inntektsmelding internal constructor(
         if (dagerMellom >= 60) {
             hendelse.info("Det er $dagerMellom dager mellom forrige inntektdato (${this.dato}) og ny inntektdato ($nyDato), dette utløser varsel om gjenbruk.")
             hendelse.varsel(RV_IV_7)
-        } else if (oppholdsperiodeMellom != null && oppholdsperiodeMellom.count() >= 16 && this.dato < oppholdsperiodeMellom.endInclusive) {
-            hendelse.info("Det er ${oppholdsperiodeMellom.count()} dager ($oppholdsperiodeMellom) mellom forrige vedtaksperiodeperiode og det er en antagelse om at det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. " +
-                    "Forrige inntektdato var ${this.dato} og ny inntektdato er $nyDato")
+        } else if (nyArbeidsgiverperiode) {
+            hendelse.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var ${this.dato} og ny inntektdato er $nyDato")
             hendelse.varsel(RV_IV_7)
         }
         inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel))

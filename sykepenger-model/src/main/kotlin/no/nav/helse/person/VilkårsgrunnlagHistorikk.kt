@@ -387,9 +387,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             skjæringstidspunkt: LocalDate,
             arbeidsgiver: Arbeidsgiver,
             hendelse: IAktivitetslogg,
-            oppholdsperiodeMellom: Periode?
+            nyArbeidsgiverperiode: Boolean
         ) {
-            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
+            sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, nyArbeidsgiverperiode)
         }
 
         internal fun byggGodkjenningsbehov(builder: GodkjenningsbehovBuilder) {

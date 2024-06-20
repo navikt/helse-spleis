@@ -10,12 +10,10 @@ import no.nav.helse.erHelg
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.SykdomstidslinjeBuilder
 import no.nav.helse.etterlevelse.Tidslinjedag
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.contains
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -172,7 +170,6 @@ internal class Sykdomstidslinje private constructor(
     }
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }
-    private fun førsteOppholdsdag(etter: LocalDate) = periode?.firstOrNull { it > etter && erOppholdsdag(it) }
     private fun sisteOppholdsdag(før: LocalDate) = periode?.filter { erOppholdsdag(it) }?.lastOrNull { it.isBefore(før) }
 
     private fun erOppholdsdag(dato: LocalDate): Boolean {
@@ -250,15 +247,6 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun sykdomsperiode() = kuttEtterSisteSykedag().periode
     internal fun subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
-    internal fun oppholdsperiodeMellom(other: Sykdomstidslinje): Periode? {
-        val førsteSykedag = other.finnSkjæringstidspunkt() ?: other.periode?.endInclusive ?: return null
-        val førsteSkjæringstidspunkt = this.sisteSkjæringstidspunkt()
-        val førsteOppholdsdagEtterSkjæringstidspunkt = førsteSkjæringstidspunkt?.let {
-            this.førsteOppholdsdag(it)?.forrigeDag ?: this.periode?.endInclusive
-        }
-        val sisteIkkeOppholdsdag = førsteOppholdsdagEtterSkjæringstidspunkt ?: this.periode?.start ?: return null
-        return sisteIkkeOppholdsdag.somPeriode().periodeMellom(førsteSykedag)
-    }
 
     internal fun egenmeldingerFraSøknad() = dager
         .filter { it.value.kommerFra(Søknad::class) && ( it.value is Arbeidsgiverdag || it.value is ArbeidsgiverHelgedag) }

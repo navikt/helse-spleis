@@ -425,10 +425,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 }
             }
 
-            internal fun oppholdsperiodeMellom(neste: Endring): Periode? {
-                if (this.erRettFør(neste)) return null
-                return this.sykdomstidslinje.oppholdsperiodeMellom(neste.sykdomstidslinje)
-            }
+            internal fun arbeidsgiverperiodeEndret(other: Endring) =
+                this.arbeidsgiverperiode != other.arbeidsgiverperiode
 
             internal fun erRettFør(neste: Endring): Boolean {
                 return this.sykdomstidslinje.erRettFør(neste.sykdomstidslinje)
@@ -594,9 +592,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
 
-        private fun oppholdsperiodeMellom(før: Behandling?): Periode? {
-            if (før == null) return null
-            return før.endringer.last().oppholdsperiodeMellom(this.endringer.last())
+        private fun endretArbeidsgiverperiode(før: Behandling?): Boolean {
+            if (før == null) return false
+            return før.endringer.last().arbeidsgiverperiodeEndret(this.endringer.last())
         }
 
         override fun equals(other: Any?): Boolean {
@@ -972,8 +970,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 aktivitetslogg: IAktivitetslogg,
                 behandlingFør: Behandling?
             ) {
-                val oppholdsperiodeMellom = this.last().oppholdsperiodeMellom(behandlingFør)
-                forrigeVilkårsgrunnlag()?.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, oppholdsperiodeMellom)
+                val nyArbeidsgiverperiode = this.last().endretArbeidsgiverperiode(behandlingFør)
+                forrigeVilkårsgrunnlag()?.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, nyArbeidsgiverperiode)
             }
 
             private fun List<Behandling>.forrigeVilkårsgrunnlag(): VilkårsgrunnlagElement? {
@@ -986,9 +984,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             internal fun List<Behandling>.lagreGjenbrukbareOpplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg) {
                 val (forrigeEndring, vilkårsgrunnlag) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) ?: return
                 val sisteEndring = last().endringer.last()
-                val oppholdsperiodeMellom = forrigeEndring.oppholdsperiodeMellom(sisteEndring)
+                val nyArbeidsgiverperiode = forrigeEndring.arbeidsgiverperiodeEndret(sisteEndring)
                 // Herfra bruker vi "gammel" løype - kanskje noe kan skrus på fra det punktet her om en skulle skru på dette
-                vilkårsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
+                vilkårsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, nyArbeidsgiverperiode)
             }
             private fun List<Behandling>.forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? {
                 return this.asReversed().firstNotNullOfOrNull { behandling ->

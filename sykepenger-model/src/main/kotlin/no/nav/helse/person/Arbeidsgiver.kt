@@ -781,12 +781,12 @@ internal class Arbeidsgiver private constructor(
         inntektsmelding: no.nav.helse.person.inntekt.Inntektsmelding,
         refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
         hendelse: IAktivitetslogg,
-        oppholdsperiodeMellom: Periode?
+        nyArbeidsgiverperiode: Boolean
     ) {
         if (this.organisasjonsnummer != orgnummer) return
         val nyFørsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         if (nyFørsteFraværsdag == null) return
-        inntektsmelding.kopierTidsnærOpplysning(nyFørsteFraværsdag, hendelse, oppholdsperiodeMellom, inntektshistorikk)
+        inntektsmelding.kopierTidsnærOpplysning(nyFørsteFraværsdag, hendelse, nyArbeidsgiverperiode, inntektshistorikk)
         // TODO: lagre refusjonsopplysninger inni inntektsmelding-opplysningen?
         refusjonsopplysninger.lagreTidsnær(nyFørsteFraværsdag, refusjonshistorikk)
     }

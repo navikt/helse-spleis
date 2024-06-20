@@ -92,7 +92,7 @@ sealed class Inntektsopplysning(
         skjæringstidspunkt: LocalDate,
         arbeidsgiver: Arbeidsgiver,
         hendelse: IAktivitetslogg,
-        oppholdsperiodeMellom: Periode?,
+        nyArbeidsgiverperiode: Boolean,
         refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger,
         orgnummer: String,
         beløp: Inntekt? = null
@@ -105,7 +105,7 @@ sealed class Inntektsopplysning(
             inntektsmelding = gjenbrukbarInntekt,
             refusjonsopplysninger = refusjonsopplysninger,
             hendelse = hendelse,
-            oppholdsperiodeMellom = oppholdsperiodeMellom
+            nyArbeidsgiverperiode = nyArbeidsgiverperiode
         )
     }
 

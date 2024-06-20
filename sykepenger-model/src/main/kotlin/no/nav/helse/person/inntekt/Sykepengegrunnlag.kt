@@ -447,8 +447,8 @@ internal class Sykepengegrunnlag private constructor(
     fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harGjenbrukbareOpplysninger(organisasjonsnummer)
 
-    fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg, oppholdsperiodeMellom: Periode?) {
-        arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, oppholdsperiodeMellom)
+    fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg, nyArbeidsgiverperiode: Boolean) {
+        arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, nyArbeidsgiverperiode)
     }
 
     internal fun byggGodkjenningsbehov(builder: GodkjenningsbehovBuilder) {
