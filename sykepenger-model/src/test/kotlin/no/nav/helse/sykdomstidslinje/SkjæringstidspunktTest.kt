@@ -47,6 +47,44 @@ internal class SkjæringstidspunktTest {
     }
 
     @Test
+    fun `skjæringstidspunkter happy cases`() {
+        assertEquals(1.januar, beregnSkjæringstidspunkt(31.S, 20.januar til 31.januar))
+
+        // ferie mellom sykdomsperioder
+        resetSeed()
+        assertEquals(1.januar, beregnSkjæringstidspunkt(10.S + 10.F + 10.S, 25.januar til 31.januar))
+
+        // ferie mellom arbeid og sykdomsperiode
+        resetSeed()
+        assertEquals(21.januar, beregnSkjæringstidspunkt(10.A + 10.F + 10.S, 20.januar til 31.januar))
+
+        // skjæringstidspunkt for ukjent dag-hale-periode
+        resetSeed()
+        assertEquals(1.januar, beregnSkjæringstidspunkt(16.S + 10.opphold, 20.januar til 31.januar))
+
+        // ukjent dager mellom sykdomsperioder
+        resetSeed()
+        assertEquals(25.januar, beregnSkjæringstidspunkt(20.S + 4.opphold + 7.S, 25.januar til 31.januar))
+
+        // periode med 100 % friskmelding
+        resetSeed()
+        assertEquals(17.januar, beregnSkjæringstidspunkt(16.S + 15.A, 17.januar til 31.januar))
+
+        // andre ytelser mellom sykdomsperioder
+        resetSeed()
+        assertEquals(27.januar, beregnSkjæringstidspunkt(16.S + 10.YF + 5.S, 27.januar til 31.januar))
+
+        // ferie etter opphold
+        resetSeed()
+        assertEquals(27.januar, beregnSkjæringstidspunkt(16.S + 10.opphold + 5.F, 27.januar til 31.januar))
+    }
+
+    private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode): LocalDate {
+        val s = Skjæringstidspunkt(tidslinje)
+        return s.beregnSkjæringstidspunkt(søkeperiode, null)
+    }
+
+    @Test
     fun `skjæringstidspunkt er null for ugyldige situasjoner`() {
         assertNull(1.F.sisteSkjæringstidspunkt())
         assertNull(1.P.sisteSkjæringstidspunkt())
