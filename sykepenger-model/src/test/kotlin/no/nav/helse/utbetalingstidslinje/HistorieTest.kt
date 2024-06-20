@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -114,7 +115,8 @@ internal abstract class HistorieTest {
         return infotrygdhistorikk.buildUtbetalingstidslinje(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, Subsumsjonslogg.NullObserver).let { utbetalingstidslinjebuilder.result() }
     }
 
-    protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(fom, fom), arbeidsgiverSykdomstidslinje.values.toList())
+    protected fun skjæringstidspunkt(fom: LocalDate) =
+        Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(fom.somPeriode(), infotrygdhistorikk.sykdomstidslinje(arbeidsgiverSykdomstidslinje.values.toList())) ?: fom
 
     protected fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingsdag>) {
         utbetalingstidslinje.subset(periode).also { tidslinje ->

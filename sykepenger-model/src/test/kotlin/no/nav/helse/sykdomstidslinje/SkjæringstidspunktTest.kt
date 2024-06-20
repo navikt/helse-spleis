@@ -445,7 +445,7 @@ internal class SkjæringstidspunktTest {
     }
 
     private fun assertSkjæringstidspunkt(forventetSkjæringstidspunkt: LocalDate?, periode: Periode, vararg tidslinje: Sykdomstidslinje) {
-        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, tidslinje.toList()))
+        assertEquals(forventetSkjæringstidspunkt, Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, Sykdomstidslinje.samletTidslinje(tidslinje.toList())))
     }
 
     private fun assertSkjæringstidspunkt(

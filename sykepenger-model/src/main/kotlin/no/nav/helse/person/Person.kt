@@ -606,9 +606,6 @@ class Person private constructor(
         observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
     }
 
-    internal fun skjæringstidspunkt(periode: Periode) =
-        Arbeidsgiver.skjæringstidspunkt(arbeidsgivere, periode, infotrygdhistorikk)
-
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg) {
         infotrygdhistorikk.oppfriskNødvendig(hendelse, arbeidsgivere.tidligsteDato())
     }

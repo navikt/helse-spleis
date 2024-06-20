@@ -19,7 +19,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.testhelpers.A
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
@@ -260,28 +260,8 @@ internal class InfotrygdhistorikkTest {
             ArbeidsgiverUtbetalingsperiode("ag1", 16.januar,  20.januar, 100.prosent, 25000.månedlig),
             ArbeidsgiverUtbetalingsperiode("ag1", 1.februar,  28.februar, 100.prosent, 25000.månedlig)
         )))
-        assertEquals(5.januar, historikk.skjæringstidspunkt(5.januar til 31.januar, emptyList()))
-        assertEquals(1.januar, historikk.skjæringstidspunkt(1.januar til 31.januar, listOf(2.S, 3.S)))
-    }
-
-    @Test
-    fun `skjæringstidspunkt med låst periode`() {
-        val sykdomstidslinje = 28.S + 3.A + 16.S
-        sykdomstidslinje.lås(1.januar til 31.januar)
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 29.januar,  31.januar, 100.prosent, 25000.månedlig)
-        )))
-        assertEquals(1.januar, historikk.skjæringstidspunkt(1.februar til 16.februar, listOf(sykdomstidslinje)))
-    }
-
-    @Test
-    fun `skjæringstidspunkt for orgnr med låst periode`() {
-        val sykdomstidslinje = 28.S + 3.A + 16.S
-        sykdomstidslinje.lås(1.januar til 31.januar)
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 29.januar,  31.januar, 100.prosent, 25000.månedlig)
-        )))
-        assertEquals(1.januar, historikk.skjæringstidspunkt("ag1", 1.februar til 16.februar, sykdomstidslinje))
+        assertEquals(5.januar, Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(5.januar til 31.januar, historikk.sykdomstidslinje(emptyList())))
+        assertEquals(1.januar, Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(1.januar til 31.januar, historikk.sykdomstidslinje(listOf(2.S, 3.S))))
     }
 
     @Test

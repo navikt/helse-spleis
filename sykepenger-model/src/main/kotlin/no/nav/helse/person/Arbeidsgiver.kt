@@ -138,7 +138,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk) = { periode: Periode ->
-            infotrygdhistorikk.skjæringstidspunkt(periode, map(Arbeidsgiver::sykdomstidslinje))
+            Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, infotrygdhistorikk.sykdomstidslinje(map(Arbeidsgiver::sykdomstidslinje))) ?: periode.start
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
@@ -177,20 +177,6 @@ internal class Arbeidsgiver private constructor(
             mapNotNull { arbeidsgiver -> arbeidsgiver.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger[arbeidsgiver.organisasjonsnummer], aktivitetslogg) }
 
         internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse) = forEach { it.vedtaksperioder.validerTilstand(hendelse) }
-
-        internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
-            infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
-
-        internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, arbeidsgiver: Arbeidsgiver, sykdomstidslinje: Sykdomstidslinje, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk): LocalDate {
-            // Bruker sykdomstidslinjen fra alle arbeidsgivere, med unntak av den ene som det sendes inn en sykdomstidslinje for 🫠
-            val sykdomstidslinjer = arbeidsgivere
-                .filterNot { it.organisasjonsnummer == arbeidsgiver.organisasjonsnummer }
-                .map { it.sykdomstidslinje() }
-                .toMutableList()
-                .also { it.add(sykdomstidslinje) }
-                .toList()
-            return infotrygdhistorikk.skjæringstidspunkt(periode, sykdomstidslinjer)
-        }
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             aktørId: String,
@@ -755,7 +741,7 @@ internal class Arbeidsgiver private constructor(
         val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, inntektsmelding.jurist(jurist))
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
-        val skjæringstidspunkt = person.skjæringstidspunkt(inntektsdato.somPeriode())
+        val skjæringstidspunkt = person.beregnSkjæringstidspunkt()(inntektsdato.somPeriode())
 
         if (!inntektsmelding.skalOppdatereVilkårsgrunnlag(sykdomstidslinjeperiode, forkastede)) {
             inntektsmelding.info("Inntektsmelding oppdaterer ikke vilkårsgrunnlag")
