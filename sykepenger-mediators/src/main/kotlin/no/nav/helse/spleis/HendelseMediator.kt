@@ -465,7 +465,9 @@ internal class HendelseMediator(
         minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
         context: MessageContext
     ) {
-        TODO("Not yet implemented")
+        hentPersonOgHåndter(message, minimumSykdomsgradsvurdering, context) { person ->
+            person.håndter(minimumSykdomsgradsvurdering)
+        }
     }
 
     private fun <Hendelse : PersonHendelse> opprettPersonOgHåndter(
