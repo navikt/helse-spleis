@@ -161,7 +161,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar,)
-        assertEquals(listOf(1.januar), person.skjæringstidspunkter())
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -179,7 +180,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar,)
-        assertEquals(listOf(1.januar), person.skjæringstidspunkter())
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

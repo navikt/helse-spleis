@@ -285,29 +285,6 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `skjæringstidspunkter med låst periode`() {
-        val sykdomstidslinje = 28.S + 3.A + 16.S
-        sykdomstidslinje.lås(1.januar til 31.januar)
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 29.januar,  31.januar, 100.prosent, 25000.månedlig)
-        )))
-        assertEquals(listOf(1.januar), historikk.skjæringstidspunkter(listOf(sykdomstidslinje)))
-    }
-
-    @Test
-    fun skjæringstidspunkter() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),
-            Friperiode(11.januar,  12.januar),
-            ArbeidsgiverUtbetalingsperiode("ag2", 13.januar,  15.januar, 100.prosent, 25000.månedlig),
-            ArbeidsgiverUtbetalingsperiode("ag1", 16.januar,  20.januar, 100.prosent, 25000.månedlig),
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar,  28.februar, 100.prosent, 25000.månedlig)
-        )))
-        assertEquals(listOf(1.februar, 5.januar), historikk.skjæringstidspunkter(emptyList()))
-        assertEquals(listOf(1.februar, 1.januar), historikk.skjæringstidspunkter(listOf(2.S, 3.S)))
-    }
-
-    @Test
     fun `har endret historikk når historikk er tom`() {
         assertFalse(historikk.harEndretHistorikk(utbetaling()))
     }

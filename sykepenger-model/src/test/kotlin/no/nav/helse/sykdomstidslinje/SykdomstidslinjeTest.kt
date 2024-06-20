@@ -20,7 +20,6 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.YF
-import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
@@ -157,57 +156,6 @@ internal class SykdomstidslinjeTest {
 
         val merged = tidslinje1.merge(tidslinje2, Dag.replace)
         assertEquals("AAASS", merged.toShortString())
-    }
-
-    @Test
-    fun `ferie + ukjente dager i tidslinje skaper rare skjæringstidspunkt`() {
-        val tidslinje = 24.S + 2.F + 5.opphold + 16.F + 5.S
-        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
-        assertTrue(skjæringstidspunkter.contains(1.januar))
-        assertTrue(skjæringstidspunkter.contains(17.februar))
-        assertEquals(2, skjæringstidspunkter.size)
-    }
-
-    @Test
-    fun `skjæringstidspunkt - sammenhengende syk`() {
-        val tidslinje = 24.S
-        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
-        assertEquals(1, skjæringstidspunkter.size)
-        assertEquals(1.januar, skjæringstidspunkter.first())
-    }
-
-    @Test
-    fun `skjæringstidspunkt - syk opphold syk`() {
-        val tidslinje = 24.S + 10.opphold + 10.S
-        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
-        assertEquals(2, skjæringstidspunkter.size)
-        assertTrue(skjæringstidspunkter.contains(1.januar))
-        assertTrue(skjæringstidspunkter.contains(4.februar))
-    }
-
-    @Test
-    fun `skjæringstidspunkt - syk ferie syk`() {
-        val tidslinje = 24.S + 10.F + 10.S
-        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
-        assertEquals(1, skjæringstidspunkter.size)
-        assertEquals(1.januar, skjæringstidspunkter.first())
-    }
-
-    @Test
-    fun `skjæringstidspunkt - syk opphold ferie`() {
-        val tidslinje = 24.S + 10.opphold + 10.F
-        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
-        assertEquals(1, skjæringstidspunkter.size)
-        assertEquals(1.januar, skjæringstidspunkter.first())
-    }
-
-    @Test
-    fun `skjæringstidspunkt - syk ferie opphold syk`() {
-        val tidslinje = 24.S + 10.F + 10.opphold + 10.S
-        val skjæringstidspunkter = tidslinje.skjæringstidspunkter()
-        assertEquals(2, skjæringstidspunkter.size)
-        assertTrue(skjæringstidspunkter.contains(1.januar))
-        assertTrue(skjæringstidspunkter.contains(14.februar))
     }
 
     @Test

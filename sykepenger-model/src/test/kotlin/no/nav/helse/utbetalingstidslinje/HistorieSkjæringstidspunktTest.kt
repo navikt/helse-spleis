@@ -17,7 +17,6 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
         assertEquals(1.januar, skjæringstidspunkt(31.januar))
         assertEquals(1.januar, skjæringstidspunkt(28.februar))
         assertEquals(1.januar, skjæringstidspunkt(28.februar))
-        assertSkjæringstidspunkter(1.januar)
     }
 
     @Test
@@ -26,9 +25,7 @@ internal class HistorieSkjæringstidspunktTest : HistorieTest() {
         addSykdomshistorikk(AG1, sykedager(1.mars, 31.mars))
         assertEquals(1.februar, skjæringstidspunkt(28.februar))
         assertEquals(1.mars, skjæringstidspunkt(31.mars))
-        assertSkjæringstidspunkter(1.mars, 1.februar)
     }
-
 
     @Test
     fun `infotrygd - gap - infotrygdTilBbruker - spleis`() {

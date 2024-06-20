@@ -146,18 +146,6 @@ internal class Sykdomstidslinje private constructor(
         return førsteSykedagEtterEllerLik(sisteOppholdsdag)
     }
 
-    internal fun skjæringstidspunkter(): List<LocalDate> {
-        val skjæringstidspunkter = mutableListOf<LocalDate>()
-        var kuttdato = periode?.endInclusive ?: return skjæringstidspunkter
-        do {
-            val skjæringstidspunkt = sisteSkjæringstidspunktTidligereEnn(kuttdato)?.also {
-                kuttdato = it.minusDays(1)
-                skjæringstidspunkter.add(it)
-            }
-        } while (skjæringstidspunkt != null)
-        return skjæringstidspunkter
-    }
-
     private fun førsteSykedagEtterEllerLik(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
@@ -265,9 +253,6 @@ internal class Sykdomstidslinje private constructor(
         internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinjer: List<Sykdomstidslinje>) = samletTidslinje(tidslinjer).fremTilOgMed(periode.endInclusive)
             .fjernDagerFørSisteOppholdsdagFør(periode.start)
             .sisteSkjæringstidspunktTidligereEnn(periode.endInclusive)
-
-        internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>) = samletTidslinje(tidslinjer)
-            .skjæringstidspunkter()
 
         private fun samletTidslinje(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
             .map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først

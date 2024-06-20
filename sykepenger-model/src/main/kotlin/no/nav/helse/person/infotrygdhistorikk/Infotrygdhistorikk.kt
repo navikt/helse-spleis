@@ -70,10 +70,6 @@ internal class Infotrygdhistorikk private constructor(
         return Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, tidslinjer + listOf(sykdomstidslinje())) ?: periode.start
     }
 
-    internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>): List<LocalDate> {
-        return Sykdomstidslinje.skjæringstidspunkter(tidslinjer + listOf(sykdomstidslinje()))
-    }
-
     private fun sykdomstidslinje(orgnummer: String): Sykdomstidslinje {
         if (!harHistorikk()) return Sykdomstidslinje()
         return siste.sykdomstidslinje(orgnummer)
