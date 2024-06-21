@@ -70,6 +70,10 @@ internal class SkjæringstidspunktTest {
         resetSeed()
         assertEquals(17.januar, beregnSkjæringstidspunkt(16.S + 15.A, 17.januar til 31.januar))
 
+        // periode friskmelding i halen og snuten
+        resetSeed()
+        assertEquals(11.januar, beregnSkjæringstidspunkt(10.A + 6.S + 15.A, 1.januar til 31.januar))
+
         // andre ytelser mellom sykdomsperioder
         resetSeed()
         assertEquals(27.januar, beregnSkjæringstidspunkt(16.S + 10.YF + 5.S, 27.januar til 31.januar))
@@ -77,6 +81,22 @@ internal class SkjæringstidspunktTest {
         // ferie etter opphold
         resetSeed()
         assertEquals(27.januar, beregnSkjæringstidspunkt(16.S + 10.opphold + 5.F, 27.januar til 31.januar))
+
+        // periode med litt tøysete hale
+        resetSeed()
+        assertEquals(7.januar, beregnSkjæringstidspunkt(2.S + 2.YF + 2.F + 2.S, 1.januar til 8.januar))
+
+        // sykdomsperiode med tøysete hale #2
+        resetSeed()
+        assertEquals(1.januar, beregnSkjæringstidspunkt(2.S + 1.A + 14.F, 1.januar til 17.januar))
+
+        // sykdomsperiode med tøysete hale #3
+        resetSeed()
+        assertEquals(1.januar, beregnSkjæringstidspunkt(2.S + 1.AIG + 14.F, 1.januar til 17.januar))
+
+        // sykdomsperiode med andre ytelser og ferie forut
+        resetSeed()
+        assertEquals(7.januar, beregnSkjæringstidspunkt(2.S + 2.YF + 2.F + 2.S, 7.januar til 8.januar))
     }
 
     private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode): LocalDate {
