@@ -123,6 +123,7 @@ class Person private constructor(
                     dto.vilkårsgrunnlagHistorikk,
                     grunnlagsdataMap
                 ),
+                minimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering.gjenopprett(dto.minimumSykdomsgradVurdering),
                 jurist = personJurist,
                 tidligereBehandlinger = tidligereBehandlinger
             )
@@ -232,6 +233,7 @@ class Person private constructor(
     }
 
     fun håndter(melding: MinimumSykdomsgradsvurderingMelding) {
+        registrer(melding, "Behandler minimum sykdomsgradvurdering")
         melding.oppdater(this.minimumSykdomsgradsvurdering)
         this.igangsettOverstyring(Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()))
         håndterGjenoppta(melding)
@@ -854,7 +856,8 @@ class Person private constructor(
         arbeidsgivere = arbeidsgivere.map { it.dto(arbeidsgivere.nestemann(), arbeidsgivere.toList()) },
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.dto(),
-        vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto()
+        vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto(),
+        minimumSykdomsgradVurdering = minimumSykdomsgradsvurdering.dto()
     )
 
 

@@ -1243,6 +1243,29 @@ internal class TestMessageFactory(
             }
         )
     )
+
+    fun lagMinimumSykdomsgradVurdert(
+        perioderMedMinimumSykdomsgradVurdertOK: List<Pair<LocalDate, LocalDate>>,
+        perioderMedMinimumSykdomsgradVurdertIkkeOK: List<Pair<LocalDate, LocalDate>>
+    ) = nyHendelse(
+        "minimum_sykdomsgrad_vurdert", mutableMapOf(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "perioder_med_minimum_sykdomsgrad_vurdert_ok" to perioderMedMinimumSykdomsgradVurdertOK.map {
+                mutableMapOf(
+                    "fom" to it.first,
+                    "tom" to it.second
+                )
+            },
+            "perioder_med_minimum_sykdomsgrad_vurdert_ikke_ok" to perioderMedMinimumSykdomsgradVurdertIkkeOK.map {
+                mutableMapOf(
+                    "fom" to it.first,
+                    "tom" to it.second
+                )
+            }
+        )
+    )
+
     fun lagSkjønnsmessigFastsettelse(
         skjæringstidspunkt: LocalDate,
         skjønnsmessigFastsatt: List<SkjønnsmessigFastsatt>

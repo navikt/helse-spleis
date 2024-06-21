@@ -56,6 +56,7 @@ import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
@@ -85,6 +86,7 @@ data class PersonData(
     val opprettet: LocalDateTime,
     val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
     val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
+    val minimumSykdomsgradVurdering: List<MinimumSykdomsgradVurderingPeriodeData>?,
     val dødsdato: LocalDate?,
     val skjemaVersjon: Int
 ) {
@@ -95,9 +97,13 @@ data class PersonData(
         opprettet = this.opprettet,
         arbeidsgivere = this.arbeidsgivere.map { it.tilDto() },
         infotrygdhistorikk = InfotrygdhistorikkInnDto(this.infotrygdhistorikk.map { it.tilDto() }),
-        vilkårsgrunnlagHistorikk = VilkårsgrunnlaghistorikkInnDto(vilkårsgrunnlagHistorikk.map { it.tilDto() })
+        vilkårsgrunnlagHistorikk = VilkårsgrunnlaghistorikkInnDto(vilkårsgrunnlagHistorikk.map { it.tilDto() }),
+        minimumSykdomsgradVurdering = MinimumSykdomsgradVurderingInnDto(
+            perioder = minimumSykdomsgradVurdering?.map { PeriodeDto(it.fom, it.tom) } ?: emptyList()
+        )
     )
 
+    data class MinimumSykdomsgradVurderingPeriodeData(val fom: LocalDate, val tom: LocalDate)
     data class InfotrygdhistorikkElementData(
         val id: UUID,
         val tidsstempel: LocalDateTime,

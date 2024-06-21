@@ -618,6 +618,17 @@ internal abstract class AbstractEndToEndMediatorTest() {
         testRapid.sendTestMessage(message)
     }
 
+    protected fun sendMinimumSykdomdsgradVurdert(
+        perioderMedMinimumSykdomsgradVurdertOK: List<Pair<LocalDate, LocalDate>>,
+        perioderMedMinimumSykdomsgradVurdertIkkeOK: List<Pair<LocalDate, LocalDate>>
+    ) {
+        val (_, message) = meldingsfabrikk.lagMinimumSykdomsgradVurdert(
+            perioderMedMinimumSykdomsgradVurdertOK,
+            perioderMedMinimumSykdomsgradVurdertIkkeOK
+        )
+        testRapid.sendTestMessage(message)
+    }
+
     protected fun sendSkjønnsmessigFastsettelse(
         skjæringstidspunkt: LocalDate,
         skjønnsmessigFastsatt: List<SkjønnsmessigFastsatt>

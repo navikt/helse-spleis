@@ -424,7 +424,5 @@ internal class TestHendelseMediator : IHendelseMediator {
         message: MinimumSykdomsgradVurdertMessage,
         minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
         context: MessageContext
-    ) {
-        TODO("Not yet implemented")
-    }
+    ) {}
 }

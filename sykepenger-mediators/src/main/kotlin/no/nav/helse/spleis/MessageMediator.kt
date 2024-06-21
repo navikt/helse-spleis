@@ -19,6 +19,7 @@ import no.nav.helse.spleis.meldinger.InfotrygdendringerRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.helse.spleis.meldinger.MigrateRiver
+import no.nav.helse.spleis.meldinger.MinimumSykdomsgradVurdertRiver
 import no.nav.helse.spleis.meldinger.NyeArbeidsledigSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeFrilansSøknaderRiver
 import no.nav.helse.spleis.meldinger.NyeSelvstendigSøknaderRiver
@@ -98,6 +99,7 @@ internal class MessageMediator(
             GjenopplivVilkårsgrunnlagRiver(it, this)
             IdentOpphørtRiver(it, this)
             SkjønnsmessigFastsettelseRiver(it, this)
+            MinimumSykdomsgradVurdertRiver(it, this)
         }
     }
 

@@ -10,6 +10,7 @@ data class PersonUtDto(
     val opprettet: LocalDateTime,
     val arbeidsgivere: List<ArbeidsgiverUtDto>,
     val infotrygdhistorikk: InfotrygdhistorikkUtDto,
-    val vilkårsgrunnlagHistorikk: VilkårsgrunnlaghistorikkUtDto
+    val vilkårsgrunnlagHistorikk: VilkårsgrunnlaghistorikkUtDto,
+    val minimumSykdomsgradVurdering: MinimumSykdomsgradVurderingUtDto
 )
 

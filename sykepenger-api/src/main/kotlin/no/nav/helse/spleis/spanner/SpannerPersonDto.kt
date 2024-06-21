@@ -63,6 +63,7 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.VedtaksperiodeVenterDto
 import no.nav.helse.dto.VenterPåDto
 import no.nav.helse.dto.VenteårsakDto
+import no.nav.helse.dto.serialisering.MinimumSykdomsgradVurderingUtDto
 import no.nav.helse.nesteDag
 
 internal data class SpannerPersonDto(
@@ -73,8 +74,10 @@ internal data class SpannerPersonDto(
     val opprettet: LocalDateTime,
     val infotrygdhistorikk: List<InfotrygdhistorikkElementData>,
     val vilkårsgrunnlagHistorikk: List<VilkårsgrunnlagInnslagData>,
+    val minimumSykdomsgradVurdering: List<MinimumSykdomsgradVurderingPeriode>,
     val dødsdato: LocalDate?
 ) {
+    data class MinimumSykdomsgradVurderingPeriode(val fom: LocalDate, val tom: LocalDate)
     data class InfotrygdhistorikkElementData(
         val id: UUID,
         val tidsstempel: LocalDateTime,
@@ -671,6 +674,7 @@ internal fun PersonUtDto.tilSpannerPersonDto() = SpannerPersonDto(
     arbeidsgivere = this.arbeidsgivere.map { it.tilPersonData() },
     infotrygdhistorikk = this.infotrygdhistorikk.elementer.map { it.tilPersonData() },
     vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.historikk.map { it.tilPersonData() },
+    minimumSykdomsgradVurdering = minimumSykdomsgradVurdering.perioder.map { SpannerPersonDto.MinimumSykdomsgradVurderingPeriode(it.fom, it.tom) },
     dødsdato = this.alder.dødsdato
 )
 
