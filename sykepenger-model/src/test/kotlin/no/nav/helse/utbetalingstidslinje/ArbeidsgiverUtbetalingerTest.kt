@@ -18,6 +18,7 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.MinimumSykdomsgradsvurdering
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold
 import no.nav.helse.person.Person
@@ -348,7 +349,8 @@ internal class ArbeidsgiverUtbetalingerTest {
             fødselsdato.alder,
             { _, _, _ -> mapOf(person.arbeidsgiver(ORGNUMMER) to arbeidsgiverTidslinje) },
             historiskTidslinje,
-            vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikk,
+            MinimumSykdomsgradsvurdering()
         )
         val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = utbetalinger.beregn(
             arbeidsgiverTidslinje.periode(),

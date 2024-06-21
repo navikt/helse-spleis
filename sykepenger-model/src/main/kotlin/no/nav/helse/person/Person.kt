@@ -234,7 +234,6 @@ class Person private constructor(
     fun håndter(melding: MinimumSykdomsgradsvurderingMelding) {
         melding.oppdater(this.minimumSykdomsgradsvurdering)
         this.igangsettOverstyring(Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()))
-        gjenopptaBehandling(melding)
         håndterGjenoppta(melding)
     }
 
@@ -367,7 +366,8 @@ class Person private constructor(
                 ) }
             },
             infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            minimumSykdomsgradsvurdering = minimumSykdomsgradsvurdering
         )
         finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
         håndterGjenoppta(ytelser)

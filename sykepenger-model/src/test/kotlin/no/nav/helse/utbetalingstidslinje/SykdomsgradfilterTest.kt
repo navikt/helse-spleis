@@ -8,6 +8,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.person.MinimumSykdomsgradsvurdering
 import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -124,7 +125,7 @@ internal class SykdomsgradfilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        val resultat = Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
+        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering()).filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
         inspektør = resultat.inspektør(0)
         return resultat
     }

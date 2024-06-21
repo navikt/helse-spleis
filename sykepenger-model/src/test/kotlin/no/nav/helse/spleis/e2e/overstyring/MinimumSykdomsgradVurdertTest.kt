@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test
 
 internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
 
-    @Disabled
     @Test
     fun `Saksbehandler overstyrer avslag pga minimum sykdomsgrad`() {
         nyPeriode(januar, orgnummer = a1)
@@ -59,6 +58,6 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager)
+        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
     }
 }

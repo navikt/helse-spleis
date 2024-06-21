@@ -6,17 +6,19 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.person.MinimumSykdomsgradsvurdering
 
 internal class ArbeidsgiverUtbetalinger(
     regler: ArbeidsgiverRegler,
     alder: Alder,
     private val arbeidsgivere: (Periode, Subsumsjonslogg, IAktivitetslogg) -> Map<Arbeidsgiver, Utbetalingstidslinje>,
     infotrygdUtbetalingstidslinje: Utbetalingstidslinje,
-    vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering
 ) {
     private val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdUtbetalingstidslinje)
     private val filtere = listOf(
-        Sykdomsgradfilter,
+        Sykdomsgradfilter(minimumSykdomsgradsvurdering),
         AvvisDagerEtterDødsdatofilter(alder),
         AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk),
         maksimumSykepengedagerfilter,

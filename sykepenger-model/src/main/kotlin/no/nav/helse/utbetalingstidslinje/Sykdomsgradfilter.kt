@@ -3,13 +3,15 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.MinimumSykdomsgradsvurdering
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import no.nav.helse.økonomi.Prosentdel
 
-internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
+internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering) :
+    UtbetalingstidslinjerFilter {
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
@@ -21,7 +23,7 @@ internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
 
         val oppdaterte = Utbetalingsdag.totalSykdomsgrad(tidslinjer)
 
-        val dagerUnderGrensen = Utbetalingsdag.dagerUnderGrensen(oppdaterte)
+        val dagerUnderGrensen = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(Utbetalingsdag.dagerUnderGrensen(oppdaterte))
 
         val avvisteTidslinjer = avvis(oppdaterte, dagerUnderGrensen, listOf(Begrunnelse.MinimumSykdomsgrad))
 
