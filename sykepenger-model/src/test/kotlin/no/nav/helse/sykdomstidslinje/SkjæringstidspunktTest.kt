@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.perioder
 import no.nav.helse.somPersonidentifikator
@@ -48,6 +49,11 @@ internal class SkjæringstidspunktTest {
 
     @Test
     fun `skjæringstidspunkter happy cases`() {
+        // snodige egenmeldingsdager fra sykmelding
+        resetSeed(11.juni(2024))
+        assertEquals(15.juni(2024), beregnSkjæringstidspunkt(2.U + 2.A + 1.U + 1.UK + 8.S, 11.juni(2024) til 23.juni(2024)))
+
+        resetSeed()
         assertEquals(1.januar, beregnSkjæringstidspunkt(31.S, 20.januar til 31.januar))
 
         // ferie mellom sykdomsperioder
@@ -99,10 +105,8 @@ internal class SkjæringstidspunktTest {
         assertEquals(7.januar, beregnSkjæringstidspunkt(2.S + 2.YF + 2.F + 2.S, 7.januar til 8.januar))
     }
 
-    private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode): LocalDate {
-        val s = Skjæringstidspunkt(tidslinje)
-        return s.beregnSkjæringstidspunkt(søkeperiode, null)
-    }
+    private fun beregnSkjæringstidspunkt(tidslinje: Sykdomstidslinje, søkeperiode: Periode) =
+        Skjæringstidspunkt(tidslinje).beregnSkjæringstidspunkt(søkeperiode, null)
 
     @Test
     fun `skjæringstidspunkt er null for ugyldige situasjoner`() {
