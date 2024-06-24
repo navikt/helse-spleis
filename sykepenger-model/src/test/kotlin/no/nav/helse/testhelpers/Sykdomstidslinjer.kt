@@ -199,6 +199,12 @@ internal val Int.PROBLEM
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, INGEN, "Problemdag") }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
+internal val Int.FORELDET
+    get() = Sykdomstidslinje(
+        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Dag.ForeldetSykedag(it, Økonomi.sykdomsgrad(100.prosent), INGEN) }))
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
 
 internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), private val meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
     override fun dokumentsporing() = error("ikke i bruk")
