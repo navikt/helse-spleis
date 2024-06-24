@@ -18,7 +18,6 @@ import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagType
 import no.nav.helse.spleis.speil.dto.UtbetalingsdagDTO
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagUtenGrad
-import no.nav.helse.ukedager
 import kotlin.math.roundToInt
 
 internal class SykdomstidslinjeBuilder(private val dto: SykdomstidslinjeDto, periode: PeriodeDto) {

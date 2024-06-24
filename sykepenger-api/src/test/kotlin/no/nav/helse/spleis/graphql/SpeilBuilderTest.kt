@@ -6,6 +6,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -15,6 +16,7 @@ import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Inntektkilde
+import no.nav.helse.spleis.speil.dto.PersonDTO
 import no.nav.helse.spleis.speil.dto.SammenslåttDag
 import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Sykdomstidslinjedag
@@ -26,6 +28,7 @@ import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
@@ -33,6 +36,36 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SpeilBuilderTest : AbstractE2ETest() {
+
+    @Test
+    fun `totalgrad må jo være lik for avslag og utbetaling`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 19.prosent), orgnummer = a1)
+        håndterInntektsmelding(1.januar, orgnummer = a1, beregnetInntekt = 836352.årlig)
+        håndterVilkårsgrunnlag(arbeidsgivere = listOf(a1 to 836352.årlig, a2 to 168276.årlig))
+        håndterYtelser()
+
+        // Totalgraden er her 15.81748468089681
+        // På avslagsdager tar vi toInt() -> 15
+        // Dette er nok fordi 19.99 skal gi avslag på minumum sykdomsgrad, og da er det rart å vise 20% i Speil
+        speilApi().assertTotalgrad(15, 17.januar til 19.januar, 22.januar til 26.januar, 29.januar til 31.januar)
+
+        håndterMinimumSykdomsgradsvurderingMelding(perioderMedMinimumSykdomsgradVurdertOK = setOf(17.januar til 31.januar))
+        håndterYtelser()
+
+        // På utbetalingsdager tar vi toRoundInt() -> 16
+        speilApi().assertTotalgrad(16, 17.januar til 19.januar, 22.januar til 26.januar, 29.januar til 31.januar)
+    }
+
+    private fun PersonDTO.assertTotalgrad(forventet: Int, vararg perioder: Periode) {
+        val totalgrader = (arbeidsgivere[0]
+        .generasjoner[0]
+        .perioder[0] as BeregnetPeriode)
+        .sammenslåttTidslinje
+        .filter { sammenslåttDag -> perioder.any { sammenslåttDag.dagen in it } }
+        .map { it.utbetalingsinfo?.totalGrad }
+        assertTrue(totalgrader.all { it == forventet }) { "Her er det noe som ikke er $forventet: $totalgrader"}
+    }
+
     @Test
     fun `Dødsdato ligger på person`() {
         val dødsdato = 1.januar

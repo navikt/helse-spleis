@@ -287,6 +287,10 @@ internal abstract class AbstractE2ETest {
         personfabrikk.lagDødsmelding(dødsdato).håndter(Person::håndter)
     }
 
+    protected fun håndterMinimumSykdomsgradsvurderingMelding(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode> = emptySet(), perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode> = emptySet()) {
+        personfabrikk.lagMinimumSykdomsgradsvurderingMelding(perioderMedMinimumSykdomsgradVurdertOK, perioderMedMinimumSykdomsgradVurdertIkkeOK).håndter(Person::håndter)
+    }
+
     protected fun håndterYtelserTilGodkjenning() {
         håndterYtelser()
         try {

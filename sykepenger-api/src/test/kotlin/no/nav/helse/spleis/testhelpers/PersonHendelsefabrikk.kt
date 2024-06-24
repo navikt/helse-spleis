@@ -6,6 +6,7 @@ import java.time.Year
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
@@ -28,6 +29,15 @@ internal class PersonHendelsefabrikk(
     private val aktørId: String,
     private val personidentifikator: Personidentifikator
 ) {
+    internal fun lagMinimumSykdomsgradsvurderingMelding(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode> = emptySet(), perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode> = emptySet()) =
+        MinimumSykdomsgradsvurderingMelding(
+            perioderMedMinimumSykdomsgradVurdertOK = perioderMedMinimumSykdomsgradVurdertOK,
+            perioderMedMinimumSykdomsgradVurdertIkkeOK = perioderMedMinimumSykdomsgradVurdertIkkeOK,
+            meldingsreferanseId = UUID.randomUUID(),
+            fødselsnummer = personidentifikator.toString(),
+            aktørId = aktørId
+        )
+
     internal fun lagDødsmelding(dødsdato: LocalDate) =
         Dødsmelding(
             meldingsreferanseId = UUID.randomUUID(),
