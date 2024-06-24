@@ -263,7 +263,7 @@ internal class Sykdomstidslinje private constructor(
             val samletTidslinje = samletTidslinje(tidslinjer)
             val skjæringstidspunkt = sisteRelevanteSkjæringstidspunktForPerioden(periode, samletTidslinje) ?: periode.start
             val nySkjæringstidspunktBeregning = Skjæringstidspunkt(samletTidslinje).beregnSkjæringstidspunkt(periode, null)
-            if (skjæringstidspunkt != nySkjæringstidspunktBeregning) {
+            if (skjæringstidspunkt != nySkjæringstidspunktBeregning && samletTidslinje[periode.start] !is Arbeidsdag) {
                 val flyttet = DAYS.between(skjæringstidspunkt, nySkjæringstidspunktBeregning).absoluteValue
                 sikkerlogg.info("Skjæringstidspunkt=$skjæringstidspunkt, nyBeregning=$nySkjæringstidspunktBeregning (Flyttet $flyttet dager)")
             }
