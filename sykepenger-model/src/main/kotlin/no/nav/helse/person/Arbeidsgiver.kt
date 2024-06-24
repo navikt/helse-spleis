@@ -138,7 +138,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk) = { periode: Periode ->
-            Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, infotrygdhistorikk.sykdomstidslinje(map(Arbeidsgiver::sykdomstidslinje))) ?: periode.start
+            infotrygdhistorikk.skjæringstidspunkt(periode, map(Arbeidsgiver::sykdomstidslinje))
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {

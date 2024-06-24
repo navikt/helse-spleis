@@ -65,6 +65,9 @@ internal class Infotrygdhistorikk private constructor(
     internal fun sykdomstidslinje(tidslinjer: List<Sykdomstidslinje>) =
         Sykdomstidslinje.samletTidslinje(tidslinjer + listOf(sykdomstidslinje()))
 
+    internal fun skjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>) =
+        Sykdomstidslinje.beregnSkjæringstidspunkt(periode, tidslinjer + listOf(sykdomstidslinje()))
+
     private fun sykdomstidslinje(): Sykdomstidslinje {
         if (!harHistorikk()) return Sykdomstidslinje()
         return siste.sykdomstidslinje()

@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit.DAYS
 import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
@@ -39,6 +40,8 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
+import org.slf4j.LoggerFactory
+import kotlin.math.absoluteValue
 
 internal class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
@@ -254,6 +257,18 @@ internal class Sykdomstidslinje private constructor(
             .fremTilOgMed(periode.endInclusive)
             .fjernDagerFørSisteOppholdsdagFør(periode.start)
             .sisteSkjæringstidspunktTidligereEnn(periode.endInclusive)
+
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        internal fun beregnSkjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>): LocalDate {
+            val samletTidslinje = samletTidslinje(tidslinjer)
+            val skjæringstidspunkt = sisteRelevanteSkjæringstidspunktForPerioden(periode, samletTidslinje) ?: periode.start
+            val nySkjæringstidspunktBeregning = Skjæringstidspunkt(samletTidslinje).beregnSkjæringstidspunkt(periode, null)
+            if (skjæringstidspunkt != nySkjæringstidspunktBeregning) {
+                val flyttet = DAYS.between(skjæringstidspunkt, nySkjæringstidspunktBeregning).absoluteValue
+                sikkerlogg.info("Skjæringstidspunkt=$skjæringstidspunkt, nyBeregning=$nySkjæringstidspunktBeregning (Flyttet $flyttet dager)")
+            }
+            return skjæringstidspunkt
+        }
 
         internal fun samletTidslinje(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
             .map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først
