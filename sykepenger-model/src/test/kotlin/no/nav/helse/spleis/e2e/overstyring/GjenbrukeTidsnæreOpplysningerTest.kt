@@ -8,6 +8,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
@@ -62,6 +63,53 @@ import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
 internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
+
+    @Test
+    fun `Gjenbruker kun inntekt på én arbeidsgiver, men om alle periodene etter blir andre ytelser, så trengte vi ikke tidsnære opplysninger uansett`() {
+        listOf(a1, a2).nyeVedtak(januar)
+        listOf(a1, a2).forlengVedtak(februar)
+        a1 {
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Svangerskapspengerdag)))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+        }
+        a2 {
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Svangerskapspengerdag)))
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 {
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        }
+        a2 {
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 2.vedtaksperiode }.venterPå
+            assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venterPå.venteårsak.hvorfor)
+        }
+        a1 {
+            håndterOverstyrTidslinje(februar.map { ManuellOverskrivingDag(it, Dagtype.Svangerskapspengerdag) })
+            assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        }
+        a2 {
+            håndterOverstyrTidslinje(februar.map { ManuellOverskrivingDag(it, Dagtype.Svangerskapspengerdag) })
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        }
+        a1 {
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        }
+    }
 
     @Test
     fun `kort periode i forkant endrer skjæringstidspunktet tilbake`() {
