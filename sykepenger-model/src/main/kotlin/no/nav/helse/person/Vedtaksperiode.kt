@@ -1412,7 +1412,14 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
+        private fun manglerInntektEllerRefusjon(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse): Boolean {
+            val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return false
+            return !arbeidsgiveropplysningerStrategi.harInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, påminnelse)
+        }
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (påminnelse.skalReberegnes() && manglerInntektEllerRefusjon(vedtaksperiode, påminnelse)) {
+                vedtaksperiode.behandlinger.lagreGjenbrukbareOpplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer, vedtaksperiode.arbeidsgiver, påminnelse)
+            }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
