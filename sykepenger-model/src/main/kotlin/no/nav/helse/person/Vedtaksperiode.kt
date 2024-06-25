@@ -110,6 +110,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -438,7 +439,8 @@ internal class Vedtaksperiode private constructor(
     private fun måInnhenteInntektEllerRefusjon(hendelse: IAktivitetslogg): Boolean {
         val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
         if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
-        return tilstand.arbeidsgiveropplysningerStrategi.måInnhenteInntektEllerRefusjon(this, arbeidsgiverperiode, hendelse)
+        if (tilstand.arbeidsgiveropplysningerStrategi.harInntektOgRefusjon(this, arbeidsgiverperiode, hendelse)) return false
+        return true
     }
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
@@ -1094,38 +1096,43 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal sealed class ArbeidsgiveropplysningerStrategi {
-        internal fun måInnhenteInntektEllerRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) = !harInntekt(vedtaksperiode) || !harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, hendelse)
-        abstract fun harInntekt(vedtaksperiode: Vedtaksperiode): Boolean
-        abstract fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg): Boolean
+        abstract fun harInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg): Boolean
+        abstract fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, hendelse: IAktivitetslogg): Boolean
+
         open fun loggGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-        // Inntekt vi har uten å måtte lagre noe tilbake i historikken på arbeidsgiver.
-        protected fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
+
+        protected fun harEksisterendeInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
+            harEksisterendeInntekt(vedtaksperiode) && harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, eksisterendeRefusjonsopplysninger(vedtaksperiode), hendelse)
+        // Inntekt vi allerede har i vilkårsgrunnlag/ i inntekshistorikken på arbeidsgiver
+        private fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
             // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
             // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)
             val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag
             return vilkårsgrunnlag != null || vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt)
         }
-        // Refusjonsopplysningene vi har uten å måtte lagre noe tilbake i historikken på arbeidsgiver.
-        protected fun eksisterendeRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode) = when (val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag) {
+        // Refusjonsopplysningene vi allerede har i vilkårsgrunnlag/ i refusjonshistorikken på arbeidsgiver
+        private fun eksisterendeRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode) = when (val vilkårsgrunnlag = vedtaksperiode.vilkårsgrunnlag) {
             null -> vedtaksperiode.arbeidsgiver.refusjonsopplysninger(vedtaksperiode.skjæringstidspunkt)
             else -> vilkårsgrunnlag.refusjonsopplysninger(vedtaksperiode.organisasjonsnummer)
         }
     }
 
     private data object FørInntektsmelding: ArbeidsgiveropplysningerStrategi() {
-        override fun harInntekt(vedtaksperiode: Vedtaksperiode) = harEksisterendeInntekt(vedtaksperiode)
-        override fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
-            Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, eksisterendeRefusjonsopplysninger(vedtaksperiode), arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
+        override fun harInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
+            harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, hendelse)
+        override fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, hendelse: IAktivitetslogg) =
+            Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
     }
 
     private data object EtterInntektsmelding: ArbeidsgiveropplysningerStrategi() {
-        override fun harInntekt(vedtaksperiode: Vedtaksperiode) = harEksisterendeInntekt(vedtaksperiode) // Dette skal på sikt sjekke OR harGjenbrukbarInntekt
-        override fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
-            Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, eksisterendeRefusjonsopplysninger(vedtaksperiode), arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
+        override fun harInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
+            harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, hendelse)// TODO: || vedtaksperiode.behandlinger.harGjenbrukbareOpplysninger(vedtaksperiode.organisasjonsnummer)
+        override fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, hendelse: IAktivitetslogg) =
+            Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
         override fun loggGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return
             if (!arbeidsgiverperiode.forventerInntekt(vedtaksperiode.periode)) return
-            if (harEksisterendeInntekt(vedtaksperiode) && harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, hendelse)) return
+            if (harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, hendelse)) return
             if (vedtaksperiode.behandlinger.harGjenbrukbareOpplysninger(vedtaksperiode.organisasjonsnummer)) return hendelse.info("Her har vi gjenbrukbare opplysninger")
             hendelse.info("Her mangler vi gjenbrukbare opplysninger")
         }
