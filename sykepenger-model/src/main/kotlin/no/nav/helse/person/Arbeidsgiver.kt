@@ -767,8 +767,7 @@ internal class Arbeidsgiver private constructor(
         nyArbeidsgiverperiode: Boolean
     ) {
         if (this.organisasjonsnummer != orgnummer) return
-        val nyFørsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        if (nyFørsteFraværsdag == null) return
+        val nyFørsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt) ?: return
         inntektsmelding.kopierTidsnærOpplysning(nyFørsteFraværsdag, hendelse, nyArbeidsgiverperiode, inntektshistorikk)
         // TODO: lagre refusjonsopplysninger inni inntektsmelding-opplysningen?
         refusjonsopplysninger.lagreTidsnær(nyFørsteFraværsdag, refusjonshistorikk)

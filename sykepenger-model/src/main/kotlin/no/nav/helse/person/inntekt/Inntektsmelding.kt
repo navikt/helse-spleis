@@ -91,6 +91,7 @@ class Inntektsmelding internal constructor(
             hendelse.varsel(RV_IV_7)
         }
         inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel))
+        hendelse.info("Kopierte inntekt som lå lagret på ${this.dato} til $nyDato")
     }
 
     override fun dto() =
