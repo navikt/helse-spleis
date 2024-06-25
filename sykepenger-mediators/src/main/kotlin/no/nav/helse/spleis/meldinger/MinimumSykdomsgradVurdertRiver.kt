@@ -16,11 +16,11 @@ internal class MinimumSykdomsgradVurdertRiver(
 
     override fun validate(message: JsonMessage) {
         message.requireKey("@id", "fødselsnummer", "aktørId")
-        message.requireArray("perioder_med_minimum_sykdomsgrad_vurdert_ok") {
+        message.requireArray("perioderMedMinimumSykdomsgradVurdertOk") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }
-        message.requireArray("perioder_med_minimum_sykdomsgrad_vurdert_ikke_ok") {
+        message.requireArray("perioderMedMinimumSykdomsgradVurdertIkkeOk") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
         }

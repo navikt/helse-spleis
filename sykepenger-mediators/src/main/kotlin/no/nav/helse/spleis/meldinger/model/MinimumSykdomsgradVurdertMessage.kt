@@ -8,8 +8,9 @@ import no.nav.helse.spleis.IHendelseMediator
 internal class MinimumSykdomsgradVurdertMessage(packet: JsonMessage) : HendelseMessage(packet) {
     override val fødselsnummer: String = packet["fødselsnummer"].asText()
     private val aktørId: String = packet["aktørId"].asText()
-    private val perioderMedMinimumSykdomsgradVurdertOK = packet["perioder_med_minimum_sykdomsgrad_vurdert_ok"].map(::asPeriode)
-    private val perioderMedMinimumSykdomsgradVurdertIkkeOK = packet["perioder_med_minimum_sykdomsgrad_vurdert_ikke_ok"].map(::asPeriode)
+    private val perioderMedMinimumSykdomsgradVurdertOK = packet["perioderMedMinimumSykdomsgradVurdertOk"].map(::asPeriode)
+    private val perioderMedMinimumSykdomsgradVurdertIkkeOK = packet["perioderMedMinimumSykdomsgradVurdertIkkeOk"].map(::asPeriode)
+
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(

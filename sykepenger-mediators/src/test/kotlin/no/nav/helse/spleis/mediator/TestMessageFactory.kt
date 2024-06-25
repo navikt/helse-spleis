@@ -1251,13 +1251,13 @@ internal class TestMessageFactory(
         "minimum_sykdomsgrad_vurdert", mutableMapOf(
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
-            "perioder_med_minimum_sykdomsgrad_vurdert_ok" to perioderMedMinimumSykdomsgradVurdertOK.map {
+            "perioderMedMinimumSykdomsgradVurdertOk" to perioderMedMinimumSykdomsgradVurdertOK.map {
                 mutableMapOf(
                     "fom" to it.first,
                     "tom" to it.second
                 )
             },
-            "perioder_med_minimum_sykdomsgrad_vurdert_ikke_ok" to perioderMedMinimumSykdomsgradVurdertIkkeOK.map {
+            "perioderMedMinimumSykdomsgradVurdertIkkeOk" to perioderMedMinimumSykdomsgradVurdertIkkeOK.map {
                 mutableMapOf(
                     "fom" to it.first,
                     "tom" to it.second
