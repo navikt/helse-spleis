@@ -157,6 +157,7 @@ enum class Varselkode(
     RV_VV_14("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.", avviklet = true),
     RV_VV_15("Maks antall sykepengedager er nådd i perioden", avviklet = true),
     RV_VV_16("Søknaden inneholder egenmeldingsdager som ikke er oppgitt i inntektsmeldingen. Vurder om arbeidsgiverperioden beregnes riktig", avviklet = true),
+    RV_VV_17("Det er beregnet utbetaling under 20% total sykdomsgrad"),
 
     // VV: Opptjeningsvurdering
     RV_OV_1("Perioden er avslått på grunn av manglende opptjening"),

@@ -5,6 +5,7 @@ import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjo
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.MinimumSykdomsgradsvurdering
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
@@ -23,12 +24,14 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
 
         val oppdaterte = Utbetalingsdag.totalSykdomsgrad(tidslinjer)
 
-        val dagerUnderGrensen = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(Utbetalingsdag.dagerUnderGrensen(oppdaterte))
+        val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(oppdaterte)
+        val avvistePerioder = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)
+        if (!avvistePerioder.containsAll(tentativtAvvistePerioder)) aktivitetslogg.varsel(RV_VV_17)
 
-        val avvisteTidslinjer = avvis(oppdaterte, dagerUnderGrensen, listOf(Begrunnelse.MinimumSykdomsgrad))
+        val avvisteTidslinjer = avvis(oppdaterte, avvistePerioder, listOf(Begrunnelse.MinimumSykdomsgrad))
 
         Prosentdel.subsumsjon(subsumsjonslogg) { grense ->
-            `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, dagerUnderGrensen)
+            `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, avvistePerioder)
         }
         val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
