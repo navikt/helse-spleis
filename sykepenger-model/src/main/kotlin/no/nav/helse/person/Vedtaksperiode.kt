@@ -1136,7 +1136,7 @@ internal class Vedtaksperiode private constructor(
             Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
         override fun lagreGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return
-            if (!arbeidsgiverperiode.forventerInntekt(vedtaksperiode.periode)) return // En periode i AvventerBlokkerendePeriode som skal tilbake AvsluttetUtenUtbetaling trenger uansett ikke inntekt og/eller refusjon
+            if (vedtaksperiode.tilstand == AvventerBlokkerendePeriode && !arbeidsgiverperiode.forventerInntekt(vedtaksperiode.periode)) return // En periode i AvventerBlokkerendePeriode som skal tilbake AvsluttetUtenUtbetaling trenger uansett ikke inntekt og/eller refusjon
             if (harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, hendelse)) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
             vedtaksperiode.behandlinger.lagreGjenbrukbareOpplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer, vedtaksperiode.arbeidsgiver, hendelse) // Ikke 100% at dette lagrer noe. F.eks. revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
         }
@@ -1277,6 +1277,8 @@ internal class Vedtaksperiode private constructor(
         override val type = START
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
             HJELP.utenBegrunnelse
+
+        override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
             val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
