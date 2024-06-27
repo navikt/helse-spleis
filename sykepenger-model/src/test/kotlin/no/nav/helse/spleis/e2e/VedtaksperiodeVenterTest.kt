@@ -34,7 +34,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     @Test
     fun `Korrigerte søknader kommer i vedtaksperiode_venter`() {
         a1 {
-            tilGodkjenning(1.januar, 31.januar, 100.prosent)
+            tilGodkjenning(januar, 100.prosent)
             val søknadId1 = observatør.behandlingOpprettetEventer.single().søknadIder.single()
             val behandlingId = observatør.behandlingOpprettetEventer.single().behandlingId
             val søknadId2 = UUID.randomUUID()

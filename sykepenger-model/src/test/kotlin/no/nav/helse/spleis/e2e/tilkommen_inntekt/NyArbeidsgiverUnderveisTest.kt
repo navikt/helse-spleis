@@ -39,7 +39,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     @Test
     fun `Ny arbeidsgiver underveis happy case`() = Toggle.TilkommenInntekt.enable {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
         }
         a2 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -80,7 +80,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     @Test
     fun `Bytter arbeidsgiver underveis i sykefravær`() = Toggle.TilkommenInntekt.enable {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
         }
         a2 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -151,7 +151,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     @Test
     fun `tilkommen inntekt etter skjønnsmessig fastsettelse`() = Toggle.TilkommenInntekt.enable {
         a1 {
-            nyttVedtak(1.januar, 31.januar, 100.prosent)
+            nyttVedtak(januar, 100.prosent)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 1000.månedlig)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -178,7 +178,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     @Test
     fun `Omgjøring av overlappende periode med nytt skjæringstidspunkt`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag), ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

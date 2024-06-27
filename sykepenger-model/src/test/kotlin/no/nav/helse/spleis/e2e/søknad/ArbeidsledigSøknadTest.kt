@@ -23,7 +23,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
     @Test
     fun `støtter arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
             assertVarsel(`Arbeidsledigsøknad er lagt til grunn`, 2.vedtaksperiode.filter())
@@ -32,7 +32,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
     @Test
     fun `trenger ikke varsel ved forlengelse hvis det ikke er refusjon`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
+            nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
             assertIngenVarsel(`Arbeidsledigsøknad er lagt til grunn`, 2.vedtaksperiode.filter())

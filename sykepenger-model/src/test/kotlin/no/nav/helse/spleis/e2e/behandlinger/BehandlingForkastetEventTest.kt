@@ -24,7 +24,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     @Test
     fun `uberegnet behandling forkastes`() {
         a1 {
-            tilGodkjenning(1.januar, 31.januar)
+            tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.single()
@@ -45,7 +45,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     @Test
     fun `uberegnet behandling forkastes manuelt`() {
         a1 {
-            tilGodkjenning(1.januar, 31.januar)
+            tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false, automatiskBehandling = false)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.single()
@@ -89,7 +89,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     @Test
     fun `annullering oppretter ny behandling som forkastes`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             håndterAnnullering(inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.utbetalingId)
             val behandlingForkastetEvent = observatør.behandlingForkastetEventer.single()
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.last()
@@ -116,7 +116,7 @@ internal class BehandlingForkastetEventTest : AbstractDslTest() {
     @Test
     fun `annullering av åpnet revurdering endrer behandling som forkastes`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

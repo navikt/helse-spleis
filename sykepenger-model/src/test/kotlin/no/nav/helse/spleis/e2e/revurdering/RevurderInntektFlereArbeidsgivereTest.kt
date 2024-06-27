@@ -514,7 +514,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     @Test
     fun `kun den arbeidsgiveren som har fått overstyrt inntekt som faktisk lagrer inntekten`() {
         a2 {
-            nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent) // gammelt vedtak
+            nyttVedtak(1.januar(2017) til 31.januar(2017), 100.prosent) // gammelt vedtak
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))

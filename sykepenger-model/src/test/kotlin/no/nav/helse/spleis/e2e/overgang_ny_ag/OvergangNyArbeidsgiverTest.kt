@@ -35,7 +35,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
     fun `overgang til ny arbeidsgiver - innenfor agp - reduksjon oppgitt`() = Toggle.TilkommenInntekt.enable {
         // Inntektsmelding-signal corner case
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
         }
         a2 {
             håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
@@ -51,7 +51,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
         val forventetSykepengegrunnlag = `6G`.beløp(1.januar)
 
         a1 {
-            nyttVedtak(1.januar, 31.januar, beregnetInntekt = inntektA1)
+            nyttVedtak(januar, beregnetInntekt = inntektA1)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, inntektA1, gjelder = 1.januar til 31.januar, forklaring = "42")))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

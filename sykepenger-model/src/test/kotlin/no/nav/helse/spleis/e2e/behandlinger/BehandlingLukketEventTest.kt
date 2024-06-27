@@ -24,7 +24,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes når vedtak fattes`() {
         a1 {
-            tilGodkjenning(1.januar, 31.januar)
+            tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
             val behandlingLukketEvent = observatør.behandlingLukketEventer.single()
             val sisteBehandling = inspektør(1.vedtaksperiode).behandlinger.single()
@@ -45,7 +45,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes ikke når vedtak avvises`() {
         a1 {
-            tilGodkjenning(1.januar, 31.januar)
+            tilGodkjenning(januar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = false)
             assertEquals(0, observatør.behandlingLukketEventer.size)
             val sisteBehandling = inspektørForkastet(1.vedtaksperiode).behandlinger.single()
@@ -57,7 +57,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes når revurdert vedtak avvises`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -118,7 +118,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes når revurdering fattes`() {
         a1 {
-            nyttVedtak(1.januar, onsdag den 31.januar)
+            nyttVedtak(1.januar til (onsdag den 31.januar))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -143,7 +143,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes når revurdering avvises`() {
         a1 {
-            nyttVedtak(1.januar, onsdag den 31.januar)
+            nyttVedtak(1.januar til (onsdag den 31.januar))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(onsdag den 31.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -168,7 +168,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes når revurdering uten utbetaling fattes`() {
         a1 {
-            nyttVedtak(1.januar, søndag den 28.januar)
+            nyttVedtak(1.januar til (søndag den 28.januar))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(søndag den 28.januar, Dagtype.Feriedag)))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, godkjent = true)
@@ -192,7 +192,7 @@ internal class BehandlingLukketEventTest : AbstractDslTest() {
     @Test
     fun `behandling lukkes når revurdering gjør om til auu - med tidligere utbetaling`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             håndterOverstyrTidslinje((17.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) })
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

@@ -49,7 +49,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         "a4" {}
         "a5" {}
         "a6" {
-            tilGodkjenning(1.mars, 31.mars)
+            tilGodkjenning(mars)
             håndterSkjønnsmessigFastsettelse(1.mars, listOf(OverstyrtArbeidsgiveropplysning("a6", INGEN)))
             håndterYtelser(1.vedtaksperiode)
             assertForventetFeil(
@@ -154,7 +154,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `korrigere inntekten på noe som allerede har blitt skjønnsmessig fastsatt`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -174,7 +174,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `skjønnsmessig fastsatt inntekt skal ikke ha avviksvurdering`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
@@ -196,7 +196,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `saksbehandler-inntekt overstyres av en skjønnsmessig med samme beløp`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2, forklaring = "forklaring")))
         assertTrue(inspektør.inntektsopplysningISykepengegrunnlaget(1.januar) is Saksbehandler)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
@@ -206,7 +206,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `skjønnsmessig fastsettelse overstyres av en skjønnsmessig med samme beløp`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
@@ -215,7 +215,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `skjønnsmessig fastsettelse overstyres av en inntektmelding med samme beløp`() {
         a1 {
-            tilGodkjenning(1.januar, 31.januar)
+            tilGodkjenning(januar)
             val inntekt = INNTEKT
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntekt)))
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
@@ -258,7 +258,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `skjønnsmessig fastsettelse overstyres av en inntektmelding med ulikt beløp`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSkjønnsmessigFastsettelse(
             1.januar,
             listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2))
@@ -298,7 +298,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `Tidligere perioder revurderes mens nyere skjønnsmessig fastsettes`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             nyPeriode(1.mars til 31.mars, a1)
             håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT * 2)
             håndterVilkårsgrunnlag(2.vedtaksperiode, inntekt = INNTEKT)

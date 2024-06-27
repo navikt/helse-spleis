@@ -31,7 +31,7 @@ internal class AndreSøknadstyperTest: AbstractDslTest() {
     @ValueSource(strings = ["SELVSTENDIGE_OG_FRILANSERE", "OPPHOLD_UTLAND", "ANNET_ARBEIDSFORHOLD", "BEHANDLINGSDAGER", "REISETILSKUDD", "GRADERT_REISETILSKUDD"])
     fun `støtter ikke forlengelser`(søknadstype: String) {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Søknadstype(søknadstype))
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)

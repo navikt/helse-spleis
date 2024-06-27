@@ -14,7 +14,7 @@ internal class GrunnbeløpsreguleringTest: AbstractDslTest() {
     @Test
     fun `Grunnbeløpsregulering med allerede riktig G-beløp`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertEquals(561804.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.`6G`)
             nullstillTilstandsendringer()

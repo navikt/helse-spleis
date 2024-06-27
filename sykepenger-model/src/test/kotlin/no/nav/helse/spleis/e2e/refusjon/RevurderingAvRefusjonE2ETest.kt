@@ -27,7 +27,7 @@ internal class RevurderingAvRefusjonE2ETest : AbstractDslTest() {
                 )
             }
 
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             assertSubsumsjoner { assertEquals(1, antallSubsumsjoner(this)) }
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
                 OverstyrtArbeidsgiveropplysning(a1, INNTEKT, "ingen endring", null, listOf(

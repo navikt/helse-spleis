@@ -490,10 +490,9 @@ internal fun standardSimuleringsresultat(orgnummer: String) = SimuleringResultat
 )
 
 internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     grad: Prosentdel = 100.prosent,
-    førsteFraværsdag: LocalDate = fom,
+    førsteFraværsdag: LocalDate = periode.start,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
@@ -501,7 +500,7 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag),
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
 ): UUID {
-    val vedtaksperiode = nyPeriode(fom til tom, grad)
+    val vedtaksperiode = nyPeriode(periode, grad)
     håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
     håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, Medlemskapsvurdering.Medlemskapstatus.Ja, sykepengegrunnlagSkatt, arbeidsforhold)
     håndterYtelser(vedtaksperiode)
@@ -509,17 +508,16 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     return vedtaksperiode
 }
 internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     grad: Prosentdel = 100.prosent,
-    førsteFraværsdag: LocalDate = fom,
+    førsteFraværsdag: LocalDate = periode.start,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag)
 ) {
-    val vedtaksperiode = tilGodkjenning(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
+    val vedtaksperiode = tilGodkjenning(periode, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, sykepengegrunnlagSkatt)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
     håndterUtbetalt(status)
 }

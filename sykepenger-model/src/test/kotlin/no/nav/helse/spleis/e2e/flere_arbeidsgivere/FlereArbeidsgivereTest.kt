@@ -391,7 +391,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         listOf(a1).nyeVedtak(1.januar til 31.januar, inntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.januar), arbeidsforhold = arbeidsforhold)
         listOf(a1).forlengVedtak(1.februar til 28.februar)
         a2 {
-            tilGodkjenning(1.april, 30.april, beregnetInntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.april), arbeidsforhold = arbeidsforhold)
+            tilGodkjenning(april, beregnetInntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.april), arbeidsforhold = arbeidsforhold)
         }
         listOf(a1).forlengVedtak(1.mars til 31.mars)
 
@@ -507,7 +507,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
     @Test
     fun `kort sykdom hos ag2 med eksisterende vedtak`() {
-        a1 { nyttVedtak(1.januar, 31.januar, 100.prosent) }
+        a1 { nyttVedtak(januar, 100.prosent) }
         nyPeriode(1.februar til 14.februar, a1, a2)
         a1 {
             assertEquals(1.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
@@ -550,12 +550,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
         a1 {
-            nyttVedtak(1.januar, 31.januar)
+            nyttVedtak(januar)
             assertIngenFunksjonelleFeil()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         }
         a2 {
-            nyttVedtak(1.mars, 31.mars)
+            nyttVedtak(mars)
             assertIngenFunksjonelleFeil()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         }
