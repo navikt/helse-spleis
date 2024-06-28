@@ -1,8 +1,10 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.DumpVedtaksperioder
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
@@ -47,6 +49,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val vedtaksperiodeOpprettetEventer = mutableListOf<PersonObserver.VedtaksperiodeOpprettet>()
     val overlappendeInfotrygdperioder = mutableListOf<PersonObserver.OverlappendeInfotrygdperioder>()
     val utkastTilVedtakEventer = mutableListOf<PersonObserver.UtkastTilVedtakEvent>()
+    val vedtaksperiodeDumper = mutableListOf<String>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
@@ -219,5 +222,21 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
         utkastTilVedtakEventer.add(event)
+    }
+
+    override fun dumpVedtaksperiode(dump: DumpVedtaksperioder, yrkesaktivitet: String, vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, tilstand: String, oppdatert: LocalDateTime) {
+        vedtaksperiodeDumper.add(
+            """
+                {
+                "yrkesaktivitet": "$yrkesaktivitet",
+                "vedtaksperiodeId": "$vedtaksperiodeId",
+                "fom": "$fom",
+                "tom": "$tom",
+                "skjæringstidspunkt": "$skjæringstidspunkt",
+                "tilstand": "$tilstand",
+                "oppdatert" "$oppdatert"
+                }
+            """
+        )
     }
 }

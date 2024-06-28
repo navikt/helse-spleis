@@ -12,6 +12,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.DumpVedtaksperioder
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
@@ -685,6 +686,10 @@ internal class Arbeidsgiver private constructor(
         return énHarHåndtert(overstyrSykepengegrunnlag) { håndter(it) }
     }
 
+    fun håndter(dump: DumpVedtaksperioder) {
+        vedtaksperioder.forEach { it.dump(dump) }
+    }
+
     internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {
         return sykdomshistorikk.håndter(hendelse)
     }
@@ -885,6 +890,7 @@ internal class Arbeidsgiver private constructor(
         looper { håndtert = håndterer(it, hendelse) || håndtert }
         return håndtert
     }
+
 
     // støtter å loope over vedtaksperioder som modifiseres pga. forkasting.
     // dvs. vi stopper å iterere så snart listen har endret seg

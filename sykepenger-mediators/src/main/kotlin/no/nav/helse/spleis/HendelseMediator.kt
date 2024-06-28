@@ -4,6 +4,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.DumpVedtaksperioder
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -46,6 +47,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
+import no.nav.helse.spleis.meldinger.model.DumpVedtaksperioderMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
 import no.nav.helse.spleis.meldinger.model.GjenopplivVilkårsgrunnlagMessage
@@ -472,6 +474,12 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: DumpVedtaksperioderMessage, dump: DumpVedtaksperioder, context: MessageContext) {
+        hentPersonOgHåndter(message, dump, context) { person ->
+            person.håndter(dump)
+        }
+    }
+
     private fun <Hendelse : PersonHendelse> opprettPersonOgHåndter(
         personopplysninger: Personopplysninger,
         message: HendelseMessage,
@@ -639,4 +647,5 @@ internal interface IHendelseMediator {
     fun behandle(message: GjenopplivVilkårsgrunnlagMessage, gjenopplivVilkårsgrunnlag: GjenopplivVilkårsgrunnlag, context: MessageContext)
     fun behandle(message: SkjønnsmessigFastsettelseMessage, skjønnsmessigFastsettelse: SkjønnsmessigFastsettelse, context: MessageContext)
     fun behandle(message: MinimumSykdomsgradVurdertMessage, minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding, context: MessageContext)
+    fun behandle(message: DumpVedtaksperioderMessage, dump: DumpVedtaksperioder, context: MessageContext)
 }

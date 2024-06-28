@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.DumpVedtaksperioder
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
@@ -438,6 +440,18 @@ internal class PersonMediator(
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "behandlingId" to event.behandlingId,
             "tags" to event.tags
+        )))
+    }
+
+    override fun dumpVedtaksperiode(dump: DumpVedtaksperioder, yrkesaktivitet: String, vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, tilstand: String, oppdatert: LocalDateTime) {
+        queueMessage(JsonMessage.newMessage("vedtaksperiode_data", mapOf(
+            "yrkesaktivitet" to yrkesaktivitet,
+            "fom" to fom,
+            "tom" to tom,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "tilstand" to tilstand,
+            "oppdatert" to oppdatert,
+            "vedtaksperiodeId" to vedtaksperiodeId
         )))
     }
 

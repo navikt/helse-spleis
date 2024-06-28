@@ -3,6 +3,7 @@ package no.nav.helse.spleis.mediator
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.DumpVedtaksperioder
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -39,6 +40,7 @@ import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
+import no.nav.helse.spleis.meldinger.model.DumpVedtaksperioderMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
 import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
@@ -425,4 +427,6 @@ internal class TestHendelseMediator : IHendelseMediator {
         minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurderingMelding,
         context: MessageContext
     ) {}
+
+    override fun behandle(message: DumpVedtaksperioderMessage, dump: DumpVedtaksperioder, context: MessageContext) {}
 }
