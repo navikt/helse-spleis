@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import java.util.UUID
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -15,18 +13,12 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.i
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RE_1
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -125,7 +117,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         listOf(a1, a2).nyeVedtak(1.desember(2017) til 28.desember(2017))
 
         a2 {
-            forlengVedtak(fom = 29.desember(2017), tom = 10.januar)
+            forlengVedtak(29.desember(2017) til 10.januar)
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
@@ -147,7 +139,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         listOf(a1, a2).nyeVedtak(1.desember(2017) til 28.desember(2017))
 
         a2 {
-            forlengVedtak(fom = 29.desember(2017), tom = 10.januar)
+            forlengVedtak(29.desember(2017) til 10.januar)
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
@@ -175,7 +167,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         listOf(a1, a2).nyeVedtak(1.desember(2017) til 28.desember(2017), inntekt = INNTEKT)
 
         a2 {
-            forlengVedtak(fom = 29.desember(2017), tom = 10.januar)
+            forlengVedtak(29.desember(2017) til 10.januar)
         }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar))
@@ -201,12 +193,6 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                     assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
                 })
         }
-    }
-
-    private fun Periode.avsluttUtenUtbetaling(): UUID {
-        håndterSykmelding(Sykmeldingsperiode(start, endInclusive))
-        håndterSøknad(Sykdom(start, endInclusive, 100.prosent))
-        return observatør.sisteVedtaksperiodeId(a1)
     }
 
     private fun Refusjonsopplysninger.assertRefusjonsbeløp(periode: Periode, beløp: Inntekt) {
