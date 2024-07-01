@@ -281,7 +281,8 @@ internal class PersonMediator(
             "hendelser" to event.hendelser,
             "makstid" to event.makstid,
             "fom" to event.fom,
-            "tom" to event.tom
+            "tom" to event.tom,
+            "skjæringstidspunkt" to event.skjæringstidspunkt
         )))
     }
 
