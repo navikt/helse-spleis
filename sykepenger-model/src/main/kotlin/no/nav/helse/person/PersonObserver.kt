@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.hendelser.DumpVedtaksperioder
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -754,5 +753,4 @@ interface PersonObserver {
     fun behandlingUtført() {}
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
-    fun dumpVedtaksperiode(dump: DumpVedtaksperioder, yrkesaktivitet: String, vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, tilstand: String, oppdatert: LocalDateTime) {}
 }

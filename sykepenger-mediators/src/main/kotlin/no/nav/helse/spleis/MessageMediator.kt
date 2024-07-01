@@ -10,7 +10,6 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
 import no.nav.helse.spleis.meldinger.AvbruttSøknadRiver
-import no.nav.helse.spleis.meldinger.DumpVedtaksperioderRiver
 import no.nav.helse.spleis.meldinger.DødsmeldingerRiver
 import no.nav.helse.spleis.meldinger.ForkastSykmeldingsperioderRiver
 import no.nav.helse.spleis.meldinger.GjenopplivVilkårsgrunnlagRiver
@@ -101,7 +100,6 @@ internal class MessageMediator(
             IdentOpphørtRiver(it, this)
             SkjønnsmessigFastsettelseRiver(it, this)
             MinimumSykdomsgradVurdertRiver(it, this)
-            DumpVedtaksperioderRiver(it, this)
         }
     }
 

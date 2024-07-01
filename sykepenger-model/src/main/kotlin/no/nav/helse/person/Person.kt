@@ -13,7 +13,6 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.DumpVedtaksperioder
 import no.nav.helse.hendelser.Dødsmelding
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
@@ -478,16 +477,6 @@ class Person private constructor(
             "Ingen vedtaksperioder håndterte grunnbeløpsregulering"
         }
         håndterGjenoppta(hendelse)
-    }
-
-    fun håndter(hendelse: DumpVedtaksperioder) {
-        arbeidsgivere.forEach { it.håndter(hendelse) }
-    }
-
-    fun dumpVedtaksperiode(dump: DumpVedtaksperioder, yrkesaktivitet: String, vedtaksperiodeId: UUID, fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, tilstand: String, oppdatert: LocalDateTime) {
-        observers.forEach { observer ->
-            observer.dumpVedtaksperiode(dump, yrkesaktivitet, vedtaksperiodeId, fom, tom, skjæringstidspunkt, tilstand, oppdatert)
-        }
     }
 
     fun addObserver(observer: PersonObserver) {

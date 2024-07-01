@@ -13,7 +13,6 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.DumpVedtaksperioder
 import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
@@ -2738,19 +2737,6 @@ internal class Vedtaksperiode private constructor(
         opprettet = opprettet,
         oppdatert = oppdatert
     )
-
-    fun dump(dump: DumpVedtaksperioder) {
-        person.dumpVedtaksperiode(
-            dump = dump,
-            yrkesaktivitet = arbeidsgiver.organisasjonsnummer(),
-            vedtaksperiodeId = this.id,
-            fom = this.behandlinger.periode().start,
-            tom = this.behandlinger.periode().endInclusive,
-            skjæringstidspunkt = skjæringstidspunkt,
-            tilstand = tilstand.type.name,
-            oppdatert = oppdatert
-        )
-    }
 }
 
 internal typealias VedtaksperiodeFilter = (Vedtaksperiode) -> Boolean
