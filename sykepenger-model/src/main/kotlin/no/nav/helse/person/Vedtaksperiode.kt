@@ -787,7 +787,8 @@ internal class Vedtaksperiode private constructor(
             hendelser = hendelseIder,
             makstid = person.makstid(this),
             fom = periode.start,
-            tom = periode.endInclusive
+            tom = periode.endInclusive,
+            skjæringstidspunkt = skjæringstidspunkt
         )
 
         person.vedtaksperiodeEndret(event)

@@ -38,7 +38,8 @@ interface PersonObserver {
         val hendelser: Set<UUID>,
         val makstid: LocalDateTime,
         val fom: LocalDate,
-        val tom: LocalDate
+        val tom: LocalDate,
+        val skjæringstidspunkt: LocalDate
     )
 
     data class VedtaksperiodeVenterEvent(
