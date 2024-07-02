@@ -768,8 +768,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `får tidligere sykmelding og søknad for en annen arbeidsgiver`() {
-        tilGodkjenning(1.februar, 28.februar, a1)
-        tilGodkjenning(1.januar, 31.januar, a2)
+        tilGodkjenning(1.februar til 28.februar, a1)
+        tilGodkjenning(1.januar til 31.januar, a2)
 
         assertTilstander(
             1.vedtaksperiode,

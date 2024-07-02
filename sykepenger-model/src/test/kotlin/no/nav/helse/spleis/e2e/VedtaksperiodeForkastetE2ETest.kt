@@ -90,7 +90,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse forkastet periode`() {
-        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
@@ -103,7 +103,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse forkastet periode over helg`() {
-        tilGodkjenning(1.januar, 26.januar, ORGNUMMER)
+        tilGodkjenning(1.januar til 26.januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
@@ -126,7 +126,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forventer arbeidsgiveropplysninger ved kort gap til forkastet periode`() {
-        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 

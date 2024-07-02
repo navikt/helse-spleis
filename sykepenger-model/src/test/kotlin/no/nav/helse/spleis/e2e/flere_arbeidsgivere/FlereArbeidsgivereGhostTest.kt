@@ -124,7 +124,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        tilGodkjenning(10.februar, 28.februar, ghost)
+        tilGodkjenning(10.februar til 28.februar, ghost)
         assertEquals(10.februar, inspektør(ghost).vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
 
         nullstillTilstandsendringer()

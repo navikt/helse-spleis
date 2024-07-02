@@ -113,7 +113,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke hente registerdata for vilkårsprøving på nytt ved overstyring av inntekt`() {
-        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 19000.månedlig, orgnummer = ORGNUMMER, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)

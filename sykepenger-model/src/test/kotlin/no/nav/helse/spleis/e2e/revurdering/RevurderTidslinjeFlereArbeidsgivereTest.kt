@@ -317,7 +317,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `revurdere en AG når en annen AG er til godkjenning`() {
-        tilGodkjenning(1.januar, 31.januar, a1, a2)
+        tilGodkjenning(1.januar til 31.januar, a1, a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 

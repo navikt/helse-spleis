@@ -463,7 +463,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `andre inntektskilder til godkjenning på førstegangsbehandling - skal gi error`() {
-        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent), andreInntektskilder = true)
         assertForventetFeil(
             forklaring = "Produkteier ønsker warning, legal ønsker error. for øyeblikket warning",

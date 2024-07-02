@@ -81,7 +81,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun arbeidsgiverutbetaling() {
-        tilGodkjenning(1.januar, 31.januar, a1)
+        tilGodkjenning(1.januar til 31.januar, a1)
         assertGodkjenningsbehov(
             tags = setOf("Arbeidsgiverutbetaling"),
             omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 240000.0)),
@@ -101,7 +101,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `6G-begrenset`() {
-        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = 100000.månedlig)
+        tilGodkjenning(1.januar til 31.januar, a1, beregnetInntekt = 100000.månedlig)
         assertGodkjenningsbehov(
             tags = setOf("Arbeidsgiverutbetaling", "6GBegrenset"),
             omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 1200000.0)),
@@ -165,7 +165,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `ingen ny arbeidsgiverperiode og sykepengegrunnlag under 2g`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
-        tilGodkjenning(10.februar, 20.februar, a1, beregnetInntekt = 10000.månedlig)
+        tilGodkjenning(10.februar til 20.februar, a1, beregnetInntekt = 10000.månedlig)
         assertGodkjenningsbehov(
             skjæringstidspunkt = 10.februar,
             periodeFom = 10.februar,
@@ -229,7 +229,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        tilGodkjenning(16.februar, 28.februar, a1)
+        tilGodkjenning(16.februar til 28.februar, a1)
         assertEquals("NNNNNHH NNNNNHH NNSSSHH SSSSSHH SSS???? ??????? ????SHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
         assertTags(setOf("IngenNyArbeidsgiverperiode"), 2.vedtaksperiode.id(a1))
     }
@@ -260,7 +260,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga forlengelse`() {
-        tilGodkjenning(1.januar, 31.januar, a1)
+        tilGodkjenning(1.januar til 31.januar, a1)
         assertIngenTag("IngenNyArbeidsgiverperiode", 1.vedtaksperiode.id(a1))
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
@@ -270,11 +270,11 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ikke med tag IngenNyArbeidsgiverperiode når det er ny AGP`() {
-        tilGodkjenning(1.januar, 31.januar, a1)
+        tilGodkjenning(1.januar til 31.januar, a1)
         assertIngenTag("IngenNyArbeidsgiverperiode", 1.vedtaksperiode.id(a1))
         håndterUtbetalingsgodkjenning()
         håndterUtbetalt()
-        tilGodkjenning(1.mars, 31.mars, a1)
+        tilGodkjenning(1.mars til 31.mars, a1)
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
     }
 
@@ -282,7 +282,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     fun `Periode med utbetaling etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 10.januar, 100.prosent))
-        tilGodkjenning(15.januar, 31.januar, a1)
+        tilGodkjenning(15.januar til 31.januar, a1)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
@@ -293,7 +293,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
         val inntektsmeldingId = UUID.randomUUID()
-        tilGodkjenning(17.januar, 31.januar, a1, arbeidsgiverperiode = listOf(1.januar til 16.januar), inntektsmeldingId = inntektsmeldingId)
+        tilGodkjenning(17.januar til 31.januar, a1, arbeidsgiverperiode = listOf(1.januar til 16.januar), inntektsmeldingId = inntektsmeldingId)
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
     }
 
@@ -380,7 +380,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `flere arbeidsgivere`() {
-        tilGodkjenning(1.januar, 31.januar, a1, a2)
+        tilGodkjenning(1.januar til 31.januar, a1, a2)
         assertGodkjenningsbehov(
             tags = setOf("Arbeidsgiverutbetaling", "FlereArbeidsgivere"),
             inntektskilde = "FLERE_ARBEIDSGIVERE",
@@ -413,7 +413,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode med minst én navdag får Innvilget-tag`() {
-        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = INNTEKT)
+        tilGodkjenning(1.januar til 31.januar, a1, beregnetInntekt = INNTEKT)
         assertGodkjenningsbehov(tags = setOf("Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
     }
 
@@ -437,7 +437,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Periode med minst én navdag og minst én avslagsdag får DelvisInnvilget-tag`() {
         createTestPerson("18.01.1948".somPersonidentifikator(), 18.januar(1948))
-        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = INNTEKT)
+        tilGodkjenning(1.januar til 31.januar, a1, beregnetInntekt = INNTEKT)
         assertGodkjenningsbehov(tags = setOf("DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver"))
     }
 
@@ -484,7 +484,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `legger til førstegangsbehandling eller forlengelse som tag`() {
-        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = INNTEKT)
+        tilGodkjenning(1.januar til 31.januar, a1, beregnetInntekt = INNTEKT)
         assertGodkjenningsbehov(
             tags = setOf("Førstegangsbehandling")
         )
@@ -523,7 +523,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `markerer sykepengegrunnlagsfakta som skjønnsfastsatt dersom én arbeidsgiver har fått skjønnmessig fastsatt sykepengegrunnlaget`() {
-        tilGodkjenning(1.januar, 31.januar, a1, a2,  beregnetInntekt = 20000.månedlig)
+        tilGodkjenning(1.januar til 31.januar, a1, a2,  beregnetInntekt = 20000.månedlig)
         håndterSkjønnsmessigFastsettelse(1.januar, arbeidsgiveropplysninger = listOf(
             OverstyrtArbeidsgiveropplysning(a1, 41000.månedlig),
             OverstyrtArbeidsgiveropplysning(a2, 30000.månedlig)

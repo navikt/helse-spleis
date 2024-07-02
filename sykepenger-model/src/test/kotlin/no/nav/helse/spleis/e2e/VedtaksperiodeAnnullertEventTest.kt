@@ -50,7 +50,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `vi sender ikke ut vedtaksperiode annullert-hendelse for vedtaksperioder som ikke er utbetalt`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        tilGodkjenning(5.mars, 31.mars, ORGNUMMER)
+        tilGodkjenning(5.mars til 31.mars, ORGNUMMER)
         håndterAnnullerUtbetaling()
 
         assertEquals(2, observatør.vedtaksperiodeAnnullertEventer.size)

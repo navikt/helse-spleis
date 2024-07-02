@@ -549,7 +549,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `overlappende sykmeldinger - første bit skal kunne gå videre selv om vi ikke har mottatt søknad for halen`() {
-        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))

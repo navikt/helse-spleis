@@ -358,7 +358,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
     @Test
     fun `korrigert agp i avventer_godkjenning`() {
-        tilGodkjenning(1.januar, 31.januar, a1, beregnetInntekt = INNTEKT)
+        tilGodkjenning(1.januar til 31.januar, a1, beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         håndterInntektsmelding(listOf(5.januar til 20.januar),)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)

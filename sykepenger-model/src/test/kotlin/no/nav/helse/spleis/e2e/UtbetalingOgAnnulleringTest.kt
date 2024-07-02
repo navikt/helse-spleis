@@ -45,7 +45,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     @Test
     fun `annullere senere periode enn perioden til godkjenning`() {
         nyttVedtak(1.mars, 31.mars)
-        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)

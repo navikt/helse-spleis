@@ -953,7 +953,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `Out of order kastes ut når det finnes en forkastet periode senere i tid`() {
-        tilGodkjenning(1.februar, 25.februar, ORGNUMMER)
+        tilGodkjenning(1.februar til 25.februar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
 

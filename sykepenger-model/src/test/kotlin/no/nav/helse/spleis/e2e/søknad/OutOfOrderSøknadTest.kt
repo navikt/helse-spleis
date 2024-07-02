@@ -58,7 +58,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `out-of-order perioder endrer skjæringstidspunkter`() {
-        tilGodkjenning(3.januar, 31.januar, ORGNUMMER)
+        tilGodkjenning(3.januar til 31.januar, ORGNUMMER)
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 2.januar, ORGNUMMER)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 20000.månedlig)

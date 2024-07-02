@@ -26,7 +26,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `kan ikke overstyre én AG hvis en annen AG har blitt godkjent`() {
-        tilGodkjenning(1.januar, 31.januar, a1, a2)
+        tilGodkjenning(1.januar til 31.januar, a1, a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
@@ -42,7 +42,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
     @Test
     fun `overstyre en eldre periode hos en arbeidsgiver`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
-        tilGodkjenning(1.oktober, 30.oktober, a2)
+        tilGodkjenning(1.oktober til 30.oktober, a2)
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a2)
@@ -52,7 +52,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
     fun `overstyre og utbetalte en eldre periode hos en arbeidsgiver`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
 
-        tilGodkjenning(1.oktober, 30.oktober, a2)
+        tilGodkjenning(1.oktober til 30.oktober, a2)
 
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
 

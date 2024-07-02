@@ -2035,7 +2035,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Hensyntar korrigert inntekt i avventer blokkerende`() {
-        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         nyPeriode(1.mars til 31.mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = 25000.månedlig)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -2060,7 +2060,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding korrigerer periode til godkjenning`() {
-        tilGodkjenning(1.januar, 31.januar, ORGNUMMER, beregnetInntekt = INNTEKT)
+        tilGodkjenning(1.januar til 31.januar, ORGNUMMER, beregnetInntekt = INNTEKT)
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(
@@ -2075,7 +2075,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `inntektsmelding korrigerer periode til godkjenning - starter før perioden`() {
-        tilGodkjenning(2.januar, 31.januar, ORGNUMMER, beregnetInntekt = INNTEKT)
+        tilGodkjenning(2.januar til 31.januar, ORGNUMMER, beregnetInntekt = INNTEKT)
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(

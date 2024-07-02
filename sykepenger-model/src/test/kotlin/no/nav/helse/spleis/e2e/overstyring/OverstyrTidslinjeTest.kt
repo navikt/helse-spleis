@@ -198,7 +198,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `vedtaksperiode strekker seg tilbake og endrer ikke skjæringstidspunktet`() {
-        tilGodkjenning(10.januar, 31.januar, a1)
+        tilGodkjenning(10.januar til 31.januar, a1)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
@@ -217,7 +217,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `strekker ikke inn i forrige periode`() {
         nyPeriode(1.januar til 9.januar, a1)
-        tilGodkjenning(10.januar, 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
+        tilGodkjenning(10.januar til 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
         nullstillTilstandsendringer()
         // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
         assertEquals(4, inspektør.sykdomshistorikk.inspektør.elementer())
