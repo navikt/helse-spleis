@@ -1589,7 +1589,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
-        forlengelseTilGodkjenning(1.februar, 28.februar, a1)
+        forlengelseTilGodkjenning(februar, a1)
         nyPeriode(1.mars til 31.mars, orgnummer = a1)
         nyPeriode(1.april til 30.april, orgnummer = a1)
         nyPeriode(1.april til 30.april, orgnummer = a2)

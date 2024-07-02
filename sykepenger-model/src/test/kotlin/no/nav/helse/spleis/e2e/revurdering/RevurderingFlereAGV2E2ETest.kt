@@ -193,7 +193,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     @Test
     fun `revurdering av ag 2 mens ag 1 er til utbetaling`() {
         nyeVedtak(januar, a1, a2)
-        forlengelseTilGodkjenning(1.februar, 28.februar, a1, a2)
+        forlengelseTilGodkjenning(februar, a1, a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
 
@@ -264,7 +264,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a3)
 
         nyeVedtak(mai, a1, a2)
-        forlengelseTilGodkjenning(1.juni, 30.juni, a1, a2)
+        forlengelseTilGodkjenning(juni, a1, a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
 

@@ -41,7 +41,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun forlengelse() {
         nyeVedtak(januar, a1, a2, inntekt = 20000.månedlig)
-        forlengelseTilGodkjenning(1.februar, 10.februar, a1, a2)
+        forlengelseTilGodkjenning(1.februar til 10.februar, a1, a2)
         assertGodkjenningsbehov(
             vedtaksperiodeId = 2.vedtaksperiode.id(a1),
             periodeFom = 1.februar,

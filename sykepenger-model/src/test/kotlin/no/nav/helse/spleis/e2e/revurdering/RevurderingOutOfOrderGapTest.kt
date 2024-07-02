@@ -740,7 +740,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
 
-        forlengelseTilGodkjenning(1.mars, 15.mars, a2, a3)
+        forlengelseTilGodkjenning(1.mars til 15.mars, a2, a3)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
