@@ -173,7 +173,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling på ag1 reduseres selv om det ikke utbetales noe til ag2`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = 40000.månedlig)
+        nyeVedtak(januar, a1, a2, inntekt = 40000.månedlig)
         forlengVedtak(1.februar, 28.februar, a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
@@ -208,7 +208,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `flere AG - kort periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - kort periode`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
@@ -217,7 +217,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `flere AG - periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - sender feilaktig flere perioder til behandling`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
@@ -799,7 +799,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `sykmelding og søknad i forlengelsen til a1 kommer før sykmelding til a2 - skal ikke ha flere perioder i AvventerGodkjenning`() {
-        nyeVedtak(1.januar, 31.januar, a2, a1)
+        nyeVedtak(januar, a2, a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)

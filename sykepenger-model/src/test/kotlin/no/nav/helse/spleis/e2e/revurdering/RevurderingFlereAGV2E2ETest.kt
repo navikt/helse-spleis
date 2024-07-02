@@ -20,7 +20,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -61,7 +60,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdere første periode - flere ag - ag 1`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         forlengVedtak(1.mars, 31.mars, a1, a2)
         nullstillTilstandsendringer()
@@ -81,7 +80,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdere andre periode - flere ag - ag 1`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         forlengVedtak(1.mars, 31.mars, a1, a2)
         nullstillTilstandsendringer()
@@ -96,7 +95,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdere tredje periode - flere ag - ag1`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         forlengVedtak(1.mars, 31.mars, a1, a2)
         nullstillTilstandsendringer()
@@ -111,7 +110,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdere første periode - flere ag - ag 2`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         forlengVedtak(1.mars, 31.mars, a1, a2)
         nullstillTilstandsendringer()
@@ -126,7 +125,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdere andre periode - flere ag - ag 2`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         forlengVedtak(1.mars, 31.mars, a1, a2)
         nullstillTilstandsendringer()
@@ -141,7 +140,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdere tredje periode - flere ag - ag2`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         forlengVedtak(1.mars, 31.mars, a1, a2)
         nullstillTilstandsendringer()
@@ -156,7 +155,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `starte revurdering av ag1 igjen etter at ag2 har startet revurdering`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -174,7 +173,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdering påvirkes ikke av gjenoppta behandling ved avsluttet uten utbetaling`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -193,7 +192,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdering av ag 2 mens ag 1 er til utbetaling`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengelseTilGodkjenning(1.februar, 28.februar, a1, a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
@@ -264,7 +263,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     fun `revurdering av tidligere frittstående periode hos ag3 mens overlappende hos ag1 og ag2 utbetales`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a3)
 
-        nyeVedtak(1.mai, 31.mai, a1, a2)
+        nyeVedtak(mai, a1, a2)
         forlengelseTilGodkjenning(1.juni, 30.juni, a1, a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
@@ -306,7 +305,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdering av ag 1 kicker i gang revurdering av ag 2 - holder igjen senere perioder hos ag1`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
 
         nyttVedtak(1.april, 30. april, orgnummer = a1)
@@ -369,7 +368,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `tre ag der a1 og a3 har to førstegangsbehandlinger - første førstegang på a1 blir revurdert mens andre førstegang på a1 er til utbetaling`() {
-        nyeVedtak(1.januar, 31.januar, a1, a3)
+        nyeVedtak(januar, a1, a3)
         førstegangTilGodkjenning(1.mars, 31.mars, a1, a2, a3)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
@@ -411,7 +410,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdering av ag 2 mens ag 1 revurderes og er til utbetaling`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
@@ -462,7 +461,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `validerer ytelser på alle arbeidsgivere ved revurdering av flere arbeidgivere`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
         håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(20.januar til 31.januar, 100)), orgnummer = a1)
@@ -472,7 +471,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `validerer ytelser for periode som strekker seg fra skjæringstidsunkt til siste tom`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         forlengVedtak(1.mars, 31.mars, a2)
 
@@ -483,7 +482,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `forkaster gamle utbetalinger for flere AG når der skjer endringer siden forrige`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
 
         håndterOverstyrTidslinje(listOf(
@@ -520,7 +519,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `Varsel på perioder hos begge AG dersom grad er under 20 prosent`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a1)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a2)
@@ -534,7 +533,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `revurdere på en eldre arbeidsgiver - infotrygd har utbetalt `() {
-        nyeVedtak(1.januar, 31.januar, a1)
+        nyeVedtak(januar, a1)
         nyPeriode(1.februar til 18.februar, a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)

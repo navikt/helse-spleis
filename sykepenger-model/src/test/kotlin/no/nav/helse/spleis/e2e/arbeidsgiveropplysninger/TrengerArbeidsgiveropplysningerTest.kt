@@ -302,7 +302,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `ber ikke om inntekt når vi allerede har inntekt på skjæringstidspunktet -- med arbeidsgiverperiode`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, orgnummer = a2)
         nyPeriode(1.mars til 31.mars, a1)
 
@@ -326,7 +326,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `ber ikke om inntekt og AGP når vi har inntekt på skjæringstidspunkt og det er mindre enn 16 dagers gap`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 10.februar, orgnummer = a2)
         nyPeriode(11.februar til 28.februar, a1)
 
@@ -347,7 +347,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med FastsattInntekt når vi allerede har en inntektsmelding lagt til grunn på skjæringstidspunktet`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, orgnummer = a2)
         nyPeriode(1.mars til 31.mars, a1)
 

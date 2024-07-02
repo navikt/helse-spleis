@@ -139,7 +139,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
     @Test
     fun `blir syk fra ghost man har vært syk fra tidligere, og inntektsmeldingen kommer først`() {
-        nyeVedtak(1.januar(2017), 31.januar(2017), a1, a2)
+        nyeVedtak(1.januar(2017) til 31.januar(2017), a1, a2)
 
         håndterSøknad(Sykdom(1.januar, fredag den 26.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)

@@ -20,7 +20,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -182,7 +181,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `to AG - én periode på hver - én blir revurdert`() {
-        nyeVedtak(1.januar, 31.januar, a2, a1)
+        nyeVedtak(januar, a2, a1)
         nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = a2)
@@ -225,7 +224,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `to AG - to perioder på den ene der den siste er ufullstendig, én periode på den andre - én blir revurdert`() {
-        nyeVedtak(1.januar, 31.januar, a2, a1)
+        nyeVedtak(januar, a2, a1)
         nullstillTilstandsendringer()
 
         håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar), orgnummer = a2)
@@ -276,7 +275,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `to AG - to perioder på hver - første periode blir revurdert på én AG og avventer godkjenning`() {
-        nyeVedtak(1.januar, 31.januar, a2, a1)
+        nyeVedtak(januar, a2, a1)
         forlengVedtak(1.februar, 28.februar, a2, a1)
         nullstillTilstandsendringer()
 
@@ -333,7 +332,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `to AG - to perioder på hver - én blir revurdert på én AG`() {
-        nyeVedtak(1.januar, 31.januar, a2, a1)
+        nyeVedtak(januar, a2, a1)
         forlengVedtak(1.februar, 28.februar, a2, a1)
         nullstillTilstandsendringer()
 
@@ -363,7 +362,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
     @Test
     fun `Revurdering til ferie på a1 skal ikke påvirke utbetalingen til a2`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = 32000.månedlig)
+        nyeVedtak(januar, a1, a2, inntekt = 32000.månedlig)
         assertPeriode(17.januar til 31.januar, a1, 1081.daglig)
         assertPeriode(17.januar til 31.januar, a2, 1080.daglig)
 

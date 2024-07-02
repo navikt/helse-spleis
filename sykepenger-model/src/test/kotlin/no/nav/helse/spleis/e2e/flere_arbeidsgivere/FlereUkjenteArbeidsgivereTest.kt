@@ -62,7 +62,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val inntektA1 = INNTEKT + 500.daglig
         val inntektA2 = INNTEKT
 
-        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = INNTEKT)
+        nyeVedtak(1.januar til 31.januar, a1, a2, inntekt = INNTEKT)
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
         forlengVedtak(1.mars, 31.mars, orgnummer = a1)
 

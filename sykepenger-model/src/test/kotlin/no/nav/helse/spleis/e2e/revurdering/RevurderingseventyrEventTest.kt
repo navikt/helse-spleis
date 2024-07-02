@@ -170,7 +170,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
     @Test
     fun `flere arbeidsgivere`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         val overstyringId = UUID.randomUUID()
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar, meldingsreferanseId = overstyringId)
 

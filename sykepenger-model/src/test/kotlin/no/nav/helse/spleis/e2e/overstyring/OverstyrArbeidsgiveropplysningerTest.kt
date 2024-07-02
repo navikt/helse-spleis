@@ -280,7 +280,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `overstyrer arbeidsgiveropplysninger på flere arbeidsgivere`() {
         val inntektPerArbeidsgiver = 19000.månedlig
-        nyeVedtak(1.januar, 31.januar, a1, a2, a3, inntekt = inntektPerArbeidsgiver)
+        nyeVedtak(januar, a1, a2, a3, inntekt = inntektPerArbeidsgiver)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a3)
@@ -346,7 +346,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `to arbeidsgivere uten endring`() {
         val inntektPerArbeidsgiver = 19000.månedlig
-        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntektPerArbeidsgiver)
+        nyeVedtak(januar, a1, a2, inntekt = inntektPerArbeidsgiver)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
 
@@ -389,7 +389,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `to arbeidsgivere kun endring på den ene`() {
         val inntektPerArbeidsgiver = 19000.månedlig
-        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntektPerArbeidsgiver)
+        nyeVedtak(januar, a1, a2, inntekt = inntektPerArbeidsgiver)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
 
@@ -439,7 +439,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `to arbeidsgivere kun refusjonsendring på den ene og endring av inntekt på andre`() {
         val inntektPerArbeidsgiver = 19000.månedlig
-        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntektPerArbeidsgiver)
+        nyeVedtak(januar, a1, a2, inntekt = inntektPerArbeidsgiver)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a2)
@@ -490,7 +490,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `flere arbeidsgivere får rett utbetaling etter nye opplysninger på begge arbeidsgivere`() {
         val inntekt = 10000.månedlig
-        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntekt)
+        nyeVedtak(januar, a1, a2, inntekt = inntekt)
         assertEquals(1, ikkeForkastedeUtbetalinger(a1).size)
         assertEquals(1, ikkeForkastedeUtbetalinger(a2).size)
 
@@ -628,7 +628,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `overstyrer kun enkelte arbeidsgivere i sykepengegrunnlaget`() {
         val inntektPerArbeidsgiver = 19000.månedlig
-        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = inntektPerArbeidsgiver)
+        nyeVedtak(januar, a1, a2, inntekt = inntektPerArbeidsgiver)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
 
@@ -667,7 +667,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `g`() {
-        nyeVedtak(1.januar, 31.januar, a1, a2)
+        nyeVedtak(januar, a1, a2)
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             meldingsreferanseId = UUID.randomUUID(),

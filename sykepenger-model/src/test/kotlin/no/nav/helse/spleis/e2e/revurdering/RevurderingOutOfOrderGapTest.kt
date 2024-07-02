@@ -503,7 +503,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `out of order periode uten utbetaling trigger revurdering -- flere ag`() {
-        nyeVedtak(1.mai, 31.mai, a1, a2)
+        nyeVedtak(mai, a1, a2)
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 15.januar, a1)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)

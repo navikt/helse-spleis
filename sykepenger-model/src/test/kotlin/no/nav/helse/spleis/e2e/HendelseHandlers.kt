@@ -155,14 +155,13 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
 }
 
 internal fun AbstractEndToEndTest.nyeVedtak(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     vararg organisasjonsnummere: String,
     inntekt: Inntekt = 20000.månedlig
 ) {
     val vedtaksperiode = observatør.sisteVedtaksperiode()
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    tilGodkjenning(fom til tom, *organisasjonsnummere, beregnetInntekt = inntekt)
+    tilGodkjenning(periode, *organisasjonsnummere, beregnetInntekt = inntekt)
     val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
 
     første.let { organisasjonsnummer ->

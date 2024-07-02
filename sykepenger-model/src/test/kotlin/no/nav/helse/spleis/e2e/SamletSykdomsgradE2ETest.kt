@@ -31,7 +31,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `hele perioden avvises`() {
-        nyeVedtak(1.januar, 4.februar, a1, a2)
+        nyeVedtak(1.januar til 4.februar, a1, a2)
         nyPeriode(5.februar til 9.februar, a1, 10.prosent)
         nyPeriode(5.februar til 9.februar, a2, 10.prosent)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
