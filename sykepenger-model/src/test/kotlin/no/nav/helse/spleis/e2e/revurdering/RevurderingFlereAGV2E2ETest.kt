@@ -337,7 +337,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
         * */
         nyttVedtak(1.januar, 31.januar, orgnummer = a1)
-        førstegangTilGodkjenning(1.mars, 31.mars, a1, a2)
+        førstegangTilGodkjenning(mars, a1, a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()
@@ -369,7 +369,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     @Test
     fun `tre ag der a1 og a3 har to førstegangsbehandlinger - første førstegang på a1 blir revurdert mens andre førstegang på a1 er til utbetaling`() {
         nyeVedtak(januar, a1, a3)
-        førstegangTilGodkjenning(1.mars, 31.mars, a1, a2, a3)
+        førstegangTilGodkjenning(mars, a1, a2, a3)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
 
         nullstillTilstandsendringer()

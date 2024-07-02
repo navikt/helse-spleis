@@ -178,21 +178,20 @@ internal fun AbstractEndToEndTest.nyeVedtak(
 }
 
 internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     vararg organisasjonsnummere: String
 ) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnummere.forEach {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom), orgnummer = it)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = it)
     }
     organisasjonsnummere.forEach {
-        håndterSøknad(Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it)
+        håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = it)
 
     }
     organisasjonsnummere.forEach {
         håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
+            arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
             beregnetInntekt = 20000.månedlig,
             orgnummer = it,
         )
