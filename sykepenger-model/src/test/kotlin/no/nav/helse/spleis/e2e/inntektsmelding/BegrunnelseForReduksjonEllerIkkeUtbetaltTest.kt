@@ -3,10 +3,13 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -71,6 +74,35 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
                         assertEquals(periode, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().sykdomstidslinje.periode())
 
                     }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `Varsel havner på feil periode når første fraværsdag er i forlengelsen`() {
+        a1 {
+            nyPeriode(1.januar til 17.januar)
+            nyPeriode(18.januar til 31.januar)
+            håndterInntektsmelding(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", førsteFraværsdag = 19.januar)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals("SSSSSHH SSSSSHH SSSSNHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertForventetFeil(
+                forklaring = "Når arbeidsgiver oppgir første fraværsdag ut i forlengelsen havner varselet om uenighet i " +
+                        "AGP på siste periode. Da utbetaler vi potensielt første periode feil og automatisk.",
+                nå = {
+                     assertVarsel(Varselkode.RV_IM_3, 2.vedtaksperiode.filter())
+                },
+                ønsket = {
+                    assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
                 }
             )
         }
