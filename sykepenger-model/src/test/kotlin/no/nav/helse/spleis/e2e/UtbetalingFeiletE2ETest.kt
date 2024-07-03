@@ -70,7 +70,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling feilet med ett oppdrag status avvist`() {
-        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent, 1.januar)
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
         nullstillTilstandsendringer()
 

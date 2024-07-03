@@ -367,7 +367,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for forkastede perioder`() {
-        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent, 1.januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = true)
         håndterUtbetalt()
 
@@ -604,7 +604,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en førstegangsbehandlingen er til utbetaling`() {
-        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent, 1.januar)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(INNTEKT * 1.05, skjæringstidspunkt = 1.januar)
         håndterUtbetalt()
@@ -614,7 +614,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en førstegangsbehandlingen er til utbetaling - utbetalingen feiler`() {
-        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent, 1.januar)
         håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)

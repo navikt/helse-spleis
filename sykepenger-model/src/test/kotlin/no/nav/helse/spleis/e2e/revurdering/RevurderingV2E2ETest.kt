@@ -465,7 +465,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering av eldre skjæringstidspunkt mens nyere skjæringstidspunkt utbetales`() {
         nyttVedtak(januar)
-        tilGodkjent(1.mars, 31.mars, 100.prosent, førsteFraværsdag = 1.mars)
+        tilGodkjent(mars, 100.prosent, førsteFraværsdag = 1.mars)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
 
@@ -609,7 +609,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `periode til utbetaling blir overstyrt`() {
-        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        tilGodkjent(januar, 100.prosent, 1.januar)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)

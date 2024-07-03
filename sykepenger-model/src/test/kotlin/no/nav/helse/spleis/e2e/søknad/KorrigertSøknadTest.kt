@@ -71,7 +71,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigert søknad i til utbetaling - utbetaler først, så revurdere`() {
-        tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
+        tilGodkjent(3.januar til 26.januar, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)

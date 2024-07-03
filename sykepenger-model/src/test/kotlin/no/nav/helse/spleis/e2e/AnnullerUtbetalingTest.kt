@@ -135,7 +135,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Annuller oppdrag som er under utbetaling feiler`() {
-        tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
+        tilGodkjent(3.januar til 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
         assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertIngenAnnulleringsbehov()
@@ -143,7 +143,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `Annuller av oppdrag med feilet utbetaling feiler`() {
-        tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
+        tilGodkjent(3.januar til 26.januar, 100.prosent, 3.januar)
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
         assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre())
@@ -153,7 +153,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `Kan annullere hvis noen vedtaksperioder er til utbetaling`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
-        tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
+        tilGodkjent(mars, 100.prosent, 1.mars)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
         sisteBehovErAnnullering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
