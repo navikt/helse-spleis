@@ -509,7 +509,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `forsøk på å revurdere eldre fagsystemId med nyere perioder uten utbetaling, og periode med utbetaling etterpå`() {
         nyttVedtak(3.januar til 26.januar)
-        tilGodkjenning(1.mai, 31.mai, 100.prosent, 1.mai)
+        tilGodkjenning(mai, 100.prosent, 1.mai)
 
         håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
