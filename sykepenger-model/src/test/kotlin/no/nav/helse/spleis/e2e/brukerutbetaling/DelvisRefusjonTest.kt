@@ -58,7 +58,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `Full refusjon til en arbeidsgiver med RefusjonPerDag på`() {
-        nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
+        nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()))
 
         assertTrue(inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.isNotEmpty())
         inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.forEach { assertEquals(1431, it.beløp) }
@@ -69,7 +69,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `Full refusjon til en arbeidsgiver med forlengelse og opphørsdato treffer ferie`() {
-        nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 27.februar, emptyList()))
+        nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 27.februar, emptyList()))
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(27.februar, 28.februar))

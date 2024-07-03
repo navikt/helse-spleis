@@ -233,7 +233,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ikke ut spisset event ved tidslinjeoverstyring som ikke fører til en endring av agp`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterOverstyrTidslinje(
             listOf(
                 ManuellOverskrivingDag(
@@ -278,7 +278,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ikke ut spisset event ved korrigerende inntektsmelding som korrigerer noe annet enn en inntektsmelding`() {
-        nyttVedtak(1.januar,  31.januar)
+        nyttVedtak(januar)
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,
             arbeidsgiveropplysninger = listOf(

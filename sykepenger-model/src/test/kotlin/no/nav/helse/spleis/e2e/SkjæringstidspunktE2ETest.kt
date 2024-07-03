@@ -32,7 +32,7 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

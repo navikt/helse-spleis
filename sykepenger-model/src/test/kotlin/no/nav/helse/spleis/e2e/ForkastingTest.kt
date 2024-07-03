@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -249,7 +250,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke revurderinger - avventer simulering revurdering`() {
-        nyttVedtak(3.januar, 26.januar)
+        nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
@@ -263,7 +264,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke revurderinger - avventer godkjenning revurdering`() {
-        nyttVedtak(3.januar, 26.januar)
+        nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
@@ -278,7 +279,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke revurderinger - til utbetaling`() {
-        nyttVedtak(3.januar, 26.januar)
+        nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
@@ -294,7 +295,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
 
     @Test
     fun `forkaster ikke revurderinger - revurdering feilet`() {
-        nyttVedtak(3.januar, 26.januar)
+        nyttVedtak(3.januar til 26.januar)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)

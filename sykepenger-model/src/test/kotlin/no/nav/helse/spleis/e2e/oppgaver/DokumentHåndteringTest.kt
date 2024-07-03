@@ -42,7 +42,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender ut inntektsmelding håndtert også når inntektsmelding kommer før søknad og dagene håndteres av en tidligere periode`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         observatør.inntektsmeldingHåndtert.clear()
         val inntektsmelding = håndterInntektsmelding(
             arbeidsgiverperioder = listOf(1.januar til 16.januar),
@@ -89,7 +89,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `to helt like korrigerende inntektsmeldinger`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = INNTEKT)
+        nyttVedtak(januar, 100.prosent, beregnetInntekt = INNTEKT)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1,)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -108,7 +108,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender ikke ut signal om at inntektsmelding ikke er håndtert om annen vedtaksperiode har håndtert inntektsmelding før`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSøknad(Sykdom(20.februar, 20.mars, 100.prosent))
         assertEquals(emptyList<UUID>(),  observatør.inntektsmeldingIkkeHåndtert)
     }
@@ -266,7 +266,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `har overlappende avslutta vedtaksperiode på annen arbeidsgiver`() {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a2)
+        nyttVedtak(januar, orgnummer = a2)
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
@@ -322,7 +322,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `har en periode rett før på annen arbeidsgiver`() {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a2)
+        nyttVedtak(januar, orgnummer = a2)
         val søknad2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), utenlandskSykmelding = true)
         assertEquals(
             PersonObserver.VedtaksperiodeForkastetEvent(
@@ -456,7 +456,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender ut inntektsmelding ikke håndtert på im med funksjonelle feil ved revurdering av dager`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
@@ -470,7 +470,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding med første fraværsdag utenfor sykdom - ett tidligere vedtak - inntektsmelding ikke håndtert fordi inntekt håndteres ikke`() {
         val im1 = UUID.randomUUID()
-        nyttVedtak(1.januar, 31.januar, inntektsmeldingId = im1)
+        nyttVedtak(januar, inntektsmeldingId = im1)
         val im2 = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar, refusjon = Inntektsmelding.Refusjon(
             Inntekt.INGEN,
             null

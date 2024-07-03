@@ -112,7 +112,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
 
     @Test
     fun `godtar overstyring uavhengig av rekkefølgen på arbeidsgivere`() {
-        nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a1)
+        nyttVedtak(1.januar(2017) til 31.januar(2017), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)

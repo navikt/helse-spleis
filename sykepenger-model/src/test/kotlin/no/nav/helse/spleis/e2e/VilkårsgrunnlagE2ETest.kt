@@ -157,7 +157,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forkaster vilkårsgrunnlag når periode annulleres`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         assertVilkårsgrunnlagFraSpleisFor(1.januar)
         håndterAnnullerUtbetaling()
         assertIngenVilkårsgrunnlagFraSpleis()

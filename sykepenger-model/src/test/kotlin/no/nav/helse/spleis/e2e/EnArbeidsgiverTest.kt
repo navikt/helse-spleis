@@ -40,7 +40,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `en sprø case som ender opp med å trekker masse penger uten at vedtaksperiodene får vite om det`(){
-        nyttVedtak(1.august(2017), 5.januar) // Lang for pengenes skyld
+        nyttVedtak(1.august(2017) til 5.januar) // Lang for pengenes skyld
         val korrelasjonsIdAugust2017 = inspektør.utbetalinger.single().inspektør.korrelasjonsId
         val førsteUtbetalingsdag = inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag[0].inspektør.fom
 
@@ -111,7 +111,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Arbeid gjenopptatt i minst 16 dager fører til at vi bygger videre på feil utbetaling`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSøknad(Sykdom(1.februar, 18.februar, 100.prosent), Arbeid(3.februar, 18.februar))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

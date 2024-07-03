@@ -1597,7 +1597,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-19 fjerde ledd - ny agp etter tilstrekkelig opphold`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
@@ -2024,7 +2024,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         createTestPerson(personOver67år, 5.februar(1951))
         val inntekt = 100_000.årlig // mellom 0.5G og 2G - slik at kravet er oppfyllt før personen fyllte 67, men ikke etter
 
-        nyttVedtak(1.januar, 31.januar, fnr = personOver67år, beregnetInntekt = inntekt)
+        nyttVedtak(januar, fnr = personOver67år, beregnetInntekt = inntekt)
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_2, ledd = LEDD_2)
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_3,
@@ -2331,7 +2331,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
         val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
-        nyttVedtak(1.januar, 31.januar, fnr = personOver67år)
+        nyttVedtak(januar, fnr = personOver67år)
         forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
         forlengVedtak(1.mars, 31.mars, fnr = personOver67år)
         forlengVedtak(1.april, 26.april, fnr = personOver67år)
@@ -2453,7 +2453,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
         val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
-        nyttVedtak(1.januar, 31.januar, fnr = personOver67år)
+        nyttVedtak(januar, fnr = personOver67år)
         forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
         forlengVedtak(1.mars, 31.mars, fnr = personOver67år)
         forlengVedtak(1.april, 27.april, fnr = personOver67år)
@@ -2631,7 +2631,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ forvaltningsloven 35 - omgjøring av vedtak uten klage`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 90.prosent))
         SubsumsjonInspektør(jurist).assertOppfylt(
             lovverk = "forvaltningsloven",
@@ -2648,7 +2648,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `andre ytelser i snuten`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje(overstyringsdager = listOf(
             ManuellOverskrivingDag(1.februar, Dagtype.Foreldrepengerdag),
@@ -2702,7 +2702,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `andre ytelser i halen`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterOverstyrTidslinje(overstyringsdager = listOf(
             ManuellOverskrivingDag(24.januar, Dagtype.Foreldrepengerdag),
             ManuellOverskrivingDag(25.januar, Dagtype.Pleiepengerdag),

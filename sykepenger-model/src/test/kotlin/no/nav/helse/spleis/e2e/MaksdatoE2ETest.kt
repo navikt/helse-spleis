@@ -55,7 +55,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     @Test
     fun `syk etter maksdato`() {
         var forrigePeriode = 1.januar til 31.januar
-        nyttVedtak(forrigePeriode.start, forrigePeriode.endInclusive, 100.prosent)
+        nyttVedtak(forrigePeriode.start til forrigePeriode.endInclusive, 100.prosent)
         // setter opp vedtaksperioder frem til 182 dager etter maksdato
         repeat(17) { _ ->
             forrigePeriode = nestePeriode(forrigePeriode)
@@ -76,7 +76,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     @Test
     fun `avviser perioder med sammenhengende sykdom etter 26 uker fra maksdato`() {
         var forrigePeriode = 1.januar til 31.januar
-        nyttVedtak(forrigePeriode.start, forrigePeriode.endInclusive, 100.prosent)
+        nyttVedtak(forrigePeriode.start til forrigePeriode.endInclusive, 100.prosent)
         // setter opp vedtaksperioder frem til 182 dager etter maksdato
         repeat(17) { _ ->
             forrigePeriode = nestePeriode(forrigePeriode)

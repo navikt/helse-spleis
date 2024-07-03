@@ -42,7 +42,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `sender vedtak fattet for perioder utenfor arbeidsgiverperioden`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1, inspektør.utbetalinger.size)
         assertEquals(0, observatør.utbetalingUtenUtbetalingEventer.size)
@@ -76,7 +76,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `sender vedtak fattet for forlengelseperioder utenfor arbeidsgiverperioden med bare ferie`() {
-        nyttVedtak(1.januar, 20.januar, 100.prosent)
+        nyttVedtak(1.januar til 20.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
@@ -134,7 +134,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `sender vedtak fattet ved tilkommen inntekt`() = Toggle.TilkommenInntekt.enable {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        nyttVedtak(januar, orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(
@@ -250,7 +250,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender avsluttet uten vedtak ved kort gap til periode med kun ferie`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar))
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Ferie(10.februar, 28.februar))
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -276,7 +276,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med tidligere dokumenter etter revurdering`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         val overstyringId = UUID.randomUUID()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), meldingsreferanseId = overstyringId)
         håndterYtelser(1.vedtaksperiode)

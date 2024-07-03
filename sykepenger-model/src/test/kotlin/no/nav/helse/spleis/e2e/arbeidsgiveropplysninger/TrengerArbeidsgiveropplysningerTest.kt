@@ -95,7 +95,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `første fraværsdag vi mottar i IM blir feil når det er ferie første dag i sykmeldingsperioden etter kort gap`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
 
         håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent), Ferie(12.februar, 12.februar))
         observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().let { event ->
@@ -193,7 +193,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `skal ikke be om arbeidsgiverperiode når det er mindre en 16 dagers gap`() {
         val inntektsmeldingId = UUID.randomUUID()
-        nyttVedtak(1.januar, 31.januar, inntektsmeldingId = inntektsmeldingId)
+        nyttVedtak(januar, inntektsmeldingId = inntektsmeldingId)
         nyPeriode(16.februar til 15.mars)
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -209,7 +209,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke be om arbeidsgiveropplysninger ved forlengelse`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -226,7 +226,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `skal be om arbeidsgiverperiode ved 16 dagers gap`() {
         val inntektsmeldingId = UUID.randomUUID()
-        nyttVedtak(1.januar, 31.januar, inntektsmeldingId = inntektsmeldingId)
+        nyttVedtak(januar, inntektsmeldingId = inntektsmeldingId)
         nyPeriode(17.februar til 17.mars)
 
         val expectedForespurteOpplysninger = listOf(
@@ -619,7 +619,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode etter kort gap skal ikke sende forespørsel dersom inntektsmeldingen allerede er mottatt`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar,)
         håndterSykmelding(Sykmeldingsperiode(10.februar, 5.mars))
@@ -668,7 +668,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `Skal ikke sende med skjønnsfastsatt sykpengegrunnlag som inntektForrigeSkjæringstidspunkt` () {
         val inntektsmeldingId = UUID.randomUUID()
-        nyttVedtak(1.januar, 31.januar, inntektsmeldingId = inntektsmeldingId)
+        nyttVedtak(januar, inntektsmeldingId = inntektsmeldingId)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT *2)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -691,7 +691,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skal sende med saksbehandlerinntekt som inntektForrigeSkjæringstidspunkt` () {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         val id = håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
             arbeidsgiveropplysninger = listOf(
@@ -715,7 +715,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skal ikke sende med inntektForrigeSkjæringstidspunkt fra annen arbeidsgiver`() {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        nyttVedtak(januar, orgnummer = a1)
         nyPeriode(1.mars til 31.mars, orgnummer = a2)
 
         assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -899,7 +899,7 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Skal ikke sende med egenmeldingsperioder når vi ikke ber om AGP`() {
-        nyttVedtak(1.januar, 17.januar)
+        nyttVedtak(1.januar til 17.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
         håndterSøknad(
             Sykdom(20.januar, 31.januar, 100.prosent),

@@ -139,7 +139,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes ikke`() = Toggle.TilkommenInntekt.enable {
         val inntektA1 = INNTEKT + 500.daglig
 
-        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        nyttVedtak(januar, orgnummer = a1)
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
         forlengVedtak(1.mars, 31.mars, orgnummer = a1)
 

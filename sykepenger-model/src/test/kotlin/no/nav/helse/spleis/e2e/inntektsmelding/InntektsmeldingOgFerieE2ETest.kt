@@ -74,7 +74,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun ferieforlengelse() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), Ferie(1.februar, 20.februar))
@@ -141,7 +141,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 5.januar, a1)
         nyPeriode(10.januar til 16.januar, a1)
         nyPeriode(17.januar til 20.januar, a1)
-        nyttVedtak(21.januar, 31.januar, arbeidsgiverperiode = listOf(1.januar til 5.januar, 10.januar til 20.januar), orgnummer = a1)
+        nyttVedtak(21.januar til 31.januar, arbeidsgiverperiode = listOf(1.januar til 5.januar, 10.januar til 20.januar), orgnummer = a1)
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling(a1)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD, orgnummer = a1)
@@ -152,7 +152,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `bare ferie (forlengelse) - etter tilbakevennende sykdom`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar,)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
@@ -176,7 +176,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `bare ferie (sykdomsforlengelse) - etter tilbakevennende sykdom`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar,)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
@@ -199,7 +199,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     }
     @Test
     fun `periode med ferie kant-i-kant med en periode med utbetalingsdag`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar,)
         håndterSykmelding(Sykmeldingsperiode(24.februar, 12.mars))

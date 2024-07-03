@@ -39,7 +39,7 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `fjerner egenmeldingsdager fra søknad som er før tidligere vedtaksperioder`() {
-        nyttVedtak(3.januar, 21.januar)
+        nyttVedtak(3.januar til 21.januar)
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), egenmeldinger = listOf(
@@ -53,7 +53,7 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `fjerner egenmeldingsdager fra søknad som overlapper med tidligere vedtaksperioder`() {
-        nyttVedtak(3.januar, 21.januar)
+        nyttVedtak(3.januar til 21.januar)
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), egenmeldinger = listOf(
@@ -83,7 +83,7 @@ internal class EgenmeldingerFraSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `egenmeldingsdager påvirker ikke hvilken vedtaksperiode som håndterer en søknad`() {
-        nyttVedtak(3.januar, 21.januar)
+        nyttVedtak(3.januar til 21.januar)
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar))
         val søknadId = håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), egenmeldinger = listOf(

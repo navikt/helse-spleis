@@ -22,7 +22,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `vedtaksperioder forkastes`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
         forlengPeriode(1.april, 30.april)
@@ -70,7 +70,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av spleis`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
 
@@ -80,7 +80,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av spleis over helg`() {
-        nyttVedtak(1.januar, 26.januar)
+        nyttVedtak(1.januar til 26.januar)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
         håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
 
@@ -116,7 +116,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forventer arbeidsgiveropplysninger ved kort gap til spleis`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), sendTilGosys = true)
 

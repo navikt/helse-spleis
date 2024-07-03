@@ -115,7 +115,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `arbeidsgiver endrer arbeidsgiverperioden tilbake - må overstyre tidslinje for å fikse`() {
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-        nyttVedtak(11.februar, 28.februar, arbeidsgiverperiode = listOf(1.februar til 4.februar, 7.februar til 18.februar))
+        nyttVedtak(11.februar til 28.februar, arbeidsgiverperiode = listOf(1.februar til 4.februar, 7.februar til 18.februar))
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[5.februar]::class)
         assertEquals(Dag.Arbeidsdag::class, inspektør.sykdomstidslinje[6.februar]::class)
         nullstillTilstandsendringer()
@@ -155,7 +155,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `ferie uten sykmelding mellom to perioder`() {
-        nyttVedtak(1.juni, 30.juni)
+        nyttVedtak(juni)
 
         håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
         håndterInntektsmelding(
@@ -399,7 +399,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `Overstyring av utkast til revurdering`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
         nullstillTilstandsendringer()
@@ -416,7 +416,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal kunne overstyre dagtype i utkast til revurdering ved revurdering av inntekt`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
         nullstillTilstandsendringer()
 
@@ -467,7 +467,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyring av andre ytelser i halen`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterOverstyrTidslinje((20.januar til 31.januar).map { manuellForeldrepengedag(it) })
         assertEquals("SSSSSHH SSSSSHH SSSSSYY YYYYYYY YYY", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         håndterYtelser(1.vedtaksperiode)
@@ -478,7 +478,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyring av egenmeldingsdager til arbeidsdager`(){
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
         håndterInntektsmelding(listOf(10.februar til 26.februar),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -495,7 +495,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyring av andre ytelser i snuten`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterOverstyrTidslinje((1.januar til 10.januar).map { manuellForeldrepengedag(it) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

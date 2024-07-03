@@ -48,7 +48,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyrer inntekt og refusjon`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         nullstillTilstandsendringer()
         val nyInntekt = INNTEKT * 2
         val overstyringId = UUID.randomUUID()
@@ -87,7 +87,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `ny inntektsmelding etter saksbehandleroverstyrt inntekt`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         val nySaksbehandlerInntekt = INNTEKT * 2
         val nyIMInntekt = INNTEKT * 3
         val overstyringId = UUID.randomUUID()
@@ -107,7 +107,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyrer inntekt og refusjon til samme som før`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         nullstillTilstandsendringer()
         val nyInntekt = INNTEKT * 2
         val overstyringId = UUID.randomUUID()
@@ -158,7 +158,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyring av refusjon skal starte revurdering fom første dato med endring`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
         nullstillTilstandsendringer()
@@ -256,7 +256,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal være idempotente greier`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
 
         val overstyr: () -> Unit = {
             håndterOverstyrArbeidsgiveropplysninger(
@@ -584,7 +584,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyrer arbeidsgiver som ikke er i sykepengegrunnlaget`() = Toggle.TilkommenInntekt.enable {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        nyttVedtak(januar, orgnummer = a1)
         val nyInntekt = INNTEKT * 1.25
 
         håndterOverstyrArbeidsgiveropplysninger(
@@ -697,7 +697,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
 
     @Test
     fun `Legge til refusjonsopplysninger tilbake i tid`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
 
         nyPeriode(5.februar til 28.februar)
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar,)

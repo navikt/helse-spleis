@@ -67,7 +67,7 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Forlengelse med kun helg og friskmelding`() {
-        nyttVedtak(1.januar, 19.januar)
+        nyttVedtak(1.januar til 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
         håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
 

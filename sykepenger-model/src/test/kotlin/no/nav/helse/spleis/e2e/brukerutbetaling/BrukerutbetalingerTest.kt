@@ -59,7 +59,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling med full refusjon til arbeidsgiver`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
     }
 

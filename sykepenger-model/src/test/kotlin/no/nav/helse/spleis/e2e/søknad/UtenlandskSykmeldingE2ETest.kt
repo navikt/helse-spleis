@@ -41,7 +41,7 @@ internal class UtenlandskSykmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Overlapper med utbetalt - søknad med flagg utenlandskSykmelding ignoreres og kastes ut`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), utenlandskSykmelding = true)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

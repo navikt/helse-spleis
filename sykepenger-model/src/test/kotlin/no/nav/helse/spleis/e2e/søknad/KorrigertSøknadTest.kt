@@ -60,7 +60,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigerer med arbeid gjenopptatt etter utbetalt`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(1.januar, 31.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -153,7 +153,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `Korrigerer feriedag til sykedag i forlengelse`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         val søknadId = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.mars)

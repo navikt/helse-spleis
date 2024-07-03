@@ -121,7 +121,7 @@ internal class ForeldetSøknadE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `forledet søknad ved forlengelse`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), mottatt = 1.februar(2019).atStartOfDay())
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.februar(2019))
         assertVarsel(RV_SØ_2)

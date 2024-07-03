@@ -63,7 +63,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `person som har fått utbetalt direkte`() {
-        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
         inspektør.utbetalinger.single().inspektør.let { utbetalingInspektør ->
             assertEquals(0, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
@@ -77,7 +77,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
     @Test
     fun `person som har både refusjon og direkte utbetaling`() {
-        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null))
+        nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null))
         inspektør.utbetalinger.single().inspektør.let { utbetalingInspektør ->
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
@@ -93,7 +93,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
     @Test
     fun `person som har både litt fra infotrygd og litt fra spleis`() {
-        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null))
+        nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null))
         inspektør.utbetalinger.single().inspektør.let { utbetalingInspektør ->
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
@@ -118,7 +118,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     }
     @Test
     fun `person som har både litt fra infotrygd og litt fra spleis med forskjellig refusjon`() {
-        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INNTEKT / 3, null))
+        nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INNTEKT / 3, null))
         inspektør.utbetalinger.single().inspektør.let { utbetalingInspektør ->
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
@@ -161,7 +161,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Infotrygd har betalt ut 48 dager til person - Spleis har utbetalt 48 i forkant`() {
-        nyttVedtak(1.januar(2022), 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        nyttVedtak(1.januar(2022) til 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
         val dagsatsIT = 1574
 
         håndterUtbetalingshistorikkForFeriepenger(
@@ -190,7 +190,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Spleis utbetaler feriepenger til person, blir annullert i Spleis mellom første og andre kjøring`() {
-        nyttVedtak(1.januar(2022), 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        nyttVedtak(1.januar(2022) til 31.mars(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
         val dagsatsIT = 1574
 
         // Første kjøring
@@ -244,7 +244,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `serialiserer og deserialiserer Spleis feriepengebeløp for person`() {
-        nyttVedtak(1.januar(2022), 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        nyttVedtak(1.januar(2022) til 31.januar(2022), refusjon = Inntektsmelding.Refusjon(INGEN, null))
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022)
         )

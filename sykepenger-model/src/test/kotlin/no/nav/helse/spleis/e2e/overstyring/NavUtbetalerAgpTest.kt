@@ -392,7 +392,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
     fun `kort periode etter ferie uten sykdom`() {
-        nyttVedtak(1.juni, 30.juni)
+        nyttVedtak(juni)
         håndterSøknad(Sykdom(1.august, 10.august, 100.prosent))
         nullstillTilstandsendringer()
         håndterInntektsmelding(
@@ -409,7 +409,8 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
     fun `kort periode etter ferie uten sykdom med arbeidsgiverperioden spredt litt utover`() {
-        nyttVedtak(1.juni, 30.juni, arbeidsgiverperiode = listOf(
+        nyttVedtak(
+            juni, arbeidsgiverperiode = listOf(
             1.juni til 5.juni,
             8.juni til 18.juni
         ))
@@ -484,7 +485,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
     fun `eget varsel ved oppgitt begrunnelse FerieEllerAvspasering`() {
-        nyttVedtak(1.juni, 30.juni)
+        nyttVedtak(juni)
 
         håndterSøknad(Sykdom(1.august, 31.august, 50.prosent))
         håndterInntektsmelding(

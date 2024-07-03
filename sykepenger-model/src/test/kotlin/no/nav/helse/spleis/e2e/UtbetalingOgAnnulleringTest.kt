@@ -14,7 +14,6 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -44,7 +43,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
     @Test
     fun `annullere senere periode enn perioden til godkjenning`() {
-        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(mars)
         tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
         håndterUtbetalt()
@@ -54,8 +53,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
 
     @Test
     fun `annullere senere periode enn perioden til revurdering`() {
-        nyttVedtak(1.januar, 31.januar)
-        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(januar)
+        nyttVedtak(mars)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)

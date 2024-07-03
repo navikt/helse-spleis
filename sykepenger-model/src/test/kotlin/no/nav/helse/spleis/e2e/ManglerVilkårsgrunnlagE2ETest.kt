@@ -64,7 +64,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Infotrygd utbetaler periode i forkant - Skjæringstidspunktet flytter seg`() {
-        nyttVedtak(1.februar, 28.februar)
+        nyttVedtak(februar)
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
@@ -153,7 +153,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigert arbeidsgiverperiode under pågående revurdering`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar, 100.prosent)
         håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
 
@@ -172,7 +172,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigert arbeidsgiverperiode under pågående revurdering - korrigert søknad for februar`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar, 100.prosent)
         håndterSøknad(Sykdom(1.februar, 28.februar, 80.prosent))
 

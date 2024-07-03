@@ -11,7 +11,6 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -102,7 +101,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `out-of-order med senere periode i Avventer inntektsmelding eller historikk`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         nyPeriode(1.mars til 20.mars, ORGNUMMER)
         nullstillTilstandsendringer()
         forlengVedtak(1.februar, 28.februar)

@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -23,7 +22,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_38
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -139,7 +137,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `avslutter forlengelse utenfor arbeidsgiverperioden dersom det kun er friskmelding - etter utbetaling`() {
-        nyttVedtak(1.januar, 23.januar)
+        nyttVedtak(1.januar til 23.januar)
         håndterSykmelding(Sykmeldingsperiode(24.januar, 25.januar))
         håndterSøknad(Sykdom(24.januar, 25.januar, 100.prosent), Arbeid(24.januar, 25.januar))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
@@ -297,7 +295,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `bare ferie - etter tilbakevennende sykdom`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar,)
         håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent), Ferie(5.februar, 28.februar))

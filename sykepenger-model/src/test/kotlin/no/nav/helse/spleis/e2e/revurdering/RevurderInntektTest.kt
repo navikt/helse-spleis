@@ -75,7 +75,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurder inntekt happy case`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -124,7 +124,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurder inntekt flere ganger`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 32000.månedlig,
@@ -161,7 +161,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurder inntekt ukjent skjæringstidspunkt`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         nullstillTilstandsendringer()
         assertThrows<IllegalStateException> { håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar) }
         assertIngenFunksjonelleFeil(AktivitetsloggFilter.person())
@@ -171,8 +171,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurder inntekt tidligere skjæringstidspunkt`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        nyttVedtak(1.mars, 31.mars, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
+        nyttVedtak(mars, 100.prosent)
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
@@ -212,7 +212,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyr inntekt to vedtak med kort opphold`() {
-        nyttVedtak(1.januar, 26.januar, 100.prosent)
+        nyttVedtak(1.januar til 26.januar, 100.prosent)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar))
         håndterSøknad(Sykdom(1.februar, 14.februar, 100.prosent))
@@ -278,7 +278,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurder inntekt ny inntekt under en halv G`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -310,7 +310,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for ett enkelt vedtak`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
 
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
 
@@ -320,7 +320,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for flere vedtak`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar)
 
         val førsteEvent = observatør.utbetalingMedUtbetalingEventer.first()
@@ -334,7 +334,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for revurdering over flere perioder`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nyttVedtak(januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar)
 
         håndterInntektsmelding(
@@ -562,7 +562,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere inntekt slik at det blir brukerutbetaling`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -572,7 +572,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere inntekt slik at det blir brukerutbetaling `() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
@@ -580,7 +580,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere inntekt slik at det blir delvis refusjon`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterInntektsmelding(
             listOf(Periode(1.januar, 16.januar)),
             refusjon = Refusjon(25000.månedlig, null, emptyList()),
@@ -592,7 +592,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en forlengelse er til utbetaling`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(INNTEKT * 1.05, skjæringstidspunkt = 1.januar)
@@ -624,7 +624,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en periode har feilet i utbetaling`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterOverstyrInntekt(INNTEKT /2, skjæringstidspunkt = 1.januar)

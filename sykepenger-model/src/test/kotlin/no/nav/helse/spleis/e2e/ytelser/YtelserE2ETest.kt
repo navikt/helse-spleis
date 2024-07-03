@@ -73,7 +73,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Foreldrepenger i halen klemrer ikke vekk skjæringstidspunkt`() {
-        nyttVedtak(1.januar, søndag(28.januar))
+        nyttVedtak(1.januar til søndag(28.januar))
         // Saksbehandler overstyrer i snuten
         håndterOverstyrTidslinje((1.januar til fredag(26.januar)).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -166,7 +166,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `forlengelse trenger ikke sjekke mot 4-ukers vindu`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
@@ -239,7 +239,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `skal ikke ha varsler om andre ytelser ved sammenhengende sykdom etter nådd maksdato`() {
         createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
 
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -256,7 +256,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `skal ikke ha funksjonelle feil om andre ytelser ved sammenhengende sykdom etter nådd maksdato`() {
         createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
 
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -278,7 +278,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     fun `skal ikke ha varsler om andre ytelser for revurdering ved sammenhengende sykdom etter nådd maksdato`() {
         createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
 
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 95.prosent))
@@ -298,7 +298,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Var ikke permisjon i forlengelsen likevel`(){
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Permisjon(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -420,7 +420,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
      */
     @Test
     fun `Overstyr til andre ytelser i andre pølse, og så kommer det en tredje -- Da vil vi gjenbruke inntektsmelding`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje(februar.map { manuellForeldrepengedag(it) })

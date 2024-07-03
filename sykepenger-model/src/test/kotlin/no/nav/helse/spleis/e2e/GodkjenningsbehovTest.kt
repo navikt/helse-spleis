@@ -45,7 +45,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `Tilkommen inntekt`() = Toggle.TilkommenInntekt.enable {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        nyttVedtak(januar, orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", orgnummer = a2)
@@ -192,7 +192,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdering kan ikke avvises`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.05, "forklaring", null, emptyList())))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -202,7 +202,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `kan avvise en out of order rett i forkant av en utbetalt periode`() {
-        nyttVedtak(1.februar, 28.februar)
+        nyttVedtak(februar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -222,7 +222,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `kan avvise en out of order selv om noe er utbetalt senere på annen agp`() {
-        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(mars)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)

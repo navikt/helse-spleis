@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.VedtaksperiodeInspektør
 import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -99,7 +98,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
     @Test
     fun `omgjøre kort periode etter mottatt im - med eldre utbetalt periode`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
 
         nyPeriode(10.august til 20.august)
         håndterInntektsmelding(listOf(1.august til 16.august),)
@@ -135,7 +134,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     fun `revurderer eldre skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(mars)
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
@@ -150,7 +149,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar))
         håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
 
-        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(mars)
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(10.januar til 25.januar),)
@@ -165,7 +164,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     fun `gjenopptar ikke behandling dersom det er nyere periode som er utbetalt`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        nyttVedtak(1.mars, 31.mars)
+        nyttVedtak(mars)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 15.mai))
@@ -454,7 +453,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(21.januar, 3.februar))
         håndterSøknad(Sykdom(21.januar, 3.februar, 100.prosent))
 
-        nyttVedtak(1.mai, 31.mai)
+        nyttVedtak(mai)
         nullstillTilstandsendringer()
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1163,7 +1162,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     @Test
     fun `omgjøring med funksjonell feil i inntektsmelding`() {
         håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent))
-        nyttVedtak(18.januar, 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
+        nyttVedtak(18.januar til 31.januar, arbeidsgiverperiode = listOf(2.januar til 17.januar))
         nullstillTilstandsendringer()
         val im = håndterInntektsmelding(
             listOf(1.januar til 16.januar),

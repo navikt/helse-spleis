@@ -86,7 +86,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Infotrygdutbetaling mens perioden er til revurdering`() {
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 80.prosent))
         håndterYtelser()
         håndterSimulering()
