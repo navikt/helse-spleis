@@ -291,12 +291,11 @@ internal fun AbstractEndToEndTest.tilSimulering(
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
-    return tilYtelser(periode.start, periode.endInclusive, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
+    return tilYtelser(periode, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
 }
 
 internal fun AbstractEndToEndTest.tilYtelser(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     grad: Prosentdel,
     førsteFraværsdag: LocalDate,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
@@ -305,7 +304,7 @@ internal fun AbstractEndToEndTest.tilYtelser(
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
         inntekter = inntektperioderForSykepengegrunnlag {
-            fom.minusMonths(3) til fom.minusMonths(1) inntekter {
+            periode.start.minusMonths(3) til periode.start.minusMonths(1) inntekter {
                 orgnummer inntekt beregnetInntekt
             }
         }, arbeidsforhold = emptyList()
@@ -313,10 +312,10 @@ internal fun AbstractEndToEndTest.tilYtelser(
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
-    håndterSykmelding(Sykmeldingsperiode(fom, tom), fnr = fnr, orgnummer = orgnummer)
-    håndterSøknad(Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+    håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), fnr = fnr, orgnummer = orgnummer)
+    håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = orgnummer)
     håndterInntektsmelding(
-        arbeidsgiverperiode ?: listOf(Periode(fom, fom.plusDays(15))),
+        arbeidsgiverperiode ?: listOf(Periode(periode.start, periode.start.plusDays(15))),
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         refusjon = refusjon,
