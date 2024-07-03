@@ -174,7 +174,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling på ag1 reduseres selv om det ikke utbetales noe til ag2`() {
         nyeVedtak(januar, a1, a2, inntekt = 40000.månedlig)
-        forlengVedtak(1.februar, 28.februar, a1)
+        forlengVedtak(februar, a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
@@ -209,7 +209,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     @Test
     fun `flere AG - kort periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - kort periode`() {
         nyeVedtak(januar, a1, a2)
-        forlengVedtak(1.februar, 28.februar, a1)
+        forlengVedtak(februar, a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)

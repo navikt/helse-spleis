@@ -216,10 +216,10 @@ internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(periode: Periode, va
     håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
 }
 
-internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
+internal fun AbstractEndToEndTest.forlengVedtak(periode: Periode, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom), orgnummer = it) }
-    organisasjonsnumre.forEach { håndterSøknad(Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it) }
+    organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = it) }
+    organisasjonsnumre.forEach { håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = it) }
     organisasjonsnumre.forEach { organisasjonsnummer ->
         håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)

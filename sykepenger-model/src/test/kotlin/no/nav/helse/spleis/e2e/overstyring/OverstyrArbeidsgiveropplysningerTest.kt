@@ -440,7 +440,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `to arbeidsgivere kun refusjonsendring på den ene og endring av inntekt på andre`() {
         val inntektPerArbeidsgiver = 19000.månedlig
         nyeVedtak(januar, a1, a2, inntekt = inntektPerArbeidsgiver)
-        forlengVedtak(1.februar, 28.februar, a1, a2)
+        forlengVedtak(februar, a1, a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, a2)
 
