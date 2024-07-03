@@ -274,25 +274,24 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
-    val id = tilSimulering(periode.start, periode.endInclusive, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
+    val id = tilSimulering(periode, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
     håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
     return id
 }
 
 internal fun AbstractEndToEndTest.tilSimulering(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     grad: Prosentdel,
     førsteFraværsdag: LocalDate,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, periode.start, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null,
     inntektsmeldingId: UUID = UUID.randomUUID()
 ): IdInnhenter {
-    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
+    return tilYtelser(periode.start, periode.endInclusive, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt, inntektsmeldingId = inntektsmeldingId)
 }
 
 internal fun AbstractEndToEndTest.tilYtelser(

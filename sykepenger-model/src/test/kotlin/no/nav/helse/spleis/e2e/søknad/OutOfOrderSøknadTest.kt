@@ -47,7 +47,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `ny tidligere periode - senere i avventer simulering - forkaster utbetalingen`() {
-        tilSimulering(3.mars, 26.mars, 100.prosent, 3.januar)
+        tilSimulering(3.mars til 26.mars, 100.prosent, 3.januar)
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(5.januar, 19.januar, 80.prosent))
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
