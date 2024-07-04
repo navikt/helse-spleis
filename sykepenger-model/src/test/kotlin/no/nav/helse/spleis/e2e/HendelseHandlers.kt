@@ -346,13 +346,12 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
 }
 
 internal fun AbstractEndToEndTest.forlengTilSimulering(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
-    nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
+    nyPeriode(periode.start til periode.endInclusive, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterYtelser(id, orgnummer = orgnummer, fnr = fnr)
     assertTrue(person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) { "Forventet at simulering er etterspurt" }

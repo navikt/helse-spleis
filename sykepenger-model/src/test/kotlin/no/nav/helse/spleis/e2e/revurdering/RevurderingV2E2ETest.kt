@@ -676,7 +676,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `revurdering på tidligere skjæringstidspunkt mens nyere forlengelse står i avventer simulering`() {
         nyttVedtak(januar)
         nyttVedtak(mars)
-        forlengTilSimulering(1.april, 30.april, 100.prosent)
+        forlengTilSimulering(april, 100.prosent)
         assertDag<Sykedag, NavDag>(17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
