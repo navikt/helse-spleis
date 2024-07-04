@@ -753,7 +753,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out of order periode mens senere periode revurderes til utbetaling`() {
         nyttVedtak(mai)
-        forlengTilGodkjenning(1.juni, 30.juni)
+        forlengTilGodkjenning(juni)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         nullstillTilstandsendringer()

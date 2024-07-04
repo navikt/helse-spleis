@@ -126,7 +126,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere periode med forlengelse i avventer godkjenning`() {
         nyttVedtak(januar)
-        forlengTilGodkjenning(1.februar, 28.februar)
+        forlengTilGodkjenning(februar)
         nullstillTilstandsendringer()
 
         assertDag<Sykedag, NavDag>(17.januar, 1431.0)
@@ -698,7 +698,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     fun `revurdering på tidligere skjæringstidspunkt mens nyere forlengelse står i avventer godkjenning`() {
         nyttVedtak(januar)
         nyttVedtak(mars)
-        forlengTilGodkjenning(1.april, 30.april, 100.prosent)
+        forlengTilGodkjenning(april, 100.prosent)
         assertDag<Sykedag, NavDag>(17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
