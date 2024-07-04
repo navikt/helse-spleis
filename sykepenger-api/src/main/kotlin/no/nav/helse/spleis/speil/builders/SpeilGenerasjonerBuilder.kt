@@ -212,7 +212,7 @@ internal class SpeilGenerasjonerBuilder(
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING, VedtaksperiodetilstandDto.AVVENTER_SIMULERING, VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING) -> Periodetilstand.ForberederGodkjenning
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_HISTORIKK) -> Periodetilstand.ForberederGodkjenning
                 periodetilstand == VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
-                periodetilstand == VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE -> Periodetilstand.VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
+                periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE, VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING) -> Periodetilstand.VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
                 else -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
             }
             Utbetalingstatus.GodkjentUtenUtbetaling -> when {
