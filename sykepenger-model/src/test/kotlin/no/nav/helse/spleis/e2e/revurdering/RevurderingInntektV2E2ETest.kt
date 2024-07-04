@@ -657,7 +657,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere mens en periode er til utbetaling`() {
         nyttVedtak(januar)
-        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        forlengTilGodkjentVedtak(februar)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -674,7 +674,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere mens en periode har feilet i utbetaling`() {
         nyttVedtak(januar)
-        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        forlengTilGodkjentVedtak(februar)
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)

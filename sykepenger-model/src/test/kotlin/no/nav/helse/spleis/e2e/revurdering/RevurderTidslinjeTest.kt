@@ -95,7 +95,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `revurdere mens en forlengelse er til utbetaling`() {
         nyttVedtak(januar)
-        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        forlengTilGodkjentVedtak(februar)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterUtbetalt()
@@ -127,7 +127,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `revurdere mens en periode har feilet i utbetaling`() {
         nyttVedtak(januar)
-        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        forlengTilGodkjentVedtak(februar)
         håndterUtbetalt(Oppdragstatus.FEIL)
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
