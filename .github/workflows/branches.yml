@@ -33,6 +33,7 @@ jobs:
           team: tbd
           image_suffix: spleis
           tag: "${{ github.ref_name }}-${{ github.sha }}"
+          dockerfile: Dockerfile
           docker_context: sykepenger-mediators
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
