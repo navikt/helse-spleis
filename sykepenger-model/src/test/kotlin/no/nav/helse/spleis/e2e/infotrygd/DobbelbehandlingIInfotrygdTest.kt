@@ -57,7 +57,7 @@ internal class DobbelbehandlingIInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling i infotrygd etterpå`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
 
         val historie1 = arrayOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 26.januar, 100.prosent, 1000.daglig)

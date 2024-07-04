@@ -370,13 +370,12 @@ internal fun AbstractEndToEndTest.forlengTilGodkjenning(
 }
 
 internal fun AbstractEndToEndTest.forlengVedtak(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
-    forlengTilGodkjentVedtak(fom til tom, grad, fnr, orgnummer)
+    forlengTilGodkjentVedtak(periode.start til periode.endInclusive, grad, fnr, orgnummer)
     håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
 }
 

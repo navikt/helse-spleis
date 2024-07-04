@@ -167,7 +167,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forlengelse trenger ikke sjekke mot 4-ukers vindu`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode,
@@ -279,7 +279,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 11)
 
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 95.prosent))
         håndterYtelser(
@@ -421,7 +421,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Overstyr til andre ytelser i andre pølse, og så kommer det en tredje -- Da vil vi gjenbruke inntektsmelding`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
 
         håndterOverstyrTidslinje(februar.map { manuellForeldrepengedag(it) })
         håndterYtelser(2.vedtaksperiode)

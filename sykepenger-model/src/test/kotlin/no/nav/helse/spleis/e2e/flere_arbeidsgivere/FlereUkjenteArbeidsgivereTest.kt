@@ -63,8 +63,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val inntektA2 = INNTEKT
 
         nyeVedtak(1.januar til 31.januar, a1, a2, inntekt = INNTEKT)
-        forlengVedtak(1.februar, 28.februar, orgnummer = a1)
-        forlengVedtak(1.mars, 31.mars, orgnummer = a1)
+        forlengVedtak(februar, orgnummer = a1)
+        forlengVedtak(mars, orgnummer = a1)
 
         val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektA1, orgnummer = a1,)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -140,8 +140,8 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val inntektA1 = INNTEKT + 500.daglig
 
         nyttVedtak(januar, orgnummer = a1)
-        forlengVedtak(1.februar, 28.februar, orgnummer = a1)
-        forlengVedtak(1.mars, 31.mars, orgnummer = a1)
+        forlengVedtak(februar, orgnummer = a1)
+        forlengVedtak(mars, orgnummer = a1)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektA1, orgnummer = a1,)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

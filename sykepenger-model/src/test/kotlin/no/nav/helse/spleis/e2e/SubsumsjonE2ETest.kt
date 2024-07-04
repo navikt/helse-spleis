@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
@@ -32,7 +31,6 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_28
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_29
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
-import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_30
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
@@ -48,7 +46,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -67,9 +64,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.september
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -2034,7 +2029,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 16.desember(2011)
         )
 
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_51,
             ledd = LEDD_2,
@@ -2051,7 +2046,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             output = emptyMap()
         )
 
-        forlengVedtak(1.mars, 31.mars)
+        forlengVedtak(mars)
         assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(
             paragraf = PARAGRAF_8_3,
             ledd = LEDD_2,
@@ -2332,9 +2327,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
         nyttVedtak(januar, fnr = personOver67år)
-        forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
-        forlengVedtak(1.mars, 31.mars, fnr = personOver67år)
-        forlengVedtak(1.april, 26.april, fnr = personOver67år)
+        forlengVedtak(februar, fnr = personOver67år)
+        forlengVedtak(mars, fnr = personOver67år)
+        forlengVedtak(1.april til 26.april, fnr = personOver67år)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,
@@ -2454,9 +2449,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
         nyttVedtak(januar, fnr = personOver67år)
-        forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
-        forlengVedtak(1.mars, 31.mars, fnr = personOver67år)
-        forlengVedtak(1.april, 27.april, fnr = personOver67år)
+        forlengVedtak(februar, fnr = personOver67år)
+        forlengVedtak(mars, fnr = personOver67år)
+        forlengVedtak(1.april til 27.april, fnr = personOver67år)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,
@@ -2649,7 +2644,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `andre ytelser i snuten`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         håndterOverstyrTidslinje(overstyringsdager = listOf(
             ManuellOverskrivingDag(1.februar, Dagtype.Foreldrepengerdag),
             ManuellOverskrivingDag(2.februar, Dagtype.Pleiepengerdag),

@@ -137,7 +137,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `skal kunne overstyre inntekt i utkast til revurdering, også når det er snakk om flere perioder`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
@@ -214,7 +214,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `skal kunne overstyre inntekt i utkast til revurdering ved revurdering av tidslinje`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         nullstillTilstandsendringer()
         assertDag<Sykedag, NavDag>(
             dato = 22.januar,
@@ -588,7 +588,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     fun `Perioder med aktuelt skjæringstidspunkt skal være stemplet med hendelseId`() {
         nyttVedtak(januar)
         nyttVedtak(mars)
-        forlengVedtak(1.april, 30.april)
+        forlengVedtak(april)
         val overstyrInntektHendelseId = UUID.randomUUID()
         håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
 

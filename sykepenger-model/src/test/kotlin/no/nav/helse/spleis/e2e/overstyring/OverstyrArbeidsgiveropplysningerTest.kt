@@ -159,8 +159,8 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     @Test
     fun `overstyring av refusjon skal starte revurdering fom første dato med endring`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
-        forlengVedtak(1.mars, 31.mars)
+        forlengVedtak(februar)
+        forlengVedtak(mars)
         nullstillTilstandsendringer()
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(

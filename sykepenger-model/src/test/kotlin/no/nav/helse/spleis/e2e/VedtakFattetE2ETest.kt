@@ -213,7 +213,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `sender vedtak fattet med sykepengegrunnlag fastsatt i Infotrygd`() {
         createOvergangFraInfotrygdPerson()
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         assertEquals(1, observatør.avsluttetMedVedtakEvent.size)
         val event = observatør.avsluttetMedVedtakEvent.values.single()
         val forventetSykepengegrunnlagsfakta = FastsattIInfotrygd(372000.0)

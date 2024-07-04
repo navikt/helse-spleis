@@ -171,14 +171,14 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
     @Test
     fun `forkaster ikke etterfølgende perioder som er avsluttet`(){
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         forkastAlle(hendelselogg)
 
         nyttVedtak(mars)
-        forlengVedtak(1.april, 30.april)
+        forlengVedtak(april)
         nyttVedtak(juni)
 
-        nyPeriode(1.februar til 28.februar)
+        nyPeriode(februar)
 
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)

@@ -321,7 +321,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for flere vedtak`() {
         nyttVedtak(januar, 100.prosent)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
 
         val førsteEvent = observatør.utbetalingMedUtbetalingEventer.first()
         val andreEvent = observatør.utbetalingMedUtbetalingEventer.last()
@@ -335,7 +335,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for revurdering over flere perioder`() {
         nyttVedtak(januar, 100.prosent)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
 
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

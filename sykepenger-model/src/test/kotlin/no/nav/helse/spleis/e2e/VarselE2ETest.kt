@@ -116,7 +116,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     @Test
     fun `varsel revurdering - Forlenger en Infotrygdperiode på tvers av arbeidsgivere`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.februar, Dagtype.Feriedag)))
         håndterUtbetalingshistorikkEtterInfotrygdendring(
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)),

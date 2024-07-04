@@ -160,7 +160,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out of order periode i helg mellom to andre perioder`() {
         nyttVedtak(1.januar til 26.januar)
-        forlengVedtak(29.januar, 11.februar)
+        forlengVedtak(29.januar til 11.februar)
         nullstillTilstandsendringer()
         nyPeriode(27.januar til 28.januar)
         håndterYtelser(3.vedtaksperiode)
@@ -472,7 +472,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out of order periode trigger revurdering`() {
         nyttVedtak(mai)
-        forlengVedtak(1.juni, 30.juni)
+        forlengVedtak(juni)
         nullstillTilstandsendringer()
         nyttVedtak(januar)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
@@ -493,7 +493,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out of order periode uten utbetaling trigger revurdering`() {
         nyttVedtak(mai)
-        forlengVedtak(1.juni, 30.juni)
+        forlengVedtak(juni)
         nullstillTilstandsendringer()
         nyPeriode(1.januar til 15.januar)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
@@ -922,8 +922,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `Warning ved out-of-order - én warning for perioden som trigger out-of-order, én warning for de som blir påvirket av out-of-order`() {
         nyttVedtak(mars)
-        forlengVedtak(1.april, 30.april)
-        forlengVedtak(1.mai, 31.mai)
+        forlengVedtak(april)
+        forlengVedtak(mai)
 
         nyttVedtak(januar)
 
@@ -937,8 +937,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `Warning ved out-of-order - dukker ikke opp i revurderinger som ikke er out-of-order`() {
         nyttVedtak(mars)
-        forlengVedtak(1.april, 30.april)
-        forlengVedtak(1.mai, 31.mai)
+        forlengVedtak(april)
+        forlengVedtak(mai)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mars, Sykedag, 50)))
 

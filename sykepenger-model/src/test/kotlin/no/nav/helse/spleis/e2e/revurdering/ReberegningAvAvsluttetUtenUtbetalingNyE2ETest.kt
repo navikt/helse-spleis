@@ -1051,7 +1051,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        forlengVedtak(1.februar, 28.februar, orgnummer = a1)
+        forlengVedtak(februar, orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(10.mars, 22.mars), orgnummer = a2)
         håndterSøknad(Sykdom(10.mars, 22.mars, 100.prosent), orgnummer = a2)

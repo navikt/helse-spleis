@@ -27,7 +27,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     @Test
     fun `vi sender vedtaksperiode annullert-hendelser når saksbehandler annullerer en vedtaksperiode i et lengre sykdomsforløp`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         nyttVedtak(5.mars til 31.mars)
         håndterAnnullerUtbetaling()
 
@@ -49,7 +49,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     @Test
     fun `vi sender ikke ut vedtaksperiode annullert-hendelse for vedtaksperioder som ikke er utbetalt`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         tilGodkjenning(5.mars til 31.mars, ORGNUMMER)
         håndterAnnullerUtbetaling()
 
@@ -67,7 +67,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     @Test
     fun `også langt gap`() {
         nyttVedtak(januar)
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
         nyttVedtak(1.april til 30.april)
         håndterAnnullerUtbetaling()
 

@@ -104,7 +104,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
         nyttVedtak(januar, 100.prosent)
         nyPeriode(1.mars til 20.mars, ORGNUMMER)
         nullstillTilstandsendringer()
-        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(februar)
 
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
