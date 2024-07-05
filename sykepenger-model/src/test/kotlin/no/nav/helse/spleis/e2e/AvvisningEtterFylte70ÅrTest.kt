@@ -37,7 +37,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         person = createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -70,7 +70,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(Sykmeldingsperiode(20.desember(2017), 9.januar))
-        håndterSøknad(Sykdom(20.desember(2017), 9.januar, 100.prosent))
+        håndterSøknad(20.desember(2017) til 9.januar)
         håndterInntektsmelding(listOf(20.desember(2017) til 4.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -79,7 +79,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(11.juli, 31.juli))
-        håndterSøknad(Sykdom(11.juli, 31.juli, 100.prosent))
+        håndterSøknad(11.juli til 31.juli)
         håndterInntektsmelding(listOf(11.juli til 26.juli),)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -99,7 +99,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -113,7 +113,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         person = createTestPerson(FYLLER_70_TIENDE_JANUAR, FYLLER_70_TIENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -127,7 +127,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         person = createTestPerson(FYLLER_70_FJORTENDE_JANUAR, FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -140,7 +140,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         person = createTestPerson(FYLLER_70_TOOGTYVENDE_JANUAR, FYLLER_70_TOOGTYVENDE_JANUAR_FØDSELSDATO)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
