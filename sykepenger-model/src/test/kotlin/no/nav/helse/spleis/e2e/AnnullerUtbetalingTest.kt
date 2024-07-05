@@ -66,7 +66,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         forlengVedtak(februar) // forlengelse
         nyttVedtak(10.mars til 31.mars) // førstegangsbehandling, men med samme agp
         håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai)) // førstegangsbehandling, ny agp
-        håndterSøknad(Sykdom(1.mai, 20.mai, 100.prosent))
+        håndterSøknad(1.mai til 20.mai)
         håndterAnnullerUtbetaling()
         assertEquals(4, observatør.forkastedePerioder())
         assertEquals(AVSLUTTET, observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
@@ -347,7 +347,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `annuller over ikke utbetalt forlengelse`() {
         nyttVedtak(3.januar til 26.januar, 100.prosent, 3.januar)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar))
-        håndterSøknad(Sykdom(27.januar, 31.januar, 100.prosent))
+        håndterSøknad(27.januar til 31.januar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
@@ -377,8 +377,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         // prøv å forkast, ikke klar det
         håndterSykmelding(Sykmeldingsperiode(1.februar, 19.februar))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
-        håndterSøknad(Sykdom(1.februar, 19.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
+        håndterSøknad(1.februar til 19.februar)
+        håndterSøknad(1.februar til 20.februar)
 
         assertTrue(inspektør.periodeErIkkeForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
