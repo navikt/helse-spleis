@@ -101,8 +101,8 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     fun `sender vedtak fattet ved fastsettelse etter hovedregel med flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a2)
+        håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a1)
+        håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a1,)
         håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)), beregnetInntekt = INNTEKT, orgnummer = a2,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
@@ -135,8 +135,8 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `sender vedtak fattet ved tilkommen inntekt`() = Toggle.TilkommenInntekt.enable {
         nyttVedtak(januar, orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(februar, orgnummer = a1)
+        håndterSøknad(februar, orgnummer = a2)
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
             beregnetInntekt = 10000.månedlig,
@@ -169,8 +169,8 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     fun `sender vedtak fattet etter skjønnsmessig fastsettelse med flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020)), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent), orgnummer = a2)
+        håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a1)
+        håndterSøknad(1.januar(2020) til 31.januar(2020), orgnummer = a2)
         håndterInntektsmelding(
             listOf(1.januar(2020) til 16.januar(2020)),
             beregnetInntekt = 45000.månedlig,
@@ -222,7 +222,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `sender avsluttet uten vedtak når saksbehandler overstyrer perioden inn i AvsluttetUtenUtbetaling`(){
-        val søknadId = håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        val søknadId = håndterSøknad(1.januar til 16.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         val inntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -262,7 +262,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Periode med kun ferie etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(1.januar til 10.januar)
         håndterSykmelding(Sykmeldingsperiode(15.januar, 31.januar))
         håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent), Ferie(15.januar, 31.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)

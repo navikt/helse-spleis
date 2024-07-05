@@ -388,8 +388,8 @@ internal fun AbstractEndToEndTest.forlengPeriode(
     nyPeriode(periode, orgnummer, grad = grad, fnr = fnr)
 }
 
-internal fun AbstractEndToEndTest.håndterSøknad(periode: Periode, orgnummer: String = AbstractPersonTest.ORGNUMMER, sendTilGosys: Boolean = false) {
-    håndterSøknad(
+internal fun AbstractEndToEndTest.håndterSøknad(periode: Periode, orgnummer: String = AbstractPersonTest.ORGNUMMER, sendTilGosys: Boolean = false): UUID {
+    return håndterSøknad(
         Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
         orgnummer = orgnummer,
         sykmeldingSkrevet = periode.start.atStartOfDay(),
