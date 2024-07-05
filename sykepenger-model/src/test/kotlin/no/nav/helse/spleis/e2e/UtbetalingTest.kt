@@ -28,16 +28,16 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
             )
         )
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterSøknad(januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(2.februar til 28.februar)
+        håndterSøknad(februar)
 
         assertEquals(ORGNUMMER, observatør.utbetaltEndretEventer.last().organisasjonsnummer)
     }
@@ -46,7 +46,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     fun `grad rundes av`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 80.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -59,9 +59,9 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     fun `første periode er kun arbeidsgiverperiode og ferie`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar))
         håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(20.januar, 22.januar))
-        håndterInntektsmelding(listOf(4.januar til 19.januar),)
+        håndterInntektsmelding(listOf(4.januar til 19.januar))
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar))
-        håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
+        håndterSøknad(23.januar til 31.januar)
 
         assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(4.januar til 22.januar, inspektør.periode(1.vedtaksperiode))

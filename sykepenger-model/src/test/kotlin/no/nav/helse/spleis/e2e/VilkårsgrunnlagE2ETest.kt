@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -25,7 +24,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -34,7 +32,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `skjæringstidspunkt måneden før inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(26.januar, 8.februar), orgnummer = a1)
-        håndterSøknad(Sykdom(26.januar, 8.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(26.januar til 8.februar, orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar), orgnummer = a2)
         håndterSøknad(6.februar til 28.februar, orgnummer = a2)
