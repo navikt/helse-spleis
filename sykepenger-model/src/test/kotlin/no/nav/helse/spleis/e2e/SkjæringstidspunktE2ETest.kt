@@ -33,12 +33,12 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
     @Test
     fun `skjæringstidspunkt skal ikke hensynta sykedager i et senere sykefraværstilefelle`() {
         nyttVedtak(januar)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(1.mai, 31.mai, 100.prosent))
+        håndterSøknad(mars)
+        håndterSøknad(mai)
 
         håndterOverstyrTidslinje((1.februar til 31.mars).map { manuellForeldrepengedag(it) })
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -64,8 +64,8 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar), orgnummer = a2)
 
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(januar, orgnummer = a1)
+        håndterSøknad(24.februar til 24.mars, orgnummer = a1)
         håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar), orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.månedlig, orgnummer = a1,)
@@ -133,8 +133,8 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(23.februar, 24.mars), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar), orgnummer = a2)
 
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(23.februar, 24.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(januar, orgnummer = a1)
+        håndterSøknad(23.februar til 24.mars, orgnummer = a1)
         håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar), orgnummer = a2)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.månedlig, orgnummer = a1,)

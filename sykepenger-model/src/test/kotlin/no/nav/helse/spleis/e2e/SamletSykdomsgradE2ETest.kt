@@ -76,7 +76,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
-        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
+        håndterSøknad(21.januar til 31.januar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -104,7 +104,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent)) // korrigert søknad med 0 prosent arbeidshelse => 100 prosent syk
+        håndterSøknad(1.januar til 20.januar) // korrigert søknad med 0 prosent arbeidshelse => 100 prosent syk
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -144,7 +144,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars))
-        håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent))
+        håndterSøknad(1.mars til 20.mars)
         håndterInntektsmelding(listOf(Periode(1.mars, 16.mars)),)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)

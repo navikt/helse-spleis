@@ -383,17 +383,24 @@ internal fun AbstractEndToEndTest.forlengPeriode(
     periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
 ) {
     nyPeriode(periode, orgnummer, grad = grad, fnr = fnr)
 }
 
-internal fun AbstractEndToEndTest.håndterSøknad(periode: Periode, orgnummer: String = AbstractPersonTest.ORGNUMMER, sendTilGosys: Boolean = false): UUID {
+internal fun AbstractEndToEndTest.håndterSøknad(
+    periode: Periode,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    fnr: Personidentifikator = UNG_PERSON_FNR_2018,
+    sendTilGosys: Boolean = false,
+    sendtTilNAVEllerArbeidsgiver: LocalDate = periode.endInclusive
+): UUID {
     return håndterSøknad(
         Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
         orgnummer = orgnummer,
+        fnr = fnr,
         sykmeldingSkrevet = periode.start.atStartOfDay(),
-        sendtTilNAVEllerArbeidsgiver = periode.endInclusive,
+        sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
         sendTilGosys = sendTilGosys
     )
 }
