@@ -81,7 +81,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         // Og nå stokker det seg skikkelig til..
         nullstillTilstandsendringer()
-        håndterSøknad(Sykdom(25.februar, 15.mars, 100.prosent))
+        håndterSøknad(25.februar til 15.mars)
         håndterYtelser(4.vedtaksperiode)
 
         assertEquals(5, inspektør.utbetalinger.size)
@@ -117,7 +117,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-        håndterSøknad(Sykdom(19.februar, 19.mars, 100.prosent))
+        håndterSøknad(19.februar til 19.mars)
         håndterInntektsmelding(listOf(19.februar til 6.mars))
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -137,8 +137,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
 
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(januar)
+        håndterSøknad(februar)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
@@ -176,7 +176,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Én arbeidsgiver - førstegangsbehandling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -202,7 +202,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Forlengelse av en avsluttet periode går til AvventerHistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -211,7 +211,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
@@ -220,10 +220,10 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Førstegangsbehandling går ikke videre dersom vi har en tidligere uferdig periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -238,10 +238,10 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Førstegangsbehandling går videre etter at en tidligere uferdig periode er ferdig`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
@@ -259,7 +259,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Kort periode går til AvsluttetUtenUtbetaling, pusher neste periode til AvventerHistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(1.januar til 16.januar)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
 
@@ -272,7 +272,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        håndterSøknad(17.januar til 31.januar)
         assertTrue(im in observatør.inntektsmeldingHåndtert.map(Pair<InntektsmeldingId, *>::first))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -283,7 +283,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Inntektsmelding kommer før søknad - vi kommer oss videre til AvventerHistorikk pga replay`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -298,7 +298,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Kort periode skal ikke blokkeres av mangelende søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar))
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
+        håndterSøknad(1.januar til 20.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -309,10 +309,10 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar))
         håndterSykmelding(Sykmeldingsperiode(25.januar, 17.februar))
 
-        håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent))
+        håndterSøknad(1.januar til 22.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
-        håndterSøknad(Sykdom(25.januar, 17.februar, 100.prosent))
+        håndterSøknad(25.januar til 17.februar)
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
@@ -322,11 +322,11 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
@@ -340,14 +340,14 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `går tilbake til AvventerTidligereEllerOverlappende dersom vi får en tilbakedatert søknad før periode i AvventerGodkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -356,11 +356,11 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `går tilbake til AvventerTidligereEllerOverlappende dersom vi får en tilbakedatert søknad før periode i AvventerHistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -369,11 +369,11 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `går tilbake til AvventerTidligereEllerOverlappende dersom vi får en tilbakedatert søknad før periode i AvventerVilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -382,13 +382,13 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `går tilbake til AvventerTidligereEllerOverlappende dersom vi får en tilbakedatert søknad før periode i AvventerSimulering`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -397,10 +397,10 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `blir i AvventerInntektsmelding dersom vi får en out-of-order søknad forran`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
@@ -408,12 +408,12 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `blir i AvventerTidligereEllerOverlappende dersom vi får en out-of-order søknad forran`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
 
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
@@ -421,10 +421,10 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `hopper ikke videre fra AvventerInntektsmelding dersom vi får en out-of-order søknad foran og IM kommer på den seneste vedtaksperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         håndterInntektsmelding(listOf(1.mars til 16.mars),)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -436,8 +436,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
         håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai))
 
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.mai, 31.mai, 100.prosent))
+        håndterSøknad(januar)
+        håndterSøknad(mai)
 
         håndterInntektsmelding(listOf(1.mai til 16.mai),)
         håndterPåminnelse(
@@ -456,9 +456,9 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar))
         håndterSykmelding(Sykmeldingsperiode(10.januar, 11.januar))
 
-        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
+        håndterSøknad(1.januar til 2.januar)
         håndterInntektsmelding(listOf(1.januar til 2.januar, 10.januar til 23.januar), førsteFraværsdag = 10.januar,)
-        håndterSøknad(Sykdom(10.januar, 11.januar, 100.prosent))
+        håndterSøknad(10.januar til 11.januar)
 
         assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
     }
@@ -467,17 +467,17 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Periode skal ha utbetaling grunnet inntektsmelding vi mottok før søknad`() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 26.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
-        håndterSøknad(Sykdom(11.januar, 26.januar, 100.prosent))
+        håndterSøknad(11.januar til 26.januar)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
     fun `Skal ikke forkaste periode som mottar to identiske søknader`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
@@ -485,16 +485,16 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Skal ikke forkaste periode som mottar to identiske søknader for forlengelse i AvventerTidligereEllerOverlappendePerioder`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -503,12 +503,12 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `ikke opprett ny vedtaksperiode dersom vi tidligere har forkastet en i samme periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         forkastAlle(hendelselogg)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
 
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
@@ -517,14 +517,14 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Dersom alle perioder forkastes skal ingen av dem pokes videre fra gjenopptaBehandling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         forkastAlle(hendelselogg)
 
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
@@ -533,7 +533,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Infotrygdhistorikk fører til at en senere periode ikke trenger ny AGP - må vente på infotrygdhistorikk før vi bestemmer om vi skal til AUU`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         utbetalPeriode(1.vedtaksperiode)
 
@@ -543,7 +543,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar,)
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
-        håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
+        håndterSøknad(20.februar til 28.februar)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
@@ -551,7 +551,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `overlappende sykmeldinger - første bit skal kunne gå videre selv om vi ikke har mottatt søknad for halen`() {
         tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar))
-        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
+        håndterSøknad(1.februar til 20.februar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -561,7 +561,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `korrigert sykmelding skal ikke blokkere for behandlingen av den første`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar)) // dup
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         assertEquals(emptyList<Periode>(), inspektør.sykmeldingsperioder())
@@ -571,7 +571,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `tilbakedatert sykmelding som ikke overlapper skal ikke hindre at tidligere periode kan gå videre`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterSykmelding(Sykmeldingsperiode(31.januar, 31.januar))
         håndterInntektsmelding(listOf(1.februar til 16.februar),)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
