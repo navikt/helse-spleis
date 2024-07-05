@@ -756,7 +756,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     fun `revurder med kun ferie`() {
         nyttVedtak(3.januar til 26.januar)
         forlengVedtak(27.januar til 13.februar)
-        forlengPeriode(14.februar, 15.februar)
+        forlengPeriode(14.februar til 15.februar)
 
         håndterOverstyrTidslinje((27.januar til 13.februar).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)

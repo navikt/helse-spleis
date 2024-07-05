@@ -363,7 +363,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjenning(
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
-    nyPeriode(periode.start til periode.endInclusive, orgnummer, grad = grad, fnr = fnr)
+    nyPeriode(periode, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterYtelser(id, orgnummer = orgnummer, fnr = fnr)
     if (person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
@@ -375,18 +375,17 @@ internal fun AbstractEndToEndTest.forlengVedtak(
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
-    forlengTilGodkjentVedtak(periode.start til periode.endInclusive, grad, fnr, orgnummer)
+    forlengTilGodkjentVedtak(periode, grad, fnr, orgnummer)
     håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.forlengPeriode(
-    fom: LocalDate,
-    tom: LocalDate,
+    periode: Periode,
     grad: Prosentdel = 100.prosent,
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
-    nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
+    nyPeriode(periode, orgnummer, grad = grad, fnr = fnr)
 }
 
 internal fun AbstractEndToEndTest.håndterSøknad(

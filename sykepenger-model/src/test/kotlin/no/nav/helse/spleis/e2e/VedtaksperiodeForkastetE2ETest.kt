@@ -25,7 +25,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
-        forlengPeriode(1.april, 30.april)
+        forlengPeriode(april)
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode, false) // <- TIL_INFOTRYGD
