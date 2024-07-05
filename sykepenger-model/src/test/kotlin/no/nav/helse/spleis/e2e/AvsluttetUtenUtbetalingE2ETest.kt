@@ -47,8 +47,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         val periode1 = 1.januar til 5.januar
         val periode2 = 10.januar til 14.januar
         val periode3 = 20.januar til 31.januar
-        håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent))
-        håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent))
+        håndterSøknad(periode1)
+        håndterSøknad(periode2)
         håndterSøknad(Sykdom(periode3.start, periode3.endInclusive, 100.prosent), Søknad.Søknadsperiode.Ferie(26.januar, 31.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -60,7 +60,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `en auu som strekker seg utover arbeidsgiverperioden kun med helg`() {
-        håndterSøknad(Sykdom(4.januar, søndag(21.januar), 100.prosent))
+        håndterSøknad(4.januar til søndag(21.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(4.januar til fredag(19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         val utoverAgp = inspektør.arbeidsgiverperioden(1.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje)
@@ -70,7 +70,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
-        håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
+        håndterSøknad(3.januar til 10.januar)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -80,8 +80,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars))
-        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)),)
-        håndterSøknad(Sykdom(3.mars, 26.mars, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
+        håndterSøknad(3.mars til 26.mars)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -109,7 +109,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     @Test
     fun `kort periode setter senere periode fast i AVVENTER_HISTORIKK`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar))
-        håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
+        håndterSøknad(3.januar  til 10.januar)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -119,15 +119,15 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 7.mars))
-        håndterSøknad(Sykdom(3.mars, 7.mars, 100.prosent))
+        håndterSøknad(3.mars til 7.mars)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
 
         håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars))
-        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)),)
+        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
 
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
 
-        håndterSøknad(Sykdom(8.mars, 26.mars, 100.prosent))
+        håndterSøknad(8.mars til 26.mars)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
@@ -150,10 +150,10 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `arbeidsgiverperiode med brudd i helg`() {
-        håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
-        håndterSøknad(Sykdom(8.januar, 12.januar, 100.prosent))
-        håndterSøknad(Sykdom(13.januar, 19.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 1.februar, 100.prosent))
+        håndterSøknad(4.januar til 5.januar)
+        håndterSøknad(8.januar til 12.januar)
+        håndterSøknad(13.januar til 19.januar)
+        håndterSøknad(20.januar til 1.februar)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
