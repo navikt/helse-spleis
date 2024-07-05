@@ -6,7 +6,6 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -33,7 +32,6 @@ import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -64,7 +62,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
     @Test
     fun `skjønnsfastsetting`() {
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 60000.månedlig,)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = 30000.månedlig)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK)
@@ -90,7 +88,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
 
     @Test
     fun `auu skal utbetales`() {
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(1.januar til 16.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(16.januar, Dagtype.SykedagNav, 100)))
         revurderingIgangsattEvent {
             this bleForårsaketAv "SYKDOMSTIDSLINJE"
@@ -142,7 +140,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         forlengVedtak(februar)
         forlengVedtak(mars)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(27.februar, 28.februar, 50.prosent))
+        håndterSøknad(27.februar til 28.februar)
         nullstillTilstandsendringer()
         håndterPåminnelse(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, skalReberegnes = true)
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
@@ -157,7 +155,7 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
     @Test
     fun `flere revurderinger`() {
         nyttVedtak(januar)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(29.januar, 30.januar, 50.prosent))
+        håndterSøknad(29.januar til 30.januar)
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
 
         revurderingIgangsattEvent(0) {
