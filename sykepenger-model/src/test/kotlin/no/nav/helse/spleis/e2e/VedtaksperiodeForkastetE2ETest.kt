@@ -5,14 +5,12 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -40,11 +38,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `forkaster kort periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
-        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
+        håndterSøknad(1.januar til 5.januar)
         håndterSykmelding(Sykmeldingsperiode(6.januar, 15.januar))
-        håndterSøknad(Sykdom(6.januar, 15.januar, 100.prosent))
+        håndterSøknad(6.januar til 15.januar)
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar))
-        håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
+        håndterSøknad(16.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
@@ -62,7 +60,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer arbeidsgiveropplysninger for søknad som forkastes pga sendTilGosys = true`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.januar til 31.januar, sendTilGosys = true)
 
         assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 31.januar), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -72,7 +70,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av spleis`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.februar til 28.februar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 31.januar, 1.februar til 28.februar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -82,7 +80,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av spleis over helg`() {
         nyttVedtak(1.januar til 26.januar)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
-        håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(29.januar til 28.februar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 26.januar, 29.januar til 28.februar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -95,7 +93,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.februar til 28.februar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 31.januar, 1.februar til 28.februar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -108,7 +106,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 28.februar))
-        håndterSøknad(Sykdom(29.januar, 28.februar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(29.januar til 28.februar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 26.januar, 29.januar til 28.februar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -118,7 +116,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     fun `Forventer arbeidsgiveropplysninger ved kort gap til spleis`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
-        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(2.februar til 28.februar, sendTilGosys = true)
 
         assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 31.januar, 2.februar til 28.februar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -131,7 +129,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
-        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
+        håndterSøknad(2.februar til 28.februar)
 
         assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 31.januar, 2.februar til 28.februar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -140,7 +138,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger ved forkasting av AUU`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.januar til 10.januar, sendTilGosys = true)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         val event = observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
@@ -153,7 +151,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 10.januar)
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 15.januar))
-        håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(11.januar til 15.januar, sendTilGosys = true)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 10.januar, 11.januar til 15.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -164,7 +162,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 10.januar)
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 17.januar))
-        håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(11.januar til 17.januar, sendTilGosys = true)
 
         assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 10.januar, 11.januar til 17.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -173,11 +171,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer ikke arbeidsgiveropplysninger ved forlengelse av kort forkastet periode, ny periode er fortsatt innenfor AGP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.januar til 10.januar, sendTilGosys = true)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 15.januar))
-        håndterSøknad(Sykdom(11.januar, 15.januar, 100.prosent))
+        håndterSøknad(11.januar til 15.januar)
 
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 10.januar, 11.januar til 15.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -186,11 +184,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer arbeidsgiveropplysninger ved forlengelse av kort forkastet periode, ny periode går utover AGP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.januar til 10.januar, sendTilGosys = true)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar))
-        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
+        håndterSøknad(11.januar til 31.januar)
 
         assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 10.januar, 11.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -199,11 +197,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer arbeidsgiveropplysninger ved forlengelse av kort forkastet periode, ny periode går utover AGP, men er kortere enn 16 dager`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.januar til 10.januar, sendTilGosys = true)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(11.januar, 17.januar))
-        håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent))
+        håndterSøknad(11.januar til 17.januar)
 
         assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 10.januar, 11.januar til 17.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -212,11 +210,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer ikke arbeisgiveropplysninger ved kort periode med gap til kort forkastet periode, ny periode går ikke utover AGP`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar))
-        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.januar til 5.januar, sendTilGosys = true)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 15.januar))
-        håndterSøknad(Sykdom(10.januar, 15.januar, 100.prosent))
+        håndterSøknad(10.januar til 15.januar)
         assertFalse(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 5.januar, 10.januar til 15.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
     }
@@ -224,15 +222,15 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Forventer arbeisgiveropplysninger ved kort periode med gap til kort forkastet periode, ny periode går utover AGP`() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2017), 10.desember(2017)))
-        håndterSøknad(Sykdom(1.desember(2017), 10.desember(2017), 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.desember(2017) til 10.desember(2017), sendTilGosys = true)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(1.januar til 10.januar, sendTilGosys = true)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(15.januar, 25.januar))
-        håndterSøknad(Sykdom(15.januar, 25.januar, 100.prosent))
+        håndterSøknad(15.januar til 25.januar)
         assertTrue(observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 10.januar, 15.januar til 25.januar), observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
     }
@@ -242,11 +240,11 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 5.januar)
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 15.januar))
-        håndterSøknad(Sykdom(10.januar, 15.januar, 100.prosent), sendTilGosys = true)
+        håndterSøknad(10.januar til 15.januar, sendTilGosys = true)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
 
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
-        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
+        håndterSøknad(20.januar til 31.januar)
         assertTrue(observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 5.januar, 10.januar til 15.januar, 20.januar til 31.januar), observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
     }
@@ -296,7 +294,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 25.januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         assertTrue(observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
         assertEquals(listOf(1.januar til 25.januar, 1.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
@@ -307,7 +305,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 15.januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         assertEquals(listOf(1.januar til 15.januar, 1.januar til 31.januar), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).sykmeldingsperioder)
         assertTrue(observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).trengerArbeidsgiveropplysninger)
     }
