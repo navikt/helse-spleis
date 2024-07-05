@@ -58,7 +58,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     @Test
     fun `varsel - Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
 
@@ -144,7 +144,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - skjæringstidspunkt endres som følge av historikk fra IT - forlengelse`() {
         nyttVedtak(10.februar til 28.februar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.februar, 11.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 5.februar, INNTEKT, true)
         ))

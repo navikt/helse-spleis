@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -102,7 +101,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling feilet med ett oppdrag status avvist og ett som er ok`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
@@ -137,7 +136,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling feilet med ett oppdrag status ok og ett som er avvist`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())

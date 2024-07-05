@@ -20,11 +20,11 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Prodbug - Feilaktig varsel om flere inntektsmeldinger`() {
         håndterSykmelding(Sykmeldingsperiode(22.mars(2021), 28.mars(2021)))
-        håndterSøknad(Sykdom(22.mars(2021), 28.mars(2021), 100.prosent))
+        håndterSøknad(22.mars(2021) til 28.mars(2021))
 
         håndterSykmelding(Sykmeldingsperiode(29.mars(2021), 5.april(2021)))
-        håndterSøknad(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
-        håndterSøknad(Sykdom(29.mars(2021), 5.april(2021), 100.prosent))
+        håndterSøknad(29.mars(2021) til 5.april(2021))
+        håndterSøknad(29.mars(2021) til 5.april(2021))
 
         håndterSykmelding(Sykmeldingsperiode(6.april(2021), 16.april(2021)))
         håndterInntektsmelding(
@@ -46,7 +46,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
     @Test
     fun `Varsel om flere inntektsmeldinger hvis vi forlenger en avsluttet periode med inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar,)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, inntekt = INNTEKT)
         håndterYtelser(1.vedtaksperiode)
