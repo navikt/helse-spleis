@@ -6,7 +6,6 @@ import no.nav.helse.desember
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -23,7 +22,6 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -81,8 +79,8 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
     fun `tar ikke med inntekter fra A-Ordningen dersom arbeidsforholdet kun er brukt til opptjening og ikke gjelder under skjæringstidspunktet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,)
+        håndterSøknad(1.januar til 15.mars, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
 
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(3)),
@@ -122,7 +120,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Har ikke pensjonsgivende inntekt måneden før skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = listOf(
@@ -148,8 +146,8 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
     private fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {
         håndterSykmelding(Sykmeldingsperiode(fom, tom), orgnummer = a1)
-        håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1,)
+        håndterSøknad(fom til tom, orgnummer = a1)
+        håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
         håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
     }
     companion object {

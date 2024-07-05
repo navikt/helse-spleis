@@ -132,7 +132,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     inntektsmeldingId: UUID = UUID.randomUUID()
 ) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    organisasjonsnummere.forEach { nyPeriode(periode.start til periode.endInclusive, it) }
+    organisasjonsnummere.forEach { nyPeriode(periode, it) }
     organisasjonsnummere.forEach {
         håndterInntektsmelding(
             arbeidsgiverperioder = arbeidsgiverperiode,
@@ -351,7 +351,7 @@ internal fun AbstractEndToEndTest.forlengTilSimulering(
     fnr: Personidentifikator = UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
-    nyPeriode(periode.start til periode.endInclusive, orgnummer, grad = grad, fnr = fnr)
+    nyPeriode(periode, orgnummer, grad = grad, fnr = fnr)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterYtelser(id, orgnummer = orgnummer, fnr = fnr)
     assertTrue(person.personLogg.etterspurteBehov(id, Behovtype.Simulering, orgnummer)) { "Forventet at simulering er etterspurt" }

@@ -40,12 +40,12 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
         nyPeriode(22.januar til 31.januar)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 22.januar,)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 22.januar)
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
 
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -70,7 +70,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT))
         nyPeriode(10.mars til 31.mars)
-        håndterInntektsmelding(listOf(10.mars til 26.mars),)
+        håndterInntektsmelding(listOf(10.mars til 26.mars))
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -82,8 +82,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `søknad omgjør paddet arbeidsdager til syk`() {
-        håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
-        håndterSøknad(Sykdom(31.januar, 5.februar, 100.prosent))
+        håndterSøknad(1.januar til 3.januar)
+        håndterSøknad(31.januar til 5.februar)
         // perioden 4. til 9.januar er paddet arbeidsdager; perioden 23.januar til 30.januar er "implisitte arbeidsdager" (ukjentdager på sykdomtsidslinjen)
         håndterInntektsmelding(listOf(1.januar til 3.januar, 10.januar til 22.januar), førsteFraværsdag = 31.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -100,7 +100,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         }
 
         observatør.vedtaksperiodeVenter.clear()
-        håndterSøknad(Sykdom(10.januar, 26.januar, 100.prosent))
+        håndterSøknad(10.januar til 26.januar)
         observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
 
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
@@ -143,7 +143,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
         // arbeidsgiver, også lengre tilbake i tid enn vedtaksperioden som blir truffet.
-        håndterSøknad(Sykdom(5.mars, 31.mars, 100.prosent))
+        håndterSøknad(5.mars til 31.mars)
         assertTilstandFørInnteksmeldingHensyntas()
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -160,7 +160,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar,)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 
@@ -179,7 +179,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         nullstillTilstandsendringer()
-        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar,)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.februar)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
 

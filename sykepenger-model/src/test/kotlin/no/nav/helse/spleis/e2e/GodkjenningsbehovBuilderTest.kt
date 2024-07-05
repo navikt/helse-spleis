@@ -26,7 +26,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.somPersonidentifikator
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -122,8 +121,8 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Tilkommen inntekt`() = Toggle.TilkommenInntekt.enable {
         nyttVedtak(januar, orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(februar, orgnummer = a1)
+        håndterSøknad(februar, orgnummer = a2)
         håndterInntektsmelding(
             listOf(1.februar til 16.februar),
             beregnetInntekt = 10000.månedlig,
@@ -200,7 +199,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga AIG-dager`() {
         nyttVedtak(juni)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.august, 31.august, 100.prosent))
+        håndterSøknad(august)
         håndterInntektsmelding(
             listOf(1.juni til 16.juni),
             førsteFraværsdag = 1.august,
@@ -218,10 +217,10 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender med tag IngenNyArbeidsgiverperiode når det ikke er ny AGP pga mindre enn 16 dagers gap selv om AGP er betalt av nav`() {
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()),
+            refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert",
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -281,17 +280,17 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Periode med utbetaling etter kort gap etter kort auu tagges ikke med IngenNyArbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(1.januar til 10.januar)
         tilGodkjenning(15.januar til 31.januar, a1)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
     }
 
     @Test
     fun `Forlengelse av auu skal ikke tagges med IngenNyArbeidsgiverperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(1.januar til 16.januar)
         val inntektsmeldingId = UUID.randomUUID()
         tilGodkjenning(17.januar til 31.januar, a1, arbeidsgiverperiode = listOf(1.januar til 16.januar), inntektsmeldingId = inntektsmeldingId)
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
@@ -326,7 +325,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `ingen utbetaling`() {
         nyttVedtak(januar)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode)
         assertGodkjenningsbehov(
             tags = setOf("IngenUtbetaling"),
@@ -420,7 +419,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `Periode uten noen navdager får Avslag-tag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertForventetFeil(
             forklaring = "Skal implementeres snarest",
@@ -465,7 +464,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     fun `Periode uten navdager og avslagsdager får Avslag-tag`() {
         nyttVedtak(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
         håndterYtelser(2.vedtaksperiode)
         assertGodkjenningsbehov(
             tags = setOf("Avslag", "IngenUtbetaling", "EnArbeidsgiver"),
@@ -509,7 +508,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `legger til hendelses ID'er og dokumenttype på godkjenningsbehovet` () {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        val søknadId = håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        val søknadId = håndterSøknad(januar)
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -554,13 +553,13 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun assertTags(tags: Set<String>, vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),) {
+    private fun assertTags(tags: Set<String>, vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1)) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         assertTrue(actualtags.containsAll(tags))
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertEquals(actualtags, utkastTilVedtak.tags)
     }
-    private fun assertIngenTag(tag: String, vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1),) {
+    private fun assertIngenTag(tag: String, vedtaksperiodeId: UUID = 1.vedtaksperiode.id(a1)) {
         val actualtags = hentFelt<Set<String>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "tags") ?: emptySet()
         assertFalse(actualtags.contains(tag))
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()

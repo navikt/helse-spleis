@@ -4,7 +4,6 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -24,7 +23,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     fun `hensyntar tidligere arbeidsgivere fra IT`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT))
         nyPeriode(1.mars til 31.mars, a1)
-        håndterInntektsmelding(listOf(1.mars til 16.mars),)
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -40,7 +39,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     fun `hensyntar ikke senere arbeidsgivere fra IT`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.april, 30.april, 100.prosent, INNTEKT))
         nyPeriode(1.mars til 31.mars, a1)
-        håndterInntektsmelding(listOf(1.mars til 16.mars),)
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -94,7 +93,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     private fun nyPeriode(forrigePeriode: Periode): Periode {
         val nestePeriode = nestePeriode(forrigePeriode)
         håndterSykmelding(Sykmeldingsperiode(nestePeriode.start, nestePeriode.endInclusive))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(nestePeriode.start, nestePeriode.endInclusive, 100.prosent))
+        håndterSøknad(nestePeriode)
         return nestePeriode
     }
 
