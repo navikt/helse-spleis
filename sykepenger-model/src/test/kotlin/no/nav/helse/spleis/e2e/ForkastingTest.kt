@@ -44,7 +44,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = emptyList()
         )
-        håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
+        håndterSøknad(1.februar til 23.februar)
         assertTrue(inspektør.utbetalinger.isEmpty())
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
@@ -52,13 +52,13 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     @Test
     fun `når utbetaling er ikke godkjent skal påfølgende perioder også kastes ut`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterSøknad(3.januar til 26.januar)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
-        håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
+        håndterSøknad(29.januar til 23.februar)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
         assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(0))
         assertForkastetPeriodeTilstander(
@@ -85,9 +85,9 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `når utbetaling er ikke godkjent skal påfølgende perioder også kastes ut -- alternativ syntax`() {
         hendelsene {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-            håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+            håndterSøknad(3.januar til 26.januar)
         } førerTil AVVENTER_INNTEKTSMELDING somEtterfulgtAv {
-            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         } førerTil AVVENTER_VILKÅRSPRØVING somEtterfulgtAv {
             håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         } førerTil AVVENTER_HISTORIKK somEtterfulgtAv {
@@ -96,7 +96,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             håndterSimulering(1.vedtaksperiode)
         } førerTil AVVENTER_GODKJENNING somEtterfulgtAv {
             håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
-            håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
+            håndterSøknad(29.januar til 23.februar)
         } førerTil listOf(AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE) somEtterfulgtAv {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
         } førerTil listOf(TIL_INFOTRYGD, TIL_INFOTRYGD)
@@ -106,10 +106,10 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     @Test
     fun `kan ikke forlenge en periode som er gått TilInfotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknad(3.januar til 26.januar)
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
-        håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterSøknad(29.januar til 23.februar)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -153,7 +153,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     @Test
     fun `refusjon opphører i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknad(3.januar til 26.januar)
         håndterInntektsmelding(
             listOf(Periode(3.januar, 18.januar)),
             refusjon = Refusjon(INNTEKT, 20.januar, emptyList()),
@@ -175,7 +175,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     @Test
     fun `refusjon endres i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSøknad(3.januar til 26.januar)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)),
             refusjon = Refusjon(INNTEKT, null, listOf(Refusjon.EndringIRefusjon(INNTEKT / 2, 14.januar))),
@@ -197,8 +197,8 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     @Test
     fun `forkaster ikke i til utbetaling ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterSøknad(3.januar til 26.januar)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -225,13 +225,13 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     @Test
     fun `forkaster i avventer godkjenning ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)),)
+        håndterSøknad(3.januar til 26.januar)
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(3.januar, 27.januar))
-        håndterSøknad(Sykdom(3.januar, 27.januar, 100.prosent))
+        håndterSøknad(3.januar til 27.januar)
 
         assertEquals(Utbetalingstatus.FORKASTET, inspektør.utbetalingtilstand(0))
         assertForkastetPeriodeTilstander(
