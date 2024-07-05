@@ -5,6 +5,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -36,10 +37,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(5.april, 30.april, 100.prosent))
+        håndterSøknad(januar)
+        håndterSøknad(februar)
+        håndterSøknad(mars)
+        håndterSøknad(5.april til 30.april)
         val inntektsmelding1Id = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),)
         val inntektsmelding2Id = håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -80,12 +81,12 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(5.april, 30.april, 100.prosent))
+        håndterSøknad(februar)
+        håndterSøknad(mars)
+        håndterSøknad(5.april til 30.april)
 
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
@@ -96,13 +97,13 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     @Test
     fun `inntektsmelding bryter ikke opp forlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterInntektsmelding(listOf(Periode(18.januar, 1.februar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         nullstillTilstandsendringer()
         håndterInntektsmelding(
             listOf(Periode(18.januar, 1.februar)),
@@ -126,10 +127,10 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     @Test
     fun `setter ikke inntektsmeldingId flere ganger`() {
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar))
-        håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
+        håndterSøknad(20.februar til 28.februar)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        val søknadId = håndterSøknad(mars)
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(20.februar, 8.mars)), 20.februar,)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
