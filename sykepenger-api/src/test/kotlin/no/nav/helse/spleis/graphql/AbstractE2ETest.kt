@@ -105,9 +105,6 @@ internal abstract class AbstractE2ETest {
         }
     }
 
-    protected fun håndterSøknad(fom: LocalDate, tom: LocalDate, orgnummer: String = a1): UUID {
-        return håndterSøknad(fom til tom, orgnummer)
-    }
     protected fun håndterSøknad(periode: Periode, orgnummer: String = a1): UUID {
         return håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), sykmeldingSkrevet = periode.start.atStartOfDay(), sendtTilNAV = periode.endInclusive.atStartOfDay(), orgnummer = orgnummer)
     }
