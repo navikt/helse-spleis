@@ -165,7 +165,7 @@ enum class Varselkode(
     RV_OV_3("Det er ikke registrert inntekt i måneden før skjæringstidspunktet"),
 
     // MV: Medlemskapsvurdering
-    RV_MV_1("Vurder lovvalg og medlemskap", avviklet = true),
+    RV_MV_1("Vurder lovvalg og medlemskap"),
     RV_MV_2("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden"),
     RV_MV_3("Arbeid utenfor Norge oppgitt i søknaden"),
 
