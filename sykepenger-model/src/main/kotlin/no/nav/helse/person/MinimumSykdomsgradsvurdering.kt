@@ -9,14 +9,14 @@ import no.nav.helse.hendelser.Periode
  * tross < 20% tapt inntekt
  */
 internal class MinimumSykdomsgradsvurdering(private val perioderMedMinimumSykdomsgradVurdertOK: MutableSet<Periode> = mutableSetOf()) {
-    fun leggTil(nyePerioder: Set<Periode>) {
+    internal fun leggTil(nyePerioder: Set<Periode>) {
         val ny = perioderMedMinimumSykdomsgradVurdertOK.fjernPerioder(nyePerioder) + nyePerioder
         perioderMedMinimumSykdomsgradVurdertOK.clear()
         perioderMedMinimumSykdomsgradVurdertOK.addAll(ny)
     }
 
-    fun trekkFra(perioderSomIkkeHaddeNokLikevel: Set<Periode>) {
-        val ny = perioderMedMinimumSykdomsgradVurdertOK.fjernPerioder(perioderSomIkkeHaddeNokLikevel)
+    internal fun trekkFra(perioderSomIkkeErOkLikevel: Set<Periode>) {
+        val ny = perioderMedMinimumSykdomsgradVurdertOK.fjernPerioder(perioderSomIkkeErOkLikevel)
         perioderMedMinimumSykdomsgradVurdertOK.clear()
         perioderMedMinimumSykdomsgradVurdertOK.addAll(ny)
     }
@@ -28,10 +28,10 @@ internal class MinimumSykdomsgradsvurdering(private val perioderMedMinimumSykdom
             }
         }
 
-    fun fjernDagerSomSkalUtbetalesLikevel(tentativtAvslåtteDager: List<Periode>) =
+    internal fun fjernDagerSomSkalUtbetalesLikevel(tentativtAvslåtteDager: List<Periode>) =
         tentativtAvslåtteDager.fjernPerioder(perioderMedMinimumSykdomsgradVurdertOK)
 
-    fun dto() = MinimumSykdomsgradVurderingUtDto(
+    internal fun dto() = MinimumSykdomsgradVurderingUtDto(
         perioder = perioderMedMinimumSykdomsgradVurdertOK.map {
             it.dto()
         }

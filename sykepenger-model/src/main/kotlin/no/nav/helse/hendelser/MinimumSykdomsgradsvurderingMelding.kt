@@ -16,9 +16,22 @@ class MinimumSykdomsgradsvurderingMelding(
     aktørId: String
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()) {
 
+    init {
+        sjekkForOverlapp()
+    }
+
     internal fun oppdater(vurdering: MinimumSykdomsgradsvurdering) {
         vurdering.leggTil(perioderMedMinimumSykdomsgradVurdertOK)
         vurdering.trekkFra(perioderMedMinimumSykdomsgradVurdertIkkeOK)
+        sjekkForOverlapp()
+    }
+
+    private fun sjekkForOverlapp() {
+        perioderMedMinimumSykdomsgradVurdertOK.forEach {
+            if (perioderMedMinimumSykdomsgradVurdertIkkeOK.contains(it)) {
+                error("overlappende perioder i MinimumSykdomsgradsvurdering! $it er vurdert OK, men også vurdert til IKKE å være OK")
+            }
+        }
     }
 
 

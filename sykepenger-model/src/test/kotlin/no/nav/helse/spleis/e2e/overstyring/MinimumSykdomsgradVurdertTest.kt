@@ -26,6 +26,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
 
@@ -41,20 +42,22 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertTrue(avvistedager.all { it.begrunnelser == listOf(Begrunnelse.MinimumSykdomsgrad) })
         assertVarsel(Varselkode.RV_VV_4)
 
-        håndterMinimumSykdomsgradVurdert(listOf(januar))
+        håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
+        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        assertTrue(inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.all { it.økonomi.inspektør.totalGrad == 10 })
     }
 
     @Test
     fun `Får søknad fra ghost etter at minimum sykdomsgrad er vurdert`() {
         settOppAvslagPåMinimumSykdomsgrad()
 
-        håndterMinimumSykdomsgradVurdert(listOf(januar))
+        håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
         håndterYtelser()
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
         håndterSimulering()
@@ -81,6 +84,14 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertEquals(0, inspektør(a1).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
         assertEquals(0, inspektør(a2).utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
         assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a2))
+    }
+
+    @Test
+    fun `Vurderer samme måned til å være både ok og ikke ok`() {
+        settOppAvslagPåMinimumSykdomsgrad()
+        assertThrows<IllegalStateException> {
+            håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
+        }
     }
 
     private fun settOppAvslagPåMinimumSykdomsgrad() {

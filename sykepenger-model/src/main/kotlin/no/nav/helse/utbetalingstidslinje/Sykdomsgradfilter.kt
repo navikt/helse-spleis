@@ -26,7 +26,9 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
 
         val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(oppdaterte)
         val avvistePerioder = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)
-        if (!avvistePerioder.containsAll(tentativtAvvistePerioder)) aktivitetslogg.varsel(RV_VV_17)
+        if (!avvistePerioder.containsAll(tentativtAvvistePerioder)) {
+            aktivitetslogg.varsel(RV_VV_17)
+        }
 
         val avvisteTidslinjer = avvis(oppdaterte, avvistePerioder, listOf(Begrunnelse.MinimumSykdomsgrad))
 
