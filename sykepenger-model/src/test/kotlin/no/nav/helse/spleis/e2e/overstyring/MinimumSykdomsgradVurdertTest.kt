@@ -109,6 +109,18 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
     }
 
+    @Test
+    fun `bare enkeltdager i vedtaksperioden er vurdert ok`() {
+        settOppAvslagPåMinimumSykdomsgrad()
+        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
+        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(1.januar til 20.januar))
+        håndterYtelser()
+        assertEquals(8, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
+        assertEquals(3, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        assertVarsel(Varselkode.RV_VV_17, 1.vedtaksperiode.filter(orgnummer = a1))
+    }
+
     private fun settOppAvslagPåMinimumSykdomsgrad() {
         nyPeriode(januar, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 10000.månedlig, orgnummer = a1)
