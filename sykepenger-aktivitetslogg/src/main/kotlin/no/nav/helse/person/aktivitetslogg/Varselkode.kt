@@ -299,5 +299,7 @@ enum class Varselkode(
             varsel(varselkode)
             info("${varselkode.name} detaljer: $detaljer")
         }
+
+        fun Varselkode.erAvviklet() = this.avviklet
     }
 }

@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.erAvviklet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
@@ -35,6 +36,9 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
     }
 
     override fun varsel(id: UUID, label: Char, kode: Varselkode?, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
+        if (kode?.erAvviklet() == true) {
+            sikkerlogg.warn("$kode er ikke avviklet, men i bruk i spleis. Endre?")
+        }
         val aktivitetMap = aktivitetMap(id, label, melding, kontekster, tidsstempel).toMutableMap()
         if (kode != null) aktivitetMap["varselkode"] = kode
         aktiviteter.add(aktivitetMap.toMap())
