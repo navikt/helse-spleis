@@ -94,6 +94,21 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `Saksbehandler angrer vurdering`() {
+        settOppAvslagPåMinimumSykdomsgrad()
+        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
+        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar))
+        håndterYtelser()
+        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
+        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+        håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = emptyList(), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
+        håndterYtelser()
+        assertEquals(11, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.avvistedager.size)
+        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).last().inspektør.utbetalingstidslinje.inspektør.navdager.size)
+    }
+
     private fun settOppAvslagPåMinimumSykdomsgrad() {
         nyPeriode(januar, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 10000.månedlig, orgnummer = a1)
