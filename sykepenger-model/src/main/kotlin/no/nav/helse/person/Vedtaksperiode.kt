@@ -2074,7 +2074,10 @@ internal class Vedtaksperiode private constructor(
             hendelse: Hendelse,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            if (!vedtaksperiode.behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return
+            if (!vedtaksperiode.behandlinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) {
+                hendelse.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
+                return
+            }
             vedtaksperiode.behandlinger.forkastUtbetaling(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
@@ -2156,6 +2159,7 @@ internal class Vedtaksperiode private constructor(
             ) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
             }
+            else hendelse.info("Infotrygdhistorikken er uendret, reberegner ikke periode")
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
