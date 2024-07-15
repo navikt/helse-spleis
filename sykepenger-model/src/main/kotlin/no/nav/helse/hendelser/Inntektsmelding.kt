@@ -15,6 +15,7 @@ import no.nav.helse.person.Behandlinger
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.erForkastet
+import no.nav.helse.person.ForkastetVedtaksperiode.Companion.overlapperMed
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
@@ -170,11 +171,18 @@ class Inntektsmelding(
         return dager
     }
 
-    internal fun ikkeHåndert(person: Person, vedtaksperioder: List<Vedtaksperiode>, sykmeldingsperioder: Sykmeldingsperioder, dager: DagerFraInntektsmelding) {
+    internal fun ikkeHåndert(
+        person: Person,
+        vedtaksperioder: List<Vedtaksperiode>,
+        forkastede: List<ForkastetVedtaksperiode>,
+        sykmeldingsperioder: Sykmeldingsperioder,
+        dager: DagerFraInntektsmelding
+    ) {
         if (håndtertNå()) return
         info("Inntektsmelding ikke håndtert")
         val relevanteSykmeldingsperioder = sykmeldingsperioder.overlappendePerioder(dager) + sykmeldingsperioder.perioderInnenfor16Dager(dager)
-        if (relevanteSykmeldingsperioder.isNotEmpty()) {
+        val overlapperMedForkastet = forkastede.overlapperMed(dager)
+        if (relevanteSykmeldingsperioder.isNotEmpty() && !overlapperMedForkastet) {
             person.emitInntektsmeldingFørSøknadEvent(meldingsreferanseId(), relevanteSykmeldingsperioder, organisasjonsnummer)
             return info("Inntektsmelding er relevant for sykmeldingsperioder $relevanteSykmeldingsperioder")
         }

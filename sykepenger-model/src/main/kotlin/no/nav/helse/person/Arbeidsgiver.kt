@@ -453,7 +453,7 @@ internal class Arbeidsgiver private constructor(
         val dagoverstyring = dager.revurderingseventyr()
         addInntektsmelding(inntektsmelding, dagoverstyring)
 
-        inntektsmelding.ikkeHåndert(person, vedtaksperioder, sykmeldingsperioder, dager)
+        inntektsmelding.ikkeHåndert(person, vedtaksperioder, forkastede, sykmeldingsperioder, dager)
     }
 
     internal fun inntektsmeldingFerdigbehandlet(hendelse: Hendelse) {

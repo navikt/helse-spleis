@@ -270,12 +270,12 @@ internal class DagerFraInntektsmelding(
         beregnetArbeidsgiverperiode?.validerFeilaktigNyArbeidsgiverperiode(vedtaksperiode, this)
     }
 
-    fun overlappendeSykmeldingsperioder(sykmeldingsperioder: List<Periode>): List<Periode> {
+    internal fun overlappendeSykmeldingsperioder(sykmeldingsperioder: List<Periode>): List<Periode> {
         if (overlappsperiode == null) return emptyList()
         return sykmeldingsperioder.mapNotNull { it.overlappendePeriode(overlappsperiode) }
     }
 
-    fun perioderInnenfor16Dager(sykmeldingsperioder: List<Periode>): List<Periode> {
+    internal fun perioderInnenfor16Dager(sykmeldingsperioder: List<Periode>): List<Periode> {
         if (overlappsperiode == null) return emptyList()
         return sykmeldingsperioder.mapNotNull { sykmeldingsperiode ->
             val erRettFør = overlappsperiode.erRettFør(sykmeldingsperiode)
@@ -284,6 +284,11 @@ internal class DagerFraInntektsmelding(
                 overlappsperiode.periodeMellom(sykmeldingsperiode.start)?.count() ?: return@mapNotNull null
             if (dagerMellom < MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD) sykmeldingsperiode else null
         }
+    }
+
+    internal fun overlapperMed(periode: Periode): Boolean {
+        if (overlappsperiode == null) return false
+        return overlappsperiode.overlapperMed(periode)
     }
 
     private fun validerOverstigerMaksimaltTillatAvstandMellomTidligereAGP(gammelAgp: Arbeidsgiverperiode?) {

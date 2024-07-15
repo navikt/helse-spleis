@@ -138,6 +138,15 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Inntektsmelding før søknad, men vedtaksperioden er forkastet`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), utenlandskSykmelding = true)
+        val id = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
+        assertEquals(id, inntektsmelding)
+    }
+
+    @Test
     fun `Inntektsmelding før forlengelse-søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
