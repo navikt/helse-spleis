@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.erHelg
 import no.nav.helse.februar
@@ -70,6 +71,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
@@ -109,7 +111,49 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
         håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
         håndterInntektsmelding(listOf(3.februar til 21.mars),)
+    }
 
+    @Test
+    fun `overstyring av tidslinje som flytter skjæringstidspunkt blant annet`() {
+        nyPeriode(1.januar til 10.januar)
+        nyPeriode(15.januar til 20.januar)
+        håndterInntektsmelding(listOf(15.januar til 30.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        nyPeriode(21.januar til 10.mars)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterOverstyrTidslinje(
+            listOf(
+                ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag),
+                ManuellOverskrivingDag(2.januar, Dagtype.Arbeidsdag)
+            )
+        )
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
+
+        assertForventetFeil(
+            forklaring = "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling!",
+            nå = {
+                assertThrows<IllegalStateException> { nyPeriode(11.mars til 20.mars) }
+                assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            },
+            ønsket = {
+                assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            }
+        )
     }
 
     @Test
