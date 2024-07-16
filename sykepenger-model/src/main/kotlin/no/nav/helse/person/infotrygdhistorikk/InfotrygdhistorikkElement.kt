@@ -31,7 +31,8 @@ class InfotrygdhistorikkElement private constructor(
     perioder: List<Infotrygdperiode>,
     inntekter: List<Inntektsopplysning>,
     private val arbeidskategorikoder: Map<String, LocalDate>,
-    private var oppdatert: LocalDateTime
+    private var oppdatert: LocalDateTime,
+    private var nyOpprettet: Boolean = false
 ) {
     private val inntekter = Inntektsopplysning.sorter(inntekter)
     private val perioder = Infotrygdperiode.sorter(perioder)
@@ -56,7 +57,8 @@ class InfotrygdhistorikkElement private constructor(
                 perioder = perioder,
                 inntekter = inntekter,
                 arbeidskategorikoder = arbeidskategorikoder,
-                oppdatert = oppdatert
+                oppdatert = oppdatert,
+                nyOpprettet = true
             )
 
         internal fun gjenopprett(dto: InfotrygdhistorikkelementInnDto): InfotrygdhistorikkElement {
@@ -163,8 +165,10 @@ class InfotrygdhistorikkElement private constructor(
 
     internal fun erEndretUtbetaling(sisteElementSomFantesFørUtbetaling: InfotrygdhistorikkElement): Boolean {
         if (this === sisteElementSomFantesFørUtbetaling) return false
-        return this.perioder != sisteElementSomFantesFørUtbetaling.perioder
+        return !harLikePerioder(sisteElementSomFantesFørUtbetaling)
     }
+
+    internal fun erNyopprettet() = nyOpprettet
 
     internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
 

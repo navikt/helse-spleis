@@ -82,7 +82,7 @@ internal class Infotrygdhistorikk private constructor(
         if (!harHistorikk()) return false
         val sisteElementSomFantesFørUtbetaling = elementer.firstOrNull{
             it.erEldreEnn(utbetaling)
-        } ?: return true
+        } ?: return siste.erNyopprettet()
         return siste.erEndretUtbetaling(sisteElementSomFantesFørUtbetaling)
     }
 
