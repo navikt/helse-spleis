@@ -43,6 +43,21 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `total sykdomsgrad med 0 i inntekter`() {
+        val økonomi = listOf(
+            100.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
+            0.prosent.sykdomsgrad.inntekt(0.månedlig, `6G` = `6G`.beløp(1.januar)),
+        )
+        val totalSykdomsgrad = totalSykdomsgrad(økonomi).totalSykdomsgrad()
+        assertEquals(14.285714285714286.prosent, totalSykdomsgrad) // 🤔
+    }
+
+    @Test
     fun `total sykdomsgrad regnes ut fra aktuell dagsinntekt`() {
         val inntekt = 10000.månedlig
         val økonomi = listOf(
