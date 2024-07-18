@@ -32,7 +32,9 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
         }
 
         private fun Collection<Pair<Prosentdel, BigDecimal>>.average(total: BigDecimal): Prosentdel {
-            if (total <= BigDecimal.ZERO) return map { it.first to BigDecimal.ONE }.average(size.toBigDecimal())
+            if (total <= BigDecimal.ZERO) return map { (sykdomsgrad, _) ->
+                if (sykdomsgrad > 0.prosent) sykdomsgrad to BigDecimal.ONE else sykdomsgrad to BigDecimal.ZERO
+            }.average(size.toBigDecimal())
             val teller = this.sumOf { it.first.not().brøkdel.multiply(it.second, mc) }
             val totalInntektsbevaringsgrad = teller.divide(total, mc).coerceAtMost(BigDecimal.ONE)
             return Prosentdel(totalInntektsbevaringsgrad).not()
