@@ -56,7 +56,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `ferie første dag i arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 20.januar), Ferie(25.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         assertForventetFeil(
@@ -160,7 +160,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent), Ferie(24.februar, 28.februar))
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
 
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -184,7 +184,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent))
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
 
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -207,7 +207,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(24.februar, 12.mars, 100.prosent))
 
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
 
         assertEquals(5.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))

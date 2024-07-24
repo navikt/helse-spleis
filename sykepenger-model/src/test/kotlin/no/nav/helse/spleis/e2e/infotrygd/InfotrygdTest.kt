@@ -9,7 +9,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType.AVVENTER_INFOTRYGDHISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
@@ -55,7 +54,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
     @Test
@@ -71,7 +70,7 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `eksisterende infotrygdforlengelse`() {
         createOvergangFraInfotrygdPerson()
-        nyPeriode(1.mars til 31.mars)
+        nyPeriode(mars)
         håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
         assertIngenFunksjonelleFeil()

@@ -5,11 +5,9 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -25,7 +23,7 @@ internal class DødsmeldingE2E : AbstractDslTest() {
     @Test
     fun `Dager etter dødsdato avvises`() {
         håndterDødsmelding(18.januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -35,7 +33,7 @@ internal class DødsmeldingE2E : AbstractDslTest() {
     @Test
     fun `Ingen dager avvises når dødsdato er etter perioden`() {
         håndterDødsmelding(1.februar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -45,7 +43,7 @@ internal class DødsmeldingE2E : AbstractDslTest() {
     @Test
     fun `Alle dager avvises når dødsdato er før perioden`() {
         håndterDødsmelding(31.desember(2017))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

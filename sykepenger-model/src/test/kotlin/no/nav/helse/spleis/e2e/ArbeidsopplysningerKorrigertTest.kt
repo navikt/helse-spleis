@@ -15,14 +15,13 @@ import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som endrer inntekt og refusjon`() {
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         val korrigertInntektsmeldingId = håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 31000.månedlig,
@@ -46,7 +45,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som endrer agp`() {
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -67,7 +66,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ut spisset event ved saksbehandleroverstyring som endrer inntekt og refusjon`() {
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -205,7 +204,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ut spisset event ved saksbehandleroverstyring som endrer agp`() {
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         val korrigertInntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -249,7 +248,7 @@ internal class ArbeidsopplysningerKorrigertTest : AbstractEndToEndTest() {
 
     @Test
     fun `Sender ut spisset event ved korrigerende inntektsmelding som ikke fører til endring`() {
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,

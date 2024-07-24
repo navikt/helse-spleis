@@ -4,7 +4,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -100,7 +99,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling feilet med ett oppdrag status avvist og ett som er ok`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -135,7 +134,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling feilet med ett oppdrag status ok og ett som er avvist`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -171,7 +170,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     @Test
     fun `nyere perioder må vente til periode med feilet utbetaling er ok`() {
         nyttVedtak(januar, status = Oppdragstatus.AVVIST)
-        nyPeriode(1.mars til 31.mars)
+        nyPeriode(mars)
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)

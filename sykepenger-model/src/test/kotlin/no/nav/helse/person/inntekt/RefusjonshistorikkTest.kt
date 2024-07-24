@@ -1,22 +1,26 @@
 package no.nav.helse.person.inntekt
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
-import no.nav.helse.desember
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.mars
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNotSame
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Test
 
 internal class RefusjonshistorikkTest {
 
@@ -25,13 +29,13 @@ internal class RefusjonshistorikkTest {
         val refusjonshistorikk = Refusjonshistorikk()
         val refusjon = refusjon(1.januar til 16.januar)
         refusjonshistorikk.leggTilRefusjon(refusjon)
-        assertSame(refusjon, refusjonshistorikk.finnRefusjon(1.januar til 31.januar, aktivitetslogg = Aktivitetslogg()))
+        assertSame(refusjon, refusjonshistorikk.finnRefusjon(januar, aktivitetslogg = Aktivitetslogg()))
     }
 
     @Test
     fun `hente refusjon basert på utbetalingsperiode med flere refusjoner`() {
         val refusjonshistorikk = Refusjonshistorikk()
-        val refusjon1 = refusjon(1.januar til 31.januar)
+        val refusjon1 = refusjon(januar)
         val refusjon2 = refusjon(2.februar til 15.februar)
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
@@ -41,7 +45,7 @@ internal class RefusjonshistorikkTest {
     @Test
     fun `hente refusjon basert på utbetalingsperiode når første fraværsdag ikke treffer en refusjon`() {
         val refusjonshistorikk = Refusjonshistorikk()
-        val refusjon1 = refusjon(1.januar til 31.januar)
+        val refusjon1 = refusjon(januar)
         val refusjon2 = refusjon(2.februar til 10.februar)
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
@@ -65,7 +69,7 @@ internal class RefusjonshistorikkTest {
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
         assertEquals(1, refusjonshistorikk.inspektør.antall)
-        assertSame(refusjon1, refusjonshistorikk.finnRefusjon(1.januar til 31.januar, aktivitetslogg = Aktivitetslogg()))
+        assertSame(refusjon1, refusjonshistorikk.finnRefusjon(januar, aktivitetslogg = Aktivitetslogg()))
         assertNull(refusjonshistorikk.finnRefusjon(1.mars til 20.mars, aktivitetslogg = Aktivitetslogg()))
     }
 
@@ -80,7 +84,7 @@ internal class RefusjonshistorikkTest {
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
         assertEquals(2, refusjonshistorikk.inspektør.antall)
-        assertNotSame(refusjon1, refusjonshistorikk.finnRefusjon(1.januar til 31.januar, aktivitetslogg = Aktivitetslogg()))
+        assertNotSame(refusjon1, refusjonshistorikk.finnRefusjon(januar, aktivitetslogg = Aktivitetslogg()))
         assertNotNull(refusjonshistorikk.finnRefusjon(17.januar til 31.januar, aktivitetslogg = Aktivitetslogg()))
     }
 
@@ -89,7 +93,7 @@ internal class RefusjonshistorikkTest {
         val refusjon = refusjon(1.januar til 16.januar, 20.januar til 25.januar, førsteFraværsdag = null)
         val refusjonshistorikk = Refusjonshistorikk()
         refusjonshistorikk.leggTilRefusjon(refusjon)
-        assertSame(refusjon, refusjonshistorikk.finnRefusjon(1.januar til 31.januar, aktivitetslogg = Aktivitetslogg()))
+        assertSame(refusjon, refusjonshistorikk.finnRefusjon(januar, aktivitetslogg = Aktivitetslogg()))
     }
 
     @Test
@@ -166,12 +170,12 @@ internal class RefusjonshistorikkTest {
 
     @Test
     fun `Finner nyeste refusjon hvor første fraværsdag er i perioden`() {
-        val refusjon1 = refusjon(1.januar til 31.januar, tidsstempel = LocalDateTime.now().plusSeconds(1))
-        val refusjon2 = refusjon(1.januar til 31.januar, tidsstempel = LocalDateTime.now())
+        val refusjon1 = refusjon(januar, tidsstempel = LocalDateTime.now().plusSeconds(1))
+        val refusjon2 = refusjon(januar, tidsstempel = LocalDateTime.now())
         val refusjonshistorikk = Refusjonshistorikk()
         refusjonshistorikk.leggTilRefusjon(refusjon1)
         refusjonshistorikk.leggTilRefusjon(refusjon2)
-        assertSame(refusjon1, refusjonshistorikk.finnRefusjon(1.januar til 31.januar, Aktivitetslogg()))
+        assertSame(refusjon1, refusjonshistorikk.finnRefusjon(januar, Aktivitetslogg()))
     }
 
     private fun refusjon(vararg arbeidsgiverperiode: Periode, meldingsreferanseId: UUID = UUID.randomUUID(), førsteFraværsdag: LocalDate? = arbeidsgiverperiode.maxOf { it.start }, tidsstempel: LocalDateTime = LocalDateTime.now()) = Refusjonshistorikk.Refusjon(

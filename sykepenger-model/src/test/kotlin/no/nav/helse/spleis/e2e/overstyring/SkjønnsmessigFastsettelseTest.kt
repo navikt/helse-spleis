@@ -13,7 +13,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.til
@@ -31,7 +30,6 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -63,7 +61,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `blir syk fra ghost etter skjønnsfastsettelse - skal ikke medføre ny skjønnsfastsettelse`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(
                 a1 to INNTEKT,
@@ -87,7 +85,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterUtbetalt()
         }
         a2 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
         }
         a1 {
@@ -115,7 +113,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `endring i refusjon skal ikke endre omregnet årsinntekt`() {
-        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2).nyeVedtak(januar)
 
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(
             OverstyrtArbeidsgiveropplysning(a1, 19000.0.månedlig),
@@ -135,7 +133,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
             håndterUtbetalt()
         }
 
-        (a1 og a2).forlengVedtak(1.februar til 28.februar)
+        (a1 og a2).forlengVedtak(februar)
 
         a1 {
             val im = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, refusjon = Refusjon(20000.månedlig, opphørsdato = 31.januar))
@@ -186,7 +184,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `alle inntektene må skjønnsfastsettes ved overstyring`() {
-        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2).nyeVedtak(januar)
         a1 {
             assertThrows<IllegalStateException> {
                 håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
@@ -231,7 +229,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
     @Test
     fun `korrigert IM etter skjønnsfastsettelse på flere AG`() {
-        (a1 og a2 og a3).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2 og a3).nyeVedtak(januar)
         håndterOverstyrArbeidsgiveropplysninger(
             1.januar,
             listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a3, inntekt = INNTEKT * 3, forklaring = "ogga bogga"))
@@ -272,7 +270,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     @Test
     fun `skjønnsmessig fastsatt - men så skulle det være etter hovedregel`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 2)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -299,7 +297,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     fun `Tidligere perioder revurderes mens nyere skjønnsmessig fastsettes`() {
         a1 {
             nyttVedtak(januar)
-            nyPeriode(1.mars til 31.mars, a1)
+            nyPeriode(mars, a1)
             håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT * 2)
             håndterVilkårsgrunnlag(2.vedtaksperiode, inntekt = INNTEKT)
             nullstillTilstandsendringer()
@@ -322,7 +320,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
         a1 {
             // Normal behandling med Inntektsmelding
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektsmeldingInntekt, refusjon = Refusjon(inntektsmeldingInntekt, null, emptyList()))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -356,7 +354,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
 
         a1 {
             // Normal behandling med Inntektsmelding
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntektsmeldingInntekt, refusjon = Refusjon(inntektsmeldingInntekt, null, emptyList()))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)

@@ -78,7 +78,7 @@ internal class LagUtbetalingForRevurderingTest {
         val utbetaling1 = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true) to vedtaksperiode()
         perioder.add(utbetaling1)
         val utbetaling2 =
-            utbetaling(tidslinjeOf(16.AP, 15.NAV, 28.NAV), tidligere = utbetaling1.first) to vedtaksperiode(1.februar til 28.februar)
+            utbetaling(tidslinjeOf(16.AP, 15.NAV, 28.NAV), tidligere = utbetaling1.first) to vedtaksperiode(februar)
         perioder.add(utbetaling2)
         assertEquals(1, perioder.sistePeriodeForUtbetalinger().size)
         assertEquals(utbetaling2.second, perioder.sistePeriodeForUtbetalinger().first())
@@ -90,7 +90,7 @@ internal class LagUtbetalingForRevurderingTest {
         val utbetaling1 = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true) to vedtaksperiode()
         perioder.add(utbetaling1)
         val utbetaling2 =
-            utbetaling(tidslinjeOf(16.AP, 15.NAV, 28.ARB, 16.AP, 15.NAV), tidligere = utbetaling1.first) to vedtaksperiode(1.mars til 31.mars)
+            utbetaling(tidslinjeOf(16.AP, 15.NAV, 28.ARB, 16.AP, 15.NAV), tidligere = utbetaling1.first) to vedtaksperiode(mars)
         perioder.add(utbetaling2)
         assertEquals(2, perioder.sistePeriodeForUtbetalinger().size)
         assertEquals(utbetaling1.second, perioder.sistePeriodeForUtbetalinger()[0])
@@ -118,8 +118,8 @@ internal class LagUtbetalingForRevurderingTest {
         perioder.add(utbetaling1)
         perioder.add(utbetaling2)
         assertEquals(2, perioder.sistePeriodeForUtbetalinger().size)
-        assertEquals(1.januar til 31.januar, utbetaling1.first.inspektør.periode)
-        assertEquals(1.januar til 31.januar, utbetaling2.first.inspektør.periode)
+        assertEquals(januar, utbetaling1.first.inspektør.periode)
+        assertEquals(januar, utbetaling2.first.inspektør.periode)
         assertEquals(utbetaling1.second, perioder.sistePeriodeForUtbetalinger()[0])
         assertEquals(utbetaling2.second, perioder.sistePeriodeForUtbetalinger()[1])
     }
@@ -336,7 +336,7 @@ internal class LagUtbetalingForRevurderingTest {
     private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) =
         MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()).single()
 
-    private fun vedtaksperiode(periode: Periode = 1.januar til 31.januar, organisasjonsnummer: String = ORGNUMMER): Vedtaksperiode {
+    private fun vedtaksperiode(periode: Periode = januar, organisasjonsnummer: String = ORGNUMMER): Vedtaksperiode {
         val søknad = søknad(periode)
         val sykdomstidslinje = periode.associateWith {
             Dag.Sykedag(

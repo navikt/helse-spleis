@@ -6,10 +6,13 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingkladdTest {
@@ -50,8 +53,8 @@ internal class UtbetalingkladdTest {
         )
         val utbetaling1 = kladd.begrensTil(6.januar til 31.januar).utbetaling.inspektør
         assertEquals(5.januar til 31.januar, utbetaling1.periode)
-        val utbetaling2 = kladd.begrensTil(1.januar til 31.januar).utbetaling.inspektør
-        assertEquals(1.januar til 31.januar, utbetaling2.periode)
+        val utbetaling2 = kladd.begrensTil(januar).utbetaling.inspektør
+        assertEquals(januar, utbetaling2.periode)
     }
 
     @Test
@@ -66,7 +69,7 @@ internal class UtbetalingkladdTest {
             arbeidsgiveroppdrag = Oppdrag("orgnr", SykepengerRefusjon),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
-        val result = listOf(kladd1, kladd2).finnKladd(1.januar til 31.januar)
+        val result = listOf(kladd1, kladd2).finnKladd(januar)
         assertSame(kladd1, result.single())
     }
 
@@ -84,7 +87,7 @@ internal class UtbetalingkladdTest {
             )),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
-        val result = listOf(kladd1, kladd2).finnKladd(1.januar til 31.januar)
+        val result = listOf(kladd1, kladd2).finnKladd(januar)
         assertSame(kladd2, result.single())
     }
 
@@ -104,7 +107,7 @@ internal class UtbetalingkladdTest {
             )),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
-        val result = listOf(kladd1, kladd2).finnKladd(1.januar til 31.januar)
+        val result = listOf(kladd1, kladd2).finnKladd(januar)
         assertSame(kladd2, result.single())
     }
 
@@ -124,7 +127,7 @@ internal class UtbetalingkladdTest {
             )),
             personoppdrag = Oppdrag("fnr", Sykepenger)
         )
-        val result = listOf(kladd1, kladd2).finnKladd(1.januar til 31.januar)
+        val result = listOf(kladd1, kladd2).finnKladd(januar)
         assertEquals(2, result.size)
     }
 

@@ -4,7 +4,6 @@ import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -21,7 +20,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -33,7 +31,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag deles med påfølgende tilstøtende perioder`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april))
@@ -77,7 +75,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlag deles med foregående`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
         håndterSykmelding(Sykmeldingsperiode(5.april, 30.april))

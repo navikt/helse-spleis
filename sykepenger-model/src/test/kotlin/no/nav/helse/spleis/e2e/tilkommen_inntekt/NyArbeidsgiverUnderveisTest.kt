@@ -42,14 +42,14 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             nyttVedtak(januar)
         }
         a2 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             assertVarsel(Varselkode.RV_SV_5, 1.vedtaksperiode.filter())
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
         }
         a2 {
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
@@ -83,12 +83,12 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             nyttVedtak(januar)
         }
         a2 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         }
         a1 {
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, gjelder = 1.januar til 31.januar, forklaring = "Noe")))
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, gjelder = januar, forklaring = "Noe")))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
         a2 {
@@ -120,7 +120,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     @Test
     fun `ghost blir syk`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to 10000.månedlig), 1.januar),
@@ -135,10 +135,10 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a1 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
         }
         a2 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
@@ -159,7 +159,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a2 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
             håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
             håndterYtelser(1.vedtaksperiode)
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
@@ -206,7 +206,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     @Test
     fun `saksbehandler flytter arbeidsgiver på skjæringstidspunktet som tilkommen`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
         }
         a2 {
             håndterSøknad(Sykdom(10.januar, 31.januar, 50.prosent))

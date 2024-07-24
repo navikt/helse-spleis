@@ -5,7 +5,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -36,16 +35,16 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             Inntektsopplysning(a1, 17.januar, INNTEKT, true),
             Inntektsopplysning(a2, 17.januar, INNTEKT, true)
         ))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
     }
 
     @Test
     fun `når en periode går Til Infotrygd avsluttes påfølgende, tilstøtende perioder også`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterSykmelding(Sykmeldingsperiode(18.mars, 31.mars))
         håndterSøknad(Sykdom(18.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig))
@@ -57,14 +56,14 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar), inntektshistorikk = emptyList())
-        nyPeriode(1.februar til 28.februar)
+        nyPeriode(februar)
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
     fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver - reagerer på endring`() {
-        nyPeriode(1.februar til 28.februar)
+        nyPeriode(februar)
         håndterUtbetalingshistorikkEtterInfotrygdendring(Friperiode(1.januar, 31.januar), inntektshistorikk = emptyList())
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
@@ -77,7 +76,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
     }
@@ -85,7 +84,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `forlenger utbetaling i Infotrygd på annen arbeidsgiver`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)))
-        nyPeriode(1.februar til 28.februar, a1)
+        nyPeriode(februar, a1)
         assertForlengerInfotrygdperiode()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
     }
@@ -95,7 +94,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
         ))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
         assertForlengerInfotrygdperiode()
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)

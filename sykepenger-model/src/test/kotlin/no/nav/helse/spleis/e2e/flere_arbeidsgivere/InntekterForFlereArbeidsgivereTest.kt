@@ -57,7 +57,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `Inntekter fra flere arbeidsgivere`() {
         nyPeriode(
-            periode = 1.januar til 31.januar,
+            periode = januar,
             orgnummer = a1,
             inntekt = 16000.månedlig,
         )
@@ -103,7 +103,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
             Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
-        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+        nyPeriode(januar, a1, 25000.månedlig)
 
         vilkårsgrunnlag(
             1.vedtaksperiode,
@@ -135,7 +135,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
             Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
-        nyPeriode(1.januar til 31.januar, a1, 25000.månedlig)
+        nyPeriode(januar, a1, 25000.månedlig)
         vilkårsgrunnlag(
             1.vedtaksperiode,
             skjæringstidspunkt = 1.januar,

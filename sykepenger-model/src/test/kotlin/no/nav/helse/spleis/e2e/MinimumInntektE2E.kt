@@ -30,7 +30,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         medFødselsdato(fødseldato67år)
 
         a1 {
-            nyPeriode(1.januar til 31.januar, a1)
+            nyPeriode(januar, a1)
             håndterInntektsmelding(listOf(1.januar til 16.januar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -89,7 +89,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         medFødselsdato(fødseldato67år)
 
         a1 {
-            nyPeriode(1.februar til 28.februar, a1)
+            nyPeriode(februar, a1)
             håndterInntektsmelding(listOf(1.februar til 16.februar), inntekt)
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
@@ -133,7 +133,7 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 assertEquals(21, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((31.januar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
                 assertEquals(Begrunnelse.MinimumInntekt, utbetalingstidslinjeInspektør.begrunnelse(31.januar).single())
-                assertTrue((1.februar til 28.februar).filterNot { it.erHelg() }.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
+                assertTrue((februar).filterNot { it.erHelg() }.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
             }
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
         }

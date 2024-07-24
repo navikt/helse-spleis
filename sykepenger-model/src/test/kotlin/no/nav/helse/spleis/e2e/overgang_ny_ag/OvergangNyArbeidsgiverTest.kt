@@ -52,7 +52,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
 
         a1 {
             nyttVedtak(januar, beregnetInntekt = inntektA1)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, inntektA1, gjelder = 1.januar til 31.januar, forklaring = "42")))
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, inntektA1, gjelder = januar, forklaring = "42")))
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         }
@@ -102,7 +102,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
         val forventetSykepengegrunnlag = `6G`.beløp(1.januar)
 
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
         }
         a2 {
             håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
@@ -120,7 +120,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(
-                OverstyrtArbeidsgiveropplysning(a1, inntektA1, forklaring = "orgnummerbytte fra 1. februar", gjelder = 1.januar til 31.januar),
+                OverstyrtArbeidsgiveropplysning(a1, inntektA1, forklaring = "orgnummerbytte fra 1. februar", gjelder = januar),
                 OverstyrtArbeidsgiveropplysning(a2, inntektA1, forklaring = "orgnummerbytte fra 1. februar", gjelder = 1.februar til LocalDate.MAX)
             ))
             håndterYtelser(1.vedtaksperiode)

@@ -135,7 +135,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(17.januar, 25.januar, 50.prosent))
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertEquals(1.januar til 31.januar, inspektør.sykdomstidslinje.periode())
+        assertEquals(januar, inspektør.sykdomstidslinje.periode())
         håndterYtelser(1.vedtaksperiode)
         (1..16).forEach {
             assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
@@ -191,9 +191,9 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
-        assertEquals(20, inspektør.sykdomstidslinje.subset(1.mars til 31.mars).inspektør.dagteller[Sykedag::class])
-        assertEquals(2, inspektør.sykdomstidslinje.subset(1.mars til 31.mars).inspektør.dagteller[Feriedag::class])
-        assertEquals(9, inspektør.sykdomstidslinje.subset(1.mars til 31.mars).inspektør.dagteller[SykHelgedag::class])
+        assertEquals(20, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[Sykedag::class])
+        assertEquals(2, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[Feriedag::class])
+        assertEquals(9, inspektør.sykdomstidslinje.subset(mars).inspektør.dagteller[SykHelgedag::class])
     }
 
     @Test
@@ -204,9 +204,9 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        assertEquals(21, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Sykedag::class])
-        assertEquals(2, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class])
-        assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class])
+        assertEquals(21, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Sykedag::class])
+        assertEquals(2, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Feriedag::class])
+        assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[SykHelgedag::class])
     }
 
     @Test
@@ -399,7 +399,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     fun `Korrigerende søknad for førstegangsbehandling med forlengelse i avventerGodkjenning - setter i gang en revurdering`() {
         nyttVedtak(januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), Ferie(22.januar, 26.januar))
@@ -417,7 +417,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
-        assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Arbeidsdag::class])
+        assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
         val utbetalingInspektør = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør
         val utbetalingInspektørRevurdering = inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør
         assertEquals(utbetalingInspektør.fagsystemId(), utbetalingInspektørRevurdering.fagsystemId())
@@ -438,7 +438,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Arbeidsdag::class])
+        assertEquals(8, inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Arbeidsdag::class])
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
     }
@@ -463,7 +463,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `andre inntektskilder til godkjenning på førstegangsbehandling - skal gi error`() {
-        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
+        tilGodkjenning(januar, ORGNUMMER)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent), andreInntektskilder = true)
         assertForventetFeil(
             forklaring = "Produkteier ønsker warning, legal ønsker error. for øyeblikket warning",

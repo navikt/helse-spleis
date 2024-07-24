@@ -639,9 +639,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `Avslag fører til feilet revurdering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -687,9 +687,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `annullering av feilet revurdering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -1044,8 +1044,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `validering av infotrygdhistorikk i revurdering skal føre til en warning i stedet for en feilet revurdering`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -1085,8 +1085,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `warning dersom det er utbetalt en periode i Infotrygd etter perioden som revurderes nå`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -1176,9 +1176,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `oppdager nye utbetalte dager fra infotrygd i revurderingen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -1224,8 +1224,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             meldingsreferanseId = hendelseId,
             overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
         )
-        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(februar, inspektør.periode(2.vedtaksperiode))
         assertHarHendelseIder(1.vedtaksperiode, hendelseId)
         assertHarIkkeHendelseIder(2.vedtaksperiode, hendelseId)
     }
@@ -1239,7 +1239,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             meldingsreferanseId = hendelseId,
             overstyringsdager = (30.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Feriedag) }
         )
-        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(2.februar til 28.februar, inspektør.periode(2.vedtaksperiode))
         assertHarHendelseIder(1.vedtaksperiode, hendelseId)
         assertHarIkkeHendelseIder(2.vedtaksperiode, hendelseId)
@@ -1288,8 +1288,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         vi å beregne utbetaling uten å ha lagret en inntekt. Det fører til en error i aktivitetsloggen som igjen gjør at perioden ender opp i RevurderingFeilet
         og speil er i en tilstand hvor ting ikke er oppdatert i saksbildet
          */
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

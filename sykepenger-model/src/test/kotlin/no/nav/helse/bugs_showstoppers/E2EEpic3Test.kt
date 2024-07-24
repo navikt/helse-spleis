@@ -619,8 +619,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
     @Test
     fun `ikke medlem avviser alle dager og legger på warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
@@ -658,8 +658,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `opptjening ikke ok avviser ikke dager før gjeldende skjæringstidspunkt`() {
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
@@ -742,8 +742,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `bevarer avviste dager fra tidligere periode og avviser dager fra skjæringstidspunkt ved opptjening ok`() {
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 31.desember(2017), 31.januar, Arbeidsforholdtype.ORDINÆRT))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(
                 Periode(1.januar, 16.januar)
             ), førsteFraværsdag = 1.januar, refusjon = Refusjon(INNTEKT, null, emptyList())
@@ -818,7 +818,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     @Test
     fun `en periode med under minimum inntekt avviser ikke dager for etterfølgende periode med vilkårsgrunnlag ok`() {
         val lavInntekt = 1000.månedlig
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),

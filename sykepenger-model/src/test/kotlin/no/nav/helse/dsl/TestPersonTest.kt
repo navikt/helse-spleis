@@ -70,7 +70,7 @@ internal class TestPersonTest : AbstractDslTest() {
     @Test
     fun `kan sende sykmelding via testblokk`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
         }
         assertEquals(1, a1.inspektør.sykmeldingsperioder().size)
     }

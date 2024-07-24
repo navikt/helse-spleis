@@ -18,10 +18,10 @@ import no.nav.helse.mars
 import no.nav.helse.perioder
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.H
 import no.nav.helse.testhelpers.AIG
+import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.FORELDET
+import no.nav.helse.testhelpers.H
 import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
 import no.nav.helse.testhelpers.S
@@ -56,7 +56,7 @@ internal class SkjæringstidspunktTest {
 
         // foreldede dager i forkant av forlengelse
         resetSeed()
-        assertEquals(1.januar, beregnSkjæringstidspunkt(31.FORELDET + 28.S, 1.februar til 28.februar))
+        assertEquals(1.januar, beregnSkjæringstidspunkt(31.FORELDET + 28.S, februar))
 
         // forlengelse med bare sykdom
         resetSeed()

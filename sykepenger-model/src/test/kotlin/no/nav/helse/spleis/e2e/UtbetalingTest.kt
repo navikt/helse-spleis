@@ -27,7 +27,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
                 Inntektsopplysning(ANNET_ORGNUMMER, 1.januar(2016), 1000.daglig, true)
             )
         )
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -44,7 +44,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
     @Test
     fun `grad rundes av`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode)

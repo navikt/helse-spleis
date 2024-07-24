@@ -82,7 +82,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         nyttVedtak(mars)
 
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -163,20 +163,20 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
 
         inspektør.utbetaling(0).inspektør.let {
-            assertEquals(1.januar til 31.januar, it.periode)
+            assertEquals(januar, it.periode)
             assertEquals(UTBETALT, it.tilstand)
         }
         inspektør.utbetaling(1).inspektør.let {
-            assertEquals(1.mars til 31.mars, it.periode)
+            assertEquals(mars, it.periode)
             assertEquals(UTBETALT, it.tilstand)
         }
         inspektør.utbetaling(2).inspektør.let {
-            assertEquals(1.mars til 31.mars, it.periode)
+            assertEquals(mars, it.periode)
             assertEquals(ANNULLERT, it.tilstand)
         }
 
         inspektør.utbetaling(3).inspektør.let {
-            assertEquals(1.januar til 31.januar, it.periode)
+            assertEquals(januar, it.periode)
             assertEquals(GODKJENT_UTEN_UTBETALING, it.tilstand)
         }
 
@@ -204,7 +204,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
 
         assertEquals(2, inspektør.utbetalinger.size)
 
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingshistorikkEtterInfotrygdendring(listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 1.mai(2017), 5.mai(2017), 100.prosent, 1000.daglig)))
@@ -378,7 +378,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             håndterUtbetalt()
             håndterUtbetalt()
 
-            assertEquals(1.juni til 30.juni, inspektør.periode(1.vedtaksperiode))
+            assertEquals(juni, inspektør.periode(1.vedtaksperiode))
             assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
             assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHF FFFFFFF FFFFFFF FFFFFFF FFFFFFF FASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
 
@@ -428,7 +428,7 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            assertEquals(1.juni til 30.juni, inspektør.periode(1.vedtaksperiode))
+            assertEquals(juni, inspektør.periode(1.vedtaksperiode))
             assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))
             assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSFF FFFFFFF FFFFFFF FFFFFFF FFFFFFF FASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
 

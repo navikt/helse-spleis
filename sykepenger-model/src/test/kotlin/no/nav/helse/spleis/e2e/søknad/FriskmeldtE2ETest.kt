@@ -30,7 +30,7 @@ internal class FriskmeldtE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `friskmeldt førstegangsbehandling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(1.januar, 31.januar))
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
@@ -113,7 +112,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke hente registerdata for vilkårsprøving på nytt ved overstyring av inntekt`() {
-        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
+        tilGodkjenning(januar, ORGNUMMER)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 19000.månedlig, orgnummer = ORGNUMMER, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -133,8 +132,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         val OverMinstegrense = 50000.årlig
         val UnderMinstegrense = 46000.årlig
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,

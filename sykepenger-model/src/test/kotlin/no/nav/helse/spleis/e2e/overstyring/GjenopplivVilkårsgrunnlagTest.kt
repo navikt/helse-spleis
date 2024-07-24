@@ -33,9 +33,9 @@ internal class GjenopplivVilkårsgrunnlagTest : AbstractDslTest() {
     fun `Kopierer vilkårsgrunnlag inn på et senere skjæringstidspunkt`() {
         a1 {
             val inntekt = 31200.månedlig
-            val im = vedtakFor(1.januar til 31.januar, inntekt)
+            val im = vedtakFor(januar, inntekt)
 
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
 
             kopierVilkårsgrunnlag(fra = 1.januar, til = 1.mars)
             håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, reberegning = true)
@@ -50,9 +50,9 @@ internal class GjenopplivVilkårsgrunnlagTest : AbstractDslTest() {
     fun `Kopierer vilkårsgrunnlag inn på et tidligere skjæringstidspunkt`() {
         a1 {
             val inntekt = 31500.månedlig
-            val im = vedtakFor(1.mars til 31.mars, inntekt)
+            val im = vedtakFor(mars, inntekt)
 
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 

@@ -64,8 +64,8 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode for person der det ikke foreligger opplæringspengerytelse blir behandlet og sendt til godkjenning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = emptyList())
@@ -90,19 +90,19 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som overlapper med opplæringspengerytelse får varsel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(1.januar til 31.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(januar, 100)))
         assertVarsel(Varselkode.RV_AY_8)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
     fun `Periode som overlapper med opplæringspengerytelse i starten av perioden får varsel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(1.desember(2017) til 1.januar, 100)))
@@ -112,8 +112,8 @@ internal class OpplæringspengeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som overlapper med opplæringspengerytelse i slutten av perioden får varsel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(GradertPeriode(31.januar til 14.februar, 100)))

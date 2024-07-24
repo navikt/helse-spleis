@@ -80,10 +80,10 @@ internal class VilkårsgrunnlagHistorikkTest {
 
         assertEquals(1.januar til LocalDate.MAX, skjæringstidspunktperioder(listOf(grunnlag1Januar)).single())
         skjæringstidspunktperioder(listOf(grunnlag1Januar, grunnlag1Februar)).also { resultat ->
-            assertEquals(listOf(1.januar til 31.januar, 1.februar til LocalDate.MAX), resultat)
+            assertEquals(listOf(januar, 1.februar til LocalDate.MAX), resultat)
         }
         skjæringstidspunktperioder(listOf(grunnlag1Februar, grunnlag1Januar)).also { resultat ->
-            assertEquals(listOf(1.januar til 31.januar, 1.februar til LocalDate.MAX), resultat)
+            assertEquals(listOf(januar, 1.februar til LocalDate.MAX), resultat)
         }
     }
 

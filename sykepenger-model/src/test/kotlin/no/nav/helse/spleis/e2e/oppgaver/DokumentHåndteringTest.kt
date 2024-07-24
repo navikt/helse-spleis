@@ -115,7 +115,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `Inntektsmelding før søknad`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         val id = håndterInntektsmelding(listOf(1.januar til 16.januar),)
         val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
         inntektsmeldingFørSøknadEvent.let {
@@ -139,7 +139,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `Inntektsmelding før søknad, men vedtaksperioden er forkastet`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), utenlandskSykmelding = true)
         val id = håndterInntektsmelding(listOf(1.januar til 16.januar))
         val inntektsmelding = observatør.inntektsmeldingIkkeHåndtert.single()
@@ -168,7 +168,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
         val inntektsmeldingFørSøknadEvent = observatør.inntektsmeldingFørSøknad.single()
         inntektsmeldingFørSøknadEvent.let {
             assertEquals(id, it.inntektsmeldingId)
-            assertEquals(listOf(1.februar til 28.februar), it.relevanteSykmeldingsperioder)
+            assertEquals(listOf(februar), it.relevanteSykmeldingsperioder)
         }
     }
 
@@ -191,7 +191,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `Inntektsmelding bare håndtert inntekt`() {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         val im1 = håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -347,14 +347,14 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 forlengerPeriode = true,
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = true,
-                sykmeldingsperioder = listOf(1.februar til 28.februar)
+                sykmeldingsperioder = listOf(februar)
             ), observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER))
         )
     }
 
     @Test
     fun `har ikke overlappende vedtaksperioder`() {
-        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
+        tilGodkjenning(januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         val søknad2 = håndterSøknad(Sykdom(28.januar, 28.februar, 100.prosent))
         assertEquals(
@@ -371,12 +371,12 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = false,
-                sykmeldingsperioder = listOf(1.januar til 31.januar, 28.januar til 28.februar)
+                sykmeldingsperioder = listOf(januar, 28.januar til 28.februar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
     @Test
     fun `har vedtaksperiode som påvirker arbeidsgiverperioden`() {
-        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
+        tilGodkjenning(januar, ORGNUMMER)
 
         val søknad2 = håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent))
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
@@ -394,13 +394,13 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = true,
-                sykmeldingsperioder = listOf(1.januar til 31.januar, 10.februar til 28.februar)
+                sykmeldingsperioder = listOf(januar, 10.februar til 28.februar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
     @Test
     fun `har ikke overlappende vedtaksperiode`() {
-        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
+        tilGodkjenning(januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
         val søknad2 = håndterSøknad(Sykdom(15.februar, 28.februar, 100.prosent))
@@ -418,7 +418,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
                 forlengerPeriode = false,
                 harPeriodeInnenfor16Dager = false,
                 trengerArbeidsgiveropplysninger = true,
-                sykmeldingsperioder = listOf(1.januar til 31.januar, 15.februar til 28.februar)
+                sykmeldingsperioder = listOf(januar, 15.februar til 28.februar)
             ), observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)))
     }
 
@@ -451,12 +451,12 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender ut søknad håndtert for forlengelse av forkastet periode`(){
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        val søknadId1 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        val søknadId1 = håndterSøknad(januar)
         forkastAlle(hendelselogg)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        val søknadId2 = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        val søknadId2 = håndterSøknad(februar)
         assertEquals(listOf(
             søknadId1 to 1.vedtaksperiode.id(ORGNUMMER),
             søknadId2 to 2.vedtaksperiode.id(ORGNUMMER)
@@ -485,7 +485,7 @@ internal class DokumentHåndteringTest : AbstractEndToEndTest() {
             null
         )
         )
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         assertFalse(im2 in observatør.inntektsmeldingHåndtert.map(Pair<UUID,*>::first))
         assertTrue(im2 in observatør.inntektsmeldingIkkeHåndtert)
     }

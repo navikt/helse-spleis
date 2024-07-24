@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -42,7 +41,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
@@ -53,8 +51,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     @Test
     fun `revurder arbeidsforhold i Avsluttet`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -104,8 +102,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     @Test
     fun `overstyrer forlengelse, førstegangsbehandling revurderes`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -114,7 +112,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterUtbetalt()
             // ny periode
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -175,8 +173,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     @Test
     fun `deaktiverer arbeidsforhold frem & tilbake, førstegangsbehandling revurderes`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -185,7 +183,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterUtbetalt()
             // ny periode
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -267,8 +265,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     @Test
     fun `revurderer arbeidsforhold i AvventerHistorikkRevurdering`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -343,8 +341,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     @Test
     fun `revurderer arbeidsforhold i AvventerSimuleringRevurdering`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -421,12 +419,12 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     @Test
     fun `flere arbeidsgivere med sykdom`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
         }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
@@ -550,8 +548,8 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving`() {
         val inntekt = 33000.månedlig
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode, inntekt = inntekt)
             håndterYtelser(1.vedtaksperiode)
@@ -588,12 +586,12 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
     fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving flere arbeidsgivere`() {
         val inntekt = 23000.månedlig
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
         }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }

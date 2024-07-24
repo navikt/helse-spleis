@@ -118,8 +118,8 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding sletter vilkårsgrunnlag og trekker tilbake penger`() {
         createOvergangFraInfotrygdPerson()
-        assertEquals(1.januar til 31.januar, person.inspektør.utbetaltIInfotrygd.single())
-        assertEquals(1.februar til 28.februar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
+        assertEquals(januar, person.inspektør.utbetaltIInfotrygd.single())
+        assertEquals(februar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
 
         val assertTilstandFørInnteksmeldingHensyntas: () -> Unit = {
             val førsteUtbetalingsdagIInfotrygd = 1.januar

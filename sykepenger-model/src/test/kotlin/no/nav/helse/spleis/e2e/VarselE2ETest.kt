@@ -57,7 +57,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `varsel - Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
@@ -92,7 +92,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `varsel - Utbetalingen ble gjennomført, men med advarsel`() {
-        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
+        tilGodkjenning(januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT_MED_FEIL)
         assertVarsel(RV_UT_2)

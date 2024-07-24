@@ -181,7 +181,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `historikk for overskriver selv om periode er låst`() {
         val sykdomstidslinje = 28.S + 3.A + 16.S
-        sykdomstidslinje.lås(1.januar til 31.januar)
+        sykdomstidslinje.lås(januar)
         val element = nyttHistorikkelement(
             listOf(
                 ArbeidsgiverUtbetalingsperiode("ag1", 29.januar, 31.januar, 100.prosent, 25000.månedlig)
@@ -222,7 +222,7 @@ internal class InfotrygdhistorikkElementTest {
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
         aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, 1.februar til 28.februar, "ag1"))
+            assertTrue(element.valider(it, februar, "ag1"))
         }
     }
 
@@ -239,7 +239,7 @@ internal class InfotrygdhistorikkElementTest {
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
         aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, 1.februar til 28.februar, "ag1"))
+            assertTrue(element.valider(it, februar, "ag1"))
         }
     }
 
@@ -254,7 +254,7 @@ internal class InfotrygdhistorikkElementTest {
         val element = nyttHistorikkelement(perioder = utbetalinger, inntekter = inntekter)
 
         aktivitetslogg.barn().also {
-            assertTrue(element.valider(it, 1.februar til 28.februar, "ag1"))
+            assertTrue(element.valider(it, februar, "ag1"))
         }
     }
 

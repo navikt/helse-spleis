@@ -35,7 +35,7 @@ internal class FrilanserTest : AbstractDslTest() {
     @Test
     fun `frilanssøknad gir error`() {
         frilans {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             assertFunksjonelleFeil()
             assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
@@ -44,7 +44,7 @@ internal class FrilanserTest : AbstractDslTest() {
     @Test
     fun `frilansarbeidsforhold med feriepenger siste tre måneder før skjæringstidspunktet`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
@@ -63,8 +63,8 @@ internal class FrilanserTest : AbstractDslTest() {
     @Test
     fun `Person med frilanserinntekt i løpet av de siste 3 månedene sendes til infotrygd`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
@@ -88,8 +88,8 @@ internal class FrilanserTest : AbstractDslTest() {
     @Test
     fun `Person med frilanserarbeidsforhold uten inntekt i løpet av de siste 3 månedene skal `() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
@@ -113,8 +113,8 @@ internal class FrilanserTest : AbstractDslTest() {
     @Test
     fun `Frilansere oppdages ikke i Aa-reg, men case med frilanser-ghost skal gi warning`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = INNTEKT)
             val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT))
             håndterVilkårsgrunnlag(
@@ -137,7 +137,7 @@ internal class FrilanserTest : AbstractDslTest() {
     fun `Førstegangsbehandling med ekstra arbeidsforhold som ikke er aktivt - skal ikke få warning hvis det er flere arbeidsforhold`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
             håndterInntektsmelding(
                 listOf(1.mars til 16.mars),
                 førsteFraværsdag = 1.mars,
@@ -161,7 +161,7 @@ internal class FrilanserTest : AbstractDslTest() {
     @Test
     fun `En arbeidsgiver med inntekter fra flere arbeidsgivere de siste tre månedene - får ikke warning om at det er flere arbeidsgivere, får warning om at det er flere inntektskilder enn arbeidsforhold`() {
         a1 {
-            val periode = 1.januar til 31.januar
+            val periode = januar
             håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
             håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)

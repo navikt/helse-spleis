@@ -52,7 +52,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
     @Test
     fun `overstyr inntekt med flere AG -- happy case`() {
-        tilGodkjenning(1.januar til 31.januar, a1, a2)
+        tilGodkjenning(januar, a1, a2)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
@@ -106,7 +106,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
     @Test
     fun `overstyr inntekt med flere AG -- kan overstyre perioden i AvventerBlokkerende`() {
-        tilGodkjenning(1.januar til 31.januar, a1, a2)
+        tilGodkjenning(januar, a1, a2)
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
@@ -135,7 +135,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke kunne overstyre en arbeidsgiver hvis en annen er utbetalt`() {
-        tilGodkjenning(1.januar til 31.januar, a1, a2)
+        tilGodkjenning(januar, a1, a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
@@ -205,7 +205,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
     @Test
     fun `overstyrer inntekt til under krav til minste inntekt`() {
-        tilGodkjenning(1.januar til 31.januar, a1, a2, beregnetInntekt = 1959.månedlig)
+        tilGodkjenning(januar, a1, a2, beregnetInntekt = 1959.månedlig)
         håndterOverstyrInntekt(1500.månedlig, a1, 1.januar)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(RV_SV_1, 1.vedtaksperiode.filter(a1))

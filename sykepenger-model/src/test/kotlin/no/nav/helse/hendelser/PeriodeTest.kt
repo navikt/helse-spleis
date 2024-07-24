@@ -281,7 +281,7 @@ internal class PeriodeTest {
     @Test
     fun subset() {
         val periode1 = 10.januar til 15.januar
-        assertEquals(periode1, periode1.subset(1.januar til 31.januar))
+        assertEquals(periode1, periode1.subset(januar))
         assertEquals(11.januar til 12.januar, periode1.subset(11.januar til 12.januar))
         assertEquals(2.januar til 2.januar, (1.januar til 2.januar).subset(2.januar til 12.januar))
         assertEquals(2.januar til 2.januar, (2.januar til 3.januar).subset(1.januar til 2.januar))
@@ -290,7 +290,7 @@ internal class PeriodeTest {
 
     @Test
     fun beholdDagerEtter() {
-        val periode = 1.februar til 28.februar
+        val periode = februar
         assertEquals(null, periode.beholdDagerEtter(28.februar))
         assertEquals(2.februar til 28.februar, periode.beholdDagerEtter(1.februar))
         assertEquals(28.februar til 28.februar, periode.beholdDagerEtter(27.februar))
@@ -313,7 +313,7 @@ internal class PeriodeTest {
 
     @Test
     fun `antall dager`() {
-        val periode = 1.januar til 31.januar
+        val periode = januar
         assertEquals(31, periode.count())
     }
 

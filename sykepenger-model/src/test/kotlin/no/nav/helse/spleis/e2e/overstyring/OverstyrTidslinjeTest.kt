@@ -213,7 +213,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((1.juli til 31.juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
+        håndterOverstyrTidslinje((juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -235,7 +235,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
                 assertEquals(17.juni til 30.juni, linje.fom til linje.tom)
             }
             oppdrag[1].also { linje ->
-                assertEquals(1.august til 31.august, linje.fom til linje.tom)
+                assertEquals(august, linje.fom til linje.tom)
             }
         }
     }
@@ -428,7 +428,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `Overstyring av sykHelgDag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(20.januar, 21.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -489,7 +489,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `overstyrer fra SykedagNav til Sykedag`(){
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "Saerregler",)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

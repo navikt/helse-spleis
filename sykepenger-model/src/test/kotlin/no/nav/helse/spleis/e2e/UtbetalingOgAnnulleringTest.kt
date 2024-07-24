@@ -44,7 +44,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     @Test
     fun `annullere senere periode enn perioden til godkjenning`() {
         nyttVedtak(mars)
-        tilGodkjenning(1.januar til 31.januar, ORGNUMMER)
+        tilGodkjenning(januar, ORGNUMMER)
         håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
@@ -82,16 +82,16 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSøknad(1.februar til 2.februar)
         håndterInntektsmelding(emptyList(), 1.februar, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til 31.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
         håndterOverstyrTidslinje(
-            (1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
+            (januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) } +
             listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100))
         )
-        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.januar til 31.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()

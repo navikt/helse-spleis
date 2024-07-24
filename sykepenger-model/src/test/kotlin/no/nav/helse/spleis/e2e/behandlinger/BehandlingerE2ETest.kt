@@ -693,7 +693,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             nyttVedtak(mars)
             forlengVedtak(april)
 
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
 
             assertTilstand(4.vedtaksperiode, TIL_INFOTRYGD)
             inspektør(2.vedtaksperiode).behandlinger.also { behandlinger ->
@@ -721,13 +721,13 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
     fun `tilbakedatert søknad lapper lager sammenheng mellom to perioder hos samme ag`() {
-        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2).nyeVedtak(januar)
 
         a1 {
             nyPeriode(2.februar til 28.februar)
         }
         a2 {
-            nyPeriode(1.februar til 28.februar)
+            nyPeriode(februar)
         }
         a1 {
             // tilbakedatert periode lapper hullet mellom vedtaksperiodene hos a1

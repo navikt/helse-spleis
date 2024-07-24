@@ -8,7 +8,6 @@ import no.nav.helse.dsl.TestPerson.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
@@ -60,7 +59,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
         }
         val a1Vedtaksperiode2 = a1 { 2.vedtaksperiode }
         a2 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
@@ -74,8 +73,8 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     @Test
     fun `Vedtaksperiode som revurderes som følge av søknad fra ghost skal peke på at den venter på perioden til ghosten`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode,
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
@@ -91,8 +90,8 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
         }
 
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val vedtaksperiodeVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }
             assertEquals(1.vedtaksperiode, vedtaksperiodeVenter.venterPå.vedtaksperiodeId)
@@ -114,9 +113,9 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
 
     @Test
     fun `Vedtaksperioden vi venter på kan være en annen enn den som er nestemann til behandling`() {
-        a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
+        a1 { håndterSøknad(januar) }
         a2 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
         val a2VedtaksperiodeId = a2 { 1.vedtaksperiode }
@@ -135,14 +134,14 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     fun `Venter på tidligere periode som ikke har fått inntektsmelding`(){
         a1 {
             val søknadIdJanuar = UUID.randomUUID()
-            nyPeriode(1.januar til 31.januar, søknadId = søknadIdJanuar)
+            nyPeriode(januar, søknadId = søknadIdJanuar)
 
             assertVenterPå(listOf(
                 1.vedtaksperiode to Hva.INNTEKTSMELDING,
                 1.vedtaksperiode to Hva.INNTEKTSMELDING
             ))
             val søknadIdMars = UUID.randomUUID()
-            nyPeriode(1.mars til 31.mars, søknadId = søknadIdMars)
+            nyPeriode(mars, søknadId = søknadIdMars)
             assertVenterPå(listOf(
                 1.vedtaksperiode to Hva.INNTEKTSMELDING,
                 1.vedtaksperiode to Hva.INNTEKTSMELDING,
@@ -218,11 +217,11 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     @Test
     fun `Venter på søknad på annen arbeidsgiver`(){
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
         }
         a2 {
             val søknadId = UUID.randomUUID()
-            nyPeriode(1.januar til 31.januar, søknadId = søknadId)
+            nyPeriode(januar, søknadId = søknadId)
             assertVenterPå(listOf(
                 1.vedtaksperiode to Hva.INNTEKTSMELDING,
                 1.vedtaksperiode to Hva.INNTEKTSMELDING
@@ -264,7 +263,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     fun `Periode i avventer innteksmelding`() {
         a1 {
             val søknadId = UUID.randomUUID()
-            nyPeriode(1.januar til 31.januar, søknadId = søknadId)
+            nyPeriode(januar, søknadId = søknadId)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             val forventet = PersonObserver.VedtaksperiodeVenterEvent(
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
@@ -304,8 +303,8 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     @Test
     fun `Om perioden man venter på har en timeout bør den brukes som venter til`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(januar)
+            håndterSøknad(mars)
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)

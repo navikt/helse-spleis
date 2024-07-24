@@ -355,13 +355,15 @@ internal abstract class AbstractDslTest {
         }
         return orgnr
     }
+    protected fun håndterSykmelding(periode: Periode) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
     protected fun håndterSykmelding(
         vararg sykmeldingsperiode: Sykmeldingsperiode,
         sykmeldingSkrevet: LocalDateTime? = null,
         mottatt: LocalDateTime? = null,
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt)
+        bareÈnArbeidsgiver(orgnummer).håndterSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt)
+    protected fun håndterSøknad(periode: Periode) = håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
     protected fun håndterSøknad(
         vararg perioder: Søknad.Søknadsperiode,
         andreInntektskilder: Boolean = false,
@@ -371,7 +373,7 @@ internal abstract class AbstractDslTest {
         orgnummer: String = a1,
         sendTilGosys: Boolean = false
     ) =
-        bareÈnArbeidsgiver(a1).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys)
+        bareÈnArbeidsgiver(orgnummer).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys)
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
@@ -383,7 +385,7 @@ internal abstract class AbstractDslTest {
         id: UUID = UUID.randomUUID(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+        bareÈnArbeidsgiver(orgnummer).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
 protected fun håndterInntektsmeldingPortal(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
@@ -397,7 +399,7 @@ protected fun håndterInntektsmeldingPortal(
         id: UUID = UUID.randomUUID(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterInntektsmeldingPortal(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, inntektsdato, vedtaksperiodeId, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+        bareÈnArbeidsgiver(orgnummer).håndterInntektsmeldingPortal(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, inntektsdato, vedtaksperiodeId, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
 
     internal fun håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
@@ -407,7 +409,7 @@ protected fun håndterInntektsmeldingPortal(
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
+        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<GradertPeriode> = emptyList(),
@@ -420,13 +422,13 @@ protected fun håndterInntektsmeldingPortal(
         dagpenger: List<Periode> = emptyList(),
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(a1).håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger)
+        bareÈnArbeidsgiver(orgnummer).håndterYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspenger, dagpenger)
     internal fun håndterSimulering(vedtaksperiodeId: UUID, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(a1).håndterSimulering(vedtaksperiodeId)
+        bareÈnArbeidsgiver(orgnummer).håndterSimulering(vedtaksperiodeId)
     internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(a1).håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent)
+        bareÈnArbeidsgiver(orgnummer).håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent)
     internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(a1).håndterUtbetalt(status)
+        bareÈnArbeidsgiver(orgnummer).håndterUtbetalt(status)
     protected fun håndterAnnullering(utbetalingId: UUID) =
         bareÈnArbeidsgiver(a1).håndterAnnullering(utbetalingId)
     protected fun håndterIdentOpphørt(nyttFnr: Personidentifikator, nyAktørId: String) =
@@ -449,7 +451,7 @@ protected fun håndterInntektsmeldingPortal(
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         bareÈnArbeidsgiver(a1).assertTilstander(id, *tilstander)
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) =
-        bareÈnArbeidsgiver(a1).assertSisteTilstand(id, tilstand)
+        bareÈnArbeidsgiver(orgnummer).assertSisteTilstand(id, tilstand)
     protected fun assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) =
         bareÈnArbeidsgiver(a1).assertIngenFunksjonelleFeil(*filtre)
     protected fun assertVarsler(vararg filtre: AktivitetsloggFilter) =

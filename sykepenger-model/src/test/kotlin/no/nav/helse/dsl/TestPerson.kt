@@ -157,6 +157,8 @@ internal class TestPerson(
 
         internal val Int.vedtaksperiode get() = vedtaksperiodesamler.vedtaksperiodeId(orgnummer, this - 1)
 
+        internal fun håndterSykmelding(periode: Periode) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
+
         internal fun håndterSykmelding(
             vararg sykmeldingsperiode: Sykmeldingsperiode,
             sykmeldingSkrevet: LocalDateTime? = null,
@@ -164,6 +166,8 @@ internal class TestPerson(
         ) = arbeidsgiverHendelsefabrikk.lagSykmelding(*sykmeldingsperiode).håndter(Person::håndter)
 
         internal fun håndterAvbruttSøknad(sykmeldingsperiode: Periode) = arbeidsgiverHendelsefabrikk.lagAvbruttSøknad(sykmeldingsperiode).håndter(Person::håndter)
+
+        internal fun håndterSøknad(periode: Periode) = håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
 
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,

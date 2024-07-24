@@ -1,12 +1,9 @@
 package no.nav.helse.hendelser.inntektsmelding
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -20,7 +17,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingMatchingTest {
@@ -75,11 +71,11 @@ internal class InntektsmeldingMatchingTest {
 
     @Test
     fun `inntektsmelding treffer ingen vedtaksperiode`() {
-        val vedtaksperiode1 = 1.januar til 31.januar
+        val vedtaksperiode1 = januar
         val dager = inntektsmelding(1.mars, 1.mars til 16.mars)
 
         assertFalse(dager.skalHåndteresAv(vedtaksperiode1))
-        assertEquals(1.januar til 31.januar, dager.håndter(vedtaksperiode1))
+        assertEquals(januar, dager.håndter(vedtaksperiode1))
     }
 
     @Test
@@ -138,8 +134,8 @@ internal class InntektsmeldingMatchingTest {
 
     @Test
     fun `Har ikke blitt håndtert av revurdering mer enn 10 dager`() {
-        val vedtaksperiode1 =  1.januar til 31.januar
-        val vedtaksperiode2 =  1.februar til 28.februar
+        val vedtaksperiode1 = 1.januar til 31.januar
+        val vedtaksperiode2 = februar
         val sammenhengendePeriode = 1.januar til 28.februar
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
         val dager = inntektsmelding(1.februar, 1.februar til 16.februar)
@@ -153,8 +149,8 @@ internal class InntektsmeldingMatchingTest {
 
     @Test
     fun `Har blitt håndtert av revurdering mindre enn 10 dager`() {
-        val vedtaksperiode1 =  10.januar til 31.januar
-        val vedtaksperiode2 =  1.februar til 28.februar
+        val vedtaksperiode1 = 10.januar til 31.januar
+        val vedtaksperiode2 = februar
         val sammenhengendePeriode = 10.januar til 28.februar
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(10.januar til 26.januar))
         val dager = inntektsmelding(1.februar, 1.februar til 16.februar)
@@ -239,7 +235,7 @@ internal class InntektsmeldingMatchingTest {
 
     @Test
     fun `Må hensynta arbeidsdager før i tillegg til de opprinnelig dagene for å avgjøre om en periode er håndtert`() {
-        val vedtaksperiode = 1.januar til 31.januar
+        val vedtaksperiode = januar
         val dager = inntektsmelding(1.januar, 15.januar til 30.januar)
         dager.leggTilArbeidsdagerFør(vedtaksperiode.start)
         assertEquals(1.januar til 30.januar, dager.håndter(vedtaksperiode))

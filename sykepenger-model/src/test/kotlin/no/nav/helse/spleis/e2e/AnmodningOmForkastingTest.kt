@@ -6,7 +6,6 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -19,7 +18,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class AnmodningOmForkastingTest: AbstractDslTest() {
@@ -35,12 +33,12 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
 
     @Test
     fun `når anmodning innfris forkastes alt på skjæringstidspunktet`(){
-        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2).nyeVedtak(januar)
         a1 {
-            nyPeriode(1.mars til 31.mars)
+            nyPeriode(mars)
         }
         a2 {
-            nyPeriode(1.mars til 31.mars)
+            nyPeriode(mars)
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         }
@@ -63,10 +61,10 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     @Test
     fun `når anmodning innfris forkastes alt senere`() {
         a1 {
-            nyPeriode(1.januar til 31.januar)
-            nyPeriode(1.mars til 31.mars)
-            nyPeriode(1.mai til 31.mai)
-            nyPeriode(1.juli til 31.juli)
+            nyPeriode(januar)
+            nyPeriode(mars)
+            nyPeriode(mai)
+            nyPeriode(juli)
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(2.vedtaksperiode)
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -79,7 +77,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     @Test
     fun `anmodning innfris av en vedtaksperiode som avventer inntektsmelding`(){
         a1 {
-            nyPeriode(1.januar til 31.januar)
+            nyPeriode(januar)
             nullstillTilstandsendringer()
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
@@ -90,7 +88,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
     fun `Forkaster senere periode påvirker ikke pågående revurdering på tidligere periode med samme skjæringstidspunkt`() {
         a1 {
             nyttVedtak(januar)
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -100,7 +98,7 @@ internal class AnmodningOmForkastingTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
 
             nullstillTilstandsendringer()
 

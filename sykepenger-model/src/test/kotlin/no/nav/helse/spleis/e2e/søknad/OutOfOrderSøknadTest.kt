@@ -70,7 +70,7 @@ internal class OutOfOrderSøknadTest : AbstractEndToEndTest() {
     @Test
     fun `Revurderer vegg-i-vegg-AUU når det ikke foreligger tidligere utbetaling`() {
         nyPeriode(1.mars til 16.mars)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertIngenVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())

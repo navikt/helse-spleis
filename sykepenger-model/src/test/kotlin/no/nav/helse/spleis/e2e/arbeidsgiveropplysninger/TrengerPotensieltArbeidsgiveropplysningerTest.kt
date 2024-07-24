@@ -169,7 +169,7 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
 
     @Test
     fun `Skal sende med første fraværsdager for alle arbeidsgivere på skjæringstidspunktet`() {
-        nyPeriode(1.januar til 31.januar, orgnummer = a1)
+        nyPeriode(januar, orgnummer = a1)
         nyPeriode(2.januar til 2.januar, orgnummer = a2)
 
         assertEquals(

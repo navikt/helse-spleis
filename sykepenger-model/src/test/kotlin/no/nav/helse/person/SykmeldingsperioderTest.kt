@@ -31,22 +31,22 @@ internal class SykmeldingsperioderTest {
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
-        assertEquals(listOf(1.januar til 31.januar), sykmeldingsperioder.perioder())
+        sykmeldingsperioder.lagre(januar)
+        assertEquals(listOf(januar), sykmeldingsperioder.perioder())
     }
 
     @Test
     fun `utvider ikke perioder ved duplikate sykmeldingsperioder`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
-        assertEquals(listOf(1.januar til 31.januar), sykmeldingsperioder.perioder())
+        sykmeldingsperioder.lagre(januar)
+        sykmeldingsperioder.lagre(januar)
+        assertEquals(listOf(januar), sykmeldingsperioder.perioder())
     }
 
     @Test
     fun `utvider periode ved overlappende sykmeldingsperioder, lager ikke ny periode`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(januar)
         sykmeldingsperioder.lagre(20.januar til 20.februar)
         assertEquals(listOf(1.januar til 20.februar), sykmeldingsperioder.perioder())
     }
@@ -54,9 +54,9 @@ internal class SykmeldingsperioderTest {
     @Test
     fun `gap fører til to sykmeldingsperioder`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(januar)
         sykmeldingsperioder.lagre(20.februar til 28.februar)
-        assertEquals(listOf(1.januar til 31.januar, 20.februar til 28.februar), sykmeldingsperioder.perioder())
+        assertEquals(listOf(januar, 20.februar til 28.februar), sykmeldingsperioder.perioder())
     }
 
     @Test
@@ -81,19 +81,19 @@ internal class SykmeldingsperioderTest {
     @Test
     fun `sjekk om en periode kan behandles med ett innslag`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(januar)
         assertFalse(sykmeldingsperioder.avventerSøknad(1.desember(2017) til 31.desember(2017)))
         assertTrue(sykmeldingsperioder.avventerSøknad(1.desember(2017) til 1.januar))
-        assertFalse(sykmeldingsperioder.avventerSøknad(1.februar til 28.februar))
+        assertFalse(sykmeldingsperioder.avventerSøknad(februar))
     }
 
     @Test
     fun `sjekk om det kan behandles med flere innslag`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.februar til 28.februar)
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(februar)
+        sykmeldingsperioder.lagre(januar)
         assertFalse(sykmeldingsperioder.avventerSøknad(1.desember(2017) til 31.desember(2017)))
-        assertTrue(sykmeldingsperioder.avventerSøknad(1.februar til 28.februar))
+        assertTrue(sykmeldingsperioder.avventerSøknad(februar))
     }
 
     @Test
@@ -105,9 +105,9 @@ internal class SykmeldingsperioderTest {
     @Test
     fun `fjerner perioder frem tom søknadsperioden`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(januar)
         sykmeldingsperioder.lagre(1.januar til 28.februar)
-        sykmeldingsperioder.fjern(1.februar til 28.februar)
+        sykmeldingsperioder.fjern(februar)
         assertEquals(emptyList<Periode>(), sykmeldingsperioder.perioder())
     }
 
@@ -115,27 +115,27 @@ internal class SykmeldingsperioderTest {
     fun `fjerner deler av en sammenhengende sykmeldingsperiode`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 28.februar)
-        sykmeldingsperioder.fjern(1.januar til 31.januar)
-        assertEquals(listOf(1.februar til 28.februar), sykmeldingsperioder.perioder())
+        sykmeldingsperioder.fjern(januar)
+        assertEquals(listOf(februar), sykmeldingsperioder.perioder())
     }
 
     @Test
     fun `fjerner deler av en overlappende sykmeldingsperiode`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(januar)
         sykmeldingsperioder.lagre(30.januar til 28.februar)
-        sykmeldingsperioder.fjern(1.januar til 31.januar)
-        assertEquals(listOf(1.februar til 28.februar), sykmeldingsperioder.perioder())
+        sykmeldingsperioder.fjern(januar)
+        assertEquals(listOf(februar), sykmeldingsperioder.perioder())
     }
 
     @Test
     fun `søknad kommer midt inne i en sammenhengende sykmeldingsperiode, fjerner sykmeldingsperiode tom sluttdatoen til søknad`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
-        sykmeldingsperioder.lagre(1.februar til 28.februar)
-        sykmeldingsperioder.lagre(1.mars til 31.mars)
+        sykmeldingsperioder.lagre(januar)
+        sykmeldingsperioder.lagre(februar)
+        sykmeldingsperioder.lagre(mars)
         sykmeldingsperioder.fjern(1.januar til 28.februar)
-        assertEquals(listOf(1.mars til 31.mars), sykmeldingsperioder.perioder())
+        assertEquals(listOf(mars), sykmeldingsperioder.perioder())
     }
 
     @Test
@@ -169,17 +169,17 @@ internal class SykmeldingsperioderTest {
     @Test
     fun `etterfølgende søknad som tilstøter sykmeldingsperiode, fjerner alt`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
-        sykmeldingsperioder.fjern(1.februar til 28.februar)
+        sykmeldingsperioder.lagre(januar)
+        sykmeldingsperioder.fjern(februar)
         assertEquals(emptyList<Periode>(), sykmeldingsperioder.perioder())
     }
 
     @Test
     fun `søknad forran som tilstøter sykmeldingsperioden, fjerner ingenting`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.februar til 28.februar)
-        sykmeldingsperioder.fjern(1.januar til 31.januar)
-        assertEquals(listOf(1.februar til 28.februar), sykmeldingsperioder.perioder())
+        sykmeldingsperioder.lagre(februar)
+        sykmeldingsperioder.fjern(januar)
+        assertEquals(listOf(februar), sykmeldingsperioder.perioder())
     }
 
     @Test
@@ -196,7 +196,7 @@ internal class SykmeldingsperioderTest {
     @Test
     fun `AGP treffer sykmeldingsperiode, men første fraværsdag er senere`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(januar)
 
         assertEquals(emptyList<Periode>(), sykmeldingsperioder.overlappendePerioder(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar).dager()))
     }
@@ -204,7 +204,7 @@ internal class SykmeldingsperioderTest {
     @Test
     fun `AGP treffer ikke sykmeldingsperiode, men første fraværsdag treffer`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
-        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(januar)
         sykmeldingsperioder.lagre(10.februar til 28.februar)
 
         assertEquals(

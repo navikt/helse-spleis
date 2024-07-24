@@ -4,15 +4,12 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.tilGodkjenning
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -21,10 +18,10 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
     @Test
     fun `periode i avventer blokkerende som venter på inntektsmelding fra annen arbeidsgiver bør ha samme timeout som avventer inntektsmelding`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
         }
         a2 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
         }
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -43,11 +40,11 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
     @Test
     fun `periode i avventer blokkerende som venter på søknad fra annen arbeidsgiver venter i 3 måneder`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertEquals(LocalDate.now().plusDays(90), venterTil(1.vedtaksperiode))
@@ -58,7 +55,7 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
     fun `periode i avventer blokkerende venter på annen periode til godkjenning har evig timeout`() {
         a1 {
             tilGodkjenning(januar)
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
             håndterInntektsmelding(listOf(1.mars til 16.mars))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -70,10 +67,10 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
     fun `periode i avventer blokkerende som venter på inntektsmelding fra annen arbeidsgiver tross tidligere periode til godkjenning har samme timeout som avventer inntektsmelding`() {
         a1 {
             tilGodkjenning(januar)
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
         }
         a2 {
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
         }
         a1 {
             håndterInntektsmelding(listOf(1.mars til 16.mars))
@@ -94,10 +91,10 @@ internal class MakstidIAvventerBlokkerendePeriodeTest: AbstractDslTest() {
     fun `perioder i avventer blokkerende som kun venter på godkjenning har evig timeout`() {
         a1 {
             tilGodkjenning(januar)
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
         }
         a2 {
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
         }
         a1 {
             håndterInntektsmelding(listOf(1.mars til 16.mars))

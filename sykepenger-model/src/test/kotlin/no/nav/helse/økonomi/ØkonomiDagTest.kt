@@ -2,12 +2,12 @@ package no.nav.helse.økonomi
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -144,7 +144,7 @@ internal class ØkonomiDagTest {
     fun `Beløp medNavDag som har blitt avvist`() {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
-        val c = Utbetalingstidslinje.avvis(listOf(tidslinjeOf(2.NAV(1200))), listOf(1.januar til 31.januar), listOf(Begrunnelse.MinimumInntekt)).single()
+        val c = Utbetalingstidslinje.avvis(listOf(tidslinjeOf(2.NAV(1200))), listOf(januar), listOf(Begrunnelse.MinimumInntekt)).single()
         val (a1, b1, c1) = listOf(a, b, c).betal()
         assertØkonomi(a, null, null)
         assertØkonomi(a1, 721.0, 0.0)

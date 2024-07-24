@@ -338,11 +338,11 @@ internal class RefusjonsopplysningerTest {
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply {
             (17.januar til 25.januar).forEach { utbetalingsdag(it) }
             (26.januar til 31.januar).forEach { oppholdsdag(it) }
-            (1.februar til 28.februar).forEach { utbetalingsdag(it) }
+            (februar).forEach { utbetalingsdag(it) }
         }
         val refusjonsopplysninger = Refusjonsopplysning(meldingsreferanseId1, 1.januar, null, 20000.månedlig).refusjonsopplysninger
         assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, refusjonsopplysninger, arbeidsgiverperiode))
-        assertFalse(harNødvendigeRefusjonsopplysninger(1.januar, 1.februar til 28.februar, refusjonsopplysninger, arbeidsgiverperiode))
+        assertFalse(harNødvendigeRefusjonsopplysninger(1.januar, februar, refusjonsopplysninger, arbeidsgiverperiode))
     }
 
     @Test
@@ -350,19 +350,19 @@ internal class RefusjonsopplysningerTest {
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)).apply {
             (17.januar til 25.januar).forEach { utbetalingsdag(it) }
             (26.januar til 31.januar).forEach { oppholdsdag(it) }
-            (1.februar til 28.februar).forEach { utbetalingsdag(it) }
+            (februar).forEach { utbetalingsdag(it) }
         }
         // IM: FF = 1.januar, AGP = 1.januar - 16.januar
         val refusjonsopplysningerJanuar = Refusjonsopplysning(meldingsreferanseId1, 1.januar, null, 20000.månedlig).refusjonsopplysninger
         assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
-        assertFalse(harNødvendigeRefusjonsopplysninger(1.januar, 1.februar til 28.februar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
+        assertFalse(harNødvendigeRefusjonsopplysninger(1.januar, februar, refusjonsopplysningerJanuar, arbeidsgiverperiode))
 
         // IM: FF = 1.februar, AGP = 1.januar - 16.januar
         val refusjonsopplysningerFebruar = Refusjonsopplysning(meldingsreferanseId2, 1.februar, null, 25000.månedlig).refusjonsopplysninger
 
         val oppdaterteRefusjonsopplysninger = refusjonsopplysningerJanuar.merge(refusjonsopplysningerFebruar)
         assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.januar til 31.januar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
-        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, 1.februar til 28.februar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
+        assertTrue(harNødvendigeRefusjonsopplysninger(1.januar, februar, oppdaterteRefusjonsopplysninger, arbeidsgiverperiode))
     }
 
     @Test

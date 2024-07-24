@@ -184,14 +184,14 @@ internal class RevurderingseventyrEventTest : AbstractEndToEndTest() {
                     VedtaksperiodeData(
                         orgnummer = a1,
                         vedtaksperiodeId = periodeAG1,
-                        periode = 1.januar til 31.januar,
+                        periode = januar,
                         skjæringstidspunkt = 1.januar,
                         typeEndring = "REVURDERING"
                     ),
                     VedtaksperiodeData(
                         orgnummer = a2,
                         vedtaksperiodeId = periodeAG2,
-                        periode = 1.januar til 31.januar,
+                        periode = januar,
                         skjæringstidspunkt = 1.januar,
                         typeEndring = "REVURDERING"
                     )

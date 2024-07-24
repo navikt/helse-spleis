@@ -152,7 +152,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         nullstillTilstandsendringer()
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
     }
@@ -514,7 +514,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `Burde revurdere utbetalt periode dersom det kommer en eldre periode fra en annen AG`() {
         nyttVedtak(mars, orgnummer = a2)
-        nyPeriode(1.januar til 31.januar, a1)
+        nyPeriode(januar, a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a1)
@@ -626,8 +626,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
 
-        nyPeriode(1.februar til 28.februar, a2)
-        nyPeriode(1.februar til 28.februar, a3)
+        nyPeriode(februar, a2)
+        nyPeriode(februar, a3)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
@@ -699,8 +699,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
 
-        nyPeriode(1.februar til 28.februar, a2)
-        nyPeriode(1.februar til 28.februar, a3)
+        nyPeriode(februar, a2)
+        nyPeriode(februar, a3)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, orgnummer = a3)
@@ -757,7 +757,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         nullstillTilstandsendringer()
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -787,7 +787,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     fun `første periode i til utbetaling når det dukker opp en out of order-periode`() {
         tilGodkjent(mars, 100.prosent, 1.mars)
         nullstillTilstandsendringer()
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING)
@@ -823,7 +823,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `første periode i til utbetaling når det dukker opp en out of order-periode - utbetalingen feiler`() {
         tilGodkjent(mars, 100.prosent, 1.mars)
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         nullstillTilstandsendringer()
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
@@ -838,7 +838,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(1.mars til 16.mars)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         assertIngenInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
@@ -893,7 +893,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out-of-order med error skal ikke medføre revurdering`() {
         nyttVedtak(mars)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = true)
         assertFunksjonellFeil(RV_SØ_10.varseltekst, 2.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
@@ -1016,7 +1016,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `Out of order som overlapper med annen AG og flytter skjæringstidspunktet - nærmere enn 18 dager fra neste`() {
-        nyPeriode(1.mars til 31.mars, a1)
+        nyPeriode(mars, a1)
         nyPeriode(20.mars til 20.april, a2)
 
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1,)
@@ -1065,7 +1065,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyttVedtak(mars)
         assertSisteTilstand(marsId, AVSLUTTET)
 
-        nyPeriode(1.februar til 28.februar)
+        nyPeriode(februar)
         håndterInntektsmelding(listOf(1.februar til 16.februar),)
         val februarId = 2.vedtaksperiode
         håndterVilkårsgrunnlag(februarId)
@@ -1080,7 +1080,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(februarId, AVSLUTTET)
 
 
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         val januarId = 3.vedtaksperiode
         håndterVilkårsgrunnlag(januarId)
@@ -1097,7 +1097,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out-of-order søknad medfører revurdering`() {
         nyttVedtak(februar)
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
 
         val februarId = 1.vedtaksperiode
         val januarId = 2.vedtaksperiode
@@ -1128,7 +1128,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             februarId,
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 1.februar til 28.februar
+            subset = februar
         )
     }
 
@@ -1144,7 +1144,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     @Test
     fun `out-of-order søknad medfører revurdering -- AvsluttetUtenUtbetaling`() {
         nyPeriode(1.februar til 10.februar)
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
 
         val februarId = 1.vedtaksperiode
         val januarId = 2.vedtaksperiode
@@ -1179,7 +1179,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             februarId,
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 1.februar til 28.februar
+            subset = februar
         )
     }
 

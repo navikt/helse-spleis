@@ -10,7 +10,6 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
@@ -23,19 +22,18 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.SkjønnsmessigFastsatt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -45,8 +43,8 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
     @Test
     fun `revurder ghost-inntekt ned`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -114,8 +112,8 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
     @Test
     fun `revurder ghost-inntekt opp`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -175,8 +173,8 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
     @Test
     fun `revurder ghost-inntekt til 0 kr`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -244,8 +242,8 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
     @Test
     fun `revurderer tidligere skjæringstidspunkt`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -254,7 +252,7 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             håndterUtbetalt()
             // ny periode med nytt skjæringstidspunlt
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+            håndterSøknad(mars)
             håndterInntektsmelding(listOf(1.mars til 16.mars), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlagMedGhostArbeidsforhold(2.vedtaksperiode, skjæringstidspunkt = 1.mars)
             håndterYtelser(2.vedtaksperiode)

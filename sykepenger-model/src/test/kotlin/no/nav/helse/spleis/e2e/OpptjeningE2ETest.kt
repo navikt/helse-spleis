@@ -119,7 +119,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Har ikke pensjonsgivende inntekt måneden før skjæringstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(

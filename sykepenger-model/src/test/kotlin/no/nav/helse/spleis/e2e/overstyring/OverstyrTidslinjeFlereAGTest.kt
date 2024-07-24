@@ -26,7 +26,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
 
     @Test
     fun `kan ikke overstyre én AG hvis en annen AG har blitt godkjent`() {
-        tilGodkjenning(1.januar til 31.januar, a1, a2)
+        tilGodkjenning(januar, a1, a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 

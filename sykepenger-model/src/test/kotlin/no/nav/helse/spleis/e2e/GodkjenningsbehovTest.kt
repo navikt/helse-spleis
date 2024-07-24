@@ -56,7 +56,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `sender med feil vilkårsgrunnlagId i påminnet godkjenningsbehov om det har kommet nytt vilkårsgrunnlag med endring _senere_ enn perioden`() {
-        tilGodkjenning(1.januar til 31.januar, a1)
+        tilGodkjenning(januar, a1)
         val vilkårsgrunnlagId1 = vilkårsgrunnlagIdFraVilkårsgrunnlaghistorikken(1.januar)
         assertEquals(vilkårsgrunnlagId1, vilkårsgrunnlagIdFraSisteGodkjenningsbehov(1.vedtaksperiode))
         håndterSøknad(februar)
@@ -143,7 +143,7 @@ internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
     fun `førstegangsbehandling som kan avvises`() {
-        tilGodkjenning(1.januar til 31.januar, a1)
+        tilGodkjenning(januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTrue(kanAvvises(1.vedtaksperiode))
     }

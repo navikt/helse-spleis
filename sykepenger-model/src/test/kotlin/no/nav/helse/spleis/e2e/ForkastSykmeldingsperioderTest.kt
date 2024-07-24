@@ -2,8 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
-import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -20,14 +18,14 @@ internal class ForkastSykmeldingsperioderTest: AbstractDslTest() {
     @Test
     fun `Forkaster sykmeldingsperioder slik at den andre arbeidsgiveren kan behandles`(){
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
         }
 
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             val sisteVedtaksperiodeventer = observatør.vedtaksperiodeVenter.last()
@@ -50,14 +48,14 @@ internal class ForkastSykmeldingsperioderTest: AbstractDslTest() {
     @Test
     fun `Forkaster sykmeldingsperioder slik at den andre arbeidsgiveren gjenopptar behandling`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
         }
         a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
         }
 
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterUtbetalingshistorikkEtterInfotrygdendring(
                 utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))

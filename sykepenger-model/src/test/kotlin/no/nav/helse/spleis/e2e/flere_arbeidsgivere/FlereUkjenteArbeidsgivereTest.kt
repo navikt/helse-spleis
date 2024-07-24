@@ -62,7 +62,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         val inntektA1 = INNTEKT + 500.daglig
         val inntektA2 = INNTEKT
 
-        nyeVedtak(1.januar til 31.januar, a1, a2, inntekt = INNTEKT)
+        nyeVedtak(januar, a1, a2, inntekt = INNTEKT)
         forlengVedtak(februar, orgnummer = a1)
         forlengVedtak(mars, orgnummer = a1)
 
@@ -96,7 +96,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
                 periodeForEndring = 1.januar til 1.januar,
                 berørtePerioder = listOf(
                     VedtaksperiodeData(a1, 1.vedtaksperiode.id(a1), 1.januar til 31.januar, 1.januar, "REVURDERING"),
-                    VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), 1.februar til 28.februar, 1.januar, "REVURDERING"),
+                    VedtaksperiodeData(a1, 2.vedtaksperiode.id(a1), februar, 1.januar, "REVURDERING"),
                     VedtaksperiodeData(a1, 3.vedtaksperiode.id(a1), 1.mars til 31.mars, 1.januar, "REVURDERING"),
                     VedtaksperiodeData(a2, 1.vedtaksperiode.id(a2), 1.januar til 31.januar, 1.januar, "REVURDERING")
                 ),

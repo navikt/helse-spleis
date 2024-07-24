@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -116,7 +115,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         })
         assertEquals(1431.daglig, utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp)
 
-        assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
         assertEquals("USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("USSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).toShortString())
     }
@@ -160,7 +159,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         })
         assertEquals(1431.daglig, utbetalingstidslinje[18.januar].økonomi.inspektør.arbeidsgiverbeløp)
 
-        assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
         assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
         assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).toShortString())
     }
@@ -358,7 +357,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
     @Test
     fun `korrigert agp i avventer_godkjenning`() {
-        tilGodkjenning(1.januar til 31.januar, a1, beregnetInntekt = INNTEKT)
+        tilGodkjenning(januar, a1, beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         håndterInntektsmelding(listOf(5.januar til 20.januar),)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -369,7 +368,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     @Test
     fun `forlengelse til godkjenning - korrigerende agp mindre enn ti dager fra forrige`() {
         nyttVedtak(10.januar til 31.januar)
-        nyPeriode(1.februar til 28.februar)
+        nyPeriode(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -384,7 +383,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
     @Test
     fun `forlengelse til godkjenning - korrigerende agp mer enn ti dager fra forrige`() {
         nyttVedtak(januar)
-        nyPeriode(1.februar til 28.februar)
+        nyPeriode(februar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterInntektsmelding(listOf(1.februar til 16.februar),)

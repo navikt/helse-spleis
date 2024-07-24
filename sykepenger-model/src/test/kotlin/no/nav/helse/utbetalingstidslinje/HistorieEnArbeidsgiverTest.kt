@@ -36,7 +36,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         val utbetalingstidslinje = beregn(AG1, 1.januar, 5.april)
         assertAlleDager(utbetalingstidslinje, 1.januar til 16.januar, ArbeidsgiverperiodeDag::class)
         assertAlleDager(utbetalingstidslinje, 17.januar til 31.januar, NavDag::class, NavHelgDag::class)
-        assertAlleDager(utbetalingstidslinje, 1.februar til 28.februar, UkjentDag::class, Fridag::class)
+        assertAlleDager(utbetalingstidslinje, februar, UkjentDag::class, Fridag::class)
         assertAlleDager(utbetalingstidslinje, 1.mars til 4.april, Arbeidsdag::class, Fridag::class)
         assertAlleDager(utbetalingstidslinje, 5.april til 10.april, UkjentDag::class, Fridag::class)
         assertAlleDager(utbetalingstidslinje, 11.april til 30.april, NavDag::class, NavHelgDag::class)
@@ -48,7 +48,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         addSykdomshistorikk(AG1, sykedager(1.februar, 28.februar))
         val utbetalingstidslinje = beregn(AG1, 1.januar)
         assertAlleDager(utbetalingstidslinje, 1.januar til 31.januar, UkjentDag::class)
-        assertAlleDager(utbetalingstidslinje, 1.februar til 28.februar, NavDag::class, NavHelgDag::class)
+        assertAlleDager(utbetalingstidslinje, februar, NavDag::class, NavHelgDag::class)
     }
 
     @Test
@@ -71,9 +71,9 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         addSykdomshistorikk(AG1, sykedager(1.april, 30.april))
         val utbetalingstidslinje = beregn(AG1, 17.januar)
         assertAlleDager(utbetalingstidslinje, 17.januar til 31.januar, UkjentDag::class, Fridag::class)
-        assertAlleDager(utbetalingstidslinje, 1.februar til 28.februar, NavDag::class, NavHelgDag::class)
+        assertAlleDager(utbetalingstidslinje, februar, NavDag::class, NavHelgDag::class)
         assertAlleDager(utbetalingstidslinje, 1.mars til 31.mars, UkjentDag::class, Fridag::class)
-        assertAlleDager(utbetalingstidslinje, 1.april til 30.april, NavDag::class, NavHelgDag::class)
+        assertAlleDager(utbetalingstidslinje, april, NavDag::class, NavHelgDag::class)
     }
 
     @Test
@@ -84,7 +84,7 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         )
         addSykdomshistorikk(AG1, sykedager(1.mars, 31.mars))
         val utbetalingstidslinje = beregn(AG1, 1.januar)
-        assertEquals(1.mars til 31.mars, utbetalingstidslinje.periode())
+        assertEquals(mars, utbetalingstidslinje.periode())
         assertAlleDager(utbetalingstidslinje, 1.mars til 31.mars, NavDag::class, NavHelgDag::class)
     }
 
@@ -96,8 +96,8 @@ internal class HistorieEnArbeidsgiverTest : HistorieTest() {
         )
         addSykdomshistorikk(AG1, sykedager(1.juni, 30.juni))
         beregn(AG1, 1.januar, 1.juni).also {
-            assertAlleDager(it, 1.juni til 30.juni, NavDag::class, NavHelgDag::class)
-            assertEquals(1.juni til 30.juni, it.periode())
+            assertAlleDager(it, juni, NavDag::class, NavHelgDag::class)
+            assertEquals(juni, it.periode())
         }
     }
 

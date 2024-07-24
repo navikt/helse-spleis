@@ -1,15 +1,15 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.AIG
+import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
@@ -33,7 +33,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(31.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(1.januar til 31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
@@ -45,7 +45,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         }
         assertEquals(1, perioder.size)
         assertEquals(emptyList<LocalDate>(), perioder.first())
-        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(1.januar til 31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
@@ -57,7 +57,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         }
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(1.januar til 31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }

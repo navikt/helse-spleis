@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
@@ -228,8 +227,8 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
     fun `Overstyrer agp til sykedagNav - ingen refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(INGEN, null, emptyList()),)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -245,7 +244,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             assertEquals(1, overstyringen.personOppdrag.size)
             assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.personOppdrag[0].inspektør.also { linje ->
-                assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(januar, linje.fom til linje.tom)
                 assertEquals(1431, linje.beløp)
             }
         }
@@ -272,7 +271,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
     fun `Overstyrer sykedagNav tilbake til vanlig agp`() {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Refusjon(INGEN, null, emptyList()),
@@ -324,7 +323,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             assertEquals(1, overstyringen.personOppdrag.size)
             assertEquals(0, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.personOppdrag[0].inspektør.also { linje ->
-                assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(januar, linje.fom til linje.tom)
                 assertEquals(1431, linje.beløp)
             }
         }
@@ -332,8 +331,8 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
 
     @Test
     fun `Overstyrer agp til sykedagNav - refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -349,7 +348,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
             assertEquals(0, overstyringen.personOppdrag.size)
             assertEquals(1, overstyringen.arbeidsgiverOppdrag.size)
             overstyringen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-                assertEquals(1.januar til 31.januar, linje.fom til linje.tom)
+                assertEquals(januar, linje.fom til linje.tom)
                 assertEquals(1431, linje.beløp)
             }
         }
@@ -515,7 +514,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
     @Test
     fun `avviser dager nav skal utbetale i arbeidsgiverperioden om kravet til minsteinntekt ikke er innfridd`() {
         val underHalvG = Grunnbeløp.halvG.beløp(1.januar) - 1000.årlig
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = underHalvG,
@@ -531,7 +530,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         (17.januar til 31.januar).filterNot { it.erHelg() }.forEach {
             assertTrue(inspektør.sykdomstidslinje[it] is Sykedag)
         }
-        (1.januar til 31.januar).filterNot { it.erHelg() }.forEach {
+        (januar).filterNot { it.erHelg() }.forEach {
             assertNotNull(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it].erAvvistMed(Begrunnelse.MinimumInntekt))
         }
     }

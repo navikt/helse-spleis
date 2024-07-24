@@ -5,7 +5,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadstype.Companion.Arbeidsledig
-import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -50,7 +49,7 @@ internal class ArbeidsledigSøknadTest: AbstractDslTest() {
 
     @Test
     fun `støtter arbeidsledigsøknad som forlengelse av tidligere vilkårsprøvd skjæringstidspunkt med fler arbeidsgivere i sykepengegrunnlaget`() {
-        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), søknadstype = Arbeidsledig)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)

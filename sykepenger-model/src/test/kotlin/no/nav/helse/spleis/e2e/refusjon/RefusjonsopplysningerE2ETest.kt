@@ -49,7 +49,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 22.januar, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null))
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
@@ -65,36 +65,36 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
         }
     }
     @Test
     fun `Duplikat inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             val inntektsmeldingId = håndterInntektsmelding(arbeidsgiverperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(februar)
             håndterInntektsmelding(
                 id = inntektsmeldingId,
                 arbeidsgiverperioder = arbeidsgiverperiode,
             )
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(januar, INNTEKT)
         }
     }
 
@@ -102,8 +102,8 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     @Test
     fun `Inntektsmelding uten refusjonsopplysninger tolkes som ingen refusjon`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
             assertEquals(0, inspektør.arbeidsgiver.inspektør.refusjonshistorikk.inspektør.antall)
             assertEquals(emptyList<Refusjonsopplysning>(), inspektør.refusjonsopplysningerFraRefusjonshistorikk(1.januar).inspektør.refusjonsopplysninger)
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(null, null, emptyList()), beregnetInntekt = INNTEKT)
@@ -120,7 +120,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             forlengVedtak(29.desember(2017) til 10.januar)
         }
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 1.januar))
             håndterInntektsmelding(listOf(), førsteFraværsdag = 1.januar)
         }
@@ -142,7 +142,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             forlengVedtak(29.desember(2017) til 10.januar)
         }
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSykmelding(januar)
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 1.januar))
             håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), førsteFraværsdag = 2.januar)
 

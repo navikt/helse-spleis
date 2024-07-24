@@ -22,7 +22,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     @Test
     fun `hensyntar tidligere arbeidsgivere fra IT`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT))
-        nyPeriode(1.mars til 31.mars, a1)
+        nyPeriode(mars, a1)
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -38,7 +38,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     @Test
     fun `hensyntar ikke senere arbeidsgivere fra IT`() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a2, 1.april, 30.april, 100.prosent, INNTEKT))
-        nyPeriode(1.mars til 31.mars, a1)
+        nyPeriode(mars, a1)
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -53,7 +53,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `syk etter maksdato`() {
-        var forrigePeriode = 1.januar til 31.januar
+        var forrigePeriode = januar
         nyttVedtak(forrigePeriode, 100.prosent)
         // setter opp vedtaksperioder frem til 182 dager etter maksdato
         repeat(17) { _ ->
@@ -74,7 +74,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `avviser perioder med sammenhengende sykdom etter 26 uker fra maksdato`() {
-        var forrigePeriode = 1.januar til 31.januar
+        var forrigePeriode = januar
         nyttVedtak(forrigePeriode, 100.prosent)
         // setter opp vedtaksperioder frem til 182 dager etter maksdato
         repeat(17) { _ ->

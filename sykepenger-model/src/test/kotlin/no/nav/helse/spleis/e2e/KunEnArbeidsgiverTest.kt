@@ -28,6 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.september
 import no.nav.helse.sisteBehov
@@ -36,7 +37,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -289,9 +289,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
     @Test
     fun `vedtaksperioder som avventer inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode`() {
-        nyPeriode(1.januar til 31.januar, a1)
+        nyPeriode(januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
         håndterInntektsmelding(
             førsteFraværsdag = 1.januar,
             arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
@@ -304,9 +304,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
     @Test
     fun `vedtaksperioder som avventer inntektsmelding strekkes tilbake til å dekke arbeidsgiverperiode om det er helg mellom`() {
-        nyPeriode(1.januar til 31.januar, a1)
+        nyPeriode(januar, a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-        assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
+        assertEquals(januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode())
         håndterInntektsmelding(
             førsteFraværsdag = 1.januar,
             arbeidsgiverperioder = listOf(14.desember(2017) til 29.desember(2017)),
@@ -657,11 +657,11 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
     @Test
     fun `oppretter ikke ny vedtaksperiode ved søknad som overlapper med forkastet periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendTilGosys = true)
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
 
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
@@ -682,8 +682,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
     @Test
     fun `sender med skjæringstidspunkt på godkjenningsbehov`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)

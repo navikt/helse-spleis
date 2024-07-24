@@ -47,7 +47,7 @@ import org.junit.jupiter.api.fail
 internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     @Test
     fun `fjerner arbeidsforhold fra arbeidsforholdhistorikken ved overstyring`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(
@@ -70,7 +70,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Overstyring av arbeidsforhold fører til et nytt vilkårsgrunnlag med nye inntektsopplysninger`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(

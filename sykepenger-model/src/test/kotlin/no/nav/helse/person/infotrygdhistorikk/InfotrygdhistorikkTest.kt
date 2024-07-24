@@ -187,7 +187,7 @@ internal class InfotrygdhistorikkTest {
             ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar,  31.januar, 100.prosent, 25000.månedlig)
         )))
         historikk.utbetalingstidslinje().also {
-            assertEquals(1.januar til 31.januar, it.periode())
+            assertEquals(januar, it.periode())
         }
     }
 
@@ -260,7 +260,7 @@ internal class InfotrygdhistorikkTest {
             ArbeidsgiverUtbetalingsperiode("ag1", 1.februar,  28.februar, 100.prosent, 25000.månedlig)
         )))
         assertEquals(5.januar, historikk.skjæringstidspunkt(emptyList()).beregnSkjæringstidspunkt(5.januar til 31.januar, null))
-        assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).beregnSkjæringstidspunkt(1.januar til 31.januar, null))
+        assertEquals(1.januar, historikk.skjæringstidspunkt(listOf(2.S, 3.S)).beregnSkjæringstidspunkt(januar, null))
     }
 
     @Test
@@ -298,10 +298,10 @@ internal class InfotrygdhistorikkTest {
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 subsumsjonslogg = Subsumsjonslogg.NullObserver
-            ), beregningsperiode = 1.januar til 31.januar
+            ), beregningsperiode = januar
         )
         val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, Subsumsjonslogg.NullObserver).let { builder.result() }
-        assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
+        assertEquals(januar, utbetalingstidslinje.periode())
     }
 
     @Test
@@ -320,10 +320,10 @@ internal class InfotrygdhistorikkTest {
                 ).somVilkårsgrunnlagHistorikk("a1"),
                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 subsumsjonslogg = Subsumsjonslogg.NullObserver
-            ), beregningsperiode = 1.februar til 28.februar
+            ), beregningsperiode = februar
         )
         val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, Subsumsjonslogg.NullObserver).let { builder.result()}
-        assertEquals(1.februar til 28.februar, utbetalingstidslinje.periode())
+        assertEquals(februar, utbetalingstidslinje.periode())
     }
 
     @Test

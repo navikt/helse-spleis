@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
@@ -49,7 +48,7 @@ internal class UtbetalingkladderBuilderTest {
             assertEquals(1.januar til 16.februar, utbetaling.inspektør.periode)
             val arbeidsgiverOppdrag = utbetaling.inspektør.arbeidsgiverOppdrag
             assertEquals(1, arbeidsgiverOppdrag.size)
-            assertEquals(1.januar til 31.januar, arbeidsgiverOppdrag.single().periode)
+            assertEquals(januar, arbeidsgiverOppdrag.single().periode)
         }
         result[1].also { kladd ->
             val utbetaling = kladd.lagUtbetaling(Utbetalingtype.UTBETALING, null, tidslinje, LocalDate.MAX, 0, 0)

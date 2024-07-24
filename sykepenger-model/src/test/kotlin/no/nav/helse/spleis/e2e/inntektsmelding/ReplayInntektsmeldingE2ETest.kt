@@ -87,7 +87,7 @@ internal class ReplayInntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         nullstillTilstandsendringer()
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, TilstandType.AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)

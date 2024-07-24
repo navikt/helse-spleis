@@ -121,7 +121,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2,)
 
         assertEquals(13.januar til 31.januar, inspektør(a1).periode(3.vedtaksperiode))
-        assertEquals(1.januar til 31.januar, inspektør(a2).periode(1.vedtaksperiode))
+        assertEquals(januar, inspektør(a2).periode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
@@ -283,7 +283,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     fun `drawio -- ULIK LENGDE PÅ SYKEFRAVÆR`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(5.januar, 5.februar), orgnummer = a2)
-        assertEquals(listOf(1.januar til 31.januar), inspektør(a1).sykmeldingsperioder())
+        assertEquals(listOf(januar), inspektør(a1).sykmeldingsperioder())
         assertEquals(listOf(5.januar til 5.februar), inspektør(a2).sykmeldingsperioder())
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -291,7 +291,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertEquals(listOf(5.januar til 5.februar), inspektør(a2).sykmeldingsperioder())
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar), orgnummer = a1)
-        assertEquals(listOf(1.februar til 28.februar), inspektør(a1).sykmeldingsperioder())
+        assertEquals(listOf(februar), inspektør(a1).sykmeldingsperioder())
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, a1)
@@ -308,7 +308,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(6.februar, 26.februar), orgnummer = a2)
         håndterSøknad(Sykdom(6.februar, 26.februar, 100.prosent), orgnummer = a2)
 
-        assertEquals(listOf(1.februar til 28.februar), inspektør(a1).sykmeldingsperioder())
+        assertEquals(listOf(februar), inspektør(a1).sykmeldingsperioder())
         assertEquals(emptyList<Periode>(), inspektør(a2).sykmeldingsperioder())
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
@@ -557,8 +557,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding selv om saksbehandler har overstyrt ghostinntekten`() {
-        val periode1 = 1.januar til 31.januar
-        val periode2 = 1.februar til 28.februar
+        val periode1 = januar
+        val periode2 = februar
         håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive), orgnummer = a1)
         håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
@@ -768,8 +768,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `får tidligere sykmelding og søknad for en annen arbeidsgiver`() {
-        tilGodkjenning(1.februar til 28.februar, a1)
-        tilGodkjenning(1.januar til 31.januar, a2)
+        tilGodkjenning(februar, a1)
+        tilGodkjenning(januar, a2)
 
         assertTilstander(
             1.vedtaksperiode,

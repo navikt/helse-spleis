@@ -37,7 +37,7 @@ internal class MedlemskapE2E : AbstractDslTest() {
     @Test
     fun `ikke medlem av folketrygden`() {
         a1 {
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Nei)
             assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())

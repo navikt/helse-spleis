@@ -77,6 +77,10 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 
+internal fun AbstractEndToEndTest.håndterSykmelding(
+    periode: Periode,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER
+) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = orgnummer)
 
 internal fun AbstractEndToEndTest.håndterSykmelding(
     vararg sykeperioder: Sykmeldingsperiode,

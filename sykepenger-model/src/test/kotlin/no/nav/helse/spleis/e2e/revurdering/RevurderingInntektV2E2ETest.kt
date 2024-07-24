@@ -252,8 +252,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Ved overstyring av revurdering av inntekt til under krav til minste sykepengegrunnlag skal vi opphøre den opprinnelige utbetalingen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
@@ -380,9 +380,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             assertEquals(februarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
 
             assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", revurdering.utbetalingstidslinje.toString().trim())
-            assertEquals(1.januar til 31.januar, januarutbetaling.periode)
+            assertEquals(januar, januarutbetaling.periode)
             assertEquals(1.januar til 28.februar, februarutbetaling.periode)
-            assertEquals(1.januar til 31.januar, revurdering.periode)
+            assertEquals(januar, revurdering.periode)
             assertEquals(1, revurdering.personOppdrag.size)
             assertEquals(2, revurdering.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
@@ -540,12 +540,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - periode uten utbetaling først`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

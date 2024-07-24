@@ -35,7 +35,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
             observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
         )
         assertEquals(
-            1.februar til 28.februar,
+            februar,
             observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom
         )
         assertEquals(
@@ -57,7 +57,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
             observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
         )
         assertEquals(
-            1.februar til 28.februar,
+            februar,
             observatør.vedtaksperiodeAnnullertEventer[1].fom til observatør.vedtaksperiodeAnnullertEventer[1].tom
         )
     }
@@ -66,12 +66,12 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `også langt gap`() {
         nyttVedtak(januar)
         forlengVedtak(februar)
-        nyttVedtak(1.april til 30.april)
+        nyttVedtak(april)
         håndterAnnullerUtbetaling()
 
         assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
         assertEquals(
-            1.april til 30.april,
+            april,
             observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom
         )
     }
@@ -80,7 +80,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `arbeid ikke gjenopptatt`() {
         nyttVedtak(januar)
 
-        håndterSøknad(1.mars til 31.mars)
+        håndterSøknad(mars)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.mars,
@@ -92,7 +92,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        håndterOverstyrTidslinje((1.februar til 28.februar).map {
+        håndterOverstyrTidslinje((februar).map {
             ManuellOverskrivingDag(
                 it,
                 Dagtype.ArbeidIkkeGjenopptattDag
@@ -110,7 +110,7 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractEndToEndTest() {
     fun `revurdering uten endring som siden annulleres skal sende melding om annullert`() {
         nyttVedtak(januar)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 

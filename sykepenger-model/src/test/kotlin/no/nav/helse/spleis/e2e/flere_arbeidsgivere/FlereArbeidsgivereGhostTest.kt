@@ -102,7 +102,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-        håndterAvbrytSøknad(1.januar til 31.januar, a2)
+        håndterAvbrytSøknad(januar, a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
@@ -1106,8 +1106,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
     @Test
     fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, arbeidsforhold = listOf(

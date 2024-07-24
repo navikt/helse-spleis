@@ -42,7 +42,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad hos en arbeidsgiver - setter i gang revurdering`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        listOf(a1, a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 50.prosent),
@@ -67,8 +67,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     @Test
     fun `Overlappende søknad som strekker seg forbi vedtaksperioden`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
         }
         a2 {
             håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
@@ -106,8 +106,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Vedtaksperiodene til a1 og a2 er kant-i-kant og det kommer en korrigerende søknad for a1 - setter i gang revurdering`() {
-        val periodeAg1 = 1.januar til 31.januar
-        val periodeAg2 = 1.februar til 28.februar
+        val periodeAg1 = januar
+        val periodeAg2 = februar
         a1 {
             håndterSykmelding(Sykmeldingsperiode(periodeAg1.start, periodeAg1.endInclusive))
             håndterSøknad(Sykdom(periodeAg1.start, periodeAg1.endInclusive, 100.prosent))
@@ -166,8 +166,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     @Test
     fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager på den ene arbeidsgiveren - korrigerende søknad på periode før gap setter i gang revurdering`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
         }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
@@ -222,15 +222,15 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertEquals(
                 21,
-                inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Sykedag::class]
+                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Sykedag::class]
             )
             assertEquals(
                 2,
-                inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class]
+                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[Feriedag::class]
             )
             assertEquals(
                 8,
-                inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class]
+                inspektør.sykdomstidslinje.subset(januar).inspektør.dagteller[SykHelgedag::class]
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -256,8 +256,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             inspektør.utbetaling(0).inspektør.also { januarutbetaling ->
                 val revurdering = inspektør.utbetaling(2).inspektør
                 assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
-                assertEquals(1.januar til 31.januar, januarutbetaling.periode)
-                assertEquals(1.januar til 31.januar, revurdering.periode)
+                assertEquals(januar, januarutbetaling.periode)
+                assertEquals(januar, revurdering.periode)
                 assertEquals(0, revurdering.personOppdrag.size)
                 revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
                     assertEquals(2, arbeidsgiveroppdrag.antallLinjer())
@@ -302,8 +302,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad for tidligere skjæringstidspunkt`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
-        listOf(a1, a2).nyeVedtak(1.mars til 31.mars)
+        listOf(a1, a2).nyeVedtak(januar)
+        listOf(a1, a2).nyeVedtak(mars)
 
         a2 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(18.januar, 19.januar))
@@ -344,8 +344,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad for førstegangsbehandling med forlengelse - setter i gang en revurdering`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
-        listOf(a1, a2).forlengVedtak(1.februar til 28.februar)
+        listOf(a1, a2).nyeVedtak(januar)
+        listOf(a1, a2).forlengVedtak(februar)
 
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
@@ -394,8 +394,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad for forlengelse - setter i gang en revurdering`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
-        listOf(a1, a2).forlengVedtak(1.februar til 28.februar)
+        listOf(a1, a2).nyeVedtak(januar)
+        listOf(a1, a2).forlengVedtak(februar)
 
         a1 {
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(27.februar, 28.februar))
@@ -430,8 +430,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad for nytt sykefraværstilfelle - setter i gang en revurdering`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
-        listOf(a1, a2).nyeVedtak(1.mars til 31.mars)
+        listOf(a1, a2).nyeVedtak(januar)
+        listOf(a1, a2).nyeVedtak(mars)
 
         a1 {
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(29.mars, 31.mars))
@@ -467,8 +467,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     @Test
     fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager på den ene arbeidsgiveren - korrigerende søknad på arbeidsgiver uten gap setter i gang revurdering`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
         }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
@@ -558,8 +558,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             inspektør.utbetaling(0).inspektør.also { januarutbetaling ->
                 val revurdering = inspektør.utbetaling(2).inspektør
                 assertEquals(januarutbetaling.korrelasjonsId, revurdering.korrelasjonsId)
-                assertEquals(1.januar til 31.januar, januarutbetaling.periode)
-                assertEquals(1.januar til 31.januar, revurdering.periode)
+                assertEquals(januar, januarutbetaling.periode)
+                assertEquals(januar, revurdering.periode)
                 assertEquals(0, revurdering.personOppdrag.size)
                 assertEquals(1, revurdering.arbeidsgiverOppdrag.size)
                 assertEquals(Endringskode.UEND, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
@@ -600,8 +600,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     @Test
     fun `To arbeidsgivere med ett sykefraværstilfelle og gap under 16 dager på den ene arbeidsgiveren - korrigerende søknader setter i gang revurdering`() {
         a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(januar)
+            håndterSøknad(januar)
         }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar))
@@ -719,7 +719,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad for periode i AvventerGodkjenningRevurdering - setter i gang en overstyring av revurderingen`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        listOf(a1, a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
@@ -758,7 +758,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad for periode i AvventerSimuleringRevurdering - setter i gang en overstyring av revurderingen`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        listOf(a1, a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
@@ -796,7 +796,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad for periode i AvventerHistorikkRevurdering - setter i gang en overstyring av revurderingen`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        listOf(a1, a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
@@ -829,7 +829,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     fun `Korrigerende søknad for periode i AvventerRevurdering - setter i gang en overstyring av revurderingen`() {
-        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        listOf(a1, a2).nyeVedtak(januar)
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         }

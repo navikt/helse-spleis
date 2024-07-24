@@ -1504,7 +1504,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     fun `skjæringstidspunktet er i måneden før ag1`() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar til 28.februar), orgnummer = a1,)
+        håndterInntektsmelding(listOf(februar), orgnummer = a1,)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
                 1.oktober(2017) til 1.desember(2017) inntekter {
@@ -1565,7 +1565,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
     fun `ghost blir syk, vi har ikke mottatt IM enda, men kan beregne tidligere periode`() {
-        nyPeriode(1.januar til 31.januar, orgnummer = a1)
+        nyPeriode(januar, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -1587,9 +1587,9 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         forlengelseTilGodkjenning(februar, a1)
-        nyPeriode(1.mars til 31.mars, orgnummer = a1)
-        nyPeriode(1.april til 30.april, orgnummer = a1)
-        nyPeriode(1.april til 30.april, orgnummer = a2)
+        nyPeriode(mars, orgnummer = a1)
+        nyPeriode(april, orgnummer = a1)
+        nyPeriode(april, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt()
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)

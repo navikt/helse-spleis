@@ -48,7 +48,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
 
     @Test
     fun `En arbeidsgiver og sykepenger fra Nav - får ingen warnings da dette ikke er en reell arbeidsgiver`() {
-        val periode = 1.januar til 31.januar
+        val periode = januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1,)
@@ -63,7 +63,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
 
     @Test
     fun `Første arbeidsgiver har blitt sendt til godkjenning før vi mottar sykmelding på neste arbeidsgiver`() {
-        val periode = 1.januar til 31.januar
+        val periode = januar
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1,)

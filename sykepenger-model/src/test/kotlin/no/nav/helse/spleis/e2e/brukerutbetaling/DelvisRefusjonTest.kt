@@ -93,8 +93,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `Refusjonsbeløpet er forskjellig fra beregnet inntekt i inntektsmeldingen`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = 30000.månedlig,
@@ -116,8 +116,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `arbeidsgiver refunderer ikke`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             beregnetInntekt = INNTEKT,
@@ -139,8 +139,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `tidligere vedtaksperiode har opphør i refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, 20.januar, emptyList()),
@@ -165,7 +165,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(mars)
         håndterInntektsmelding(
             listOf(1.mars til 16.mars),
         )
@@ -191,8 +191,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `kaster ikke ut vedtaksperiode når refusjonopphører`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, 20.januar, emptyList()),
@@ -213,8 +213,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `ikke kast ut vedtaksperiode ved endring i refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(15000.månedlig, 20.januar))),
@@ -235,8 +235,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `kaster ikke ut vedtaksperiode hvor endring i refusjon er etter perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(15000.månedlig, 1.februar))),
@@ -259,7 +259,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `ikke kast ut vedtaksperiode ved ferie i slutten av perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -289,10 +289,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `to arbeidsgivere med ulik fom hvor den første har utbetalingsdager før arbeisdgiverperioden til den andre, ingen felles utbetalingsdager`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
+        håndterSykmelding(januar, orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 10.februar), orgnummer = a2)
 
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(januar, orgnummer = a1)
         håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a2)
 
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1,)
@@ -547,7 +547,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `gradert sykmelding med en arbeidsgiver`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -569,7 +569,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigerende inntektsmelding endrer på refusjonsbeløp`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+        håndterSykmelding(januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -603,10 +603,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `to arbeidsgivere hvor andre arbeidsgiver har delvis refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(januar, orgnummer = a1)
+        håndterSykmelding(januar, orgnummer = a2)
+        håndterSøknad(januar, orgnummer = a1)
+        håndterSøknad(januar, orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
@@ -666,8 +666,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `Første utbetalte dag er før første fraværsdag`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         val inntektsmeldingId = håndterInntektsmelding(listOf(), førsteFraværsdag = 17.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -687,8 +687,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `Korrigerende inntektsmelding med feil skjæringstidspunkt går til manuell behandling på grunn av warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar,)
         håndterInntektsmelding(emptyList(), førsteFraværsdag = 17.januar,)
 
@@ -703,8 +703,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `arbeidsgiver sender unødvendig inntektsmelding ved forlengelse før sykmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -714,7 +714,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar,)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(februar)
         håndterYtelser(2.vedtaksperiode)
 
         assertIngenVarsler(1.vedtaksperiode.filter())
@@ -723,10 +723,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
     @Test
     fun `to arbeidsgivere, hvor den andre har opphør i refusjon`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(januar, orgnummer = a1)
+        håndterSykmelding(januar, orgnummer = a2)
+        håndterSøknad(januar, orgnummer = a1)
+        håndterSøknad(januar, orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1,)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),

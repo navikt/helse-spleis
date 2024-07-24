@@ -67,19 +67,19 @@ internal class PleiepengerE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som overlapper med pleiepengerytelse får varsel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode, pleiepenger = listOf(GradertPeriode(1.januar til 31.januar, 100)))
+        håndterYtelser(1.vedtaksperiode, pleiepenger = listOf(GradertPeriode(januar, 100)))
         assertVarsel(Varselkode.RV_AY_6)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
     }
 
     @Test
     fun `Periode som overlapper med pleiepengerytelse i starten av perioden får varsel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, pleiepenger = listOf(GradertPeriode(1.desember(2017) til 1.januar, 100)))
@@ -89,8 +89,8 @@ internal class PleiepengerE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `Periode som overlapper med pleiepengerytelse i slutten av perioden får varsel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(januar)
+        håndterSøknad(januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)),)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, pleiepenger = listOf(GradertPeriode(31.januar til 14.februar, 100)))

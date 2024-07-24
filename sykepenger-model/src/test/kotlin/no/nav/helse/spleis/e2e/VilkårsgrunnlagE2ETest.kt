@@ -65,7 +65,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
     fun `negativt omregnet årsinntekt for ghost-arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a1)
-        håndterSøknad(1.januar til 31.januar, orgnummer = a1)
+        håndterSøknad(januar, orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterVilkårsgrunnlag(1.vedtaksperiode,
             orgnummer = a1,
@@ -147,7 +147,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `nytt og eneste arbeidsforhold på skjæringstidspunkt`() {
-        nyPeriode(1.januar til 31.januar)
+        nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
         håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar, null, Arbeidsforholdtype.ORDINÆRT)))
         assertVarsel(Varselkode.RV_VV_1)
