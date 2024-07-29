@@ -13,6 +13,7 @@ import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
@@ -37,6 +38,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
 import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -276,7 +278,9 @@ class Utbetaling private constructor(
             val bb = UtbetalingkladderBuilder(utbetalingstidslinje, organisasjonsnummer, fødselsnummer)
             val oppdragene = bb.build()
 
-            val kladdene = oppdragene.finnKladd(periode)
+            val førsteDagSomIkkeErArbeidEllerFri = utbetalingstidslinje.subset(periode).firstOrNull{ it !is Utbetalingsdag.Arbeidsdag && it !is Utbetalingsdag.Fridag}?.dato
+            val trimmetPeriode = (førsteDagSomIkkeErArbeidEllerFri ?: periode.start) til periode.endInclusive
+            val kladdene = oppdragene.finnKladd(trimmetPeriode)
             val kladden = kladdene.firstOrNull() ?: Utbetalingkladd(
                 periode = periode,
                 arbeidsgiveroppdrag = Oppdrag(organisasjonsnummer, SykepengerRefusjon),

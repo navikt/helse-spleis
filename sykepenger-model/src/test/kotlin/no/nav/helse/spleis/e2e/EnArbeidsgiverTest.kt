@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.august
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -28,7 +28,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
+import no.nav.helse.utbetalingslinjer.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -39,11 +39,11 @@ import org.junit.jupiter.api.Test
 internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
-    fun `en sprø case som ender opp med å trekker masse penger uten at vedtaksperiodene får vite om det`(){
-        nyttVedtak(1.august(2017) til 5.januar) // Lang for pengenes skyld
+    fun `en sprø case som ikke lenger trekker masse penger uten at vedtaksperiodene får vite om det`(){
+        nyttVedtak(5.desember(2017) til 5.januar)
         val korrelasjonsIdAugust2017 = inspektør.utbetalinger.single().inspektør.korrelasjonsId
-        val førsteUtbetalingsdag = inspektør.utbetalinger.single().inspektør.arbeidsgiverOppdrag[0].inspektør.fom
 
+        // Forlengelse med arbeid og ferie
         håndterSøknad(Sykdom(6.januar, 4.februar, 100.prosent), Arbeid(6.januar, 4.februar))
         håndterSøknad(Sykdom(5.februar, 24.februar, 100.prosent), Ferie(5.februar, 11.februar))
         håndterInntektsmelding(listOf(5.februar til 20.februar))
@@ -53,16 +53,16 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
 
-        // Her ser jo alt fint & flott ut :)
         assertEquals(5.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
         assertEquals(2, inspektør.utbetalinger.size)
-        assertEquals(1.august(2017) til 5.januar, inspektør.utbetalinger[0].inspektør.periode)
+        assertEquals(5.desember(2017) til 5.januar, inspektør.utbetalinger[0].inspektør.periode)
         assertEquals(korrelasjonsIdAugust2017,inspektør.utbetalinger[0].inspektør.korrelasjonsId)
         val korrelasjonsIdFebruar2018 = inspektør.utbetalinger[1].inspektør.korrelasjonsId
         assertEquals(5.februar til 24.februar, inspektør.utbetalinger[1].inspektør.periode)
         assertNotEquals(korrelasjonsIdAugust2017, korrelasjonsIdFebruar2018)
 
-        // Her begynner det å balle på seg..
+        // Inntektsmelding som flytter arbeidsgiverperioden en uke frem
+        // Utbetaling revurderes og skal trekke penger tilbake for 21.-23.februar
         håndterInntektsmelding(listOf(12.februar til 27.februar))
         assertEquals(12.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
 
@@ -73,38 +73,39 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        assertEquals(4, inspektør.utbetalinger.size)
-        assertEquals(korrelasjonsIdFebruar2018, inspektør.utbetalinger[2].inspektør.korrelasjonsId)
-        assertEquals(ANNULLERING, inspektør.utbetalinger[2].inspektør.type)
-        assertEquals(korrelasjonsIdAugust2017, inspektør.utbetalinger[3].inspektør.korrelasjonsId)
-        assertEquals(1.august(2017) til 24.februar, inspektør.utbetalinger[3].inspektør.periode)
+        assertEquals(3, inspektør.utbetalinger.size)
+        val utbetalingenSomTrekkerPenger = inspektør.utbetalinger[2]
+        assertEquals(REVURDERING, utbetalingenSomTrekkerPenger.inspektør.type)
+        assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.inspektør.korrelasjonsId)
+        assertEquals(5.februar til 24.februar, utbetalingenSomTrekkerPenger.inspektør.periode)
 
-        // Og nå stokker det seg skikkelig til..
+        val opphørslinje = utbetalingenSomTrekkerPenger.inspektør.arbeidsgiverOppdrag[0]
+        assertEquals(21.februar, opphørslinje.inspektør.datoStatusFom)
+        assertEquals("OPPH", opphørslinje.inspektør.statuskode)
+        assertEquals(-4293, utbetalingenSomTrekkerPenger.inspektør.nettobeløp)
+
+        // Det kommer en forlengelse som skal lage en ny utbetaling som hekter seg på forrige utbetaling
         nullstillTilstandsendringer()
         håndterSøknad(25.februar til 15.mars)
         håndterYtelser(4.vedtaksperiode)
 
-        assertEquals(5, inspektør.utbetalinger.size)
-        val utbetalingenSomTrekkerPenger = inspektør.utbetalinger[4]
-        assertEquals(korrelasjonsIdAugust2017, utbetalingenSomTrekkerPenger.inspektør.korrelasjonsId)
-        assertEquals(2, utbetalingenSomTrekkerPenger.inspektør.arbeidsgiverOppdrag.size)
-        val opphørslinje = utbetalingenSomTrekkerPenger.inspektør.arbeidsgiverOppdrag[0]
-        assertEquals(førsteUtbetalingsdag, opphørslinje.inspektør.datoStatusFom)
-        assertEquals("OPPH", opphørslinje.inspektør.statuskode)
-        assertEquals(-82998, utbetalingenSomTrekkerPenger.inspektør.nettobeløp)
+        assertEquals(4, inspektør.utbetalinger.size)
+        assertEquals(korrelasjonsIdFebruar2018, utbetalingenSomTrekkerPenger.inspektør.korrelasjonsId)
+        val nyUtbetaling = inspektør.utbetalinger[3]
+        assertEquals(1, nyUtbetaling.inspektør.arbeidsgiverOppdrag.size)
 
-        val utbetalingslinje = utbetalingenSomTrekkerPenger.inspektør.arbeidsgiverOppdrag[1]
+        val utbetalingslinje = inspektør.utbetalinger[3].inspektør.arbeidsgiverOppdrag[0]
         assertEquals(28.februar, utbetalingslinje.inspektør.fom)
         assertEquals(15.mars, utbetalingslinje.inspektør.tom)
 
-        // 1 og 3 vedtaksperiode har fått utbetalingene sine opphørt uten at de har beveget på seg :/
+        // Utbetalingene er knyttet opp mot riktige vedtaksperioder
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertFalse(utbetalingenSomTrekkerPenger.inspektør.utbetalingId in utbetalingIder(1.vedtaksperiode))
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, AVSLUTTET)
-        assertFalse(utbetalingenSomTrekkerPenger.inspektør.utbetalingId in utbetalingIder(3.vedtaksperiode))
+        assertTrue(utbetalingenSomTrekkerPenger.inspektør.utbetalingId in utbetalingIder(3.vedtaksperiode))
         assertTilstander(4.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
-        assertTrue(utbetalingenSomTrekkerPenger.inspektør.utbetalingId in utbetalingIder(4.vedtaksperiode))
+        assertFalse(utbetalingenSomTrekkerPenger.inspektør.utbetalingId in utbetalingIder(4.vedtaksperiode))
     }
 
     private fun utbetalingIder(vedtaksperiode: IdInnhenter) = inspektør.vedtaksperioder(vedtaksperiode).inspektør.behandlinger.flatMap { it.endringer.mapNotNull { endring -> endring.utbetaling?.inspektør?.utbetalingId } }

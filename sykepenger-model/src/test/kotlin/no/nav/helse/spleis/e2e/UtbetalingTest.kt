@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -112,7 +111,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Utbetaling med stort gap kobles feilaktig sammen med forrige når snutete egenmeldingsdager og utbetaling uten utbetaling`() {
+    fun `Utbetaling med stort gap kobles ikke sammen med forrige utbetaling -- når snutete egenmeldingsdager og denne utbetalingen ikke har penger`() {
         nyttVedtak(januar)
 
         håndterSøknad(
@@ -128,18 +127,8 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         assertEquals(1.desember til 16.desember, inspektør(ORGNUMMER).arbeidsgiverperiode(2.vedtaksperiode))
 
         assertEquals(2, inspektør(ORGNUMMER).utbetalinger.size)
-
-        assertForventetFeil(
-            forklaring = "Ønsker oss to utbetalinger når det er perioder med hver sin AGP",
-            nå = {
-                assertEquals(1.januar til 31.desember, inspektør(ORGNUMMER).utbetalinger.last().inspektør.periode)
-                assertEquals(inspektør(ORGNUMMER).utbetalinger[0].inspektør.korrelasjonsId, inspektør(ORGNUMMER).utbetalinger[1].inspektør.korrelasjonsId)
-            },
-            ønsket = {
-                assertEquals(1.desember til 31.desember, inspektør(ORGNUMMER).utbetalinger.last().inspektør.periode)
-                assertNotEquals(inspektør(ORGNUMMER).utbetalinger[0].inspektør.korrelasjonsId, inspektør(ORGNUMMER).utbetalinger[1].inspektør.korrelasjonsId)
-
-            }
-        )
+        assertEquals(1.januar til 31.januar, inspektør(ORGNUMMER).utbetalinger.first().inspektør.periode)
+        assertEquals(13.november til 31.desember, inspektør(ORGNUMMER).utbetalinger.last().inspektør.periode)
+        assertNotEquals(inspektør(ORGNUMMER).utbetalinger[0].inspektør.korrelasjonsId, inspektør(ORGNUMMER).utbetalinger[1].inspektør.korrelasjonsId)
     }
 }
