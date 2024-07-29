@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -7,6 +9,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -14,6 +17,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingTest : AbstractEndToEndTest() {
@@ -105,5 +109,37 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         assertEquals(1.vedtaksperiode.id(ORGNUMMER), førsteEvent.vedtaksperiodeIder.first())
         assertEquals(1, andreEvent.vedtaksperiodeIder.size)
         assertEquals(2.vedtaksperiode.id(ORGNUMMER), andreEvent.vedtaksperiodeIder.first())
+    }
+
+    @Test
+    fun `Utbetaling med stort gap kobles feilaktig sammen med forrige når snutete egenmeldingsdager og utbetaling uten utbetaling`() {
+        nyttVedtak(januar)
+
+        håndterSøknad(
+            Sykdom(1.desember, 31.desember, 10.prosent),
+            egenmeldinger = listOf(Søknad.Søknadsperiode.Arbeidsgiverdag(13.november, 14.november))
+        )
+        håndterInntektsmelding(listOf(1.desember til 16.desember))
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        // Arbeidsgiverperioden blir beregnet riktig
+        assertEquals(1.januar til 16.januar, inspektør(ORGNUMMER).arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(1.desember til 16.desember, inspektør(ORGNUMMER).arbeidsgiverperiode(2.vedtaksperiode))
+
+        assertEquals(2, inspektør(ORGNUMMER).utbetalinger.size)
+
+        assertForventetFeil(
+            forklaring = "Ønsker oss to utbetalinger når det er perioder med hver sin AGP",
+            nå = {
+                assertEquals(1.januar til 31.desember, inspektør(ORGNUMMER).utbetalinger.last().inspektør.periode)
+                assertEquals(inspektør(ORGNUMMER).utbetalinger[0].inspektør.korrelasjonsId, inspektør(ORGNUMMER).utbetalinger[1].inspektør.korrelasjonsId)
+            },
+            ønsket = {
+                assertEquals(1.desember til 31.desember, inspektør(ORGNUMMER).utbetalinger.last().inspektør.periode)
+                assertNotEquals(inspektør(ORGNUMMER).utbetalinger[0].inspektør.korrelasjonsId, inspektør(ORGNUMMER).utbetalinger[1].inspektør.korrelasjonsId)
+
+            }
+        )
     }
 }
