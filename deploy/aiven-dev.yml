@@ -277,3 +277,6 @@ spec:
         - team: tbd
           application: sparkel-representasjon
           access: readwrite
+        - team: tbd
+          application: spregulering
+          access: readwrite
