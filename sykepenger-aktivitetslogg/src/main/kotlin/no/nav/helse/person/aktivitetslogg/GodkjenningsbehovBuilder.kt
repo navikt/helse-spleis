@@ -158,6 +158,10 @@ class GodkjenningsbehovBuilder(
     }
 
     fun tags() = tags.toSet()
+    fun `6G`() = when (val fakta = sykepengegrunnlagsfakta) {
+        is FastsattISpeil -> fakta.`6G`
+        else -> null
+    }
 
     sealed class SykepengegrunnlagsfaktaBuilder {
         abstract fun build(): Sykepengegrunnlagsfakta

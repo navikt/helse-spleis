@@ -623,9 +623,11 @@ interface PersonObserver {
     data class UtkastTilVedtakEvent(
         val fødselsnummer: String,
         val aktørId: String,
+        val skjæringstidspunkt: LocalDate,
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
-        val tags: Set<String>
+        val tags: Set<String>,
+        val `6G`: Double?
     )
 
     data class AvsluttetMedVedtakEvent(

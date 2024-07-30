@@ -566,7 +566,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 grunnlagsdata.byggGodkjenningsbehov(builder)
                 utbetaling.byggGodkjenningsbehov(hendelse, periode, builder)
                 arbeidsgiverperiode?.tags(this.periode, builder, harPeriodeRettFør)
-                behandling.observatører.forEach { it.utkastTilVedtak(behandling.id, builder.tags()) }
+                behandling.observatører.forEach { it.utkastTilVedtak(behandling.id, builder.tags(), builder.`6G`()) }
                 Aktivitet.Behov.godkjenning(
                     aktivitetslogg = hendelse,
                     builder = builder

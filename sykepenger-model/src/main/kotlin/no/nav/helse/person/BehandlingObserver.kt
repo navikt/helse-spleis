@@ -43,6 +43,7 @@ internal interface BehandlingObserver {
 
     fun utkastTilVedtak(
         id: UUID,
-        tags: Set<String>
+        tags: Set<String>,
+        `6G`: Double?
     )
 }

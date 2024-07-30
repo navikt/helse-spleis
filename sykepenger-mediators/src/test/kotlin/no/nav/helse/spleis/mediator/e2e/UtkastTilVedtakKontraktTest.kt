@@ -15,6 +15,10 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "@event_name": "utkast_til_vedtak",
             "vedtaksperiodeId": "<uuid>",
             "behandlingId": "<uuid>",
+            "skjæringstidspunkt": "2018-01-01",
+            "sykepengegrunnlagsfakta": {
+              "6G": 561804.0
+            },
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "tags": [

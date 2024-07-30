@@ -435,11 +435,14 @@ internal class PersonMediator(
     }
 
     override fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
-        queueMessage(JsonMessage.newMessage("utkast_til_vedtak", mapOf(
+        val utkastTilVedtak = mutableMapOf(
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "behandlingId" to event.behandlingId,
+            "skjæringstidspunkt" to event.skjæringstidspunkt,
             "tags" to event.tags
-        )))
+        )
+        if (event.`6G` != null) utkastTilVedtak["sykepengegrunnlagsfakta"] = mapOf("6G" to event.`6G`)
+        queueMessage(JsonMessage.newMessage("utkast_til_vedtak", utkastTilVedtak.toMap()))
     }
 
     private fun leggPåStandardfelter(outgoingMessage: JsonMessage) = outgoingMessage.apply {

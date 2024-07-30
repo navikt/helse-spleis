@@ -896,13 +896,15 @@ internal class Vedtaksperiode private constructor(
         person.nyBehandling(event)
     }
 
-    override fun utkastTilVedtak(id: UUID, tags: Set<String>) {
+    override fun utkastTilVedtak(id: UUID, tags: Set<String>, `6G`: Double?) {
         val event = PersonObserver.UtkastTilVedtakEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = this.id,
+            skjæringstidspunkt = skjæringstidspunkt,
             behandlingId = id,
-            tags = tags
+            tags = tags,
+            `6G`= `6G`
         )
         person.utkastTilVedtak(event)
     }
