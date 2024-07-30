@@ -78,6 +78,21 @@ import kotlin.reflect.KClass
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
+    fun `Sendes ikke ut overstyring i gangsatt når det er en periode som står i avventer inntektsmelding`() {
+        nyttVedtak(januar)
+
+        håndterSøknad(15.februar til 28.februar)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+
+        // Når saksbehandler overstyrer tidslinjen forventer Speilvendt å få overstyring igangsatt, men
+        // dette får de ikke i AvventerInntektsmelding. Perioden melder seg ikke på revurderingseventyret
+        // i denne tilstanden. Om den alltid hadde gjort det ville vi også sende overstyring igangsatt når vi mottar inntektsmelding..
+        håndterOverstyrTidslinje((1.februar til 14.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
+
+        assertEquals(0, observatør.overstyringIgangsatt.size)
+    }
+
+    @Test
     fun `overstyring av tidslinje i avventer inntektsmelding`() {
         håndterSøknad(Sykdom(3.februar, 26.februar, 100.prosent))
         håndterSøknad(Sykdom(27.februar, 12.mars, 100.prosent))
