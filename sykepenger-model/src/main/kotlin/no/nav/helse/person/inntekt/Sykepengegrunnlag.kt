@@ -421,6 +421,7 @@ internal class Sykepengegrunnlag private constructor(
                  && arbeidsgiverInntektsopplysninger == other.arbeidsgiverInntektsopplysninger
                  && beregningsgrunnlag == other.beregningsgrunnlag
                  && begrensning == other.begrensning
+                 && `6G` == other.`6G`
                  && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
 
