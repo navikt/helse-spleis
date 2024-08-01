@@ -47,6 +47,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val vedtaksperiodeOpprettetEventer = mutableListOf<PersonObserver.VedtaksperiodeOpprettet>()
     val overlappendeInfotrygdperioder = mutableListOf<PersonObserver.OverlappendeInfotrygdperioder>()
     val utkastTilVedtakEventer = mutableListOf<PersonObserver.UtkastTilVedtakEvent>()
+    val sykefraværstilfelleIkkeFunnet = mutableListOf<PersonObserver.SykefraværstilfelleIkkeFunnet>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
@@ -219,5 +220,9 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun utkastTilVedtak(event: PersonObserver.UtkastTilVedtakEvent) {
         utkastTilVedtakEventer.add(event)
+    }
+
+    override fun sykefraværstilfelleIkkeFunnet(event: PersonObserver.SykefraværstilfelleIkkeFunnet) {
+        sykefraværstilfelleIkkeFunnet.add(event)
     }
 }

@@ -21,6 +21,11 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 interface PersonObserver {
+    data class SykefraværstilfelleIkkeFunnet(
+        val fødselsnummer: String,
+        val skjæringstidspunkt: LocalDate
+    )
+
     data class VedtaksperiodeIkkeFunnetEvent(
         val fødselsnummer: String,
         val aktørId: String,
@@ -725,6 +730,7 @@ interface PersonObserver {
     fun vedtaksperiodeVenter(event: VedtaksperiodeVenterEvent) {}
     fun vedtaksperiodeForkastet(event: VedtaksperiodeForkastetEvent) {}
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
+    fun sykefraværstilfelleIkkeFunnet(event: SykefraværstilfelleIkkeFunnet) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
     fun trengerPotensieltArbeidsgiveropplysninger(event: TrengerPotensieltArbeidsgiveropplysningerEvent) {}
     fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}

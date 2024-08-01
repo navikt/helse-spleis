@@ -418,6 +418,13 @@ internal class PersonMediator(
         )))
     }
 
+    override fun sykefraværstilfelleIkkeFunnet(event: PersonObserver.SykefraværstilfelleIkkeFunnet) {
+        queueMessage(JsonMessage.newMessage("sykefraværstilfelle_ikke_funnet", mapOf(
+            "fødselsnummer" to event.fødselsnummer,
+            "skjæringstidspunkt" to event.skjæringstidspunkt,
+        )))
+    }
+
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }
