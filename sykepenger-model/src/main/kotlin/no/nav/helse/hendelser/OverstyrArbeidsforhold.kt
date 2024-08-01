@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
@@ -30,6 +31,7 @@ class OverstyrArbeidsforhold(
 
     override fun innsendt() = opprettet
 
+    override fun avsender() = SAKSBEHANDLER
 
     internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
         return overstyrteArbeidsforhold.fold(sykepengegrunnlag) { acc, overstyring ->

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
@@ -61,6 +62,12 @@ class Revurderingseventyr private constructor(
 
     internal fun inngåSomEndring(vedtaksperiode: Vedtaksperiode, periode: Periode) =
         inngå(vedtaksperiode, TypeEndring.ENDRING, periode)
+
+    internal fun inngåVedSaksbehandlerendring(vedtaksperiode: Vedtaksperiode, periode: Periode) {
+        if (hendelse.avsender() != Avsender.SAKSBEHANDLER) return
+        if (!periode.overlapperMed(periodeForEndring)) return
+        inngåSomEndring(vedtaksperiode, periode)
+    }
 
     private fun inngå(vedtaksperiode: Vedtaksperiode, typeEndring: TypeEndring, periode: Periode) {
         hvorfor.dersomInngått(this, vedtaksperioder.isEmpty())

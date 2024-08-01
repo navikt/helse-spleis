@@ -39,11 +39,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterOverstyringSykedag
@@ -78,18 +80,58 @@ import kotlin.reflect.KClass
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Sendes ikke ut overstyring i gangsatt når det er en periode som står i avventer inntektsmelding`() {
+    fun `Sendes ut overstyring i gangsatt når det er en periode som står i avventer inntektsmelding ved endring fra saksbehandler`() {
         nyttVedtak(januar)
 
         håndterSøknad(15.februar til 28.februar)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        // Når saksbehandler overstyrer tidslinjen forventer Speilvendt å få overstyring igangsatt, men
-        // dette får de ikke i AvventerInntektsmelding. Perioden melder seg ikke på revurderingseventyret
-        // i denne tilstanden. Om den alltid hadde gjort det ville vi også sende overstyring igangsatt når vi mottar inntektsmelding..
+        // Når saksbehandler overstyrer tidslinjen forventer Speilvendt å få overstyring igangsatt for å håndhenve totrinns
         håndterOverstyrTidslinje((1.februar til 14.februar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
 
+        val overstyringIgangsatt = observatør.overstyringIgangsatt.single()
+        assertEquals(listOf(PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
+            orgnummer = ORGNUMMER,
+            vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+            periode = 1.februar til 28.februar,
+            skjæringstidspunkt = 1.januar,
+            typeEndring = "ENDRING"
+        )), overstyringIgangsatt.berørtePerioder)
+        assertEquals("SYKDOMSTIDSLINJE", overstyringIgangsatt.årsak)
+    }
+
+    @Test
+    fun `sendes ikke ut overstyring igangsatt når det kommer inntektsmelding i avventer inntektsmelding`() {
+        håndterSøknad(januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertEquals(0, observatør.overstyringIgangsatt.size)
+    }
+
+    @Test
+    fun `Sendes ut overstyring i gangsatt når det er en periode som står i avventer blokkerende periode ved endring fra saksbehandler`() {
+        tilGodkjenning(januar, ORGNUMMER)
+        håndterSøknad(februar)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 60)))
+        val overstyringIgangsatt = observatør.overstyringIgangsatt.single()
+        assertEquals(listOf(PersonObserver.OverstyringIgangsatt.VedtaksperiodeData(
+            orgnummer = ORGNUMMER,
+            vedtaksperiodeId = 2.vedtaksperiode.id(ORGNUMMER),
+            periode = 1.februar til 28.februar,
+            skjæringstidspunkt = 1.januar,
+            typeEndring = "ENDRING"
+        )), overstyringIgangsatt.berørtePerioder)
+        assertEquals("SYKDOMSTIDSLINJE", overstyringIgangsatt.årsak)
+    }
+
+    @Test
+    fun `Senere perioder inngår ikke i overstyring igangsatt selv om det er en endring fra saksbehandler`() {
+        tilGodkjenning(januar, ORGNUMMER)
+        håndterSøknad(mars)
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(ORGNUMMER, INNTEKT/2)))
+        val overstyringIgangsatt = observatør.overstyringIgangsatt.single()
+        assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER)), overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId })
     }
 
     @Test
