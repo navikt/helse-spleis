@@ -475,7 +475,6 @@ class Person private constructor(
         hendelse.kontekst(aktivitetslogg, this)
         if (arbeidsgivere.håndter(hendelse)) return håndterGjenoppta(hendelse)
         observers.forEach { hendelse.sykefraværstilfelleIkkeFunnet(it) }
-        error("Ingen vedtaksperioder håndterte grunnbeløpsregulering")
     }
 
     fun addObserver(observer: PersonObserver) {
