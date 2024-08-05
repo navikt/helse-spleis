@@ -7,6 +7,7 @@ on:
       - 'sykepenger-opprydding-dev/**'
       - '.github/workflows/spleis-jobs.yml'
       - '.github/workflows/spleis-opprydding-dev.yml'
+      - '.github/workflows/manuell-jobb.yml'
       - 'jobs/**'
       - 'doc/**'
       - '.idea/**'

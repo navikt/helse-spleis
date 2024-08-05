@@ -4,16 +4,23 @@ on:
       sha:
         description: 'Hvilen SHA skal jobben kjøre på?'
         required: true
-        default: ${GITHUB_SHA::7}
+        default: ${{ GITHUB_SHA }}
         type: string
       navn:
         description: 'Hva er navnet på jobben?'
         required: true
         type: string
-      environment:
+      id:
         description: 'Hva er IDen på jobben?'
         required: true
         type: string
+      environment:
+        description: 'Hvilket miljø skal jobben kjøre i?'
+        required: true
+        type: choice
+        options:
+          - dev-gcp
+          - prod-gcp
 
 jobs:
   log-the-inputs:
@@ -23,7 +30,9 @@ jobs:
           echo "Job sha: $JOB_SHA"
           echo "Job navn: $JOB_NAVN"
           echo "Job id: $JOB_ID"
+          echo "Job environment: $JOB_ENVIRONMENT"
         env:
           JOB_SHA: ${{ inputs.sha }}
           JOB_NAVN: ${{ inputs.navn }}
           JOB_ID: ${{ inputs.id }}
+          JOB_ENVIRONMENT: ${{ inputs.environment }}
