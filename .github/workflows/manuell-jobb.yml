@@ -24,19 +24,6 @@ on:
           - prod-gcp
 
 jobs:
-  log-the-inputs:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "Job image version: $JOB_IMAGE_VERSION"
-          echo "Job navn: $JOB_NAVN"
-          echo "Job id: $JOB_ID"
-          echo "Job environment: $JOB_ENVIRONMENT"
-        env:
-          JOB_IMAGE_VERSION: ${{ inputs.image_version }}
-          JOB_NAVN: ${{ inputs.navn }}
-          JOB_ID: ${{ inputs.id }}
-          JOB_ENVIRONMENT: ${{ inputs.environment }}
   deploy:
     name: Kjør jobben
     runs-on: ubuntu-latest
@@ -51,4 +38,3 @@ jobs:
           IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spleis-jobs:${{ inputs.image_version }}
           VARS: deploy/manuell-jobb-${{ inputs.environment }}.json
           VAR: job_name=${{ inputs.navn }},job_id=${{ inputs.id }}
-          PRINT_PAYLOAD: true

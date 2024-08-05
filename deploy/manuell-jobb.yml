@@ -16,7 +16,7 @@ spec:
     requests:
       cpu: 200m
   kafka:
-    pool: {( kafka_pool }}
+    pool: {{ kafka_pool }}
   secureLogs:
     enabled: true
   envFrom:
