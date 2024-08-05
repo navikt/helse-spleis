@@ -2,9 +2,8 @@ on:
   workflow_dispatch:
     inputs:
       sha:
-        description: 'Hvilen SHA skal jobben kjøre på?'
-        required: true
-        default: ${{ GITHUB_SHA }}
+        description: 'Hvilen SHA skal jobben kjøre på? Hvis tom kjører den på siste versjon'
+        required: false
         type: string
       navn:
         description: 'Hva er navnet på jobben?'
@@ -32,7 +31,7 @@ jobs:
           echo "Job id: $JOB_ID"
           echo "Job environment: $JOB_ENVIRONMENT"
         env:
-          JOB_SHA: ${{ inputs.sha }}
+          JOB_SHA: ${{ inputs.sha || github.sha }}
           JOB_NAVN: ${{ inputs.navn }}
           JOB_ID: ${{ inputs.id }}
           JOB_ENVIRONMENT: ${{ inputs.environment }}
