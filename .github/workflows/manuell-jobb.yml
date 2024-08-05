@@ -1,0 +1,29 @@
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Hvilen SHA skal jobben kjøre på?'
+        required: true
+        default: ${GITHUB_SHA::7}
+        type: string
+      navn:
+        description: 'Hva er navnet på jobben?'
+        required: true
+        type: string
+      environment:
+        description: 'Hva er IDen på jobben?'
+        required: true
+        type: string
+
+jobs:
+  log-the-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Job sha: $JOB_SHA"
+          echo "Job navn: $JOB_NAVN"
+          echo "Job id: $JOB_ID"
+        env:
+          JOB_SHA: ${{ inputs.sha }}
+          JOB_NAVN: ${{ inputs.navn }}
+          JOB_ID: ${{ inputs.id }}
