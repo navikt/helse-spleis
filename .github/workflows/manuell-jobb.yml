@@ -40,6 +40,8 @@ jobs:
   deploy:
     name: Kjør jobben
     runs-on: ubuntu-latest
+    permissions:
+      id-token: read
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
