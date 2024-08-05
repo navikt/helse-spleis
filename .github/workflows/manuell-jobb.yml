@@ -39,7 +39,6 @@ jobs:
           JOB_ENVIRONMENT: ${{ inputs.environment }}
   deploy:
     name: Kjør jobben
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
