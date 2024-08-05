@@ -41,7 +41,7 @@ jobs:
     name: Kjør jobben
     runs-on: ubuntu-latest
     permissions:
-      id-token: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
