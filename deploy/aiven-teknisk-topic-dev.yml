@@ -20,5 +20,8 @@ spec:
           application: spleis
           access: readwrite
         - team: tbd
+          application: spleis-migrate
+          access: write
+        - team: tbd
           application: spregulering
           access: read
