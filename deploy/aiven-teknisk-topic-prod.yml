@@ -28,3 +28,6 @@ spec:
         - team: tbd
           application: spesialist-migrering
           access: readwrite
+        - team: tbd
+          application: spregulering
+          access: read

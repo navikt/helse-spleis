@@ -48,7 +48,7 @@ fun main(cliArgs: Array<String>) {
         "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
         "migrate_v2" -> migrateV2Task(args[1].trim())
         "test_speiljson" -> testSpeilJsonTask(args[1].trim())
-        "migrere_behandlinger" -> migrereBehandlinger(ConsumerProducerFactory(AivenConfig.default), args[1].trim())
+        "migrereg" -> migrereGrunnbeløp(ConsumerProducerFactory(AivenConfig.default), args[1].trim())
         else -> log.error("Unknown task $task")
     }
 }

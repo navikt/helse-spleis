@@ -19,3 +19,6 @@ spec:
         - team: tbd
           application: spleis
           access: readwrite
+        - team: tbd
+          application: spregulering
+          access: read
