@@ -1,0 +1,6 @@
+{
+  "kafka_pool": "nav-dev",
+  "gcp_sql_secret_name": "google-sql-helse-spleis-spleis-spleis-migrate-70ddf3c6",
+  "gcp_project_id": "tbd-dev-7ff9",
+  "database_instance": "helse-spleis"
+}

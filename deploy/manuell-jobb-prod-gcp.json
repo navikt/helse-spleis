@@ -1,0 +1,6 @@
+{
+  "kafka_pool": "nav-prod",
+  "gcp_sql_secret_name": "google-sql-spleis-spleis-spleis-migrate-dc6feb9b",
+  "gcp_project_id": "tbd-prod-eacd",
+  "database_instance": "spleis2"
+}
