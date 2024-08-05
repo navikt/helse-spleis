@@ -51,3 +51,4 @@ jobs:
           IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spleis-jobs:${{ inputs.image_version }}
           VARS: deploy/manuell-jobb-${{ inputs.environment }}.json
           VAR: job_name=${{ inputs.navn }},job_id=${{ inputs.id }}
+          PRINT_PAYLOAD: true
