@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -73,6 +74,47 @@ import org.junit.jupiter.api.Test
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `forbrukte og gjenståend sykedager blir feil når den andre arbeidsgiveren strekker seg lengre enn den som beregner utbetalinger`() {
+        a1 { håndterSøknad(1.januar til 20.januar) }
+        a2 { håndterSøknad(januar) }
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            inspektør.utbetalinger.single().inspektør.let {
+                assertEquals(3, it.forbrukteSykedager)
+                assertEquals(245, it.gjenståendeSykedager)
+            }
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertForventetFeil(
+                forklaring = "forbrukte og gjenståend sykedager blir feil når den andre arbeidsgiveren strekker seg lengre enn den som beregner utbetalinger",
+                nå = {
+                    inspektør.utbetalinger.single().inspektør.let {
+                        assertEquals(3, it.forbrukteSykedager)
+                        assertEquals(245, it.gjenståendeSykedager)
+                    }
+                },
+                ønsket = {
+                    inspektør.utbetalinger.single().inspektør.let {
+                        assertEquals(11, it.forbrukteSykedager)
+                        assertEquals(237, it.gjenståendeSykedager)
+                    }
+                }
+            )
+        }
+    }
 
     @Test
     fun `En AUU som åpnes opp, men vil tilbake til AUU bør ikke trenge å vente på en eventuell overlappende søknad`() {
