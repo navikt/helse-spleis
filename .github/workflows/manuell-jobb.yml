@@ -13,7 +13,7 @@ on:
         required: true
         type: string
       id:
-        description: 'Hva er IDen på jobben? Dette er arbeidIDen som identifiserer kjøringen og sendes inn som args[1]. Om den ikke fylles ut genereres en UUID'
+        description: 'Hva er IDen på jobben? Dette er arbeidIDen som identifiserer kjøringen og sendes inn som args[1]. Om den ikke fylles ut brukes "run_id" (A unique number for each workflow run within a repository. This number does not change if you re-run the workflow run.)'
         type: string
       environment:
         description: 'Hvilket miljø skal jobben kjøre i?'
@@ -38,7 +38,7 @@ jobs:
           RESOURCE: deploy/manuell-jobb.yml
           IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spleis-jobs:${{ inputs.image_version }}
           VARS: deploy/manuell-jobb-${{ inputs.environment }}.json
-          VAR: job_name=${{ inputs.navn }},job_id=${{ inputs.id || uuidgen }}
+          VAR: job_name=${{ inputs.navn }},job_id=${{ inputs.id || github.run_id }}
           PRINT_PAYLOAD: true
           DRY_RUN: true
 
