@@ -4,21 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       image_version:
-        description: 'Hvilen versjon av imaget skal jobben kjøre?'
-        required: false
+        description: 'Hvilen versjon av imaget skal jobben kjøre? Bruk ønsket versjon med riktig format fra https://console.cloud.google.com/artifacts/docker/nais-management-233d/europe-north1/tbd/helse-spleis-jobs'
+        required: true
         type: string
+        default: 'yyyy.MM.dd-HH.mm-<short_sha>'
       navn:
-        description: 'Hva er navnet på jobben?'
+        description: 'Hva er navnet på jobben? Dette er navnet (task name) du har valgt som sendes inn til jobben som args[0]'
         required: true
         type: string
       id:
-        description: 'Hva er IDen på jobben?'
-        required: true
+        description: 'Hva er IDen på jobben? Dette er arbeidIDen som identifiserer kjøringen og sendes inn som args[1]. Om den ikke fylles ut genereres en UUID'
         type: string
       environment:
         description: 'Hvilket miljø skal jobben kjøre i?'
         required: true
         type: choice
+        default: prod-gcp
         options:
           - dev-gcp
           - prod-gcp
@@ -37,4 +38,7 @@ jobs:
           RESOURCE: deploy/manuell-jobb.yml
           IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spleis-jobs:${{ inputs.image_version }}
           VARS: deploy/manuell-jobb-${{ inputs.environment }}.json
-          VAR: job_name=${{ inputs.navn }},job_id=${{ inputs.id }}
+          VAR: job_name=${{ inputs.navn }},job_id=${{ inputs.id || uuidgen }}
+          PRINT_PAYLOAD: true
+          DRY_RUN: true
+
