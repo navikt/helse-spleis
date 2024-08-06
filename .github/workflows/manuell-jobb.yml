@@ -40,5 +40,4 @@ jobs:
           VARS: deploy/manuell-jobb-${{ inputs.environment }}.json
           VAR: job_name=${{ inputs.navn }},job_id=${{ inputs.id || github.run_id }}
           PRINT_PAYLOAD: true
-          DRY_RUN: true
 
