@@ -50,6 +50,38 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest: AbstractDslTest() {
     }
 
     @Test
+    fun `en tolkning av Permisjon`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        // Arbeidsgiver kommuniserer at bruker er permitert fra 11.januar og at de dekker AGP tom 10.januar 🤔
+        håndterInntektsmelding(listOf(1.januar til 10.januar), beregnetInntekt = INNTEKT, begrunnelseForReduksjonEllerIkkeUtbetalt = "Permisjon")
+        assertForventetFeil(
+            forklaring = "Nav skal dekke de resterende dagene av arbeidsgiverperioden som arbeidsgiver ikke opplyser om",
+            nå = {
+                assertEquals("NNNNNHH NNNSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            },
+            ønsket = {
+                assertEquals("SSSSSHH SSSNNHH NN", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            }
+        )
+    }
+
+    @Test
+    fun `en tolkning av ArbeidOpphoert`() {
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        // Arbeidsgiver kommuniserer at arbeidet er opphørt fra 11.januar og at de dekker AGP tom 10.januar 🤔
+        håndterInntektsmelding(listOf(1.januar til 10.januar), beregnetInntekt = INNTEKT, begrunnelseForReduksjonEllerIkkeUtbetalt = "ArbeidOpphoert")
+        assertForventetFeil(
+            forklaring = "Nav skal dekke de resterende dagene av arbeidsgiverperioden som arbeidsgiver ikke opplyser om",
+            nå = {
+                assertEquals("NNNNNHH NNNSSHH SS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            },
+            ønsket = {
+                assertEquals("SSSSSHH SSSNNHH NN", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            }
+        )
+    }
+
+    @Test
     fun `Vedtaksperiode blir strukket med UkjentDag`() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
