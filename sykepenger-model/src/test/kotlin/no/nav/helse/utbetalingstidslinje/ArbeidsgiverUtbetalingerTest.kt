@@ -288,16 +288,17 @@ internal class ArbeidsgiverUtbetalingerTest {
     fun `Beregner lik maksdato før og etter 67-årsdagen som faller på en lørdag`() {
         undersøke(PERSON_67_ÅR_3_FEBRUAR_FNR_2018, 16.AP, 17.NAV, fødselsdato = PERSON_67_ÅR_3_FEBRUAR_2018_FØDSELSDATO)
         assertEquals(fredag.den(2.februar), inspektør.sistedag.dato) // vedkommende blir 67 år i morgen lørdag
-        assertEquals(61, gjenståendeSykedager)
         assertEquals(13, inspektør.navDagTeller)
         val maksdatoDagenFør = maksdato
         assertForventetFeil(
             forklaring = "En smule rart at maksdato telles ulikt før og etter 67-årsdagen når den faller på en lørdag",
             nå = {
+                assertEquals(61, gjenståendeSykedager)
                 assertEquals(30.april, maksdatoDagenFør)
             },
             ønsket = {
                 assertEquals(27.april, maksdatoDagenFør)
+                assertEquals(60, gjenståendeSykedager)
             }
         )
         undersøke(PERSON_67_ÅR_3_FEBRUAR_FNR_2018, 16.AP, 20.NAV, fødselsdato = PERSON_67_ÅR_3_FEBRUAR_2018_FØDSELSDATO)
