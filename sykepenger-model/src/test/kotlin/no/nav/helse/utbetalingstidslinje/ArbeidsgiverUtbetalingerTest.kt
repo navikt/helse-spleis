@@ -5,11 +5,13 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -17,6 +19,8 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.lørdag
+import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.person.MinimumSykdomsgradsvurdering
 import no.nav.helse.person.Opptjening
@@ -35,11 +39,13 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.torsdag
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -56,6 +62,10 @@ internal class ArbeidsgiverUtbetalingerTest {
         val UNG_PERSON_2018_FØDSELSDATO = 12.februar(1992)
         val PERSON_67_ÅR_5_JANUAR_FNR_2018 = "05015112345".somPersonidentifikator()
         val PERSON_67_ÅR_5_JANUAR_2018_FØDSELSDATO = 5.januar(1951)
+        val PERSON_67_ÅR_3_FEBRUAR_FNR_2018 = "03025112345".somPersonidentifikator()
+        val PERSON_67_ÅR_3_FEBRUAR_2018_FØDSELSDATO = lørdag.den(3.februar(1951))
+        val PERSON_67_ÅR_2_FEBRUAR_FNR_2018 = "03025112345".somPersonidentifikator()
+        val PERSON_67_ÅR_2_FEBRUAR_2018_FØDSELSDATO = fredag.den(2.februar(1951))
         val PERSON_68_ÅR_1_DESEMBER_2018 = "01125112345".somPersonidentifikator()
         val PERSON_68_ÅR_1_DESEMBER_2018_FØDSELDATO = 1.desember(1951)
         val PERSON_70_ÅR_1_FEBRUAR_2018 = "01024812345".somPersonidentifikator()
@@ -255,6 +265,51 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(60, inspektør.navDagTeller)
         aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
+    }
+
+    @Test
+    fun `Beregner lik maksdato før og etter 67-årsdagen som faller på en fredag`() {
+        undersøke(PERSON_67_ÅR_2_FEBRUAR_FNR_2018, 16.AP, 16.NAV, fødselsdato = PERSON_67_ÅR_2_FEBRUAR_2018_FØDSELSDATO)
+        assertEquals(torsdag.den(1.februar), inspektør.sistedag.dato) // vedkommende blir 67 år i morgen fredag
+        assertEquals(61, gjenståendeSykedager)
+        assertEquals(12, inspektør.navDagTeller)
+        val maksdatoDagenFør = maksdato
+        assertEquals(27.april, maksdatoDagenFør)
+
+        undersøke(PERSON_67_ÅR_2_FEBRUAR_FNR_2018, 16.AP, 20.NAV, fødselsdato = PERSON_67_ÅR_2_FEBRUAR_2018_FØDSELSDATO)
+        assertEquals(mandag.den(5.februar), inspektør.sistedag.dato)
+        assertEquals(59, gjenståendeSykedager)
+        assertEquals(14, inspektør.navDagTeller)
+        val maksdatoDagenEtter = maksdato
+        assertEquals(27.april, maksdatoDagenEtter)
+        assertEquals(maksdatoDagenFør, maksdatoDagenEtter)
+    }
+
+    @Test
+    fun `Beregner lik maksdato før og etter 67-årsdagen som faller på en lørdag`() {
+        undersøke(PERSON_67_ÅR_3_FEBRUAR_FNR_2018, 16.AP, 17.NAV, fødselsdato = PERSON_67_ÅR_3_FEBRUAR_2018_FØDSELSDATO)
+        assertEquals(fredag.den(2.februar), inspektør.sistedag.dato) // vedkommende blir 67 år i morgen lørdag
+        assertEquals(61, gjenståendeSykedager)
+        assertEquals(13, inspektør.navDagTeller)
+        val maksdatoDagenFør = maksdato
+        assertEquals(30.april, maksdatoDagenFør)
+
+        undersøke(PERSON_67_ÅR_3_FEBRUAR_FNR_2018, 16.AP, 20.NAV, fødselsdato = PERSON_67_ÅR_3_FEBRUAR_2018_FØDSELSDATO)
+        assertEquals(mandag.den(5.februar), inspektør.sistedag.dato)
+        assertEquals(59, gjenståendeSykedager)
+        assertEquals(14, inspektør.navDagTeller)
+        val maksdatoDagenEtter = maksdato
+        assertForventetFeil(
+            forklaring = "En smule rart at maksdato telles ulikt før og etter 67-årsdagen når den faller på en lørdag",
+            nå = {
+                assertEquals(27.april, maksdatoDagenEtter)
+                assertNotEquals(maksdatoDagenFør, maksdatoDagenEtter)
+            },
+            ønsket = {
+                assertEquals(30.april, maksdatoDagenEtter)
+                assertEquals(maksdatoDagenFør, maksdatoDagenEtter)
+            }
+        )
     }
 
     @Test
