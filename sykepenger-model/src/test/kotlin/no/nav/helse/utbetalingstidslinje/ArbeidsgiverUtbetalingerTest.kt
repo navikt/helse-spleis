@@ -45,7 +45,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -292,24 +291,21 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(61, gjenståendeSykedager)
         assertEquals(13, inspektør.navDagTeller)
         val maksdatoDagenFør = maksdato
-        assertEquals(30.april, maksdatoDagenFør)
-
+        assertForventetFeil(
+            forklaring = "En smule rart at maksdato telles ulikt før og etter 67-årsdagen når den faller på en lørdag",
+            nå = {
+                assertEquals(30.april, maksdatoDagenFør)
+            },
+            ønsket = {
+                assertEquals(27.april, maksdatoDagenFør)
+            }
+        )
         undersøke(PERSON_67_ÅR_3_FEBRUAR_FNR_2018, 16.AP, 20.NAV, fødselsdato = PERSON_67_ÅR_3_FEBRUAR_2018_FØDSELSDATO)
         assertEquals(mandag.den(5.februar), inspektør.sistedag.dato)
         assertEquals(59, gjenståendeSykedager)
         assertEquals(14, inspektør.navDagTeller)
         val maksdatoDagenEtter = maksdato
-        assertForventetFeil(
-            forklaring = "En smule rart at maksdato telles ulikt før og etter 67-årsdagen når den faller på en lørdag",
-            nå = {
-                assertEquals(27.april, maksdatoDagenEtter)
-                assertNotEquals(maksdatoDagenFør, maksdatoDagenEtter)
-            },
-            ønsket = {
-                assertEquals(30.april, maksdatoDagenEtter)
-                assertEquals(maksdatoDagenFør, maksdatoDagenEtter)
-            }
-        )
+        assertEquals(27.april, maksdatoDagenEtter)
     }
 
     @Test
