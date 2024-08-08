@@ -39,7 +39,7 @@ internal class Maksdatosituasjon(
     private val forrigeVirkedag = forrigeMaksdato ?: dato.sisteVirkedagInklusiv()
 
     private val maksdatoOrdinærRett = forrigeVirkedag + gjenståendeSykepengedagerUnder67.ukedager
-    private val maksdatoBegrensetRett = maxOf(forrigeVirkedag, redusertYtelseAlder) + gjenståendeSykepengedagerOver67.ukedager
+    private val maksdatoBegrensetRett = maxOf(forrigeVirkedag, redusertYtelseAlder.sisteVirkedagInklusiv()) + gjenståendeSykepengedagerOver67.ukedager
 
     private val hjemmelsbegrunnelse: Maksdatobestemmelse
     internal val maksdato: LocalDate
