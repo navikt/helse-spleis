@@ -1057,6 +1057,7 @@ internal class Vedtaksperiode private constructor(
         val beregningsperiode = this.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: this.periode
 
         val utbetalingsperioder = utbetalingsperioder()
+
         check(utbetalingsperioder.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
@@ -1065,10 +1066,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         try {
-            val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = arbeidsgiverUtbetalinger.beregn(beregningsperiode, this.periode, hendelse, this.jurist)
+            val beregningsperiodePerArbeidsgiver = utbetalingsperioder.groupBy { it.arbeidsgiver }.mapValues { (_, perioder) -> perioder.map { it.periode }.periode()!! }
+            val beregnedeArbeidsgivere = arbeidsgiverUtbetalinger.beregn(beregningsperiode, beregningsperiodePerArbeidsgiver, this.periode, hendelse, this.jurist)
             utbetalingsperioder.forEach { other ->
-                val utbetalingstidslinje = tidslinjerPerArbeidsgiver.getValue(other.arbeidsgiver)
-                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksimumSykepenger, grunnlagsdata)
+                val (utbetalingstidslinje, maksdatoSituasjon) = beregnedeArbeidsgivere.getValue(other.arbeidsgiver)
+                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksdatoSituasjon, grunnlagsdata)
             }
             return true
         } catch (err: UtbetalingstidslinjeBuilderException) {

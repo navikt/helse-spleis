@@ -27,11 +27,13 @@ internal class ArbeidsgiverUtbetalinger(
 
     internal fun beregn(
         beregningsperiode: Periode,
+        beregningsperiodePerArbeidsgiver: Map<Arbeidsgiver, Periode>,
         vedtaksperiode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
-    ): Pair<Maksdatosituasjon, Map<Arbeidsgiver, Utbetalingstidslinje>> {
+    ): Map<Arbeidsgiver, Pair<Utbetalingstidslinje, Maksdatosituasjon>> {
         val arbeidsgivertidslinjer = arbeidsgivere(beregningsperiode, subsumsjonslogg, aktivitetslogg)
+
         val tidslinjerPerArbeidsgiver = filtere.fold(arbeidsgivertidslinjer) { tidslinjer, filter ->
             val input = tidslinjer.entries.map { (key, value) -> key to value }
             val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, vedtaksperiode, aktivitetslogg, subsumsjonslogg)
@@ -39,6 +41,9 @@ internal class ArbeidsgiverUtbetalinger(
                 arbeidsgiver to utbetalingstidslinje
             }.toMap()
         }
-        return maksimumSykepengedagerfilter.maksimumSykepenger(vedtaksperiode, subsumsjonslogg) to tidslinjerPerArbeidsgiver
+
+        return tidslinjerPerArbeidsgiver.filterKeys { it in beregningsperiodePerArbeidsgiver.keys }.mapValues { (arbeidsgiver, tidslinje) ->
+            tidslinje to maksimumSykepengedagerfilter.maksimumSykepenger(beregningsperiodePerArbeidsgiver.getValue(arbeidsgiver), subsumsjonslogg)
+        }
     }
 }

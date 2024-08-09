@@ -394,18 +394,18 @@ internal class ArbeidsgiverUtbetalingerTest {
             vilkårsgrunnlagHistorikk,
             MinimumSykdomsgradsvurdering()
         )
-        val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = utbetalinger.beregn(
-            arbeidsgiverTidslinje.periode(),
-            arbeidsgiverTidslinje.periode(),
-            aktivitetslogg,
-            Subsumsjonslogg.NullObserver
-        )
-        maksdato = maksimumSykepenger.maksdato
-        gjenståendeSykedager = maksimumSykepenger.gjenståendeDager
-        forbrukteSykedager = maksimumSykepenger.forbrukteDager
-        inspektør = tidslinjerPerArbeidsgiver.entries
-            .single { (arbeidsgiver, _) -> arbeidsgiver.inspektør.organisasjonsnummer == ORGNUMMER }
-            .value
-            .inspektør
+
+        val (utbetalingstidslinje, maksdatosituasjon) = utbetalinger.beregn(
+            beregningsperiode = arbeidsgiverTidslinje.periode(),
+            beregningsperiodePerArbeidsgiver = mapOf(person.arbeidsgiver(ORGNUMMER) to arbeidsgiverTidslinje.periode()),
+            vedtaksperiode = arbeidsgiverTidslinje.periode(),
+            aktivitetslogg = aktivitetslogg,
+            subsumsjonslogg = Subsumsjonslogg.NullObserver
+        ).entries.single().value
+
+        maksdato = maksdatosituasjon.maksdato
+        gjenståendeSykedager = maksdatosituasjon.gjenståendeDager
+        forbrukteSykedager = maksdatosituasjon.forbrukteDager
+        inspektør = utbetalingstidslinje.inspektør
     }
 }
