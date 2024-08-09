@@ -1022,7 +1022,7 @@ internal class Vedtaksperiode private constructor(
                 ytelser.avgrensTil(periode),
                 validering = {})
         }
-        beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger) ?: return false
+        if (!beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger)) return false
         behandlinger.valider(ytelser, erForlengelse())
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
@@ -1052,7 +1052,7 @@ internal class Vedtaksperiode private constructor(
         return this.periode.overlapperMed(periodeSomBeregner.periode) && skjæringstidspunktet == this.skjæringstidspunkt && !this.tilstand.erFerdigBehandlet
     }
 
-    private fun beregnUtbetalinger(hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Maksdatosituasjon? {
+    private fun beregnUtbetalinger(hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
         val sisteTomKlarTilBehandling = beregningsperioderFørstegangsbehandling(person, this)
         val beregningsperiode = this.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: this.periode
 
@@ -1063,17 +1063,18 @@ internal class Vedtaksperiode private constructor(
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
+
         try {
             val (maksimumSykepenger, tidslinjerPerArbeidsgiver) = arbeidsgiverUtbetalinger.beregn(beregningsperiode, this.periode, hendelse, this.jurist)
             utbetalingsperioder.forEach { other ->
                 val utbetalingstidslinje = tidslinjerPerArbeidsgiver.getValue(other.arbeidsgiver)
                 other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksimumSykepenger, grunnlagsdata)
             }
-            return maksimumSykepenger
+            return true
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(hendelse)
         }
-        return null
+        return false
     }
 
     private fun håndterOverstyringIgangsattRevurdering(revurdering: Revurderingseventyr) {
