@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
@@ -117,6 +118,12 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun valider(simulering: Simulering) {
         siste!!.valider(simulering)
+    }
+
+    internal fun valider(ytelser: Ytelser, erForlengelse: Boolean) {
+        siste!!.valider { maksdato ->
+            ytelser.valider(periode(), skjæringstidspunkt(), maksdato, erForlengelse)
+        }
     }
 
     internal fun erKlarForGodkjenning() = siste?.erKlarForGodkjenning() ?: false

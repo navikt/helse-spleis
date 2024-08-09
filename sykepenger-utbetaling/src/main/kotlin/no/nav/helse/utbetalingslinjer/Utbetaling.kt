@@ -195,6 +195,8 @@ class Utbetaling private constructor(
         personOppdrag.valider(simulering)
     }
 
+    fun valider(valider: (maksdato: LocalDate) -> Unit) = valider(this.maksdato)
+
     fun håndter(hendelse: AnnullerUtbetaling) {
         godkjenn(hendelse, hendelse.vurdering())
     }

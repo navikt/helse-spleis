@@ -1022,8 +1022,8 @@ internal class Vedtaksperiode private constructor(
                 ytelser.avgrensTil(periode),
                 validering = {})
         }
-        val maksimumSykepenger = beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger) ?: return false
-        ytelser.valider(periode, skjæringstidspunkt, maksimumSykepenger.maksdato, erForlengelse())
+        beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger) ?: return false
+        behandlinger.valider(ytelser, erForlengelse())
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
