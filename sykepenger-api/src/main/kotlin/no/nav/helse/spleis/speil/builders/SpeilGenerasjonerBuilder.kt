@@ -203,7 +203,7 @@ internal class SpeilGenerasjonerBuilder(
     private fun utledePeriodetilstand(periodetilstand: VedtaksperiodetilstandDto, utbetalingDTO: Utbetaling, avgrensetUtbetalingstidslinje: List<Utbetalingstidslinjedag>) =
         when (utbetalingDTO.status) {
             Utbetalingstatus.IkkeGodkjent -> Periodetilstand.RevurderingFeilet
-            Utbetalingstatus.Utbetalt -> when {
+            Utbetalingstatus.Utbetalt, Utbetalingstatus.GodkjentUtenUtbetaling -> when {
                 avgrensetUtbetalingstidslinje.none { it.utbetalingsinfo()?.harUtbetaling() == true } -> Periodetilstand.IngenUtbetaling
                 else -> Periodetilstand.Utbetalt
             }
@@ -214,10 +214,6 @@ internal class SpeilGenerasjonerBuilder(
                 periodetilstand == VedtaksperiodetilstandDto.AVVENTER_REVURDERING -> Periodetilstand.UtbetaltVenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (revurdering)
                 periodetilstand in setOf(VedtaksperiodetilstandDto.AVVENTER_BLOKKERENDE_PERIODE, VedtaksperiodetilstandDto.AVVENTER_INNTEKTSMELDING) -> Periodetilstand.VenterPåAnnenPeriode // flere AG; en annen AG har laget utbetaling på vegne av *denne* (førstegangsvurdering)
                 else -> error("har ikke mappingregel for utbetalingstatus ${utbetalingDTO.status} og periodetilstand=$periodetilstand")
-            }
-            Utbetalingstatus.GodkjentUtenUtbetaling -> when {
-                utbetalingDTO.type == Utbetalingtype.REVURDERING -> Periodetilstand.Utbetalt
-                else -> Periodetilstand.IngenUtbetaling
             }
             Utbetalingstatus.Godkjent,
             Utbetalingstatus.Overført -> Periodetilstand.TilUtbetaling

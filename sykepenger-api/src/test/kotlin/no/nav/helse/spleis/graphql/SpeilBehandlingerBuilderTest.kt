@@ -1153,6 +1153,46 @@ internal class SpeilBehandlingerBuilderTest : AbstractE2ETest() {
     }
 
     @Test
+    fun `En arbeidsgiver korrigerer inn litt mer ferie i ferien sin`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 27.februar), orgnummer = a2)
+
+        håndterYtelser()
+        håndterUtbetalingsgodkjenning()
+
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar), orgnummer = a2)
+        håndterYtelser()
+        håndterUtbetalingsgodkjenning()
+
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        generasjoner(a1) {
+            0.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING medTilstand IngenUtbetaling
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+            }
+        }
+        generasjoner(a2) {
+            0.generasjon {
+                assertEquals(2, size)
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING medTilstand IngenUtbetaling
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING medTilstand Utbetalt
+            }
+        }
+
+    }
+
+    @Test
     fun `overlappende periode flere arbeidsgivere`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
 
