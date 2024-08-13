@@ -1647,7 +1647,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (vedtaksperiode.periodeRettFørHarFåttInntektsmelding()) {
                 påminnelse.info("Periode ser ut til å feilaktig vente på inntektsmelding. ")
-                if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
+                return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
             }
             if (påminnelse.skalReberegnes()) return vurderOmKanGåVidere(vedtaksperiode, påminnelse)
             if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(påminnelse)) {
