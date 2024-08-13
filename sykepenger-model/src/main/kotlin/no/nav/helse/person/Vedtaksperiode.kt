@@ -1767,7 +1767,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>
         ): Tilstand {
             check(!vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) {
-                "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling!"
+                "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
             }
 
             if (!vedtaksperiode.forventerInntekt()) return ForventerIkkeInntekt
