@@ -36,6 +36,7 @@ jobs:
         with:
           team: tbd
           image_suffix: sykepenger-opprydding-dev
+          dockerfile: Dockerfile
           docker_context: sykepenger-opprydding-dev
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
