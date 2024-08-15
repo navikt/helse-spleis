@@ -1603,7 +1603,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode, arbeidsgivere: List<Arbeidsgiver>) =
-            INNTEKTSMELDING.utenBegrunnelse
+            if (vedtaksperiode.harFlereSkjæringstidspunkt()) HJELP fordi FLERE_SKJÆRINGSTIDSPUNKT else INNTEKTSMELDING.utenBegrunnelse
 
         override fun venter(
             vedtaksperiode: Vedtaksperiode,
