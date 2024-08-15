@@ -1,12 +1,12 @@
 import java.io.PrintWriter
 
 plugins {
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.0.10"
 }
 
 val junitJupiterVersion = "5.10.2"
 val jvmTargetVersion = 21
-val gradleVersjon = "8.6"
+val gradleVersjon = "8.10"
 
 allprojects {
     group = "no.nav.helse"
