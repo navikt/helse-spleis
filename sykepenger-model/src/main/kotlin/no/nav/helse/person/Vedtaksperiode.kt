@@ -66,6 +66,7 @@ import no.nav.helse.person.Venteårsak.Hva.HJELP
 import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
 import no.nav.helse.person.Venteårsak.Hva.SØKNAD
 import no.nav.helse.person.Venteårsak.Hva.UTBETALING
+import no.nav.helse.person.Venteårsak.Hvorfor.FLERE_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT
 import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
 import no.nav.helse.person.Venteårsak.Hvorfor.VIL_OMGJØRES
@@ -441,6 +442,12 @@ internal class Vedtaksperiode private constructor(
         if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
         if (tilstand.arbeidsgiveropplysningerStrategi.harInntektOgRefusjon(this, arbeidsgiverperiode, hendelse)) return false
         return true
+    }
+
+    private fun harFlereSkjæringstidspunkt(): Boolean {
+        val arbeidsgiverperiode = finnArbeidsgiverperiode() ?: return false
+        if (!arbeidsgiverperiode.forventerInntekt(periode)) return false
+        return Arbeidsgiverperiode.harUtbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt, periode, arbeidsgiverperiode)
     }
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>, hendelse: IAktivitetslogg): Boolean {
@@ -1436,6 +1443,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun tilstand(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg): Tilstand {
+            if (vedtaksperiode.harFlereSkjæringstidspunkt()) return HarFlereSkjæringstidspunkt(vedtaksperiode)
             if (vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) return TrengerInntektsmelding(vedtaksperiode)
             val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = arbeidsgivere.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(vedtaksperiode)
             if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null) return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver, arbeidsgivere.toList())
@@ -1454,6 +1462,14 @@ internal class Vedtaksperiode private constructor(
             override fun venteårsak() = INNTEKTSMELDING fordi SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Trenger inntektsmelding for perioden etter igangsatt revurdering")
+            }
+        }
+
+        private data class HarFlereSkjæringstidspunkt(private val vedtaksperiode: Vedtaksperiode): Tilstand {
+            override fun venterPå() = vedtaksperiode
+            override fun venteårsak() = HJELP fordi FLERE_SKJÆRINGSTIDSPUNKT
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
+                hendelse.info("Denne perioden har flere skjæringstidspunkt slik den står nå. Saksbehandler må inn å vurdere om det kan overstyres dager på en slik måte at det kun er ett skjæringstidspunkt. Om ikke må den kastes ut av Speil.")
             }
         }
 

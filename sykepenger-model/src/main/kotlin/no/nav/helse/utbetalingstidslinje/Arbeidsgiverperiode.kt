@@ -185,6 +185,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return sykdomstidslinje.subset(periodeUtoverArbeidsgiverperioden)
     }
 
+    private fun utbetalingsdagerI(periode: Periode) = periode.filter { dag -> utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
+
     internal companion object {
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 
@@ -210,8 +212,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         }
 
         private fun harNødvendigeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String, sisteOppholdsdagFørUtbetalingsdager: () -> LocalDate?): Boolean {
-            val utbetalingsdager = periode.filter { dag -> arbeidsgiverperiode.utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
-            if(utbetalingsdager.isEmpty()) return true
+            val utbetalingsdager = arbeidsgiverperiode.utbetalingsdagerI(periode)
+            if (utbetalingsdager.isEmpty()) return true
             return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, utbetalingsdager, sisteOppholdsdagFørUtbetalingsdager(), hendelse, organisasjonsnummer)
         }
 
@@ -222,5 +224,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
         internal fun harNødvendigeRefusjonsopplysningerEtterInntektsmelding(skjæringstidspunkt: LocalDate, periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String) =
             harNødvendigeRefusjonsopplysninger(skjæringstidspunkt, periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer) { null } // Ved revurderinger hensyntar vi ikke oppholdsdager før utbetalignsdager
+
+        internal fun harUtbetalingsdagerFørSkjæringstidspunkt(skjæringstidspunkt: LocalDate, periode: Periode, arbeidsgiverperiode: Arbeidsgiverperiode) =
+            arbeidsgiverperiode.utbetalingsdagerI(periode).any { it < skjæringstidspunkt }
     }
 }

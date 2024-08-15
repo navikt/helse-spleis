@@ -17,8 +17,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.Venteårsak.Hva.INNTEKTSMELDING
-import no.nav.helse.person.Venteårsak.Hvorfor.SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING
+import no.nav.helse.person.Venteårsak.Hva.HJELP
+import no.nav.helse.person.Venteårsak.Hvorfor.FLERE_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,7 +48,7 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
                 ManuellOverskrivingDag(15.januar, Dagtype.Sykedag, 100),
                 ManuellOverskrivingDag(16.januar, Dagtype.Sykedag, 100)
             ))
-            observatør.assertVenter(1.vedtaksperiode, venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
+            observatør.assertVenter(1.vedtaksperiode, venterPåHva = HJELP, fordi = FLERE_SKJÆRINGSTIDSPUNKT)
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(1.februar, Dagtype.Sykedag, 100)))
