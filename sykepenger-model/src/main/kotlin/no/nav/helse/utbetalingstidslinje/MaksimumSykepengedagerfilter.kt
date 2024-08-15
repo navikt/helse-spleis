@@ -261,6 +261,11 @@ internal class MaksimumSykepengedagerfilter(
         }
 
         class Karantene(private val begrunnelse: Begrunnelse) : State {
+
+            override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
+                avgrenser.opphold = 0
+            }
+
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.opphold += 1
                 vurderTilstrekkeligOppholdNådd(avgrenser)

@@ -37,6 +37,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse.NyVilkårsprøvingNødvendi
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -73,6 +74,17 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(16.NAP, 10.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
         assertEquals(28.desember, maksdato)
+    }
+
+    @Test
+    fun `Når vi utbetaler maksdato må vi nullstille oppholdstellingen`() {
+        val tidslinje = tidslinjeOf(16.AP, 247.NAVDAGER, 180.ARB, 1.NAVDAGER, 2.ARB, 10.NAVDAGER)
+        val avvisteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
+        assertEquals(10, avvisteDager.size)
+        avvisteDager.map {
+            val dag = avvisteTidslinjer.single()[it]
+            assertNotNull(dag.erAvvistMed(SykepengedagerOppbrukt))
+        }
     }
 
     @Test
