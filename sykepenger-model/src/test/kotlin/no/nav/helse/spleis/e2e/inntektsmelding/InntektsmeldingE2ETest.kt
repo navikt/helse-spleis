@@ -114,6 +114,19 @@ import org.junit.jupiter.api.Test
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `Manglende sporing av IM ved langt gap mellom AGP og FF når IM kommer før søknad`() {
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
+        håndterSøknad(1.mars til 31.mars)
+        håndterVilkårsgrunnlag()
+
+        assertForventetFeil(
+            forklaring = "Manglende sporing av IM ved langt gap mellom AGP og FF når IM kommer før søknad",
+            nå = { assertFalse(inspektør.hendelseIder(1.vedtaksperiode).contains(inntektsmeldingId)) },
+            ønsket = { assertTrue(inspektør.hendelseIder(1.vedtaksperiode).contains(inntektsmeldingId)) }
+        )
+    }
+
+    @Test
     fun `ingen søknad for halen av arbeidsgiverperiode`() {
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(28.januar, 10.februar, 100.prosent))
