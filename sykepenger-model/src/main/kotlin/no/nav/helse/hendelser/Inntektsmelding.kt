@@ -8,7 +8,6 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger
@@ -39,7 +38,7 @@ class Inntektsmelding(
     private val beregnetInntekt: Inntekt,
     arbeidsgiverperioder: List<Periode>,
     private val arbeidsforholdId: String?,
-    private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
+    begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     harOpphørAvNaturalytelser: Boolean = false,
     harFlereInntektsmeldinger: Boolean,
     private val avsendersystem: Avsendersystem?,
@@ -71,7 +70,6 @@ class Inntektsmelding(
     }
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
-    private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
     private val dager = DagerFraInntektsmelding(
         this.arbeidsgiverperioder,
         førsteFraværsdag,
