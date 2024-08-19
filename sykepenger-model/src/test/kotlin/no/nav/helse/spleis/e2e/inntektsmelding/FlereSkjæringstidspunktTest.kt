@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -36,7 +37,20 @@ internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
                 assertEquals("FLERE_SKJÆRINGSTIDSPUNKT", it.venterPå.venteårsak.hvorfor)
             }
         }
+    }
 
+    @Test
+    fun `Egenmeldingsdager fra sykmelding møter begrunnelseForReduksjonEllerIkkeUtbetalt`() {
+        a1 {
+            håndterSøknad(Sykdom(9.mars, 14.mars, 100.prosent), egenmeldinger = listOf(2.mars.arbeidsgiverdag, 3.mars.arbeidsgiverdag))
+            håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.mars, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+
+            observatør.vedtaksperiodeVenter.last().let {
+                assertEquals("NG? ????SHH SSS", inspektør.sykdomstidslinje(1.vedtaksperiode).toShortString())
+                assertEquals("HJELP", it.venterPå.venteårsak.hva)
+                assertEquals("FLERE_SKJÆRINGSTIDSPUNKT", it.venterPå.venteårsak.hvorfor)
+            }
+        }
     }
 
     private companion object {
