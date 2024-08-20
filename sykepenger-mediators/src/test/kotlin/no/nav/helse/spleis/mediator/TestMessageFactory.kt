@@ -700,7 +700,7 @@ internal class TestMessageFactory(
         )
     }
 
-    data class InntekterForSammenligningsgrunnlagFraLøsning(
+    data class InntekterForOpptjeningsvurderingFraLøsning(
         val måned: YearMonth,
         val inntekter: List<Inntekt>
     ) {
@@ -836,6 +836,7 @@ internal class TestMessageFactory(
         skjæringstidspunkt: LocalDate,
         tilstand: TilstandType,
         inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning>,
+        inntekterForOpptjeningsvurdering: List<InntekterForOpptjeningsvurderingFraLøsning>,
         arbeidsforhold: List<Arbeidsforhold>,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         orgnummer: String = organisasjonsnummer
@@ -878,6 +879,21 @@ internal class TestMessageFactory(
                                 mapOf(
                                     "orgnummer" to arbeidsforhold.orgnummer,
                                     "type" to arbeidsforhold.type
+                                )
+                            }
+                        )
+                    },
+                InntekterForOpptjeningsvurdering.name to inntekterForOpptjeningsvurdering
+                    .map {
+                        mapOf(
+                            "årMåned" to it.måned,
+                            "inntektsliste" to it.inntekter.map { inntekt ->
+                                mapOf(
+                                    "beløp" to inntekt.beløp,
+                                    "inntektstype" to "LOENNSINNTEKT",
+                                    "orgnummer" to inntekt.orgnummer,
+                                    "fordel" to "kontantytelse",
+                                    "beskrivelse" to "fastloenn"
                                 )
                             }
                         )

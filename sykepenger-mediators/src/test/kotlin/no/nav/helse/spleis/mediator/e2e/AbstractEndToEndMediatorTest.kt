@@ -54,7 +54,6 @@ import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold
 import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsforholdOverstyrt
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsgiveropplysning
 import no.nav.helse.spleis.mediator.TestMessageFactory.DagpengerTestdata
-import no.nav.helse.spleis.mediator.TestMessageFactory.InntekterForSammenligningsgrunnlagFraLøsning
 import no.nav.helse.spleis.mediator.TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning
 import no.nav.helse.spleis.mediator.TestMessageFactory.InstitusjonsoppholdTestdata
 import no.nav.helse.spleis.mediator.TestMessageFactory.OmsorgspengerTestdata
@@ -496,6 +495,15 @@ internal abstract class AbstractEndToEndMediatorTest() {
             skjæringstidspunkt = testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate(),
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag),
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
+            inntekterForOpptjeningsvurdering = listOf(
+                TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                    måned = YearMonth.of(2017, 12),
+                    inntekter = listOf(
+                        TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0,
+                            ORGNUMMER
+                        )),
+                )
+            ),
             arbeidsforhold = (arbeidsforhold),
             medlemskapstatus = medlemskapstatus,
             orgnummer = orgnummer
@@ -511,16 +519,6 @@ internal abstract class AbstractEndToEndMediatorTest() {
         return (3L downTo 1L).map {
             val mnd = YearMonth.from(skjæringstidspunkt).minusMonths(it)
             InntekterForSykepengegrunnlagFraLøsning(mnd, inntekter, arbeidsforhold)
-        }
-    }
-
-    fun sammenligningsgrunnlag(
-        skjæringstidspunkt: LocalDate,
-        inntekter: List<InntekterForSammenligningsgrunnlagFraLøsning.Inntekt>
-    ): List<InntekterForSammenligningsgrunnlagFraLøsning> {
-        return (12L downTo 1L).map {
-            val mnd = YearMonth.from(skjæringstidspunkt).minusMonths(it)
-            InntekterForSammenligningsgrunnlagFraLøsning(mnd, inntekter)
         }
     }
 

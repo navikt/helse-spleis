@@ -31,11 +31,13 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             behov,
             Dagpenger,
             InntekterForSykepengegrunnlag,
+            InntekterForOpptjeningsvurdering,
             Medlemskap,
             ArbeidsforholdV2
         )
         assertMedlemskapdetaljer(behov)
         assertInntekterForSykepengegrunnlagdetaljer(behov)
+        assertInntekterForOpptjeningsvurderingdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
     }
 
@@ -172,6 +174,11 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertÅrMåned(behov.path(InntekterForSykepengegrunnlag.name).path("beregningSlutt").asText())
     }
 
+    private fun assertInntekterForOpptjeningsvurderingdetaljer(behov: JsonNode) {
+        assertDato(behov.path(InntekterForOpptjeningsvurdering.name).path("skjæringstidspunkt").asText())
+        assertÅrMåned(behov.path(InntekterForOpptjeningsvurdering.name).path("beregningStart").asText())
+        assertÅrMåned(behov.path(InntekterForOpptjeningsvurdering.name).path("beregningSlutt").asText())
+    }
 
     private fun assertMedlemskapdetaljer(behov: JsonNode) {
         assertDato(behov.path(Medlemskap.name).path("skjæringstidspunkt").asText())

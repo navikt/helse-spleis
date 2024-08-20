@@ -3,6 +3,7 @@ package no.nav.helse.spleis.mediator
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -10,6 +11,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -115,6 +117,14 @@ internal class MessageMediatorTest {
                 skjæringstidspunkt = 1.januar,
                 tilstand = TilstandType.START,
                 inntekterForSykepengegrunnlag = emptyList(),
+                inntekterForOpptjeningsvurdering = listOf(
+                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                        måned = YearMonth.of(2017, 12),
+                        inntekter = listOf(
+                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0,
+                                AbstractEndToEndMediatorTest.ORGNUMMER
+                            ))
+                    )),
                 arbeidsforhold = emptyList(),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
             ))

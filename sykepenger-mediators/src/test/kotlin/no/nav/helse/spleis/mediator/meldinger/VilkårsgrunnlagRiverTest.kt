@@ -44,6 +44,11 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                     inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, ORGNUMMER)),
                     arbeidsforhold = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Arbeidsforhold(ORGNUMMER, "frilanserOppdragstakerHonorarPersonerMm"))
                 )),
+                inntekterForOpptjeningsvurdering = listOf(
+                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                    måned = YearMonth.of(2017, 12),
+                    inntekter = listOf(TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0, ORGNUMMER))
+                )),
                 arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
             )
@@ -63,6 +68,14 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
                     inntekter = listOf(TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Inntekt(32000.0, "987654322")),
                     arbeidsforhold = emptyList()
                 )),
+                inntekterForOpptjeningsvurdering = listOf(
+                    TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
+                        måned = YearMonth.of(2017, 12),
+                        inntekter = listOf(
+                            TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0,
+                                ORGNUMMER
+                            )),
+                    )),
                 arbeidsforhold = listOf(TestMessageFactory.Arbeidsforhold(ORGNUMMER, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja
             )

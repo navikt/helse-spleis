@@ -74,6 +74,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavkla
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForOpptjeningsvurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
@@ -680,6 +681,7 @@ internal class Vedtaksperiode private constructor(
     private fun trengerVilkårsgrunnlag(hendelse: IAktivitetslogg) {
         val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
         inntekterForSykepengegrunnlag(hendelse, skjæringstidspunkt, beregningSlutt.minusMonths(2), beregningSlutt)
+        inntekterForOpptjeningsvurdering(hendelse, skjæringstidspunkt, beregningSlutt, beregningSlutt)
         arbeidsforhold(hendelse, skjæringstidspunkt)
         medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
     }
