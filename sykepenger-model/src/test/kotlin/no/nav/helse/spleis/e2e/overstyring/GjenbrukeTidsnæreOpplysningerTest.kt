@@ -65,7 +65,7 @@ import kotlin.reflect.KClass
 internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
     @Test
-    fun `revurdere seg inn i en situasjon hvor man ikke har noen første fraværsdag, og da biter ikke gjenbrukbare opplysninger`() {
+    fun `revurdere seg inn i en situasjon hvor man ikke har noen første fraværsdag, men gjenbrukbare opplysninger biter læll`() {
         a1 {
             nyttVedtak(januar)
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(12.februar, 28.februar))
@@ -98,11 +98,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
             assertEquals(1.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
-            val marsVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 3.vedtaksperiode }
-            assertEquals(3.vedtaksperiode, marsVenter.venterPå.vedtaksperiodeId)
-            assertEquals("INNTEKTSMELDING", marsVenter.venterPå.venteårsak.hva)
-            assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", marsVenter.venterPå.venteårsak.hvorfor)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         }
     }
 
