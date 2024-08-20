@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.mediator.db
 
 import com.github.navikt.tbd_libs.test_support.TestDataSource
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -52,7 +53,7 @@ internal class HendelseRepositoryTest {
 
 private object TestMessages {
     private fun String.somPacket(validate: (packet: JsonMessage) -> Unit) =
-        JsonMessage(this, MessageProblems(this)).also { packet ->
+        JsonMessage(this, MessageProblems(this), SimpleMeterRegistry()).also { packet ->
             validate(packet)
         }
 

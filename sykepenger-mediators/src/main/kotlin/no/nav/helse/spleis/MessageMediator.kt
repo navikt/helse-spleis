@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import io.micrometer.core.instrument.MeterRegistry
 import java.sql.SQLException
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -178,9 +179,9 @@ internal class MessageMediator(
             rapidsConnection.register(this)
         }
 
-        override fun onMessage(message: String, context: MessageContext) {
+        override fun onMessage(message: String, context: MessageContext, metrics: MeterRegistry) {
             beforeRiverHandling()
-            notifyMessage(message, context)
+            notifyMessage(message, context, metrics)
             afterRiverHandling(message)
         }
 

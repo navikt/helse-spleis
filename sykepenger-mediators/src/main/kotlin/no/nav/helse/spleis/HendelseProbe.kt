@@ -1,22 +1,20 @@
 package no.nav.helse.spleis
 
-import io.prometheus.client.Counter
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.hendelser.Påminnelse
 
 object HendelseProbe {
-    private val hendelseCounter = Counter.build("hendelser_totals", "Antall hendelser mottatt")
-        .labelNames("hendelse")
-        .register()
-
-    private val påminnetCounter =
-        Counter.build("paminnet_totals", "Antall ganger vi har mottatt en påminnelse")
-            .labelNames("tilstand")
-            .register()
+    private val metrics: MeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     fun onPåminnelse(påminnelse: Påminnelse) {
-        påminnetCounter
-            .labels(påminnelse.tilstand().toString())
-            .inc()
+        Counter.builder("paminnet_totals")
+            .description("Antall ganger vi har mottatt en påminnelse")
+            .tag("tilstand", påminnelse.tilstand().toString())
+            .register(metrics)
+            .increment()
         tell("Påminnelse")
     }
 
@@ -105,6 +103,10 @@ object HendelseProbe {
     }
 
     private fun tell(navn: String) {
-        hendelseCounter.labels(navn).inc()
+        Counter.builder("hendelser_totals")
+            .description("Antall hendelser mottatt")
+            .tag("hendelse", navn)
+            .register(metrics)
+            .increment()
     }
 }

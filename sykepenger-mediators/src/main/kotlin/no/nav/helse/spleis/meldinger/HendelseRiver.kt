@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.prometheus.client.Histogram
+import io.micrometer.core.instrument.Timer
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import java.util.UUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -46,13 +48,22 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
                 "melding_type" to eventName,
                 "melding_id" to packet["@id"].asText()
             )) {
-                behandlingstid.labels(riverName, eventName).time {
-                    try {
-                        messageMediator.onRecognizedMessage(createMessage(packet), context)
-                    } catch (e: Exception) {
-                        sikkerLogg.error("Klarte ikke å lese melding, innhold: ${packet.toJson()}", e)
-                        throw e
-                    }
+
+                val timer = Timer.start(metersRegistry)
+
+                try {
+                    messageMediator.onRecognizedMessage(createMessage(packet), context)
+                } catch (e: Exception) {
+                    sikkerLogg.error("Klarte ikke å lese melding, innhold: ${packet.toJson()}", e)
+                    throw e
+                } finally {
+                    timer.stop(
+                        Timer.builder("behandlingstid_seconds")
+                            .description("hvor lang tid spleis bruker på behandling av en melding")
+                            .tag("river_name", riverName)
+                            .tag("event_name", eventName)
+                            .register(metersRegistry)
+                    )
                 }
             }
         }
@@ -63,10 +74,7 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
     }
 
     companion object {
+        private val metersRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val behandlingstid = Histogram.build("behandlingstid_seconds", "hvor lang tid spleis bruker på behandling av en melding")
-            .labelNames("river_name", "event_name")
-            .buckets(0.05, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 10.0, 20.0, 60.0, 120.0)
-            .register()
     }
 }
