@@ -4,7 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
-import no.nav.helse.økonomi.Økonomi
 
 class UtbetalingkladdBuilder(private var periode: Periode, arbeidsgivermottaker: String, personmottaker: String) {
     // bruker samme "sak id" i OS for begge oppdragene
@@ -22,18 +21,16 @@ class UtbetalingkladdBuilder(private var periode: Periode, arbeidsgivermottaker:
 
     fun build() = Utbetalingkladd(periode, arbeidsgiveroppdragBuilder.build(), personoppdragBuilder.build())
 
-    fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, økonomi: Økonomi) {
+    fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, grad: Int) {
         periode = periode.oppdaterTom(dato)
-        arbeidsgiveroppdragBuilder.betalingsdag(beløpkilde, dato, økonomi.brukAvrundetGrad { grad -> grad })
-        personoppdragBuilder.betalingsdag(beløpkilde, dato, økonomi.brukAvrundetGrad { grad -> grad })
+        arbeidsgiveroppdragBuilder.betalingsdag(beløpkilde, dato, grad)
+        personoppdragBuilder.betalingsdag(beløpkilde, dato, grad)
     }
 
-    fun betalingshelgedag(dato: LocalDate, økonomi: Økonomi) {
+    fun betalingshelgedag(dato: LocalDate, grad: Int) {
         periode = periode.oppdaterTom(dato)
-        økonomi.brukAvrundetGrad { grad->
-            arbeidsgiveroppdragBuilder.betalingshelgedag(dato, grad)
-            personoppdragBuilder.betalingshelgedag(dato, grad)
-        }
+        arbeidsgiveroppdragBuilder.betalingshelgedag(dato, grad)
+        personoppdragBuilder.betalingshelgedag(dato, grad)
     }
 
     fun ikkeBetalingsdag(dato: LocalDate) {

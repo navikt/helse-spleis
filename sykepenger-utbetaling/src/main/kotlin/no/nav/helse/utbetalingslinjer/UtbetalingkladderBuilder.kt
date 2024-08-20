@@ -13,7 +13,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
@@ -78,15 +77,15 @@ class UtbetalingkladderBuilder(
 
     override fun visit(dag: ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
         håndterArbeidsgiverperiode(dato)
-        builder(dato).betalingsdag(beløpkilde = dag.beløpkilde(), dato = dato, økonomi = økonomi)
+        builder(dato).betalingsdag(beløpkilde = dag.beløpkilde(), dato = dato, grad = økonomi.brukAvrundetGrad { grad -> grad })
     }
 
     override fun visit(dag: NavDag, dato: LocalDate, økonomi: Økonomi) {
-        builder(dato).betalingsdag(beløpkilde = dag.beløpkilde(), dato = dato, økonomi = økonomi)
+        builder(dato).betalingsdag(beløpkilde = dag.beløpkilde(), dato = dato, grad = økonomi.brukAvrundetGrad { grad -> grad })
     }
 
     override fun visit(dag: NavHelgDag, dato: LocalDate, økonomi: Økonomi) {
-        builder(dato).betalingshelgedag(dato, økonomi)
+        builder(dato).betalingshelgedag(dato, økonomi.brukAvrundetGrad { grad -> grad })
     }
 
     override fun visit(dag: Arbeidsdag, dato: LocalDate, økonomi: Økonomi) {
