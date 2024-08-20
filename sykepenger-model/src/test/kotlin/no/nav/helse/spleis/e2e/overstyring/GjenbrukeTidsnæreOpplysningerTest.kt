@@ -12,6 +12,7 @@ import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Dagtype.Pleiepengerdag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -62,6 +63,49 @@ import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
 internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
+
+    @Test
+    fun `revurdere seg inn i en situasjon hvor man ikke har noen første fraværsdag, og da biter ikke gjenbrukbare opplysninger`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(12.februar, 28.februar))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 14.mars))
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+
+            håndterOverstyrTidslinje((15.mars til 31.mars).map { ManuellOverskrivingDag(it, Pleiepengerdag) })
+            håndterYtelser(3.vedtaksperiode)
+            håndterSimulering(3.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+
+            håndterOverstyrTidslinje((15.februar til 28.februar).map { ManuellOverskrivingDag(it, Pleiepengerdag) })
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertEquals(1.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
+            val marsVenter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 3.vedtaksperiode }
+            assertEquals(3.vedtaksperiode, marsVenter.venterPå.vedtaksperiodeId)
+            assertEquals("INNTEKTSMELDING", marsVenter.venterPå.venteårsak.hva)
+            assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", marsVenter.venterPå.venteårsak.hvorfor)
+        }
+    }
+
 
     @Test
     fun `Gjenbruker kun inntekt på én arbeidsgiver, men om alle periodene etter blir andre ytelser, så trengte vi ikke tidsnære opplysninger uansett`() {
