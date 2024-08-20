@@ -1,29 +1,24 @@
 package no.nav.helse.spleis.dao
 
-import io.prometheus.client.Counter
+import io.micrometer.core.instrument.Counter.*
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 
 object PostgresProbe {
-    private val personLestFraDbCounter =
-        Counter.build("person_lest_fra_db_totals", "Antall ganger vi har lest en person fra db")
-            .register()
-
-    private val utbetalingLestFraDbCounter =
-        Counter.build("utbetaling_lest_fra_db_totals", "Antall ganger vi har lest en utbetaling fra db")
-            .register()
-
-    private val hendelseLestFraDbCounter =
-        Counter.build("hendelse_lest_fra_db_totals", "Antall ganger vi har lest en hendelse fra db")
-            .register()
+    private val metrics: MeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     fun personLestFraDb() {
-        personLestFraDbCounter.inc()
-    }
-
-    fun utbetalingLestFraDb() {
-        utbetalingLestFraDbCounter.inc()
+        builder("person_lest_fra_db_totals")
+            .description("Antall ganger vi har lest en person fra db")
+            .register(metrics)
+            .increment()
     }
 
     fun hendelseLestFraDb() {
-        hendelseLestFraDbCounter.inc()
+        builder("hendelse_lest_fra_db_totals")
+            .description("Antall ganger vi har lest en hendelse fra db")
+            .register(metrics)
+            .increment()
     }
 }

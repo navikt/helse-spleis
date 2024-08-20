@@ -16,9 +16,10 @@ import io.ktor.server.auth.authentication
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.engine.connector
 import io.ktor.server.testing.testApplication
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
-import io.prometheus.client.CollectorRegistry
 import java.net.ServerSocket
 import java.net.URI
 import java.time.LocalDate
@@ -784,7 +785,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                         }
                     }
                     val dataSource = testDataSource.ds
-                    lagApplikasjonsmodul(spekematClient, null, { dataSource }, CollectorRegistry())
+                    lagApplikasjonsmodul(spekematClient, null, { dataSource }, PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
                 }
                 startApplication()
 

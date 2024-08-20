@@ -10,28 +10,15 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.uri
 import io.ktor.server.response.ApplicationSendPipeline
 import io.ktor.util.*
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.Counter
-import io.prometheus.client.Histogram
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Timer
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.Logger
 
 private val ignoredPaths = listOf("/metrics", "/isalive", "/isready")
 
-internal fun Application.requestResponseTracing(logger: Logger, registry: CollectorRegistry) {
-    val httpRequestCounter = Counter.build(
-        "http_requests_total",
-        "Counts the http requests"
-    )
-        .labelNames("method", "code")
-        .register(registry)
-
-    val httpRequestDuration = Histogram.build(
-        "http_request_duration_seconds",
-        "Distribution of http request duration"
-    )
-        .register(registry)
-
+internal fun Application.requestResponseTracing(logger: Logger, registry: MeterRegistry) {
     intercept(ApplicationCallPipeline.Monitoring) {
         try {
             if (call.request.uri in ignoredPaths) return@intercept proceed()
@@ -41,8 +28,16 @@ internal fun Application.requestResponseTracing(logger: Logger, registry: Collec
                     keyValue("req_header_$key", values.joinToString(separator = ";"))
                 }.toTypedArray()
             logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}", *headers)
-            httpRequestDuration.startTimer().use {
+
+            val timer = Timer.start(registry)
+            try {
                 proceed()
+            } finally {
+                timer.stop(
+                    Timer.builder("http_request_duration_seconds")
+                        .description("Distribution of http request duration")
+                        .register(registry)
+                )
             }
         } catch (err: Throwable) {
             logger.error("feil i håndtering av request: ${err.message} callId=${call.callId}", err)
@@ -61,6 +56,11 @@ internal fun Application.requestResponseTracing(logger: Logger, registry: Collec
 
         if (call.request.uri in ignoredPaths) return@intercept
         logger.info("responding with status=${status.value} callId=${call.callId} ")
-        httpRequestCounter.labels(call.request.httpMethod.value, "${status.value}").inc()
+        Counter.builder("http_requests_total")
+            .description("Counts the http requests")
+            .tag("method", call.request.httpMethod.value)
+            .tag("code", "${status.value}")
+            .register(registry)
+            .increment()
     }
 }

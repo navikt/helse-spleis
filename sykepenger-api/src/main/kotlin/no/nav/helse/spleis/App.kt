@@ -18,7 +18,9 @@ import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.path
-import io.prometheus.client.CollectorRegistry
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spleis.config.ApplicationConfiguration
@@ -56,7 +58,14 @@ fun main() {
     app.start(wait = true)
 }
 
-internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, spekematClient: SpekematClient, spurteDuClient: SpurteDuClient?, dataSourceProvider: () -> DataSource, collectorRegistry: CollectorRegistry = CollectorRegistry()) =
+internal fun createApp(
+    ktorConfig: KtorConfig,
+    azureConfig: AzureAdAppConfig,
+    spekematClient: SpekematClient,
+    spurteDuClient: SpurteDuClient?,
+    dataSourceProvider: () -> DataSource,
+    collectorRegistry: PrometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+) =
     embeddedServer(
         factory = Netty,
         environment = applicationEngineEnvironment {
@@ -76,7 +85,7 @@ internal fun Application.lagApplikasjonsmodul(
     spekematClient: SpekematClient,
     spurteDuClient: SpurteDuClient?,
     dataSourceProvider: () -> DataSource,
-    collectorRegistry: CollectorRegistry
+    collectorRegistry: PrometheusMeterRegistry
 ) {
     install(CallId) {
         header("callId")
