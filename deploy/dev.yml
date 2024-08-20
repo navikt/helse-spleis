@@ -38,6 +38,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_15
         diskAutoresize: true
+        tier: db-f1-micro
         databases:
           - name: spleis
             envVarPrefix: DATABASE
