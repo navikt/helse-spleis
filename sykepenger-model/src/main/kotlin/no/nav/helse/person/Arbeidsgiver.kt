@@ -43,7 +43,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.førsteOverlappendePeriodeSomTrengerRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.førstePeriodeSomTrengerInntektTilVilkårsprøving
-import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.sendOppdatertForespørselOmArbeidsgiveropplysningerForNestePeriode
@@ -573,7 +572,6 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
                 personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(),
-                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id), // TODO: denne kan slettes når spesialsaker ikke trengs automatiseres mer (eneste avhengighet er sporbar).
                 ident = ident
             )
         )
@@ -615,7 +613,6 @@ internal class Arbeidsgiver private constructor(
                 arbeidsgiverOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(arbeidsgiverOppdrag),
                 personOppdrag = PersonObserver.UtbetalingUtbetaltEvent.OppdragEventDetaljer.mapOppdrag(personOppdrag),
                 utbetalingsdager = builder.result(),
-                vedtaksperiodeIder = vedtaksperioder.iderMedUtbetaling(id), // TODO: denne kan slettes når spesialsaker ikke trengs automatiseres mer (eneste avhengighet er sporbar).
                 ident = ident,
                 korrelasjonsId = korrelasjonsId
             )

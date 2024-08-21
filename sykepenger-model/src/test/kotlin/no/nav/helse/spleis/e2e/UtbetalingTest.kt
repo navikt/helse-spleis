@@ -87,30 +87,6 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `utbetaling_utbetalt tar med vedtaksperiode-ider for ett enkelt vedtak`() {
-        nyttVedtak(januar, 100.prosent)
-
-        val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
-
-        assertEquals(1, utbetalingEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode.id(ORGNUMMER), utbetalingEvent.vedtaksperiodeIder.first())
-    }
-
-    @Test
-    fun `utbetaling_utbetalt tar med vedtaksperiode-ider for flere vedtak`() {
-        nyttVedtak(januar, 100.prosent)
-        forlengVedtak(februar)
-
-        val førsteEvent = observatør.utbetalingMedUtbetalingEventer.first()
-        val andreEvent = observatør.utbetalingMedUtbetalingEventer.last()
-
-        assertEquals(1, førsteEvent.vedtaksperiodeIder.size)
-        assertEquals(1.vedtaksperiode.id(ORGNUMMER), førsteEvent.vedtaksperiodeIder.first())
-        assertEquals(1, andreEvent.vedtaksperiodeIder.size)
-        assertEquals(2.vedtaksperiode.id(ORGNUMMER), andreEvent.vedtaksperiodeIder.first())
-    }
-
-    @Test
     fun `Utbetaling med stort gap kobles ikke sammen med forrige utbetaling -- når snutete egenmeldingsdager og denne utbetalingen ikke har penger`() {
         nyttVedtak(januar)
 

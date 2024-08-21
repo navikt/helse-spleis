@@ -330,14 +330,8 @@ interface PersonObserver {
         val arbeidsgiverOppdrag: OppdragEventDetaljer,
         val personOppdrag: OppdragEventDetaljer,
         val utbetalingsdager: List<Utbetalingsdag>,
-        val vedtaksperiodeIder: List<UUID>,
         val ident: String
     ) {
-        init {
-            check(vedtaksperiodeIder.size <= 1) {
-                "En utbetaling-melding kan ikke høre til flere enn én vedtaksperiode"
-            }
-        }
         data class OppdragEventDetaljer(
             val fagsystemId: String,
             val fagområde: String,

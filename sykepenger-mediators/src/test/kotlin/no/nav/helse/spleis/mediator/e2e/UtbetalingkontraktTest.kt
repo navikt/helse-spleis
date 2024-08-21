@@ -467,11 +467,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         testRapid.assertUtgåendeMelding(forventetMelding) {
             it.assertOgFjernFagsystemId("arbeidsgiverOppdrag.fagsystemId")
             it.assertOgFjernFagsystemId("personOppdrag.fagsystemId")
-            it.assertOgFjern("vedtaksperiodeIder") { vedtaksperiodeIder ->
-                check(vedtaksperiodeIder.isArray)
-                check(vedtaksperiodeIder.size() == 1)
-                UUID.fromString(vedtaksperiodeIder.first().asText())
-            }
         }
     }
 

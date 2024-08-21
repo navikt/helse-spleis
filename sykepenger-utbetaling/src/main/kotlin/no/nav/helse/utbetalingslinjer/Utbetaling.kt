@@ -348,8 +348,6 @@ class Utbetaling private constructor(
                 .map { it.periode }
         }
 
-        fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
-
         // kan forkaste dersom ingen utbetalinger er utbetalt/in flight, eller de er annullert
         fun kanForkastes(vedtaksperiodeUtbetalinger: List<Utbetaling>, arbeidsgiverUtbetalinger: List<Utbetaling>): Boolean {
             val annulleringer = arbeidsgiverUtbetalinger.filter { it.erAnnullering() && it.tilstand != Forkastet }

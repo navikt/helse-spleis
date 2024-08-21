@@ -2639,9 +2639,6 @@ internal class Vedtaksperiode private constructor(
         internal fun List<Vedtaksperiode>.slåSammenForkastedeSykdomstidslinjer(sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje =
             map { it.sykdomstidslinje }.plusElement(sykdomstidslinje).slåSammenForkastedeSykdomstidslinjer()
 
-        internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
-            filter { it.behandlinger.harId(utbetalingId) }.map { it.id }
-
         internal fun List<Vedtaksperiode>.inneholder(id: UUID) = any { id == it.id }
 
         internal fun List<Vedtaksperiode>.periode(): Periode {

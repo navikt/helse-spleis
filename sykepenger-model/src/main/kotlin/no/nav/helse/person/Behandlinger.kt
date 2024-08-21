@@ -46,7 +46,6 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -97,7 +96,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun kanForkastes(hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) =
         behandlinger.last().kanForkastes(hendelse, arbeidsgiverUtbetalinger)
-    internal fun harId(utbetalingId: UUID) = utbetalingene.harId(utbetalingId)
     internal fun håndterUtbetalinghendelse(hendelse: UtbetalingHendelse) = behandlinger.any { it.håndterUtbetalinghendelse(hendelse) }
 
     internal fun behandlingVenter(builder: VedtaksperiodeVenter.Builder) {
