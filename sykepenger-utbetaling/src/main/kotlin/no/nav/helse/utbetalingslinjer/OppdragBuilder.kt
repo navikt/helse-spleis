@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingslinjer
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.økonomi.Økonomi
 
 class OppdragBuilder(
     private val fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()),
@@ -14,11 +15,11 @@ class OppdragBuilder(
 
     fun build() = Oppdrag(mottaker, fagområde, utbetalingslinjer, fagsystemId)
 
-    fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, grad: Int) {
-        if (utbetalingslinjer.isEmpty() || !fagområde.kanLinjeUtvides(linje, beløpkilde, grad))
-            tilstand.nyLinje(beløpkilde, dato, grad)
+    fun betalingsdag(økonomi: Økonomi, dato: LocalDate, grad: Int) {
+        if (utbetalingslinjer.isEmpty() || !fagområde.kanLinjeUtvides(linje, økonomi, grad))
+            tilstand.nyLinje(økonomi, dato, grad)
         else
-            tilstand.betalingsdag(beløpkilde, dato, grad)
+            tilstand.betalingsdag(økonomi, dato, grad)
     }
 
     fun betalingshelgedag(dato: LocalDate, grad: Int) {
@@ -32,8 +33,8 @@ class OppdragBuilder(
         tilstand.ikkeBetalingsdag()
     }
 
-    private fun addLinje(beløpkilde: Beløpkilde, dato: LocalDate, grad: Int) {
-        utbetalingslinjer.add(fagområde.linje(fagsystemId, beløpkilde, dato, grad))
+    private fun addLinje(økonomi: Økonomi, dato: LocalDate, grad: Int) {
+        utbetalingslinjer.add(fagområde.linje(fagsystemId, økonomi, dato, grad))
     }
 
     private fun addLinje(dato: LocalDate, grad: Int) {
@@ -43,7 +44,7 @@ class OppdragBuilder(
     private interface Tilstand {
 
         fun betalingsdag(
-            beløpkilde: Beløpkilde,
+            økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {}
@@ -51,7 +52,7 @@ class OppdragBuilder(
         fun helgedag(dato: LocalDate, grad: Int) {}
 
         fun nyLinje(
-            beløpkilde: Beløpkilde,
+            økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {}
@@ -63,21 +64,21 @@ class OppdragBuilder(
 
     private inner class MellomLinjer : Tilstand {
         override fun betalingsdag(
-            beløpkilde: Beløpkilde,
+            økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {
-            addLinje(beløpkilde, dato, grad)
+            addLinje(økonomi, dato, grad)
             tilstand = LinjeMedSats()
         }
 
 
         override fun nyLinje(
-            beløpkilde: Beløpkilde,
+            økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {
-            addLinje(beløpkilde, dato, grad)
+            addLinje(økonomi, dato, grad)
             tilstand = LinjeMedSats()
         }
 
@@ -99,7 +100,7 @@ class OppdragBuilder(
         }
 
         override fun betalingsdag(
-            beløpkilde: Beløpkilde,
+            økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {
@@ -108,11 +109,11 @@ class OppdragBuilder(
         }
 
         override fun nyLinje(
-            beløpkilde: Beløpkilde,
+            økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {
-            addLinje(beløpkilde, dato, grad)
+            addLinje(økonomi, dato, grad)
         }
 
         override fun helgedag(dato: LocalDate, grad: Int) {
@@ -133,20 +134,20 @@ class OppdragBuilder(
         }
 
         override fun betalingsdag(
-            beløpkilde: Beløpkilde,
+            økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {
-            utbetalingslinjer.add(fagområde.utvidLinje(utbetalingslinjer.removeLast(), dato, beløpkilde))
+            utbetalingslinjer.add(fagområde.utvidLinje(utbetalingslinjer.removeLast(), dato, økonomi))
             tilstand = LinjeMedSats()
         }
 
         override fun nyLinje(
-            beløpkilde: Beløpkilde,
+            økonomi: Økonomi,
             dato: LocalDate,
             grad: Int
         ) {
-            addLinje(beløpkilde, dato, grad)
+            addLinje(økonomi, dato, grad)
             tilstand = LinjeMedSats()
         }
 

@@ -1,9 +1,15 @@
 package no.nav.helse.utbetalingslinjer
 
+import no.nav.helse.dto.InntektbeløpDto
+import no.nav.helse.dto.ProsentdelDto
+import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -14,7 +20,7 @@ internal class OppdragBuilderTest {
         val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 22.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 22.januar, 100)
         val result = builder.build()
 
         assertEquals(1, result.size)
@@ -27,15 +33,15 @@ internal class OppdragBuilderTest {
         val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 22.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 23.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 24.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 25.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 26.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 22.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 23.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 24.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 25.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 26.januar, 100)
         builder.betalingshelgedag(27.januar, 100)
         builder.betalingshelgedag(28.januar, 100)
         builder.ikkeBetalingsdag()
-        builder.betalingsdag(beløpskilde(500, 0), 30.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 30.januar, 100)
         val result = builder.build()
 
         assertEquals(2, result.size)
@@ -48,11 +54,11 @@ internal class OppdragBuilderTest {
         val builder = OppdragBuilder(mottaker = "ornr", fagområde = Fagområde.SykepengerRefusjon)
         builder.betalingshelgedag(20.januar, 100)
         builder.betalingshelgedag(21.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 22.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 23.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 24.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 25.januar, 100)
-        builder.betalingsdag(beløpskilde(500, 0), 26.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 22.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 23.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 24.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 25.januar, 100)
+        builder.betalingsdag(femhundreKronerIRefusjon, 26.januar, 100)
         builder.betalingshelgedag(27.januar, 100)
         builder.betalingshelgedag(28.januar, 100)
         val result = builder.build()
@@ -61,8 +67,16 @@ internal class OppdragBuilderTest {
         assertEquals(20.januar til 26.januar, result[0].inspektør.fom til result[0].inspektør.tom)
     }
 
-    private fun beløpskilde(arbeidsgiverbeløp: Int, personbeløp: Int = 0) = object: Beløpkilde {
-        override fun arbeidsgiverbeløp() = arbeidsgiverbeløp
-        override fun personbeløp() = personbeløp
-    }
+    private val femhundreKronerIRefusjon: Økonomi = Økonomi.gjenopprett(ØkonomiInnDto(
+        grad = ProsentdelDto(100.0),
+        totalGrad = ProsentdelDto(100.0),
+        arbeidsgiverRefusjonsbeløp = InntektbeløpDto.DagligDouble(500.0),
+        aktuellDagsinntekt = InntektbeløpDto.DagligDouble(500.0),
+        beregningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
+        dekningsgrunnlag = InntektbeløpDto.DagligDouble(500.0),
+        grunnbeløpgrense = null,
+        arbeidsgiverbeløp = InntektbeløpDto.DagligDouble(500.0),
+        personbeløp = InntektbeløpDto.DagligDouble(0.0),
+        er6GBegrenset = false
+    ), erAvvistDag = false)
 }

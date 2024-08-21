@@ -77,11 +77,11 @@ class UtbetalingkladderBuilder(
 
     override fun visit(dag: ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
         håndterArbeidsgiverperiode(dato)
-        builder(dato).betalingsdag(beløpkilde = dag.beløpkilde(), dato = dato, grad = økonomi.brukAvrundetGrad { grad -> grad })
+        builder(dato).betalingsdag(økonomi = dag.økonomi, dato = dato, grad = økonomi.brukAvrundetGrad { grad -> grad })
     }
 
     override fun visit(dag: NavDag, dato: LocalDate, økonomi: Økonomi) {
-        builder(dato).betalingsdag(beløpkilde = dag.beløpkilde(), dato = dato, grad = økonomi.brukAvrundetGrad { grad -> grad })
+        builder(dato).betalingsdag(økonomi = dag.økonomi, dato = dato, grad = økonomi.brukAvrundetGrad { grad -> grad })
     }
 
     override fun visit(dag: NavHelgDag, dato: LocalDate, økonomi: Økonomi) {

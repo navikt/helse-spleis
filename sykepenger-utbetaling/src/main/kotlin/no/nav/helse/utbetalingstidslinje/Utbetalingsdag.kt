@@ -6,7 +6,6 @@ import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.utbetalingslinjer.Beløpkilde
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.Økonomi
@@ -19,7 +18,6 @@ sealed class Utbetalingsdag(
 ) : Comparable<Utbetalingsdag> {
 
     internal abstract val prioritet: Int
-    fun beløpkilde(): Beløpkilde = BeløpkildeAdapter(økonomi)
     override fun compareTo(other: Utbetalingsdag): Int {
         return this.prioritet.compareTo(other.prioritet)
     }
@@ -250,25 +248,4 @@ sealed class Utbetalingsdag(
 
     fun dto() = dto(this.dato, this.økonomi.dto())
     protected abstract fun dto(dato: LocalDate, økonomi: ØkonomiUtDto): UtbetalingsdagUtDto
-}
-
-/**
- * Tilpasser Økonomi så det passer til Beløpkilde-porten til utbetalingslinjer
- */
-internal class BeløpkildeAdapter(økonomi: Økonomi): Beløpkilde, ØkonomiVisitor {
-    private var arbeidsgiverbeløp: Int? = null
-    private var personbeløp: Int? = null
-    init {
-        økonomi.accept(this)
-    }
-    override fun arbeidsgiverbeløp(): Int = arbeidsgiverbeløp!!
-    override fun personbeløp(): Int = personbeløp!!
-
-    override fun visitAvrundetØkonomi(
-        arbeidsgiverbeløp: Int?,
-        personbeløp: Int?
-    ) {
-        this.arbeidsgiverbeløp = arbeidsgiverbeløp
-        this.personbeløp = personbeløp
-    }
 }

@@ -2,6 +2,7 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
+import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -244,6 +245,11 @@ class Økonomi private constructor(
     }
 
     fun ikkeBetalt() = kopierMed(tilstand = Tilstand.IkkeBetalt)
+
+    internal fun dagligBeløpForFagområde(område: Fagområde): Int? = when(område) {
+        Fagområde.SykepengerRefusjon -> arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() }
+        Fagområde.Sykepenger -> personbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() }
+    }
 
     private fun kopierMed(
         grad: Prosentdel = this.grad,

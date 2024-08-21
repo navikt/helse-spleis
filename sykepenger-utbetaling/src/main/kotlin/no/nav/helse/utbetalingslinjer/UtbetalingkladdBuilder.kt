@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.økonomi.Økonomi
 
 class UtbetalingkladdBuilder(private var periode: Periode, arbeidsgivermottaker: String, personmottaker: String) {
     // bruker samme "sak id" i OS for begge oppdragene
@@ -21,10 +22,10 @@ class UtbetalingkladdBuilder(private var periode: Periode, arbeidsgivermottaker:
 
     fun build() = Utbetalingkladd(periode, arbeidsgiveroppdragBuilder.build(), personoppdragBuilder.build())
 
-    fun betalingsdag(beløpkilde: Beløpkilde, dato: LocalDate, grad: Int) {
+    fun betalingsdag(økonomi: Økonomi, dato: LocalDate, grad: Int) {
         periode = periode.oppdaterTom(dato)
-        arbeidsgiveroppdragBuilder.betalingsdag(beløpkilde, dato, grad)
-        personoppdragBuilder.betalingsdag(beløpkilde, dato, grad)
+        arbeidsgiveroppdragBuilder.betalingsdag(økonomi, dato, grad)
+        personoppdragBuilder.betalingsdag(økonomi, dato, grad)
     }
 
     fun betalingshelgedag(dato: LocalDate, grad: Int) {
