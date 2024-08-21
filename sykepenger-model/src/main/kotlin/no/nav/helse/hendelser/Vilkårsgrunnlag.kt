@@ -67,7 +67,12 @@ class Vilkårsgrunnlag(
         inntektsvurderingForSykepengegrunnlag.valider(this)
         arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
         val opptjening = opptjening(subsumsjonslogg)
-        opptjening.validerInntektMånedenFørSkjæringstidspunkt(this)
+        opptjening.validerInntektMånedenFørSkjæringstidspunkt(this).also {
+            if (harInntektMånedenFørSkjæringstidspunkt && !inntektsvurderingForSykepengegrunnlag.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
+                // Varsel spart
+                info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
+            }
+        }
         val opptjeningvurderingOk = opptjening.validerOpptjeningsdager(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
