@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Økonomi
 
@@ -16,8 +15,8 @@ internal sealed class UtbetalingstidslinjeBuilderException(message: String) : Ru
         aktivitetslogg.funksjonellFeil(RV_UT_3)
     }
 
-    internal class UforventetDagException(dag: Dag, melding: String) : UtbetalingstidslinjeBuilderException(
-        "Forventet ikke ${dag::class.simpleName} i utbetalingstidslinjen. Melding: $melding"
+    internal class ProblemdagException(melding: String) : UtbetalingstidslinjeBuilderException(
+        "Forventet ikke ProblemDag i utbetalingstidslinjen. Melding: $melding"
     )
 
 }

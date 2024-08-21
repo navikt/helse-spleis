@@ -124,7 +124,7 @@ internal class ArbeidsgiverperiodeBuilder(
         other: Hendelseskilde?,
         melding: String
     ) {
-        throw UtbetalingstidslinjeBuilderException.UforventetDagException(dag, melding)
+        throw UtbetalingstidslinjeBuilderException.ProblemdagException(melding)
     }
 
     override fun visitDag(

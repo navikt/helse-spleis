@@ -37,7 +37,7 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.UforventetDagException
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ProblemdagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -49,7 +49,7 @@ import org.junit.jupiter.api.assertThrows
 internal class UtbetalingstidslinjeBuilderTest {
     @Test
     fun problemdag() {
-        assertThrows<UforventetDagException> {
+        assertThrows<ProblemdagException> {
             undersøke(1.PROBLEM)
         }
     }
