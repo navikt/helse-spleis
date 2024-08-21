@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -291,6 +292,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)),
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+    inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018
 ): Vilkårsgrunnlag {
     return Vilkårsgrunnlag(
@@ -302,6 +304,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
         orgnummer = orgnummer,
         medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+        inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
         arbeidsforhold = arbeidsforhold
     ).apply {
         hendelselogg = this

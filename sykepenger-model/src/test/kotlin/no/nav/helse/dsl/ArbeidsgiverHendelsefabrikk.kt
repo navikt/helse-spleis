@@ -6,16 +6,21 @@ import java.time.LocalDateTime
 import java.time.temporal.Temporal
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
+import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.KanIkkeBehandlesHer
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -27,10 +32,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Svangerskapspenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -43,7 +44,6 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -345,7 +345,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         skjæringstidspunkt: LocalDate,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -356,6 +357,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             orgnummer = organisasjonsnummer,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold
         )
     }

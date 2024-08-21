@@ -3,8 +3,10 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -226,8 +228,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
         meldingsreferanseId: UUID = UUID.randomUUID(),
-        inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>
-
+        inntekterForSykepengegrunnlag: List<ArbeidsgiverInntekt>,
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INNTEKT, skjæringstidspunkt)
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = meldingsreferanseId,
@@ -240,6 +242,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList()
             ),
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold ?: listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
             )

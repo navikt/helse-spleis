@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
+import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
@@ -245,6 +246,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -269,6 +271,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
 
@@ -292,6 +295,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -303,6 +307,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
@@ -339,6 +344,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -350,6 +356,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
 
@@ -373,6 +380,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -397,6 +405,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -422,6 +431,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
@@ -437,6 +447,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(
@@ -462,6 +473,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
@@ -497,6 +509,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             orgnummer = "ORGNUMMER",
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering("ORGNUMMER", INGEN, 1.januar),
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(

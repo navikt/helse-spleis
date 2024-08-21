@@ -843,9 +843,9 @@ internal class TestMessageFactory(
     ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf(
-                Arbeidsavklaringspenger.name,
                 Medlemskap.name,
                 InntekterForSykepengegrunnlag.name,
+                InntekterForOpptjeningsvurdering.name,
                 ArbeidsforholdV2.name
             ),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -909,6 +909,9 @@ internal class TestMessageFactory(
             ),
             ekstraFelter = mapOf(
                 InntekterForSykepengegrunnlag.name to mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt
+                ),
+                InntekterForOpptjeningsvurdering.name to mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt
                 ),
                 ArbeidsforholdV2.name to mapOf(

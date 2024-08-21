@@ -13,13 +13,14 @@ internal class VilkårsgrunnlagRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator
 ) : ArbeidsgiverBehovRiver(rapidsConnection, messageMediator) {
-    override val behov = listOf(InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
+    override val behov = listOf(InntekterForSykepengegrunnlag, InntekterForOpptjeningsvurdering, ArbeidsforholdV2, Medlemskap)
 
     override val riverName = "Vilkårsgrunnlag"
 
     override fun validate(message: JsonMessage) {
         message.requireKey("vedtaksperiodeId", "tilstand")
         message.require("${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt", JsonNode::asLocalDate)
+        message.require("${InntekterForOpptjeningsvurdering.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${ArbeidsforholdV2.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${Medlemskap.name}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.interestedIn("@løsning.${Medlemskap.name}.resultat.svar") {
@@ -34,6 +35,14 @@ internal class VilkårsgrunnlagRiver(
             }
             requireArray("arbeidsforholdliste") {
                 requireKey("orgnummer", "type")
+            }
+        }
+        message.requireArray("@løsning.${InntekterForOpptjeningsvurdering.name}") {
+            require("årMåned", JsonNode::asYearMonth)
+            requireArray("inntektsliste") {
+                requireKey("beløp")
+                requireAny("inntektstype", listOf("LOENNSINNTEKT", "NAERINGSINNTEKT", "PENSJON_ELLER_TRYGD", "YTELSE_FRA_OFFENTLIGE"))
+                interestedIn("orgnummer", "fødselsnummer", "aktørId", "fordel", "beskrivelse")
             }
         }
         message.requireArray("@løsning.${ArbeidsforholdV2.name}"){

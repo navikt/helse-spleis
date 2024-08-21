@@ -1,9 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.time.YearMonth
 import no.nav.helse.desember
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -19,7 +18,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_3
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -122,20 +121,10 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-            inntekter = listOf(
-                ArbeidsgiverInntekt(a1, (0..2).map {
-                    val yearMonth = YearMonth.from(inspektør(a1).skjæringstidspunkt(1.vedtaksperiode)).minusMonths(3L - it)
-                    ArbeidsgiverInntekt.MånedligInntekt(
-                        yearMonth = yearMonth,
-                        type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                        inntekt = Inntekt.INGEN,
-                        fordel = "fordel",
-                        beskrivelse = "beskrivelse"
-                    )
-                })
-            ), arbeidsforhold = emptyList()
-        ))
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INGEN, 1.januar)
+        )
 
         assertVarsel(RV_OV_3, 1.vedtaksperiode.filter())
 

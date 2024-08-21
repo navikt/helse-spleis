@@ -490,14 +490,16 @@ internal abstract class AbstractEndToEndMediatorTest() {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, ArbeidsforholdV2))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag))
+        val skjæringstidspunktFraBehov =
+            testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
         val (_, message) = meldingsfabrikk.lagVilkårsgrunnlag(
             vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            skjæringstidspunkt = testRapid.inspektør.etterspurteBehov(Medlemskap).path("Medlemskap").path("skjæringstidspunkt").asLocalDate(),
+            skjæringstidspunkt = skjæringstidspunktFraBehov,
             tilstand = testRapid.inspektør.tilstandForEtterspurteBehov(vedtaksperiodeIndeks, InntekterForSykepengegrunnlag),
             inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag,
             inntekterForOpptjeningsvurdering = listOf(
                 TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning(
-                    måned = YearMonth.of(2017, 12),
+                    måned = YearMonth.from(skjæringstidspunktFraBehov.minusMonths(1)),
                     inntekter = listOf(
                         TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning.Inntekt(32000.0,
                             ORGNUMMER

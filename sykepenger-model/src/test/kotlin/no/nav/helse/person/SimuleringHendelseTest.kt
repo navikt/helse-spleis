@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -198,6 +199,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                     }
                 }, arbeidsforhold = emptyList()
             ),
+            inntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, 31000.månedlig, 1.januar),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017), type = Arbeidsforholdtype.ORDINÆRT)
             )

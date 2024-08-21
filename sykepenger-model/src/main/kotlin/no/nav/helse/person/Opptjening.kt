@@ -49,7 +49,9 @@ internal class Opptjening private constructor(
 
     internal fun validerInntektMånedenFørSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {
         val harInntektMånedenFørSkjæringstidspunkt = harInntektMånedenFørSkjæringstidspunkt()
-        if (!harInntektMånedenFørSkjæringstidspunkt!!) aktivitetslogg.varsel(Varselkode.RV_OV_3)
+        if (!harInntektMånedenFørSkjæringstidspunkt!!) {
+            aktivitetslogg.varsel(Varselkode.RV_OV_3)
+        }
     }
 
     internal fun accept(visitor: OpptjeningVisitor) {

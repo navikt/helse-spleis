@@ -8,6 +8,7 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Institusjonsopphold
@@ -274,9 +275,10 @@ internal abstract class AbstractDslTest {
         inntekt: Inntekt = INNTEKT,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null
     ) =
-        this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold) }
+        this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, inntekterForOpptjeningsvurdering, arbeidsforhold) }
     protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<GradertPeriode> = emptyList(),
@@ -406,10 +408,11 @@ protected fun håndterInntektsmeldingPortal(
         inntekt: Inntekt = INNTEKT,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
         orgnummer: String = a1
     ) =
-        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, arbeidsforhold)
+        bareÈnArbeidsgiver(orgnummer).håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurderingForSykepengegrunnlag, inntekterForOpptjeningsvurdering, arbeidsforhold)
     internal fun håndterYtelser(
         vedtaksperiodeId: UUID,
         foreldrepenger: List<GradertPeriode> = emptyList(),

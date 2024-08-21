@@ -14,7 +14,9 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -285,6 +287,7 @@ internal class TestPerson(
             inntekt: Inntekt = INNTEKT,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
+            inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = null,
             arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
             orgnummer: String = "aa"
         ) {
@@ -294,7 +297,8 @@ internal class TestPerson(
                 inspektør.skjæringstidspunkt(vedtaksperiodeId),
                 medlemskapstatus,
                 arbeidsforhold ?: arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },
-                inntektsvurderingForSykepengegrunnlag ?: lagStandardSykepengegrunnlag(this.orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId))
+                inntektsvurderingForSykepengegrunnlag ?: lagStandardSykepengegrunnlag(this.orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId)),
+                inntekterForOpptjeningsvurdering ?: lagStandardInntekterForOpptjeningsvurdering(this.orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId))
             ).håndter(Person::håndter)
         }
 
@@ -452,6 +456,28 @@ internal fun lagStandardSykepengegrunnlag(arbeidsgivere: List<Pair<String, Innte
 internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
     lagStandardSykepengegrunnlag(map { it to inntekt }, skjæringstidspunkt)
 
+internal fun lagStandardInntekterForOpptjeningsvurdering(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+    lagStandardInntekterForOpptjeningsvurdering(listOf(orgnummer to inntekt), skjæringstidspunkt)
+
+internal fun lagStandardInntekterForOpptjeningsvurdering(arbeidsgivere: List<Pair<String, Inntekt>>, skjæringstidspunkt: LocalDate) =
+    InntekterForOpptjeningsvurdering(inntekter = arbeidsgivere.map { arbeidsgiver ->
+        val orgnummer = arbeidsgiver.first
+        val inntekt = arbeidsgiver.second
+        val måned = skjæringstidspunkt.minusMonths(1L)
+        ArbeidsgiverInntekt(
+            arbeidsgiver = orgnummer,
+            inntekter = listOf(
+                ArbeidsgiverInntekt.MånedligInntekt(
+                    YearMonth.from(måned),
+                    inntekt,
+                    ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                    "kontantytelse",
+                    "fastloenn"
+                )
+            )
+        )
+    })
+
 internal fun standardSimuleringsresultat(orgnummer: String) = SimuleringResultatDto(
     totalbeløp = 2000,
     perioder = listOf(
@@ -502,11 +528,12 @@ internal fun TestPerson.TestArbeidsgiver.tilGodkjenning(
     arbeidsgiverperiode: List<Periode> = emptyList(),
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sykepengegrunnlagSkatt: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, beregnetInntekt, førsteFraværsdag),
+    inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering? = lagStandardInntekterForOpptjeningsvurdering(orgnummer, beregnetInntekt, førsteFraværsdag),
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
 ): UUID {
     val vedtaksperiode = nyPeriode(periode, grad)
     håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
-    håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, Medlemskapsvurdering.Medlemskapstatus.Ja, sykepengegrunnlagSkatt, arbeidsforhold)
+    håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, Medlemskapsvurdering.Medlemskapstatus.Ja, sykepengegrunnlagSkatt, inntekterForOpptjeningsvurdering, arbeidsforhold)
     håndterYtelser(vedtaksperiode)
     håndterSimulering(vedtaksperiode)
     return vedtaksperiode

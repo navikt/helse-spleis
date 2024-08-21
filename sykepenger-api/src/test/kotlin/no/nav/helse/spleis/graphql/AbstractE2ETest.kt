@@ -3,6 +3,7 @@ package no.nav.helse.spleis.graphql
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedDeque
 import no.nav.helse.Alder
@@ -10,6 +11,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -212,6 +214,23 @@ internal abstract class AbstractE2ETest {
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = behov.vedtaksperiodeId.vedtaksperiode,
             skjæringstidspunkt = behov.skjæringstidspunkt,
+            inntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(inntekter = inntekter.map { arbeidsgiverInntekt ->
+                val orgnummer = arbeidsgiverInntekt.first
+                val inntekt = arbeidsgiverInntekt.second
+                val måned = behov.skjæringstidspunkt.minusMonths(1L)
+                ArbeidsgiverInntekt(
+                    arbeidsgiver = orgnummer,
+                    inntekter = listOf(
+                        ArbeidsgiverInntekt.MånedligInntekt(
+                            YearMonth.from(måned),
+                            inntekt,
+                            ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                            "kontantytelse",
+                            "fastloenn"
+                        )
+                    )
+                )
+            }),
             arbeidsforhold = arbeidsforhold.map { (orgnr, oppstart) ->
                 Vilkårsgrunnlag.Arbeidsforhold(orgnr, oppstart, type = Arbeidsforholdtype.ORDINÆRT)
             },
@@ -237,23 +256,26 @@ internal abstract class AbstractE2ETest {
             }
         )
 
-    protected fun håndterVilkårsgrunnlag(vedtaksperiodeId: IdInnhenter = 1.vedtaksperiode, skjæringstidspunkt: LocalDate, inntekter: InntektForSykepengegrunnlag, arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, orgnummer: String = a1) {
+    protected fun håndterVilkårsgrunnlag(
+        vedtaksperiodeId: IdInnhenter = 1.vedtaksperiode,
+        skjæringstidspunkt: LocalDate,
+        inntekter: InntektForSykepengegrunnlag,
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
+        orgnummer: String = a1
+    ) {
         (fabrikker.getValue(orgnummer).lagVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId.id(orgnummer),
             skjæringstidspunkt = skjæringstidspunkt,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             arbeidsforhold = arbeidsforhold,
-            inntektsvurderingForSykepengegrunnlag = inntekter
+            inntektsvurderingForSykepengegrunnlag = inntekter,
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering
         )).håndter(Person::håndter)
     }
 
     protected fun håndterVilkårsgrunnlagTilGodkjenning() {
         håndterVilkårsgrunnlag()
-        håndterYtelserTilGodkjenning()
-    }
-
-    protected fun håndterVilkårsgrunnlagTilGodkjenning(vedtaksperiodeId: IdInnhenter, skjæringstidspunkt: LocalDate, inntekter: InntektForSykepengegrunnlag, arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, orgnummer: String) {
-        håndterVilkårsgrunnlag(vedtaksperiodeId, skjæringstidspunkt, inntekter, arbeidsforhold, orgnummer)
         håndterYtelserTilGodkjenning()
     }
 

@@ -24,12 +24,13 @@ class Vilkårsgrunnlag(
     orgnummer: String,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+    inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
     private val arbeidsforhold: List<Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
     private val opptjeningsgrunnlag = arbeidsforhold.opptjeningsgrunnlag()
-    private val harInntektMånedenFørSkjæringstidspunkt = inntektsvurderingForSykepengegrunnlag.harInntektI(YearMonth.from(skjæringstidspunkt).minusMonths(1))
+    private val harInntektMånedenFørSkjæringstidspunkt = inntekterForOpptjeningsvurdering.harInntektI(YearMonth.from(skjæringstidspunkt).minusMonths(1))
 
     internal fun erRelevant(other: UUID, skjæringstidspunktVedtaksperiode: LocalDate): Boolean {
         if (other.toString() != vedtaksperiodeId) return false

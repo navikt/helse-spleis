@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -250,7 +251,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         skjæringstidspunkt: LocalDate,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
+        inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering
     ): Vilkårsgrunnlag {
         return Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -261,6 +263,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             orgnummer = organisasjonsnummer,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             arbeidsforhold = arbeidsforhold
         )
     }

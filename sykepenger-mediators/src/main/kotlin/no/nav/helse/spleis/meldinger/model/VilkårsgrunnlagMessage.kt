@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
@@ -43,6 +44,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             InntektForSykepengegrunnlag.Arbeidsforhold(orgnummer, arbeidsforhold.flatten())
         }
 
+    private val inntekterForOpptjeningsvurdering = mapSkatteopplysninger(packet["@løsning.${Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering.name}"])
     private val arbeidsforhold = packet["@løsning.${ArbeidsforholdV2.name}"]
         .filterNot { it["orgnummer"].asText().isBlank() }
         .filter {
@@ -73,6 +75,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
 
     private val skjæringstidspunkter = listOfNotNull(
         packet["${InntekterForSykepengegrunnlag.name}.skjæringstidspunkt"].asLocalDate(),
+        packet["${Aktivitet.Behov.Behovtype.InntekterForOpptjeningsvurdering.name}.skjæringstidspunkt"].asLocalDate(),
         packet["${ArbeidsforholdV2.name}.skjæringstidspunkt"].asLocalDate(),
         packet["${Medlemskap.name}.skjæringstidspunkt"].asLocalDate(),
     )
@@ -92,6 +95,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
                 inntekter = inntekterForSykepengegrunnlag,
                 arbeidsforhold = arbeidsforholdForSykepengegrunnlag
             ),
+            inntekterForOpptjeningsvurdering = no.nav.helse.hendelser.InntekterForOpptjeningsvurdering(inntekter = inntekterForOpptjeningsvurdering),
             arbeidsforhold = arbeidsforhold
         )
 

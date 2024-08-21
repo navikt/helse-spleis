@@ -7,6 +7,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.PersonHendelsefabrikk
+import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -16,6 +17,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Infotrygdendring
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
@@ -47,6 +49,7 @@ import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.AbstractPersonTest.Companion.AKTØRID
+import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.IdInnhenter
@@ -567,6 +570,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
             })
         ), arbeidsforhold = emptyList()
     ),
+    inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering = lagStandardInntekterForOpptjeningsvurdering(ORGNUMMER, INNTEKT, inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)),
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT) },
     fnr: Personidentifikator = UNG_PERSON_FNR_2018
 ): Vilkårsgrunnlag {
@@ -574,6 +578,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         assertEtterspurt(Vilkårsgrunnlag::class, behovtype, vedtaksperiodeIdInnhenter, orgnummer)
 
     assertEtterspurt(Behovtype.InntekterForSykepengegrunnlag)
+    assertEtterspurt(Behovtype.InntekterForOpptjeningsvurdering)
     assertEtterspurt(Behovtype.ArbeidsforholdV2)
     assertEtterspurt(Behovtype.Medlemskap)
     return vilkårsgrunnlag(
@@ -583,6 +588,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         orgnummer = orgnummer,
         arbeidsforhold = arbeidsforhold,
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+        inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
         fnr = fnr
     ).håndter(Person::håndter)
 }
