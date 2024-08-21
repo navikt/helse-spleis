@@ -11,6 +11,7 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.fredag
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Dagtype.Pleiepengerdag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -23,6 +24,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
+import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -63,6 +65,90 @@ import org.junit.jupiter.api.fail
 import kotlin.reflect.KClass
 
 internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
+
+    @Test
+    fun `Stuckiness med helg involvert og tidsnære opplysninger ikke biter`() {
+        a1 { håndterSykmelding(januar) }
+        a2 {
+            håndterSykmelding(1.januar til fredag(19.januar))
+            håndterSykmelding(mandag(22.januar) til 31.januar)
+        }
+        a1 { håndterSøknad(januar) }
+        a2 {
+            håndterSøknad(1.januar til fredag(19.januar))
+            håndterSøknad(mandag(22.januar) til 31.januar)
+        }
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 { assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode)) }
+        a2 {
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        }
+        /**
+         * Kjære leser av testen: Alt før dette er litt kjedelig, men nå blir det gøy
+         * Ting ser slik ut:
+         *
+         *      A1 |---------------januar--------------|
+         *      A2 |-----------|  |--------------------|
+         *
+         * - Det lille hullet vi ikke har søknad for på A2 er helg (lørdag-søndag)
+         * - Nå kommer det en korrigerende innteksmelding fra A1 som sier
+         *   at AGP startet mandagen A2 sin andre periode starter
+         *
+
+         */
+        a1 {
+            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+            håndterInntektsmelding(listOf(mandag(22.januar) til 6.februar))
+            assertEquals("AAAAARR AAAAARR AAAAARR SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+        }
+        a2 {
+            assertEquals("SSSSSHH SSSSSHH SSSSS?? SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
+
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            assertEquals(1.januar, inspektør.førsteFraværsdag(1.vedtaksperiode))
+
+            // Perioden som nå er stuck beregner første fraværsdag før skjæringstidspunktet
+            // Første fraværsdag er fortsatt lik som før, så ingenting ble gjenbrukt og perioden er stuck
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertEquals(22.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(1.januar, inspektør.førsteFraværsdag(2.vedtaksperiode))
+
+            val venter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 2.vedtaksperiode }
+            assertEquals(2.vedtaksperiode, venter.venterPå.vedtaksperiodeId)
+            assertEquals("INNTEKTSMELDING", venter.venterPå.venteårsak.hva)
+            assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venter.venterPå.venteårsak.hvorfor)
+        }
+    }
+
+    private fun TestArbeidsgiverInspektør.førsteFraværsdag(vedtaksperiodeId: UUID) =
+        sykdomstidslinje.sisteSkjæringstidspunkt(periode(vedtaksperiodeId))
 
     @Test
     fun `revurdere seg inn i en situasjon hvor man ikke har noen første fraværsdag, men gjenbrukbare opplysninger biter læll`() {
