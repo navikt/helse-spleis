@@ -145,6 +145,10 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals("INNTEKTSMELDING", venter.venterPå.venteårsak.hva)
             assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venter.venterPå.venteårsak.hvorfor)
         }
+
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        }
     }
 
     private fun TestArbeidsgiverInspektør.førsteFraværsdag(vedtaksperiodeId: UUID) =
