@@ -764,10 +764,11 @@ internal class Arbeidsgiver private constructor(
         nyArbeidsgiverperiode: Boolean
     ) {
         if (this.organisasjonsnummer != orgnummer) return
-        val nyFørsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt) ?: skjæringstidspunkt
-        inntektsmelding.kopierTidsnærOpplysning(nyFørsteFraværsdag, hendelse, nyArbeidsgiverperiode, inntektshistorikk)
-        // TODO: lagre refusjonsopplysninger inni inntektsmelding-opplysningen?
-        refusjonsopplysninger.lagreTidsnær(nyFørsteFraværsdag, refusjonshistorikk)
+        setOfNotNull(finnFørsteFraværsdag(skjæringstidspunkt), skjæringstidspunkt).forEach { dato ->
+            inntektsmelding.kopierTidsnærOpplysning(dato, hendelse, nyArbeidsgiverperiode, inntektshistorikk)
+            // TODO: lagre refusjonsopplysninger inni inntektsmelding-opplysningen?
+            refusjonsopplysninger.lagreTidsnær(dato, refusjonshistorikk)
+        }
     }
 
     private fun søppelbøtte(hendelse: Hendelse, filter: VedtaksperiodeFilter): List<Vedtaksperiode.VedtaksperiodeForkastetEventBuilder> {

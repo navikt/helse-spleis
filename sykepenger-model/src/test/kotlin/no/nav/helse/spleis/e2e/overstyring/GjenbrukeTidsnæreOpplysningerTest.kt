@@ -144,10 +144,14 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(2.vedtaksperiode, venter.venterPå.vedtaksperiodeId)
             assertEquals("INNTEKTSMELDING", venter.venterPå.venteårsak.hva)
             assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venter.venterPå.venteårsak.hvorfor)
+
+            observatør.vedtaksperiodeVenter.clear()
+            håndterPåminnelse(2.vedtaksperiode, AVVENTER_REVURDERING, reberegning = true) // Kicker igang "ny" gjenbruk av tidsnære opplysninger
+            assertTrue(observatør.vedtaksperiodeVenter.isEmpty()) // Nå venter vi på den i avventer vilkårsprøving som ikke har noen venteårsak.
         }
 
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
         }
     }
 
