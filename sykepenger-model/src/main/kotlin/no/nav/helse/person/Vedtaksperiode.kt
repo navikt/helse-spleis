@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
+import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
@@ -163,7 +164,7 @@ internal class Vedtaksperiode private constructor(
         organisasjonsnummer = organisasjonsnummer,
         tilstand = Start,
         behandlinger = Behandlinger(),
-        egenmeldingsperioder = emptyList(),
+        egenmeldingsperioder = søknad.egenmeldingsperioder(),
         opprettet = LocalDateTime.now(),
         arbeidsgiverjurist = jurist
     ) {
@@ -590,12 +591,17 @@ internal class Vedtaksperiode private constructor(
         behandlinger.håndterEndring(person, arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(), validering)
     }
 
-    private fun håndterEgenmeldingsperioder(søknad: Søknad) {
-        egenmeldingsperioder = (egenmeldingsperioder + søknad.egenmeldingsperioder()).grupperSammenhengendePerioderMedHensynTilHelg()
+    private fun håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad: Søknad) {
+        val nyeEgenmeldingsperioder = søknad.egenmeldingsperioder()
+        if (egenmeldingsperioder.lik(nyeEgenmeldingsperioder)) return
+        if (nyeEgenmeldingsperioder.isEmpty()) return søknad.info("Hadde egenmeldingsperioder $egenmeldingsperioder, men den overlappende søknaden har ingen.")
+
+        val sammenslåtteEgenmeldingsperioder = (egenmeldingsperioder + nyeEgenmeldingsperioder).grupperSammenhengendePerioderMedHensynTilHelg()
+        søknad.info("Oppdaterer egenmeldingsperioder fra $egenmeldingsperioder til $sammenslåtteEgenmeldingsperioder")
+        egenmeldingsperioder = sammenslåtteEgenmeldingsperioder
     }
 
     private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
-        håndterEgenmeldingsperioder(søknad)
         oppdaterHistorikk(søknad) {
             søknad.valider(vilkårsgrunnlag, jurist)
         }
@@ -609,6 +615,7 @@ internal class Vedtaksperiode private constructor(
             return forkast(søknad)
         }
         søknad.info("Håndterer overlappende søknad")
+        håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad)
         håndterSøknad(søknad) { nesteTilstand }
         person.igangsettOverstyring(Revurderingseventyr.korrigertSøknad(søknad, skjæringstidspunkt, periode))
     }
@@ -618,8 +625,8 @@ internal class Vedtaksperiode private constructor(
         if (søknad.sendtTilGosys()) return søknad.funksjonellFeil(RV_SØ_30)
         if (søknad.utenlandskSykmelding()) return søknad.funksjonellFeil(RV_SØ_29)
         else {
-            håndterEgenmeldingsperioder(søknad)
             søknad.info("Søknad har trigget en revurdering")
+            håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad)
             oppdaterHistorikk(søknad) {
                 søknad.valider(vilkårsgrunnlag, jurist)
             }

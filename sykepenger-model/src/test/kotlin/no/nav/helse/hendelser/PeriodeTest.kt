@@ -9,6 +9,7 @@ import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.Periode.Companion.intersect
+import no.nav.helse.hendelser.Periode.Companion.lik
 import no.nav.helse.hendelser.Periode.Companion.merge
 import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
@@ -384,6 +385,16 @@ internal class PeriodeTest {
         assertEquals(emptyList<Periode>(), emptyList<Periode>().intersect(emptyList()))
         assertEquals(emptyList<Periode>(), perioder1.intersect(emptyList()))
         assertEquals(emptyList<Periode>(), emptyList<Periode>().intersect(perioder1))
+    }
+
+    @Test
+    fun `likhet på lister av perioder`() {
+        assertTrue(listOf(januar, februar).lik(listOf(februar, januar)))
+        assertTrue(listOf(januar, februar).lik(listOf(januar, februar)))
+        assertFalse(listOf(januar, februar).lik(listOf(januar, 1.februar til 27.februar)))
+        assertTrue((januar.map { it til it }).lik(januar.shuffled().map { it til it }))
+        assertFalse(((1.januar til 30.januar).map { it til it }).lik(januar.shuffled().map { it til it }))
+        assertTrue(emptyList<Periode>().lik(emptyList()))
     }
 
     private fun assertSize(expected: Int, periode: Periode) {
