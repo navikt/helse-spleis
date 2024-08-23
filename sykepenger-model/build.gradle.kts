@@ -16,6 +16,12 @@ dependencies {
     testImplementation("com.github.navikt.spill_av_im:matching:$tbdSpillAvImMatchingVersion")
 
     testImplementation(project(":sykepenger-serde"))
+
+    // for å kunne lage spannerpersoner i tester med OpenInSpanner-annotation
+    testImplementation(project(":sykepenger-api-dto"))
+    // for å kunne lage json av spannerpersoner
+    testImplementation(libs.bundles.jackson)
+
     implementation(libs.bundles.logging) {
         exclude("com.fasterxml.jackson.core")
         exclude("com.fasterxml.jackson.dataformat")
