@@ -333,7 +333,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() = PersonData.ArbeidsgiverData.Ve
     },
     skjæringstidspunkt = skjæringstidspunkt,
     behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },
-    egenmeldingsperioder = egenmeldingsdager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    egenmeldingsperioder = egenmeldingsperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     opprettet = opprettet,
     oppdatert = oppdatert
 )

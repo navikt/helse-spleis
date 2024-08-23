@@ -2773,7 +2773,7 @@ internal class Vedtaksperiode private constructor(
         sykmeldingTom = this.sykmeldingsperiode.endInclusive,
         behandlinger = behandlinger.dto(),
         venteårsak = LazyVedtaksperiodeVenterDto { nestemann?.let { tilstand.venter(this, arbeidsgivere, it)?.dto() } },
-        egenmeldingsdager = egenmeldingsperioder.map { it.dto() },
+        egenmeldingsperioder = egenmeldingsperioder.map { it.dto() },
         opprettet = opprettet,
         oppdatert = oppdatert
     )

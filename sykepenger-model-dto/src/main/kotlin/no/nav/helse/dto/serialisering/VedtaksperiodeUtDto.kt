@@ -17,7 +17,7 @@ data class VedtaksperiodeUtDto(
     val sykmeldingTom: LocalDate,
     val behandlinger: BehandlingerUtDto,
     val venteårsak: LazyVedtaksperiodeVenterDto,
-    val egenmeldingsdager: List<PeriodeDto>,
+    val egenmeldingsperioder: List<PeriodeDto>,
     val opprettet: LocalDateTime,
     var oppdatert: LocalDateTime
 )
