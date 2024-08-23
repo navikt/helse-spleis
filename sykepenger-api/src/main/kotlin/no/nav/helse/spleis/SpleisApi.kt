@@ -20,11 +20,11 @@ import io.ktor.util.pipeline.PipelineContext
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.dto.tilSpannerPersonDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.person.Person
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
-import no.nav.helse.spleis.spanner.tilSpannerPersonDto
 import no.nav.helse.spleis.sporing.serializePersonForSporing
 
 internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonDao, spurteDuClient: SpurteDuClient?) {

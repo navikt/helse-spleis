@@ -19,6 +19,7 @@ val mainClass = "no.nav.helse.spleis.AppKt"
 dependencies {
     implementation(project(":sykepenger-model"))
     implementation(project(":sykepenger-serde"))
+    implementation(project(":sykepenger-api-dto"))
     implementation("com.github.navikt.tbd-libs:azure-token-client-default:$tbdLibsVersion")
     implementation("com.github.navikt.tbd-libs:spurtedu-client:$tbdLibsVersion")
     implementation(libs.bundles.jackson)
