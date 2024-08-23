@@ -1,0 +1,65 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "sykdomstidslinje": {
+                    "dager": [
+                      {
+                        "type": "ARBEIDSGIVERDAG",
+                        "kilde": {
+                          "type": "Søknad"
+                        },
+                        "fom": "2018-01-01",
+                        "tom": "2018-01-02",
+                        "dato": null
+                      },
+                      {
+                        "type": "ARBEIDSGIVERDAG",
+                        "kilde": {
+                          "type": "Søknad"
+                        },
+                        "fom": null,
+                        "tom": null,
+                        "dato": "2018-01-04"
+                      },
+                      {
+                        "type": "ARBEIDSGIVERDAG",
+                        "kilde": {
+                          "type": "Inntektsmelding"
+                        },
+                        "fom": "2018-01-05",
+                        "tom": "2018-01-06",
+                        "dato": null
+                      },
+                      {
+                        "type": "SYKEDAG",
+                        "kilde": {
+                          "type": "Søknad"
+                        },
+                        "fom": "2018-01-07",
+                        "tom": "2018-01-31",
+                        "dato": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "egenmeldingsperioder": [
+            {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 298
+}

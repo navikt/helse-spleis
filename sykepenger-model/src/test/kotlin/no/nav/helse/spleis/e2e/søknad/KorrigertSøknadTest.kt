@@ -486,10 +486,10 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
     @Test
     fun `Korrigerende søknad appender egenmeldingsperioder til vedtaksperioden`() {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
+        håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
         assertEquals(listOf(1.januar til 2.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.egenmeldingsperioder)
 
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), egenmeldinger = listOf(5.januar til 6.januar))
+        håndterSøknad(Sykdom(7.januar, 31.januar, 100.prosent), egenmeldinger = listOf(5.januar til 6.januar))
         assertEquals(listOf(1.januar til 2.januar, 5.januar til 6.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.egenmeldingsperioder)
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), egenmeldinger = listOf(2.januar til  5.januar))
