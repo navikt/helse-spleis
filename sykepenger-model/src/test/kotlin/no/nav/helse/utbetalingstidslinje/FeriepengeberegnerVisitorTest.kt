@@ -98,7 +98,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
                     1.desember(2017),
                     31.januar(2018),
                     1000,
-                    14.mai(2024)
+                    24.august(2024)
                 )
             )
         )
