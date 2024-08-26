@@ -65,3 +65,5 @@ spec:
     value: none
   - name: TILKOMMEN_INNTEKT
     value: "false"
+  - name: EGENMELDING_STREKKER_IKKE_SYKDOMSTIDSLINJE
+    value: "false"

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.Alder
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SYKMELDT
@@ -74,11 +75,6 @@ class Søknad(
         if (perioder.isEmpty()) logiskFeil("Søknad må inneholde perioder")
         sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: logiskFeil("Søknad inneholder ikke sykdomsperioder")
         if (perioder.inneholderDagerEtter(sykdomsperiode.endInclusive)) logiskFeil("Søknad inneholder dager etter siste sykdomsdag")
-        val egenmeldingstidslinje = egenmeldinger
-            .map { Søknadsperiode.Arbeidsgiverdag(it.start, it.endInclusive) }
-            .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
-            .merge(Dagturnering.SØKNAD::beste)
-            .fremTilOgMed(sykdomsperiode.endInclusive)
 
         val søknadstidslinje = perioder
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
@@ -86,7 +82,19 @@ class Søknad(
             .merge(Dagturnering.SØKNAD::beste)
             .subset(sykdomsperiode)
 
-        opprinneligSykdomstidslinje = egenmeldingstidslinje.merge(søknadstidslinje, replace)
+        if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) {
+            opprinneligSykdomstidslinje = søknadstidslinje // Kan kvitte oss med opprinneligSykdomstidslinje når vi kan kvitte oss med togglen
+        }
+        else {
+            val egenmeldingstidslinje = egenmeldinger
+                .map { Søknadsperiode.Arbeidsgiverdag(it.start, it.endInclusive) }
+                .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
+                .merge(Dagturnering.SØKNAD::beste)
+                .fremTilOgMed(sykdomsperiode.endInclusive)
+
+            opprinneligSykdomstidslinje = egenmeldingstidslinje.merge(søknadstidslinje, replace)
+        }
+
         sykdomstidslinje = opprinneligSykdomstidslinje
     }
 
@@ -101,8 +109,10 @@ class Søknad(
     }
 
     override fun trimSykdomstidslinje(fom: LocalDate) {
-        if (fom > sykdomsperiode.endInclusive) return
-        sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
+        if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.disabled) {
+            if (fom > sykdomsperiode.endInclusive) return
+            sykdomstidslinje = sykdomstidslinje.fraOgMed(fom)
+        }
     }
 
     override fun dokumentsporing() =
