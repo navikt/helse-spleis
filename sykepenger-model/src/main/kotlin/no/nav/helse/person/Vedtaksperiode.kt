@@ -967,8 +967,9 @@ internal class Vedtaksperiode private constructor(
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
         val perioder = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .map { it.id to it.behandlinger }
+        val auukerIForkant = person.auuerIForkant(this).map { it.id }
         val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
-        behandlinger.godkjenning(hendelse, erForlengelse(), perioder, arbeidsgiver.kanForkastes(this, Aktivitetslogg()), finnArbeidsgiverperiode(), harPeriodeRettFør)
+        behandlinger.godkjenning(hendelse, erForlengelse(), perioder, auukerIForkant, arbeidsgiver.kanForkastes(this, Aktivitetslogg()), finnArbeidsgiverperiode(), harPeriodeRettFør)
     }
     internal fun gjenopptaBehandling(hendelse: Hendelse, arbeidsgivere: Iterable<Arbeidsgiver>) {
         hendelse.kontekst(arbeidsgiver)
@@ -2485,6 +2486,13 @@ internal class Vedtaksperiode private constructor(
                 .filter { it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt }
                 .filter { it.måInnhenteInntektEllerRefusjon(Aktivitetslogg()) }
                 .minOrNull()
+        }
+
+        internal fun Iterable<Vedtaksperiode>.finnAuuerIForkant(utgangspunkt: Vedtaksperiode): List<Vedtaksperiode> {
+            val forrigeAvsluttet = this.lastOrNull { it.tilstand == Avsluttet && it < utgangspunkt }
+            return this.filter { vedtaksperiode ->
+                vedtaksperiode.tilstand == AvsluttetUtenUtbetaling && (forrigeAvsluttet == null || vedtaksperiode > forrigeAvsluttet) && vedtaksperiode < utgangspunkt
+            }
         }
 
         // Fredet funksjonsnavn

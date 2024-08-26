@@ -41,6 +41,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
+import no.nav.helse.person.Vedtaksperiode.Companion.finnAuuerIForkant
 import no.nav.helse.person.Vedtaksperiode.Companion.førsteOverlappendePeriodeSomTrengerRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.førstePeriodeSomTrengerInntektTilVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
@@ -733,6 +734,13 @@ internal class Arbeidsgiver private constructor(
                 sammenhengendePerioder.add(it)
         }
         return sammenhengendePerioder
+    }
+
+    // finner auuer før vedtaksperioden, men etter forrige avsluttede vedtaksperiode.
+    // brukes av spesialist for å avdekke totrinns, om noen av auu'ene har fått en overstyring
+    // som skal "dryppe over" på neste vedtaksperiode til godkjenning
+    internal fun finnAuuerIForkant(utgangspunkt: Vedtaksperiode): List<Vedtaksperiode> {
+        return vedtaksperioder.finnAuuerIForkant(utgangspunkt)
     }
 
     private fun addInntektsmelding(inntektsmelding: Inntektsmelding, dagoverstyring: Revurderingseventyr?) {

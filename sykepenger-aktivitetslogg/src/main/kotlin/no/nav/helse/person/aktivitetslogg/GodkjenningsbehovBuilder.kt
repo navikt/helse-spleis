@@ -14,6 +14,7 @@ class GodkjenningsbehovBuilder(
     periode: ClosedRange<LocalDate>,
     private val behandlingId: UUID,
     private val perioderMedSammeSkjæringstidspunkt: List<PeriodeMedSammeSkjæringstidspunkt>,
+    private val auuerIForkant: List<UUID>,
     private val hendelser: Set<UUID>
 ) {
     private val tags: MutableSet<String> = mutableSetOf()
@@ -132,6 +133,7 @@ class GodkjenningsbehovBuilder(
                     "tom" to it.periode.endInclusive.toString()
                 )
             },
+            "auuerIForkant" to auuerIForkant,
             "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {
                 is FastsattIInfotrygd -> mapOf(
                     "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt,

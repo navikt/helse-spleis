@@ -249,6 +249,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(godkjenning.path("omregnedeÅrsinntekter").path(0).path("beløp").isDouble)
         assertTrue(godkjenning.path("behandlingId").asText().isNotEmpty())
         assertTrue(godkjenning.path("perioderMedSammeSkjæringstidspunkt").isArray)
+        assertTrue(godkjenning.path("auuerIForkant").isArray)
         assertFalse(godkjenning.path("perioderMedSammeSkjæringstidspunkt").isEmpty)
         godkjenning.path("perioderMedSammeSkjæringstidspunkt").path(0).also {
             assertTrue(it.path("vedtaksperiodeId").asText().isNotEmpty())
