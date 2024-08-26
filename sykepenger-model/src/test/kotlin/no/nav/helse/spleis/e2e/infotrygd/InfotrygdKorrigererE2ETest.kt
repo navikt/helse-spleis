@@ -71,7 +71,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to sykefraværstilfeller blir til en, starter med AUU`() = Toggle.Spekemat.disable {
+    fun `to sykefraværstilfeller blir til en, starter med AUU`() {
         createDobbelutbetalingPerson()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
@@ -97,7 +97,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to sykefraværstilfeller blir til en, starter med Avsluttet`() = Toggle.Spekemat.disable {
+    fun `to sykefraværstilfeller blir til en, starter med Avsluttet`() {
         createAuuBlirMedIRevureringPerson()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
