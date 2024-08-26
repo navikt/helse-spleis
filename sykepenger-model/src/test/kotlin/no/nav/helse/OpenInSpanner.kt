@@ -1,12 +1,13 @@
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.awt.Desktop
-import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.util.UUID
 import no.nav.helse.dto.tilSpannerPersonDto
 import no.nav.helse.inspectors.personLogg
@@ -35,41 +36,43 @@ class SpannerEtterTestInterceptor : TestWatcher {
     }
 
     override fun testSuccessful(context: ExtensionContext?) {
-        // sjekk at vi har spanner-config
-        val spannerConfigJson = {}.javaClass.getResource("/spanner_config.json")?.readText(Charsets.UTF_8)
-        if (spannerConfigJson == null) Error("Fant ikke spanner_config.json. Finnes den i resources-mmappen?")
-        val tree = objectMapper.readTree(spannerConfigJson)
-        val map: Map<String, String> = objectMapper.treeToValue(tree)
-        // sjekk at vi har feltene vi trenger i spanner-config
-        check(map.containsKey("filplassering") && map.containsKey("person_lokal_uuid") && map.containsKey("spanner_frontend_port"))
-
         // fisk ut person på et vis og opprett SpannerDto
         val person = context!!.testInstance.get().get("person") as Person
         val spannerPerson = person.dto().tilSpannerPersonDto()
         val personJson = objectMapper.writeValueAsString(spannerPerson)
+
         // aktivitetsloggen krever litt mer greier ettersom spanner henter den fra sparsom på ekte
         val aktivtetsloggV2Json = SugUtAlleAktivitetene(person.personLogg)
 
         // trikser inn aktivitetsloggen. Dette burde sikkert gjøres på en bedre måte
         val json = "{" + aktivtetsloggV2Json.drop(1).dropLast(1) + "," + personJson.drop(1)
 
-        // skriver spannerDto til filsystem
-        val writeLocation = map["filplassering"] + "/jsonPersonLokalFraSpleis.json"
-        val fil = File(writeLocation)
-        if (!fil.exists()) {
-            fil.createNewFile()
-        }
-        fil.printWriter().use { printer ->
-            printer.println(json)
-        }
+        // poster tullegutten til spannerish
+        val uri = lastOppTilSpannerish(json)
 
         // Åpne i browser på din supercomputer
+        åpneBrowser(uri)
+    }
+
+    private fun lastOppTilSpannerish(json: String): URI {
+        val uuid = UUID.randomUUID()
+        HttpClient.newHttpClient().use { client ->
+            // Må laste opp mot intern.dev pga. en Microsoft-redirect på ansatt.dev. Så må ha naisdevicen på
+            val request = HttpRequest.newBuilder(URI("https://spannerish.intern.dev.nav.no/api/person/$uuid"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build()
+            val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+            check(response.statusCode() == 201) { "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?"}
+        }
+        // Men vi kan se på den i ansatt.dev da, så kan den deles med folk uten naisdevice
+        return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid")
+    }
+
+    private fun åpneBrowser(uri: URI) {
         if (Desktop.isDesktopSupported()) {
             val desktop = Desktop.getDesktop()
             try {
-                val port = map["spanner_frontend_port"]
-                val uuid = map["person_lokal_uuid"]
-                val uri = URI("http://localhost:$port/person/$uuid")
                 desktop.browse(uri)
             } catch (excp: IOException) {
                 excp.printStackTrace()
@@ -77,7 +80,7 @@ class SpannerEtterTestInterceptor : TestWatcher {
                 excp.printStackTrace()
             }
         } else {
-            Error("Desktop er ikke støttet")
+            error("Desktop er ikke støttet")
         }
     }
 
