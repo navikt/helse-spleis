@@ -696,12 +696,6 @@ internal class Arbeidsgiver private constructor(
             .merge(sykdomstidslinje(), replace)
     }
 
-    internal fun migrerArbeidsgiverperiode(): (vedtaksperiode: Periode, historiskTidsstempel: LocalDateTime) -> List<Periode> {
-        return { vedtaksperiode: Periode, historiskTidsstempel: LocalDateTime ->
-            person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikk.historiskSykdomstidslinje(historiskTidsstempel), null).finn(vedtaksperiode)?.grupperSammenhengendePerioder() ?: emptyList()
-        }
-    }
-
     internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
         person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), null).finn(vedtaksperiode)?.grupperSammenhengendePerioder() ?: emptyList()
     }

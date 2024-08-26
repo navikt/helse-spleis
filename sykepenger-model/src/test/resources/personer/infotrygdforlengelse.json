@@ -137,6 +137,7 @@
                   "tom": "2018-02-28",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -174,6 +175,7 @@
                   "tom": "2018-02-28",
                   "utbetalingId": "ac1bb797-0ab3-4bca-b796-a22d2028e0e3",
                   "vilkårsgrunnlagId": "83d1fbd3-5e75-4489-ab24-a04b043bd8f1",
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {

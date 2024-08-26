@@ -22,8 +22,6 @@ class Sykdomshistorikk private constructor(
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
-    internal fun historiskSykdomstidslinje(tidsstempel: LocalDateTime) = Element.historiskSykdomstidslinje(elementer, tidsstempel).utenProblemdager()
-
     internal fun håndter(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {
         val nyttElement = hendelse.element()
         val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse) ?: return sykdomstidslinje()
@@ -102,8 +100,6 @@ class Sykdomshistorikk private constructor(
             }
 
             internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
-            internal fun historiskSykdomstidslinje(elementer: List<Element>, datum: LocalDateTime) =
-                elementer.firstOrNull { it.tidsstempel <= datum.plusSeconds(1) }?.beregnetSykdomstidslinje ?: Sykdomstidslinje()
 
             internal fun opprett(
                 meldingsreferanseId: UUID,

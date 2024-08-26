@@ -407,6 +407,7 @@
                   "tom": "2018-01-16",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -444,6 +445,7 @@
                   "tom": "2018-01-16",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -481,6 +483,7 @@
                   "tom": "2018-01-16",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -518,6 +521,7 @@
                   "tom": "2018-01-16",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -555,6 +559,7 @@
                   "tom": "2018-01-16",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -616,6 +621,7 @@
                   "tom": "2018-01-31",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -653,6 +659,7 @@
                   "tom": "2018-01-31",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -690,6 +697,7 @@
                   "tom": "2018-01-31",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -727,6 +735,7 @@
                   "tom": "2018-01-31",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -764,6 +773,7 @@
                   "tom": "2018-01-31",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -801,6 +811,7 @@
                   "tom": "2018-01-31",
                   "utbetalingId": "8a185ce1-349a-40f5-a891-d35cbdaf9386",
                   "vilkårsgrunnlagId": "23ea1cac-8ff4-4a33-bf02-adcf362613a0",
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -862,6 +873,7 @@
                   "tom": "2018-03-19",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {
@@ -923,6 +935,7 @@
                   "tom": "2018-03-31",
                   "utbetalingId": null,
                   "vilkårsgrunnlagId": null,
+                  "arbeidsgiverperioder": [],
                   "sykdomstidslinje": {
                     "dager": [
                       {

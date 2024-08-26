@@ -17,5 +17,5 @@ data class BehandlingendringInnDto(
     val dokumentsporing: DokumentsporingDto,
     val sykdomstidslinje: SykdomstidslinjeDto,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgiverperiode: List<PeriodeDto>?
+    val arbeidsgiverperiode: List<PeriodeDto>
 )

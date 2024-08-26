@@ -846,7 +846,7 @@ data class PersonData(
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
-                    val arbeidsgiverperioder: List<PeriodeData>?
+                    val arbeidsgiverperioder: List<PeriodeData>
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -858,7 +858,7 @@ data class PersonData(
                         dokumentsporing = this.dokumentsporing.tilDto(),
                         sykdomstidslinje = this.sykdomstidslinje.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
-                        arbeidsgiverperiode = arbeidsgiverperioder?.map { it.tilDto() }
+                        arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() }
                     )
                 }
             }

@@ -53,8 +53,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) {
     internal constructor() : this(emptyList())
     companion object {
-        fun gjenopprett(dto: BehandlingerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>, migrerArbeidsgiverperiode: (Periode, LocalDateTime) -> List<Periode>) = Behandlinger(
-            behandlinger = dto.behandlinger.map { Behandling.gjenopprett(it, grunnlagsdata, utbetalinger, migrerArbeidsgiverperiode) }
+        fun gjenopprett(dto: BehandlingerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Behandlinger(
+            behandlinger = dto.behandlinger.map { Behandling.gjenopprett(it, grunnlagsdata, utbetalinger) }
         )
     }
     private val utbetalingene get() = behandlinger.mapNotNull(Behandling::utbetaling)
@@ -414,7 +414,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             companion object {
                 val IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT = LocalDate.MIN
                 val List<Endring>.dokumentsporing get() = map { it.dokumentsporing }.toSet()
-                fun gjenopprett(dto: BehandlingendringInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>, migrerArbeidsgiverperiode: (Periode, LocalDateTime) -> List<Periode>): Endring {
+                fun gjenopprett(dto: BehandlingendringInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Endring {
                     val periode = Periode.gjenopprett(dto.periode)
                     return Endring(
                         id = dto.id,
@@ -426,7 +426,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         dokumentsporing = Dokumentsporing.gjenopprett(dto.dokumentsporing),
                         sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje),
                         skjæringstidspunkt = dto.skjæringstidspunkt,
-                        arbeidsgiverperiode = dto.arbeidsgiverperiode?.map { Periode.gjenopprett(it) } ?: migrerArbeidsgiverperiode(periode, dto.tidsstempel)
+                        arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) }
                     )
                 }
             }
@@ -1026,7 +1026,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             private val List<Behandling>.forrigeIverksatte get() = lastOrNull { it.vedtakFattet != null }
 
-            internal fun gjenopprett(dto: BehandlingInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>, migrerArbeidsgiverperiode: (Periode, LocalDateTime) -> List<Periode>): Behandling {
+            internal fun gjenopprett(dto: BehandlingInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Behandling {
                 return Behandling(
                     id = dto.id,
                     tilstand = when (dto.tilstand) {
@@ -1043,7 +1043,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         BehandlingtilstandDto.VEDTAK_FATTET -> Tilstand.VedtakFattet
                         BehandlingtilstandDto.VEDTAK_IVERKSATT -> Tilstand.VedtakIverksatt
                     },
-                    endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger, migrerArbeidsgiverperiode) }.toMutableList(),
+                    endringer = dto.endringer.map { Endring.gjenopprett(it, grunnlagsdata, utbetalinger) }.toMutableList(),
                     vedtakFattet = dto.vedtakFattet,
                     avsluttet = dto.avsluttet,
                     kilde = Behandlingkilde.gjenopprett(dto.kilde),
