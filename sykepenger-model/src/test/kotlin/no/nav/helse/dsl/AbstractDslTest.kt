@@ -79,6 +79,7 @@ internal abstract class AbstractDslTest {
     protected lateinit var jurist: MaskinellJurist
     protected lateinit var observatør: TestObservatør
     private lateinit var testperson: TestPerson
+    @Suppress("unused") private val person get() = testperson.person // Hen brukes av @OpenInSpanner
     private lateinit var deferredLog: DeferredLog
 
     protected fun Int.vedtaksperiode(orgnummer: String) = orgnummer { vedtaksperiode }
