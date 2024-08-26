@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
-internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
+internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private val a1Inspektør get() = TestArbeidsgiverInspektør(person, a1)
     private val a2Inspektør get() = TestArbeidsgiverInspektør(person, a2)

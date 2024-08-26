@@ -26,7 +26,7 @@ import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.Inntekter
+import no.nav.helse.person.Vedtaksperioder
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -290,7 +290,7 @@ internal class InfotrygdhistorikkTest {
         )))
         val sykdomstidslinje = 31.S
         val builder = UtbetalingstidslinjeBuilder(
-            Inntekter(
+            Vedtaksperioder(
                 hendelse = Aktivitetslogg(),
                 organisasjonsnummer = "a1",
                 vilkårsgrunnlagHistorikk = mapOf(
@@ -312,7 +312,7 @@ internal class InfotrygdhistorikkTest {
         )))
         val sykdomstidslinje = 31.opphold + 28.S
         val builder = UtbetalingstidslinjeBuilder(
-            Inntekter(
+            Vedtaksperioder(
                 hendelse = Aktivitetslogg(),
                 organisasjonsnummer = "a1",
                 vilkårsgrunnlagHistorikk = mapOf(

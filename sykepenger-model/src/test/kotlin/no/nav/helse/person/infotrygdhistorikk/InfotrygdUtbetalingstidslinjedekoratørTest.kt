@@ -17,7 +17,7 @@ import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
-import no.nav.helse.utbetalingstidslinje.Inntekter
+import no.nav.helse.person.Vedtaksperioder
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -37,7 +37,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `ekskluderer dager før første dag`() {
         val builder = UtbetalingstidslinjeBuilder(
-            Inntekter(
+            Vedtaksperioder(
                 hendelse = Aktivitetslogg(),
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
@@ -56,7 +56,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `ekskluderer infotrygd-snuter`() {
         val builder = UtbetalingstidslinjeBuilder(
-            Inntekter(
+            Vedtaksperioder(
                 hendelse = Aktivitetslogg(),
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
@@ -75,7 +75,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `ekskluderer infotrygd-haler`() {
         val builder = UtbetalingstidslinjeBuilder(
-            Inntekter(
+            Vedtaksperioder(
                 hendelse = Aktivitetslogg(),
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
@@ -94,7 +94,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `legger ikke til samme ukjente dag flere ganger selv om det er utbetalt for flere arbeidsgivere`() {
         val builder = UtbetalingstidslinjeBuilder(
-            Inntekter(
+            Vedtaksperioder(
                 hendelse = Aktivitetslogg(),
                 vilkårsgrunnlagHistorikk = mapOf(
                     1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())

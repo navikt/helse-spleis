@@ -1,16 +1,15 @@
-package no.nav.helse.utbetalingstidslinje
+package no.nav.helse.person
 
 import java.time.LocalDate
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.inngårIkkeISykepengegrunnlaget
 import no.nav.helse.person.Vedtaksperiode.Companion.manglerRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.manglerVilkårsgrunnlag
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Økonomi
 
-internal class Inntekter(
+internal class Vedtaksperioder(
     private val hendelse: IAktivitetslogg,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val organisasjonsnummer: String,

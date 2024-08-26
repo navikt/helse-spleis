@@ -10,6 +10,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.person.Vedtaksperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
@@ -888,7 +889,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         betalteInfotrygddager: List<Periode> = emptyList()
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
-        val inntekter = Inntekter(
+        val inntekter = Vedtaksperioder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),

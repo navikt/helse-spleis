@@ -79,7 +79,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 
@@ -852,7 +851,7 @@ internal class Arbeidsgiver private constructor(
         infotrygdhistorikk: Infotrygdhistorikk,
         subsumsjonslogg: Subsumsjonslogg
     ): Utbetalingstidslinje {
-        val inntekter = Inntekter(
+        val inntekter = Vedtaksperioder(
             hendelse = hendelse,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = regler,

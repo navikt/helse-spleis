@@ -12,6 +12,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.Vedtaksperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
@@ -628,7 +629,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     )
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
-        val inntekter = Inntekter(
+        val inntekter = Vedtaksperioder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),

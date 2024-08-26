@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.person.Vedtaksperioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
@@ -21,7 +22,7 @@ internal sealed class UtbetalingstidslinjeBuilderException(message: String) : Ru
 
 }
 
-internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, private val beregningsperiode: Periode) : ArbeidsgiverperiodeMediator {
+internal class UtbetalingstidslinjeBuilder(private val vedtaksperioder: Vedtaksperioder, private val beregningsperiode: Periode) : ArbeidsgiverperiodeMediator {
     private val builder = Utbetalingstidslinje.Builder()
     private val kildeSykmelding = mutableSetOf<LocalDate>()
 
@@ -31,15 +32,15 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     }
 
     override fun fridag(dato: LocalDate) {
-        builder.addFridag(dato, inntekter.medInntekt(dato, Økonomi.ikkeBetalt()))
+        builder.addFridag(dato, vedtaksperioder.medInntekt(dato, Økonomi.ikkeBetalt()))
     }
 
     override fun fridagOppholdsdag(dato: LocalDate) {
-        builder.addFridag(dato, inntekter.medInntekt(dato, Økonomi.ikkeBetalt()))
+        builder.addFridag(dato, vedtaksperioder.medInntekt(dato, Økonomi.ikkeBetalt()))
     }
 
     override fun arbeidsdag(dato: LocalDate) {
-        builder.addArbeidsdag(dato, inntekter.medInntekt(dato, Økonomi.ikkeBetalt()))
+        builder.addArbeidsdag(dato, vedtaksperioder.medInntekt(dato, Økonomi.ikkeBetalt()))
     }
 
     override fun arbeidsgiverperiodedag(
@@ -47,7 +48,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         økonomi: Økonomi,
         kilde: Hendelseskilde
     ) {
-        builder.addArbeidsgiverperiodedag(dato, inntekter.medInntekt(dato, økonomi.ikkeBetalt()))
+        builder.addArbeidsgiverperiodedag(dato, vedtaksperioder.medInntekt(dato, økonomi.ikkeBetalt()))
     }
 
     override fun arbeidsgiverperiodedagNav(
@@ -56,8 +57,8 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
         kilde: Hendelseskilde
     ) {
         val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
-            true -> inntekter.medUtbetalingsopplysninger(dato, økonomi)
-            false -> inntekter.medInntekt(dato, økonomi)
+            true -> vedtaksperioder.medUtbetalingsopplysninger(dato, økonomi)
+            false -> vedtaksperioder.medInntekt(dato, økonomi)
         }
         builder.addArbeidsgiverperiodedagNav(dato, medUtbetalingsopplysninger)
     }
@@ -67,19 +68,19 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter, pri
     }
 
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        if (dato.erHelg()) return builder.addHelg(dato, inntekter.medInntekt(dato, økonomi.ikkeBetalt()))
+        if (dato.erHelg()) return builder.addHelg(dato, vedtaksperioder.medInntekt(dato, økonomi.ikkeBetalt()))
         val medUtbetalingsopplysninger = when (dato in beregningsperiode) {
-            true -> inntekter.medUtbetalingsopplysninger(dato, økonomi)
-            false -> inntekter.medInntekt(dato, økonomi)
+            true -> vedtaksperioder.medUtbetalingsopplysninger(dato, økonomi)
+            false -> vedtaksperioder.medInntekt(dato, økonomi)
         }
         builder.addNAVdag(dato, medUtbetalingsopplysninger)
     }
 
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
-        builder.addForeldetDag(dato, inntekter.medInntekt(dato, økonomi))
+        builder.addForeldetDag(dato, vedtaksperioder.medInntekt(dato, økonomi))
     }
 
     override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
-        builder.addAvvistDag(dato, inntekter.medInntekt(dato, økonomi.ikkeBetalt()), listOf(begrunnelse))
+        builder.addAvvistDag(dato, vedtaksperioder.medInntekt(dato, økonomi.ikkeBetalt()), listOf(begrunnelse))
     }
 }
