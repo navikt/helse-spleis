@@ -132,12 +132,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         hendelse: IAktivitetslogg,
         erForlengelse: Boolean,
         perioderMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandlinger>>,
+        auuerIForkant: List<UUID>,
         kanForkastes: Boolean,
         arbeidsgiverperiode: Arbeidsgiverperiode?,
         harPeriodeRettFør: Boolean
     ) {
         val behandlingerMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map { it.first to it.second.behandlinger.last() }
-        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør)
+        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, auuerIForkant, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør)
     }
 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Utbetaling? {
@@ -552,6 +553,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 kanForkastes: Boolean,
                 behandling: Behandling,
                 perioderMedSammeSkjæringstidspunkt: List<Triple<UUID, UUID, Periode>>,
+                auuerIForkant: List<UUID>,
                 arbeidsgiverperiode: Arbeidsgiverperiode?,
                 harPeriodeRettFør: Boolean
             ) {
@@ -566,6 +568,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, behandlingId, periode) ->
                         PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, behandlingId, periode)
                     },
+                    auuerIForkant,
                     hendelser
                 )
                 grunnlagsdata.byggGodkjenningsbehov(builder)
@@ -906,12 +909,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelse: IAktivitetslogg,
             erForlengelse: Boolean,
             behandlingerMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandling>>,
+            auuerIForkant: List<UUID>,
             kanForkastes: Boolean,
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             harPeriodeRettFør: Boolean
         ) {
             val perioderMedSammeSkjæringstidspunkt = behandlingerMedSammeSkjæringstidspunkt.map { Triple(it.first, it.second.id, it.second.periode) }
-            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt, arbeidsgiverperiode, harPeriodeRettFør)
+            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt, auuerIForkant, arbeidsgiverperiode, harPeriodeRettFør)
         }
 
         fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, behandlinger: List<Behandling>): Utbetaling? {

@@ -668,6 +668,8 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
+    internal fun auuerIForkant(utgangspunkt: Vedtaksperiode) = arbeidsgivere.flatMap { it.finnAuuerIForkant(utgangspunkt) }
+
     internal fun avklarSykepengegrunnlag(
         hendelse: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,

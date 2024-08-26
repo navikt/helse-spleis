@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -13,6 +14,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -72,6 +74,72 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
                     ), mapOf(
                         "arbeidsgiver" to a2,
                         "omregnetÅrsinntekt" to 240000.0
+                    )
+                )
+            )
+        )
+    }
+
+
+    @Test
+    fun auuIForkant() {
+        nyPeriode(1.januar til 16.januar, a1)
+        nyPeriode(1.januar til 16.januar, a2)
+
+        nyPeriode(17.januar til 31.januar, a1)
+        nyPeriode(17.januar til 31.januar, a2)
+
+        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, orgnummer = a1)
+        håndterInntektsmeldingPortal(listOf(1.januar til 16.januar), inntektsdato = 1.januar, orgnummer = a2)
+
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)
+            ),
+            orgnummer = a1
+        )
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+
+        assertGodkjenningsbehov(
+            vedtaksperiodeId = 2.vedtaksperiode.id(a1),
+            periodeFom = 17.januar,
+            periodeTom = 31.januar,
+            behandlingId = 2.vedtaksperiode.sisteBehandlingId(a1),
+            tags = setOf("Arbeidsgiverutbetaling"),
+            periodeType = "FØRSTEGANGSBEHANDLING",
+            førstegangsbehandling = true,
+            inntektskilde = "FLERE_ARBEIDSGIVERE",
+            orgnummere = setOf(a1, a2),
+            omregnedeÅrsinntekter = listOf(
+                mapOf("organisasjonsnummer" to a1, "beløp" to 372000.0),
+                mapOf("organisasjonsnummer" to a2, "beløp" to 372000.0)
+            ),
+            perioderMedSammeSkjæringstidspunkt = listOf(
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 16.januar.toString()),
+                mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 16.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 17.januar.toString(), "tom" to 31.januar.toString()),
+                mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a2).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 17.januar.toString(), "tom" to 31.januar.toString()),
+            ),
+            auuerIForkant = listOf(
+                1.vedtaksperiode.id(a1),
+                1.vedtaksperiode.id(a2)
+            ),
+            sykepengegrunnlagsfakta = mapOf(
+                "omregnetÅrsinntektTotalt" to 744000.0,
+                "6G" to 561804.0,
+                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+                "arbeidsgivere" to listOf (
+                    mapOf(
+                        "arbeidsgiver" to a1,
+                        "omregnetÅrsinntekt" to 372000.0
+                    ), mapOf(
+                        "arbeidsgiver" to a2,
+                        "omregnetÅrsinntekt" to 372000.0
                     )
                 )
             )
@@ -596,6 +664,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         perioderMedSammeSkjæringstidspunkt: List<Map<String, String>> = listOf(
             mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
         ),
+        auuerIForkant: List<UUID> = emptyList(),
         sykepengegrunnlagsfakta: Map<String, Any> = mapOf(
             "omregnetÅrsinntektTotalt" to INNTEKT.reflection { årlig, _, _, _ -> årlig }.toDouble(),
             "6G" to 561804.0,
@@ -621,6 +690,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         val actualOmregnedeÅrsinntekter = hentFelt<List<Map<String, String>>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "omregnedeÅrsinntekter")!!
         val actualBehandlingId = hentFelt<String>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "behandlingId")!!
         val actualPerioderMedSammeSkjæringstidspunkt = hentFelt<Any>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "perioderMedSammeSkjæringstidspunkt")!!
+        val actualAuuerIForkant = hentFelt<List<UUID>>(vedtaksperiodeId = vedtaksperiodeId, feltNavn = "auuerIForkant")!!
 
         hendelser?.let { assertHendelser(it, vedtaksperiodeId) }
         assertSykepengegrunnlagsfakta(vedtaksperiodeId, sykepengegrunnlagsfakta)
@@ -637,6 +707,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         assertEquals(omregnedeÅrsinntekter, actualOmregnedeÅrsinntekter)
         assertEquals(behandlingId.toString(), actualBehandlingId)
         assertEquals(perioderMedSammeSkjæringstidspunkt, actualPerioderMedSammeSkjæringstidspunkt)
+        assertEquals(auuerIForkant, actualAuuerIForkant)
 
         val utkastTilVedtak = observatør.utkastTilVedtakEventer.last()
         assertEquals(actualtags, utkastTilVedtak.tags)
