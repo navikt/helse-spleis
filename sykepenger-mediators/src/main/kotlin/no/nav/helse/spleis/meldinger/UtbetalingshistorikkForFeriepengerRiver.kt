@@ -5,10 +5,8 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehis
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
-import java.time.LocalDateTime
 
 /**
  * Entry point for å starte utbetaling av feriepenger
@@ -21,7 +19,6 @@ internal class UtbetalingshistorikkForFeriepengerRiver(
     override val riverName = "UtbetalingshistorikkForFeriepenger"
 
     override fun validate(message: JsonMessage) {
-        message.require("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
         validerSykepengehistorikk(message)
     }
 
