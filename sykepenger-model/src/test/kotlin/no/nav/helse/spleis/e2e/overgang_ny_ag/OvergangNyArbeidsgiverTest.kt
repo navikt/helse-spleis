@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test
 internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
 
     @Test
-    fun `overgang til ny arbeidsgiver - innenfor agp - reduksjon oppgitt`() = Toggle.TilkommenInntekt.enable {
+    fun `overgang til ny arbeidsgiver - innenfor agp - reduksjon oppgitt`() = Toggle.TilkommenArbeidsgiver.enable {
         // Inntektsmelding-signal corner case
         a1 {
             nyttVedtak(januar)
@@ -45,7 +45,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `overgang til ny arbeidsgiver - utenfor agp`() = Toggle.TilkommenInntekt.enable {
+    fun `overgang til ny arbeidsgiver - utenfor agp`() = Toggle.TilkommenArbeidsgiver.enable {
         val inntektA1 = 50000.månedlig
         val inntektA2 = 30000.månedlig
         val forventetSykepengegrunnlag = `6G`.beløp(1.januar)

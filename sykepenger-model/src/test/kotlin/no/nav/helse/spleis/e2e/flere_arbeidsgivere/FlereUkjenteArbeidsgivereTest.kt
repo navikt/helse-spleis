@@ -136,7 +136,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes ikke`() = Toggle.TilkommenInntekt.enable {
+    fun `én arbeidsgiver blir to - førstegangsbehandlingen hos ag2 forkastes ikke`() = Toggle.TilkommenArbeidsgiver.enable {
         val inntektA1 = INNTEKT + 500.daglig
 
         nyttVedtak(januar, orgnummer = a1)

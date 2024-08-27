@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.den
 import no.nav.helse.desember
@@ -256,26 +255,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        }
-    }
-
-    @Test
-    fun `Skal kanskje ikke være varsel om tilkommen inntekt her`() = Toggle.TilkommenInntekt.enable {
-        a1 {
-            nyPeriode(1.januar til 16.januar)
-        }
-        a2 {
-            nyPeriode(1.januar til 16.januar)
-        }
-        a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "oink")
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        }
-        a2 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "voff")
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertVarsel(Varselkode.RV_SV_5) // Det har tilkommet nye inntekter - teit eller ikke?
         }
     }
 

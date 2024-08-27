@@ -41,7 +41,7 @@ class Toggle private constructor(enabled: Boolean) {
     internal operator fun plus(toggle: Toggle) = listOf(this, toggle)
 
     companion object {
-        val TilkommenInntekt = fraEnv("TILKOMMEN_INNTEKT", false)
+        val TilkommenArbeidsgiver = fraEnv("TILKOMMEN_ARBEIDSGIVER", false)
         val SendFeriepengeOppdrag = fraEnv("SEND_FERIEPENGEOPPDRAG", false)
         val EgenmeldingStrekkerIkkeSykdomstidslinje = fraEnv("EGENMELDING_STREKKER_IKKE_SYKDOMSTIDSLINJE", false)
 

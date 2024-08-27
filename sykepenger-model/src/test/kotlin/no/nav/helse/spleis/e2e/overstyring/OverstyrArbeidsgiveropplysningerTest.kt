@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -583,7 +582,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrer arbeidsgiver som ikke er i sykepengegrunnlaget`() = Toggle.TilkommenInntekt.enable {
+    fun `overstyrer arbeidsgiver som ikke er i sykepengegrunnlaget`() {
         nyttVedtak(januar, orgnummer = a1)
         val nyInntekt = INNTEKT * 1.25
 
@@ -613,13 +612,9 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
         assertNotNull(vilkårsgrunnlag)
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
-        assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
-            assertEquals(nyInntekt, it.inntektsopplysning.inspektør.beløp)
-            assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
-        }
-        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(nyInntekt, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Saksbehandler::class, it.inntektsopplysning::class)
         }

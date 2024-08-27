@@ -440,7 +440,7 @@ internal class Vedtaksperiode private constructor(
         ?.takeIf { it.forventerInntekt() } != null
 
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(): Boolean {
-        if (Toggle.TilkommenInntekt.enabled) return false
+        if (Toggle.TilkommenArbeidsgiver.enabled) return false
         return vilkårsgrunnlag?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer) == false
     }
 

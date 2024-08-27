@@ -58,7 +58,7 @@ spec:
     value: earliest
   - name: IDENTBYTTE
     value: "true"
-  - name: TILKOMMEN_INNTEKT
+  - name: TILKOMMEN_ARBEIDSGIVER
     value: "true"
   - name: EGENMELDING_STREKKER_IKKE_SYKDOMSTIDSLINJE
     value: "false"

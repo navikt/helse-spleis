@@ -63,7 +63,7 @@ spec:
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
     value: none
-  - name: TILKOMMEN_INNTEKT
+  - name: TILKOMMEN_ARBEIDSGIVER
     value: "false"
   - name: EGENMELDING_STREKKER_IKKE_SYKDOMSTIDSLINJE
     value: "false"

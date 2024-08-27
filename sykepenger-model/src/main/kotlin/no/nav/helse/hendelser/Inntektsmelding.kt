@@ -113,7 +113,7 @@ class Inntektsmelding(
         // startskuddet dikterer hvorvidt refusjonsopplysningene skal strekkes tilbake til å fylle gråsonen (perioden mellom skjæringstidspunkt og første refusjonsopplysning)
         // inntektsdato er den dagen refusjonsopplysningen i IM gjelder fom slik at det blir ingen strekking da, bare dersom skjæringstidspunkt brukes
         val startskudd = if (builder.ingenRefusjonsopplysninger(organisasjonsnummer)) skjæringstidspunkt else beregnetInntektsdato
-        val inntektGjelder = if (Toggle.TilkommenInntekt.enabled) beregnetInntektsdato til LocalDate.MAX else skjæringstidspunkt til LocalDate.MAX
+        val inntektGjelder = if (Toggle.TilkommenArbeidsgiver.enabled) beregnetInntektsdato til LocalDate.MAX else skjæringstidspunkt til LocalDate.MAX
         builder.leggTilInntekt(
             ArbeidsgiverInntektsopplysning(
                 organisasjonsnummer,

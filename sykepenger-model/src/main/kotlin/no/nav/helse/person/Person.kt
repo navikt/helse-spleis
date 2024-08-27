@@ -142,7 +142,7 @@ class Person private constructor(
         }
     }
 
-    fun kandidatForTilkommenInntekt() = Toggle.TilkommenInntekt.enabled
+    fun kandidatForTilkommenInntekt() = Toggle.TilkommenArbeidsgiver.enabled
 
     internal constructor(
         aktørId: String,

@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e.tilkommen_inntekt
+package no.nav.helse.spleis.e2e.tilkommen_arbeidsgiver
 
 import java.time.LocalDate
 import no.nav.helse.Toggle
@@ -37,7 +37,7 @@ import org.junit.jupiter.api.assertThrows
 internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
 
     @Test
-    fun `Ny arbeidsgiver underveis happy case`() = Toggle.TilkommenInntekt.enable {
+    fun `Ny arbeidsgiver underveis happy case`() = Toggle.TilkommenArbeidsgiver.enable {
         a1 {
             nyttVedtak(januar)
         }
@@ -78,7 +78,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Bytter arbeidsgiver underveis i sykefravær`() = Toggle.TilkommenInntekt.enable {
+    fun `Bytter arbeidsgiver underveis i sykefravær`() = Toggle.TilkommenArbeidsgiver.enable {
         a1 {
             nyttVedtak(januar)
         }
@@ -149,7 +149,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
     }
     @Test
-    fun `tilkommen inntekt etter skjønnsmessig fastsettelse`() = Toggle.TilkommenInntekt.enable {
+    fun `ny arbeidsgiver etter skjønnsmessig fastsettelse`() = Toggle.TilkommenArbeidsgiver.enable {
         a1 {
             nyttVedtak(januar, 100.prosent)
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT - 1000.månedlig)))
