@@ -60,7 +60,8 @@ class Søknad(
     private val egenmeldinger: List<Periode>,
     private val søknadstype: Søknadstype,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-    private val registrert: LocalDateTime
+    private val registrert: LocalDateTime,
+    private val tilkomneInntekter: List<TilkommenInntekt>
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
     private val sykdomsperiode: Periode
@@ -75,6 +76,7 @@ class Søknad(
         if (perioder.isEmpty()) logiskFeil("Søknad må inneholde perioder")
         sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: logiskFeil("Søknad inneholder ikke sykdomsperioder")
         if (perioder.inneholderDagerEtter(sykdomsperiode.endInclusive)) logiskFeil("Søknad inneholder dager etter siste sykdomsdag")
+        if (tilkomneInntekter.isNotEmpty()) info("Tilkomne inntekter i søknaden")
 
         val søknadstidslinje = perioder
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
@@ -138,6 +140,7 @@ class Søknad(
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
         merknaderFraSykmelding.forEach { it.valider(this) }
+        tilkomneInntekter.forEach { it.valider(this) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {
             subsumsjonslogg.`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager)
@@ -208,6 +211,12 @@ class Søknad(
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type !in tilbakedateringer) return
             aktivitetslogg.varsel(RV_SØ_3)
+        }
+    }
+
+    class TilkommenInntekt(private val fom: LocalDate, private val tom: LocalDate?, private val orgnummer: String, private val beløp: Int) {
+        internal fun valider(aktivitetslogg: IAktivitetslogg) {
+            aktivitetslogg.info("Tilkomne inntekter i søknaden for $orgnummer")
         }
     }
 

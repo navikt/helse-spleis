@@ -43,6 +43,15 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             val inntektskilder = andreInntektskilder(packet["andreInntektskilder"], ikkeJobbetIDetSisteFraAnnetArbeidsforhold)
             builder.inntektskilde(inntektskilder.isNotEmpty())
 
+            packet["tilkomneInntekter"].takeIf(JsonNode::isArray)?.forEach {
+                builder.tilkommenInntekt(
+                    fom = it.path("fom").asLocalDate(),
+                    tom = it.path("tom").takeUnless { it.isMissingOrNull() }?.asLocalDate(),
+                    orgnummer = it.path("orgnummer").asText(),
+                    beløp = it.path("belop").asInt(),
+                )
+            }
+
             packet["fravar"].forEach { fravær ->
                 val fraværstype = fravær["type"].asText()
                 val fom = fravær.path("fom").asLocalDate()

@@ -11,11 +11,13 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
+import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class SendtSøknadBuilder : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
+    private val tilkomneInntekter = mutableListOf<TilkommenInntekt>()
     private var opprinneligSendt: LocalDateTime? = null
     private var harAndreInntektskilder: Boolean = false
     private var ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
@@ -42,7 +44,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         yrkesskade = yrkesskade,
         egenmeldinger = egenmeldinger,
         registrert = registrert,
-        søknadstype = søknadstype
+        søknadstype = søknadstype,
+        tilkomneInntekter = tilkomneInntekter
     )
 
     fun arbeidsledigsøknad() {
@@ -101,5 +104,16 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
 
     fun opprinneligSendt(opprinneligSendt: LocalDateTime) {
         this.opprinneligSendt = opprinneligSendt
+    }
+
+    fun tilkommenInntekt(fom: LocalDate, tom: LocalDate?, orgnummer: String, beløp: Int) {
+        tilkomneInntekter.add(
+            TilkommenInntekt(
+                fom = fom,
+                tom = tom,
+                orgnummer = orgnummer,
+                beløp = beløp
+            )
+        )
     }
 }

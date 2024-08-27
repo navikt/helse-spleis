@@ -127,11 +127,12 @@ internal class ArbeidsgiverHendelsefabrikk(
             utenlandskSykmelding = utenlandskSykmelding,
             arbeidUtenforNorge = arbeidUtenforNorge,
             sendTilGosys = sendTilGosys,
-            aktivitetslogg = aktivitetslogg,
             yrkesskade = yrkesskade,
             egenmeldinger = egenmeldinger,
             søknadstype = søknadstype,
-            registrert = registrert
+            aktivitetslogg = aktivitetslogg,
+            registrert = registrert,
+            tilkomneInntekter = emptyList()
         ).apply {
             søknader.add(this)
         }
