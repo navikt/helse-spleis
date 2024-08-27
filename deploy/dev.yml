@@ -61,4 +61,4 @@ spec:
   - name: TILKOMMEN_ARBEIDSGIVER
     value: "true"
   - name: EGENMELDING_STREKKER_IKKE_SYKDOMSTIDSLINJE
-    value: "false"
+    value: "true"
