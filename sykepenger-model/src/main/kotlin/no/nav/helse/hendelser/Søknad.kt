@@ -27,6 +27,10 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.IkkeRapportert
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -139,7 +143,6 @@ class Søknad(
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
         merknaderFraSykmelding.forEach { it.valider(this) }
-        tilkomneInntekter.forEach { it.valider(this) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {
             subsumsjonslogg.`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager)
@@ -198,6 +201,17 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
+    internal fun harNoenTilkomneInntekter() = tilkomneInntekter.isNotEmpty()
+
+    internal fun nyeInntekter(
+        builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
+        skjæringstidspunkt: LocalDate
+    ) {
+        tilkomneInntekter.forEach { inntekt ->
+            inntekt.nyInntekt(builder, skjæringstidspunkt, meldingsreferanseId(), registrert)
+        }
+    }
+
     class Merknad(private val type: String) {
         private companion object {
             private val tilbakedateringer = setOf(
@@ -213,9 +227,35 @@ class Søknad(
         }
     }
 
-    class TilkommenInntekt(private val fom: LocalDate, private val tom: LocalDate?, private val orgnummer: String, private val beløp: Inntekt) {
-        internal fun valider(aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.varsel(RV_SV_5)
+    class TilkommenInntekt(
+        private val fom: LocalDate,
+        private val tom: LocalDate?,
+        private val orgnummer: String,
+        private val beløp: Inntekt,
+    ) {
+        private fun gjelder(): Periode {
+            return if (tom != null) fom til tom
+            else fom til LocalDate.MAX
+        }
+
+        internal fun nyInntekt(
+            builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
+            skjæringstidspunkt: LocalDate,
+            meldingsreferanseId: UUID,
+            registrert: LocalDateTime
+        ) {
+            builder.leggTilInntekt(
+                ArbeidsgiverInntektsopplysning(
+                    orgnummer = orgnummer,
+                    gjelder = gjelder(),
+                    inntektsopplysning = IkkeRapportert(
+                        dato = skjæringstidspunkt,
+                        hendelseId = meldingsreferanseId,
+                        tidsstempel = registrert
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysning.Refusjonsopplysninger()
+                )
+            )
         }
     }
 

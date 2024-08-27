@@ -606,6 +606,7 @@ internal class Vedtaksperiode private constructor(
             søknad.valider(vilkårsgrunnlag, jurist)
         }
         if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
+        if (søknad.harNoenTilkomneInntekter()) person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, jurist)
         nesteTilstand()?.also { tilstand(søknad, it) }
     }
 

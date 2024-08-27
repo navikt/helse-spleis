@@ -726,6 +726,20 @@ class Person private constructor(
         }
     }
 
+    internal fun oppdaterVilkårsgrunnlagMedInntektene(
+        skjæringstidspunkt: LocalDate,
+        søknad: Søknad,
+        subsumsjonslogg: Subsumsjonslogg
+    ) {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
+        if (grunnlag == null) {
+            søknad.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
+            return
+        }
+        val nyttGrunnlag = grunnlag.tilkomneInntekterFraSøknaden(søknad, subsumsjonslogg)
+        nyttVilkårsgrunnlag(søknad, nyttGrunnlag)
+    }
+
     internal fun nyeArbeidsgiverInntektsopplysninger(
         skjæringstidspunkt: LocalDate,
         inntektsmelding: Inntektsmelding,
@@ -857,7 +871,6 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto(),
         minimumSykdomsgradVurdering = minimumSykdomsgradsvurdering.dto()
     )
-
 
 }
 

@@ -23,6 +23,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -334,6 +335,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             }
             hendelse.info("Grunnbeløpet i sykepengegrunnlaget $skjæringstidspunkt korrigeres til rett beløp.")
             return kopierMed(hendelse, nyttSykepengegrunnlag, opptjening, subsumsjonslogg)
+        }
+
+        internal fun tilkomneInntekterFraSøknaden(søknad: Søknad, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement {
+            val sykepengegrunnlag = sykepengegrunnlag.tilkomneInntekterFraSøknaden(søknad, subsumsjonslogg)
+            return kopierMed(søknad, sykepengegrunnlag, opptjening, NullObserver)
         }
 
         internal fun nyeArbeidsgiverInntektsopplysninger(

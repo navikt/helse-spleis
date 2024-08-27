@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
@@ -283,6 +284,17 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
         arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
+
+    fun tilkomneInntekterFraSøknaden(søknad: Søknad, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
+        val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, null, subsumsjonslogg)
+        søknad.nyeInntekter(builder, skjæringstidspunkt)
+        val (resultat, harTilkommetInntekter) = builder.resultat(kandidatForTilkommenInntekt = true)
+        if (harTilkommetInntekter) {
+            søknad.varsel(Varselkode.RV_SV_5)
+        }
+        return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
+    }
+
 
     internal fun nyeArbeidsgiverInntektsopplysninger(
         person: Person,
