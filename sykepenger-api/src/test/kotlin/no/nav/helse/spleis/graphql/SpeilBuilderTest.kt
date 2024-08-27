@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -64,6 +65,15 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         .filter { sammenslåttDag -> perioder.any { sammenslåttDag.dagen in it } }
         .map { it.utbetalingsinfo?.totalGrad }
         assertTrue(totalgrader.all { it == forventet }) { "Her er det noe som ikke er $forventet: $totalgrader"}
+    }
+
+    @Test
+    fun `lager ghostpølse for tilkommen ghost`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = null, orgnummer = "a24", beløp = 10000.månedlig)))
+        val ghostPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder ?: error("har ikke ghostperioder")
+        assertEquals(1, ghostPølser.size)
+        assertEquals(1.februar til 28.februar, ghostPølser.single().fom til ghostPølser.single().tom)
     }
 
     @Test

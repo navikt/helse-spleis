@@ -93,7 +93,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
         egenmeldinger: List<Periode> = emptyList(),
         søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
-        registrert: LocalDateTime = LocalDateTime.now()
+        registrert: LocalDateTime = LocalDateTime.now(),
+        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList(),
     ): Søknad {
         return Søknad(
             meldingsreferanseId = id,
@@ -116,7 +117,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             søknadstype = søknadstype,
             aktivitetslogg = aktivitetslogg,
             registrert = registrert,
-            tilkomneInntekter = emptyList()
+            tilkomneInntekter = tilkomneInntekter
         ).apply {
             søknader.add(this)
         }

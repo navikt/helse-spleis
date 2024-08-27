@@ -110,13 +110,20 @@ internal abstract class AbstractE2ETest {
     protected fun håndterSøknad(periode: Periode, orgnummer: String = a1): UUID {
         return håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), sykmeldingSkrevet = periode.start.atStartOfDay(), sendtTilNAV = periode.endInclusive.atStartOfDay(), orgnummer = orgnummer)
     }
-    protected fun håndterSøknad(vararg perioder: Søknad.Søknadsperiode, sykmeldingSkrevet: LocalDateTime = 1.januar.atStartOfDay(), sendtTilNAV: LocalDateTime = 1.januar.atStartOfDay(), orgnummer: String = a1): UUID {
+    protected fun håndterSøknad(
+        vararg perioder: Søknad.Søknadsperiode,
+        sykmeldingSkrevet: LocalDateTime = 1.januar.atStartOfDay(),
+        sendtTilNAV: LocalDateTime = 1.januar.atStartOfDay(),
+        orgnummer: String = a1,
+        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
+    ): UUID {
         val søknadId = UUID.randomUUID()
         val søknad = fabrikker.getValue(orgnummer).lagSøknad(
             *perioder,
             sykmeldingSkrevet = sykmeldingSkrevet,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAV,
-            id = søknadId
+            id = søknadId,
+            tilkomneInntekter = tilkomneInntekter
         )
         søknad.håndter(Person::håndter)
 

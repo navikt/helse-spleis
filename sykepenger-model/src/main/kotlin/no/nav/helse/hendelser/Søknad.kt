@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
+import no.nav.helse.hendelser.Søknad.TilkommenInntekt.Companion.orgnummereMedTilkomneInntekter
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
@@ -201,7 +202,7 @@ class Søknad(
         arbeidsgiveren.fjern(sykdomsperiode)
     }
 
-    internal fun harNoenTilkomneInntekter() = tilkomneInntekter.isNotEmpty()
+    internal fun orgnummereMedTilkomneInntekter() = tilkomneInntekter.orgnummereMedTilkomneInntekter()
 
     internal fun nyeInntekter(
         builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
@@ -256,6 +257,10 @@ class Søknad(
                     refusjonsopplysninger = Refusjonsopplysning.Refusjonsopplysninger()
                 )
             )
+        }
+
+        companion object {
+            fun List<TilkommenInntekt>.orgnummereMedTilkomneInntekter() = map { it.orgnummer }
         }
     }
 

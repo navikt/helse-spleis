@@ -729,12 +729,16 @@ class Person private constructor(
     internal fun oppdaterVilkårsgrunnlagMedInntektene(
         skjæringstidspunkt: LocalDate,
         søknad: Søknad,
+        orgnummereMedTilkomneInntekter: List<String>,
         subsumsjonslogg: Subsumsjonslogg
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
         if (grunnlag == null) {
             søknad.info("Fant ikke vilkårsgrunnlag på skjæringstidspunkt $skjæringstidspunkt")
             return
+        }
+        orgnummereMedTilkomneInntekter.forEach { orgnr ->
+            finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), søknad)
         }
         val nyttGrunnlag = grunnlag.tilkomneInntekterFraSøknaden(søknad, subsumsjonslogg)
         nyttVilkårsgrunnlag(søknad, nyttGrunnlag)
