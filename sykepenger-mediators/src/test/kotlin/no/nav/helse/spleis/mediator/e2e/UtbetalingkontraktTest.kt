@@ -14,7 +14,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.rapids_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertOgFjern
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage

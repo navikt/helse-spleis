@@ -5,10 +5,10 @@ import java.util.UUID
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.isMissingOrNull
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.valueOf

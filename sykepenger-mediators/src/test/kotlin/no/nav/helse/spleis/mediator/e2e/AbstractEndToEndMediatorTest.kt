@@ -39,9 +39,9 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.toUUID
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spill_av_im.FørsteFraværsdag
 import no.nav.helse.spleis.HendelseMediator

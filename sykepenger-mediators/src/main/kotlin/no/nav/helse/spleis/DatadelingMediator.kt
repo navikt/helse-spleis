@@ -1,5 +1,7 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -8,8 +10,6 @@ import no.nav.helse.person.aktivitetslogg.AktivitetsloggObserver
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.erAvviklet
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 
 class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggObserver {

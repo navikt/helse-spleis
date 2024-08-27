@@ -6,7 +6,7 @@ plugins {
 
 val mainClass = "no.nav.helse.AppKt"
 
-val tbdLibsVersion = "2024.05.31-08.02-2c3441c1"
+val tbdLibsVersion = "2024.08.27-12.00-c263a5f7"
 val tbdSpillAvImMatchingVersion = "2024.04.22-15.08-c7e3d08c"
 val syfokafkaVersion = "2024.02.14-18.01-3523e4c2"
 val mockkVersion = "1.13.9"
@@ -24,6 +24,7 @@ dependencies {
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
     }
+    testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")
     testImplementation("com.github.navikt.tbd-libs:postgres-testdatabaser:$tbdLibsVersion")
     testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
     testImplementation("com.github.navikt.spill_av_im:matching:$tbdSpillAvImMatchingVersion")

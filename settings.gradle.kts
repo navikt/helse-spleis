@@ -5,7 +5,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("testcontainers", "1.20.1")
-            version("rapids-and-rivers", "2024082010411724143294.7221e391eba8")
+            version("rapids-and-rivers", "2024082712401724755232.610a5f59323d")
             version("postgres", "42.7.3")
             version("hikari", "5.1.0")
             version("kotliquery", "1.9.0")

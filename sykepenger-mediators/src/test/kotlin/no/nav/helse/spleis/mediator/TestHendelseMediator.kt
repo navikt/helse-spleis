@@ -31,7 +31,7 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.rapids_rivers.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage

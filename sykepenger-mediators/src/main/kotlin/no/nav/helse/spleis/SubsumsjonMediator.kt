@@ -1,10 +1,10 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import java.time.ZonedDateTime
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.KontekstType
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 

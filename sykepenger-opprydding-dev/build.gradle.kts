@@ -5,6 +5,7 @@ plugins {
 }
 
 val mainClass = "no.nav.helse.opprydding.AppKt"
+val tbdLibsVersion = "2024.08.27-12.00-c263a5f7"
 
 dependencies {
     implementation(libs.rapids.and.rivers)
@@ -13,6 +14,7 @@ dependencies {
     implementation(project(":sykepenger-utbetaling"))
 
     testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
+    testImplementation("com.github.navikt.tbd-libs:rapids-and-rivers-test:$tbdLibsVersion")
     testImplementation(libs.bundles.flyway)
     testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")

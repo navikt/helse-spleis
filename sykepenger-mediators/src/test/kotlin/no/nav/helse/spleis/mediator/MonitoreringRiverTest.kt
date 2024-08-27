@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.mediator
 
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.spleis.monitorering.MonitoreringRiver
 import no.nav.helse.spleis.monitorering.RegelmessigAvstemming
 import org.intellij.lang.annotations.Language

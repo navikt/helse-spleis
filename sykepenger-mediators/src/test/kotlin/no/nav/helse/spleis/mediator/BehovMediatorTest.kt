@@ -16,7 +16,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.rapids_rivers.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.BehovMediator
 import no.nav.helse.spleis.Personopplysninger

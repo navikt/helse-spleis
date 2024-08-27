@@ -1,9 +1,9 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.Logger
 
 internal class BehovMediator(private val sikkerLogg: Logger) {

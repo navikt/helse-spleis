@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.mai
-import no.nav.helse.rapids_rivers.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype

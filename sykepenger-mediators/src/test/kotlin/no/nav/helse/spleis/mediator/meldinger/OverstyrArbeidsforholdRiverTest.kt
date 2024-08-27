@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import no.nav.helse.januar
-import no.nav.helse.rapids_rivers.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsforholdOverstyrt

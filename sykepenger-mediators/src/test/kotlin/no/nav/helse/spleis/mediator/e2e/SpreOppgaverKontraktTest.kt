@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.rapids_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals

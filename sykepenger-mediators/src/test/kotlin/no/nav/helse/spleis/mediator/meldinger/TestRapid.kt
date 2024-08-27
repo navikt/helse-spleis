@@ -9,7 +9,7 @@ import java.util.UUID
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.rapids_rivers.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.varsler
 import org.junit.jupiter.api.fail

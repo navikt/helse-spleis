@@ -1,5 +1,7 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -35,8 +37,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao

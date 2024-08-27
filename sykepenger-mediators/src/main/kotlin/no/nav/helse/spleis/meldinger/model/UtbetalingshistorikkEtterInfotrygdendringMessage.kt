@@ -5,9 +5,9 @@ import java.util.UUID
 import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.arbeidskategorikoder
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage.Companion.inntektshistorikk

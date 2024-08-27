@@ -1,7 +1,7 @@
 package no.nav.helse
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRepository

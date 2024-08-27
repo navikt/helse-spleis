@@ -5,8 +5,8 @@ import java.time.YearMonth
 import no.nav.helse.desember
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asYearMonth
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.spleis.mediator.TestMessageFactory.Subsumsjon

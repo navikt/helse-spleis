@@ -1,9 +1,8 @@
 package no.nav.helse.spleis.meldinger
 
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
 
 internal class IdentOpphørtRiver (

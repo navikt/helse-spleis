@@ -5,13 +5,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
-import no.nav.helse.rapids_rivers.JsonMessage
 
 class Avstemmer(private val person: PersonUtDto) {
     private companion object {

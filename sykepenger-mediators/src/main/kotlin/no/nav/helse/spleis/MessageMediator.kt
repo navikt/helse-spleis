@@ -1,10 +1,10 @@
 package no.nav.helse.spleis
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import java.sql.SQLException
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.serde.DeserializationException
 import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository

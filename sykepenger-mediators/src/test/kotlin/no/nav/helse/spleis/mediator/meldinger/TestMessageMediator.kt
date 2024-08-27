@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.MessageProblems
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 

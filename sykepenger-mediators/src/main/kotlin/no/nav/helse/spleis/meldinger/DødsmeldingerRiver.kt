@@ -1,12 +1,11 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 
 internal class DødsmeldingerRiver (
     rapidsConnection: RapidsConnection,

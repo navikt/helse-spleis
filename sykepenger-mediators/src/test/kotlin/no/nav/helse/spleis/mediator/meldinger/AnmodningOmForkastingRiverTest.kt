@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.mediator.meldinger
 
 import java.util.UUID
-import no.nav.helse.rapids_rivers.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.AnmodningOmForkastingRiver
 import org.intellij.lang.annotations.Language

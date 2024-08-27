@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.mediator.etterlevelse
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import no.nav.helse.januar
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Tidslinjedag
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.spleis.SubsumsjonMediator
 import no.nav.helse.spleis.mediator.TestHendelseMessage
 import org.junit.jupiter.api.Assertions.assertEquals

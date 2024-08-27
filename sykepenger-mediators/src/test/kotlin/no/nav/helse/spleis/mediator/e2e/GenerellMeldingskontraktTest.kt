@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.rapids_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals

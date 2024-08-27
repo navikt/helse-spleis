@@ -12,11 +12,11 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asOptionalLocalDate
-import no.nav.helse.rapids_rivers.asYearMonth
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.asYearMonth
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig

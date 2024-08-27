@@ -2,6 +2,7 @@ package no.nav.helse.spleis.mediator.e2e
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -15,7 +16,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
-import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.mediator.TestHendelseMediator

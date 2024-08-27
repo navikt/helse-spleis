@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.rapids_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 
 // Understands a JSON message representing a Need with solution
 internal abstract class BehovMessage(packet: JsonMessage) : HendelseMessage(packet) {
