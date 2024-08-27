@@ -224,9 +224,10 @@ internal abstract class AbstractDslTest {
         arbeidUtenforNorge: Boolean = false,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
-        sendTilGosys: Boolean = false
+        sendTilGosys: Boolean = false,
+        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
     ) =
-        this { håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys) }
+        this { håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, tilkomneInntekter = tilkomneInntekter) }
     protected fun String.håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
@@ -374,9 +375,10 @@ internal abstract class AbstractDslTest {
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
         orgnummer: String = a1,
-        sendTilGosys: Boolean = false
+        sendTilGosys: Boolean = false,
+        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
     ) =
-        bareÈnArbeidsgiver(orgnummer).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys)
+        bareÈnArbeidsgiver(orgnummer).håndterSøknad(*perioder, andreInntektskilder = andreInntektskilder, arbeidUtenforNorge = arbeidUtenforNorge, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet, sendTilGosys = sendTilGosys, tilkomneInntekter=tilkomneInntekter)
     protected fun håndterInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,

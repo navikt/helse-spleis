@@ -139,20 +139,22 @@ internal fun AbstractEndToEndTest.søknad(
     opprinneligSendt: LocalDate? = null,
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false,
-    egenmeldinger: List<Periode> = emptyList()
+    egenmeldinger: List<Periode> = emptyList(),
+    tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
 ) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer).lagSøknad(
-    id = id,
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
     sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
     sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
+    id = id,
+    merknaderFraSykmelding = merknaderFraSykmelding,
+    permittert = permittert,
     korrigerer = korrigerer,
     utenlandskSykmelding = utenlandskSykmelding,
     sendTilGosys = sendTilGosys,
     opprinneligSendt = opprinneligSendt,
-    merknaderFraSykmelding = merknaderFraSykmelding,
-    permittert = permittert,
-    egenmeldinger = egenmeldinger
+    egenmeldinger = egenmeldinger,
+    tilkomneInntekter = tilkomneInntekter
 ).apply {
     hendelselogg = this
 }

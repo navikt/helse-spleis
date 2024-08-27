@@ -288,19 +288,21 @@ internal class SøknadTest {
         hendelsefabrikk: ArbeidsgiverHendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         egenmeldinger: List<Periode> = emptyList(),
-        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false
+        ikkeJobbetIDetSisteFraAnnetArbeidsforhold: Boolean = false,
+        tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
     ) {
         aktivitetslogg = Aktivitetslogg()
         søknad = hendelsefabrikk.lagSøknad(
             perioder = perioder,
             andreInntektskilder = andreInntektskilder,
-            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
-            permittert = permittert,
-            merknaderFraSykmelding = merknaderFraSykmelding,
             sykmeldingSkrevet = LocalDateTime.now(),
+            ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
+            merknaderFraSykmelding = merknaderFraSykmelding,
+            permittert = permittert,
             aktivitetslogg = aktivitetslogg,
-            egenmeldinger = egenmeldinger
+            egenmeldinger = egenmeldinger,
+            tilkomneInntekter = tilkomneInntekter
         )
     }
 }

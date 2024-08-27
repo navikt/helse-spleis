@@ -184,7 +184,8 @@ internal class TestPerson(
             utenlandskSykmelding: Boolean = false,
             søknadstype: Søknad.Søknadstype = Søknad.Søknadstype.Arbeidstaker,
             sendTilGosys: Boolean = false,
-            registrert: LocalDateTime = LocalDateTime.now()
+            registrert: LocalDateTime = LocalDateTime.now(),
+            tilkomneInntekter: List<Søknad.TilkommenInntekt> = emptyList()
         ) =
             behovsamler.fangInntektsmeldingReplay({
                 vedtaksperiodesamler.fangVedtaksperiode {
@@ -200,7 +201,8 @@ internal class TestPerson(
                         utenlandskSykmelding = utenlandskSykmelding,
                         søknadstype = søknadstype,
                         sendTilGosys = sendTilGosys,
-                        registrert = registrert
+                        registrert = registrert,
+                        tilkomneInntekter = tilkomneInntekter
                     ).håndter(Person::håndter)
                 }?.also {
                     if (behovsamler.harBehov(it, Sykepengehistorikk)){
