@@ -41,6 +41,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
+import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.førsteOverlappendePeriodeSomTrengerRefusjonsopplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.førstePeriodeSomTrengerInntektTilVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
@@ -66,6 +67,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -81,6 +83,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
@@ -708,6 +711,20 @@ internal class Arbeidsgiver private constructor(
         arbeidsgiverperiode(periode, sykdomstidslinje())
     internal fun arbeidsgiverperiodeInkludertForkastet(periode: Periode, sykdomstidslinje: Sykdomstidslinje) =
         arbeidsgiverperiode(periode, sykdomstidslinjeInkludertForkastet(sykdomstidslinje))
+
+    internal fun arbeidsgiverperiodeHensyntattEgenmeldinger(periode: Periode): Arbeidsgiverperiode? {
+        val egenmeldingsperioder = vedtaksperioder.egenmeldingsperioder()
+        if (egenmeldingsperioder.isEmpty()) return arbeidsgiverperiode(periode)
+
+        val tøyseteKilde = SykdomshistorikkHendelse.Hendelseskilde(Søknad::class, UUID.randomUUID(), LocalDateTime.now())
+        val egenmeldingstidslinje = egenmeldingsperioder
+            .map { Sykdomstidslinje.arbeidsgiverdager(it.start, it.endInclusive, 100.prosent, tøyseteKilde) }
+            .merge()
+            .fremTilOgMed(periode.endInclusive)
+
+        val sykdomstidslinjeMedEgenmeldinger = egenmeldingstidslinje.merge(sykdomstidslinje(), replace)
+        return arbeidsgiverperiode(periode, sykdomstidslinjeMedEgenmeldinger)
+    }
 
     /**
      * Finner alle vedtaksperioder som tilstøter vedtaksperioden

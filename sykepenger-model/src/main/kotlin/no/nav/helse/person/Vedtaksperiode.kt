@@ -710,8 +710,8 @@ internal class Vedtaksperiode private constructor(
         return arbeidsgiverperiode.forventerOpplysninger(periode)
     }
 
-    private fun sendTrengerArbeidsgiveropplysninger() {
-        val arbeidsgiverperiode = checkNotNull ( finnArbeidsgiverperiode() ) { "Må ha arbeidsgiverperiode før vi sier dette." }
+    private fun sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode: Arbeidsgiverperiode? = finnArbeidsgiverperiode()) {
+        checkNotNull (arbeidsgiverperiode) { "Må ha arbeidsgiverperiode før vi sier dette." }
         val forespurtInntektOgRefusjon = person.forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer, skjæringstidspunkt, periode)
         val forespurteOpplysninger = forespurtInntektOgRefusjon + listOfNotNull(forespurtArbeidsgiverperiode(arbeidsgiverperiode))
 
@@ -2258,7 +2258,13 @@ internal class Vedtaksperiode private constructor(
         override val erFerdigBehandlet = true
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerPotensieltArbeidsgiveropplysninger()
+            val arbeidsgiverperiode = vedtaksperiode.arbeidsgiver.arbeidsgiverperiodeHensyntattEgenmeldinger(vedtaksperiode.periode)
+            if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled && arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
+                // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
+                vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
+            } else {
+                vedtaksperiode.trengerPotensieltArbeidsgiveropplysninger()
+            }
             vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
@@ -2457,6 +2463,8 @@ internal class Vedtaksperiode private constructor(
         // det kan derfor være mer enn 16 dager avstand mellom periodene, og arbeidsgiverperioden kan være den samme
         // Derfor bruker vi tallet 18 fremfor kanskje det forventende 16…
         internal const val MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD = 18L
+
+        internal fun List<Vedtaksperiode>.egenmeldingsperioder(): List<Periode> = flatMap { it.egenmeldingsperioder }
 
         private fun Iterable<Iterable<Vedtaksperiode>>.annenArbeidsgiver(vedtaksperiode: Vedtaksperiode) = this
             .asSequence()

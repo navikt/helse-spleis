@@ -649,7 +649,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
     fun `Skal sende egenmeldingsdager fra søknad i forespørsel`() {
         håndterSykmelding(Sykmeldingsperiode(5.januar, 31.januar))
         håndterSøknad(Sykdom(5.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 4.januar))
-        assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
+        if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) {
+            assertEquals(5.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
+        } else {
+            assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
+        }
 
         val expectedEgenmeldinger = listOf(1.januar til 4.januar)
         assertEquals(expectedEgenmeldinger, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().egenmeldingsperioder)
@@ -869,19 +873,35 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         val expectedTilstand = if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) AVSLUTTET_UTEN_UTBETALING else AVVENTER_INNTEKTSMELDING
         assertTilstand(1.vedtaksperiode, expectedTilstand)
 
-        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
-            skjæringstidspunkt = 1.januar,
-            sykmeldingsperioder = listOf(2.januar til 17.januar),
-            egenmeldingsperioder = listOf(1.januar til 1.januar),
-            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 1.januar)),
-            forespurteOpplysninger = listOf(
-                PersonObserver.Inntekt(null),
-                PersonObserver.Refusjon(forslag = emptyList()),
-                PersonObserver.Arbeidsgiverperiode
+        val expectedForespørsel = if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) {
+            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+                skjæringstidspunkt = 2.januar,
+                sykmeldingsperioder = listOf(2.januar til 17.januar),
+                egenmeldingsperioder = listOf(1.januar til 1.januar),
+                førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 2.januar)),
+                forespurteOpplysninger = listOf(
+                    PersonObserver.Inntekt(null),
+                    PersonObserver.Refusjon(forslag = emptyList()),
+                    PersonObserver.Arbeidsgiverperiode
+                )
             )
-        )
+        } else {
+            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+                organisasjonsnummer = ORGNUMMER,
+                vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
+                skjæringstidspunkt = 1.januar,
+                sykmeldingsperioder = listOf(2.januar til 17.januar),
+                egenmeldingsperioder = listOf(1.januar til 1.januar),
+                førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(a1, 1.januar)),
+                forespurteOpplysninger = listOf(
+                    PersonObserver.Inntekt(null),
+                    PersonObserver.Refusjon(forslag = emptyList()),
+                    PersonObserver.Arbeidsgiverperiode
+                )
+            )
+        }
 
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         val actualForespørsel = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last()
@@ -915,7 +935,11 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
             Sykdom(20.januar, 31.januar, 100.prosent),
             egenmeldinger = listOf(19.januar til 19.januar)
         )
-        assertEquals(19.januar til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
+        if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) {
+            assertEquals(20.januar til 31.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.periode)
+        } else {
+            assertEquals(19.januar til 31.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.periode)
+        }
 
         håndterInntektsmeldingPortal(emptyList(), inntektsdato = 20.januar, førsteFraværsdag = 20.januar)
         håndterVilkårsgrunnlag(2.vedtaksperiode)

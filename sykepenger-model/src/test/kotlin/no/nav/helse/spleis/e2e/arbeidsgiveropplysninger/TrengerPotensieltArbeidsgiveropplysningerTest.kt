@@ -135,14 +135,25 @@ internal class TrengerPotensieltArbeidsgiveropplysningerTest : AbstractEndToEndT
         assertEquals(listOf(1.januar til 4.januar), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[0].egenmeldingsperioder)
         assertEquals(listOf(1.mars til 2.mars), observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder[1].egenmeldingsperioder)
 
-        val expectedPotensiellForespørsel = PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
-            ORGNUMMER,
-            inspektør.vedtaksperiodeId(3.vedtaksperiode),
-            13.mars,
-            sykmeldingsperioder = listOf(5.mars til 8.mars, 14.mars til 16.mars),
-            egenmeldingsperioder = listOf(1.mars til 2.mars, 13.mars til 13.mars),
-            førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 13.mars))
-        )
+        val expectedPotensiellForespørsel = if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) {
+            PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
+                ORGNUMMER,
+                inspektør.vedtaksperiodeId(3.vedtaksperiode),
+                14.mars,
+                sykmeldingsperioder = listOf(5.mars til 8.mars, 14.mars til 16.mars),
+                egenmeldingsperioder = listOf(1.mars til 2.mars, 13.mars til 13.mars),
+                førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 14.mars))
+            )
+        } else {
+            PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
+                ORGNUMMER,
+                inspektør.vedtaksperiodeId(3.vedtaksperiode),
+                13.mars,
+                sykmeldingsperioder = listOf(5.mars til 8.mars, 14.mars til 16.mars),
+                egenmeldingsperioder = listOf(1.mars til 2.mars, 13.mars til 13.mars),
+                førsteFraværsdager = listOf(PersonObserver.FørsteFraværsdag(ORGNUMMER, 13.mars))
+            )
+        }
         assertEquals(expectedPotensiellForespørsel, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.last())
     }
 
