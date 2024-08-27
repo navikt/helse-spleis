@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class SendtSøknadBuilder : SøknadBuilder() {
@@ -112,7 +113,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
                 fom = fom,
                 tom = tom,
                 orgnummer = orgnummer,
-                beløp = beløp
+                beløp = beløp.månedlig
             )
         )
     }

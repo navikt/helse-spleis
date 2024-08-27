@@ -213,7 +213,7 @@ class Søknad(
         }
     }
 
-    class TilkommenInntekt(private val fom: LocalDate, private val tom: LocalDate?, private val orgnummer: String, private val beløp: Int) {
+    class TilkommenInntekt(private val fom: LocalDate, private val tom: LocalDate?, private val orgnummer: String, private val beløp: Inntekt) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             aktivitetslogg.varsel(RV_SV_5)
         }
