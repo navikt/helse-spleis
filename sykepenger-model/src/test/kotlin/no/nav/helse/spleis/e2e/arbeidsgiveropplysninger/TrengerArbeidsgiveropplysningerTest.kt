@@ -999,6 +999,20 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         assertEquals(expectedForespurteOpplysninger, actualForespørsel.forespurteOpplysninger)
     }
 
+    @Test
+    fun `egenmeldinger som hadde strukket perioden utover AGP skal føre til forespørsel om arbeidsgiveropplysninger`() {
+        nyPeriode(2.januar til 16.januar)
+        håndterSøknad(Sykdom(25.januar, 25.januar, 100.prosent), egenmeldinger = listOf(24.januar til 24.januar))
+
+        if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) {
+            assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        } else {
+            assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+        assertEquals(1, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.size)
+        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
+    }
+
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(januar, a1)
