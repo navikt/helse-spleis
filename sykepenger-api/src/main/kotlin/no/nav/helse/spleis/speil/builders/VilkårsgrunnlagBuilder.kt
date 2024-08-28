@@ -186,6 +186,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 is InntektsopplysningUtDto.SaksbehandlerDto -> it.inntektsopplysning.hendelseId
                 is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> null
                 is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> it.inntektsopplysning.hendelseId
+                is InntektsopplysningUtDto.InntektFraSøknadDto -> null
             }
         }.toSet()
 
@@ -234,6 +235,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 }
             )
             is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> inntekter.getValue(io.overstyrtInntekt)
+            is InntektsopplysningUtDto.InntektFraSøknadDto -> IOmregnetÅrsinntekt(IInntektkilde.Søknad, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
         }.also {
             inntekter[io.id] = it
         }

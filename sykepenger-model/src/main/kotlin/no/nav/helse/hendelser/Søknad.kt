@@ -29,7 +29,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøk
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.IkkeRapportert
+import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
@@ -249,9 +249,11 @@ class Søknad(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = orgnummer,
                     gjelder = gjelder(),
-                    inntektsopplysning = IkkeRapportert(
+                    inntektsopplysning = InntektFraSøknad(
+                        id = UUID.randomUUID(),
                         dato = skjæringstidspunkt,
                         hendelseId = meldingsreferanseId,
+                        beløp = beløp,
                         tidsstempel = registrert
                     ),
                     refusjonsopplysninger = Refusjonsopplysning.Refusjonsopplysninger()

@@ -757,6 +757,7 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
         is InntektsopplysningUtDto.InntektsmeldingDto -> this.beløp.månedligDouble.beløp
         is InntektsopplysningUtDto.SaksbehandlerDto -> this.beløp.månedligDouble.beløp
         is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> this.beløp.månedligDouble.beløp
+        is InntektsopplysningUtDto.InntektFraSøknadDto -> this.beløp.månedligDouble.beløp
     },
     kilde = when (this) {
         is InntektsopplysningUtDto.IkkeRapportertDto -> "IKKE_RAPPORTERT"
@@ -765,6 +766,7 @@ private fun InntektsopplysningUtDto.tilPersonData() = PersonData.Vilkårsgrunnla
         is InntektsopplysningUtDto.SaksbehandlerDto -> "SAKSBEHANDLER"
         is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> "SKATT_SYKEPENGEGRUNNLAG"
         is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> "SKJØNNSMESSIG_FASTSATT"
+        is InntektsopplysningUtDto.InntektFraSøknadDto -> "INNTEKT_FRA_SØKNAD"
     },
     forklaring = when (this) {
         is InntektsopplysningUtDto.SaksbehandlerDto -> this.forklaring

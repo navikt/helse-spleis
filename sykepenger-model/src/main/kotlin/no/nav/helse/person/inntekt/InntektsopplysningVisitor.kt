@@ -68,6 +68,16 @@ internal interface InntektsopplysningVisitor : InntektsmeldingVisitor, Skatteopp
     ) {
     }
 
+    fun visitInntektFraSøknad(
+        inntektFraSøknad: InntektFraSøknad,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+    }
+
     fun preVisitSkattSykepengegrunnlag(
         skattSykepengegrunnlag: SkattSykepengegrunnlag,
         id: UUID,

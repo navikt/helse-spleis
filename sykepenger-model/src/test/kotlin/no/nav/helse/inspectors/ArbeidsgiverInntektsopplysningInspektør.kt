@@ -9,6 +9,7 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.inntekt.IkkeRapportert
 import no.nav.helse.person.inntekt.Infotrygd
+import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -100,6 +101,17 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         tidsstempel: LocalDateTime
     ) {
         this.tilstand.lagreInntekt(this, infotrygd)
+    }
+
+    override fun visitInntektFraSøknad(
+        inntektFraSøknad: InntektFraSøknad,
+        id: UUID,
+        dato: LocalDate,
+        hendelseId: UUID,
+        beløp: Inntekt,
+        tidsstempel: LocalDateTime
+    ) {
+        this.tilstand.lagreInntekt(this, inntektFraSøknad)
     }
 
     override fun preVisitSkattSykepengegrunnlag(

@@ -7,7 +7,6 @@ import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
@@ -52,6 +51,7 @@ sealed class Inntektsopplysning(
     internal open fun overstyrer(gammel: IkkeRapportert) = this
     internal open fun overstyrer(gammel: SkattSykepengegrunnlag) = this
     internal open fun overstyrer(gammel: Inntektsmelding) = this
+    internal open fun overstyrer(gammel: InntektFraSøknad) = this
     internal open fun overstyrer(gammel: Saksbehandler): Inntektsopplysning {
         throw IllegalStateException("Kan ikke overstyre saksbehandler-inntekt")
     }
@@ -147,6 +147,7 @@ sealed class Inntektsopplysning(
                     is InntektsopplysningInnDto.SaksbehandlerDto -> Saksbehandler.gjenopprett(dto, inntekter)
                     is InntektsopplysningInnDto.SkattSykepengegrunnlagDto -> SkattSykepengegrunnlag.gjenopprett(dto)
                     is InntektsopplysningInnDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsatt.gjenopprett(dto, inntekter)
+                    is InntektsopplysningInnDto.InntektFraSøknadDto -> InntektFraSøknad.gjenopprett(dto)
                 }
             }
             return inntektsopplysning

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.InntektDto
-import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.SkatteopplysningDto
 import no.nav.helse.dto.SubsumsjonDto
 
@@ -26,6 +25,14 @@ sealed class InntektsopplysningUtDto {
     }
 
     data class InfotrygdDto(
+        override val id: UUID,
+        override val hendelseId: UUID,
+        override val dato: LocalDate,
+        override val beløp: InntektDto,
+        override val tidsstempel: LocalDateTime
+    ) : InntektsopplysningUtDto()
+
+    data class InntektFraSøknadDto(
         override val id: UUID,
         override val hendelseId: UUID,
         override val dato: LocalDate,

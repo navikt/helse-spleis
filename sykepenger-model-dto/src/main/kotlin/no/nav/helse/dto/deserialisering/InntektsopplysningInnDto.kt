@@ -32,6 +32,14 @@ sealed class InntektsopplysningInnDto {
         override val tidsstempel: LocalDateTime
     ) : InntektsopplysningInnDto()
 
+    data class InntektFraSøknadDto(
+        override val id: UUID,
+        override val hendelseId: UUID,
+        override val dato: LocalDate,
+        override val beløp: InntektbeløpDto.MånedligDouble,
+        override val tidsstempel: LocalDateTime
+    ) : InntektsopplysningInnDto()
+
     data class SaksbehandlerDto(
         override val id: UUID,
         override val hendelseId: UUID,

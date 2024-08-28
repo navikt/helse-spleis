@@ -10,7 +10,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.person.inntekt.IkkeRapportert
+import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -36,8 +36,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(31000.månedlig, inntektA1.inspektør.inntektsopplysning.fastsattÅrsinntekt())
                 assertTrue(inntektA1.inspektør.inntektsopplysning is Inntektsmelding)
                 assertEquals(1.februar til LocalDate.MAX, inntektA2!!.inspektør.gjelder)
-                assertEquals(0.månedlig, inntektA2.inspektør.inntektsopplysning.fastsattÅrsinntekt()) // TODO: Kanskje ta inn den faktiske oppgitte inntekten (krever egen inntektstype)
-                assertTrue(inntektA2.inspektør.inntektsopplysning is IkkeRapportert) // TODO: Kanskje en egen inntektstype for dissan herran
+                assertEquals(10000.månedlig, inntektA2.inspektør.inntektsopplysning.fastsattÅrsinntekt())
+                assertTrue(inntektA2.inspektør.inntektsopplysning is InntektFraSøknad)
             }
         }
     }
