@@ -21,6 +21,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.IDENT_OPPHØRT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDINGER_REPLAY
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.MINIMUM_SYKDOMSGRAD_VURDERT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_ARBEIDSLEDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD_FRILANS
@@ -57,6 +58,7 @@ import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
@@ -159,6 +161,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is SkjønnsmessigFastsettelseMessage -> SKJØNNSMESSIG_FASTSETTELSE
         is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
         is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
+        is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
@@ -219,6 +222,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         IDENT_OPPHØRT,
         SKJØNNSMESSIG_FASTSETTELSE,
         AVBRUTT_SØKNAD,
-        INNTEKTSMELDINGER_REPLAY
+        INNTEKTSMELDINGER_REPLAY,
+        MINIMUM_SYKDOMSGRAD_VURDERT
     }
 }
