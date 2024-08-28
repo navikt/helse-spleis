@@ -133,7 +133,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender vedtak fattet ved tilkommen inntekt`() = Toggle.TilkommenArbeidsgiver.enable {
+    fun `sender vedtak fattet ved tilkommen arbeidsgiver`() = Toggle.TilkommenArbeidsgiver.enable {
         nyttVedtak(januar, orgnummer = a1)
         håndterSøknad(februar, orgnummer = a1)
         håndterSøknad(februar, orgnummer = a2)

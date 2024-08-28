@@ -6,6 +6,7 @@ import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.SykepengegrunnlagInnDto
 import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -253,7 +254,7 @@ internal class Sykepengegrunnlag private constructor(
     internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonslogg)
         hendelse.overstyr(builder)
-        val (resultat, harTilkommetInntekter) = builder.resultat(person.kandidatForTilkommenInntekt())
+        val (resultat, harTilkommetInntekter) = builder.resultat(Toggle.TilkommenArbeidsgiver.enabled)
         arbeidsgiverInntektsopplysninger.forEach { it.arbeidsgiveropplysningerKorrigert(person, hendelse) }
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
     }
@@ -303,7 +304,7 @@ internal class Sykepengegrunnlag private constructor(
     ): Sykepengegrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, null, subsumsjonslogg)
         inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder, skjæringstidspunkt)
-        val (resultat, harTilkommetInntekter) = builder.resultat(person.kandidatForTilkommenInntekt())
+        val (resultat, harTilkommetInntekter) = builder.resultat(Toggle.TilkommenArbeidsgiver.enabled)
         if (harTilkommetInntekter) {
             inntektsmelding.varsel(Varselkode.RV_SV_5)
         }

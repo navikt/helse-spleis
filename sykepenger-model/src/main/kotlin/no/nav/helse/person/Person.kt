@@ -142,8 +142,6 @@ class Person private constructor(
         }
     }
 
-    fun kandidatForTilkommenInntekt() = Toggle.TilkommenArbeidsgiver.enabled
-
     internal constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,

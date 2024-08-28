@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test
 internal class GodkjenningsbehovTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Tilkommen inntekt`() = Toggle.TilkommenArbeidsgiver.enable {
+    fun `Tilkommen arbeidsgiver`() = Toggle.TilkommenArbeidsgiver.enable {
         nyttVedtak(januar, orgnummer = a1)
         håndterSøknad(februar, orgnummer = a1)
         håndterSøknad(februar, orgnummer = a2)
