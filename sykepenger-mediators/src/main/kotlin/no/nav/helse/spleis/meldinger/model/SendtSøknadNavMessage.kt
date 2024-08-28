@@ -48,7 +48,7 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
                     fom = it.path("fom").asLocalDate(),
                     tom = it.path("tom").takeUnless { it.isMissingOrNull() }?.asLocalDate(),
                     orgnummer = it.path("orgnummer").asText(),
-                    beløp = it.path("belop").asInt(),
+                    beløp = it.path("beløp").asInt(),
                 )
             }
 
