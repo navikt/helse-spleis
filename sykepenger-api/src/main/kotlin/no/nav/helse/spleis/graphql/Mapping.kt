@@ -441,7 +441,7 @@ private fun Inntekt.tilGraphQLOmregnetArsinntekt() = GraphQLOmregnetArsinntekt(
         Inntektkilde.Infotrygd -> GraphQLInntektskilde.Infotrygd
         Inntektkilde.AOrdningen -> GraphQLInntektskilde.AOrdningen
         Inntektkilde.IkkeRapportert -> GraphQLInntektskilde.IkkeRapportert
-        Inntektkilde.Søknad -> GraphQLInntektskilde.Soknad
+        Inntektkilde.Søknad -> GraphQLInntektskilde.IkkeRapportert
     },
     belop = this.beløp,
     manedsbelop = this.månedsbeløp,
