@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.person.Vedtaksperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -105,14 +104,14 @@ internal abstract class HistorieTest {
 
     protected fun beregn(orgnr: String, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
         val sykdomstidslinje = arbeidsgiverSykdomstidslinje.getValue(orgnr)
-        val inntekter = Vedtaksperioder(
+        val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = orgnr,
             vilkårsgrunnlagHistorikk = inntektsdatoer.associateWith { Inntektsmelding(it, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()) }.somVilkårsgrunnlagHistorikk(orgnr),
             regler = regler,
-            subsumsjonslogg = Subsumsjonslogg.NullObserver
+            subsumsjonslogg = Subsumsjonslogg.NullObserver,
+            beregningsperiode = sykdomstidslinje.periode()!!
         )
-        val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(inntekter, sykdomstidslinje.periode()!!)
         return infotrygdhistorikk.buildUtbetalingstidslinje(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, Subsumsjonslogg.NullObserver).let { utbetalingstidslinjebuilder.result() }
     }
 

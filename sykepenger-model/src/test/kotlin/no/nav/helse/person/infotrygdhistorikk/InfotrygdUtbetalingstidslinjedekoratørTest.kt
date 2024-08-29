@@ -17,7 +17,6 @@ import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
-import no.nav.helse.person.Vedtaksperioder
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -37,15 +36,14 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `ekskluderer dager før første dag`() {
         val builder = UtbetalingstidslinjeBuilder(
-            Vedtaksperioder(
-                hendelse = Aktivitetslogg(),
-                vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-                ).somVilkårsgrunnlagHistorikk("a1"),
-                organisasjonsnummer = "a1",
-                regler = NormalArbeidstaker,
-                subsumsjonslogg = MaskinellJurist(),
-            ), beregningsperiode = februar
+            hendelse = Aktivitetslogg(),
+            vilkårsgrunnlagHistorikk = mapOf(
+                1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+            ).somVilkårsgrunnlagHistorikk("a1"),
+            organisasjonsnummer = "a1",
+            regler = NormalArbeidstaker,
+            subsumsjonslogg = MaskinellJurist(),
+            beregningsperiode = februar
         )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, februar, emptyList(), infotrygdkilde)
         val tidslinje = 31.S(infotrygdkilde) + 28.S + 31.S(infotrygdkilde)
@@ -56,15 +54,14 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `ekskluderer infotrygd-snuter`() {
         val builder = UtbetalingstidslinjeBuilder(
-            Vedtaksperioder(
-                hendelse = Aktivitetslogg(),
-                vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-                ).somVilkårsgrunnlagHistorikk("a1"),
-                organisasjonsnummer = "a1",
-                regler = NormalArbeidstaker,
-                subsumsjonslogg = MaskinellJurist()
-            ), beregningsperiode = februar
+            hendelse = Aktivitetslogg(),
+            vilkårsgrunnlagHistorikk = mapOf(
+                1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+            ).somVilkårsgrunnlagHistorikk("a1"),
+            organisasjonsnummer = "a1",
+            regler = NormalArbeidstaker,
+            subsumsjonslogg = MaskinellJurist(),
+            beregningsperiode = februar
         )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, februar, listOf(1.januar til 10.februar), infotrygdkilde)
         val tidslinje = 31.S(infotrygdkilde) + 28.S
@@ -75,15 +72,14 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `ekskluderer infotrygd-haler`() {
         val builder = UtbetalingstidslinjeBuilder(
-            Vedtaksperioder(
-                hendelse = Aktivitetslogg(),
-                vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-                ).somVilkårsgrunnlagHistorikk("a1"),
-                organisasjonsnummer = "a1",
-                regler = NormalArbeidstaker,
-                subsumsjonslogg = MaskinellJurist()
-            ), beregningsperiode = januar
+            hendelse = Aktivitetslogg(),
+            vilkårsgrunnlagHistorikk = mapOf(
+                1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+            ).somVilkårsgrunnlagHistorikk("a1"),
+            organisasjonsnummer = "a1",
+            regler = NormalArbeidstaker,
+            subsumsjonslogg = MaskinellJurist(),
+            beregningsperiode = januar
         )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.januar til 31.januar, listOf(20.januar til 28.februar), infotrygdkilde)
         val tidslinje = 31.S + 28.S(infotrygdkilde)
@@ -94,15 +90,14 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `legger ikke til samme ukjente dag flere ganger selv om det er utbetalt for flere arbeidsgivere`() {
         val builder = UtbetalingstidslinjeBuilder(
-            Vedtaksperioder(
-                hendelse = Aktivitetslogg(),
-                vilkårsgrunnlagHistorikk = mapOf(
-                    1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-                ).somVilkårsgrunnlagHistorikk("a1"),
-                organisasjonsnummer = "a1",
-                regler = NormalArbeidstaker,
-                subsumsjonslogg = MaskinellJurist()
-            ), beregningsperiode = 1.januar til 31.mars
+            hendelse = Aktivitetslogg(),
+            vilkårsgrunnlagHistorikk = mapOf(
+                1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
+            ).somVilkårsgrunnlagHistorikk("a1"),
+            organisasjonsnummer = "a1",
+            regler = NormalArbeidstaker,
+            subsumsjonslogg = MaskinellJurist(),
+            beregningsperiode = 1.januar til 31.mars
         )
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.januar til 31.mars, listOf(
             februar, // ag1 i IT

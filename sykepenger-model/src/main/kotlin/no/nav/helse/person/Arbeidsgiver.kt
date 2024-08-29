@@ -867,18 +867,17 @@ internal class Arbeidsgiver private constructor(
         infotrygdhistorikk: Infotrygdhistorikk,
         subsumsjonslogg: Subsumsjonslogg
     ): Utbetalingstidslinje {
-        val inntekter = Vedtaksperioder(
-            hendelse = hendelse,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            regler = regler,
-            subsumsjonslogg = subsumsjonslogg,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperioder = vedtaksperioder
-        )
         val ghosttidslinje = vilkårsgrunnlagHistorikk.ghosttidslinje(organisasjonsnummer, periode.endInclusive)
         val sykdomstidslinje = ghosttidslinje.merge(sykdomstidslinje(), replace)
         if (sykdomstidslinje.count() == 0) return Utbetalingstidslinje()
-        val builder = UtbetalingstidslinjeBuilder(inntekter, periode)
+        val builder = UtbetalingstidslinjeBuilder(
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            hendelse = hendelse,
+            regler = regler,
+            subsumsjonslogg = subsumsjonslogg,
+            organisasjonsnummer = organisasjonsnummer,
+            beregningsperiode = periode
+        )
         infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonslogg)
         return builder.result()
     }

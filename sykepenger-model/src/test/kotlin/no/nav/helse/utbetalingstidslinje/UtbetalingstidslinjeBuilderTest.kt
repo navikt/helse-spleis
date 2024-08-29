@@ -12,7 +12,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.Vedtaksperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
@@ -629,14 +628,14 @@ internal class UtbetalingstidslinjeBuilderTest {
     )
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
-        val inntekter = Vedtaksperioder(
+        val builder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonslogg = Subsumsjonslogg.NullObserver
+            subsumsjonslogg = Subsumsjonslogg.NullObserver,
+            beregningsperiode = tidslinje.periode() ?: LocalDate.MIN.somPeriode()
         )
-        val builder = UtbetalingstidslinjeBuilder(inntekter, tidslinje.periode() ?: LocalDate.MIN.somPeriode())
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller,
             Komposittmediator(periodebuilder, builder), Subsumsjonslogg.NullObserver)
