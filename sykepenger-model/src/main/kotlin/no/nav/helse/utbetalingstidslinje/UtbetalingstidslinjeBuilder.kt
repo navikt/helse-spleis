@@ -5,11 +5,14 @@ import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt.Companion.finnSkjæringstidspunkt
 import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt.Companion.finnArbeidsgiver
 import no.nav.helse.økonomi.Inntekt
@@ -30,6 +33,10 @@ internal sealed class UtbetalingstidslinjeBuilderException(message: String) : Ru
 internal class FaktaavklarteInntekter(
     private val skjæringstidspunkter: List<VilkårsprøvdSkjæringstidspunkt>
 ) {
+    internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje {
+        return skjæringstidspunkter.mapNotNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }.merge()
+    }
+
     internal fun medInntekt(
         organisasjonsnummer: String,
         dato: LocalDate,
@@ -69,6 +76,10 @@ internal class FaktaavklarteInntekter(
             fun List<VilkårsprøvdSkjæringstidspunkt>.finnSkjæringstidspunkt(dato: LocalDate) = this
                 .filter { it.skjæringstidspunkt <= dato }
                 .maxByOrNull { it.skjæringstidspunkt }
+        }
+
+        internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje? {
+            return inntekter.finnArbeidsgiver(organisasjonsnummer)?.ghosttidslinje(sisteDag)
         }
 
         internal fun medInntekt(
@@ -135,6 +146,11 @@ internal class FaktaavklarteInntekter(
             internal companion object {
                 fun List<FaktaavklartInntekt>.finnArbeidsgiver(organisasjonsnummer: String) = this
                     .singleOrNull { it.organisasjonsnummer == organisasjonsnummer }
+            }
+
+            internal fun ghosttidslinje(sisteDag: LocalDate): Sykdomstidslinje {
+                if (sisteDag < gjelder.start) return Sykdomstidslinje()
+                return Sykdomstidslinje.ghostdager(gjelder.start til sisteDag)
             }
 
             private fun fastsattÅrsinntekt(dagen: LocalDate): Inntekt {

@@ -18,6 +18,7 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Comp
 import no.nav.helse.serde.PersonData
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.testhelpers.FiktivInntekt
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.faktaavklarteInntekter
 import no.nav.helse.testhelpers.opphold
@@ -290,7 +291,7 @@ internal class InfotrygdhistorikkTest {
         val builder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
-            faktaavklarteInntekter = listOf("a1" to 25000.månedlig).faktaavklarteInntekter(1.januar),
+            faktaavklarteInntekter = listOf(FiktivInntekt("a1", 25000.månedlig)).faktaavklarteInntekter(1.januar),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
             beregningsperiode = januar
@@ -309,7 +310,7 @@ internal class InfotrygdhistorikkTest {
         val builder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
-            faktaavklarteInntekter = listOf("a1" to 25000.månedlig).faktaavklarteInntekter(1.januar),
+            faktaavklarteInntekter = listOf(FiktivInntekt("a1", 25000.månedlig)).faktaavklarteInntekter(1.januar),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
             beregningsperiode = februar

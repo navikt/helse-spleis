@@ -4,57 +4,29 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.inspectors.SubsumsjonInspektør
-import no.nav.helse.januar
-import no.nav.helse.person.Opptjening
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.SubsumsjonInspektør
+import no.nav.helse.januar
+import no.nav.helse.person.Opptjening
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ghostdager
 import no.nav.helse.yearMonth
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiverInntektsopplysningTest {
-
-    @Test
-    fun ghosttidslinje() {
-        val skjæringstidspunkt = 1.januar
-        val a1Fom = skjæringstidspunkt
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Fom til 10.januar, Inntektsmelding(a1Fom, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
-        assertNull(a1Opplysning.ghosttidslinje("a2", skjæringstidspunkt))
-        assertEquals(Sykdomstidslinje(), a1Opplysning.ghosttidslinje("a1", 31.desember(2017)))
-        assertEquals(ghostdager(skjæringstidspunkt til 31.januar), a1Opplysning.ghosttidslinje("a1", 31.januar))
-        assertEquals(ghostdager(skjæringstidspunkt til 5.januar), a1Opplysning.ghosttidslinje("a1", 5.januar))
-    }
-
-    @Test
-    fun `fastsatt årsinntekt - tilkommen inntekt`() {
-        val skjæringstidspunkt = 1.januar
-        val a1Fom = skjæringstidspunkt
-        val a2Fom = skjæringstidspunkt.plusDays(1)
-        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", a1Fom til 10.januar, Inntektsmelding(a1Fom, UUID.randomUUID(), 1000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
-        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", a2Fom til LocalDate.MAX, Inntektsmelding(a2Fom, UUID.randomUUID(), 2000.månedlig, LocalDateTime.now()), Refusjonsopplysninger())
-        assertEquals(1000.månedlig, listOf(a1Opplysning, a2Opplysning).fastsattÅrsinntekt(skjæringstidspunkt))
-        assertEquals(ghostdager(skjæringstidspunkt til 31.januar), a1Opplysning.ghosttidslinje("a1", 31.januar))
-        assertEquals(ghostdager(a2Fom til 31.januar), a2Opplysning.ghosttidslinje("a2", 31.januar))
-    }
 
     @Test
     fun `overstyr inntekter`() {

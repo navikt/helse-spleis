@@ -20,6 +20,7 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.FiktivInntekt
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.faktaavklarteInntekter
 import no.nav.helse.testhelpers.resetSeed
@@ -106,7 +107,7 @@ internal abstract class HistorieTest {
         val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = orgnr,
-            faktaavklarteInntekter = listOf(orgnr to 25000.månedlig).faktaavklarteInntekter(inntektsdato),
+            faktaavklarteInntekter = listOf(FiktivInntekt(orgnr, 25000.månedlig)).faktaavklarteInntekter(inntektsdato),
             regler = regler,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
             beregningsperiode = sykdomstidslinje.periode()!!

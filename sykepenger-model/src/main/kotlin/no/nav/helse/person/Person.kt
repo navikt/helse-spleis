@@ -90,11 +90,11 @@ class Person private constructor(
     private var aktørId: String,
     private var personidentifikator: Personidentifikator,
     private var alder: Alder,
-    private val arbeidsgivere: MutableList<Arbeidsgiver>,
+    internal val arbeidsgivere: MutableList<Arbeidsgiver>,
     private val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
-    private val infotrygdhistorikk: Infotrygdhistorikk,
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    internal val infotrygdhistorikk: Infotrygdhistorikk,
+    internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val jurist: MaskinellJurist,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     private val regler: ArbeidsgiverRegler = NormalArbeidstaker,
@@ -356,14 +356,10 @@ class Person private constructor(
             regler = regler,
             alder = alder,
             arbeidsgivere = { beregningsperiode: Periode, subsumsjonslogg: Subsumsjonslogg, hendelse: IAktivitetslogg ->
-                arbeidsgivere.associateWith { it.beregnUtbetalingstidslinje(
-                    hendelse,
-                    beregningsperiode,
-                    regler,
-                    vilkårsgrunnlagHistorikk,
-                    infotrygdhistorikk,
-                    subsumsjonslogg
-                ) }
+                val faktaavklarteInntekter = vilkårsgrunnlagHistorikk.faktavklarteInntekter()
+                arbeidsgivere.associateWith {
+                    it.beregnUtbetalingstidslinje(hendelse, beregningsperiode, regler, faktaavklarteInntekter, infotrygdhistorikk, subsumsjonslogg)
+                }
             },
             infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,

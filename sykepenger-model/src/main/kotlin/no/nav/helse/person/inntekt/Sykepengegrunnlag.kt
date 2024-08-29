@@ -484,9 +484,6 @@ internal class Sykepengegrunnlag private constructor(
     internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode) =
         arbeidsgiverInntektsopplysninger.forespurtInntektOgRefusjonsopplysninger(skjæringstidspunkt, organisasjonsnummer, periode)
 
-    internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate) =
-        arbeidsgiverInntektsopplysninger.firstNotNullOfOrNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }
-
     internal fun dto() = SykepengegrunnlagUtDto(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },

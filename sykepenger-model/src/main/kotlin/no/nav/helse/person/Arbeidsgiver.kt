@@ -81,6 +81,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
+import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
@@ -863,15 +864,15 @@ internal class Arbeidsgiver private constructor(
         hendelse: IAktivitetslogg,
         periode: Periode,
         regler: ArbeidsgiverRegler,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+        faktaavklarteInntekter: FaktaavklarteInntekter,
         infotrygdhistorikk: Infotrygdhistorikk,
         subsumsjonslogg: Subsumsjonslogg
     ): Utbetalingstidslinje {
-        val ghosttidslinje = vilkårsgrunnlagHistorikk.ghosttidslinje(organisasjonsnummer, periode.endInclusive)
+        val ghosttidslinje = faktaavklarteInntekter.ghosttidslinje(organisasjonsnummer, periode.endInclusive)
         val sykdomstidslinje = ghosttidslinje.merge(sykdomstidslinje(), replace)
         if (sykdomstidslinje.count() == 0) return Utbetalingstidslinje()
         val builder = UtbetalingstidslinjeBuilder(
-            faktaavklarteInntekter = vilkårsgrunnlagHistorikk.faktavklarteInntekter(),
+            faktaavklarteInntekter = faktaavklarteInntekter,
             hendelse = hendelse,
             regler = regler,
             subsumsjonslogg = subsumsjonslogg,

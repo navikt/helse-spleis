@@ -20,7 +20,6 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -124,12 +123,6 @@ class ArbeidsgiverInntektsopplysning(
         saksbehandleroverstyring: OverstyrArbeidsgiveropplysninger
     ) {
         inntektsopplysning.arbeidsgiveropplysningerKorrigert(person, orgnummer, saksbehandleroverstyring)
-    }
-
-    internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje? {
-        if (organisasjonsnummer != this.orgnummer) return null
-        if (sisteDag < gjelder.start) return Sykdomstidslinje()
-        return Sykdomstidslinje.ghostdager(gjelder.start til sisteDag)
     }
 
     internal fun gjenoppliv(forrigeSkjæringstidspunkt: LocalDate, nyttSkjæringstidspunkt: LocalDate): ArbeidsgiverInntektsopplysning {

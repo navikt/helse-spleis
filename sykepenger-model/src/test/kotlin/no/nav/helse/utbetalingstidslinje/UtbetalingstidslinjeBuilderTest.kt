@@ -19,6 +19,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.FiktivInntekt
 import no.nav.helse.testhelpers.K
 import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
@@ -622,9 +623,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     private val perioder: MutableList<Arbeidsgiverperiode> = mutableListOf()
 
     private val inntektsopplysningPerSkjæringstidspunkt = mapOf(
-        1.januar to listOf("a1" to 31000.månedlig),
-        1.februar to listOf("a1" to 25000.månedlig),
-        1.mars to listOf("a1" to 50000.månedlig)
+        1.januar to listOf(FiktivInntekt("a1", 31000.månedlig)),
+        1.februar to listOf(FiktivInntekt("a1", 25000.månedlig)),
+        1.mars to listOf(FiktivInntekt("a1", 50000.månedlig))
     ).faktaavklarteInntekter()
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
