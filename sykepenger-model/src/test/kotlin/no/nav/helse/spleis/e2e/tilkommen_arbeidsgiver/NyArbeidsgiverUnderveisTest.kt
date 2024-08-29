@@ -196,8 +196,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertEquals(
                 """Arbeidsgiver a2 mangler i sykepengegrunnlaget ved utbetaling av 2018-01-31. 
-                Arbeidsgiveren må være i sykepengegrunnlaget for å legge til utbetalingsopplysninger. 
-                Arbeidsgiverne i sykepengegrunlaget er [a1]""",
+                Arbeidsgiveren må være i sykepengegrunnlaget for å legge til utbetalingsopplysninger.""",
                 assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }.message
             )
         }

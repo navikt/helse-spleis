@@ -15,14 +15,13 @@ import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
-import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.serde.PersonData
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.faktaavklarteInntekter
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -291,9 +290,7 @@ internal class InfotrygdhistorikkTest {
         val builder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
-            vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-            ).somVilkårsgrunnlagHistorikk("a1"),
+            faktaavklarteInntekter = listOf("a1" to 25000.månedlig).faktaavklarteInntekter(1.januar),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
             beregningsperiode = januar
@@ -312,9 +309,7 @@ internal class InfotrygdhistorikkTest {
         val builder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
-            vilkårsgrunnlagHistorikk = mapOf(
-                1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now())
-            ).somVilkårsgrunnlagHistorikk("a1"),
+            faktaavklarteInntekter = listOf("a1" to 25000.månedlig).faktaavklarteInntekter(1.januar),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
             beregningsperiode = februar

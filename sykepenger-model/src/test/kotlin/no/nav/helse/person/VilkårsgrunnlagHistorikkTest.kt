@@ -126,7 +126,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        val økonomi: Økonomi = historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
+        val økonomi: Økonomi = historikk.faktavklarteInntekter().medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -143,40 +143,14 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver).also { økonomi ->
+        historikk.faktavklarteInntekter().medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver).also { økonomi ->
             assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
             assertEquals(INGEN, økonomi.inspektør.dekningsgrunnlag)
         }
-        historikk.medInntekt(ORGNR, 3.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver).also { økonomi ->
+        historikk.faktavklarteInntekter().medInntekt(ORGNR, 3.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver).also { økonomi ->
             assertNotNull(økonomi)
             assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
         }
-    }
-
-    @Test
-    fun `setter nyeste inntekt på økonomi`() {
-        val inntekt = 21000.månedlig
-        val inntekt2 = 25000.månedlig
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ))
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 3.januar,
-            sykepengegrunnlag = inntekt2.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 3.januar, true, NullObserver),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ))
-        val økonomi: Økonomi = historikk.medInntekt(ORGNR, 4.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
-        assertEquals(inntekt2, økonomi.inspektør.aktuellDagsinntekt)
     }
 
     @Test
@@ -192,7 +166,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             vilkårsgrunnlagId = UUID.randomUUID()
         )
         historikk.lagre(grunnlagsdata)
-        val økonomi: Økonomi = historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
+        val økonomi: Økonomi = historikk.faktavklarteInntekter().medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -208,7 +182,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        val resultat = historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
+        val resultat = historikk.faktavklarteInntekter().medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
         assertEquals(INGEN, resultat.inspektør.aktuellDagsinntekt)
         assertEquals(INGEN, resultat.inspektør.dekningsgrunnlag)
     }
@@ -225,14 +199,9 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        val resultat = historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
+        val resultat = historikk.faktavklarteInntekter().medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
         assertEquals(INGEN, resultat.inspektør.aktuellDagsinntekt)
         assertEquals(INGEN, resultat.inspektør.dekningsgrunnlag)
-    }
-
-    @Test
-    fun `ugyldige å be om inntekt uten vilkårsgrunnlag`() {
-        assertThrows<RuntimeException> { historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver) }
     }
 
     @Test

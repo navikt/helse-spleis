@@ -12,7 +12,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
@@ -22,8 +21,8 @@ import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.faktaavklarteInntekter
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
@@ -102,12 +101,12 @@ internal abstract class HistorieTest {
         )
     }
 
-    protected fun beregn(orgnr: String, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
+    protected fun beregn(orgnr: String, inntektsdato: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
         val sykdomstidslinje = arbeidsgiverSykdomstidslinje.getValue(orgnr)
         val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = orgnr,
-            vilkårsgrunnlagHistorikk = inntektsdatoer.associateWith { Inntektsmelding(it, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()) }.somVilkårsgrunnlagHistorikk(orgnr),
+            faktaavklarteInntekter = listOf(orgnr to 25000.månedlig).faktaavklarteInntekter(inntektsdato),
             regler = regler,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
             beregningsperiode = sykdomstidslinje.periode()!!

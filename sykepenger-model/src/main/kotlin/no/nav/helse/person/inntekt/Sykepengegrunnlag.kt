@@ -32,6 +32,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.faktaavklarteInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finn
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnEndringsdato
@@ -41,8 +42,6 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.harI
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.ingenRefusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omregnedeÅrsinntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
@@ -56,12 +55,9 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Økonomi
 
 internal class Sykepengegrunnlag private constructor(
     private val alder: Alder,
@@ -386,21 +382,6 @@ internal class Sykepengegrunnlag private constructor(
     internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) } || sammenligningsgrunnlag.erRelevant(organisasjonsnummer)
 
-    internal fun utenInntekt(økonomi: Økonomi): Økonomi {
-        return økonomi.inntekt(
-            aktuellDagsinntekt = INGEN,
-            dekningsgrunnlag = INGEN,
-            `6G` = `6G`,
-            refusjonsbeløp = INGEN
-        )
-    }
-    internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonslogg: Subsumsjonslogg): Økonomi {
-        return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, regler, subsumsjonslogg) ?: utenInntekt(økonomi)
-    }
-
-    internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonslogg: Subsumsjonslogg) =
-        arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, regler, subsumsjonslogg)
-
     internal fun build(builder: VedtakFattetBuilder) {
         val fakta = when (vurdertInfotrygd) {
             true -> VedtakFattetBuilder.FastsattIInfotrygdBuilder(omregnetÅrsinntekt)
@@ -520,5 +501,7 @@ internal class Sykepengegrunnlag private constructor(
         minsteinntekt = this.minsteinntekt.dto(),
         oppfyllerMinsteinntektskrav = this.oppfyllerMinsteinntektskrav
     )
+
+    internal fun faktaavklarteInntekter() = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(skjæringstidspunkt, `6G`)
 }
 

@@ -3,12 +3,10 @@ package no.nav.helse.person.inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.inspectors.SubsumsjonInspektør
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Opptjening
 import no.nav.helse.etterlevelse.Bokstav
@@ -20,20 +18,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.ghostdager
-import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.yearMonth
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -372,39 +363,5 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 refusjonsopplysninger = Refusjonsopplysninger()
             )
         )
-    }
-
-    @Test
-    fun `setter negativt omregnet årsinntekt til 0`() {
-        val arbeidsgiverInntektsopplysning = ArbeidsgiverInntektsopplysning(
-            "orgnummer",
-            1.januar til LocalDate.MAX,
-            SkattSykepengegrunnlag(UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
-                    Skatteopplysning(
-                        hendelseId = UUID.randomUUID(),
-                        beløp = (-2500).daglig,
-                        måned = desember(2017),
-                        type = LØNNSINNTEKT,
-                        fordel = "fordel",
-                        beskrivelse = "beskrivelse"
-                    )
-                ),
-                emptyList()
-            ),
-            Refusjonsopplysninger()
-        )
-
-        val økonomi = listOf(arbeidsgiverInntektsopplysning).medInntekt(
-            organisasjonsnummer = "orgnummer",
-            `6G` = `6G`.beløp(1.januar),
-            dato = 1.januar,
-            skjæringstidspunkt = 1.januar,
-            økonomi = Økonomi.sykdomsgrad(100.prosent),
-            regler = NormalArbeidstaker,
-            subsumsjonslogg = NullObserver,
-        )
-        assertNotNull(økonomi)
-        assertEquals(Inntekt.INGEN, økonomi.inspektør.dekningsgrunnlag)
-        assertEquals(Inntekt.INGEN, økonomi.inspektør.aktuellDagsinntekt)
     }
 }

@@ -30,17 +30,14 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_8
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Økonomi
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
@@ -49,6 +46,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     private fun sisteInnlag() = historikk.firstOrNull()
 
     private fun forrigeInnslag() = historikk.elementAtOrNull(1)
+
+    internal fun faktavklarteInntekter() = sisteInnlag()?.faktaavklarteInntekter() ?: FaktaavklarteInntekter(emptyList())
 
     internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
         visitor.preVisitVilkårsgrunnlagHistorikk()
@@ -96,12 +95,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>, periode: Periode, subsumsjonslogg: Subsumsjonslogg) =
         sisteInnlag()?.avvis(tidslinjer, periode, subsumsjonslogg) ?: tidslinjer
 
-    internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonslogg: Subsumsjonslogg) =
-        sisteInnlag()!!.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-
-    internal fun medUtbetalingsopplysninger(hendelse: IAktivitetslogg, organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonslogg: Subsumsjonslogg) =
-        sisteInnlag()!!.medUtbetalingsopplysninger(hendelse, organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-
     internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate): Boolean {
         if (sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false) return false
         return forrigeInnslag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false
@@ -125,6 +118,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal constructor(other: Innslag?, elementer: List<VilkårsgrunnlagElement>) : this(other?.vilkårsgrunnlag?.toMap()?: emptyMap()) {
             elementer.forEach { it.add(this) }
         }
+
+        internal fun faktaavklarteInntekter() = FaktaavklarteInntekter(vilkårsgrunnlag.map { it.value.faktaavklarteInntekter() })
 
         internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
             visitor.preVisitInnslag(this, id, opprettet)
@@ -174,38 +169,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 element.avvis(resultat, skjæringstidspunktperiode, periode, subsumsjonslogg)
             }
         }
-
-        internal fun medInntekt(
-            organisasjonsnummer: String,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            regler: ArbeidsgiverRegler,
-            subsumsjonslogg: Subsumsjonslogg
-        ) = VilkårsgrunnlagElement.medInntekt(
-            vilkårsgrunnlag.values,
-            organisasjonsnummer,
-            dato,
-            økonomi,
-            regler,
-            subsumsjonslogg
-        )
-
-        internal fun medUtbetalingsopplysninger(
-            hendelse: IAktivitetslogg,
-            organisasjonsnummer: String,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            regler: ArbeidsgiverRegler,
-            subsumsjonslogg: Subsumsjonslogg,
-        ) = VilkårsgrunnlagElement.medUtbetalingsopplysninger(
-            vilkårsgrunnlag.values,
-            hendelse,
-            organisasjonsnummer,
-            dato,
-            økonomi,
-            regler,
-            subsumsjonslogg
-        )
 
         override fun hashCode(): Int {
             return this.vilkårsgrunnlag.hashCode()
@@ -358,25 +321,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String
-        private fun medInntekt(
-            organisasjonsnummer: String,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            regler: ArbeidsgiverRegler,
-            subsumsjonslogg: Subsumsjonslogg
-        ) = sykepengegrunnlag.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-
-        private fun medUtbetalingsopplysninger(
-            organisasjonsnummer: String,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            regler: ArbeidsgiverRegler,
-            subsumsjonslogg: Subsumsjonslogg
-        ) = sykepengegrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-
-        private fun utenInntekt(økonomi: Økonomi): Økonomi {
-            return sykepengegrunnlag.utenInntekt(økonomi)
-        }
 
         internal fun er6GBegrenset() = sykepengegrunnlag.er6GBegrenset()
 
@@ -427,64 +371,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     }
             }
 
-            internal fun medInntekt(
-                elementer: Collection<VilkårsgrunnlagElement>,
-                organisasjonsnummer: String,
-                dato: LocalDate,
-                økonomi: Økonomi,
-                regler: ArbeidsgiverRegler,
-                subsumsjonslogg: Subsumsjonslogg
-            ): Økonomi {
-                return finnVilkårsgrunnlag(elementer, dato)?.medInntekt(
-                    organisasjonsnummer,
-                    dato,
-                    økonomi,
-                    regler,
-                    subsumsjonslogg
-                ) ?: utenInntekt(elementer, dato, økonomi)
-            }
-
-            internal fun medUtbetalingsopplysninger(
-                elementer: Collection<VilkårsgrunnlagElement>,
-                hendelse: IAktivitetslogg,
-                organisasjonsnummer: String,
-                dato: LocalDate,
-                økonomi: Økonomi,
-                regler: ArbeidsgiverRegler,
-                subsumsjonslogg: Subsumsjonslogg
-            ): Økonomi {
-                val vilkårsgrunnlag = finnVilkårsgrunnlag(elementer, dato)
-
-                if (vilkårsgrunnlag == null) {
-                    hendelse.info("Fant ikke vilkårsgrunnlag for $dato. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene ${elementer.map { it.skjæringstidspunkt }}")
-                    hendelse.varsel(RV_IV_8)
-                    return utenInntekt(elementer, dato, økonomi)
-                }
-                return vilkårsgrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-            }
-
-            private fun utenInntekt(
-                elementer: Collection<VilkårsgrunnlagElement>,
-                dato: LocalDate,
-                økonomi: Økonomi
-            ): Økonomi {
-                return finnVilkårsgrunnlag(elementer, dato)?.utenInntekt(økonomi) ?: økonomi.inntekt(
-                    aktuellDagsinntekt = INGEN,
-                    dekningsgrunnlag = INGEN,
-                    `6G` = INGEN,
-                    refusjonsbeløp = INGEN
-                )
-            }
-
-            private fun finnVilkårsgrunnlag(
-                elementer: Collection<VilkårsgrunnlagElement>,
-                dato: LocalDate
-            ): VilkårsgrunnlagElement? {
-                return elementer
-                    .filter { it.skjæringstidspunkt <= dato }
-                    .maxByOrNull { it.skjæringstidspunkt }
-            }
-
             internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): VilkårsgrunnlagElement {
                 return when (dto) {
                     is VilkårsgrunnlagInnDto.Infotrygd -> InfotrygdVilkårsgrunnlag.gjenopprett(alder, dto, inntekter)
@@ -500,6 +386,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: SykepengegrunnlagUtDto
         ): VilkårsgrunnlagUtDto
+
+        fun faktaavklarteInntekter() = sykepengegrunnlag.faktaavklarteInntekter()
     }
 
     internal class Grunnlagsdata(

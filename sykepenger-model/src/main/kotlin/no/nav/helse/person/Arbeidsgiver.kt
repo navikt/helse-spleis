@@ -871,7 +871,7 @@ internal class Arbeidsgiver private constructor(
         val sykdomstidslinje = ghosttidslinje.merge(sykdomstidslinje(), replace)
         if (sykdomstidslinje.count() == 0) return Utbetalingstidslinje()
         val builder = UtbetalingstidslinjeBuilder(
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            faktaavklarteInntekter = vilkårsgrunnlagHistorikk.faktavklarteInntekter(),
             hendelse = hendelse,
             regler = regler,
             subsumsjonslogg = subsumsjonslogg,

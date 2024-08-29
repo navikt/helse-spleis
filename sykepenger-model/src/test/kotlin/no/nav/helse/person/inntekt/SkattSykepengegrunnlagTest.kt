@@ -4,13 +4,17 @@ import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.forrigeDag
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.inntekt.AvklarbarSykepengegrunnlag.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.yearMonth
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -18,6 +22,23 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SkattSykepengegrunnlagTest {
+
+    @Test
+    fun `setter negativt omregnet årsinntekt til 0`() {
+        val skatt = SkattSykepengegrunnlag(UUID.randomUUID(), 1.januar, inntektsopplysninger = listOf(
+            Skatteopplysning(
+                hendelseId = UUID.randomUUID(),
+                beløp = (-2500).daglig,
+                måned = desember(2017),
+                type = LØNNSINNTEKT,
+                fordel = "fordel",
+                beskrivelse = "beskrivelse"
+            )
+        ),
+            emptyList()
+        )
+        assertEquals(Inntekt.INGEN, skatt.fastsattÅrsinntekt())
+    }
 
     @Test
     fun `inntekt må gjelde skjæringstidspunktet`() {

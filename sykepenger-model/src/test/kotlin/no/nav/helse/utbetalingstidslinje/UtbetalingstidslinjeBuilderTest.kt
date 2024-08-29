@@ -34,9 +34,9 @@ import no.nav.helse.testhelpers.YOL
 import no.nav.helse.testhelpers.YP
 import no.nav.helse.testhelpers.YS
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.testhelpers.faktaavklarteInntekter
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ProblemdagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
@@ -622,16 +622,16 @@ internal class UtbetalingstidslinjeBuilderTest {
     private val perioder: MutableList<Arbeidsgiverperiode> = mutableListOf()
 
     private val inntektsopplysningPerSkjæringstidspunkt = mapOf(
-        1.januar to Inntektsmelding(1.januar, UUID.randomUUID(), 31000.månedlig, LocalDateTime.now()),
-        1.februar to Inntektsmelding(1.februar, UUID.randomUUID(), 25000.månedlig, LocalDateTime.now()),
-        1.mars to Inntektsmelding(1.mars, UUID.randomUUID(), 50000.månedlig, LocalDateTime.now()),
-    )
+        1.januar to listOf("a1" to 31000.månedlig),
+        1.februar to listOf("a1" to 25000.månedlig),
+        1.mars to listOf("a1" to 50000.månedlig)
+    ).faktaavklarteInntekter()
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
         val builder = UtbetalingstidslinjeBuilder(
             hendelse = Aktivitetslogg(),
             organisasjonsnummer = "a1",
-            vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
+            faktaavklarteInntekter = inntektsopplysningPerSkjæringstidspunkt,
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
             beregningsperiode = tidslinje.periode() ?: LocalDate.MIN.somPeriode()
