@@ -56,6 +56,7 @@ import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 
@@ -504,6 +505,11 @@ internal class Sykepengegrunnlag private constructor(
         oppfyllerMinsteinntektskrav = this.oppfyllerMinsteinntektskrav
     )
 
-    internal fun faktaavklarteInntekter() = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter(skjæringstidspunkt, `6G`)
+    internal fun faktaavklarteInntekter() = FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt(
+        skjæringstidspunkt = skjæringstidspunkt,
+        vurdertIInfotrygd = vurdertInfotrygd,
+        `6G` = `6G`,
+        inntekter = arbeidsgiverInntektsopplysninger.faktaavklarteInntekter()
+    )
 }
 

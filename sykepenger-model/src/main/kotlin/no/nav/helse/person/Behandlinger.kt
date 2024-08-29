@@ -15,6 +15,7 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Ytelser
@@ -48,6 +49,7 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -83,6 +85,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         visitor.postVisitBehandlinger(behandlinger)
     }
 
+    internal fun arbeidsgiverperiode() = ArbeidsgiverperiodeForVedtaksperiode(periode(), behandlinger.last().arbeidsgiverperiode)
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
     private fun varEllerErRettFør(neste: Behandlinger) = behandlinger.varEllerErRettFør(neste.behandlinger.last())
 
@@ -359,7 +362,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private val tidsstempel = endringer.first().tidsstempel
         private val dokumentsporing get() = endringer.dokumentsporing
         val arbeidsgiverperiode get() = gjeldende.arbeidsgiverperiode
-        val skjæringstidspunkt get() = endringer.last().skjæringstidspunkt
+        val skjæringstidspunkt get() = gjeldende.skjæringstidspunkt
 
         constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
             check(observatører.isNotEmpty()) {
@@ -709,6 +712,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             utbetalingstidslinje: Utbetalingstidslinje
         ): Utbetalingstidslinje {
             val strategi = Arbeidsgiver::lagUtbetaling
+            // TODO: bør sende med beregnet AGP slik at utbetalingskoden vet hvilket oppdrag som skal bygges videre på
             return lagUtbetaling(
                 vedtaksperiodeSomLagerUtbetaling,
                 fødselsnummer,

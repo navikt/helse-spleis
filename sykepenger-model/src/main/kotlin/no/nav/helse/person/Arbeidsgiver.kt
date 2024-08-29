@@ -39,6 +39,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
+import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
@@ -84,7 +85,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderNy
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Arbeidsgiver private constructor(
@@ -146,7 +147,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
-            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt(infotrygdhistorikk), it.beregnArbeidsgiverperiode()) }
+            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt(infotrygdhistorikk), it.beregnArbeidsgiverperiode(Subsumsjonslogg.NullObserver)) }
         }
 
         internal fun List<Arbeidsgiver>.aktiveSkjæringstidspunkter(): Set<LocalDate> {
@@ -705,8 +706,8 @@ internal class Arbeidsgiver private constructor(
             .merge(sykdomstidslinje(), replace)
     }
 
-    internal fun beregnArbeidsgiverperiode() = { vedtaksperiode: Periode ->
-        person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), null).finn(vedtaksperiode)?.grupperSammenhengendePerioder() ?: emptyList()
+    internal fun beregnArbeidsgiverperiode(jurist: Subsumsjonslogg) = { vedtaksperiode: Periode ->
+        person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), jurist).finn(vedtaksperiode)?.grupperSammenhengendePerioder() ?: emptyList()
     }
 
     private fun arbeidsgiverperiode(periode: Periode, sykdomstidslinje: Sykdomstidslinje): Arbeidsgiverperiode? {
@@ -869,21 +870,26 @@ internal class Arbeidsgiver private constructor(
         periode: Periode,
         regler: ArbeidsgiverRegler,
         faktaavklarteInntekter: FaktaavklarteInntekter,
-        infotrygdhistorikk: Infotrygdhistorikk,
+        utbetaltePerioderInfotrygd: List<Periode>,
         subsumsjonslogg: Subsumsjonslogg
     ): Utbetalingstidslinje {
         val ghosttidslinje = faktaavklarteInntekter.ghosttidslinje(organisasjonsnummer, periode.endInclusive)
         val sykdomstidslinje = ghosttidslinje.merge(sykdomstidslinje(), replace)
         if (sykdomstidslinje.count() == 0) return Utbetalingstidslinje()
-        val builder = UtbetalingstidslinjeBuilder(
+
+        val arbeidsgiverperioder = vedtaksperioder.arbeidsgiverperioder()
+
+        val builder = UtbetalingstidslinjeBuilderNy(
             faktaavklarteInntekter = faktaavklarteInntekter,
             hendelse = hendelse,
             regler = regler,
             subsumsjonslogg = subsumsjonslogg,
             organisasjonsnummer = organisasjonsnummer,
-            beregningsperiode = periode
+            beregningsperiode = periode,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            utbetaltePerioderInfotrygd = utbetaltePerioderInfotrygd
         )
-        infotrygdhistorikk.buildUtbetalingstidslinje(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonslogg)
+        sykdomstidslinje.accept(builder)
         return builder.result()
     }
 

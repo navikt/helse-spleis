@@ -522,7 +522,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             håndterSøknad(10.januar til 31.januar)
             håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = a2Inntekt, refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList()))
-            assertEquals(8.januar til 23.januar, inspektør.arbeidsgiverperiode { 1.vedtaksperiode })
+            assertEquals(listOf(8.januar til 23.januar), inspektør.arbeidsgiverperiode { 1.vedtaksperiode })
         }
 
         a1 {

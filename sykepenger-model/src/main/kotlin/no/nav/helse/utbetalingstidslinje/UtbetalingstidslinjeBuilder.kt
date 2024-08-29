@@ -6,10 +6,12 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
 import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
@@ -69,6 +71,7 @@ internal class FaktaavklarteInntekter(
 
     internal class VilkårsprøvdSkjæringstidspunkt(
         private val skjæringstidspunkt: LocalDate,
+        private val vurdertIInfotrygd: Boolean,
         private val `6G`: Inntekt,
         private val inntekter: List<FaktaavklartInntekt>
     ) {
@@ -79,6 +82,7 @@ internal class FaktaavklarteInntekter(
         }
 
         internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje? {
+            if (vurdertIInfotrygd) return null
             return inntekter.finnArbeidsgiver(organisasjonsnummer)?.ghosttidslinje(sisteDag)
         }
 
@@ -179,6 +183,10 @@ internal class FaktaavklarteInntekter(
     }
 }
 
+internal data class ArbeidsgiverperiodeForVedtaksperiode(
+    val vedtaksperiode: Periode,
+    val arbeidsgiverperioder: List<Periode>
+)
 internal class UtbetalingstidslinjeBuilder(
     private val faktaavklarteInntekter: FaktaavklarteInntekter,
     private val hendelse: IAktivitetslogg,
@@ -246,5 +254,145 @@ internal class UtbetalingstidslinjeBuilder(
 
     override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
         builder.addAvvistDag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi.ikkeBetalt(), regler, subsumsjonslogg), listOf(begrunnelse))
+    }
+}
+
+/**
+ * val sykdomstidslinje = ...
+ * val builder = UtbetalingstidslinjeBuilderNy(..)
+ * sykdomstidslinje.accept(builder)
+ *
+ * val result = builder.result()
+ */
+internal class UtbetalingstidslinjeBuilderNy(
+    private val faktaavklarteInntekter: FaktaavklarteInntekter,
+    private val hendelse: IAktivitetslogg,
+    private val organisasjonsnummer: String,
+    private val regler: ArbeidsgiverRegler,
+    private val subsumsjonslogg: Subsumsjonslogg,
+    private val beregningsperiode: Periode,
+    private val arbeidsgiverperioder: List<ArbeidsgiverperiodeForVedtaksperiode>,
+    private val utbetaltePerioderInfotrygd: List<Periode>
+) : SykdomstidslinjeVisitor {
+    private val builder = Utbetalingstidslinje.Builder()
+
+    internal fun result(): Utbetalingstidslinje {
+        return builder.build()
+    }
+
+    private fun erAGP(dato: LocalDate) = arbeidsgiverperioder.any { vedtaksperiode ->
+        vedtaksperiode.arbeidsgiverperioder.any { dato in it }
+    }
+    private fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
+        builder.addArbeidsgiverperiodedag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi.ikkeBetalt(), regler, subsumsjonslogg))
+    }
+    private fun avvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) {
+        builder.addAvvistDag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg), listOf(begrunnelse))
+    }
+    private fun helg(dato: LocalDate, økonomi: Økonomi) {
+        builder.addHelg(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi.ikkeBetalt(), regler, subsumsjonslogg))
+    }
+    private fun navDag(dato: LocalDate, økonomi: Økonomi) {
+        builder.addNAVdag(dato, when (dato in beregningsperiode) {
+            true -> faktaavklarteInntekter.medUtbetalingsopplysninger(hendelse, organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
+            false -> faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
+        })
+    }
+    private fun fridag(dato: LocalDate) {
+        builder.addFridag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, Økonomi.ikkeBetalt(), regler, subsumsjonslogg))
+    }
+    private fun arbeidsdag(dato: LocalDate) {
+        builder.addArbeidsdag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, Økonomi.ikkeBetalt(), regler, subsumsjonslogg))
+    }
+
+    /** <potensielt arbeidsgiverperiode-dager> **/
+    override fun visitDag(dag: Dag.Arbeidsgiverdag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, økonomi)
+        else avvistDag(dato, økonomi.ikkeBetalt(), Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
+    }
+
+    override fun visitDag(dag: Dag.ArbeidsgiverHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, økonomi)
+        else helg(dato, økonomi)
+    }
+
+    override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, økonomi)
+        else navDag(dato, økonomi)
+    }
+
+    override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, økonomi)
+        else helg(dato, økonomi)
+    }
+
+    override fun visitDag(dag: Dag.SykedagNav, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        if (erAGP(dato)) builder.addArbeidsgiverperiodedagNav(dato, when (dato in beregningsperiode) {
+            true -> faktaavklarteInntekter.medUtbetalingsopplysninger(hendelse, organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
+            false -> faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
+        })
+        else when (dato.erHelg()) {
+            true -> helg(dato, økonomi)
+            false -> navDag(dato, økonomi)
+        }
+    }
+
+    override fun visitDag(dag: Dag.AndreYtelser, dato: LocalDate, kilde: Hendelseskilde, ytelse: Dag.AndreYtelser.AnnenYtelse) {
+        // andreytelse-dagen er fridag hvis den overlapper med en agp-dag, eller om vedtaksperioden ikke har noen agp -- fordi andre ytelsen spiser opp alt
+        val vedtaksperiode = arbeidsgiverperioder.single { dato in it.vedtaksperiode }
+        if (vedtaksperiode.arbeidsgiverperioder.isEmpty() || dato <= vedtaksperiode.arbeidsgiverperioder.last().endInclusive) fridag(dato)
+        else {
+            val begrunnelse = when(ytelse) {
+                Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
+                Dag.AndreYtelser.AnnenYtelse.Dagpenger -> Begrunnelse.AndreYtelserDagpenger
+                Dag.AndreYtelser.AnnenYtelse.Foreldrepenger -> Begrunnelse.AndreYtelserForeldrepenger
+                Dag.AndreYtelser.AnnenYtelse.Omsorgspenger -> Begrunnelse.AndreYtelserOmsorgspenger
+                Dag.AndreYtelser.AnnenYtelse.Opplæringspenger -> Begrunnelse.AndreYtelserOpplaringspenger
+                Dag.AndreYtelser.AnnenYtelse.Pleiepenger -> Begrunnelse.AndreYtelserPleiepenger
+                Dag.AndreYtelser.AnnenYtelse.Svangerskapspenger -> Begrunnelse.AndreYtelserSvangerskapspenger
+            }
+            avvistDag(dato, Økonomi.ikkeBetalt(), begrunnelse)
+
+        }
+    }
+
+    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: Hendelseskilde) {
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
+        else fridag(dato)
+    }
+
+    override fun visitDag(dag: Dag.ForeldetSykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, økonomi)
+        else builder.addForeldetDag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg))
+    }
+    /** </potensielt arbeidsgiverperiode-dager> **/
+
+    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {
+        if (utbetaltePerioderInfotrygd.any { dato in it }) return builder.addUkjentDag(dato)
+        when (dato.erHelg()) {
+            true -> fridag(dato)
+            false -> arbeidsdag(dato)
+        }
+    }
+
+    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {
+        arbeidsdag(dato)
+    }
+
+    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
+        fridag(dato)
+    }
+
+    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {
+        arbeidsdag(dato)
+    }
+
+    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {
+        fridag(dato)
+    }
+
+    override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: Hendelseskilde, other: Hendelseskilde?, melding: String) {
+        // den andre builderen kaster egentlig exception her, men trenger vi det –– sånn egentlig?
+        fridag(dato)
     }
 }

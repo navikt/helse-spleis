@@ -68,12 +68,12 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
 
         assertEquals(4.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(4.januar til 22.januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(4.januar til 19.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(4.januar til 19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         assertEquals(4.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         assertEquals(23.januar til 31.januar, inspektør.periode(2.vedtaksperiode))
-        assertEquals(4.januar til 19.januar, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(listOf(4.januar til 19.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -97,8 +97,8 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         // Arbeidsgiverperioden blir beregnet riktig
-        assertEquals(1.januar til 16.januar, inspektør(ORGNUMMER).arbeidsgiverperiode(1.vedtaksperiode))
-        assertEquals(1.desember til 16.desember, inspektør(ORGNUMMER).arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør(ORGNUMMER).arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.desember til 16.desember), inspektør(ORGNUMMER).arbeidsgiverperiode(2.vedtaksperiode))
 
         assertEquals(2, inspektør(ORGNUMMER).utbetalinger.size)
         assertEquals(1.januar til 31.januar, inspektør(ORGNUMMER).utbetalinger.first().inspektør.periode)

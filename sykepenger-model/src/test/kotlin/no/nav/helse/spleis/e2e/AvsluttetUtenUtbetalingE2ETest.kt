@@ -1,11 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
-import no.nav.helse.fredag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -21,11 +18,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.søndag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
@@ -33,39 +26,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         Hvis vi har en kort periode som har endt opp i AVSLUTTET_UTEN_UTBETALING vil alle etterkommende perioder
         bli stuck med å vente på den korte perioden. Da vil de aldri komme seg videre og til slutt time ut
     */
-
-    @Test
-    fun `en auu som strekker seg utover arbeidsgiverperioden`() {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(17.januar, 25.januar), Søknad.Søknadsperiode.Permisjon(26.januar, 31.januar))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        val utoverAgp = inspektør.arbeidsgiverperioden(1.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje)
-        assertEquals("FFFFF FFFFPPP PPP", utoverAgp.toShortString())
-    }
-
-    @Test
-    fun `flere auuer hvor siste strekker seg utover arbeidsgiverperioden`() {
-        val periode1 = 1.januar til 5.januar
-        val periode2 = 10.januar til 14.januar
-        val periode3 = 20.januar til 31.januar
-        håndterSøknad(periode1)
-        håndterSøknad(periode2)
-        håndterSøknad(Sykdom(periode3.start, periode3.endInclusive, 100.prosent), Søknad.Søknadsperiode.Ferie(26.januar, 31.januar))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertEquals(Sykdomstidslinje(), inspektør.arbeidsgiverperioden(1.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje.subset(periode1)))
-        assertEquals(Sykdomstidslinje(), inspektør.arbeidsgiverperioden(2.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje.subset(periode2)))
-        assertEquals("FFF FFF", inspektør.arbeidsgiverperioden(3.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje.subset(periode3)).toShortString())
-    }
-
-    @Test
-    fun `en auu som strekker seg utover arbeidsgiverperioden kun med helg`() {
-        håndterSøknad(4.januar til søndag(21.januar))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertEquals(4.januar til fredag(19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        val utoverAgp = inspektør.arbeidsgiverperioden(1.vedtaksperiode)!!.sykdomstidslinjeSomStrekkerSegUtoverArbeidsgiverperioden(inspektør.sykdomstidslinje)
-        assertEquals(Sykdomstidslinje(), utoverAgp)
-    }
 
     @Test
     fun `kort periode blokkerer neste periode i ny arbeidsgiverperiode`() {

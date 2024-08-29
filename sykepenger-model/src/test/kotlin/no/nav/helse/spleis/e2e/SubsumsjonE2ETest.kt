@@ -1465,7 +1465,31 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 10.januar, 12.januar til 17.januar), beregnetInntekt = INNTEKT)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
-        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
+            index = 0,
+            utfall = VILKAR_IKKE_OPPFYLT,
+            forventetAntall = 2,
+            lovverk = "folketrygdloven",
+            paragraf = PARAGRAF_8_17,
+            ledd = 1.ledd,
+            bokstav = BOKSTAV_A,
+            versjon = 1.januar(2018),
+            input = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100)
+                )
+            ),
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar)
+                )
+            )
+        )
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
+            index = 1,
+            utfall = VILKAR_IKKE_OPPFYLT,
+            forventetAntall = 2,
+            lovverk = "folketrygdloven",
             paragraf = PARAGRAF_8_17,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,

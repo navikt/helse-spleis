@@ -132,16 +132,13 @@ class ArbeidsgiverInntektsopplysning(
     }
 
     internal companion object {
-        internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter(skjæringstidspunkt: LocalDate, `6G`: Inntekt) = FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt(
-            skjæringstidspunkt = skjæringstidspunkt,
-            `6G` = `6G`,
-            inntekter = this.map { FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
+        internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
+            .map { FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
                 organisasjonsnummer = it.orgnummer,
                 fastsattÅrsinntekt = it.inntektsopplysning.fastsattÅrsinntekt(),
                 gjelder = it.gjelder,
                 refusjonsopplysninger = it.refusjonsopplysninger
             ) }
-        )
         internal fun List<ArbeidsgiverInntektsopplysning>.validerSkjønnsmessigAltEllerIntet(skjæringstidspunkt: LocalDate) =
             omregnetÅrsinntekter(skjæringstidspunkt, this).validerSkjønnsmessigAltEllerIntet()
 

@@ -76,8 +76,19 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(setOf(1.februar, 10.mars), person.inspektør.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt)
 
+        assertEquals(listOf(1.februar til 16.februar), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
+        // infotrygdendringen påvirker beregning av agp for 2.vedtaksperiode siden den er åpnet opp.
+        // 1.vedtaksperiode forblir uendret siden den ikke har fått ny behandling
+        assertEquals(emptyList<Any>(), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
+
         håndterYtelser(2.vedtaksperiode)
-        assertVarsel(Varselkode.RV_OS_2)
+        // utbetalingen endres -ikke- fordi det fremdeles lages agp-dager for februar, siden 1.vedtaksperiode ikke åpnes opp
+        assertIngenVarsel(Varselkode.RV_OS_2)
+        inspektør.utbetaling(1).inspektør.also { utbetalinginspektør ->
+            assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
+            assertEquals(17.februar til 28.februar, utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.periode)
+            assertEquals(10.mars til 30.mars, utbetalinginspektør.arbeidsgiverOppdrag[1].inspektør.periode)
+        }
     }
 
     @Test

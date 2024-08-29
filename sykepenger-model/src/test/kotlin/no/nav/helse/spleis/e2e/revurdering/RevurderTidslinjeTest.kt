@@ -1065,16 +1065,25 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
 
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+
         val utbetaling1 = inspektør.utbetaling(0).inspektør
         val revurdering = inspektør.utbetaling(1).inspektør
 
         assertEquals(utbetaling1.korrelasjonsId, revurdering.korrelasjonsId)
         val oppdragInspektør = revurdering.arbeidsgiverOppdrag.inspektør
         assertEquals(Endringskode.ENDR, oppdragInspektør.endringskode)
-        assertEquals(1, oppdragInspektør.antallLinjer())
-        revurdering.arbeidsgiverOppdrag.single().inspektør.also { linje ->
+        // infotrygd-dagene påvirker ikke resultatet. oppdraget kortes ned mht feriedagene
+        assertEquals(2, oppdragInspektør.antallLinjer())
+        revurdering.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(Endringskode.ENDR, linje.endringskode)
             assertEquals(17.januar til 19.januar, linje.fom til linje.tom)
+            assertEquals(null, linje.datoStatusFom)
+            assertEquals(null, linje.statuskode)
+        }
+        revurdering.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+            assertEquals(Endringskode.NY, linje.endringskode)
+            assertEquals(27.januar til 31.januar, linje.fom til linje.tom)
             assertEquals(null, linje.datoStatusFom)
             assertEquals(null, linje.statuskode)
         }

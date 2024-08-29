@@ -23,6 +23,7 @@ internal fun Map<LocalDate, List<FiktivInntekt>>.faktaavklarteInntekter() = Fakt
     skjæringstidspunkter = map { (skjæringstidspunkt, inntekter) ->
         FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt(
             skjæringstidspunkt = skjæringstidspunkt,
+            vurdertIInfotrygd = false,
             `6G` = `6G`.beløp(skjæringstidspunkt),
             inntekter = inntekter.map { (orgnummer, inntekt, gjelder) ->
                 FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(

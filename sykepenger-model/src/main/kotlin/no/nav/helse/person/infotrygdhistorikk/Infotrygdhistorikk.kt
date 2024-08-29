@@ -124,6 +124,9 @@ internal class Infotrygdhistorikk private constructor(
     }
 
 
+    internal fun betaltePerioder(orgnummer: String? = null) =
+        if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
+
     internal fun harHistorikk() = elementer.isNotEmpty()
     internal fun harUtbetaltI(periode: Periode): Boolean {
         if (!harHistorikk()) return false

@@ -39,6 +39,9 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         private set
     internal val behandlinger = mutableListOf<Behandling>()
     internal var egenmeldingsperioder = listOf<Periode>()
+
+    internal val arbeidsgiverperiode get() = behandlinger.last().endringer.last().arbeidsgiverperiode
+
     init {
         vedtaksperiode.accept(this)
     }

@@ -123,9 +123,9 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
-        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertEquals(19.februar til 6.mars, inspektør.arbeidsgiverperiode(3.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(listOf(19.februar til 6.mars), inspektør.arbeidsgiverperiode(3.vedtaksperiode))
 
         assertEquals(3, inspektør.utbetalinger.size)
         val januar = inspektør.utbetalinger.first()

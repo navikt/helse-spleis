@@ -235,7 +235,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(4.januar til fredag(19.januar)))
         håndterSøknad(Sykdom(mandag(22.januar), 31.januar, 100.prosent))
         assertEquals(4.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
-        assertEquals(4.januar til fredag(19.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(4.januar til fredag(19.januar)), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         assertEquals("UUGG UUUUUGG UUUUU?? SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
@@ -321,9 +321,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 listOf(1.mars til 6.mars, 10.mars til 19.mars),
                 inspektør.arbeidsgiverperioder(1.vedtaksperiode)
             )
-            val arbeidsgiverperioden = inspektør.arbeidsgiverperioden(1.vedtaksperiode)!!
-            assertFalse(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(19.mars.somPeriode()))
-            assertTrue(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(20.mars.somPeriode()))
         }
 
         assertEquals(listOf(1.mars til 6.mars, 10.mars til 19.mars), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
@@ -380,7 +377,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Lang og useriøs arbeidsgiverperiode`() {
         nyPeriode(januar)
         håndterInntektsmelding(listOf(januar))
-        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
@@ -388,7 +385,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Kort og useriøs arbeidsgiverperiode`() {
         nyPeriode(januar)
         håndterInntektsmelding(listOf(1.januar til 5.januar))
-        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
@@ -412,9 +409,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Arbeidsgiver opplyser om feilaktig ny arbeidsgiverperiode som dekker hele perioden som skal utbetales`() {
         nyttVedtak(1.januar til 20.januar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
-        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
         nyttVedtak(25.januar til 25.januar, arbeidsgiverperiode = listOf(25.januar til 9.februar))
-        assertEquals(1.januar til 16.januar, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(listOf(1.januar til 16.januar), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
     }
 
     @Test
@@ -554,11 +551,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
 
-        assertEquals(listOf(1.januar til 6.januar, 9.januar til 18.januar), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
+        assertEquals(listOf(1.januar til 6.januar), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
         assertEquals(listOf(1.januar til 6.januar, 9.januar til 18.januar), inspektør.arbeidsgiverperioder(2.vedtaksperiode))
-        val arbeidsgiverperioden = inspektør.arbeidsgiverperioden(2.vedtaksperiode)!!
-        assertFalse(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(18.januar.somPeriode()))
-        assertTrue(arbeidsgiverperioden.erFørsteUtbetalingsdagFørEllerLik(19.januar.somPeriode()))
 
         assertForventetFeil(
             forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-6.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen",
@@ -1952,9 +1946,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 28.februar,
         )
         assertEquals("R AAAAARR AAAAARR AAAAARR AAAAARR AASSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertNull(inspektør.arbeidsgiverperiode(1.vedtaksperiode))
-        assertEquals(28.februar til 15.mars, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
-        assertEquals(28.februar til 15.mars, inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(emptyList<Any>(), inspektør.arbeidsgiverperiode(1.vedtaksperiode))
+        assertEquals(listOf(28.februar til 15.mars), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
+        assertEquals(listOf(28.februar til 15.mars), inspektør.arbeidsgiverperiode(2.vedtaksperiode))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)

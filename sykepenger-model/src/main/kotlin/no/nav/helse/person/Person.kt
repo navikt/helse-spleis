@@ -357,8 +357,9 @@ class Person private constructor(
             alder = alder,
             arbeidsgivere = { beregningsperiode: Periode, subsumsjonslogg: Subsumsjonslogg, hendelse: IAktivitetslogg ->
                 val faktaavklarteInntekter = vilkårsgrunnlagHistorikk.faktavklarteInntekter()
+                val infotrygdUtbetaltePerioder = infotrygdhistorikk.betaltePerioder()
                 arbeidsgivere.associateWith {
-                    it.beregnUtbetalingstidslinje(hendelse, beregningsperiode, regler, faktaavklarteInntekter, infotrygdhistorikk, subsumsjonslogg)
+                    it.beregnUtbetalingstidslinje(hendelse, beregningsperiode, regler, faktaavklarteInntekter, infotrygdUtbetaltePerioder, subsumsjonslogg)
                 }
             },
             infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
