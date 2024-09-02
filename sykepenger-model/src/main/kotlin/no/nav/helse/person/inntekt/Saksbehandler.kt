@@ -41,6 +41,7 @@ class Saksbehandler internal constructor(
     override fun overstyrer(gammel: SkattSykepengegrunnlag) = kopierMed(gammel)
     override fun overstyrer(gammel: Inntektsmelding) = kopierMed(gammel)
     override fun overstyrer(gammel: SkjønnsmessigFastsatt) = kopierMed(gammel)
+    override fun overstyrer(gammel: InntektFraSøknad) = kopierMed(gammel)
 
     private fun kopierMed(overstyrtInntekt: Inntektsopplysning) =
         Saksbehandler(id, dato, hendelseId, beløp, forklaring, subsumsjon, overstyrtInntekt, tidsstempel)
