@@ -268,6 +268,7 @@ internal class LagUtbetalingForRevurderingTest {
             orgnummer,
             betaltTidslinje,
             sisteDato.somPeriode(),
+            arbeidsgiverperiode = emptyList(),
             aktivitetslogg,
             LocalDate.MAX,
             100,

@@ -358,6 +358,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         private val periode: Periode get() = gjeldende.periode
         private val tidsstempel = endringer.first().tidsstempel
         private val dokumentsporing get() = endringer.dokumentsporing
+        val arbeidsgiverperiode get() = gjeldende.arbeidsgiverperiode
         val skjæringstidspunkt get() = endringer.last().skjæringstidspunkt
 
         constructor(observatører: List<BehandlingObserver>, tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde, observatører) {
@@ -750,10 +751,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             hendelse: IAktivitetslogg,
             maksimumSykepenger: Maksdatosituasjon,
             utbetalingstidslinje: Utbetalingstidslinje,
-            strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, fødselsnummer: String, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode) -> Utbetaling,
+            strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, fødselsnummer: String, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode, arbeidsgiverperiode: List<Periode>) -> Utbetaling,
             nyTilstand: Tilstand
         ): Utbetalingstidslinje {
-            val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksimumSykepenger.maksdato, maksimumSykepenger.forbrukteDager, maksimumSykepenger.gjenståendeDager, periode)
+            val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksimumSykepenger.maksdato, maksimumSykepenger.forbrukteDager, maksimumSykepenger.gjenståendeDager, periode, gjeldende.arbeidsgiverperiode)
             denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
             nyEndring(gjeldende.kopierMedUtbetaling(denNyeUtbetalingen, grunnlagsdata))
             tilstand(nyTilstand, hendelse)

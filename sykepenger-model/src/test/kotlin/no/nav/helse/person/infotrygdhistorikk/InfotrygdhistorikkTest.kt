@@ -380,6 +380,7 @@ internal class InfotrygdhistorikkTest {
         organisasjonsnummer = "",
         utbetalingstidslinje = tidslinjeOf(),
         periode = 1.januar.somPeriode(),
+        arbeidsgiverperiode = listOf(1.januar til 16.januar),
         aktivitetslogg = Aktivitetslogg(),
         maksdato = 1.januar,
         forbrukteSykedager = 0,

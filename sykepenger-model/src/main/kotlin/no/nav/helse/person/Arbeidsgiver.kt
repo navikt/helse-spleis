@@ -316,8 +316,9 @@ internal class Arbeidsgiver private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        periode: Periode
-    ) = lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
+        periode: Periode,
+        arbeidsgiverperiode: List<Periode>
+    ) = lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, arbeidsgiverperiode, Utbetalingtype.UTBETALING)
 
     internal fun lagRevurdering(
         aktivitetslogg: IAktivitetslogg,
@@ -326,9 +327,10 @@ internal class Arbeidsgiver private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        periode: Periode
+        periode: Periode,
+        arbeidsgiverperiode: List<Periode>
     ): Utbetaling {
-        return lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.REVURDERING)
+        return lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, arbeidsgiverperiode, Utbetalingtype.REVURDERING)
     }
 
     private fun lagNyUtbetaling(
@@ -339,6 +341,7 @@ internal class Arbeidsgiver private constructor(
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode,
+        arbeidsgiverperiode: List<Periode>,
         type: Utbetalingtype
     ): Utbetaling {
         val (utbetalingen, annulleringer) = Utbetaling.lagUtbetaling(
@@ -347,6 +350,7 @@ internal class Arbeidsgiver private constructor(
             organisasjonsnummer = organisasjonsnummer,
             utbetalingstidslinje = utbetalingstidslinje,
             periode = periode,
+            arbeidsgiverperiode = arbeidsgiverperiode,
             aktivitetslogg = aktivitetslogg,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,

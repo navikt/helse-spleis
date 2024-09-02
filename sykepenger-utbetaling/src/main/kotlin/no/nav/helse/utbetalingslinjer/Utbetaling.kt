@@ -12,6 +12,7 @@ import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -271,6 +272,7 @@ class Utbetaling private constructor(
             organisasjonsnummer: String,
             utbetalingstidslinje: Utbetalingstidslinje,
             periode: Periode,
+            arbeidsgiverperiode: List<Periode>,
             aktivitetslogg: IAktivitetslogg,
             maksdato: LocalDate,
             forbrukteSykedager: Int,
@@ -280,9 +282,11 @@ class Utbetaling private constructor(
             val bb = UtbetalingkladderBuilder(utbetalingstidslinje, organisasjonsnummer, fødselsnummer)
             val oppdragene = bb.build()
 
-            val førsteDagSomIkkeErArbeidEllerFri = utbetalingstidslinje.subset(periode).firstOrNull{ it !is Utbetalingsdag.Arbeidsdag && it !is Utbetalingsdag.Fridag}?.dato
-            val trimmetPeriode = (førsteDagSomIkkeErArbeidEllerFri ?: periode.start) til periode.endInclusive
-            val kladdene = oppdragene.finnKladd(trimmetPeriode)
+            val overlappsperiode = arbeidsgiverperiode.periode()?.let { agp ->
+                periode.subset(agp.start til LocalDate.MAX)
+            } ?: periode
+
+            val kladdene = oppdragene.finnKladd(overlappsperiode)
             val kladden = kladdene.firstOrNull() ?: Utbetalingkladd(
                 periode = periode,
                 arbeidsgiveroppdrag = Oppdrag(organisasjonsnummer, SykepengerRefusjon),
