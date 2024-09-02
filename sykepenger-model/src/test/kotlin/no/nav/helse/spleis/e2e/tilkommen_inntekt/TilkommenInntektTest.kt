@@ -1,17 +1,22 @@
-package no.nav.helse.spleis.e2e.tilkommen_arbeidsgiver
+package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import java.time.LocalDate
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -38,6 +43,51 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(1.februar til LocalDate.MAX, inntektA2!!.inspektør.gjelder)
                 assertEquals(10000.månedlig, inntektA2.inspektør.inntektsopplysning.fastsattÅrsinntekt())
                 assertTrue(inntektA2.inspektør.inntektsopplysning is InntektFraSøknad)
+            }
+        }
+    }
+
+    @Test
+    fun `inntekt fra søknad på førstegangsbehandling med fom lik skjæringstidspunktet`() {
+        a1 {
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                orgnummer = a1,
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(
+                        fom = 1.januar,
+                        tom = null,
+                        orgnummer = a2,
+                        beløp = 10000.månedlig
+                    )
+                )
+            )
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                    arbeidsgivere = listOf(a1 to INNTEKT, a2 to 10000.månedlig),
+                    skjæringstidspunkt = 1.januar,
+                ),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT
+                    ),
+                    Vilkårsgrunnlag.Arbeidsforhold(
+                        a2,
+                        1.januar,
+                        null,
+                        Arbeidsforholdtype.ORDINÆRT
+                    )
+                )
+            )
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
+                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a2]!!.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
             }
         }
     }
