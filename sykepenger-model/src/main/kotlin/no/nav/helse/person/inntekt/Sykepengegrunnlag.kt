@@ -127,6 +127,11 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     internal companion object {
+
+        internal fun List<Sykepengegrunnlag>.harUlikeGrunnbeløp(): Boolean {
+            return map { it.`6G` }.distinct().size > 1
+        }
+
         fun opprett(
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,

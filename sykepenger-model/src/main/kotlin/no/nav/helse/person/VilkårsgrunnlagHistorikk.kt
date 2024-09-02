@@ -33,6 +33,7 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Sykepengegrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -358,6 +359,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                         val sisteDag = skjæringstidspunkter.elementAtOrNull(index + 1)?.forrigeDag ?: LocalDate.MAX
                         skjæringstidspunkt til sisteDag
                     }
+            }
+
+            internal fun List<VilkårsgrunnlagElement>.harUlikeGrunnbeløp(): Boolean {
+                return map { it.sykepengegrunnlag }.harUlikeGrunnbeløp()
             }
 
             internal fun gjenopprett(alder: Alder, dto: VilkårsgrunnlagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): VilkårsgrunnlagElement {

@@ -37,6 +37,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.sisteInntektsmeldingInntekt
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -137,7 +138,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         harPeriodeRettFør: Boolean
     ) {
         val behandlingerMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map { it.first to it.second.behandlinger.last() }
-        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør)
+        val gregulering = if (behandlinger.size > 1) harBlittGRegulert() else false
+        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør, gregulering)
+    }
+
+    private fun harBlittGRegulert(): Boolean {
+        if (behandlinger.size < 2) return false
+        val sisteBehandling = behandlinger.last()
+        val nestSisteBehandling = behandlinger[behandlinger.size-2]
+        if (sisteBehandling.skjæringstidspunkt != nestSisteBehandling.skjæringstidspunkt) return false
+        return sisteBehandling.harBlittGRegulert(nestSisteBehandling)
     }
 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Utbetaling? {
@@ -553,7 +563,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 behandling: Behandling,
                 perioderMedSammeSkjæringstidspunkt: List<Triple<UUID, UUID, Periode>>,
                 arbeidsgiverperiode: Arbeidsgiverperiode?,
-                harPeriodeRettFør: Boolean
+                harPeriodeRettFør: Boolean,
+                gregulering: Boolean
             ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
@@ -566,7 +577,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, behandlingId, periode) ->
                         PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, behandlingId, periode)
                     },
-                    hendelser
+                    hendelser,
+                    gregulering
                 )
                 grunnlagsdata.byggGodkjenningsbehov(builder)
                 utbetaling.byggGodkjenningsbehov(hendelse, periode, builder)
@@ -577,6 +589,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     builder = builder
                 )
             }
+
             internal fun dto(): BehandlingendringUtDto {
                 val vilkårsgrunnlagUtDto = this.grunnlagsdata?.dto()
                 val utbetalingUtDto = this.utbetaling?.dto()
@@ -908,10 +921,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             behandlingerMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandling>>,
             kanForkastes: Boolean,
             arbeidsgiverperiode: Arbeidsgiverperiode?,
-            harPeriodeRettFør: Boolean
+            harPeriodeRettFør: Boolean,
+            gregulering: Boolean
         ) {
             val perioderMedSammeSkjæringstidspunkt = behandlingerMedSammeSkjæringstidspunkt.map { Triple(it.first, it.second.id, it.second.periode) }
-            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt, arbeidsgiverperiode, harPeriodeRettFør)
+            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt, arbeidsgiverperiode, harPeriodeRettFør, gregulering)
         }
 
         fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, behandlinger: List<Behandling>): Utbetaling? {
@@ -942,6 +956,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             if (kilde.meldingsreferanseId == hendelse.meldingsreferanseId()) error(feil)
             // Om det er krøll fra tidligere logger vi bare
             else hendelse.info("Eksisterende ugyldig behandling på en ferdig behandlet vedtaksperiode: $feil")
+        }
+
+        internal fun harBlittGRegulert(nestSisteBehandling: Behandling): Boolean {
+            val grunnlagsdata1 = this.gjeldende.grunnlagsdata
+            val grunnlagsdata2 = nestSisteBehandling.gjeldende.grunnlagsdata
+            if (grunnlagsdata1 == null || grunnlagsdata2 == null) return false
+            return listOf(grunnlagsdata1, grunnlagsdata2).harUlikeGrunnbeløp()
         }
 
         internal companion object {

@@ -14,7 +14,8 @@ class GodkjenningsbehovBuilder(
     periode: ClosedRange<LocalDate>,
     private val behandlingId: UUID,
     private val perioderMedSammeSkjæringstidspunkt: List<PeriodeMedSammeSkjæringstidspunkt>,
-    private val hendelser: Set<UUID>
+    private val hendelser: Set<UUID>,
+    gregulering: Boolean
 ) {
     private val tags: MutableSet<String> = mutableSetOf()
     private lateinit var skjæringstidspunkt: LocalDate
@@ -34,6 +35,7 @@ class GodkjenningsbehovBuilder(
     init {
         if (førstegangsbehandling) tags.add("Førstegangsbehandling")
         else tags.add("Forlengelse")
+        if (gregulering) tags.add("Grunnbeløpsregulering")
     }
 
     fun tagFlereArbeidsgivere(antall: Int) {
