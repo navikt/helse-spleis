@@ -13,6 +13,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
+import no.nav.helse.spleis.speil.dto.NyttInntektsforholdPeriodeDTO
 import no.nav.helse.spleis.speil.dto.Refusjonselement
 import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 import no.nav.helse.spleis.speil.dto.SpleisVilkårsgrunnlag
@@ -44,6 +45,17 @@ internal abstract class IVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             vilkårsgrunnlagId = this.id,
             deaktivert = inntekten.deaktivert
+        )
+    }
+    open fun nyttInntektsforholdperioder(organisasjonsnummer: String, ): NyttInntektsforholdPeriodeDTO? {
+        val omregnetÅrsinntekt = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer}?.omregnetÅrsinntekt
+        if (omregnetÅrsinntekt == null) return null
+        if (omregnetÅrsinntekt.fom <= skjæringstidspunkt) return null
+        return NyttInntektsforholdPeriodeDTO(
+            id = UUID.randomUUID(),
+            fom = omregnetÅrsinntekt.fom,
+            tom = omregnetÅrsinntekt.tom,
+            vilkårsgrunnlagId = id
         )
     }
 
@@ -123,6 +135,7 @@ internal class IInfotrygdGrunnlag(
     }
 
     override fun potensiellGhostperiode(organisasjonsnummer: String, sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>) = null
+    override fun nyttInntektsforholdperioder(organisasjonsnummer: String) = null
 }
 
 internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunnlag: List<Map<UUID, IVilkårsgrunnlag>>) {
@@ -137,6 +150,11 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
     ) =
         tilgjengeligeVilkårsgrunnlag.firstOrNull()?.mapNotNull { (_, vilkårsgrunnlag) ->
             vilkårsgrunnlag.potensiellGhostperiode(organisasjonsnummer, sykefraværstilfeller)
+        } ?: emptyList()
+
+    internal fun nyeInntektsforholdperioder(organisasjonsnummer: String) =
+        tilgjengeligeVilkårsgrunnlag.firstOrNull()?.mapNotNull { (_, vilkårsgrunnlag) ->
+            vilkårsgrunnlag.nyttInntektsforholdperioder(organisasjonsnummer)
         } ?: emptyList()
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {

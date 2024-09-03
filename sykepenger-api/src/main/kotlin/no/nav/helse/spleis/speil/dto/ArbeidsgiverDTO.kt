@@ -9,7 +9,8 @@ data class ArbeidsgiverDTO(
     val organisasjonsnummer: String,
     val id: UUID,
     val generasjoner: List<SpeilGenerasjonDTO>,
-    val ghostPerioder: List<GhostPeriodeDTO> = emptyList()
+    val ghostPerioder: List<GhostPeriodeDTO> = emptyList(),
+    val nyeInntektsforhold: List<NyttInntektsforholdPeriodeDTO> = emptyList()
 ) {
     private companion object {
         fun List<ArbeidsgiverDTO>.sykefraværstilfeller() = this
@@ -30,6 +31,10 @@ data class ArbeidsgiverDTO(
             .flatMap { ghostperiode -> fjernDagerMedSykdom(ghostperiode) }
 
         return copy(ghostPerioder = ghostsperioder)
+    }
+
+    internal fun medNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
+        return copy(nyeInntektsforhold = vilkårsgrunnlagHistorikk.nyeInntektsforholdperioder(organisasjonsnummer))
     }
 
     private fun fjernDagerMedSykdom(ghostperiode: GhostPeriodeDTO): List<GhostPeriodeDTO> {

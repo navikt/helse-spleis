@@ -77,6 +77,19 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
+    fun `lager NyeInnteksforhold-pølse for tilkommen inntekt`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", beløp = 10000.månedlig)))
+
+        val nyeInntektsforholdPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!
+        assertEquals(1.februar til 28.februar, nyeInntektsforholdPølser.single().fom til nyeInntektsforholdPølser.single().tom)
+
+        // TODO: fjerne tilkommen inntekt fra ghostpølser når speilvendt er klare
+        val ghostPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder!!
+        assertEquals(1.februar til 28.februar, ghostPølser.single().fom til ghostPølser.single().tom)
+    }
+
+    @Test
     fun `Dødsdato ligger på person`() {
         val dødsdato = 1.januar
         håndterDødsmelding(dødsdato)
