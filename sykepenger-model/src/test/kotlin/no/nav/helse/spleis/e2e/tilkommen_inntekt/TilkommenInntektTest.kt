@@ -5,6 +5,7 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
@@ -17,6 +18,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -44,6 +46,23 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(10000.månedlig, inntektA2.inspektør.inntektsopplysning.fastsattÅrsinntekt())
                 assertTrue(inntektA2.inspektør.inntektsopplysning is InntektFraSøknad)
             }
+        }
+    }
+
+    @Test
+    fun `til godkjenning og så kommer forlengelse-søknad med tilkommen inntekt`() {
+        a1{
+            tilGodkjenning(januar, beregnetInntekt = 31000.00.månedlig)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = null, orgnummer = "a2", beløp = 10000.månedlig)))
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            val dagsatsFørstegangs = inspektør.utbetalinger.single().inspektør.utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
+            assertEquals(1431.daglig, dagsatsFørstegangs)
+            håndterYtelser(2.vedtaksperiode)
+            val dagsatsForlengelse = inspektør.utbetalinger.last().inspektør.utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
+            assertEquals(969.daglig, dagsatsForlengelse)
+            // bruker har en tilkommen inntekt på 10K, slik at inntektstapet i perioden er 31K - 10K = 21K.
+            // utbetalingen på forlengelsen justeres derfor ned med denne brøken 21/31
         }
     }
 
