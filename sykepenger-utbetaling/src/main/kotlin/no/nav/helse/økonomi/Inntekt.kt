@@ -2,8 +2,8 @@ package no.nav.helse.økonomi
 
 import java.time.LocalDate
 import no.nav.helse.dto.InntektDto
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.dto.InntektbeløpDto
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.memoize
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.roundToInt
@@ -31,6 +31,8 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         fun fraGradert(inntekt: Inntekt, grad: Prosentdel): Inntekt {
             return grad.gradér(inntekt.tilDagligDouble()).daglig
         }
+
+        val Number.K get() = this.toDouble() * 1000
 
         val Number.månedlig get() = Inntekt(this.toDouble() * 12)
 
