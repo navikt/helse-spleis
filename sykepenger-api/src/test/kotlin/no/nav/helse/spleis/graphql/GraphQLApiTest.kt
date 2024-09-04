@@ -149,6 +149,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
         {
           "organisasjonsnummer": "987654321",
           "ghostPerioder": [],
+          "nyeInntektsforholdPerioder": [],
           "generasjoner": [
             {
               "id":  "00000000-0000-0000-0000-000000000000",

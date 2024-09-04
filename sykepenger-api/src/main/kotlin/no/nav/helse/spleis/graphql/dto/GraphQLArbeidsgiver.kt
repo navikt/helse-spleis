@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.graphql.dto
 
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 data class GraphQLGenerasjon(
     val id: UUID,
@@ -19,9 +19,18 @@ data class GraphQLGhostPeriode(
     val organisasjonsnummer: String
 )
 
+data class GraphQLNyttInntekstforholdPeriode(
+    val id: UUID,
+    val organisasjonsnummer: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val vilkarsgrunnlagId: UUID
+)
+
 data class GraphQLArbeidsgiver(
     val organisasjonsnummer: String,
     val id: UUID,
     val generasjoner: List<GraphQLGenerasjon>,
-    val ghostPerioder: List<GraphQLGhostPeriode>
+    val ghostPerioder: List<GraphQLGhostPeriode>,
+    val nyeInntektsforholdPerioder: List<GraphQLNyttInntekstforholdPeriode>
 )
