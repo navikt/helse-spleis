@@ -14,7 +14,7 @@ import no.nav.helse.spleis.dto.HendelseDTO
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
-import no.nav.helse.spleis.graphql.dto.GraphQLNyttInntekstforholdPeriode
+import no.nav.helse.spleis.graphql.dto.GraphQLNyttInntektsforholdPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
 import no.nav.helse.spleis.speil.dto.PersonDTO
 import no.nav.helse.spleis.speil.serializePersonForSpeil
@@ -80,7 +80,7 @@ private fun mapTilDto(person: PersonDTO, hendelser: List<HendelseDTO>) =
                     )
                 },
                 nyeInntektsforholdPerioder = arbeidsgiver.nyeInntektsforhold.map { periode ->
-                    GraphQLNyttInntekstforholdPeriode(
+                    GraphQLNyttInntektsforholdPeriode(
                         id = periode.id,
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                         fom = periode.fom,

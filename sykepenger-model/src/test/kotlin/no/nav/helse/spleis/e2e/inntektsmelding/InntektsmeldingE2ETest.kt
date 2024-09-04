@@ -1206,7 +1206,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Inntekstmelding kommer i feil rekkefølge - riktig inntektsmelding skal bli valgt i vilkårgrunnlaget`() {
+    fun `Inntektsmelding kommer i feil rekkefølge - riktig inntektsmelding skal bli valgt i vilkårgrunnlaget`() {
         håndterSykmelding(januar)
         håndterSøknad(januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar))

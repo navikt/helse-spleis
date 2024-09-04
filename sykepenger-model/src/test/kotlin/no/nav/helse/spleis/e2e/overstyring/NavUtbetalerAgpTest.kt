@@ -103,7 +103,7 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertEquals("GR AASSSHH SSSSSHH SSSSSHH SSSSSHH S?????? ?SSSSH", inspektør.sykdomstidslinje.toShortString())
 
         nullstillTilstandsendringer()
-        val innteksmeldingId = håndterInntektsmelding(
+        val inntektsmeldingId = håndterInntektsmelding(
             listOf(14.april til 14.april, 18.april til 2.mai),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "EnBegrunnelse",
         )
@@ -115,8 +115,8 @@ internal class NavUtbetalerAgpTest: AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-        assertTrue(observatør.inntektsmeldingHåndtert.any { it.first == innteksmeldingId })
-        assertFalse(observatør.inntektsmeldingIkkeHåndtert.contains(innteksmeldingId))
+        assertTrue(observatør.inntektsmeldingHåndtert.any { it.first == inntektsmeldingId })
+        assertFalse(observatør.inntektsmeldingIkkeHåndtert.contains(inntektsmeldingId))
     }
 
     @Test

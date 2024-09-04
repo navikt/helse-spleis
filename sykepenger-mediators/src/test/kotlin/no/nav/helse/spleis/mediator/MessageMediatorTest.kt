@@ -38,7 +38,7 @@ internal class MessageMediatorTest {
     @Test
     fun inntektsmeldinger() {
         testRapid.sendTestMessage(
-            meldingsfabrikk.lagInnteksmelding(
+            meldingsfabrikk.lagInntektsmelding(
             listOf(Periode(LocalDate.now(), LocalDate.now())),
             LocalDate.now()
         ))

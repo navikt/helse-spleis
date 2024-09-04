@@ -810,7 +810,7 @@
                 "name" : null,
                 "ofType" : {
                   "kind" : "OBJECT",
-                  "name" : "GraphQLNyttInntekstforholdPeriode",
+                  "name" : "GraphQLNyttInntektsforholdPeriode",
                   "ofType" : null
                 }
               }
@@ -1550,7 +1550,7 @@
         "possibleTypes" : null
       }, {
         "kind" : "OBJECT",
-        "name" : "GraphQLNyttInntekstforholdPeriode",
+        "name" : "GraphQLNyttInntektsforholdPeriode",
         "description" : "",
         "fields" : [ {
           "name" : "fom",

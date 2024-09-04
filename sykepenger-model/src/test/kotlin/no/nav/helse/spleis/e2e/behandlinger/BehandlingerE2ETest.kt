@@ -64,7 +64,7 @@ import org.junit.jupiter.api.Test
 internal class BehandlingerE2ETest : AbstractDslTest() {
 
     @Test
-    fun `auu som får innteksmelding med arbeidsgiverperiode langt tilbake i tid men allikevel skal validere inntektsmelding fordi den har første fraværsdag`() {
+    fun `auu som får inntektsmelding med arbeidsgiverperiode langt tilbake i tid men allikevel skal validere inntektsmelding fordi den har første fraværsdag`() {
         a1 {
             håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent))
             nullstillTilstandsendringer()

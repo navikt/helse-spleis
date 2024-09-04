@@ -260,7 +260,7 @@ internal class VedtaksperiodeVenterTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Periode i avventer innteksmelding`() {
+    fun `Periode i avventer inntektsmelding`() {
         a1 {
             val søknadId = UUID.randomUUID()
             nyPeriode(januar, søknadId = søknadId)

@@ -1139,7 +1139,7 @@ internal class Vedtaksperiode private constructor(
 
         protected fun harEksisterendeInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
             harEksisterendeInntekt(vedtaksperiode) && harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, eksisterendeRefusjonsopplysninger(vedtaksperiode), hendelse)
-        // Inntekt vi allerede har i vilkårsgrunnlag/ i inntekshistorikken på arbeidsgiver
+        // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
         private fun harEksisterendeInntekt(vedtaksperiode: Vedtaksperiode): Boolean {
             // inntekt kreves så lenge det ikke finnes et vilkårsgrunnlag.
             // hvis det finnes et vilkårsgrunnlag så antas det at inntekten er representert der (vil vi slå ut på tilkommen inntekt-error senere hvis ikke)

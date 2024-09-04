@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -25,7 +26,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.*
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -434,7 +434,7 @@ internal class TestMessageFactory(
         innsenderFulltNavn = "SPLEIS MEDIATOR"
     )
 
-    fun lagInnteksmelding(
+    fun lagInntektsmelding(
         arbeidsgiverperiode: List<Periode>,
         førsteFraværsdag: LocalDate,
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
@@ -456,7 +456,7 @@ internal class TestMessageFactory(
         ).toMapMedFelterFraSpedisjon(fødselsdato, aktørId)
     )
 
-    fun lagInnteksmeldingReplay(
+    fun lagInntektsmeldingReplay(
         vedtaksperiodeId: UUID,
         inntektsmelding: String
     ) = objectMapper.readTree(inntektsmelding).also {

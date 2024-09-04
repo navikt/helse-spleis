@@ -7,6 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.test_support.TestDataSource
 import com.zaxxer.hikari.HikariDataSource
 import java.time.LocalDate
@@ -39,9 +42,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spill_av_im.FørsteFraværsdag
 import no.nav.helse.spleis.HendelseMediator
@@ -359,7 +359,7 @@ internal abstract class AbstractEndToEndMediatorTest() {
         orgnummer: String = ORGNUMMER,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null
     ): Pair<UUID, String> {
-        return meldingsfabrikk.lagInnteksmelding(
+        return meldingsfabrikk.lagInntektsmelding(
             arbeidsgiverperiode,
             førsteFraværsdag,
             opphørAvNaturalytelser,

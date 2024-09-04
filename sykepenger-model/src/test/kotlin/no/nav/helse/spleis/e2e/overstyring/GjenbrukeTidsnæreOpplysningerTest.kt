@@ -112,7 +112,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
          *      A2 |-----------|  |--------------------|
          *
          * - Det lille hullet vi ikke har søknad for på A2 er helg (lørdag-søndag)
-         * - Nå kommer det en korrigerende innteksmelding fra A1 som sier
+         * - Nå kommer det en korrigerende inntektsmelding fra A1 som sier
          *   at AGP startet mandagen A2 sin andre periode starter
          *
 
@@ -1078,7 +1078,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         a1 {
             // Planke
             håndterSøknad(Sykdom(8.januar, 31.januar, 100.prosent))
-            val innteksmeldingId = håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
+            val inntektsmeldingId = håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -1086,7 +1086,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
             inntektsopplysning(8.januar).let {
                 assertEquals(INNTEKT, it.inspektør.beløp)
-                assertEquals(innteksmeldingId, it.inspektør.hendelseId)
+                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
             }
 
             // Skjønnsmessig fastsetter
@@ -1111,7 +1111,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             inntektsopplysning(1.januar).let {
                 assertEquals(INNTEKT, it.inspektør.beløp)
-                assertEquals(innteksmeldingId, it.inspektør.hendelseId)
+                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
             }
         }
     }
@@ -1121,7 +1121,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
         a1 {
             // Planke
             håndterSøknad(Sykdom(8.januar, 31.januar, 100.prosent))
-            val innteksmeldingId = håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
+            val inntektsmeldingId = håndterInntektsmelding(listOf(8.januar til 23.januar), beregnetInntekt = INNTEKT)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -1129,7 +1129,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
             inntektsopplysning(8.januar).let {
                 assertEquals(INNTEKT, it.inspektør.beløp)
-                assertEquals(innteksmeldingId, it.inspektør.hendelseId)
+                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
             }
 
             // Overstyrer en gang
@@ -1168,7 +1168,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
             inntektsopplysning(1.januar).let {
                 assertEquals(overstyring2Inntekt, it.inspektør.beløp)
-                assertEquals(innteksmeldingId, it.inspektør.hendelseId)
+                assertEquals(inntektsmeldingId, it.inspektør.hendelseId)
             }
         }
     }

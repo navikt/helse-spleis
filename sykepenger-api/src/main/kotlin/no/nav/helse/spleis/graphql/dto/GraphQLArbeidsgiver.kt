@@ -19,7 +19,7 @@ data class GraphQLGhostPeriode(
     val organisasjonsnummer: String
 )
 
-data class GraphQLNyttInntekstforholdPeriode(
+data class GraphQLNyttInntektsforholdPeriode(
     val id: UUID,
     val organisasjonsnummer: String,
     val fom: LocalDate,
@@ -32,5 +32,5 @@ data class GraphQLArbeidsgiver(
     val id: UUID,
     val generasjoner: List<GraphQLGenerasjon>,
     val ghostPerioder: List<GraphQLGhostPeriode>,
-    val nyeInntektsforholdPerioder: List<GraphQLNyttInntekstforholdPeriode>
+    val nyeInntektsforholdPerioder: List<GraphQLNyttInntektsforholdPeriode>
 )

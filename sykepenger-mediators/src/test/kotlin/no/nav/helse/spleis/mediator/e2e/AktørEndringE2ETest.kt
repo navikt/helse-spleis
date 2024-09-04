@@ -22,7 +22,7 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
         sendSøknad(fnr = FNR2, perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)), historiskeFolkeregisteridenter = listOf(FNR1))
 
-        meldingsfabrikkFNR2.lagInnteksmelding(listOf(Periode(3.januar, 18.januar)), 3.januar).also { (_, melding) ->
+        meldingsfabrikkFNR2.lagInntektsmelding(listOf(Periode(3.januar, 18.januar)), 3.januar).also { (_, melding) ->
             testRapid.sendTestMessage(melding)
         }
 

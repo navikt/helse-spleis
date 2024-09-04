@@ -77,7 +77,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `lager NyeInnteksforhold-pølse for tilkommen inntekt`() {
+    fun `lager NyeInntektsforhold-pølse for tilkommen inntekt`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", beløp = 10000.månedlig)))
 

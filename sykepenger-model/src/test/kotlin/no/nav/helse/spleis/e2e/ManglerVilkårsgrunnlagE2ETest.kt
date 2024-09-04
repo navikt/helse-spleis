@@ -121,14 +121,14 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertEquals(januar, person.inspektør.utbetaltIInfotrygd.single())
         assertEquals(februar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.periode)
 
-        val assertTilstandFørInnteksmeldingHensyntas: () -> Unit = {
+        val assertTilstandFørInntektsmeldingHensyntas: () -> Unit = {
             val førsteUtbetalingsdagIInfotrygd = 1.januar
             assertEquals(førsteUtbetalingsdagIInfotrygd, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
             assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.infotrygd)
         }
 
-        assertTilstandFørInnteksmeldingHensyntas()
+        assertTilstandFørInntektsmeldingHensyntas()
 
         håndterSykmelding(Sykmeldingsperiode(5.mars, 31.mars))
         // Arbeidsgiver sender inntektsmelding for forlengelse i Mars _før_ vi møttar søknad.
@@ -139,12 +139,12 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             førsteFraværsdag = 5.mars,
         )
         assertInfo("Inntektsmelding ikke håndtert")
-        assertTilstandFørInnteksmeldingHensyntas()
+        assertTilstandFørInntektsmeldingHensyntas()
 
         // Når søknaden kommer replayes Inntektsmelding og nå puttes plutselig info fra Inntektsmlding på
         // arbeidsgiver, også lengre tilbake i tid enn vedtaksperioden som blir truffet.
         håndterSøknad(5.mars til 31.mars)
-        assertTilstandFørInnteksmeldingHensyntas()
+        assertTilstandFørInntektsmeldingHensyntas()
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)

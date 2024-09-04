@@ -264,7 +264,7 @@ internal class Sykepengegrunnlag private constructor(
         val skjæringstidspunkt = nyttSkjæringstidspunkt ?: this.skjæringstidspunkt
         val nyeArbeidsgiverInntektsopplysninger = hendelse.arbeidsgiverinntektsopplysninger(skjæringstidspunkt)
         if (arbeidsgiverInntektsopplysninger.isNotEmpty() && nyeArbeidsgiverInntektsopplysninger.isNotEmpty()) {
-            hendelse.info("Kan ikke gjenopplive sykepengegrunnlag med nye inntektsopplysninger hvor det allerede foreligger innteksopplysninger.")
+            hendelse.info("Kan ikke gjenopplive sykepengegrunnlag med nye inntektsopplysninger hvor det allerede foreligger inntektsopplysninger.")
             return null
         }
 
