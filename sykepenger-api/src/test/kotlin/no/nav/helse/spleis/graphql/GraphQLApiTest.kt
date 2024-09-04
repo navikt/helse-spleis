@@ -116,7 +116,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             """
 
             request(requestBody) {
-                assertIngenFærreFelt(detSpesialistFaktiskForventer, this.utenVariableVerdier)
+                assertHeltLike(detSpesialistFaktiskForventer, this.utenVariableVerdier)
             }
         }
     }
@@ -138,6 +138,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 .replace(TidsstempelRegex, TidsstempelMandagsfrø)
                 .replace(FagsystemIdRegex, FagsystemId)
 
+
         @Language("JSON")
         private val detSpesialistFaktiskForventer = """
 {
@@ -150,7 +151,8 @@ internal class GraphQLApiTest : AbstractObservableTest() {
           "ghostPerioder": [],
           "generasjoner": [
             {
-              "id": "00000000-0000-0000-0000-000000000000",
+              "id":  "00000000-0000-0000-0000-000000000000",
+              "kildeTilGenerasjon": "00000000-0000-0000-0000-000000000000",
               "perioder": [
                 {
                   "__typename": "GraphQLBeregnetPeriode",
@@ -607,14 +609,16 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       "rapportertDato": "2018-01-01T00:00:00",
                       "sendtNav": "2018-01-01T00:00:00",
                       "tom": "2018-01-30",
-                      "type": "SendtSoknadNav"
+                      "type": "SendtSoknadNav",
+                      "eksternDokumentId": ""
                     },
                     {
                       "__typename": "GraphQLInntektsmelding",
                       "beregnetInntekt": 0.0,
                       "id": "00000000-0000-0000-0000-000000000000",
                       "mottattDato": "2018-01-01T00:00:00",
-                      "type": "Inntektsmelding"
+                      "type": "Inntektsmelding",
+                      "eksternDokumentId": ""
                     }
                   ],
                   "maksdato": "2018-12-28",
@@ -691,7 +695,8 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                       }
                     }
                   },
-                  "vilkarsgrunnlagId": "00000000-0000-0000-0000-000000000000"
+                  "vilkarsgrunnlagId": "00000000-0000-0000-0000-000000000000",
+                  "kilde": "00000000-0000-0000-0000-000000000000"
                 }
               ]
             }
@@ -712,7 +717,9 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 "kilde": "Inntektsmelding",
                 "manedsbelop": 31000.0
               },
-              "deaktivert": false
+              "deaktivert": false, 
+              "skjonnsmessigFastsatt": null,
+              "skjonnsmessigFastsattAarlig": null
             }
           ],
           "arbeidsgiverrefusjoner": [
@@ -742,14 +749,15 @@ internal class GraphQLApiTest : AbstractObservableTest() {
           "oppfyllerKravOmMedlemskap": true,
           "oppfyllerKravOmMinstelonn": true,
           "oppfyllerKravOmOpptjening": true,
-          "opptjeningFra": "2017-01-01"
+          "opptjeningFra": "2017-01-01",
+          "skjonnsmessigFastsattAarlig": null
         }
-      ]
+      ], 
+      "versjon": 53
     }
   }
 }
         """
-
         private fun assertHeltLike(forventet: String, faktisk: String) =
             JSONAssert.assertEquals(forventet, faktisk, STRICT)
 
