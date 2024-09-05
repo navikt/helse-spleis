@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -22,7 +23,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -65,12 +66,63 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
+
+    @Test
+    fun `Forsøker å beregne seg forbi det punktet vi venter på inntektsmelding hos annen arbeidsgiver`() {
+        a1 { håndterSøknad(1.januar til 20.januar) }
+        a2 {
+            håndterSøknad(1.januar til 31.januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+        }
+
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode,
+                inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT, a3 to INNTEKT), 1.januar),
+                arbeidsforhold = listOf(
+                    Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a3, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                ), orgnummer = a1
+            )
+            val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger ?: emptyList()
+            assertEquals(3, inntekter.size)
+            assertTrue(inntekter.single { it.gjelder(a1) }.inspektør.inntektsopplysning is no.nav.helse.person.inntekt.Inntektsmelding)
+            assertTrue(inntekter.single { it.gjelder(a2) }.inspektør.inntektsopplysning is no.nav.helse.person.inntekt.Inntektsmelding)
+            assertTrue(inntekter.single { it.gjelder(a3) }.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
+        a3 {
+            håndterSøknad(5.januar til 10.januar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            håndterSøknad(21.januar til 21.februar)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        }
+        a1 {
+            assertForventetFeil(
+                forklaring = "Noe har stokket seg med perioden vi beregner utbetaling for, a3 burde ikke bli forsøkt beregnet her",
+                nå =  {
+                    assertEquals(
+                        "Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-01-31",
+                        assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }.message
+                    )
+                },
+                ønsket = {
+                    assertDoesNotThrow { håndterYtelser(1.vedtaksperiode) }
+                }
+            )
+        }
+    }
 
     @Test
     fun `forbrukte og gjenstående sykedager blir riktig også om arbeidsgiver som ikke beregner utbetalinger strekker seg lengre enn den som beregner`() {
@@ -279,8 +331,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                     a2 to INNTEKT
                 ), 19.januar),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                    Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(2.vedtaksperiode)
@@ -324,8 +376,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                     a2 to INNTEKT
                 ), 1.januar),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
+                    Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                    Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT)
                 )
             )
             håndterYtelser(2.vedtaksperiode)
@@ -389,8 +441,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         val inntekt = 20000.månedlig
         val inntekter = listOf(a1 to inntekt, a2 to inntekt)
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         listOf(a1).nyeVedtak(januar, inntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.januar), arbeidsforhold = arbeidsforhold)
         listOf(a1).forlengVedtak(februar)
@@ -1365,8 +1417,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     @Test
     fun `andre inntektskilder på a2 etter vilkårsprøving på a1 - kun warning på a2`() {
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+            Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
         )
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = listOf(
@@ -1488,8 +1540,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(
             vedtaksperiode,
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, 1.desember(2017), null, Arbeidsforholdtype.ORDINÆRT)
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
