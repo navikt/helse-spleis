@@ -7,6 +7,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
@@ -66,8 +67,8 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -105,10 +106,19 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a3 {
             håndterSøknad(5.januar til 10.januar)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
+        a3 {
             håndterSøknad(21.januar til 21.februar)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
         a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "yepp")))
             assertForventetFeil(
                 forklaring = "Noe har stokket seg med perioden vi beregner utbetaling for, a3 burde ikke bli forsøkt beregnet her",
                 nå =  {
@@ -118,7 +128,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                     )
                 },
                 ønsket = {
-                    assertDoesNotThrow { håndterYtelser(1.vedtaksperiode) }
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                    val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }.venterPå
+                    assertEquals("a3", venterPå.organisasjonsnummer)
+                    assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
+                    assertNull(venterPå.venteårsak.hvorfor)
                 }
             )
         }
