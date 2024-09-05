@@ -2690,19 +2690,6 @@ internal class Vedtaksperiode private constructor(
             return Periode(fom, tom)
         }
 
-        private fun List<Vedtaksperiode>.manglendeUtbetalingsopplysninger(hendelse: IAktivitetslogg, dag: LocalDate, melding: String) {
-            val vedtaksperiode = firstOrNull { dag in it.periode } ?: return
-
-            hendelse.info("Manglende utbetalingsopplysninger: $melding for $dag med skjæringstidspunkt ${vedtaksperiode.skjæringstidspunkt}")
-        }
-
-        internal fun List<Vedtaksperiode>.manglerVilkårsgrunnlag(hendelse: IAktivitetslogg, dag: LocalDate) =
-            manglendeUtbetalingsopplysninger(hendelse, dag, "mangler vilkårsgrunnlag")
-        internal fun List<Vedtaksperiode>.inngårIkkeISykepengegrunnlaget(hendelse: IAktivitetslogg, dag: LocalDate) =
-            manglendeUtbetalingsopplysninger(hendelse, dag, "inngår ikke i sykepengegrunnlaget")
-        internal fun List<Vedtaksperiode>.manglerRefusjonsopplysninger(hendelse: IAktivitetslogg, dag: LocalDate) =
-            manglendeUtbetalingsopplysninger(hendelse, dag, "mangler refusjonsopplysninger")
-
         private fun beregningsperioderFørstegangsbehandling(person: Person, vedtaksperiode: Vedtaksperiode) = (
                 listOf(vedtaksperiode) + person
                     .vedtaksperioder(OVERLAPPER_MED(vedtaksperiode))
