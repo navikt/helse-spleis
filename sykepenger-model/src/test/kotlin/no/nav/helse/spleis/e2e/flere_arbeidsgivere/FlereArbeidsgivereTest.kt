@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.den
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
@@ -71,7 +70,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import no.nav.helse.person.inntekt.Inntektsmelding as InntektFraInntektsmelding
 
 internal class FlereArbeidsgivereTest : AbstractDslTest() {
@@ -119,22 +117,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1, forklaring = "yepp")))
-            assertForventetFeil(
-                forklaring = "Noe har stokket seg med perioden vi beregner utbetaling for, a3 burde ikke bli forsøkt beregnet her",
-                nå =  {
-                    assertEquals(
-                        "Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-01-31",
-                        assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }.message
-                    )
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                    val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }.venterPå
-                    assertEquals("a3", venterPå.organisasjonsnummer)
-                    assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
-                    assertNull(venterPå.venteårsak.hvorfor)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode }.venterPå
+            assertEquals("a3", venterPå.organisasjonsnummer)
+            assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
+            assertNull(venterPå.venteårsak.hvorfor)
         }
     }
 

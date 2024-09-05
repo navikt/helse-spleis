@@ -1081,10 +1081,14 @@ internal class Vedtaksperiode private constructor(
         return this.periode.overlapperMed(periodeSomBeregner.periode) && skjæringstidspunktet == this.skjæringstidspunkt && !this.tilstand.erFerdigBehandlet
     }
 
-    private fun beregnUtbetalinger(hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
+    private fun beregningsperiode(): Periode {
+        val agp = finnArbeidsgiverperiode() ?: return this.periode
         val sisteTomKlarTilBehandling = beregningsperioderFørstegangsbehandling(person, this)
-        val beregningsperiode = this.finnArbeidsgiverperiode()?.periode(sisteTomKlarTilBehandling) ?: this.periode
+        return agp.periode(sisteTomKlarTilBehandling)
+    }
 
+    private fun beregnUtbetalinger(hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
+        val beregningsperiode = beregningsperiode()
         val utbetalingsperioder = utbetalingsperioder()
 
         check(utbetalingsperioder.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
@@ -2495,10 +2499,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal fun Iterable<Iterable<Vedtaksperiode>>.førsteOverlappendePeriodeSomTrengerRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
+            val beregningsperiode = vedtaksperiode.beregningsperiode()
             return this
                 .annenArbeidsgiver(vedtaksperiode)
                 .flatten()
-                .filter { it.periode.overlapperMed(vedtaksperiode.periode) }
+                .filter { it.periode.overlapperMed(beregningsperiode) }
                 .filter { it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt }
                 .filter { it.måInnhenteInntektEllerRefusjon(Aktivitetslogg()) }
                 .minOrNull()
