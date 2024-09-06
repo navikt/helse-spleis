@@ -340,7 +340,8 @@ internal class UtbetalingstidslinjeBuilderNy(
     override fun visitDag(dag: Dag.AndreYtelser, dato: LocalDate, kilde: Hendelseskilde, ytelse: Dag.AndreYtelser.AnnenYtelse) {
         // andreytelse-dagen er fridag hvis den overlapper med en agp-dag, eller om vedtaksperioden ikke har noen agp -- fordi andre ytelsen spiser opp alt
         val vedtaksperiode = arbeidsgiverperioder.single { dato in it.vedtaksperiode }
-        if (vedtaksperiode.arbeidsgiverperioder.isEmpty() || dato <= vedtaksperiode.arbeidsgiverperioder.last().endInclusive) fridag(dato)
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
+        else if (vedtaksperiode.arbeidsgiverperioder.isEmpty() || dato < vedtaksperiode.arbeidsgiverperioder.first().start) fridag(dato)
         else {
             val begrunnelse = when(ytelse) {
                 Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
@@ -365,6 +366,16 @@ internal class UtbetalingstidslinjeBuilderNy(
         if (erAGP(dato)) arbeidsgiverperiodedag(dato, økonomi)
         else builder.addForeldetDag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg))
     }
+
+    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
+        else fridag(dato)
+    }
+
+    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {
+        if (erAGP(dato)) arbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
+        else fridag(dato)
+    }
     /** </potensielt arbeidsgiverperiode-dager> **/
 
     override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {
@@ -379,16 +390,8 @@ internal class UtbetalingstidslinjeBuilderNy(
         arbeidsdag(dato)
     }
 
-    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
-        fridag(dato)
-    }
-
     override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {
         arbeidsdag(dato)
-    }
-
-    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {
-        fridag(dato)
     }
 
     override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: Hendelseskilde, other: Hendelseskilde?, melding: String) {
