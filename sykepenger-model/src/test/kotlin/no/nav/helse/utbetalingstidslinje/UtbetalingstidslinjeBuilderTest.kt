@@ -12,9 +12,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
@@ -41,9 +38,6 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ProblemdagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import no.nav.helse.økonomi.Økonomi
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -679,57 +673,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         resetSeed()
         teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         perioder.clear()
-    }
-
-    private class Komposittmediator(private val mediators: List<ArbeidsgiverperiodeMediator>) : ArbeidsgiverperiodeMediator {
-        constructor(vararg mediator: ArbeidsgiverperiodeMediator) : this(mediator.toList())
-
-        override fun fridag(dato: LocalDate) {
-            mediators.forEach { it.fridag(dato) }
-        }
-        override fun fridagOppholdsdag(dato: LocalDate) {
-            mediators.forEach { it.fridagOppholdsdag(dato) }
-        }
-
-        override fun arbeidsdag(dato: LocalDate) {
-            mediators.forEach { it.arbeidsdag(dato) }
-        }
-
-        override fun arbeidsgiverperiodedag(
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
-        ) {
-            mediators.forEach { it.arbeidsgiverperiodedag(dato, økonomi, kilde) }
-        }
-
-        override fun arbeidsgiverperiodedagNav(
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
-        ) {
-            mediators.forEach { it.arbeidsgiverperiodedagNav(dato, økonomi, kilde) }
-        }
-
-        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-            mediators.forEach { it.utbetalingsdag(dato, økonomi, kilde) }
-        }
-
-        override fun arbeidsgiverperiodeAvbrutt() {
-            mediators.forEach { it.arbeidsgiverperiodeAvbrutt() }
-        }
-
-        override fun arbeidsgiverperiodeFerdig() {
-            mediators.forEach { it.arbeidsgiverperiodeFerdig() }
-        }
-
-        override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
-            mediators.forEach { it.foreldetDag(dato, økonomi) }
-        }
-
-        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
-            mediators.forEach { it.avvistDag(dato, begrunnelse, økonomi) }
-        }
     }
 
     private fun assertEquals(expected: Iterable<LocalDate>, actual: Arbeidsgiverperiode?) {
