@@ -1009,10 +1009,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractEndToEndTest() {
         } else {
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
-        assertEquals(1, observatør.trengerPotensieltArbeidsgiveropplysningerVedtaksperioder.size)
         assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
     }
-
 
     private fun gapHosÉnArbeidsgiver(refusjon: Inntektsmelding.Refusjon) {
         nyPeriode(januar, a1)

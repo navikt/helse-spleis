@@ -130,30 +130,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `sender ut forventet event TrengerPotensieltArbeidsgiveropplysninger ved en vedtaksperiode innen for arbeidsgiverperioden`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 2.januar, tom = 16.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 16.januar, sykmeldingsgrad = 100)),
-            egenmeldingerFraSykmelding = listOf(1.januar)
-        )
-        Assertions.assertEquals(1, testRapid.inspektør.meldinger("trenger_potensielt_opplysninger_fra_arbeidsgiver").size)
-        val trengerPotensieltOpplysningerEvent = testRapid.inspektør.siste("trenger_potensielt_opplysninger_fra_arbeidsgiver")
-
-        val faktiskResultat = trengerPotensieltOpplysningerEvent.json(
-            "@event_name",
-            "organisasjonsnummer",
-            "skjæringstidspunkt",
-            "sykmeldingsperioder",
-            "egenmeldingsperioder",
-            "aktørId",
-            "fødselsnummer",
-            "førsteFraværsdager"
-        )
-
-        JSONAssert.assertEquals(forventetResultatTrengerPotensieltArbeidsgiveropplysninger, faktiskResultat, JSONCompareMode.STRICT)
-    }
-
-    @Test
     fun `sender ut forventet event TrengerArbeidsgiveropplysninger ved førstegangsbehandling med kort gap til forrige`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
@@ -321,34 +297,6 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
             },
             {
               "opplysningstype": "Arbeidsgiverperiode"
-            }
-          ],
-          "aktørId": "42",
-          "fødselsnummer": "12029240045"
-        }"""
-
-    @Language("json")
-    val forventetResultatTrengerPotensieltArbeidsgiveropplysninger = """
-        {
-          "@event_name": "trenger_potensielt_opplysninger_fra_arbeidsgiver",
-          "organisasjonsnummer": "987654321",
-          "skjæringstidspunkt": "2018-01-01",
-          "sykmeldingsperioder": [
-            {
-              "fom": "2018-01-02",
-              "tom": "2018-01-16"
-            }
-          ],
-          "egenmeldingsperioder": [
-            {
-              "fom": "2018-01-01",
-              "tom": "2018-01-01"
-            }
-          ],
-          "førsteFraværsdager": [
-            { 
-                "organisasjonsnummer": "987654321",
-                "førsteFraværsdag": "2018-01-01"
             }
           ],
           "aktørId": "42",

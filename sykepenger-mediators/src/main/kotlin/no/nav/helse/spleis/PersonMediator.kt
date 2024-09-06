@@ -428,10 +428,6 @@ internal class PersonMediator(
         queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }
 
-    override fun trengerPotensieltArbeidsgiveropplysninger(event: PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent) {
-        queueMessage(JsonMessage.newMessage("trenger_potensielt_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
-    }
-
     override fun trengerIkkeArbeidsgiveropplysninger(event: PersonObserver.TrengerIkkeArbeidsgiveropplysningerEvent) {
         queueMessage(JsonMessage.newMessage("trenger_ikke_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }

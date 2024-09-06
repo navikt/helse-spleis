@@ -149,40 +149,6 @@ interface PersonObserver {
             )
     }
 
-    data class TrengerPotensieltArbeidsgiveropplysningerEvent(
-        val organisasjonsnummer: String,
-        val vedtaksperiodeId: UUID,
-        val skjæringstidspunkt: LocalDate,
-        val sykmeldingsperioder: List<Periode>,
-        val egenmeldingsperioder: List<Periode>,
-        val førsteFraværsdager: List<FørsteFraværsdag>
-    ) {
-        fun toJsonMap(): Map<String, Any> =
-            mapOf(
-                "organisasjonsnummer" to organisasjonsnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "skjæringstidspunkt" to skjæringstidspunkt,
-                "sykmeldingsperioder" to sykmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "egenmeldingsperioder" to egenmeldingsperioder.map {
-                    mapOf(
-                        "fom" to it.start,
-                        "tom" to it.endInclusive
-                    )
-                },
-                "førsteFraværsdager" to førsteFraværsdager.map {
-                    mapOf(
-                        "organisasjonsnummer" to it.organisasjonsnummer,
-                        "førsteFraværsdag" to it.førsteFraværsdag
-                    )
-                }
-            )
-    }
-
     class TrengerIkkeArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
         val vedtaksperiodeId: UUID
@@ -726,7 +692,6 @@ interface PersonObserver {
     fun vedtaksperiodeIkkeFunnet(event: VedtaksperiodeIkkeFunnetEvent) {}
     fun sykefraværstilfelleIkkeFunnet(event: SykefraværstilfelleIkkeFunnet) {}
     fun trengerArbeidsgiveropplysninger(event: TrengerArbeidsgiveropplysningerEvent) {}
-    fun trengerPotensieltArbeidsgiveropplysninger(event: TrengerPotensieltArbeidsgiveropplysningerEvent) {}
     fun trengerIkkeArbeidsgiveropplysninger(event: TrengerIkkeArbeidsgiveropplysningerEvent) {}
     fun arbeidsgiveropplysningerKorrigert(event: ArbeidsgiveropplysningerKorrigertEvent) {}
     fun utbetalingEndret(event: UtbetalingEndretEvent) {}

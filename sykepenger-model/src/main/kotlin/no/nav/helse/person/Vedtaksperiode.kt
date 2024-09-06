@@ -738,21 +738,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun trengerPotensieltArbeidsgiveropplysninger() {
-        val arbeidsgiverperiode = finnArbeidsgiverperiode()
-        val vedtaksperioder = vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode)
-        person.trengerPotensieltArbeidsgiveropplysninger(
-            PersonObserver.TrengerPotensieltArbeidsgiveropplysningerEvent(
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = id,
-                skjæringstidspunkt = skjæringstidspunkt,
-                sykmeldingsperioder = sykmeldingsperioder(vedtaksperioder),
-                egenmeldingsperioder = egenmeldingsperioder(vedtaksperioder),
-                førsteFraværsdager = person.førsteFraværsdager(skjæringstidspunkt)
-            )
-        )
-    }
-
     private fun vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(arbeidsgiverperiode: Arbeidsgiverperiode?): List<Vedtaksperiode> {
         if (arbeidsgiverperiode == null) return listOf(this)
         return arbeidsgiver.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it <= this  }
@@ -2275,8 +2260,6 @@ internal class Vedtaksperiode private constructor(
             if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled && arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
-            } else {
-                vedtaksperiode.trengerPotensieltArbeidsgiveropplysninger()
             }
             vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
