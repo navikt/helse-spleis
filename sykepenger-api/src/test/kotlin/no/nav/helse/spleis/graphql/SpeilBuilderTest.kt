@@ -81,14 +81,33 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", beløp = 10000.månedlig)))
 
-        val nyeInntektsforholdPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!
-        assertEquals(1.februar til 28.februar, nyeInntektsforholdPølser.single().fom til nyeInntektsforholdPølser.single().tom)
-        assertEquals(1.januar, nyeInntektsforholdPølser.single().skjæringstidspunkt)
+        val nyeInntektsforholdPølse = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
+        assertEquals(1.februar til 28.februar, nyeInntektsforholdPølse.fom til nyeInntektsforholdPølse.tom)
+        assertEquals(1.januar, nyeInntektsforholdPølse.skjæringstidspunkt)
+        assertTrue(nyeInntektsforholdPølse.vilkårsgrunnlagId in speilApi().vilkårsgrunnlag.keys)
 
         // TODO: fjerne tilkommen inntekt fra ghostpølser når speilvendt er klare
         val ghostPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder!!
         assertEquals(1.februar til 28.februar, ghostPølser.single().fom til ghostPølser.single().tom)
     }
+
+    @Test
+    fun `kan lage NyeInntektsforhold-pølse med peker til riktig vilkårsgrunnlag før noe er utbetalt`() {
+        tilGodkjenning(1.januar, 31.januar)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", beløp = 10000.månedlig)))
+
+        val nyeInntektsforholdPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!.single()
+        assertEquals(1.februar til 28.februar, nyeInntektsforholdPølser.fom til nyeInntektsforholdPølser.tom)
+
+        val førstegangs = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a1" }!!.generasjoner.single().perioder.find { it.fom == 1.januar } as BeregnetPeriode
+        val vilkårsgrunnlagIdFørstegangssøknad = førstegangs.vilkårsgrunnlagId
+        val vilkårsgrunnlagIdTilkommen = nyeInntektsforholdPølser.vilkårsgrunnlagId
+        val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.keys
+        assertEquals(2, vilkårsgrunnlag.size)
+        assertTrue(vilkårsgrunnlagIdTilkommen in vilkårsgrunnlag)
+        assertTrue(vilkårsgrunnlagIdFørstegangssøknad in vilkårsgrunnlag)
+    }
+
 
     @Test
     fun `Dødsdato ligger på person`() {

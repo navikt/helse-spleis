@@ -21,6 +21,7 @@ data class ArbeidsgiverDTO(
             }.groupBy({ it.first }) { it.second }
     }
     internal fun erTom(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk) = ghostPerioder.isEmpty()
+            && nyeInntektsforhold.isEmpty()
             && generasjoner.isEmpty()
             && vilkårsgrunnlagHistorikk.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer)
 

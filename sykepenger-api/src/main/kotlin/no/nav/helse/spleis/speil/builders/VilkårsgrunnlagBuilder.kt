@@ -155,7 +155,12 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
 
     internal fun nyeInntektsforholdperioder(organisasjonsnummer: String) =
         tilgjengeligeVilkårsgrunnlag.firstOrNull()?.mapNotNull { (_, vilkårsgrunnlag) ->
-            vilkårsgrunnlag.nyttInntektsforholdperioder(organisasjonsnummer)
+            val periode = vilkårsgrunnlag.nyttInntektsforholdperioder(organisasjonsnummer)
+            if (periode != null) {
+                leggIBøtta(vilkårsgrunnlag.id)
+                return@mapNotNull periode
+            }
+            null
         } ?: emptyList()
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {
