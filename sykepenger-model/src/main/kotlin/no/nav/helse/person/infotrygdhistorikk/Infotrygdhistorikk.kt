@@ -15,8 +15,8 @@ import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeoppsamler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -100,14 +100,14 @@ internal class Infotrygdhistorikk private constructor(
     internal fun beregnArbeidsgiverperioder(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
-        builder: ArbeidsgiverperiodeMediator,
+        builder: Arbeidsgiverperiodeoppsamler,
         subsumsjonslogg: Subsumsjonslogg?,
         hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonslogg)
-        if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeBuilder)
-        siste.beregnArbeidsgiverperioder(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder, hendelseskilde)
+        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller, builder, subsumsjonslogg)
+        if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeberegner)
+        siste.beregnArbeidsgiverperioder(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeberegner, hendelseskilde)
     }
 
     internal fun betaltePerioder(orgnummer: String? = null) =

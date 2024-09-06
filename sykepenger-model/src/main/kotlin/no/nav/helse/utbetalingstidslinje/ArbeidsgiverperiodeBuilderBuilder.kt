@@ -3,10 +3,8 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
-import no.nav.helse.økonomi.Økonomi
 
-internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
+internal class ArbeidsgiverperiodeBuilderBuilder : Arbeidsgiverperiodeoppsamler {
     private val perioder = mutableListOf<Periode>()
     private val siste get() = perioder.last()
 
@@ -18,19 +16,11 @@ internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
         return results.toList()
     }
 
-    override fun arbeidsgiverperiodedag(
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) {
+    override fun arbeidsgiverperiodedag(dato: LocalDate) {
         nyDag(dato)
     }
 
-    override fun arbeidsgiverperiodedagNav(
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) {
+    override fun arbeidsgiverperiodedagNav(dato: LocalDate) {
         nyDag(dato)
         aktivArbeidsgiverperiode?.utbetalingsdag(dato)
     }
@@ -56,17 +46,17 @@ internal class ArbeidsgiverperiodeBuilderBuilder : ArbeidsgiverperiodeMediator {
     override fun arbeidsdag(dato: LocalDate) {
         aktivArbeidsgiverperiode?.oppholdsdag(dato)
     }
-    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+    override fun utbetalingsdag(dato: LocalDate) {
         // lager en fiktig arbeidsgiverperiode for Infotrygd-perioder, eller
         // andre tilfeller hvor arbeidsgiverperioden består av 0 dager
         aktivArbeidsgiverperiode?.utbetalingsdag(dato) ?: Arbeidsgiverperiode.fiktiv(dato).also {
             aktivArbeidsgiverperiode = it
         }
     }
-    override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
+    override fun foreldetDag(dato: LocalDate) {
         aktivArbeidsgiverperiode?.utbetalingsdag(dato)
     }
-    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
+    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
         aktivArbeidsgiverperiode?.kjentDag(dato)
     }
 

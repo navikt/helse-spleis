@@ -6,13 +6,11 @@ import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -187,8 +185,8 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
     }
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, observatør, jurist)
-        tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
+        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller, observatør, jurist)
+        tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeberegner) ?: arbeidsgiverperiodeberegner)
     }
 
     private class Subsumsjonobservatør : Subsumsjonslogg {
@@ -243,7 +241,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         }
     }
 
-    private class Dagobservatør : ArbeidsgiverperiodeMediator {
+    private class Dagobservatør : Arbeidsgiverperiodeoppsamler {
         val dager get() = fridager + arbeidsdager + arbeidsgiverperiodedager + utbetalingsdager + foreldetdager + avvistdager
         var fridager = 0
         var arbeidsdager = 0
@@ -266,30 +264,26 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         }
 
         override fun arbeidsgiverperiodedag(
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
+            dato: LocalDate
         ) {
             arbeidsgiverperiodedager += 1
         }
 
         override fun arbeidsgiverperiodedagNav(
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
+            dato: LocalDate
         ) {
             arbeidsgiverperiodedagerNavAnsvar += 1
         }
 
-        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
+        override fun utbetalingsdag(dato: LocalDate) {
             utbetalingsdager += 1
         }
 
-        override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
+        override fun foreldetDag(dato: LocalDate) {
             foreldetdager += 1
         }
 
-        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse, økonomi: Økonomi) {
+        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
             avvistdager += 1
         }
     }

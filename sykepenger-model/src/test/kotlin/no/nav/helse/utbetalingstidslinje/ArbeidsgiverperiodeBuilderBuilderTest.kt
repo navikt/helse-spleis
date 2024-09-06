@@ -144,8 +144,8 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, periodebuilder, NullObserver)
-        tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
+        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller, periodebuilder, NullObserver)
+        tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeberegner) ?: arbeidsgiverperiodeberegner)
         perioder.addAll(periodebuilder.result())
     }
 
