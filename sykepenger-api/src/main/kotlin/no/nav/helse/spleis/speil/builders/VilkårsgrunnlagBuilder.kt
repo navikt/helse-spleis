@@ -55,7 +55,8 @@ internal abstract class IVilkårsgrunnlag(
             id = UUID.randomUUID(),
             fom = omregnetÅrsinntekt.fom,
             tom = omregnetÅrsinntekt.tom,
-            vilkårsgrunnlagId = id
+            vilkårsgrunnlagId = id,
+            skjæringstidspunkt = skjæringstidspunkt
         )
     }
 

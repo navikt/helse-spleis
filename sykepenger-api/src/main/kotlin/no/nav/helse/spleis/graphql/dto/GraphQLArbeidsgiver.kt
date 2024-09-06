@@ -24,7 +24,8 @@ data class GraphQLNyttInntektsforholdPeriode(
     val organisasjonsnummer: String,
     val fom: LocalDate,
     val tom: LocalDate,
-    val vilkarsgrunnlagId: UUID
+    val vilkarsgrunnlagId: UUID,
+    val skjaeringstidspunkt: LocalDate
 )
 
 data class GraphQLArbeidsgiver(

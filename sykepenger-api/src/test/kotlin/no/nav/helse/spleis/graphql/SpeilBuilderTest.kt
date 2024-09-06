@@ -83,6 +83,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
 
         val nyeInntektsforholdPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.nyeInntektsforhold!!
         assertEquals(1.februar til 28.februar, nyeInntektsforholdPølser.single().fom til nyeInntektsforholdPølser.single().tom)
+        assertEquals(1.januar, nyeInntektsforholdPølser.single().skjæringstidspunkt)
 
         // TODO: fjerne tilkommen inntekt fra ghostpølser når speilvendt er klare
         val ghostPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder!!

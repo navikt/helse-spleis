@@ -1598,6 +1598,21 @@
           "isDeprecated" : false,
           "deprecationReason" : null
         }, {
+          "name" : "skjaeringstidspunkt",
+          "description" : null,
+          "args" : [ ],
+          "type" : {
+            "kind" : "NON_NULL",
+            "name" : null,
+            "ofType" : {
+              "kind" : "SCALAR",
+              "name" : "LocalDate",
+              "ofType" : null
+            }
+          },
+          "isDeprecated" : false,
+          "deprecationReason" : null
+        }, {
           "name" : "tom",
           "description" : null,
           "args" : [ ],

@@ -8,4 +8,5 @@ data class NyttInntektsforholdPeriodeDTO(
     val fom: LocalDate,
     val tom: LocalDate,
     val vilkårsgrunnlagId: UUID,
+    val skjæringstidspunkt: LocalDate
 )

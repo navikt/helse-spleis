@@ -85,7 +85,8 @@ private fun mapTilDto(person: PersonDTO, hendelser: List<HendelseDTO>) =
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                         fom = periode.fom,
                         tom = periode.tom,
-                        vilkarsgrunnlagId = periode.vilkårsgrunnlagId
+                        vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
+                        skjaeringstidspunkt = periode.skjæringstidspunkt
                     )
                 }
             )
