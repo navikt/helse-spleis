@@ -482,7 +482,7 @@ class Person private constructor(
         subsumsjonslogg: Subsumsjonslogg?
     ): List<Arbeidsgiverperiode> {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-        infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonslogg)
+        infotrygdhistorikk.beregnArbeidsgiverperioder(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonslogg)
         return periodebuilder.result()
     }
 

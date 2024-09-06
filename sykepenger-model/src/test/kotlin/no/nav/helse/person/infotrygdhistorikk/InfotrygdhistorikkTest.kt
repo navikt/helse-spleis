@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -18,15 +17,10 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Comp
 import no.nav.helse.serde.PersonData
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.testhelpers.FiktivInntekt
 import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.faktaavklarteInntekter
-import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -279,44 +273,6 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(historikkelement())
         val utbetaling = lagUtbetaling()
         assertFalse(historikk.harEndretHistorikk(utbetaling))
-    }
-
-    @Test
-    fun `tar ikke med nyere historikk i beregning av utbetalingstidslinje`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 10.februar, 100.prosent, 25000.månedlig),
-            Friperiode(11.februar,  15.februar),
-        )))
-        val sykdomstidslinje = 31.S
-        val builder = UtbetalingstidslinjeBuilder(
-            hendelse = Aktivitetslogg(),
-            organisasjonsnummer = "a1",
-            faktaavklarteInntekter = listOf(FiktivInntekt("a1", 25000.månedlig)).faktaavklarteInntekter(1.januar),
-            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonslogg = Subsumsjonslogg.NullObserver,
-            beregningsperiode = januar
-        )
-        val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, Subsumsjonslogg.NullObserver).let { builder.result() }
-        assertEquals(januar, utbetalingstidslinje.periode())
-    }
-
-    @Test
-    fun `tar ikke med eldre historikk i beregning av utbetalingstidslinje`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 25.januar, 100.prosent, 25000.månedlig),
-            Friperiode(26.januar,  31.januar),
-        )))
-        val sykdomstidslinje = 31.opphold + 28.S
-        val builder = UtbetalingstidslinjeBuilder(
-            hendelse = Aktivitetslogg(),
-            organisasjonsnummer = "a1",
-            faktaavklarteInntekter = listOf(FiktivInntekt("a1", 25000.månedlig)).faktaavklarteInntekter(1.januar),
-            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonslogg = Subsumsjonslogg.NullObserver,
-            beregningsperiode = februar
-        )
-        val utbetalingstidslinje = historikk.buildUtbetalingstidslinje("ag1", sykdomstidslinje, builder, Subsumsjonslogg.NullObserver).let { builder.result()}
-        assertEquals(februar, utbetalingstidslinje.periode())
     }
 
     @Test

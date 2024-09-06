@@ -1,8 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -13,9 +11,9 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.inntekt.Inntektsmelding
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
@@ -43,7 +41,9 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ProblemdagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -214,6 +214,18 @@ internal class UtbetalingstidslinjeBuilderTest {
         assertEquals(32, inspektør.arbeidsdagTeller)
         assertEquals(28, inspektør.navDagTeller)
         assertEquals(11, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `tar ikke med nyere historikk i beregning av utbetalingstidslinje`() {
+        undersøke(31.S, infotrygdBetalteDager = listOf(1.februar til 28.februar))
+        assertEquals(31, inspektør.size)
+    }
+
+    @Test
+    fun `tar ikke med eldre historikk i beregning av utbetalingstidslinje`() {
+        undersøke(31.opphold + 28.S, infotrygdBetalteDager = listOf(1.januar til 31.januar))
+        assertEquals(28, inspektør.size)
     }
 
     @Test

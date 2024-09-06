@@ -76,7 +76,7 @@ class InfotrygdhistorikkElement private constructor(
         }
     }
 
-    internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor, hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null) {
+    internal fun beregnArbeidsgiverperioder(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor, hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null) {
         val dekoratør = Infotrygddekoratør(teller, builder, perioder.utbetalingsperioder(organisasjonsnummer))
         historikkFor(organisasjonsnummer, sykdomstidslinje, hendelseskilde).accept(dekoratør)
     }

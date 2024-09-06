@@ -1,8 +1,6 @@
 package no.nav.helse.person.infotrygdhistorikk
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -99,7 +97,7 @@ internal class Infotrygdhistorikk private constructor(
         visitor.postVisitInfotrygdhistorikk()
     }
 
-    internal fun build(
+    internal fun beregnArbeidsgiverperioder(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
         builder: ArbeidsgiverperiodeMediator,
@@ -109,20 +107,8 @@ internal class Infotrygdhistorikk private constructor(
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, subsumsjonslogg)
         if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeBuilder)
-        siste.build(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder, hendelseskilde)
+        siste.beregnArbeidsgiverperioder(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeBuilder, hendelseskilde)
     }
-
-    internal fun buildUtbetalingstidslinje(
-        organisasjonsnummer: String,
-        sykdomstidslinje: Sykdomstidslinje,
-        builder: ArbeidsgiverperiodeMediator,
-        subsumsjonslogg: Subsumsjonslogg
-    ) {
-        val infotrygdkilde = SykdomshistorikkHendelse.Hendelseskilde("Infotrygdhistorikk", UUID.randomUUID(), LocalDateTime.now())
-        val dekoratør = if (harHistorikk()) InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.periode()!!, siste.betaltePerioder(organisasjonsnummer), infotrygdkilde) else builder
-        build(organisasjonsnummer, sykdomstidslinje, dekoratør, subsumsjonslogg, infotrygdkilde)
-    }
-
 
     internal fun betaltePerioder(orgnummer: String? = null) =
         if (!harHistorikk()) emptyList() else siste.betaltePerioder(orgnummer)
