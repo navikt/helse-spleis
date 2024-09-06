@@ -423,6 +423,7 @@ data class SpannerPersonDto(
                     val utbetalingstatus: UtbetalingData.UtbetalingstatusData?,
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
+                    val utbetalingstidslinje: UtbetalingstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperiode: List<PeriodeData>
                 )
@@ -995,6 +996,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         skjæringstidspunkt = this.skjæringstidspunkt,
         vilkårsgrunnlagId = vilkårsgrunnlagId,
         sykdomstidslinje = sykdomstidslinje.tilPersonData(),
+        utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
         dokumentsporing = dokumentsporing.tilPersonData(),
         arbeidsgiverperiode = arbeidsgiverperioder.map {
             SpannerPersonDto.ArbeidsgiverData.PeriodeData(
