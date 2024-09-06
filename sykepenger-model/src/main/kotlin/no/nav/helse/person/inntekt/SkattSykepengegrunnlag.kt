@@ -86,6 +86,7 @@ internal class SkattSykepengegrunnlag private constructor(
         ansattPerioder.any { ansattPeriode -> ansattPeriode.gjelder(dato) }
 
     override fun kanOverstyresAv(ny: Inntektsopplysning): Boolean {
+        if (ny is InntektFraSøknad) return false
         if (ny !is Inntektsmelding) return true
         return super.kanOverstyresAv(ny)
     }

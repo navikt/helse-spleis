@@ -143,6 +143,7 @@ class Søknad(
         perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonslogg) }
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
+        if (tilkomneInntekter.isNotEmpty()) varsel(RV_SV_5)
         merknaderFraSykmelding.forEach { it.valider(this) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {

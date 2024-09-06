@@ -11,6 +11,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -138,6 +139,68 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a2]!!.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
+            }
+        }
+    }
+
+    @Test
+    fun `inntekt fra søknad på men allerede ghost på skjæringstidspunktet`() {
+        a1 {
+            val inntekt = 20000.månedlig
+            val inntekter = listOf(a1 to inntekt, a2 to inntekt)
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            )
+            listOf(a1).nyeVedtak(januar, inntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.januar), arbeidsforhold = arbeidsforhold)
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                orgnummer = a1,
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(
+                        fom = 15.februar,
+                        tom = null,
+                        orgnummer = a2,
+                        beløp = 20000.månedlig
+                    )
+                )
+            )
+            assertVarsel(Varselkode.RV_SV_5)
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
+                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a2]!!.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
+            }
+        }
+    }
+
+    @Test
+    fun `inntekt fra søknad på men syk med IM på skjæringstidspunktet`() {
+        a1 {
+            val inntekt = 20000.månedlig
+            val inntekter = listOf(a1 to inntekt, a2 to inntekt)
+            val arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            )
+            listOf(a1, a2).nyeVedtak(januar, inntekt = inntekt, sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(inntekter, 1.januar), arbeidsforhold = arbeidsforhold)
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                orgnummer = a1,
+                tilkomneInntekter = listOf(
+                    TilkommenInntekt(
+                        fom = 15.februar,
+                        tom = null,
+                        orgnummer = a2,
+                        beløp = 20000.månedlig
+                    )
+                )
+            )
+            assertVarsel(Varselkode.RV_SV_5)
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
+                assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a2]!!.inspektør.inntektsopplysning is Inntektsmelding)
             }
         }
     }
