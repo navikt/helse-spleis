@@ -4,12 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender
@@ -123,11 +125,13 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkas
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
+import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode private constructor(
     private val person: Person,
@@ -2252,8 +2256,9 @@ internal class Vedtaksperiode private constructor(
 
     internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         override val type = AVSLUTTET_UTEN_UTBETALING
-
         override val erFerdigBehandlet = true
+
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             val arbeidsgiverperiode = vedtaksperiode.arbeidsgiver.arbeidsgiverperiodeHensyntattEgenmeldinger(vedtaksperiode.periode)
@@ -2261,8 +2266,19 @@ internal class Vedtaksperiode private constructor(
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
             }
+            forsøkÅLageUtbetalingstidslinje(vedtaksperiode, hendelse)
             vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
+        }
+
+        private fun forsøkÅLageUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            val faktaavklarteInntekter = vedtaksperiode.person.vilkårsgrunnlagHistorikk.faktavklarteInntekter()
+            val infotrygdUtbetaltePerioder = vedtaksperiode.person.infotrygdhistorikk.betaltePerioder()
+            try {
+                vedtaksperiode.arbeidsgiver.beregnUtbetalingstidslinje(hendelse, vedtaksperiode.periode, NormalArbeidstaker, faktaavklarteInntekter, infotrygdUtbetaltePerioder, Subsumsjonslogg.NullObserver)
+            } catch (err: Exception) {
+                sikkerLogg.warn("klarte ikke lage utbetalingstidslinje for auu: ${err.message}, {}", kv("vedtaksperiodeId", vedtaksperiode.id), kv("aktørId", vedtaksperiode.aktørId), err)
+            }
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -2338,6 +2354,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            forsøkÅLageUtbetalingstidslinje(vedtaksperiode, påminnelse)
+            
             if (!vedtaksperiode.forventerInntekt() && vedtaksperiode.behandlinger.erAvsluttet()) return påminnelse.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
             påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")
