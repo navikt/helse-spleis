@@ -339,7 +339,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(3.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 2.januar))
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
-                assertEquals(2, behandlinger.single().endringer.size)
+                assertEquals(3, behandlinger.single().endringer.size)
                 assertEquals(3.januar til 17.januar, behandlinger.first().endringer.first().sykmeldingsperiode)
                 assertEquals(3.januar, behandlinger.last().endringer.last().skjæringstidspunkt)
             }

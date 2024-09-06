@@ -852,6 +852,7 @@ data class PersonData(
                     val utbetalingId: UUID?,
                     val vilkårsgrunnlagId: UUID?,
                     val sykdomstidslinje: SykdomstidslinjeData,
+                    val utbetalingstidslinje: UtbetalingstidslinjeData?,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperioder: List<PeriodeData>
                 ) {
@@ -864,6 +865,7 @@ data class PersonData(
                         utbetalingId = this.utbetalingId,
                         dokumentsporing = this.dokumentsporing.tilDto(),
                         sykdomstidslinje = this.sykdomstidslinje.tilDto(),
+                        utbetalingstidslinje = this.utbetalingstidslinje?.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() }
                     )

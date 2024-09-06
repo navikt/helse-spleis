@@ -2266,18 +2266,19 @@ internal class Vedtaksperiode private constructor(
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
             }
-            forsøkÅLageUtbetalingstidslinje(vedtaksperiode, hendelse)
-            vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, hendelse)
+            val utbetalingstidslinje = forsøkÅLageUtbetalingstidslinje(vedtaksperiode, hendelse)
+            vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, hendelse, utbetalingstidslinje)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
-        private fun forsøkÅLageUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        private fun forsøkÅLageUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Utbetalingstidslinje {
             val faktaavklarteInntekter = vedtaksperiode.person.vilkårsgrunnlagHistorikk.faktavklarteInntekter()
             val infotrygdUtbetaltePerioder = vedtaksperiode.person.infotrygdhistorikk.betaltePerioder()
-            try {
+            return try {
                 vedtaksperiode.arbeidsgiver.beregnUtbetalingstidslinje(hendelse, vedtaksperiode.periode, NormalArbeidstaker, faktaavklarteInntekter, infotrygdUtbetaltePerioder, Subsumsjonslogg.NullObserver)
             } catch (err: Exception) {
                 sikkerLogg.warn("klarte ikke lage utbetalingstidslinje for auu: ${err.message}, {}", kv("vedtaksperiodeId", vedtaksperiode.id), kv("aktørId", vedtaksperiode.aktørId), err)
+                Utbetalingstidslinje()
             }
         }
 
@@ -2325,7 +2326,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterDager(dager)
             if (dager.harFunksjonelleFeilEllerVerre()) {
                 if (vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, dager)) return vedtaksperiode.forkast(dager)
-                return vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, dager)
+                return vedtaksperiode.behandlinger.avsluttUtenVedtak(vedtaksperiode.arbeidsgiver, dager, forsøkÅLageUtbetalingstidslinje(vedtaksperiode, dager))
             }
         }
 
@@ -2355,7 +2356,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             forsøkÅLageUtbetalingstidslinje(vedtaksperiode, påminnelse)
-            
+
             if (!vedtaksperiode.forventerInntekt() && vedtaksperiode.behandlinger.erAvsluttet()) return påminnelse.info("Forventer ikke inntekt. Vil forbli i AvsluttetUtenUtbetaling")
             påminnelse.eventyr(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode)?.also {
                 påminnelse.info("Reberegner perioden ettersom det er ønsket")

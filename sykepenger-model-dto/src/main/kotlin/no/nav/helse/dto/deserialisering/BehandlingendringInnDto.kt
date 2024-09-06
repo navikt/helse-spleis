@@ -16,6 +16,7 @@ data class BehandlingendringInnDto(
     val utbetalingId: UUID?,
     val dokumentsporing: DokumentsporingDto,
     val sykdomstidslinje: SykdomstidslinjeDto,
+    val utbetalingstidslinje: UtbetalingstidslinjeInnDto?,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgiverperiode: List<PeriodeDto>
 )

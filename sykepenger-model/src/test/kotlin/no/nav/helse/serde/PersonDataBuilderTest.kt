@@ -327,7 +327,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                     assertEquals(AvsenderDto.SYKMELDT, behandling.kilde.avsender)
                     assertNull(behandling.vedtakFattet)
                     assertNotNull(behandling.avsluttet)
-                    assertEquals(2, behandling.endringer.size)
+                    assertEquals(3, behandling.endringer.size)
                     behandling.endringer[0].also { endring ->
                         assertEquals(5.januar, endring.periode.fom)
                         assertEquals(17.januar, endring.periode.tom)
@@ -338,6 +338,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                         assertEquals(5.januar, endring.sykdomstidslinje.periode?.fom)
                         assertEquals(17.januar, endring.sykdomstidslinje.periode?.tom)
                         assertEquals(LocalDate.MIN, endring.skjæringstidspunkt)
+                        assertEquals(0, endring.utbetalingstidslinje.dager.size)
                     }
                     behandling.endringer[1].also { endring ->
                         assertEquals(5.januar, endring.periode.fom)

@@ -380,6 +380,7 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     utbetalingId = utbetalingId,
     vilkårsgrunnlagId = vilkårsgrunnlagId,
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
+    utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
     dokumentsporing = dokumentsporing.tilPersonData(),
     arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
 )
