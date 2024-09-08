@@ -4,18 +4,14 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_3
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.merge
-import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt.Companion.finnSkjæringstidspunkt
-import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt.Companion.finnArbeidsgiver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
@@ -31,154 +27,118 @@ internal sealed class UtbetalingstidslinjeBuilderException(message: String) : Ru
     )
 }
 
-internal class FaktaavklarteInntekter(
-    private val skjæringstidspunkter: List<VilkårsprøvdSkjæringstidspunkt>
+internal class VilkårsprøvdSkjæringstidspunkt(
+    private val skjæringstidspunkt: LocalDate,
+    private val `6G`: Inntekt,
+    inntekter: List<FaktaavklartInntekt>
 ) {
-    internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje {
-        return skjæringstidspunkter.mapNotNull { it.ghosttidslinje(organisasjonsnummer, sisteDag) }.merge()
+    private val inntekter = inntekter.associate { inntekt ->
+        inntekt.organisasjonsnummer to ArbeidsgiverFaktaavklartInntekt(
+            skjæringstidspunkt = skjæringstidspunkt,
+            `6G` = `6G`,
+            fastsattÅrsinntekt = inntekt.fastsattÅrsinntekt,
+            gjelder = inntekt.gjelder,
+            refusjonsopplysninger = inntekt.refusjonsopplysninger
+        )
+    }
+    internal fun forArbeidsgiver(organisasjonsnummer: String): ArbeidsgiverFaktaavklartInntekt? {
+        return inntekter[organisasjonsnummer]
     }
 
-    internal fun medInntekt(
-        organisasjonsnummer: String,
+    internal fun ghosttidslinjer(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
+        val beregningsperiode = utbetalingstidslinjer.values.flatten().map { it.periode() }.periode()!!
+        return inntekter.mapValues { (orgnr, v) ->
+            v.ghosttidslinje(beregningsperiode, skjæringstidspunkt, `6G`, utbetalingstidslinjer[orgnr] ?: emptyList())
+        }
+    }
+
+    internal class FaktaavklartInntekt(
+        val organisasjonsnummer: String,
+        val fastsattÅrsinntekt: Inntekt,
+        val gjelder: Periode,
+        val refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger
+    )
+}
+
+internal class ArbeidsgiverFaktaavklartInntekt(
+    private val skjæringstidspunkt: LocalDate,
+    private val `6G`: Inntekt,
+    private val fastsattÅrsinntekt: Inntekt,
+    private val gjelder: Periode,
+    private val refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger
+) {
+    private val lagDefaultRefusjonsbeløpHvisMangler = { _: LocalDate, aktuellDagsinntekt: Inntekt -> aktuellDagsinntekt }
+    private val krevRefusjonsbeløpHvisMangler = { dato: LocalDate, _: Inntekt ->
+        error("Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag $dato")
+    }
+
+    private fun fastsattÅrsinntekt(dagen: LocalDate): Inntekt {
+        if (dagen !in gjelder) return INGEN
+        return fastsattÅrsinntekt
+    }
+
+    private fun beregningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
+        if (!gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return INGEN
+        return fastsattÅrsinntekt
+    }
+    private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) = skjæringstidspunkt == gjelder.start
+
+    internal fun medInntektHvisFinnes(
         dato: LocalDate,
         økonomi: Økonomi,
         regler: ArbeidsgiverRegler,
         subsumsjonslogg: Subsumsjonslogg
     ): Økonomi {
-        val skjæringstidspunkt = skjæringstidspunkter.finnSkjæringstidspunkt(dato)
-            ?: return økonomi.inntekt(aktuellDagsinntekt = INGEN, dekningsgrunnlag = INGEN, `6G` = INGEN, refusjonsbeløp = INGEN)
-
-        return skjæringstidspunkt.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
+        return medInntekt(dato, økonomi, regler, subsumsjonslogg, lagDefaultRefusjonsbeløpHvisMangler)
     }
 
-    internal fun medUtbetalingsopplysninger(
-        hendelse: IAktivitetslogg,
-        organisasjonsnummer: String,
+    internal fun medInntektEllersVarsel(
         dato: LocalDate,
         økonomi: Økonomi,
         regler: ArbeidsgiverRegler,
         subsumsjonslogg: Subsumsjonslogg,
     ): Økonomi {
-        val skjæringstidspunkt = skjæringstidspunkter.finnSkjæringstidspunkt(dato)
-        if (skjæringstidspunkt == null) {
-            hendelse.info("Fant ikke vilkårsgrunnlag for $dato. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger.")
-            hendelse.varsel(RV_IV_8)
-            return økonomi.inntekt(aktuellDagsinntekt = INGEN, dekningsgrunnlag = INGEN, `6G` = INGEN, refusjonsbeløp = INGEN)
-        }
-        return skjæringstidspunkt.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
+        return medInntekt(dato, økonomi, regler, subsumsjonslogg, krevRefusjonsbeløpHvisMangler)
     }
 
-    internal class VilkårsprøvdSkjæringstidspunkt(
-        private val skjæringstidspunkt: LocalDate,
-        private val vurdertIInfotrygd: Boolean,
-        private val `6G`: Inntekt,
-        private val inntekter: List<FaktaavklartInntekt>
-    ) {
-        internal companion object {
-            fun List<VilkårsprøvdSkjæringstidspunkt>.finnSkjæringstidspunkt(dato: LocalDate) = this
-                .filter { it.skjæringstidspunkt <= dato }
-                .maxByOrNull { it.skjæringstidspunkt }
+    internal fun medInntekt(dato: LocalDate, økonomi: Økonomi, regler: ArbeidsgiverRegler, subsumsjonslogg: Subsumsjonslogg, refusjonsopplysningFinnesIkkeStrategi: (LocalDate, Inntekt) -> Inntekt): Økonomi {
+        val aktuellDagsinntekt = fastsattÅrsinntekt(dato)
+        val refusjonsbeløp = refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: refusjonsopplysningFinnesIkkeStrategi(dato, aktuellDagsinntekt)
+        return økonomi.inntekt(
+            aktuellDagsinntekt = aktuellDagsinntekt,
+            beregningsgrunnlag = beregningsgrunnlag(skjæringstidspunkt),
+            dekningsgrunnlag = aktuellDagsinntekt.dekningsgrunnlag(dato, regler, subsumsjonslogg),
+            `6G` = if (dato < skjæringstidspunkt) INGEN else `6G`,
+            refusjonsbeløp = refusjonsbeløp
+        )
+    }
+
+    internal fun ghosttidslinje(beregningsperiode: Periode, skjæringstidspunkt: LocalDate, `6G`: Inntekt, arbeidsgiverlinjer: List<Utbetalingstidslinje>): Utbetalingstidslinje {
+        // avdekker hvilken periode det er aktuelt å lage ghost-dager i
+        val aktueltGhostområde = if (gjelder.start <= beregningsperiode.endInclusive) listOf(beregningsperiode.subset(gjelder.start til LocalDate.MAX)) else emptyList()
+
+        // fjerner perioder med registrert vedtaksperiode
+        val ghostperioder = arbeidsgiverlinjer.fold(aktueltGhostområde) { result, linje ->
+            result.dropLast(1) + (result.lastOrNull()?.trim(linje.periode()) ?: emptyList())
         }
 
-        internal fun ghosttidslinje(organisasjonsnummer: String, sisteDag: LocalDate): Sykdomstidslinje? {
-            if (vurdertIInfotrygd) return null
-            return inntekter.finnArbeidsgiver(organisasjonsnummer)?.ghosttidslinje(sisteDag)
-        }
-
-        internal fun medInntekt(
-            organisasjonsnummer: String,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            regler: ArbeidsgiverRegler,
-            subsumsjonslogg: Subsumsjonslogg
-        ): Økonomi {
-            return medInntekt(
-                organisasjonsnummer,
-                dato,
-                økonomi,
-                regler,
-                subsumsjonslogg,
-                inntektFinnesIkkeStrategi = {
-                    økonomi.inntekt(aktuellDagsinntekt = INGEN, dekningsgrunnlag = INGEN, `6G` = `6G`, refusjonsbeløp = INGEN)
-                },
-                refusjonsopplysningFinnesIkkeStrategi = { aktuellDagsinntekt -> aktuellDagsinntekt }
-            )
-        }
-
-        internal fun medUtbetalingsopplysninger(
-            organisasjonsnummer: String,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            regler: ArbeidsgiverRegler,
-            subsumsjonslogg: Subsumsjonslogg
-        ): Økonomi {
-            return medInntekt(
-                organisasjonsnummer = organisasjonsnummer,
-                dato = dato,
-                økonomi = økonomi,
-                regler = regler,
-                subsumsjonslogg = subsumsjonslogg, inntektFinnesIkkeStrategi = {
-                    error("""Arbeidsgiver $organisasjonsnummer mangler i sykepengegrunnlaget ved utbetaling av $dato. 
-                Arbeidsgiveren må være i sykepengegrunnlaget for å legge til utbetalingsopplysninger.""")
-                },
-                refusjonsopplysningFinnesIkkeStrategi = {
-                    error("Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag $dato")
+        // lager faktiske ghost-tidslinjer fra brudd-periodene
+        val ghosttidslinje = ghostperioder.map { periode ->
+            Utbetalingstidslinje.Builder().apply {
+                periode.forEach { dag ->
+                    val aktuellDagsinntekt = fastsattÅrsinntekt(dag)
+                    if (dag.erHelg()) addFridag(dag, Økonomi.ikkeBetalt())
+                    else addArbeidsdag(dag, Økonomi.ikkeBetalt().inntekt(
+                        aktuellDagsinntekt = aktuellDagsinntekt,
+                        beregningsgrunnlag = beregningsgrunnlag(skjæringstidspunkt),
+                        dekningsgrunnlag = INGEN,
+                        `6G` = `6G`,
+                        refusjonsbeløp = INGEN
+                    ))
                 }
-            )
+            }.build()
         }
-
-        private fun medInntekt(
-            organisasjonsnummer: String,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            regler: ArbeidsgiverRegler,
-            subsumsjonslogg: Subsumsjonslogg,
-            inntektFinnesIkkeStrategi: () -> Økonomi,
-            refusjonsopplysningFinnesIkkeStrategi: (Inntekt) -> Inntekt
-        ): Økonomi {
-            val faktaavklartInntekt = inntekter.finnArbeidsgiver(organisasjonsnummer) ?: return inntektFinnesIkkeStrategi()
-            return faktaavklartInntekt.medInntekt(skjæringstidspunkt, dato, økonomi, `6G`, regler, subsumsjonslogg, refusjonsopplysningFinnesIkkeStrategi)
-        }
-
-        internal class FaktaavklartInntekt(
-            private val organisasjonsnummer: String,
-            private val fastsattÅrsinntekt: Inntekt,
-            private val gjelder: Periode,
-            private val refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger
-        ) {
-            internal companion object {
-                fun List<FaktaavklartInntekt>.finnArbeidsgiver(organisasjonsnummer: String) = this
-                    .singleOrNull { it.organisasjonsnummer == organisasjonsnummer }
-            }
-
-            internal fun ghosttidslinje(sisteDag: LocalDate): Sykdomstidslinje {
-                if (sisteDag < gjelder.start) return Sykdomstidslinje()
-                return Sykdomstidslinje.ghostdager(gjelder.start til sisteDag)
-            }
-
-            private fun fastsattÅrsinntekt(dagen: LocalDate): Inntekt {
-                if (dagen > gjelder.endInclusive) return INGEN
-                return fastsattÅrsinntekt
-            }
-
-            private fun beregningsgrunnlag(skjæringstidspunkt: LocalDate): Inntekt {
-                if (!gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return INGEN
-                return fastsattÅrsinntekt
-            }
-            private fun gjelderPåSkjæringstidspunktet(skjæringstidspunkt: LocalDate) = skjæringstidspunkt == gjelder.start
-
-            internal fun medInntekt(skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, `6G`: Inntekt, regler: ArbeidsgiverRegler, subsumsjonslogg: Subsumsjonslogg, refusjonsopplysningFinnesIkkeStrategi: (Inntekt) -> Inntekt): Økonomi {
-                val aktuellDagsinntekt = fastsattÅrsinntekt(dato)
-                val refusjonsbeløp = refusjonsopplysninger.refusjonsbeløpOrNull(dato) ?: refusjonsopplysningFinnesIkkeStrategi(aktuellDagsinntekt)
-                return økonomi.inntekt(
-                    aktuellDagsinntekt = aktuellDagsinntekt,
-                    beregningsgrunnlag = beregningsgrunnlag(skjæringstidspunkt),
-                    dekningsgrunnlag = aktuellDagsinntekt.dekningsgrunnlag(dato, regler, subsumsjonslogg),
-                    `6G` = `6G`,
-                    refusjonsbeløp = refusjonsbeløp
-                )
-            }
-        }
+        return (ghosttidslinje + arbeidsgiverlinjer).fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
     }
 }
 
@@ -187,22 +147,11 @@ internal data class ArbeidsgiverperiodeForVedtaksperiode(
     val arbeidsgiverperioder: List<Periode>
 )
 
-/**
- * val sykdomstidslinje = ...
- * val builder = UtbetalingstidslinjeBuilderNy(..)
- * sykdomstidslinje.accept(builder)
- *
- * val result = builder.result()
- */
-internal class UtbetalingstidslinjeBuilderNy(
-    private val faktaavklarteInntekter: FaktaavklarteInntekter,
-    private val hendelse: IAktivitetslogg,
-    private val organisasjonsnummer: String,
+internal class UtbetalingstidslinjeBuilderVedtaksperiode(
+    private val faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt,
     private val regler: ArbeidsgiverRegler,
     private val subsumsjonslogg: Subsumsjonslogg,
-    private val beregningsperiode: Periode,
-    private val arbeidsgiverperioder: List<ArbeidsgiverperiodeForVedtaksperiode>,
-    private val utbetaltePerioderInfotrygd: List<Periode>
+    private val arbeidsgiverperiode: List<Periode>
 ) : SykdomstidslinjeVisitor {
     private val builder = Utbetalingstidslinje.Builder()
 
@@ -210,29 +159,25 @@ internal class UtbetalingstidslinjeBuilderNy(
         return builder.build()
     }
 
-    private fun erAGP(dato: LocalDate) = arbeidsgiverperioder.any { vedtaksperiode ->
-        vedtaksperiode.arbeidsgiverperioder.any { dato in it }
-    }
+    private fun erAGP(dato: LocalDate) = arbeidsgiverperiode.any { dato in it }
+
     private fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
-        builder.addArbeidsgiverperiodedag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi.ikkeBetalt(), regler, subsumsjonslogg))
+        builder.addArbeidsgiverperiodedag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler, subsumsjonslogg))
     }
     private fun avvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) {
-        builder.addAvvistDag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg), listOf(begrunnelse))
+        builder.addAvvistDag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi, regler, subsumsjonslogg), listOf(begrunnelse))
     }
     private fun helg(dato: LocalDate, økonomi: Økonomi) {
-        builder.addHelg(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi.ikkeBetalt(), regler, subsumsjonslogg))
+        builder.addHelg(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi.ikkeBetalt(), regler, subsumsjonslogg))
     }
     private fun navDag(dato: LocalDate, økonomi: Økonomi) {
-        builder.addNAVdag(dato, when (dato in beregningsperiode) {
-            true -> faktaavklarteInntekter.medUtbetalingsopplysninger(hendelse, organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-            false -> faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-        })
+        builder.addNAVdag(dato, faktaavklarteInntekter.medInntektEllersVarsel(dato, økonomi, regler, subsumsjonslogg))
     }
     private fun fridag(dato: LocalDate) {
-        builder.addFridag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, Økonomi.ikkeBetalt(), regler, subsumsjonslogg))
+        builder.addFridag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler, subsumsjonslogg))
     }
     private fun arbeidsdag(dato: LocalDate) {
-        builder.addArbeidsdag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, Økonomi.ikkeBetalt(), regler, subsumsjonslogg))
+        builder.addArbeidsdag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, Økonomi.ikkeBetalt(), regler, subsumsjonslogg))
     }
 
     /** <potensielt arbeidsgiverperiode-dager> **/
@@ -257,10 +202,7 @@ internal class UtbetalingstidslinjeBuilderNy(
     }
 
     override fun visitDag(dag: Dag.SykedagNav, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        if (erAGP(dato)) builder.addArbeidsgiverperiodedagNav(dato, when (dato in beregningsperiode) {
-            true -> faktaavklarteInntekter.medUtbetalingsopplysninger(hendelse, organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-            false -> faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg)
-        })
+        if (erAGP(dato)) builder.addArbeidsgiverperiodedagNav(dato, faktaavklarteInntekter.medInntektEllersVarsel(dato, økonomi, regler, subsumsjonslogg))
         else when (dato.erHelg()) {
             true -> helg(dato, økonomi)
             false -> navDag(dato, økonomi)
@@ -269,9 +211,8 @@ internal class UtbetalingstidslinjeBuilderNy(
 
     override fun visitDag(dag: Dag.AndreYtelser, dato: LocalDate, kilde: Hendelseskilde, ytelse: Dag.AndreYtelser.AnnenYtelse) {
         // andreytelse-dagen er fridag hvis den overlapper med en agp-dag, eller om vedtaksperioden ikke har noen agp -- fordi andre ytelsen spiser opp alt
-        val vedtaksperiode = arbeidsgiverperioder.single { dato in it.vedtaksperiode }
         if (erAGP(dato)) arbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
-        else if (vedtaksperiode.arbeidsgiverperioder.isEmpty() || dato < vedtaksperiode.arbeidsgiverperioder.first().start) fridag(dato)
+        else if (arbeidsgiverperiode.isEmpty() || dato < arbeidsgiverperiode.first().start) fridag(dato)
         else {
             val begrunnelse = when(ytelse) {
                 Dag.AndreYtelser.AnnenYtelse.AAP -> Begrunnelse.AndreYtelserAap
@@ -294,7 +235,7 @@ internal class UtbetalingstidslinjeBuilderNy(
 
     override fun visitDag(dag: Dag.ForeldetSykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
         if (erAGP(dato)) arbeidsgiverperiodedag(dato, økonomi)
-        else builder.addForeldetDag(dato, faktaavklarteInntekter.medInntekt(organisasjonsnummer, dato, økonomi, regler, subsumsjonslogg))
+        else builder.addForeldetDag(dato, faktaavklarteInntekter.medInntektHvisFinnes(dato, økonomi, regler, subsumsjonslogg))
     }
 
     override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
@@ -309,7 +250,8 @@ internal class UtbetalingstidslinjeBuilderNy(
     /** </potensielt arbeidsgiverperiode-dager> **/
 
     override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {
-        if (utbetaltePerioderInfotrygd.any { dato in it }) return builder.addUkjentDag(dato)
+        // todo: pga strekking av egenmeldingsdager fra søknad så har vi vedtaksperioder med ukjentdager
+        // error("Forventer ikke å finne en ukjentdag i en vedtaksperiode")
         when (dato.erHelg()) {
             true -> fridag(dato)
             false -> arbeidsdag(dato)

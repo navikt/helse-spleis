@@ -20,7 +20,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
+import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -133,7 +133,7 @@ class ArbeidsgiverInntektsopplysning(
 
     internal companion object {
         internal fun List<ArbeidsgiverInntektsopplysning>.faktaavklarteInntekter() = this
-            .map { FaktaavklarteInntekter.VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
+            .map { VilkårsprøvdSkjæringstidspunkt.FaktaavklartInntekt(
                 organisasjonsnummer = it.orgnummer,
                 fastsattÅrsinntekt = it.inntektsopplysning.fastsattÅrsinntekt(),
                 gjelder = it.gjelder,

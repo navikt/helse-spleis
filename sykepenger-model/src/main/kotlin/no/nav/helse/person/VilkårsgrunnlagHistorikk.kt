@@ -35,7 +35,6 @@ import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
@@ -45,8 +44,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     private fun sisteInnlag() = historikk.firstOrNull()
 
     private fun forrigeInnslag() = historikk.elementAtOrNull(1)
-
-    internal fun faktavklarteInntekter() = sisteInnlag()?.faktaavklarteInntekter() ?: FaktaavklarteInntekter(emptyList())
 
     internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
         visitor.preVisitVilkårsgrunnlagHistorikk()
@@ -113,8 +110,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal constructor(other: Innslag?, elementer: List<VilkårsgrunnlagElement>) : this(other?.vilkårsgrunnlag?.toMap()?: emptyMap()) {
             elementer.forEach { it.add(this) }
         }
-
-        internal fun faktaavklarteInntekter() = FaktaavklarteInntekter(vilkårsgrunnlag.map { it.value.faktaavklarteInntekter() })
 
         internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
             visitor.preVisitInnslag(this, id, opprettet)

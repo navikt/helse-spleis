@@ -32,7 +32,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
 
@@ -194,11 +194,7 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertEquals(
-                """Arbeidsgiver a2 mangler i sykepengegrunnlaget ved utbetaling av 2018-01-31. 
-                Arbeidsgiveren må være i sykepengegrunnlaget for å legge til utbetalingsopplysninger.""",
-                assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode) }.message
-            )
+            assertDoesNotThrow { håndterYtelser(1.vedtaksperiode) }
         }
     }
 

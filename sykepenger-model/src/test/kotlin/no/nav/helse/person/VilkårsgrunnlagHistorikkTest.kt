@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
@@ -117,7 +116,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `setter inntekt på økonomi`() {
         val inntekt = 21000.månedlig
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+        val grunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
@@ -125,32 +124,9 @@ internal class VilkårsgrunnlagHistorikkTest {
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
-        ))
-        val økonomi: Økonomi = historikk.faktavklarteInntekter().medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
+        )
+        val økonomi: Økonomi = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
-    }
-
-    @Test
-    fun `setter inntekt hvis finnes`() {
-        val inntekt = 21000.månedlig
-        val skjæringstidspunkt = 2.januar
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR, skjæringstidspunkt, skjæringstidspunkt),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ))
-        historikk.faktavklarteInntekter().medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver).also { økonomi ->
-            assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
-            assertEquals(INGEN, økonomi.inspektør.dekningsgrunnlag)
-        }
-        historikk.faktavklarteInntekter().medInntekt(ORGNR, 3.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver).also { økonomi ->
-            assertNotNull(økonomi)
-            assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
-        }
     }
 
     @Test
@@ -165,32 +141,14 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        historikk.lagre(grunnlagsdata)
-        val økonomi: Økonomi = historikk.faktavklarteInntekter().medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
+        val økonomi: Økonomi = grunnlagsdata.faktaavklarteInntekter().forArbeidsgiver(ORGNR)!!.medInntektHvisFinnes(1.januar, Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
-    }
-
-    @Test
-    fun `feiler dersom inntekt ikke finnes`() {
-        val inntekt = 21000.månedlig
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ))
-        val resultat = historikk.faktavklarteInntekter().medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
-        assertEquals(INGEN, resultat.inspektør.aktuellDagsinntekt)
-        assertEquals(INGEN, resultat.inspektør.dekningsgrunnlag)
     }
 
     @Test
     fun `feiler dersom inntekt ikke finnes for orgnr`() {
         val inntekt = 21000.månedlig
-        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+        val grunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag("et annet orgnr"),
             opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
@@ -198,10 +156,9 @@ internal class VilkårsgrunnlagHistorikkTest {
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
-        ))
-        val resultat = historikk.faktavklarteInntekter().medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
-        assertEquals(INGEN, resultat.inspektør.aktuellDagsinntekt)
-        assertEquals(INGEN, resultat.inspektør.dekningsgrunnlag)
+        )
+        val resultat = grunnlag.faktaavklarteInntekter().forArbeidsgiver(ORGNR)?.medInntektHvisFinnes(31.desember(2017), Økonomi.ikkeBetalt(), NormalArbeidstaker, NullObserver)
+        assertNull(resultat)
     }
 
     @Test

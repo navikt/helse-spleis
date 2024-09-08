@@ -80,7 +80,6 @@ import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilderBuilder
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -89,16 +88,16 @@ import kotlin.math.roundToInt
 class Person private constructor(
     private var aktørId: String,
     private var personidentifikator: Personidentifikator,
-    private var alder: Alder,
-    internal val arbeidsgivere: MutableList<Arbeidsgiver>,
+    internal var alder: Alder,
+    private val arbeidsgivere: MutableList<Arbeidsgiver>,
     private val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     internal val infotrygdhistorikk: Infotrygdhistorikk,
     internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val jurist: MaskinellJurist,
     private val tidligereBehandlinger: List<Person> = emptyList(),
-    private val regler: ArbeidsgiverRegler = NormalArbeidstaker,
-    private val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering()
+    internal val regler: ArbeidsgiverRegler = NormalArbeidstaker,
+    internal val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering()
 ) : Aktivitetskontekst {
     companion object {
         fun gjenopprett(
@@ -352,21 +351,7 @@ class Person private constructor(
 
     fun håndter(ytelser: Ytelser) {
         registrer(ytelser, "Behandler historiske utbetalinger og inntekter")
-        val arbeidsgiverUtbetalinger = ArbeidsgiverUtbetalinger(
-            regler = regler,
-            alder = alder,
-            arbeidsgivere = { beregningsperiode: Periode, subsumsjonslogg: Subsumsjonslogg, hendelse: IAktivitetslogg ->
-                val faktaavklarteInntekter = vilkårsgrunnlagHistorikk.faktavklarteInntekter()
-                val infotrygdUtbetaltePerioder = infotrygdhistorikk.betaltePerioder()
-                arbeidsgivere.associateWith {
-                    it.beregnUtbetalingstidslinje(hendelse, beregningsperiode, regler, faktaavklarteInntekter, infotrygdUtbetaltePerioder, subsumsjonslogg)
-                }
-            },
-            infotrygdUtbetalingstidslinje = infotrygdhistorikk.utbetalingstidslinje(),
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            minimumSykdomsgradsvurdering = minimumSykdomsgradsvurdering
-        )
-        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
+        finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk)
         håndterGjenoppta(ytelser)
     }
 

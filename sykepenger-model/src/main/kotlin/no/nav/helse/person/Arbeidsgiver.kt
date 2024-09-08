@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.Periode.Companion.trim
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -77,18 +76,12 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
-import no.nav.helse.utbetalingslinjer.Utbetalingsak
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
-import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderNy
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class Arbeidsgiver private constructor(
@@ -320,9 +313,8 @@ internal class Arbeidsgiver private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        periode: Periode,
-        arbeidsgiverperiode: List<Periode>
-    ) = lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, arbeidsgiverperiode, Utbetalingtype.UTBETALING)
+        periode: Periode
+    ) = lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.UTBETALING)
 
     internal fun lagRevurdering(
         aktivitetslogg: IAktivitetslogg,
@@ -331,10 +323,9 @@ internal class Arbeidsgiver private constructor(
         maksdato: LocalDate,
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
-        periode: Periode,
-        arbeidsgiverperiode: List<Periode>
+        periode: Periode
     ): Utbetaling {
-        return lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, arbeidsgiverperiode, Utbetalingtype.REVURDERING)
+        return lagNyUtbetaling(aktivitetslogg, fødselsnummer, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, periode, Utbetalingtype.REVURDERING)
     }
 
     private fun lagNyUtbetaling(
@@ -345,7 +336,6 @@ internal class Arbeidsgiver private constructor(
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode,
-        arbeidsgiverperiode: List<Periode>,
         type: Utbetalingtype
     ): Utbetaling {
         val utbetalingsaker = UtbetalingsakerBuilder(
@@ -488,11 +478,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(
         ytelser: Ytelser,
-        infotrygdhistorikk: Infotrygdhistorikk,
-        arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
+        infotrygdhistorikk: Infotrygdhistorikk
     ) {
         ytelser.kontekst(this)
-        håndter(ytelser) { håndter(ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
+        håndter(ytelser) { håndter(ytelser, infotrygdhistorikk) }
     }
 
     internal fun håndter(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
@@ -871,34 +860,6 @@ internal class Arbeidsgiver private constructor(
     private fun finnAlternativInntektsdato(inntektsdato: LocalDate, skjæringstidspunkt: LocalDate): LocalDate? {
         if (inntektsdato <= skjæringstidspunkt) return null
         return sykdomstidslinje().sisteSkjæringstidspunkt(inntektsdato.somPeriode())?.takeUnless { it == inntektsdato }
-    }
-
-    internal fun beregnUtbetalingstidslinje(
-        hendelse: IAktivitetslogg,
-        periode: Periode,
-        regler: ArbeidsgiverRegler,
-        faktaavklarteInntekter: FaktaavklarteInntekter,
-        utbetaltePerioderInfotrygd: List<Periode>,
-        subsumsjonslogg: Subsumsjonslogg
-    ): Utbetalingstidslinje {
-        val ghosttidslinje = faktaavklarteInntekter.ghosttidslinje(organisasjonsnummer, periode.endInclusive)
-        val sykdomstidslinje = ghosttidslinje.merge(sykdomstidslinje(), replace)
-        if (sykdomstidslinje.count() == 0) return Utbetalingstidslinje()
-
-        val arbeidsgiverperioder = vedtaksperioder.arbeidsgiverperioder()
-
-        val builder = UtbetalingstidslinjeBuilderNy(
-            faktaavklarteInntekter = faktaavklarteInntekter,
-            hendelse = hendelse,
-            regler = regler,
-            subsumsjonslogg = subsumsjonslogg,
-            organisasjonsnummer = organisasjonsnummer,
-            beregningsperiode = periode,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            utbetaltePerioderInfotrygd = utbetaltePerioderInfotrygd
-        )
-        sykdomstidslinje.accept(builder)
-        return builder.result()
     }
 
     private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {

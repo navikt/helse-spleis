@@ -5,13 +5,13 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender
@@ -124,13 +124,21 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
+import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
+import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
+import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
+import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 internal class Vedtaksperiode private constructor(
     private val person: Person,
@@ -359,12 +367,11 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(
         ytelser: Ytelser,
-        infotrygdhistorikk: Infotrygdhistorikk,
-        arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
+        infotrygdhistorikk: Infotrygdhistorikk
     ) {
         if (!ytelser.erRelevant(id)) return
         kontekst(ytelser)
-        tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger)
+        tilstand.håndter(person, arbeidsgiver, this, ytelser, infotrygdhistorikk)
     }
 
     internal fun håndter(utbetalingsavgjørelse: Utbetalingsavgjørelse) {
@@ -1073,8 +1080,29 @@ internal class Vedtaksperiode private constructor(
         return agp.periode(sisteTomKlarTilBehandling)
     }
 
-    private fun beregnUtbetalinger(hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
-        val beregningsperiode = beregningsperiode()
+    private fun utbetalingstidslinje() = behandlinger.utbetalingstidslinje()
+    private fun lagUtbetalingstidslinje(inntekt: ArbeidsgiverFaktaavklartInntekt?): Utbetalingstidslinje {
+        /** krever inntekt for vedtaksperioder med samme skjæringstidspunkt som det som beregnes, tillater manglende for AUU'er */
+        val inntekt = inntekt
+            ?: defaultinntektForAUU() // todo: spleis må legge inn en IkkeRapportert-inntekt for alle auuer som finnes på skjæringstidspunktet når vi vilkårsprøver
+            ?: error("Det er en vedtaksperiode som ikke inngår i SP: $organisasjonsnummer - $id - $periode." +
+                    "Burde ikke arbeidsgiveren være kjent i sykepengegrunnlaget, enten i form av en skatteinntekt eller en tilkommet?")
+
+        return behandlinger.lagUtbetalingstidslinje(inntekt, jurist)
+    }
+
+    private fun defaultinntektForAUU(): ArbeidsgiverFaktaavklartInntekt? {
+        if (forventerInntekt()) return null
+        return ArbeidsgiverFaktaavklartInntekt(
+            skjæringstidspunkt = skjæringstidspunkt,
+            `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
+            fastsattÅrsinntekt = Inntekt.INGEN,
+            gjelder = skjæringstidspunkt til LocalDate.MAX,
+            refusjonsopplysninger = Refusjonsopplysninger()
+        )
+    }
+
+    private fun beregnUtbetalinger(hendelse: IAktivitetslogg): Boolean {
         val utbetalingsperioder = utbetalingsperioder()
 
         check(utbetalingsperioder.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
@@ -1084,11 +1112,12 @@ internal class Vedtaksperiode private constructor(
             "krever vilkårsgrunnlag for ${skjæringstidspunkt}, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
         }
 
+        val (maksdatofilter, beregnetTidslinjePerArbeidsgiver) = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(hendelse, grunnlagsdata)
+
         try {
-            val beregningsperiodePerArbeidsgiver = utbetalingsperioder.groupBy { it.arbeidsgiver }.mapValues { (_, perioder) -> perioder.map { it.periode }.periode()!! }
-            val beregnedeArbeidsgivere = arbeidsgiverUtbetalinger.beregn(beregningsperiode, beregningsperiodePerArbeidsgiver, this.periode, hendelse, this.jurist)
             utbetalingsperioder.forEach { other ->
-                val (utbetalingstidslinje, maksdatoSituasjon) = beregnedeArbeidsgivere.getValue(other.arbeidsgiver)
+                val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.organisasjonsnummer)
+                val maksdatoSituasjon = maksdatofilter.maksimumSykepenger(other.periode, other.jurist)
                 other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksdatoSituasjon, grunnlagsdata)
             }
             return true
@@ -1096,6 +1125,63 @@ internal class Vedtaksperiode private constructor(
             err.logg(hendelse)
         }
         return false
+    }
+
+    private fun beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(hendelse: IAktivitetslogg, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {
+        val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(grunnlagsdata)
+        return filtrerUtbetalingstidslinjer(hendelse, uberegnetTidslinjePerArbeidsgiver)
+    }
+
+    private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
+        val vedtaksperiodene = person
+            .vedtaksperioder(OVERLAPPER_MED(this))
+            .filter { it.skjæringstidspunkt == skjæringstidspunkt }
+            .groupBy { it.organisasjonsnummer }
+
+        val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
+        val utbetalingstidslinjer = vedtaksperiodene.mapValues { (arbeidsgiver, vedtaksperioder) ->
+            val inntektForArbeidsgiver = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
+            vedtaksperioder.map { it.lagUtbetalingstidslinje(inntektForArbeidsgiver) }
+        }
+        // nå vi må lage en ghost-tidslinje per arbeidsgiver for de som eksisterer i sykepengegrunnlaget.
+        // resultatet er én utbetalingstidslinje per arbeidsgiver som garantert dekker perioden ${vedtaksperiode.periode}, dog kan
+        // andre arbeidsgivere dekke litt før/litt etter, avhengig av perioden til vedtaksperiodene som overlapper
+        return faktaavklarteInntekter.ghosttidslinjer(utbetalingstidslinjer)
+    }
+
+    private fun filtrerUtbetalingstidslinjer(hendelse: IAktivitetslogg, uberegnetTidslinjePerArbeidsgiver: Map<String, Utbetalingstidslinje>): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {
+        // grunnlaget for maksdatoberegning er alt som har skjedd før, frem til og med vedtaksperioden som
+        // beregnes
+        val historisktidslinjePerArbeidsgiver = person.vedtaksperioder { it.periode.endInclusive < periode.start }
+            .groupBy { it.organisasjonsnummer }
+            .mapValues { it.value.map { it.utbetalingstidslinje() }.reduce(Utbetalingstidslinje::plus) }
+
+        val historisktidslinje = historisktidslinjePerArbeidsgiver.values
+            .fold(person.infotrygdhistorikk.utbetalingstidslinje(), Utbetalingstidslinje::plus)
+
+        val maksdatofilter = MaksimumSykepengedagerfilter(person.alder, person.regler, historisktidslinje)
+        val filtere = listOf(
+            Sykdomsgradfilter(person.minimumSykdomsgradsvurdering),
+            AvvisDagerEtterDødsdatofilter(person.alder),
+            AvvisInngangsvilkårfilter(person.vilkårsgrunnlagHistorikk),
+            maksdatofilter,
+            MaksimumUtbetalingFilter()
+        )
+
+        val kjørFilter = fun(tidslinjer: Map<String, Utbetalingstidslinje>, filter: UtbetalingstidslinjerFilter): Map<String, Utbetalingstidslinje> {
+            val input = tidslinjer.entries.map { (key, value) -> key to value }
+            val result = filter.filter(input.map { (_, tidslinje) -> tidslinje }, periode, hendelse, jurist)
+            return input.zip(result) { (arbeidsgiver, _), utbetalingstidslinje ->
+                arbeidsgiver to utbetalingstidslinje
+            }.toMap()
+        }
+        val beregnetTidslinjePerArbeidsgiver = filtere.fold(uberegnetTidslinjePerArbeidsgiver) { tidslinjer, filter ->
+            kjørFilter(tidslinjer, filter)
+        }
+
+        return maksdatofilter to beregnetTidslinjePerArbeidsgiver.mapValues { (arbeidsgiver, resultat) ->
+            listOfNotNull(historisktidslinjePerArbeidsgiver[arbeidsgiver], resultat).reduce(Utbetalingstidslinje::plus)
+        }
     }
 
     private fun håndterOverstyringIgangsattRevurdering(revurdering: Revurderingseventyr) {
@@ -1248,8 +1334,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
-            infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
             ytelser.info("Forventet ikke ytelsehistorikk i %s".format(type.name))
         }
@@ -1291,7 +1376,7 @@ internal class Vedtaksperiode private constructor(
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr)
 
-        fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
+        fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
             ytelser.info("Etter å ha oppdatert sykdomshistorikken fra ytelser står vi nå i ${type.name}. Avventer beregning av utbetalinger.")
         }
 
@@ -1550,17 +1635,16 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
-            infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
             håndterRevurdering(ytelser) {
                 vedtaksperiode.oppdaterHistorikk(ytelser, infotrygdhistorikk)
-                vedtaksperiode.tilstand.beregnUtbetalinger(vedtaksperiode, ytelser, arbeidsgiverUtbetalinger)
+                vedtaksperiode.tilstand.beregnUtbetalinger(vedtaksperiode, ytelser)
             }
         }
 
-        override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
-            if (!vedtaksperiode.beregnUtbetalinger(ytelser, arbeidsgiverUtbetalinger)) return
+        override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
+            if (!vedtaksperiode.beregnUtbetalinger(ytelser)) return
             vedtaksperiode.behandlinger.valider(ytelser, vedtaksperiode.erForlengelse())
             vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
         }
@@ -1957,18 +2041,17 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             ytelser: Ytelser,
-            infotrygdhistorikk: Infotrygdhistorikk,
-            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
+            infotrygdhistorikk: Infotrygdhistorikk
         ) {
             håndterFørstegangsbehandling(ytelser, vedtaksperiode) {
                 vedtaksperiode.oppdaterHistorikk(ytelser, infotrygdhistorikk)
                 if (ytelser.harFunksjonelleFeilEllerVerre()) return@håndterFørstegangsbehandling vedtaksperiode.forkast(ytelser)
-                vedtaksperiode.tilstand.beregnUtbetalinger(vedtaksperiode, ytelser, arbeidsgiverUtbetalinger)
+                vedtaksperiode.tilstand.beregnUtbetalinger(vedtaksperiode, ytelser)
             }
         }
 
-        override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
-            if (!vedtaksperiode.beregnUtbetalinger(ytelser, arbeidsgiverUtbetalinger)) return vedtaksperiode.forkast(ytelser)
+        override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
+            if (!vedtaksperiode.beregnUtbetalinger(ytelser)) return vedtaksperiode.forkast(ytelser)
             vedtaksperiode.behandlinger.valider(ytelser, vedtaksperiode.erForlengelse())
             if (ytelser.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(ytelser)
             vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning)
@@ -2288,10 +2371,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun forsøkÅLageUtbetalingstidslinje(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Utbetalingstidslinje {
-            val faktaavklarteInntekter = vedtaksperiode.person.vilkårsgrunnlagHistorikk.faktavklarteInntekter()
-            val infotrygdUtbetaltePerioder = vedtaksperiode.person.infotrygdhistorikk.betaltePerioder()
+            val faktaavklarteInntekter = vedtaksperiode.vilkårsgrunnlag?.faktaavklarteInntekter()?.forArbeidsgiver(vedtaksperiode.organisasjonsnummer)
             return try {
-                vedtaksperiode.arbeidsgiver.beregnUtbetalingstidslinje(hendelse, vedtaksperiode.periode, NormalArbeidstaker, faktaavklarteInntekter, infotrygdUtbetaltePerioder, Subsumsjonslogg.NullObserver)
+                vedtaksperiode.lagUtbetalingstidslinje(faktaavklarteInntekter)
             } catch (err: Exception) {
                 sikkerLogg.warn("klarte ikke lage utbetalingstidslinje for auu: ${err.message}, {}", kv("vedtaksperiodeId", vedtaksperiode.id), kv("aktørId", vedtaksperiode.aktørId), err)
                 Utbetalingstidslinje()

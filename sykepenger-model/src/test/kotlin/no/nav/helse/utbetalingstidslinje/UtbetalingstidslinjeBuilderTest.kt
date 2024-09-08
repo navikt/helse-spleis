@@ -1,22 +1,23 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.FiktivInntekt
 import no.nav.helse.testhelpers.K
 import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
@@ -32,10 +33,8 @@ import no.nav.helse.testhelpers.YOL
 import no.nav.helse.testhelpers.YP
 import no.nav.helse.testhelpers.YS
 import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.testhelpers.faktaavklarteInntekter
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ProblemdagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -224,7 +223,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie og permisjon med i arbeidsgiverperioden`() {
-        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }, { 6.S + 6.AIG + 6.S }, { 6.S + 6.YF + 6.S }, vedtaksperioder = listOf(1.januar til 18.januar)) {
+        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }, { 6.S + 6.AIG + 6.S }, { 6.S + 6.YF + 6.S }) {
             assertEquals(18, inspektør.size)
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(2, inspektør.navDagTeller)
@@ -235,7 +234,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie og permisjon fullfører arbeidsgiverperioden`() {
-        undersøkeLike({ 1.S + 15.F + 6.S }, { 1.S + 15.P + 6.S }, { 1.S + 15.AIG + 6.S }, { 1.S + 15.YF + 6.S }, vedtaksperioder = listOf(1.januar til 22.januar)) {
+        undersøkeLike({ 1.S + 15.F + 6.S }, { 1.S + 15.P + 6.S }, { 1.S + 15.AIG + 6.S }, { 1.S + 15.YF + 6.S }) {
             assertEquals(22, inspektør.size)
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(4, inspektør.navDagTeller)
@@ -247,7 +246,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie med sykmelding etter permisjon fullfører agp`() {
-        undersøke(1.S + 10.P + 6.F + 5.S, vedtaksperioder = listOf(1.januar til 22.januar))
+        undersøke(1.S + 10.P + 6.F + 5.S)
 
         assertEquals(22, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
@@ -271,7 +270,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `andre ytelser etter utbetaling`() {
-        undersøke(16.S + 15.YF, vedtaksperioder = listOf(1.januar til 31.januar))
+        undersøke(16.S + 15.YF)
         assertEquals(31, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(15, inspektør.avvistDagTeller)
@@ -281,7 +280,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `andre ytelser umiddelbart etter utbetaling teller ikke som opphold`() {
-        undersøke(16.S + 16.YF + 10.S, vedtaksperioder = listOf(1.januar til 31.januar, 1.februar til 11.februar))
+        undersøke(16.S + 16.YF + 10.S)
         assertEquals(42, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(16, inspektør.avvistDagTeller)
@@ -291,7 +290,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `andre ytelser umiddelbart etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
-        undersøke(16.S + 15.YF + 1.A + 10.S, vedtaksperioder = listOf(1.januar til 31.januar, 1.februar til 11.februar))
+        undersøke(16.S + 15.YF + 1.A + 10.S)
         assertEquals(42, inspektør.size)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(6, inspektør.navDagTeller)
@@ -497,7 +496,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie mellom egenmeldingsdager`() {
-        undersøkeLike({ 1.U + 14.F + 1.U + 10.S }, { 1.U + 14.AIG + 1.U + 10.S }, vedtaksperioder = listOf(1.januar til 26.januar)) {
+        undersøkeLike({ 1.U + 14.F + 1.U + 10.S }, { 1.U + 14.AIG + 1.U + 10.S }) {
             assertEquals(26, inspektør.size)
             assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(8, inspektør.navDagTeller)
@@ -593,7 +592,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `avviser andre ytelser med riktige begrunnelser`() {
-        undersøke(16.S + 1.YF + 1.YD + 1.YA + 1.YO + 1.YP + 1.YS + 1.YOL, vedtaksperioder = listOf(1.januar til 23.januar))
+        undersøke(16.S + 1.YF + 1.YD + 1.YA + 1.YO + 1.YP + 1.YS + 1.YOL)
         assertEquals(7, inspektør.avvistDagTeller)
         assertEquals(Begrunnelse.AndreYtelserForeldrepenger, inspektør.begrunnelse(17.januar).single())
         assertEquals(Begrunnelse.AndreYtelserDagpenger, inspektør.begrunnelse(18.januar).single())
@@ -615,13 +614,7 @@ internal class UtbetalingstidslinjeBuilderTest {
     private lateinit var utbetalingstidslinje: Utbetalingstidslinje
     private val perioder: MutableList<Arbeidsgiverperiode> = mutableListOf()
 
-    private val inntektsopplysningPerSkjæringstidspunkt = mapOf(
-        1.januar to listOf(FiktivInntekt("a1", 31000.månedlig)),
-        1.februar to listOf(FiktivInntekt("a1", 25000.månedlig)),
-        1.mars to listOf(FiktivInntekt("a1", 50000.månedlig))
-    ).faktaavklarteInntekter()
-
-    private fun undersøke(tidslinje: Sykdomstidslinje, vedtaksperioder: List<Periode> = emptyList(), infotrygdBetalteDager: List<Periode> = emptyList()) {
+    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList()) {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
 
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller, periodebuilder, Subsumsjonslogg.NullObserver)
@@ -632,26 +625,17 @@ internal class UtbetalingstidslinjeBuilderTest {
         val arbeidsgiverperioder = periodebuilder.result()
         perioder.addAll(arbeidsgiverperioder)
 
-        val vedtaksperioderMedArbeidsgiverperiode = if (vedtaksperioder.isNotEmpty()) {
-            vedtaksperioder.map {
-                val agp = arbeidsgiverperioder.finn(it)
-                ArbeidsgiverperiodeForVedtaksperiode(it, agp?.toList()?.grupperSammenhengendePerioder() ?: emptyList())
-            }
-        } else {
-            arbeidsgiverperioder.map {
-                ArbeidsgiverperiodeForVedtaksperiode(LocalDate.EPOCH.somPeriode(), it.toList().grupperSammenhengendePerioder())
-            }
-        }
-
-        val builder = UtbetalingstidslinjeBuilderNy(
-            faktaavklarteInntekter = inntektsopplysningPerSkjæringstidspunkt,
-            hendelse = Aktivitetslogg(),
-            organisasjonsnummer = "a1",
+        val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
+            faktaavklarteInntekter = ArbeidsgiverFaktaavklartInntekt(
+                skjæringstidspunkt = 1.januar,
+                `6G` = Grunnbeløp.`6G`.beløp(1.januar),
+                fastsattÅrsinntekt = 31000.månedlig,
+                gjelder = 1.januar til LocalDate.MAX,
+                refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 31000.månedlig).refusjonsopplysninger
+            ),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
-            beregningsperiode = tidslinje.periode() ?: LocalDate.MIN.somPeriode(),
-            arbeidsgiverperioder = vedtaksperioderMedArbeidsgiverperiode,
-            utbetaltePerioderInfotrygd = infotrygdBetalteDager
+            arbeidsgiverperiode = arbeidsgiverperioder.flatten().grupperSammenhengendePerioder()
         )
 
         tidslinje.accept(builder)
@@ -661,9 +645,9 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     // undersøker forskjellige tidslinjer som skal ha samme funksjonelle betydning
-    private fun undersøkeLike(vararg tidslinje: () -> Sykdomstidslinje, vedtaksperioder: List<Periode> = emptyList(), assertBlock: () -> Unit) {
+    private fun undersøkeLike(vararg tidslinje: () -> Sykdomstidslinje, assertBlock: () -> Unit) {
         tidslinje.forEach {
-            undersøke(resetSeed(tidslinjegenerator = it), vedtaksperioder = vedtaksperioder)
+            undersøke(resetSeed(tidslinjegenerator = it))
             assertBlock()
             reset()
         }
