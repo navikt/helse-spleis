@@ -1726,6 +1726,9 @@ internal class Vedtaksperiode private constructor(
     internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            check(!vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) {
+                "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
+            }
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
@@ -1800,13 +1803,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>
         ): Tilstand {
-            check(!vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) {
-                "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}"
-            }
-
             if (!vedtaksperiode.forventerInntekt()) return ForventerIkkeInntekt
-            if (arbeidsgivere.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
             if (vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag()) return ManglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
+            if (vedtaksperiode.måInnhenteInntektEllerRefusjon(hendelse)) return TrengerInntektsmeldingLæll
+            if (arbeidsgivere.avventerSøknad(vedtaksperiode.periode)) return AvventerTidligereEllerOverlappendeSøknad
 
             val førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver = arbeidsgivere.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(vedtaksperiode)
             if (førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver != null) return TrengerInntektsmeldingAnnenArbeidsgiver(førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver, arbeidsgivere.toList())
@@ -1818,6 +1818,12 @@ internal class Vedtaksperiode private constructor(
             fun venteårsak(): Venteårsak? = null
             fun venterPå(): Vedtaksperiode? = null
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse)
+        }
+        private data object TrengerInntektsmeldingLæll: Tilstand {
+            override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
+                hendelse.info("Perioden hadde tidligere nødvendig inntekt og refusjon, men endringer har gjort at hen trenger inntektsmelding allikevel.")
+                vedtaksperiode.tilstand(hendelse, AvventerInntektsmelding)
+            }
         }
         private data object AvventerTidligereEllerOverlappendeSøknad: Tilstand {
             override fun venteårsak() = SØKNAD.utenBegrunnelse

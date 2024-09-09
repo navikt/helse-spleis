@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
@@ -26,6 +27,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
@@ -39,7 +41,9 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_8
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -51,6 +55,7 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -73,6 +78,35 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class YtelserE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Foreldrepenger påvirker skjæringstidspunkt for senere perioder`() {
+        nyttVedtak(januar)
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT*1.1)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(1.februar, 28.februar))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Permisjon(1.mars, 1.mars))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+        nullstillTilstandsendringer()
+        håndterYtelser(2.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(1.februar til 1.mars, 100)))
+        assertEquals(2.mars, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+        assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
+    }
 
     @Test
     fun `periode med bare andre ytelser etter langt gap kobler seg på feil utbetaling`() {
