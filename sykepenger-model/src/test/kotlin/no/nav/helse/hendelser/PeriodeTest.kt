@@ -15,6 +15,7 @@ import no.nav.helse.hendelser.Periode.Companion.omsluttendePeriode
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.Periode.Companion.periodeRettFør
 import no.nav.helse.hendelser.Periode.Companion.slutterEtter
+import no.nav.helse.hendelser.Periode.Companion.trim
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
@@ -335,6 +336,20 @@ internal class PeriodeTest {
         assertEquals(10.januar til 11.januar, dager.periodeRettFør(12.januar))
         assertEquals(10.januar til 12.januar, dager.periodeRettFør(15.januar))
         assertEquals(1.januar til 31.januar, (1.januar til 31.januar).periodeRettFør(1.februar))
+    }
+
+    @Test
+    fun `liste av perioder trimmer annen`() {
+        val periode = 5.januar til 31.januar
+        val result = listOf(
+            1.januar til 5.januar,
+            10.januar til 14.januar,
+            28.januar til 29.januar
+        ).trim(periode)
+        assertEquals(
+            listOf(6.januar til 9.januar, 15.januar til 27.januar, 30.januar til 31.januar),
+            result
+        )
     }
 
     @Test

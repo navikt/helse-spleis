@@ -250,6 +250,8 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertPeriode(17.januar til 31.januar, 1080.daglig)
+
             // ny periode med nytt skjæringstidspunlt
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(mars)
@@ -261,7 +263,6 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             håndterUtbetalt()
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertPeriode(17.januar til 31.januar, 1080.daglig)
             assertPeriode(17.mars til 31.mars, 1080.daglig)
             håndterOverstyrInntekt(
                 inntekt = 15000.månedlig,
@@ -284,7 +285,6 @@ internal class RevurderGhostInntektTest: AbstractDslTest() {
             håndterUtbetalt()
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            assertPeriode(17.januar til 31.januar, 1425.daglig)
             assertPeriode(17.mars til 31.mars, 1080.daglig)
             (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
                 val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør

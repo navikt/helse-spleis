@@ -241,36 +241,31 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertEquals(4, inspektør.utbetalinger.size)
+        assertEquals(3, inspektør.utbetalinger.size)
         val januarutbetaling = inspektør.utbetaling(0).inspektør
         val marsutbetaling = inspektør.utbetaling(1).inspektør
-        val annulleringAvMars = inspektør.utbetaling(2).inspektør
-        val revurderingAvMars = inspektør.utbetaling(3).inspektør
+        val revurderingAvMars = inspektør.utbetaling(2).inspektør
 
-        assertEquals(12, observatør.utbetaltEndretEventer.size)
+        assertEquals(9, observatør.utbetaltEndretEventer.size)
         assertUtbetalingtilstander(januarutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
         assertUtbetalingtilstander(marsutbetaling.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
-        assertUtbetalingtilstander(annulleringAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, ANNULLERT)
-        assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, GODKJENT, GODKJENT_UTEN_UTBETALING)
+        assertUtbetalingtilstander(revurderingAvMars.utbetalingId, NY, IKKE_UTBETALT, OVERFØRT, UTBETALT)
 
-        assertEquals(marsutbetaling.korrelasjonsId, annulleringAvMars.korrelasjonsId)
-        assertEquals(januarutbetaling.korrelasjonsId, revurderingAvMars.korrelasjonsId)
+        assertEquals(revurderingAvMars.korrelasjonsId, marsutbetaling.korrelasjonsId)
+        assertNotEquals(januarutbetaling.korrelasjonsId, marsutbetaling.korrelasjonsId)
 
-        assertEquals(ANNULLERT, annulleringAvMars.tilstand)
-        assertEquals(GODKJENT_UTEN_UTBETALING, revurderingAvMars.tilstand)
+        assertEquals(UTBETALT, revurderingAvMars.tilstand)
 
-        assertEquals(1, annulleringAvMars.arbeidsgiverOppdrag.size)
-        assertEquals(0, annulleringAvMars.personOppdrag.size)
-        annulleringAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+        assertEquals(1, revurderingAvMars.arbeidsgiverOppdrag.size)
+        assertEquals(0, revurderingAvMars.personOppdrag.size)
+        revurderingAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(19.mars, linje.fom)
             assertEquals(26.mars, linje.tom)
             assertEquals(19.mars, linje.datoStatusFom)
             assertEquals("OPPH", linje.statuskode)
         }
 
-        assertEquals(Endringskode.UEND, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
-        assertEquals(1, revurderingAvMars.arbeidsgiverOppdrag.size)
-        assertEquals(0, revurderingAvMars.personOppdrag.size)
+        assertEquals(Endringskode.ENDR, revurderingAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
     }
 
     @Test
@@ -396,8 +391,8 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
             assertEquals(Endringskode.ENDR, revurderingaugust.arbeidsgiverOppdrag.inspektør.endringskode)
             revurderingaugust.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(17.juni, linje.fom)
-                assertEquals(30.juni, linje.tom)
-                assertEquals(Endringskode.ENDR, linje.endringskode)
+                assertEquals(29.juni, linje.tom)
+                assertEquals(Endringskode.UEND, linje.endringskode)
             }
             revurderingaugust.arbeidsgiverOppdrag[1].inspektør.also { linje ->
                 assertEquals(1.august, linje.fom)

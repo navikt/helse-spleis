@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.dto.EndringskodeDto
 import no.nav.helse.dto.KlassekodeDto
 import no.nav.helse.dto.UtbetalingTilstandDto
@@ -11,8 +10,8 @@ import no.nav.helse.dto.UtbetalingVurderingDto
 import no.nav.helse.dto.UtbetalingtypeDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
@@ -21,6 +20,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.valider
 import no.nav.helse.hendelser.utbetaling.vurdering
+import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -32,11 +32,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_9
-import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
-import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.valider
-import no.nav.helse.utbetalingslinjer.Utbetalingkladd.Companion.finnKladd
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -257,6 +254,51 @@ class Utbetaling private constructor(
         tilstand.entering(this, hendelse)
     }
 
+    private fun nyUtbetaling(
+        aktivitetslogg: IAktivitetslogg,
+        type: Utbetalingtype,
+        utbetalingsaken: Utbetalingsak,
+        vedtaksperiode: Periode,
+        kladd: Utbetalingkladd,
+        maksdato: LocalDate,
+        forbrukteSykedager: Int,
+        gjenståendeSykedager: Int,
+        annulleringer: List<Utbetaling>
+    ): Utbetaling {
+        val nyttArbeidsgiveroppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, utbetalingsaken, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
+        val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, utbetalingsaken, this.personOppdrag, kladd.personoppdrag)
+
+        val nyereUtbetalingstidslinje = this.utbetalingstidslinje.subset(kladd.utbetalingsperiode)
+        val tidligereUtbetalingstidslinje = nyereUtbetalingstidslinje.kutt(vedtaksperiode.start.forrigeDag)
+        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + kladd.utbetalingstidslinje + nyereUtbetalingstidslinje.subset(vedtaksperiode.endInclusive.nesteDag til LocalDate.MAX)
+
+        return Utbetaling(
+            korrelerendeUtbetaling = this,
+            periode = kladd.utbetalingsperiode,
+            utbetalingstidslinje = nyUtbetalingstidslinje,
+            arbeidsgiverOppdrag = nyttArbeidsgiveroppdrag,
+            personOppdrag = nyttPersonoppdrag,
+            type = type,
+            maksdato = maksdato,
+            forbrukteSykedager = forbrukteSykedager,
+            gjenståendeSykedager = gjenståendeSykedager,
+            annulleringer = annulleringer
+        )
+    }
+
+    private fun byggViderePåOppdrag(aktivitetslogg: IAktivitetslogg, vedtaksperiode: Periode, utbetalingsaken: Utbetalingsak, historiskOppdrag: Oppdrag, nyttOppdrag: Oppdrag): Oppdrag {
+        /* ta bort eventuell hale som er avkortet */
+        val linjerFremTilOgMedUtbetalingsaken = historiskOppdrag.begrensTil(utbetalingsaken.omsluttendePeriode.endInclusive)
+
+        /* linjer forut før perioden */
+        val linjerFørVedtaksperioden = linjerFremTilOgMedUtbetalingsaken.begrensTil(vedtaksperiode.start.forrigeDag)
+        val linjerEtterVedtaksperioden = linjerFremTilOgMedUtbetalingsaken.begrensFra(vedtaksperiode.endInclusive.nesteDag)
+
+        /* legg inn endringer fra perioden og sy sammen */
+        val nyeArbeidsgiverlinjer = linjerFørVedtaksperioden + nyttOppdrag + linjerEtterVedtaksperioden
+
+        return Oppdrag(historiskOppdrag.mottaker, historiskOppdrag.fagområde, nyeArbeidsgiverlinjer).minus(historiskOppdrag, aktivitetslogg)
+    }
 
     companion object {
 
@@ -271,49 +313,48 @@ class Utbetaling private constructor(
             organisasjonsnummer: String,
             utbetalingstidslinje: Utbetalingstidslinje,
             periode: Periode,
-            arbeidsgiverperiode: List<Periode>,
+            utbetalingsaker: List<Utbetalingsak>,
             aktivitetslogg: IAktivitetslogg,
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
             type: Utbetalingtype = UTBETALING
         ): Pair<Utbetaling, List<Utbetaling>> {
-            val bb = UtbetalingkladderBuilder(utbetalingstidslinje, organisasjonsnummer, fødselsnummer)
-            val oppdragene = bb.build()
+            val utbetalingsaken = utbetalingsaker.first { periode in it.vedtaksperioder }
+            val utbetalingsperiode = periode.oppdaterFom(utbetalingsaken.omsluttendePeriode)
 
-            val overlappsperiode = arbeidsgiverperiode.periode()?.let { agp ->
-                periode.subset(agp.start til LocalDate.MAX)
-            } ?: periode
+            val vedtaksperiodekladd = UtbetalingkladdBuilder(utbetalingsperiode, utbetalingstidslinje.subset(periode), organisasjonsnummer, fødselsnummer).build()
 
-            val kladdene = oppdragene.finnKladd(overlappsperiode)
-            val kladden = kladdene.firstOrNull() ?: Utbetalingkladd(
-                periode = periode,
-                arbeidsgiveroppdrag = Oppdrag(organisasjonsnummer, SykepengerRefusjon),
-                personoppdrag = Oppdrag(fødselsnummer, Sykepenger)
-            )
-            if (kladdene.size > 1) {
-                sikkerlogg.error("Vedtaksperioden $periode brytes opp i flere utbetalinger, mest sannsynlig en overlappende Infotrygd-utbetaling",
-                    keyValue("fødselsnummer", fødselsnummer),
-                    keyValue("organisasjonsnummer", organisasjonsnummer)
-                )
-            }
-
-            val forrigeUtbetalte = kladden.forrigeUtbetalte(utbetalinger, periode)
+            val forrigeUtbetalte = utbetalinger.aktive(utbetalingsaken.omsluttendePeriode)
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull { it.harOppdragMedUtbetalinger() } ?: forrigeUtbetalte.firstOrNull()
+            val annulleringer = forrigeUtbetalte
+                .filterNot { it === korrelerendeUtbetaling }
+                .mapNotNull { it.opphør(aktivitetslogg) }
 
-            val nyUtbetaling = if (korrelerendeUtbetaling == null) {
-                kladden.begrensTil(periode)
-            } else {
-                if (kladden.opphørerHale(korrelerendeUtbetaling.periode)) {
-                    kladden.begrensTil(aktivitetslogg, periode.oppdaterFom(korrelerendeUtbetaling.periode), korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
-                } else {
-                    kladden.begrensTilOgKopier(aktivitetslogg, periode.oppdaterFom(korrelerendeUtbetaling.periode), korrelerendeUtbetaling.arbeidsgiverOppdrag, korrelerendeUtbetaling.personOppdrag)
-                }
-            }
-
-            val annulleringer = forrigeUtbetalte.filterNot { it === korrelerendeUtbetaling }.mapNotNull { it.opphør(aktivitetslogg) }
             if (annulleringer.isNotEmpty()) aktivitetslogg.varsel(RV_UT_21)
-            val utbetalingen = nyUtbetaling.lagUtbetaling(type, korrelerendeUtbetaling, utbetalingstidslinje, maksdato, forbrukteSykedager, gjenståendeSykedager, annulleringer)
+
+            val utbetalingen = korrelerendeUtbetaling?.nyUtbetaling(
+                aktivitetslogg = aktivitetslogg,
+                type = type,
+                utbetalingsaken = utbetalingsaken,
+                vedtaksperiode = periode,
+                kladd = vedtaksperiodekladd,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
+                annulleringer = annulleringer
+            ) ?: Utbetaling(
+                korrelerendeUtbetaling = null,
+                periode = vedtaksperiodekladd.utbetalingsperiode,
+                utbetalingstidslinje = utbetalingstidslinje.subset(vedtaksperiodekladd.utbetalingsperiode),
+                arbeidsgiverOppdrag = vedtaksperiodekladd.arbeidsgiveroppdrag,
+                personOppdrag = vedtaksperiodekladd.personoppdrag,
+                type = type,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
+                annulleringer = annulleringer
+            )
             listOf(utbetalingen.arbeidsgiverOppdrag, utbetalingen.personOppdrag).valider(aktivitetslogg)
             return utbetalingen to annulleringer
         }

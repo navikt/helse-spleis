@@ -164,9 +164,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyPeriode(27.januar til 28.januar)
         håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
 
         val andreUtbetaling = inspektør.utbetaling(1).inspektør
@@ -178,11 +176,11 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         val arbeidsgiverOppdrag = outOfOrderUtbetaling.arbeidsgiverOppdrag
         assertEquals(1, arbeidsgiverOppdrag.size)
         arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(NY, linje.endringskode)
+            assertEquals(UEND, linje.endringskode)
             assertEquals(17.januar, linje.fom)
             assertEquals(9.februar, linje.tom)
-            assertEquals(3, linje.delytelseId)
-            assertEquals(2, linje.refDelytelseId)
+            assertEquals(1, linje.delytelseId)
+            assertNull(linje.refDelytelseId)
             assertNull(linje.datoStatusFom)
         }
         assertEquals(1, revurderingutbetaling.arbeidsgiverOppdrag.size)
@@ -191,14 +189,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             assertEquals(UEND, linje.endringskode)
             assertEquals(17.januar, linje.fom)
             assertEquals(9.februar, linje.tom)
-            assertEquals(3, linje.delytelseId)
-            assertEquals(2, linje.refDelytelseId)
+            assertEquals(1, linje.delytelseId)
+            assertNull(linje.refDelytelseId)
             assertNull(linje.datoStatusFom)
         }
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
     }
 
     @Test

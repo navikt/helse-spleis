@@ -95,7 +95,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar til 28.januar)
         nyttVedtak(3.februar til 28.februar)
         forlengVedtak(mars)
-
+        val marsutbetaling = inspektør.utbetaling(2).inspektør
         håndterSykmelding(Sykmeldingsperiode(29.januar, 25.februar))
         håndterSøknad(Sykdom(29.januar, 25.februar, 100.prosent))
 
@@ -105,17 +105,24 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar, 2.februar, 100.prosent, INNTEKT))
         forlengVedtak(april)
         assertEquals(4, inspektør.utbetalinger.size)
-        val sisteUtbetaling = inspektør.utbetalinger.last()
-        assertEquals(2, sisteUtbetaling.inspektør.arbeidsgiverOppdrag.size)
 
-        val førsteLinje = sisteUtbetaling.inspektør.arbeidsgiverOppdrag.first()
-        assertEquals(ENDR, førsteLinje.inspektør.endringskode)
-        assertEquals("OPPH", førsteLinje.inspektør.statuskode)
-        assertEquals(17.januar, førsteLinje.inspektør.datoStatusFom)
+        inspektør.utbetalinger.last().inspektør.also { utbetalinginspektør ->
+            assertEquals(utbetalinginspektør.korrelasjonsId, marsutbetaling.korrelasjonsId)
+            assertEquals(2, utbetalinginspektør.arbeidsgiverOppdrag.size)
 
-        val andreLinje = sisteUtbetaling.inspektør.arbeidsgiverOppdrag.last()
-        assertEquals(NY, andreLinje.inspektør.endringskode)
-        assertEquals(3.februar til 30.april, andreLinje.inspektør.periode)
+            utbetalinginspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(UEND, linje.endringskode)
+                assertEquals(17.januar til 26.januar, linje.periode)
+                assertEquals(100, linje.grad)
+                assertEquals(1431, linje.beløp)
+            }
+            utbetalinginspektør.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+                assertEquals(ENDR, linje.endringskode)
+                assertEquals(3.februar til 30.april, linje.periode)
+                assertEquals(100, linje.grad)
+                assertEquals(1431, linje.beløp)
+            }
+        }
     }
 
     @Test

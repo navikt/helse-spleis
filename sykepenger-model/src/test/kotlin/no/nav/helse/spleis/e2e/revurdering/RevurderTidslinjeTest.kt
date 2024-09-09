@@ -444,7 +444,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         håndterYtelser(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
@@ -585,51 +584,29 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje((3.mars til 20.mars).map { manuellSykedag(it) })
 
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
-        assertEquals(6, inspektør.utbetalinger.size)
+        assertEquals(4, inspektør.utbetalinger.size)
         val førsteUtbetaling = inspektør.utbetaling(0).inspektør
         val andreUtbetaling = inspektør.utbetaling(1).inspektør
-        val annulleringen = inspektør.utbetaling(2).inspektør
-        val revurderingen = inspektør.utbetaling(3).inspektør
+        val annulleringenAvMars = inspektør.utbetaling(2).inspektør
+        val revurderingenAvMars = inspektør.utbetaling(3).inspektør
 
-        val revurderingenAvJanuar = inspektør.utbetaling(4).inspektør
-        val revurderingenAvMars = inspektør.utbetaling(5).inspektør
-
-        assertEquals(andreUtbetaling.korrelasjonsId, annulleringen.korrelasjonsId)
+        assertEquals(andreUtbetaling.korrelasjonsId, annulleringenAvMars.korrelasjonsId)
         assertNotEquals(førsteUtbetaling.korrelasjonsId, andreUtbetaling.korrelasjonsId)
-        assertEquals(førsteUtbetaling.korrelasjonsId, revurderingen.korrelasjonsId)
+        assertEquals(andreUtbetaling.korrelasjonsId, revurderingenAvMars.korrelasjonsId)
 
-        assertEquals(revurderingenAvJanuar.korrelasjonsId, førsteUtbetaling.korrelasjonsId)
-        assertNotEquals(revurderingenAvMars.korrelasjonsId, revurderingen.korrelasjonsId)
-
-        assertEquals(1, annulleringen.arbeidsgiverOppdrag.size)
-        annulleringen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+        assertEquals(1, annulleringenAvMars.arbeidsgiverOppdrag.size)
+        annulleringenAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(19.mars, linje.fom)
             assertEquals(26.mars, linje.tom)
             assertEquals(19.mars, linje.datoStatusFom)
             assertEquals("OPPH", linje.statuskode)
         }
 
-        assertEquals(1, revurderingen.arbeidsgiverOppdrag.size)
-        assertEquals(Endringskode.UEND, revurderingen.arbeidsgiverOppdrag.inspektør.endringskode)
-        assertEquals(3.januar til 26.mars, revurderingen.periode)
-        revurderingen.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(19.januar til 26.januar, linje.fom til linje.tom)
-        }
-
-        assertEquals(1, revurderingenAvJanuar.arbeidsgiverOppdrag.size)
-        assertEquals(Endringskode.UEND, revurderingenAvJanuar.arbeidsgiverOppdrag.inspektør.endringskode)
-        assertEquals(3.januar til 26.januar, revurderingenAvJanuar.periode)
-        revurderingenAvJanuar.arbeidsgiverOppdrag[0].inspektør.also { linje ->
-            assertEquals(19.januar til 26.januar, linje.fom til linje.tom)
-        }
         assertEquals(1, revurderingenAvMars.arbeidsgiverOppdrag.size)
-        assertEquals(Endringskode.NY, revurderingenAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
+        assertEquals(Endringskode.ENDR, revurderingenAvMars.arbeidsgiverOppdrag.inspektør.endringskode)
         assertEquals(3.mars til 26.mars, revurderingenAvMars.periode)
         revurderingenAvMars.arbeidsgiverOppdrag[0].inspektør.also { linje ->
             assertEquals(19.mars til 20.mars, linje.fom til linje.tom)
@@ -1259,9 +1236,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(25.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
         håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
 
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

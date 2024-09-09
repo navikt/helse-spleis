@@ -232,9 +232,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere dager i arbeidsgiverperioden på tidligere utbetaling`() {
         nyttVedtak(januar)
+        assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar,0.0)
         nyttVedtak(mars)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, ArbeidsgiverperiodeDag>(5.januar,0.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, ArbeidsgiverperiodeDag>(5.januar, 0.0)
@@ -345,11 +345,11 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdere nyere arbeidsgiverperiode så revurdere eldste`() {
         nyttVedtak(januar)
+        assertDag<Sykedag, NavDag>(19.januar, 1431.0)
         nyttVedtak(mars)
+        assertDag<Sykedag, NavDag>(19.mars, 1431.0)
         forlengVedtak(april)
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(19.mars, 1431.0)
-        assertDag<Sykedag, NavDag>(19.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.mars, Feriedag)))
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
@@ -635,8 +635,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt mens nyere førstegangsbehandling står i avventer simulering`() {
         nyttVedtak(januar)
-        tilSimulering(mars, 100.prosent, 1.mars)
         assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        tilSimulering(mars, 100.prosent, 1.mars)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
@@ -653,8 +653,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt mens nyere førstegangsbehandling står i avventer godkjenning`() {
         nyttVedtak(januar)
-        tilGodkjenning(mars, 100.prosent, 1.mars)
         assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+        tilGodkjenning(mars, 100.prosent, 1.mars)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
@@ -670,9 +670,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt mens nyere forlengelse står i avventer simulering`() {
         nyttVedtak(januar)
+        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
         nyttVedtak(mars)
         forlengTilSimulering(april, 100.prosent)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
@@ -692,9 +692,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `revurdering på tidligere skjæringstidspunkt mens nyere forlengelse står i avventer godkjenning`() {
         nyttVedtak(januar)
+        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
         nyttVedtak(mars)
         forlengTilGodkjenning(april, 100.prosent)
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
@@ -758,12 +758,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `fire skjæringstidspunkter der første og siste blir revurdert - kun skjæringstidspunkter med endring i utbetaling skal utbetales`() {
         nyttVedtak(januar)
+        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
         nyttVedtak(mars)
         nyttVedtak(mai)
         nyttVedtak(juli)
 
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(17.januar, 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
@@ -832,13 +832,13 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `fire skjæringstidspunkter der første og siste blir revurdert - kun skjæringstidspunkter med endring i utbetaling skal utbetales - første skjæringstidspunkt har forlengelse`() {
         nyttVedtak(1.desember(2017) til 31.desember(2017))
+        assertDag<Sykedag, NavDag>(19.desember(2017), 1431.0)
         forlengVedtak(januar)
         nyttVedtak(mars)
         nyttVedtak(mai)
         nyttVedtak(juli)
 
         nullstillTilstandsendringer()
-        assertDag<Sykedag, NavDag>(19.desember(2017), 1431.0)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.desember(2017), Feriedag)))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)

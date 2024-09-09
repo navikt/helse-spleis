@@ -27,8 +27,8 @@ import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.kobleTil
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje.Companion.normaliserLinjer
 
 class Oppdrag private constructor(
-    private val mottaker: String,
-    private val fagområde: Fagområde,
+    internal val mottaker: String,
+    internal val fagområde: Fagområde,
     private val linjer: MutableList<Utbetalingslinje>,
     private val fagsystemId: String,
     private val endringskode: Endringskode,
@@ -240,7 +240,9 @@ class Oppdrag private constructor(
     }
 
     fun begrensTil(sisteDato: LocalDate, other: Oppdrag? = null): Oppdrag {
-        val (tidligereLinjer, senereLinjer) = this.linjer.partition { it.tom <= sisteDato }
+        val (tidligereLinjer, senereLinjer) = this.linjer
+            .filterNot { it.erOpphør() }
+            .partition { it.tom <= sisteDato }
         val delvisOverlappendeSisteLinje = senereLinjer
             .firstOrNull()
             ?.takeIf { it.fom <= sisteDato }

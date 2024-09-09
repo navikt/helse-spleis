@@ -731,8 +731,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             }
 
             it.vedtaksperioder(2.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.also { tidslinjeInspektør ->
-                assertEquals(32, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
-                assertEquals(8, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
                 assertEquals(11, tidslinjeInspektør.avvistDagTeller)
 
             }
@@ -807,9 +807,9 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             }
 
             it.vedtaksperioder(2.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.also { tidslinjeInspektør ->
-                assertEquals(32, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
-                assertEquals(8, tidslinjeInspektør.navHelgDagTeller)
-                assertEquals(22, tidslinjeInspektør.avvistDagTeller)
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
 
             }
         }
@@ -884,10 +884,10 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             }
 
             it.vedtaksperioder(2.vedtaksperiode).inspektør.utbetalingstidslinje.inspektør.also { tidslinjeInspektør ->
-                assertEquals(32, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
-                assertEquals(8, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
                 assertEquals(11, tidslinjeInspektør.navDagTeller)
-                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
+                assertEquals(0, tidslinjeInspektør.avvistDagTeller)
 
             }
         }

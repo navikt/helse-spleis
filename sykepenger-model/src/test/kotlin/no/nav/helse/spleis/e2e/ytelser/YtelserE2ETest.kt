@@ -120,16 +120,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         val korrelasjonsIdJanuar = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
         val korrelasjonsIdMars = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().endringer.last().utbetaling!!.inspektør.korrelasjonsId
 
-
-        assertForventetFeil(
-            forklaring = "periode med bare andre ytelser etter langt gap kobler seg på feil utbetaling",
-            nå = {
-                assertEquals(korrelasjonsIdJanuar, korrelasjonsIdMars)
-            },
-            ønsket = {
-                assertNotEquals(korrelasjonsIdJanuar, korrelasjonsIdMars)
-            }
-        )
+        assertNotEquals(korrelasjonsIdJanuar, korrelasjonsIdMars)
     }
 
     @Test

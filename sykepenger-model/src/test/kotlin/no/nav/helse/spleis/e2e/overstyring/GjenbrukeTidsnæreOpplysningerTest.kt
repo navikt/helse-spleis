@@ -126,9 +126,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals("SSSSSHH SSSSSHH SSSSS?? SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
 
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
@@ -597,7 +595,8 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             val revurdering = inspektør.utbetaling(2).inspektør
             assertEquals(førsteUtbetaling.korrelasjonsId, revurdering.korrelasjonsId)
             assertEquals(mars, revurdering.periode)
-            assertEquals(1.januar til 31.mars, revurdering.utbetalingstidslinje.periode())
+            assertEquals(1.mars til 31.mars, førsteUtbetaling.utbetalingstidslinje.periode())
+            assertEquals(1.mars til 31.mars, revurdering.utbetalingstidslinje.periode())
             revurdering.arbeidsgiverOppdrag.also { oppdrag ->
                 assertEquals(2, oppdrag.size)
                 oppdrag[0].inspektør.also { linje ->

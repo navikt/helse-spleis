@@ -87,7 +87,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         val arbeidsgiverperiodedager = observatør.utbetalingUtenUtbetalingEventer.first().utbetalingsdager.filter { it.type == PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag}
 
         assertEquals(3, avvisteDager.size)
-        assertEquals(16 + 16, arbeidsgiverperiodedager.size)
+        assertEquals(16, arbeidsgiverperiodedager.size)
         assertTrue(avvisteDager.all { it.begrunnelser == listOf(PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.Over70) })
         assertTrue(arbeidsgiverperiodedager.all { it.begrunnelser == null })
     }

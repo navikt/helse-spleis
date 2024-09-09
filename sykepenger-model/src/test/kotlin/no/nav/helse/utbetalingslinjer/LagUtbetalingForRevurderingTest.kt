@@ -84,19 +84,6 @@ internal class LagUtbetalingForRevurderingTest {
         assertEquals(utbetaling2.second, perioder.sistePeriodeForUtbetalinger().first())
     }
 
-    @Test
-    fun `to perioder med agp-gap`() {
-        val perioder = mutableListOf<Pair<Utbetaling, Vedtaksperiode>>()
-        val utbetaling1 = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true) to vedtaksperiode()
-        perioder.add(utbetaling1)
-        val utbetaling2 =
-            utbetaling(tidslinjeOf(16.AP, 15.NAV, 28.ARB, 16.AP, 15.NAV), tidligere = utbetaling1.first) to vedtaksperiode(mars)
-        perioder.add(utbetaling2)
-        assertEquals(2, perioder.sistePeriodeForUtbetalinger().size)
-        assertEquals(utbetaling1.second, perioder.sistePeriodeForUtbetalinger()[0])
-        assertEquals(utbetaling2.second, perioder.sistePeriodeForUtbetalinger()[1])
-    }
-
     //usikkert om sistePeriodeForUtbetalinger bør ta høyde for flere skjæringstidspunkter innenfor samme agp
     @Test
     fun `to perioder med mindre enn 16 dager gap`() {
@@ -122,123 +109,6 @@ internal class LagUtbetalingForRevurderingTest {
         assertEquals(januar, utbetaling2.first.inspektør.periode)
         assertEquals(utbetaling1.second, perioder.sistePeriodeForUtbetalinger()[0])
         assertEquals(utbetaling2.second, perioder.sistePeriodeForUtbetalinger()[1])
-    }
-
-    @Test
-    fun `lag revurdering`() {
-        val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
-        val revurdering = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV), utbetaling, 31.januar)
-        assertEquals(utbetaling.inspektør.korrelasjonsId, revurdering.inspektør.korrelasjonsId)
-        assertEquals(utbetaling.inspektør.arbeidsgiverOppdrag.fagsystemId(), revurdering.inspektør.arbeidsgiverOppdrag.fagsystemId())
-        revurdering.inspektør.arbeidsgiverOppdrag.also {
-            assertEquals(2, it.size)
-            assertEquals(17.januar, it[0].inspektør.datoStatusFom)
-            assertEquals(1, it[0].inspektør.delytelseId)
-            assertEquals(null, it[0].inspektør.refDelytelseId)
-            assertEquals(null, it[0].inspektør.refFagsystemId)
-            assertEquals(Endringskode.ENDR, it[0].inspektør.endringskode)
-            assertEquals(17.januar til 31.januar, it[0].periode)
-
-            assertEquals(null, it[1].inspektør.datoStatusFom)
-            assertEquals(2, it[1].inspektør.delytelseId)
-            assertEquals(utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.delytelseId, it[1].inspektør.refDelytelseId)
-            assertEquals(it.fagsystemId(), it[1].inspektør.refFagsystemId)
-            assertEquals(Endringskode.NY, it[1].inspektør.endringskode)
-            assertEquals(18.januar til 31.januar, it[1].periode)
-        }
-        revurdering.assertDiff(-1200)
-    }
-
-    @Test
-    fun `lag revurdering begrenset til kuttdato`() {
-        val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV, 16.NAV), utbetalt = true)
-        val revurdering = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.FRI, 15.NAV), utbetaling, 31.januar)
-        assertEquals(utbetaling.inspektør.korrelasjonsId, revurdering.inspektør.korrelasjonsId)
-        revurdering.assertDiff(-1200) // Trekker tilbake 1 dag
-        revurdering.inspektør.utbetalingstidslinje.inspektør.also {
-            assertEquals(1, it.fridagTeller)
-            assertEquals(10, it.navDagTeller)
-        }
-
-        revurdering.inspektør.arbeidsgiverOppdrag.also {
-            assertEquals(2, it.size)
-            assertEquals(17.januar, it[0].inspektør.datoStatusFom)
-            assertEquals(1, it[0].inspektør.delytelseId)
-            assertEquals(null, it[0].inspektør.refDelytelseId)
-            assertEquals(null, it[0].inspektør.refFagsystemId)
-            assertEquals(Endringskode.ENDR, it[0].inspektør.endringskode)
-            assertEquals(17.januar til 16.februar, it[0].periode)
-
-            assertEquals(null, it[1].inspektør.datoStatusFom)
-            assertEquals(2, it[1].inspektør.delytelseId)
-            assertEquals(it[0].inspektør.delytelseId, it[1].inspektør.refDelytelseId)
-            assertEquals(it.fagsystemId(), it[1].inspektør.refFagsystemId)
-            assertEquals(Endringskode.NY, it[1].inspektør.endringskode)
-            assertEquals(18.januar til 16.februar, it[1].periode)
-        }
-    }
-
-    @Test
-    fun `lag revurdering begrenset til kuttdato og deretter ny revurdering`() {
-        val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV, 16.NAV), utbetalt = true)
-        val revurdering = revurdering(
-            tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.FRI, 15.NAV),
-            utbetaling,
-            31.januar,
-            utbetalt = true
-        )
-        val revurdering2 = revurdering(tidslinjeOf(16.AP, 1.FRI, 14.NAV, 1.ARB, 15.NAV), revurdering, 16.februar)
-        assertEquals(utbetaling.inspektør.korrelasjonsId, revurdering.inspektør.korrelasjonsId)
-        assertEquals(revurdering.inspektør.korrelasjonsId, revurdering2.inspektør.korrelasjonsId)
-        revurdering2.assertDiff(-1200)
-
-        revurdering.inspektør.utbetalingstidslinje.inspektør.also {
-            assertEquals(1, it.fridagTeller)
-            assertEquals(0, it.arbeidsdagTeller)
-            assertEquals(10, it.navDagTeller)
-        }
-        revurdering2.inspektør.utbetalingstidslinje.inspektør.also {
-            assertEquals(1, it.fridagTeller)
-            assertEquals(1, it.arbeidsdagTeller)
-            assertEquals(21, it.navDagTeller)
-        }
-
-        revurdering2.inspektør.arbeidsgiverOppdrag.also {
-            assertEquals(2, it.size)
-            assertEquals(null, it[0].inspektør.datoStatusFom)
-            assertEquals(2, it[0].inspektør.delytelseId)
-            assertEquals(null, it[0].inspektør.refDelytelseId)
-            assertEquals(null, it[0].inspektør.refFagsystemId)
-            assertEquals(Endringskode.ENDR, it[0].inspektør.endringskode)
-            assertEquals(18.januar til 31.januar, it[0].periode)
-
-            assertEquals(null, it[1].inspektør.datoStatusFom)
-            assertEquals(3, it[1].inspektør.delytelseId)
-            assertEquals(it[0].inspektør.delytelseId, it[1].inspektør.refDelytelseId)
-            assertEquals(it.fagsystemId(), it[1].inspektør.refFagsystemId)
-            assertEquals(Endringskode.NY, it[1].inspektør.endringskode)
-            assertEquals(2.februar til 16.februar, it[1].periode)
-        }
-    }
-
-    @Test
-    fun `revurderingen kan strekkes forbi utbetalingen`() {
-        val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
-        val revurdering = revurdering(tidslinjeOf(16.AP, 20.NAV), utbetaling, 5.februar)
-        revurdering.inspektør.utbetalingstidslinje.inspektør.apply {
-            assertEquals(1.januar, førstedag.dato)
-            assertEquals(5.februar, sistedag.dato)
-        }
-
-        revurdering.inspektør.arbeidsgiverOppdrag.also {
-            assertEquals(1, it.size)
-            assertEquals(null, it[0].inspektør.datoStatusFom)
-            assertEquals(1, it[0].inspektør.delytelseId)
-            assertEquals(null, it[0].inspektør.refDelytelseId)
-            assertEquals(null, it[0].inspektør.refFagsystemId)
-            assertEquals(Endringskode.ENDR, it[0].inspektør.endringskode)
-            assertEquals(17.januar til 5.februar, it[0].periode)
-        }
     }
 
     @Test
@@ -268,7 +138,7 @@ internal class LagUtbetalingForRevurderingTest {
             orgnummer,
             betaltTidslinje,
             sisteDato.somPeriode(),
-            arbeidsgiverperiode = emptyList(),
+            utbetalingsaker = listOf(Utbetalingsak(tidslinje.periode().start, listOf(sisteDato.somPeriode()))),
             aktivitetslogg,
             LocalDate.MAX,
             100,

@@ -20,6 +20,7 @@ import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Periode.Companion.trim
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
@@ -76,12 +77,14 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
+import no.nav.helse.utbetalingslinjer.Utbetalingsak
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.FaktaavklarteInntekter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -345,13 +348,18 @@ internal class Arbeidsgiver private constructor(
         arbeidsgiverperiode: List<Periode>,
         type: Utbetalingtype
     ): Utbetaling {
+        val utbetalingsaker = UtbetalingsakerBuilder(
+            vedtaksperioder.arbeidsgiverperioder(),
+            person.infotrygdhistorikk.betaltePerioder()
+        ).lagUtbetalingsaker()
+
         val (utbetalingen, annulleringer) = Utbetaling.lagUtbetaling(
             utbetalinger = utbetalinger,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             utbetalingstidslinje = utbetalingstidslinje,
             periode = periode,
-            arbeidsgiverperiode = arbeidsgiverperiode,
+            utbetalingsaker = utbetalingsaker,
             aktivitetslogg = aktivitetslogg,
             maksdato = maksdato,
             forbrukteSykedager = forbrukteSykedager,

@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -25,6 +27,7 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
@@ -255,8 +258,11 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
         assertEquals(listOf("ARBEIDSGIVERPERIODE"), overstyringerIgangsatt)
         assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
 
+        val utbetalingFebruar = inspektør.utbetaling(2).inspektør
+
         val revurdering1Vedtaksperiode = inspektør.utbetaling(3).inspektør
         revurdering1Vedtaksperiode.also { utbetalingInspektør ->
+            assertEquals(revurdering1Vedtaksperiode.korrelasjonsId, utbetalingFebruar.korrelasjonsId)
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(0, utbetalingInspektør.personOppdrag.size)
             utbetalingInspektør.arbeidsgiverOppdrag.inspektør.also { oppdragInspektør ->
@@ -266,20 +272,16 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
             }
         }
         val revurdering2Vedtaksperiode = inspektør.utbetaling(4).inspektør
-        assertEquals(revurdering1Vedtaksperiode.korrelasjonsId, revurdering2Vedtaksperiode.korrelasjonsId)
         revurdering2Vedtaksperiode.also { utbetalingInspektør ->
-            assertEquals(UEND, revurdering2Vedtaksperiode.arbeidsgiverOppdrag.inspektør.endringskode)
-            assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
-            utbetalingInspektør.arbeidsgiverOppdrag[0].inspektør.also { linjeInspektør ->
-                assertEquals(UEND, linjeInspektør.endringskode)
-                assertEquals(26.januar til 28.februar, linjeInspektør.periode)
-                assertEquals(26.januar, linjeInspektør.datoStatusFom)
-            }
+            assertNotEquals(revurdering2Vedtaksperiode.korrelasjonsId, revurdering1Vedtaksperiode.korrelasjonsId)
+            assertEquals(NY, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
+            assertEquals(0, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(0, utbetalingInspektør.personOppdrag.size)
         }
         val revurdering3Vedtaksperiode = inspektør.utbetaling(5).inspektør
-        assertNotEquals(revurdering1Vedtaksperiode.korrelasjonsId, revurdering3Vedtaksperiode.korrelasjonsId)
         revurdering3Vedtaksperiode.also { utbetalingInspektør ->
+            assertNotEquals(revurdering3Vedtaksperiode.korrelasjonsId, revurdering1Vedtaksperiode.korrelasjonsId)
+            assertNotEquals(revurdering3Vedtaksperiode.korrelasjonsId, revurdering2Vedtaksperiode.korrelasjonsId)
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(NY, utbetalingInspektør.arbeidsgiverOppdrag.inspektør.endringskode)
             utbetalingInspektør.arbeidsgiverOppdrag[0].inspektør.also { linjeInspektør ->

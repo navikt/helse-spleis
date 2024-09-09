@@ -21,6 +21,7 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingsak
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -336,7 +337,7 @@ internal class InfotrygdhistorikkTest {
         organisasjonsnummer = "",
         utbetalingstidslinje = tidslinjeOf(),
         periode = 1.januar.somPeriode(),
-        arbeidsgiverperiode = listOf(1.januar til 16.januar),
+        utbetalingsaker = listOf(Utbetalingsak(1.januar, listOf(1.januar.somPeriode()))),
         aktivitetslogg = Aktivitetslogg(),
         maksdato = 1.januar,
         forbrukteSykedager = 0,

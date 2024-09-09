@@ -294,7 +294,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         augustutbetalingEtter.arbeidsgiverOppdrag.also { oppdrag ->
             assertEquals(2, oppdrag.size)
             oppdrag[0].also { linje ->
-                assertEquals(17.juni til 30.juni, linje.fom til linje.tom)
+                assertEquals(17.juni til 29.juni, linje.fom til linje.tom)
             }
             oppdrag[1].also { linje ->
                 assertEquals(august, linje.fom til linje.tom)

@@ -8,6 +8,7 @@ import no.nav.helse.erRettFør
 import no.nav.helse.forrigeDag
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.nesteDag
+import kotlin.collections.plus
 
 // Understands beginning and end of a time interval
 class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
@@ -44,6 +45,15 @@ class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable
             .flatMap { it.trim(nyPeriode) }
             .plusElement(nyPeriode)
             .sortedBy { it.start }
+
+        /*
+            bryter <other> opp i ulike biter som ikke dekkes av listen av perioder.
+            antar at listen av perioder er sortert
+         */
+        fun Iterable<Periode>.trim(other: Periode): List<Periode> =
+            fold(listOf(other)) { result, trimperiode ->
+                result.dropLast(1) + (result.lastOrNull()?.trim(trimperiode) ?: emptyList())
+            }
 
         val Iterable<LocalDate>.omsluttendePeriode get() = this.takeIf { it.iterator().hasNext() }?.let { min() til max() }
 
