@@ -15,6 +15,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.BeregnetPeriode
+import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Inntektkilde
 import no.nav.helse.spleis.speil.dto.PersonDTO
@@ -68,15 +69,6 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
     }
 
     @Test
-    fun `lager ghostpølse for tilkommen ghost`() {
-        nyttVedtak(1.januar, 31.januar, orgnummer = a2)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = null, orgnummer = "a24", beløp = 10000.månedlig)))
-        val ghostPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder ?: error("har ikke ghostperioder")
-        assertEquals(1, ghostPølser.size)
-        assertEquals(1.februar til 28.februar, ghostPølser.single().fom til ghostPølser.single().tom)
-    }
-
-    @Test
     fun `lager NyeInntektsforhold-pølse for tilkommen inntekt`() {
         nyttVedtak(1.januar, 31.januar, orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a24", beløp = 10000.månedlig)))
@@ -86,9 +78,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         assertEquals(1.januar, nyeInntektsforholdPølse.skjæringstidspunkt)
         assertTrue(nyeInntektsforholdPølse.vilkårsgrunnlagId in speilApi().vilkårsgrunnlag.keys)
 
-        // TODO: fjerne tilkommen inntekt fra ghostpølser når speilvendt er klare
-        val ghostPølser = speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder!!
-        assertEquals(1.februar til 28.februar, ghostPølser.single().fom til ghostPølser.single().tom)
+        assertEquals(emptyList<GhostPeriodeDTO>(),  speilApi().arbeidsgivere.find { it.organisasjonsnummer == "a24" }?.ghostPerioder)
     }
 
     @Test

@@ -24,6 +24,8 @@ internal data class IArbeidsgiverinntekt(
             deaktivert = deaktivert
         )
     }
+
+    internal fun erTilkommenInntekt() = omregnetÅrsinntekt.kilde == IInntektkilde.Søknad
 }
 
 internal data class IArbeidsgiverrefusjon(

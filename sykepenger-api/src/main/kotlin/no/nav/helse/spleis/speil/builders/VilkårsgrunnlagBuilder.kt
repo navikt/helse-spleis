@@ -37,6 +37,7 @@ internal abstract class IVilkårsgrunnlag(
         if (inntekter.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
         val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
         if (inntekten == null) return null
+        if (inntekten.erTilkommenInntekt()) return null
         val sisteDag = minOf(inntekten.omregnetÅrsinntekt.tom, sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
         return GhostPeriodeDTO(
             id = UUID.randomUUID(),
