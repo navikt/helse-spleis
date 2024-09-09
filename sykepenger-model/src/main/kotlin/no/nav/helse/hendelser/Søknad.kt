@@ -231,14 +231,11 @@ class Søknad(
 
     class TilkommenInntekt(
         private val fom: LocalDate,
-        private val tom: LocalDate?,
+        private val tom: LocalDate,
         private val orgnummer: String,
         private val beløp: Inntekt,
     ) {
-        private fun gjelder(): Periode {
-            return if (tom != null) fom til tom
-            else fom til LocalDate.MAX
-        }
+        private fun gjelder() = fom til tom
 
         internal fun nyInntekt(
             builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,

@@ -63,7 +63,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     fun `oppdaterer sykepengegrunnlag med inntekter fra søknaden`() {
         a1 {
             nyttVedtak(januar, beregnetInntekt = 31000.månedlig)
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = null, orgnummer = "a2", beløp = 10000.månedlig)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a2", beløp = 10000.månedlig)))
             assertVarsel(Varselkode.RV_SV_5)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
@@ -74,7 +74,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertEquals(1.januar til LocalDate.MAX, inntektA1!!.inspektør.gjelder)
                 assertEquals(31000.månedlig, inntektA1.inspektør.inntektsopplysning.fastsattÅrsinntekt())
                 assertTrue(inntektA1.inspektør.inntektsopplysning is Inntektsmelding)
-                assertEquals(1.februar til LocalDate.MAX, inntektA2!!.inspektør.gjelder)
+                assertEquals(1.februar til 28.februar, inntektA2!!.inspektør.gjelder)
                 assertEquals(10000.månedlig, inntektA2.inspektør.inntektsopplysning.fastsattÅrsinntekt())
                 assertTrue(inntektA2.inspektør.inntektsopplysning is InntektFraSøknad)
             }
@@ -85,7 +85,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
     fun `til godkjenning og så kommer forlengelse-søknad med tilkommen inntekt`() {
         a1{
             tilGodkjenning(januar, beregnetInntekt = 31000.00.månedlig)
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = null, orgnummer = "a2", beløp = 10000.månedlig)))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a2", beløp = 10000.månedlig)))
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             val dagsatsFørstegangs = inspektør.utbetalinger.single().inspektør.utbetalingstidslinje.inspektør.navdager.last().økonomi.inspektør.arbeidsgiverbeløp
@@ -107,7 +107,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 tilkomneInntekter = listOf(
                     TilkommenInntekt(
                         fom = 1.januar,
-                        tom = null,
+                        tom = 31.januar,
                         orgnummer = a2,
                         beløp = 10000.månedlig
                     )
@@ -159,7 +159,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 tilkomneInntekter = listOf(
                     TilkommenInntekt(
                         fom = 15.februar,
-                        tom = null,
+                        tom = 28.februar,
                         orgnummer = a2,
                         beløp = 20000.månedlig
                     )
@@ -190,7 +190,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 tilkomneInntekter = listOf(
                     TilkommenInntekt(
                         fom = 15.februar,
-                        tom = null,
+                        tom = 28.februar,
                         orgnummer = a2,
                         beløp = 20000.månedlig
                     )
