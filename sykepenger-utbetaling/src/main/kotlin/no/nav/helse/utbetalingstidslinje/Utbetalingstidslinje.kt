@@ -108,19 +108,15 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
         this.utbetalingsdager.zip(other.utbetalingsdager) { venstre, høyre -> maxOf(venstre, høyre) }.toMutableList()
     )
 
-    private fun Builder.addUkjentDagHåndterHelg(dato: LocalDate) {
-        if (dato.erHelg()) return addFridag(dato, Økonomi.ikkeBetalt())
-        addUkjentDag(dato)
-    }
     private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate): Utbetalingstidslinje {
         val original = this
         return Builder().apply {
             tidligsteDato.datesUntil(original.førsteDato)
-                .forEach { addUkjentDagHåndterHelg(it) }
+                .forEach { addUkjentDag(it) }
             original.utbetalingsdager.forEach { add(it) }
             original.sisteDato.plusDays(1)
                 .datesUntil(sisteDato.plusDays(1))
-                .forEach { addUkjentDagHåndterHelg(it) }
+                .forEach { addUkjentDag(it) }
         }.build()
     }
 

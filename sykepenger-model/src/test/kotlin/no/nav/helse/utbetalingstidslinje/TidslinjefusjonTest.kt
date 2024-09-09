@@ -36,8 +36,18 @@ internal class TidslinjefusjonTest {
         assertEquals(37, inspektør.size)
         assertEquals(22, inspektør.navDagTeller)
         assertEquals(8, inspektør.navHelgDagTeller)
-        assertEquals(5, inspektør.ukjentDagTeller)
-        assertEquals(2, inspektør.fridagTeller)
+        assertEquals(7, inspektør.ukjentDagTeller)
+        assertEquals(0, inspektør.fridagTeller)
+    }
+
+    @Test
+    fun `overskriver ikke dager`() {
+        // den siste tidslinjen består av to mindre dager.
+        // når utbetalingstidslinjen legges sammen så vil den siste tidslinjen utvides med to dager, og de to siste dagene er en helg
+        val inspektør = (tidslinjeOf(5.NAV, 2.ARB) + tidslinjeOf(5.FRI)).inspektør
+        assertEquals(7, inspektør.size)
+        assertEquals(5, inspektør.navDagTeller)
+        assertEquals(2, inspektør.arbeidsdagTeller)
     }
 
     @Test
@@ -49,8 +59,8 @@ internal class TidslinjefusjonTest {
         assertEquals(59, inspektør.size)
         assertEquals(33, inspektør.navDagTeller)
         assertEquals(12, inspektør.navHelgDagTeller)
-        assertEquals(10, inspektør.ukjentDagTeller)
-        assertEquals(4, inspektør.fridagTeller)
+        assertEquals(14, inspektør.ukjentDagTeller)
+        assertEquals(0, inspektør.fridagTeller)
     }
 
     // The following tests handle overlapping Utbetalingstidslinjer. This should only be for multiple arbeitsgivere
