@@ -27,7 +27,9 @@ internal class TidslinjefusjonTest {
         assertEquals(33, inspektør.size)
         assertEquals(22, inspektør.navDagTeller)
         assertEquals(8, inspektør.navHelgDagTeller)
-        assertEquals(3, inspektør.ukjentDagTeller)
+        assertEquals(0, inspektør.ukjentDagTeller)
+        assertEquals(3, inspektør.arbeidsdagTeller)
+        assertEquals(0, inspektør.fridagTeller)
     }
 
     @Test
@@ -36,8 +38,9 @@ internal class TidslinjefusjonTest {
         assertEquals(37, inspektør.size)
         assertEquals(22, inspektør.navDagTeller)
         assertEquals(8, inspektør.navHelgDagTeller)
-        assertEquals(7, inspektør.ukjentDagTeller)
-        assertEquals(0, inspektør.fridagTeller)
+        assertEquals(0, inspektør.ukjentDagTeller)
+        assertEquals(5, inspektør.arbeidsdagTeller)
+        assertEquals(2, inspektør.fridagTeller)
     }
 
     @Test
@@ -59,8 +62,9 @@ internal class TidslinjefusjonTest {
         assertEquals(59, inspektør.size)
         assertEquals(33, inspektør.navDagTeller)
         assertEquals(12, inspektør.navHelgDagTeller)
-        assertEquals(14, inspektør.ukjentDagTeller)
-        assertEquals(0, inspektør.fridagTeller)
+        assertEquals(0, inspektør.ukjentDagTeller)
+        assertEquals(10, inspektør.arbeidsdagTeller)
+        assertEquals(4, inspektør.fridagTeller)
     }
 
     // The following tests handle overlapping Utbetalingstidslinjer. This should only be for multiple arbeitsgivere

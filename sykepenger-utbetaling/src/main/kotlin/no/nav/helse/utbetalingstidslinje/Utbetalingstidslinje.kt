@@ -95,7 +95,20 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
         if (this.isEmpty()) return other
         val tidligsteDato = this.tidligsteDato(other)
         val sisteDato = this.sisteDato(other)
-        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato))
+        val nyeDager = (tidligsteDato til sisteDato).map { dag ->
+            val venstre = this.utbetalingsdager.firstOrNull { it.dato == dag }
+            val høyre = other.utbetalingsdager.firstOrNull { it.dato == dag }
+            when {
+                venstre == null && høyre == null -> when (dag.erHelg()) {
+                    true -> Fridag(dag, Økonomi.ikkeBetalt())
+                    false -> Arbeidsdag(dag, Økonomi.ikkeBetalt())
+                }
+                venstre == null -> høyre!!
+                høyre == null -> venstre
+                else -> maxOf(venstre, høyre)
+            }
+        }
+        return Utbetalingstidslinje(nyeDager)
     }
 
     fun harUtbetalingsdager() = sykepengeperiode() != null
