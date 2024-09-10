@@ -401,7 +401,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             assertEquals(1.januar til 31.mars, marsutbetaling.periode)
             assertEquals(1.januar til 28.februar, revurdering.periode)
             assertEquals(0, revurdering.personOppdrag.size)
-            assertEquals(4, revurdering.arbeidsgiverOppdrag.size)
+            assertEquals(3, revurdering.arbeidsgiverOppdrag.size)
             assertEquals(Endringskode.ENDR, revurdering.arbeidsgiverOppdrag.inspektør.endringskode)
             assertEquals(-1431, revurdering.arbeidsgiverOppdrag.inspektør.nettoBeløp)
             revurdering.arbeidsgiverOppdrag.inspektør.also { arbeidsgiveroppdrag ->
@@ -416,14 +416,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                 assertEquals(Endringskode.ENDR, arbeidsgiveroppdrag.endringskode(1))
 
                 assertEquals(16.februar, arbeidsgiveroppdrag.fom(2))
-                assertEquals(28.februar, arbeidsgiveroppdrag.tom(2))
+                assertEquals(30.mars, arbeidsgiveroppdrag.tom(2))
                 assertEquals(1431, arbeidsgiveroppdrag.beløp(2))
                 assertEquals(Endringskode.NY, arbeidsgiveroppdrag.endringskode(2))
-
-                assertEquals(1.mars, arbeidsgiveroppdrag.fom(3))
-                assertEquals(30.mars, arbeidsgiveroppdrag.tom(3))
-                assertEquals(1431, arbeidsgiveroppdrag.beløp(3))
-                assertEquals(Endringskode.NY, arbeidsgiveroppdrag.endringskode(3))
             }
         }
 

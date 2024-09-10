@@ -260,7 +260,7 @@ class Oppdrag private constructor(
     private fun slåSammenOppdrag(other: Oppdrag): List<Utbetalingslinje> {
         if (this.isEmpty()) return other.linjer
         if (other.isEmpty()) return this.linjer
-        val sisteLinje = this.first()
+        val sisteLinje = this.last()
         val første = other.first()
         val mellomlinje = sisteLinje.slåSammenLinje(første) ?: return this.linjer + other.linjer
         return this.linjer.dropLast(1) + listOf(mellomlinje) + other.linjer.drop(1)
