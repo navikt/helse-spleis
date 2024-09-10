@@ -2,9 +2,9 @@ package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 
@@ -33,7 +33,7 @@ internal class SendtNavSøknaderRiver(
                 require("orgnummer") { it.isTextual }
                 require("beløp") { it.isNumber }
                 require("fom") { JsonNode::asLocalDate }
-                interestedIn("tom") { JsonNode::asLocalDate }
+                require("tom") { JsonNode::asLocalDate }
             }
         }
         message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
