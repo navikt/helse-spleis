@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.Test
 internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
 
     @Test
-    fun `Først sier sykmeldte at det var egenmeldingsdag, så ombestemmer de seg`() = Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enable {
+    fun `Først sier sykmeldte at det var egenmeldingsdag, så ombestemmer de seg`() {
         a1 {
             nyttVedtak(januar)
 
@@ -38,7 +37,7 @@ internal class FlereSkjæringstidspunktTest: AbstractDslTest() {
     }
 
     @Test
-    fun `Egenmeldingsdager fra sykmelding møter begrunnelseForReduksjonEllerIkkeUtbetalt`() = Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enable {
+    fun `Egenmeldingsdager fra sykmelding møter begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         a1 {
             håndterSøknad(Sykdom(9.mars, 14.mars, 100.prosent), egenmeldinger = listOf(2.mars til 3.mars))
             håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.mars, begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")

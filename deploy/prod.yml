@@ -65,5 +65,3 @@ spec:
     value: none
   - name: TILKOMMEN_ARBEIDSGIVER
     value: "false"
-  - name: EGENMELDING_STREKKER_IKKE_SYKDOMSTIDSLINJE
-    value: "false"

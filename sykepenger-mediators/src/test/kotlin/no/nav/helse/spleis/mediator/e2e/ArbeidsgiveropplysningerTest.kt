@@ -265,7 +265,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
         {
           "@event_name": "trenger_opplysninger_fra_arbeidsgiver",
           "organisasjonsnummer": "987654321",
-          "skjæringstidspunkt": "2018-01-01",
+          "skjæringstidspunkt": "2018-01-02",
           "sykmeldingsperioder": [
             {
               "fom": "2018-01-02",
@@ -281,7 +281,7 @@ internal class ArbeidsgiveropplysningerTest : AbstractEndToEndMediatorTest() {
           "førsteFraværsdager": [
             { 
                 "organisasjonsnummer": "987654321",
-                "førsteFraværsdag": "2018-01-01"
+                "førsteFraværsdag": "2018-01-02"
             }
           ],
           "forespurteOpplysninger": [

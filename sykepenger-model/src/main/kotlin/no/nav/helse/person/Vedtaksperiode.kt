@@ -123,7 +123,6 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje.Companion.slåSammenForkastedeSykdomstidslinjer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -2268,7 +2267,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             val arbeidsgiverperiode = vedtaksperiode.arbeidsgiver.arbeidsgiverperiodeHensyntattEgenmeldinger(vedtaksperiode.periode)
-            if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled && arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
+            if (arbeidsgiverperiode?.forventerInntekt(vedtaksperiode.periode) == true) {
                 // Dersom egenmeldingene hinter til at perioden er utenfor AGP, da ønsker vi å sende en ekte forespørsel til arbeidsgiver om opplysninger
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger(arbeidsgiverperiode)
             }
@@ -2578,13 +2577,7 @@ internal class Vedtaksperiode private constructor(
         private fun sykmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
             return vedtaksperioder.map { it.sykmeldingsperiode }
         }
-        private fun egenmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>): List<Periode> {
-            if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) {
-                return vedtaksperioder.flatMap { it.egenmeldingsperioder }
-            } else {
-                return vedtaksperioder.map { it.sykdomstidslinje }.merge().egenmeldingerFraSøknad()
-            }
-        }
+        private fun egenmeldingsperioder(vedtaksperioder: List<Vedtaksperiode>) = vedtaksperioder.flatMap { it.egenmeldingsperioder }
 
         internal fun List<Vedtaksperiode>.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
             forEach { it.behandlinger.beregnSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode) }

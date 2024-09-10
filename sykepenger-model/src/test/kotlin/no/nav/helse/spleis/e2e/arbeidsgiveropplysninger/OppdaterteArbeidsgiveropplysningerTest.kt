@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.arbeidsgiveropplysninger
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -45,8 +44,7 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
         nyPeriode(2.januar til 31.januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar, 31.januar, 100.prosent), egenmeldinger = listOf(1.januar til 1.januar))
 
-        val expectedForespørsel = if (Toggle.EgenmeldingStrekkerIkkeSykdomstidslinje.enabled) {
-            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
+        val expectedForespørsel = PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                 organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
                 skjæringstidspunkt = 2.januar,
@@ -61,23 +59,6 @@ internal class OppdaterteArbeidsgiveropplysningerTest: AbstractEndToEndTest() {
                     PersonObserver.Arbeidsgiverperiode
                 )
             )
-        } else {
-            PersonObserver.TrengerArbeidsgiveropplysningerEvent(
-                organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = 1.vedtaksperiode.id(ORGNUMMER),
-                skjæringstidspunkt = 1.januar,
-                sykmeldingsperioder = listOf(2.januar til 31.januar),
-                egenmeldingsperioder = listOf(1.januar til 1.januar),
-                førsteFraværsdager = listOf(
-                    PersonObserver.FørsteFraværsdag(a1, 1.januar)
-                ),
-                forespurteOpplysninger = listOf(
-                    PersonObserver.Inntekt(forslag = null),
-                    PersonObserver.Refusjon(forslag = emptyList()),
-                    PersonObserver.Arbeidsgiverperiode
-                )
-            )
-        }
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
