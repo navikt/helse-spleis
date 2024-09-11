@@ -5,6 +5,7 @@ import java.awt.Desktop
 import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -36,14 +37,15 @@ class SpannerEtterTestInterceptor : TestWatcher {
     }
 
     override fun testFailed(context: ExtensionContext?, cause: Throwable?) {
-        openTheSpanner(context)
+        val errorMsg = cause.toString()
+        openTheSpanner(context, errorMsg)
     }
 
     override fun testSuccessful(context: ExtensionContext?) {
         openTheSpanner(context)
     }
 
-    private fun openTheSpanner(context: ExtensionContext?) {
+    private fun openTheSpanner(context: ExtensionContext?, errorMsg: String? = null) {
         // fisk ut person på et vis og opprett SpannerDto
         val person = context!!.testInstance.get().get("person") as Person
         val spannerPerson = person.dto().tilSpannerPersonDto()
@@ -56,13 +58,14 @@ class SpannerEtterTestInterceptor : TestWatcher {
         val json = "{" + aktivtetsloggV2Json.drop(1).dropLast(1) + "," + personJson.drop(1)
 
         // poster tullegutten til spannerish
-        val uri = lastOppTilSpannerish(json)
+        val testnavn = context.testMethod.get().name
+        val uri = lastOppTilSpannerish(json, testnavn, errorMsg)
 
         // Åpne i browser på din supercomputer
         åpneBrowser(uri)
     }
 
-    private fun lastOppTilSpannerish(json: String): URI {
+    private fun lastOppTilSpannerish(json: String, testnavn: String, errorMsg: String?): URI {
         val uuid = UUID.randomUUID()
         HttpClient.newHttpClient().use { client ->
             // Må laste opp mot intern.dev pga. en Microsoft-redirect på ansatt.dev. Så må ha naisdevicen på
@@ -74,7 +77,12 @@ class SpannerEtterTestInterceptor : TestWatcher {
             check(response.statusCode() == 201) { "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?"}
         }
         // Men vi kan se på den i ansatt.dev da, så kan den deles med folk uten naisdevice
-        return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid")
+        val urlEncodedTestName = URLEncoder.encode(testnavn, "UTF-8")
+        val urlEncodedErrorName = errorMsg?.let { URLEncoder.encode(it, "UTF-8")}
+        if (urlEncodedErrorName != null) {
+            return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid?testnavn=$urlEncodedTestName?error=$urlEncodedErrorName")
+        }
+        return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid?testnavn=$urlEncodedTestName")
     }
 
     private fun åpneBrowser(uri: URI) {
