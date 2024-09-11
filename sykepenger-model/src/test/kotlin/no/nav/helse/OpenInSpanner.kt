@@ -45,7 +45,7 @@ class SpannerEtterTestInterceptor : TestWatcher {
         openTheSpanner(context)
     }
 
-    private fun openTheSpanner(context: ExtensionContext?, errorMsg: String? = null) {
+    internal fun openTheSpanner(context: ExtensionContext?, errorMsg: String? = null) {
         // fisk ut person på et vis og opprett SpannerDto
         val person = context!!.testInstance.get().get("person") as Person
         val spannerPerson = person.dto().tilSpannerPersonDto()
