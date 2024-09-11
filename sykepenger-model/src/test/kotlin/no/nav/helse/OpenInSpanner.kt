@@ -35,7 +35,15 @@ class SpannerEtterTestInterceptor : TestWatcher {
             .registerModule(JavaTimeModule())
     }
 
+    override fun testFailed(context: ExtensionContext?, cause: Throwable?) {
+        openTheSpanner(context)
+    }
+
     override fun testSuccessful(context: ExtensionContext?) {
+        openTheSpanner(context)
+    }
+
+    private fun openTheSpanner(context: ExtensionContext?) {
         // fisk ut person på et vis og opprett SpannerDto
         val person = context!!.testInstance.get().get("person") as Person
         val spannerPerson = person.dto().tilSpannerPersonDto()
