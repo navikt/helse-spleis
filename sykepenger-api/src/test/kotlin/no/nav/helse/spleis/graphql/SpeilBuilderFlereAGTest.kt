@@ -140,12 +140,26 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
 
         håndterInntektsmelding(1.januar, orgnummer = a1)
         håndterInntektsmelding(1.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2)
+        håndterInntektsmelding(29.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2)
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
             arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
         )
         håndterYtelserTilGodkjenning()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterYtelserTilGodkjenning()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterVilkårsgrunnlag(
+            inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
+            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
+        )
+        håndterYtelserTilGodkjenning()
+        håndterUtbetalingsgodkjenning()
 
         val speilJson1 = speilApi()
         val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId

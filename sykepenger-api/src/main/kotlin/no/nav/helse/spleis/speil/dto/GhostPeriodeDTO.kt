@@ -15,9 +15,15 @@ data class GhostPeriodeDTO(
 ) {
 
     internal fun brytOpp(tidslinjeperiode: ClosedRange<LocalDate>) = when {
+        // trimmer ingenting
+        tidslinjeperiode.erUtenfor(this) -> listOf(this)
+        // trimmer i midten
         tidslinjeperiode.erInni(this) -> listOf(this.til(tidslinjeperiode), this.fra(tidslinjeperiode))
+        // trimmer i slutten
         tidslinjeperiode.overlapperMedHale(this) -> listOf(this.til(tidslinjeperiode))
+        // trimmer i starten
         tidslinjeperiode.overlapperMedSnute(this) -> listOf(this.fra(tidslinjeperiode))
+        // trimmer hele
         else -> emptyList()
     }
 
@@ -30,11 +36,14 @@ data class GhostPeriodeDTO(
         fom = other.endInclusive.nesteDag
     )
 
+    private fun ClosedRange<LocalDate>.erUtenfor(other: GhostPeriodeDTO) =
+        maxOf(this.start, other.fom) > minOf(this.endInclusive, other.tom)
+
     private fun ClosedRange<LocalDate>.erInni(other: GhostPeriodeDTO) =
         this.start > other.fom && this.endInclusive < other.tom
     private fun ClosedRange<LocalDate>.overlapperMedHale(other: GhostPeriodeDTO) =
         this.start > other.fom && this.endInclusive >= other.tom
 
     private fun ClosedRange<LocalDate>.overlapperMedSnute(other: GhostPeriodeDTO) =
-        this.start <= other.fom && this.endInclusive < other.tom
+        this.endInclusive < other.tom && this.endInclusive > other.fom
 }
