@@ -1029,19 +1029,17 @@ internal class Vedtaksperiode private constructor(
             this.kontekst(kopi)
         }
 
-    private fun kalkulerUtbetalinger(aktivitetslogg: IAktivitetslogg, ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger): Boolean {
+    private fun oppdaterHistorikk(ytelser: Ytelser, infotrygdhistorikk: Infotrygdhistorikk) {
         val vilkårsgrunnlag = requireNotNull(vilkårsgrunnlag)
-        aktivitetslogg.kontekst(vilkårsgrunnlag)
-        vilkårsgrunnlag.valider(aktivitetslogg, organisasjonsnummer)
-        infotrygdhistorikk.valider(aktivitetslogg, periode, skjæringstidspunkt, organisasjonsnummer)
+        ytelser.kontekst(vilkårsgrunnlag)
+        vilkårsgrunnlag.valider(ytelser, organisasjonsnummer)
+        infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, organisasjonsnummer)
         ytelser.oppdaterHistorikk(periode, skjæringstidspunkt, arbeidsgiver.finnVedtaksperiodeRettEtter(this)?.periode) {
             oppdaterHistorikk(
                 ytelser.avgrensTil(periode),
-                validering = {})
+                validering = {}
+            )
         }
-        if (!beregnUtbetalinger(aktivitetslogg, arbeidsgiverUtbetalinger)) return false
-        behandlinger.valider(ytelser, erForlengelse())
-        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksimumSykepenger: Maksdatosituasjon, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) {
@@ -1292,6 +1290,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr)
+
+        fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
+            ytelser.info("Etter å ha oppdatert sykdomshistorikken fra ytelser står vi nå i ${type.name}. Avventer beregning av utbetalinger.")
+        }
 
         fun leaving(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
@@ -1552,11 +1554,15 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             håndterRevurdering(ytelser) {
-                validation(ytelser) {
-                    valider { vedtaksperiode.kalkulerUtbetalinger(this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
-                    onSuccess { vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering) }
-                }
+                vedtaksperiode.oppdaterHistorikk(ytelser, infotrygdhistorikk)
+                vedtaksperiode.tilstand.beregnUtbetalinger(vedtaksperiode, ytelser, arbeidsgiverUtbetalinger)
             }
+        }
+
+        override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
+            if (!vedtaksperiode.beregnUtbetalinger(ytelser, arbeidsgiverUtbetalinger)) return
+            vedtaksperiode.behandlinger.valider(ytelser, vedtaksperiode.erForlengelse())
+            vedtaksperiode.høstingsresultater(ytelser, AvventerSimuleringRevurdering, AvventerGodkjenningRevurdering)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -1955,12 +1961,17 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
         ) {
             håndterFørstegangsbehandling(ytelser, vedtaksperiode) {
-                validation(ytelser) {
-                    onValidationFailed { vedtaksperiode.forkast(ytelser) }
-                    valider { vedtaksperiode.kalkulerUtbetalinger(this, ytelser, infotrygdhistorikk, arbeidsgiverUtbetalinger) }
-                    onSuccess { vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning) }
-                }
+                vedtaksperiode.oppdaterHistorikk(ytelser, infotrygdhistorikk)
+                if (ytelser.harFunksjonelleFeilEllerVerre()) return@håndterFørstegangsbehandling vedtaksperiode.forkast(ytelser)
+                vedtaksperiode.tilstand.beregnUtbetalinger(vedtaksperiode, ytelser, arbeidsgiverUtbetalinger)
             }
+        }
+
+        override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
+            if (!vedtaksperiode.beregnUtbetalinger(ytelser, arbeidsgiverUtbetalinger)) return vedtaksperiode.forkast(ytelser)
+            vedtaksperiode.behandlinger.valider(ytelser, vedtaksperiode.erForlengelse())
+            if (ytelser.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(ytelser)
+            vedtaksperiode.høstingsresultater(ytelser, AvventerSimulering, AvventerGodkjenning)
         }
 
         override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {
