@@ -30,6 +30,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbareOppl
 import no.nav.helse.person.Behandlinger.Behandling.Companion.jurist
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbareOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreTidsnæreOpplysninger
+import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
 import no.nav.helse.person.Behandlinger.Behandling.Companion.varEllerErRettFør
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
@@ -305,11 +306,18 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>, validering: () -> Unit) {
-        val nyBehandling = behandlinger.last().håndterEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)?.also {
+        behandlinger.last().håndterEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)?.also {
             leggTilNyBehandling(it)
         }
         person.sykdomshistorikkEndret()
         validering()
+        hendelse.igangsettOverstyring(person)
+    }
+
+    private fun SykdomshistorikkHendelse.igangsettOverstyring(person: Person) {
+        revurderingseventyr(skjæringstidspunkt(), periode())
+            ?.takeIf { behandlinger.endretSykdomshistorikkFra(this) }
+            ?.let { revurderingseventyr -> person.igangsettOverstyring(revurderingseventyr) }
     }
 
     fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
@@ -1109,6 +1117,19 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             private val List<Behandling>.forrigeIverksatte get() = lastOrNull { it.vedtakFattet != null }
+
+            private fun <T> List<T>.nestSiste() = if (size < 2) null else get(size - 2)
+            private fun List<Behandling>.forrigeOgGjeldendeEndring(): Pair<Endring?, Endring> {
+                val gjeldendeEndring = last().endringer.last()
+                val forrigeEndring = last().endringer.nestSiste() ?: nestSiste()?.endringer?.last()
+                return forrigeEndring to gjeldendeEndring
+            }
+            internal fun List<Behandling>.endretSykdomshistorikkFra(hendelse: SykdomshistorikkHendelse): Boolean {
+                val (forrigeEndring, gjeldendeEndring) = forrigeOgGjeldendeEndring()
+                if (gjeldendeEndring.dokumentsporing != hendelse.dokumentsporing()) return false
+                if (forrigeEndring == null) return true
+                return gjeldendeEndring.sykdomstidslinje != forrigeEndring.sykdomstidslinje
+            }
 
             internal fun gjenopprett(dto: BehandlingInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Behandling {
                 return Behandling(
