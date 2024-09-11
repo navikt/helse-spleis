@@ -40,13 +40,10 @@ data class ArbeidsgiverDTO(
 
     private fun fjernDagerMedSykdom(ghostperiode: GhostPeriodeDTO): List<GhostPeriodeDTO> {
         if (generasjoner.isEmpty()) return listOf(ghostperiode)
-        val skjæringstidspunkt = ghostperiode.skjæringstidspunkt
         val tidslinjeperioderFraNyesteGenerasjon = generasjoner
             .first()
             .perioder
-            .filter { it.skjæringstidspunkt == skjæringstidspunkt }
             .sortedBy { it.fom }
-
         val oppslittetPølser = tidslinjeperioderFraNyesteGenerasjon.fold(listOf(ghostperiode)) { resultat, vedtaksperiode ->
             val tidligereGhostperioder = resultat.dropLast(1)
             val sisteGhostperiode = resultat.lastOrNull()

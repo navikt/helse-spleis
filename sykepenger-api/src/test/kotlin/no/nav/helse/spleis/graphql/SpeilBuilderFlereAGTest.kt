@@ -11,6 +11,7 @@ import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
@@ -128,6 +129,44 @@ internal class SpeilBuilderFlereAGTest : AbstractE2ETest() {
                 deaktivert = false
             )
             assertEquals(expected, actual)
+        }
+    }
+
+    @Test
+    fun `sender med ghost tidslinjer til speil med flere arbeidsgivere ulik skjæringstidspunkt`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(25.januar, 31.januar), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(1.januar, orgnummer = a1)
+        håndterInntektsmelding(1.januar, beregnetInntekt = 5000.månedlig, orgnummer = a2)
+
+        håndterVilkårsgrunnlag(
+            inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),
+            arbeidsforhold = listOf(a1 to EPOCH, a3 to EPOCH)
+        )
+        håndterYtelserTilGodkjenning()
+
+        val speilJson1 = speilApi()
+        val spleisVilkårsgrunnlagId = dto().vilkårsgrunnlagHistorikk.historikk.first().vilkårsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.vilkårsgrunnlagId
+
+        speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a1 }.ghostPerioder.also { ghostPerioder ->
+            assertEquals(0, ghostPerioder.size)
+        }
+
+        speilJson1.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder.also { ghostPerioder ->
+            assertEquals(1, ghostPerioder.size)
+            ghostPerioder[0].also { actual ->
+                val expected = GhostPeriodeDTO(
+                    id = actual.id,
+                    fom = 25.januar,
+                    tom = 28.januar,
+                    skjæringstidspunkt = 1.januar,
+                    vilkårsgrunnlagId = spleisVilkårsgrunnlagId,
+                    deaktivert = false
+                )
+                assertEquals(expected, actual)
+            }
         }
     }
 
