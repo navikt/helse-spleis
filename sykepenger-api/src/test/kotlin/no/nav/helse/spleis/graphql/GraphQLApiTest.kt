@@ -754,7 +754,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
           "skjonnsmessigFastsattAarlig": null
         }
       ], 
-      "versjon": 53
+      "versjon": 54
     }
   }
 }
