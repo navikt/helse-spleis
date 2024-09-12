@@ -83,6 +83,14 @@ import kotlin.reflect.KClass
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
+    fun `Overstyring av hele perioden til andre ytelser`() {
+        tilGodkjenning(januar, a1)
+        håndterOverstyrTidslinje(januar.map { ManuellOverskrivingDag(it, Dagtype.Pleiepengerdag) })
+        // Vet ikke om det er ønskelig, men er sånn det er da
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
     fun `Sendes ut overstyring i gangsatt når det er en periode som står i avventer inntektsmelding ved endring fra saksbehandler`() {
         nyttVedtak(januar)
 
