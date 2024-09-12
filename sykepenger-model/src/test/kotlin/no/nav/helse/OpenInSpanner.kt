@@ -76,14 +76,17 @@ class SpannerEtterTestInterceptor : TestWatcher {
             val response = client.send(request, HttpResponse.BodyHandlers.ofString())
             check(response.statusCode() == 201) { "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?"}
         }
+        // Litt gøyale query parametre til Spannerish
+        val queryString = mapOf("testnavn" to testnavn, "error" to errorMsg).queryString
+
         // Men vi kan se på den i ansatt.dev da, så kan den deles med folk uten naisdevice
-        val urlEncodedTestName = URLEncoder.encode(testnavn, "UTF-8")
-        val urlEncodedErrorName = errorMsg?.let { URLEncoder.encode(it, "UTF-8")}
-        if (urlEncodedErrorName != null) {
-            return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid?testnavn=$urlEncodedTestName?error=$urlEncodedErrorName")
-        }
-        return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid?testnavn=$urlEncodedTestName")
+        return URI("https://spannerish.ansatt.dev.nav.no/person/$uuid${queryString}")
     }
+
+    private val Map<String, String?>.queryString get() = this
+        .filterNot { (_, value) -> value.isNullOrBlank() }.entries
+        .joinToString("&") { (key, value) -> "${key}=${URLEncoder.encode(value, "UTF-8")}" }
+        .let { if (it.isBlank()) "" else "?$it" }
 
     private fun åpneBrowser(uri: URI) {
         if (Desktop.isDesktopSupported()) {
