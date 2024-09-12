@@ -2,6 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Objects
 import java.util.UUID
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
@@ -50,6 +51,8 @@ internal interface SykdomshistorikkHendelse : Hendelse {
         }
 
         override fun toString() = type
+        override fun equals(other: Any?) = other is Hendelseskilde && type == other.type && tidsstempel == other.tidsstempel && meldingsreferanseId == other.meldingsreferanseId
+        override fun hashCode() = Objects.hash(type, tidsstempel, meldingsreferanseId)
         internal fun meldingsreferanseId() = meldingsreferanseId
         internal fun erAvType(meldingstype: Melding) = this.type == kildenavn(meldingstype)
         // todo: midlertidig fordi "Inntektsmelding" ikke er en SykdomshistorikkHendelse. Alle dager med kilde "Inntektsmelding" må migreres til "BitFraInntektsmelding"

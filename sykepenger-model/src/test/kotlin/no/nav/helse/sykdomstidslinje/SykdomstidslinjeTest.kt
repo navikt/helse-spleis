@@ -1,5 +1,7 @@
 package no.nav.helse.sykdomstidslinje
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -11,6 +13,7 @@ import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
+import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
@@ -26,6 +29,7 @@ import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +40,22 @@ internal class SykdomstidslinjeTest {
     @BeforeEach
     fun setup() {
         resetSeed()
+    }
+
+    @Test
+    fun `Like sykdomstidslinjer med samme kilde er like`() {
+        val meldingsreferanse = UUID.randomUUID()
+        val nå = LocalDateTime.now()
+        val kilde = Hendelseskilde(SykdomshistorikkHendelse::class, meldingsreferanse, nå)
+        val kilde2 = Hendelseskilde(SykdomshistorikkHendelse::class, meldingsreferanse, nå)
+
+        val sykdomstidslinje1 = 5.S(kilde)
+        resetSeed()
+        val sykdomstidslinje2 = 5.S(kilde2)
+        resetSeed()
+        val sykdomstidslinje3 = 5.S(Hendelseskilde(SykdomshistorikkHendelse::class, UUID.randomUUID(), nå))
+        assertEquals(sykdomstidslinje1, sykdomstidslinje2)
+        assertNotEquals(sykdomstidslinje1, sykdomstidslinje3)
     }
 
     @Test
