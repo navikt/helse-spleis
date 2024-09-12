@@ -115,24 +115,6 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
 
     override fun iterator() = this.utbetalingsdager.iterator()
 
-    private fun binde(
-        other: Utbetalingstidslinje
-    ) = Utbetalingstidslinje(
-        this.utbetalingsdager.zip(other.utbetalingsdager) { venstre, høyre -> maxOf(venstre, høyre) }.toMutableList()
-    )
-
-    private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate): Utbetalingstidslinje {
-        val original = this
-        return Builder().apply {
-            tidligsteDato.datesUntil(original.førsteDato)
-                .forEach { addUkjentDag(it) }
-            original.utbetalingsdager.forEach { add(it) }
-            original.sisteDato.plusDays(1)
-                .datesUntil(sisteDato.plusDays(1))
-                .forEach { addUkjentDag(it) }
-        }.build()
-    }
-
     private fun tidligsteDato(other: Utbetalingstidslinje) =
         minOf(this.førsteDato, other.førsteDato)
 
