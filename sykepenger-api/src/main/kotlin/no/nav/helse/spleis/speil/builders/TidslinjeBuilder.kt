@@ -212,8 +212,8 @@ internal class UtbetalingstidslinjeBuilder(private val dto: Utbetalingstidslinje
         return UtbetalingsdagDTO(
             type = type,
             dato = dato,
-            arbeidsgiverbeløp = økonomi.arbeidsgiverbeløp!!.dagligInt.beløp,
-            personbeløp = økonomi.personbeløp!!.dagligInt.beløp,
+            arbeidsgiverbeløp = økonomi.arbeidsgiverbeløp?.dagligInt?.beløp ?: 0,
+            personbeløp = økonomi.personbeløp?.dagligInt?.beløp ?: 0,
             totalGrad = økonomi.totalGrad.prosent.roundToInt()
         )
     }
