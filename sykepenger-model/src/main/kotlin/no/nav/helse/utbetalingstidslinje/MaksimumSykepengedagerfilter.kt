@@ -149,7 +149,6 @@ internal class MaksimumSykepengedagerfilter(
         økonomi: Økonomi
     ) {
         state.avvistDag(this, dato)
-        oppholdsdag(dato)
         maksdatoer[dato] = this.teller.maksdatoFor(dato)
     }
 
@@ -267,13 +266,15 @@ internal class MaksimumSykepengedagerfilter(
             }
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                avgrenser.avvisDag(dagen, begrunnelse)
                 avgrenser.opphold += 1
                 vurderTilstrekkeligOppholdNådd(avgrenser)
-                avgrenser.state.avvistDag(avgrenser, dagen)
             }
 
             override fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.avvisDag(dagen, begrunnelse)
+                avgrenser.opphold += 1
+                vurderTilstrekkeligOppholdNådd(avgrenser)
             }
 
             override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
@@ -292,7 +293,7 @@ internal class MaksimumSykepengedagerfilter(
             }
 
             private fun vurderTilstrekkeligOppholdNådd(avgrenser: MaksimumSykepengedagerfilter) {
-                if (avgrenser.opphold <= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return
+                if (avgrenser.opphold < TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) return
                 avgrenser.state(KaranteneTilstrekkeligOppholdNådd)
             }
         }

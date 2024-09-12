@@ -122,18 +122,18 @@ internal class MaksimumSykepengedagerfilterTest {
 
     @Test
     fun `avvist dag som siste oppholdsdag`() {
-        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, 181.ARB, 1.AVV(1000, begrunnelse = MinimumSykdomsgrad))
+        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, 181.ARB, 2.AVV(1000, begrunnelse = MinimumSykdomsgrad))
         val avvisteDager = tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
-        assertEquals(listOf(28.juni(2019)), avvisteDager)
-        assertEquals(avvisteDager, avvisteDager
-            .filter { dato ->
-                val a = avvisteTidslinjer.single()[dato].erAvvistMed(MinimumSykdomsgrad)
-                val b = avvisteTidslinjer.single()[dato].erAvvistMed(SykepengedagerOppbrukt)
-                a != null && b != null
-            }
-        )
-        assertEquals(0, forbrukteDager)
-        assertEquals(248, gjenståendeDager)
+        assertEquals(listOf(28.juni(2019), 29.juni(2019)), avvisteDager)
+
+        assertNotNull(avvisteTidslinjer.single()[28.juni(2019)].erAvvistMed(MinimumSykdomsgrad))
+        assertNotNull(avvisteTidslinjer.single()[28.juni(2019)].erAvvistMed(SykepengedagerOppbrukt))
+
+        assertNotNull(avvisteTidslinjer.single()[29.juni(2019)].erAvvistMed(MinimumSykdomsgrad))
+        assertNotNull(avvisteTidslinjer.single()[29.juni(2019)].erAvvistMed(NyVilkårsprøvingNødvendig))
+
+        assertEquals(248, forbrukteDager)
+        assertEquals(0, gjenståendeDager)
     }
 
     @Test
