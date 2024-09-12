@@ -47,9 +47,9 @@ internal class VilkårsprøvdSkjæringstidspunkt(
 
     internal fun ghosttidslinjer(utbetalingstidslinjer: Map<String, List<Utbetalingstidslinje>>): Map<String, Utbetalingstidslinje> {
         val beregningsperiode = utbetalingstidslinjer.values.flatten().map { it.periode() }.periode()!!
-        return inntekter.mapValues { (orgnr, v) ->
-            v.ghosttidslinje(beregningsperiode, skjæringstidspunkt, `6G`, utbetalingstidslinjer[orgnr] ?: emptyList())
-        }
+        return inntekter
+            .mapValues { (orgnr, v) -> v.ghosttidslinje(beregningsperiode, skjæringstidspunkt, `6G`, utbetalingstidslinjer[orgnr] ?: emptyList()) }
+            .filterValues { it.isNotEmpty() }
     }
 
     internal class FaktaavklartInntekt(

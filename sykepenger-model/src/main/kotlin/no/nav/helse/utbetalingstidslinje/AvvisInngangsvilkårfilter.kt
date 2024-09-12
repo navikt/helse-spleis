@@ -2,11 +2,12 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
 internal class AvvisInngangsvilkårfilter(
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 ): UtbetalingstidslinjerFilter {
 
     override fun filter(
@@ -15,6 +16,7 @@ internal class AvvisInngangsvilkårfilter(
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg
     ): List<Utbetalingstidslinje> {
-        return vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer, periode, subsumsjonslogg)
+        val beregningsperiode = tidslinjer.map { it.periode() }.periode()!!
+        return vilkårsgrunnlagHistorikk.avvis(tidslinjer, beregningsperiode, periode, subsumsjonslogg)
     }
 }

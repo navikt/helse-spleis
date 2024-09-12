@@ -2088,7 +2088,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_2,
             input = mapOf(
                 "sekstisyvårsdag" to 5.februar(2018),
-                "utfallFom" to 6.februar,
+                "utfallFom" to 1.mars,
                 "utfallTom" to 31.mars,
                 "periodeFom" to 1.mars,
                 "periodeTom" to 31.mars,

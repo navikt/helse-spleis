@@ -1129,7 +1129,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(hendelse: IAktivitetslogg, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {
         val uberegnetTidslinjePerArbeidsgiver = utbetalingstidslinjePerArbeidsgiver(grunnlagsdata)
-        return filtrerUtbetalingstidslinjer(hendelse, uberegnetTidslinjePerArbeidsgiver)
+        return filtrerUtbetalingstidslinjer(hendelse, uberegnetTidslinjePerArbeidsgiver, grunnlagsdata)
     }
 
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
@@ -1149,7 +1149,7 @@ internal class Vedtaksperiode private constructor(
         return faktaavklarteInntekter.ghosttidslinjer(utbetalingstidslinjer)
     }
 
-    private fun filtrerUtbetalingstidslinjer(hendelse: IAktivitetslogg, uberegnetTidslinjePerArbeidsgiver: Map<String, Utbetalingstidslinje>): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {
+    private fun filtrerUtbetalingstidslinjer(hendelse: IAktivitetslogg, uberegnetTidslinjePerArbeidsgiver: Map<String, Utbetalingstidslinje>, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Pair<MaksimumSykepengedagerfilter, Map<String, Utbetalingstidslinje>> {
         // grunnlaget for maksdatoberegning er alt som har skjedd før, frem til og med vedtaksperioden som
         // beregnes
         val historisktidslinjePerArbeidsgiver = person.vedtaksperioder { it.periode.endInclusive < periode.start }
@@ -1163,7 +1163,7 @@ internal class Vedtaksperiode private constructor(
         val filtere = listOf(
             Sykdomsgradfilter(person.minimumSykdomsgradsvurdering),
             AvvisDagerEtterDødsdatofilter(person.alder),
-            AvvisInngangsvilkårfilter(person.vilkårsgrunnlagHistorikk),
+            AvvisInngangsvilkårfilter(grunnlagsdata),
             maksdatofilter,
             MaksimumUtbetalingFilter()
         )
