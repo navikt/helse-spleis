@@ -45,5 +45,5 @@ data class GhostPeriodeDTO(
         this.start > other.fom && this.endInclusive >= other.tom
 
     private fun ClosedRange<LocalDate>.overlapperMedSnute(other: GhostPeriodeDTO) =
-        this.endInclusive < other.tom && this.endInclusive > other.fom
+        this.start <= other.fom && this.endInclusive < other.tom
 }
