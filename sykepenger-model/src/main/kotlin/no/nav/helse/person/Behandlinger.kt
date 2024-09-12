@@ -1143,7 +1143,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 val (forrigeEndring, gjeldendeEndring) = forrigeOgGjeldendeEndring()
                 if (gjeldendeEndring.dokumentsporing != hendelse.dokumentsporing()) return false
                 if (forrigeEndring == null) return true
-                return gjeldendeEndring.sykdomstidslinje != forrigeEndring.sykdomstidslinje
+                return !gjeldendeEndring.sykdomstidslinje.funksjoneltLik(forrigeEndring.sykdomstidslinje)
             }
 
             internal fun gjenopprett(dto: BehandlingInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Behandling {

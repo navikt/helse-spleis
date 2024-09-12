@@ -149,6 +149,8 @@ internal class Sykdomstidslinje private constructor(
         return dager == other.dager && periode == other.periode && låstePerioder == other.låstePerioder
     }
 
+    internal fun funksjoneltLik(other: Sykdomstidslinje) = periode == other.periode && låstePerioder == other.låstePerioder && dager.mapValues { it.value::class } == other.dager.mapValues { it.value::class }
+
     override fun hashCode() = Objects.hash(dager, periode, låstePerioder)
 
     override fun toString() = toShortString()

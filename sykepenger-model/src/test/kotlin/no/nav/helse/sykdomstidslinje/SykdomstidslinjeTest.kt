@@ -59,6 +59,20 @@ internal class SykdomstidslinjeTest {
     }
 
     @Test
+    fun `Funksjonelt like sykdomstidslinjer`() {
+        val kilde = Hendelseskilde("SammeType", UUID.randomUUID(), LocalDateTime.now())
+        val kilde2 = Hendelseskilde("SammeType", UUID.randomUUID(), LocalDateTime.now())
+
+        val sykdomstidslinje = 20.S(kilde)
+        resetSeed()
+        val sykdomstidslinje2 = 20.S(kilde2)
+
+        assertNotEquals(sykdomstidslinje, sykdomstidslinje2)
+        assertTrue(sykdomstidslinje.funksjoneltLik(sykdomstidslinje2))
+        assertTrue(sykdomstidslinje2.funksjoneltLik(sykdomstidslinje))
+    }
+
+    @Test
     fun `unik dagtype short string `() {
         assertEquals("Tom tidslinje", Sykdomstidslinje().toUnikDagtypeShortString())
         val tidslinje = 5.S + 5.F+ 5.UK + 5.P
