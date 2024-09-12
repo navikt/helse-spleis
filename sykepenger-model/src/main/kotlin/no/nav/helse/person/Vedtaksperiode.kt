@@ -1887,6 +1887,11 @@ internal class Vedtaksperiode private constructor(
             revurdering.inngåVedSaksbehandlerendring(vedtaksperiode, vedtaksperiode.periode)
         }
 
+        override fun beregnUtbetalinger(vedtaksperiode: Vedtaksperiode, ytelser: Ytelser) {
+            super.beregnUtbetalinger(vedtaksperiode, ytelser)
+            if (!vedtaksperiode.forventerInntekt()) vedtaksperiode.behandlinger.valider(ytelser, vedtaksperiode.erForlengelse()) // LOL vi skal til AUU så bare slenger på noen varsler her
+        }
+
         private fun tilstand(
             hendelse: IAktivitetslogg,
             vedtaksperiode: Vedtaksperiode,

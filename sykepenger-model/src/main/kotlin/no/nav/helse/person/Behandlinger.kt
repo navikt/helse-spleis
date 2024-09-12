@@ -133,9 +133,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     }
 
     internal fun valider(ytelser: Ytelser, erForlengelse: Boolean) {
-        siste!!.valider { maksdato ->
-            ytelser.valider(periode(), skjæringstidspunkt(), maksdato, erForlengelse)
-        }
+        val sisteUtbetaling = siste
+        if (sisteUtbetaling == null) ytelser.valider(periode(), skjæringstidspunkt(), periode().endInclusive, erForlengelse)
+        else sisteUtbetaling.valider { maksdato -> ytelser.valider(periode(), skjæringstidspunkt(), maksdato, erForlengelse) }
     }
 
     internal fun erKlarForGodkjenning() = siste?.erKlarForGodkjenning() ?: false
