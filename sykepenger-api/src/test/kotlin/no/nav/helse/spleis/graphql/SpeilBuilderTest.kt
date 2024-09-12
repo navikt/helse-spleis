@@ -148,7 +148,7 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val forventetFørstedag = SammenslåttDag(
             dagen = 1.januar,
             sykdomstidslinjedagtype = SykdomstidslinjedagType.SYKEDAG,
-            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.UkjentDag, // ingen utbetalingstidslinje
+            utbetalingstidslinjedagtype = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, // ingen utbetalingstidslinje
             kilde = Sykdomstidslinjedag.SykdomstidslinjedagKilde(SykdomstidslinjedagKildetype.Saksbehandler, idOverstyring),
             grad = 100,
             utbetalingsinfo = null

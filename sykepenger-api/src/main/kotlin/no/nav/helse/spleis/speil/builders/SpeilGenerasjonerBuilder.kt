@@ -85,13 +85,14 @@ internal class SpeilGenerasjonerBuilder(
     private fun mapUberegnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto, periodetilstand: Periodetilstand? = null): UberegnetPeriode {
         val sisteEndring = generasjon.endringer.last()
         val sykdomstidslinje = SykdomstidslinjeBuilder(sisteEndring.sykdomstidslinje, sisteEndring.periode).build()
+        val utbetalingstidslinje = UtbetalingstidslinjeBuilder(sisteEndring.utbetalingstidslinje).build()
         return UberegnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,
             kilde = generasjon.kilde.meldingsreferanseId,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
-            sammenslåttTidslinje = sykdomstidslinje.merge(emptyList()),
+            sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
             inntektskilde = UtbetalingInntektskilde.EN_ARBEIDSGIVER, // feltet gir ikke mening for uberegnede perioder
             erForkastet = false,
@@ -118,10 +119,9 @@ internal class SpeilGenerasjonerBuilder(
     private fun mapBeregnetPeriode(vedtaksperiode: VedtaksperiodeUtDto, generasjon: BehandlingUtDto): BeregnetPeriode {
         val sisteEndring = generasjon.endringer.last()
         val utbetaling = utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId } ?: error("Fant ikke tilhørende utbetaling for vedtaksperiodeId=${vedtaksperiode.id}")
-        val utbetalingstidslinje = utbetalingstidslinjer.single { it.first == sisteEndring.utbetalingId }.second.build()
-        val avgrensetUtbetalingstidslinje = utbetalingstidslinje.filter { it.dato in sisteEndring.periode.fom..sisteEndring.periode.tom }
-        val skjæringstidspunkt = sisteEndring.skjæringstidspunkt!!
-        val sisteSykepengedag = avgrensetUtbetalingstidslinje.sisteNavDag()?.dato ?: sisteEndring.periode.tom
+        val utbetalingstidslinje = UtbetalingstidslinjeBuilder(sisteEndring.utbetalingstidslinje).build()
+        val skjæringstidspunkt = sisteEndring.skjæringstidspunkt
+        val sisteSykepengedag = utbetalingstidslinje.sisteNavDag()?.dato ?: sisteEndring.periode.tom
         val sykdomstidslinje = SykdomstidslinjeBuilder(sisteEndring.sykdomstidslinje, sisteEndring.periode).build()
         return BeregnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
@@ -136,7 +136,7 @@ internal class SpeilGenerasjonerBuilder(
             opprettet = vedtaksperiode.opprettet,
             behandlingOpprettet = generasjon.endringer.first().tidsstempel,
             oppdatert = vedtaksperiode.oppdatert,
-            periodetilstand = utledePeriodetilstand(vedtaksperiode.tilstand, utbetaling, avgrensetUtbetalingstidslinje),
+            periodetilstand = utledePeriodetilstand(vedtaksperiode.tilstand, utbetaling, utbetalingstidslinje),
             skjæringstidspunkt = skjæringstidspunkt,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
             beregningId = utbetaling.id,
