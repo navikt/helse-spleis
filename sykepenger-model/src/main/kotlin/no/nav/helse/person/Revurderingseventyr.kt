@@ -12,7 +12,6 @@ import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsforhold
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiveropplysninger
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Arbeidsgiverperiode
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.Grunnbeløpsregulering
-import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingArbeidsgiverperiode
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertInntektsmeldingInntektsopplysninger
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.KorrigertSøknad
 import no.nav.helse.person.Revurderingseventyr.RevurderingÅrsak.MinimumSykdomsgradVurdert
@@ -44,7 +43,6 @@ class Revurderingseventyr private constructor(
         fun arbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(Arbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun infotrygdendring(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(RevurderingÅrsak.Infotrygdendring, skjæringstidspunkt, periodeForEndring, hendelse)
         fun korrigertInntektsmeldingInntektsopplysninger(hendelse: Hendelse, skjæringstidspunkt: LocalDate, endringsdato: LocalDate) = Revurderingseventyr(KorrigertInntektsmeldingInntektsopplysninger, skjæringstidspunkt, endringsdato.somPeriode(), hendelse)
-        fun korrigertInntektsmeldingArbeidsgiverperiode(hendelse: Hendelse, skjæringstidspunkt: LocalDate, periodeForEndring: Periode) = Revurderingseventyr(KorrigertInntektsmeldingArbeidsgiverperiode, skjæringstidspunkt, periodeForEndring, hendelse)
         fun grunnbeløpsregulering(hendelse: Hendelse, skjæringstidspunkt: LocalDate) = Revurderingseventyr(Grunnbeløpsregulering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
         fun annullering(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(Annullering, periode.start, periode, hendelse)
         fun minimumSykdomsgradVurdert(hendelse: Hendelse, periode: Periode) = Revurderingseventyr(MinimumSykdomsgradVurdert, periode.start, periode, hendelse)
@@ -112,46 +110,46 @@ class Revurderingseventyr private constructor(
 
         fun navn(): String
 
-        object Arbeidsgiverperiode : RevurderingÅrsak {
+        data object Arbeidsgiverperiode : RevurderingÅrsak {
             override fun navn() = "ARBEIDSGIVERPERIODE"
         }
 
-        object Infotrygdendring: RevurderingÅrsak {
+        data object Infotrygdendring: RevurderingÅrsak {
             override fun navn(): String {
                 return "INFOTRYGDENDRING"
             }
         }
 
-        object Sykdomstidslinje : RevurderingÅrsak {
+        data object Sykdomstidslinje : RevurderingÅrsak {
             override fun navn() = "SYKDOMSTIDSLINJE"
         }
 
-        object Arbeidsgiveropplysninger : RevurderingÅrsak {
+        data object Arbeidsgiveropplysninger : RevurderingÅrsak {
             override fun navn() = "ARBEIDSGIVEROPPLYSNINGER"
         }
 
-        object SkjønssmessigFastsettelse : RevurderingÅrsak {
+        data object SkjønssmessigFastsettelse : RevurderingÅrsak {
             override fun navn() = "SKJØNNSMESSIG_FASTSETTELSE"
         }
 
-        object Arbeidsforhold : RevurderingÅrsak {
+        data object Arbeidsforhold : RevurderingÅrsak {
             override fun navn() = "ARBEIDSFORHOLD"
         }
-        object Grunnbeløpsregulering : RevurderingÅrsak {
+        data object Grunnbeløpsregulering : RevurderingÅrsak {
             override fun navn() = "GRUNNBELØPSREGULERING"
         }
-        object Annullering : RevurderingÅrsak {
+        data object Annullering : RevurderingÅrsak {
             override fun navn() = "ANNULLERING"
             override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
                 hendelse.varsel(RV_RV_7)
             }
         }
 
-        object MinimumSykdomsgradVurdert : RevurderingÅrsak {
+        data object MinimumSykdomsgradVurdert : RevurderingÅrsak {
             override fun navn(): String = "MINIMUM_SYKDOMSGRAD_VURDERT"
         }
 
-        object Reberegning : RevurderingÅrsak {
+        data object Reberegning : RevurderingÅrsak {
             override fun emitOverstyringIgangsattEvent(
                 person: Person,
                 vedtaksperioder: List<VedtaksperiodeData>,
@@ -163,11 +161,11 @@ class Revurderingseventyr private constructor(
             override fun navn() = "REBEREGNING"
         }
 
-        object KorrigertSøknad : RevurderingÅrsak {
+        data object KorrigertSøknad : RevurderingÅrsak {
             override fun navn() = "KORRIGERT_SØKNAD"
         }
 
-        object KorrigertInntektsmeldingInntektsopplysninger : RevurderingÅrsak {
+        data object KorrigertInntektsmeldingInntektsopplysninger : RevurderingÅrsak {
 
             override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
                 if (ingenAndrePåmeldt) hendelse.varsel(RV_IM_4, "Inngår i revurdering på grunn av korrigert inntektsmelding")
@@ -177,16 +175,7 @@ class Revurderingseventyr private constructor(
             override fun navn() = "KORRIGERT_INNTEKTSMELDING_INNTEKTSOPPLYSNINGER"
         }
 
-        object KorrigertInntektsmeldingArbeidsgiverperiode : RevurderingÅrsak {
-
-            override fun dersomInngått(hendelse: IAktivitetslogg, ingenAndrePåmeldt: Boolean) {
-                hendelse.info("korrigert inntektsmelding trigget revurdering på grunn av arbeidsgiverperiode")
-            }
-
-            override fun navn() = "KORRIGERT_INNTEKTSMELDING_ARBEIDSGIVERPERIODE"
-        }
-
-        object NyPeriode : RevurderingÅrsak {
+        data object NyPeriode : RevurderingÅrsak {
             override fun navn() = "NY_PERIODE"
         }
     }
