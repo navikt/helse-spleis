@@ -69,7 +69,7 @@ internal object Api {
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(Response(Data(person))), Json)
                     } catch (err: Exception) {
                         logger.error("callId=${call.callId} Kunne ikke lage JSON for Spesialist, sjekk tjenestekall-indeksen!")
-                        sikkerlogger.error("callId=${call.callId} {} Kunne ikke lage JSON for Spesialist: ${err.message}", keyValue("fødselsnummer", fødselsnummer), err)
+                        sikkerlogger.error("callId=${call.callId} {} Kunne ikke lage JSON for Spesialist: ${err.javaClass.simpleName} - ${err.message}", keyValue("fødselsnummer", fødselsnummer), err)
                         call.respondText(graphQLV2ObjectMapper.writeValueAsString(mapOf(
                             "errors" to listOf(
                                 mapOf(
