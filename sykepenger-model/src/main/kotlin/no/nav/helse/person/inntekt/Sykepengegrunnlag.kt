@@ -293,7 +293,7 @@ internal class Sykepengegrunnlag private constructor(
         søknad.nyeInntekter(builder, skjæringstidspunkt)
         val (resultat, harTilkommetInntekter) = builder.resultat(kandidatForTilkommenInntekt = true)
         if (harTilkommetInntekter) {
-            søknad.varsel(Varselkode.RV_SV_5)
+            søknad.info("Legger til inntekter fra søknaden i sykepengegrunnlaget")
         }
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
     }
