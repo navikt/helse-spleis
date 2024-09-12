@@ -2,9 +2,8 @@
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL
-import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource
 
-class AftereEachTestOpenSpannerExtension : AfterEachCallback, CloseableResource {
+class AftereEachTestOpenSpannerExtension : AfterEachCallback {
 
     @Throws(Exception::class)
     override fun afterEach(context: ExtensionContext) {
@@ -17,9 +16,5 @@ class AftereEachTestOpenSpannerExtension : AfterEachCallback, CloseableResource 
         } catch (e: Exception) {
             testWatcher.openTheSpanner(context, e.cause?.message)
         }
-    }
-
-    override fun close() {
-
     }
 }
