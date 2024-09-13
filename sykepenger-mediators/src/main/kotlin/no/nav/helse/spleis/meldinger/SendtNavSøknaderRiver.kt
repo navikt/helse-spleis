@@ -28,10 +28,10 @@ internal class SendtNavSøknaderRiver(
         }
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
-        message.interestedIn("tilkomneInntekter") {
-            message.requireArray("tilkomneInntekter") {
-                require("orgnummer") { it.isTextual }
-                require("beløp") { it.isNumber }
+        message.interestedIn("inntektFraNyttArbeidsforhold") {
+            message.requireArray("inntektFraNyttArbeidsforhold") {
+                require("arbeidsstedOrgnummer") { it.isTextual }
+                require("belopPerDag") { it.isNumber }
                 require("fom") { JsonNode::asLocalDate }
                 require("tom") { JsonNode::asLocalDate }
             }

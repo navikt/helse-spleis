@@ -13,6 +13,7 @@ import java.util.UUID
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -214,7 +215,8 @@ internal class TestMessageFactory(
         opprinneligSendt: LocalDateTime? = null,
         historiskeFolkeregisteridenter: List<String> = emptyList(),
         sendTilGosys: Boolean? = false,
-        egenmeldingerFraSykmelding: List<LocalDate> = emptyList()
+        egenmeldingerFraSykmelding: List<LocalDate> = emptyList(),
+        inntektFraNyttArbeidsforhold: List<InntektFraNyttArbeidsforholdDTO> = emptyList()
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
@@ -242,7 +244,8 @@ internal class TestMessageFactory(
                 MerknadDTO("EN_ANNEN_MERKNADSTYPE", "tekstlig begrunnelse")
             ),
             sendTilGosys = sendTilGosys,
-            egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding
+            egenmeldingsdagerFraSykmelding = egenmeldingerFraSykmelding,
+            inntektFraNyttArbeidsforhold = inntektFraNyttArbeidsforhold
         )
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId, historiskeFolkeregisteridenter))
     }

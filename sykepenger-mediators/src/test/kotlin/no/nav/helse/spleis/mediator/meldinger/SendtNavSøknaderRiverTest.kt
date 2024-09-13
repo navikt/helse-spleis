@@ -22,7 +22,9 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykmeldingstypeDTO
 import no.nav.helse.januar
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.spleis.IMessageMediator
+import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -121,6 +123,26 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
 
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         SendtNavSøknaderRiver(rapidsConnection, mediator)
+    }
+
+    @Test
+    fun `Noe med tilkommen inntekt`() {
+        val factory = TestMessageFactory("1", "2", "3", 31000.0, 1.januar(1990))
+        val (_, søknad) = factory.lagSøknadNav(
+            perioder = listOf(SoknadsperiodeDTO(1.januar, 31.januar, 100)),
+            inntektFraNyttArbeidsforhold = listOf(
+                InntektFraNyttArbeidsforholdDTO(
+                    fom = 10.januar,
+                    tom = 31.januar,
+                    forsteArbeidsdag = 10.januar,
+                    forstegangssporsmal = true,
+                    belopPerDag = 1000,
+                    arbeidsstedOrgnummer = "4",
+                    opplysningspliktigOrgnummer = "5"
+                    )
+            ))
+
+        assertNoErrors(søknad)
     }
 
     @Test
