@@ -24,6 +24,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
+import no.nav.helse.sykdomstidslinje.Dag.Companion.funksjoneltLik
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -149,7 +150,7 @@ internal class Sykdomstidslinje private constructor(
         return dager == other.dager && periode == other.periode && låstePerioder == other.låstePerioder
     }
 
-    internal fun funksjoneltLik(other: Sykdomstidslinje) = periode == other.periode && låstePerioder == other.låstePerioder && dager.mapValues { it.value::class } == other.dager.mapValues { it.value::class }
+    internal fun funksjoneltLik(other: Sykdomstidslinje) = dager.funksjoneltLik(other.dager)
 
     override fun hashCode() = Objects.hash(dager, periode, låstePerioder)
 
@@ -385,11 +386,6 @@ internal class Sykdomstidslinje private constructor(
         periode = periode?.dto(),
         låstePerioder = låstePerioder.map { it.dto() }
     )
-
-    internal fun utenProblemdager(): Sykdomstidslinje {
-        return Sykdomstidslinje(this.dager.filter { (_, dag) -> dag !is ProblemDag }.toSortedMap(), this.periode)
-    }
-
 }
 
 internal fun List<Sykdomstidslinje>.merge(beste: BesteStrategy = default): Sykdomstidslinje =

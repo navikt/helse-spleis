@@ -4,10 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.stream.Collectors
-import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
-import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
@@ -22,6 +20,7 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
@@ -57,10 +56,10 @@ internal val Int.N
 
 internal fun Int.S(melding: Melding) = this.S(Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now()))
 
-internal fun Int.S(hendelseskilde: Hendelseskilde) = Sykdomstidslinje.sykedager(
+internal fun Int.S(hendelseskilde: Hendelseskilde, grad: Prosentdel = 100.prosent) = Sykdomstidslinje.sykedager(
     dagensDato,
     dagensDato.plusDays(this.toLong() - 1),
-    100.prosent,
+    grad,
     hendelseskilde
 ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
@@ -114,12 +113,16 @@ internal val Int.AIG
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.YF
-    get() = Sykdomstidslinje.andreYtelsedager(
-        dagensDato,
-        dagensDato.plusDays(this.toLong() - 1),
-        INGEN,
-        Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
-    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+    get() = YF(Dag.AndreYtelser.AnnenYtelse.Foreldrepenger)
+
+internal fun Int.YF(ytelse: Dag.AndreYtelser.AnnenYtelse, kilde: Hendelseskilde = INGEN) = Sykdomstidslinje.andreYtelsedager(
+    dagensDato,
+    dagensDato.plusDays(this.toLong() - 1),
+    kilde,
+    ytelse
+).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal fun unikKilde() = UUID.randomUUID().let { Hendelseskilde(it.toString(), it, LocalDateTime.now()) }
 
 internal val Int.YD
     get() = Sykdomstidslinje.andreYtelsedager(
@@ -193,10 +196,10 @@ internal val Int.UK
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { UkjentDag(it, INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-internal val Int.PROBLEM
-    get() = Sykdomstidslinje(
-        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, INGEN, "Problemdag") }))
+internal val Int.PROBLEM get() = PROBLEM("Problemdag", INGEN)
+internal fun Int.PROBLEM(melding: String, kilde: Hendelseskilde) = Sykdomstidslinje(
+    dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
+        .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.FORELDET

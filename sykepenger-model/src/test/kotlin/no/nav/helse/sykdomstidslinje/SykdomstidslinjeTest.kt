@@ -12,6 +12,8 @@ import no.nav.helse.januar
 import no.nav.helse.mandag
 import no.nav.helse.mars
 import no.nav.helse.onsdag
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Foreldrepenger
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.testhelpers.A
@@ -19,11 +21,13 @@ import no.nav.helse.testhelpers.AIG
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.N
 import no.nav.helse.testhelpers.P
+import no.nav.helse.testhelpers.PROBLEM
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.TestEvent
 import no.nav.helse.testhelpers.UK
 import no.nav.helse.testhelpers.YF
 import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.unikKilde
 import no.nav.helse.tirsdag
 import no.nav.helse.torsdag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -60,16 +64,52 @@ internal class SykdomstidslinjeTest {
 
     @Test
     fun `Funksjonelt like sykdomstidslinjer`() {
-        val kilde = Hendelseskilde("SammeType", UUID.randomUUID(), LocalDateTime.now())
-        val kilde2 = Hendelseskilde("SammeType", UUID.randomUUID(), LocalDateTime.now())
-
-        val sykdomstidslinje = 20.S(kilde)
+        val sykdomstidslinje = 20.S(unikKilde())
         resetSeed()
-        val sykdomstidslinje2 = 20.S(kilde2)
+        val sykdomstidslinje2 = 20.S(unikKilde())
 
         assertNotEquals(sykdomstidslinje, sykdomstidslinje2)
         assertTrue(sykdomstidslinje.funksjoneltLik(sykdomstidslinje2))
         assertTrue(sykdomstidslinje2.funksjoneltLik(sykdomstidslinje))
+    }
+
+    @Test
+    fun `Forskjellig grad er ikke funksjonelt likt`() {
+        val sykdomstidslinje = 20.S(unikKilde(), 100.prosent)
+        resetSeed()
+        val sykdomstidslinje2 = 20.S(unikKilde(), 50.prosent)
+
+        assertNotEquals(sykdomstidslinje, sykdomstidslinje2)
+        assertFalse(sykdomstidslinje.funksjoneltLik(sykdomstidslinje2))
+        assertFalse(sykdomstidslinje2.funksjoneltLik(sykdomstidslinje))
+    }
+
+    @Test
+    fun `Forskjellige andre ytelser er ikke funksjonelt likt`() {
+        val sykdomstidslinje = 20.YF(Foreldrepenger)
+        resetSeed()
+        val sykdomstidslinje2 = 20.YF(Pleiepenger)
+        resetSeed()
+        val sykdomstidslinje3 = 20.YF(Foreldrepenger, kilde = unikKilde())
+
+        assertFalse(sykdomstidslinje.funksjoneltLik(sykdomstidslinje2))
+        assertFalse(sykdomstidslinje2.funksjoneltLik(sykdomstidslinje))
+        assertTrue(sykdomstidslinje.funksjoneltLik(sykdomstidslinje3))
+        assertTrue(sykdomstidslinje3.funksjoneltLik(sykdomstidslinje))
+    }
+
+    @Test
+    fun `Forskjellige meldinger på problemdager er ikke funksjonelt likt (hva enn det betyr)`() {
+        val sykdomstidslinje = 20.PROBLEM("Forklaring1", unikKilde())
+        resetSeed()
+        val sykdomstidslinje2 = 20.PROBLEM("Forklaring2", unikKilde())
+        resetSeed()
+        val sykdomstidslinje3 = 20.PROBLEM("Forklaring1", unikKilde())
+
+        assertFalse(sykdomstidslinje.funksjoneltLik(sykdomstidslinje2))
+        assertFalse(sykdomstidslinje2.funksjoneltLik(sykdomstidslinje))
+        assertTrue(sykdomstidslinje.funksjoneltLik(sykdomstidslinje3))
+        assertTrue(sykdomstidslinje3.funksjoneltLik(sykdomstidslinje))
     }
 
     @Test
