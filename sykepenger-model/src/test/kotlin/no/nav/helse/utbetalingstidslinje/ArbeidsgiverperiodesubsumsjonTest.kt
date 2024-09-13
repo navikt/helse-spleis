@@ -1,16 +1,24 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.inntekt.Refusjonsopplysning
+import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -141,9 +149,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
 
     @Test
     fun infotrygd() {
-        undersøke(31.S) { teller, other ->
-            Infotrygddekoratør(teller, other, listOf(1.januar til 10.januar))
-        }
+        undersøke(31.S, infotrygdBetalteDager = listOf(1.januar til 10.januar))
         assertEquals(31, observatør.dager)
         assertEquals(0, observatør.arbeidsgiverperiodedager)
         assertEquals(31, observatør.utbetalingsdager)
@@ -156,9 +162,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
 
     @Test
     fun `infotrygd etter arbeidsgiverperiode`() {
-        undersøke(31.S) { teller, other ->
-            Infotrygddekoratør(teller, other, listOf(17.januar til 20.januar))
-        }
+        undersøke(31.S, infotrygdBetalteDager = listOf(17.januar til 20.januar))
         assertEquals(31, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(15, observatør.utbetalingsdager)
@@ -184,9 +188,35 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
     }
 
-    private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
-        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller, observatør, jurist)
-        tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeberegner) ?: arbeidsgiverperiodeberegner)
+    private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList()) {
+        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
+
+        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller, periodebuilder, jurist)
+        val it = Infotrygddekoratør(teller, arbeidsgiverperiodeberegner, infotrygdBetalteDager)
+
+        tidslinje.accept(it)
+
+        val arbeidsgiverperioder = periodebuilder.result()
+
+        val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
+            faktaavklarteInntekter = ArbeidsgiverFaktaavklartInntekt(
+                skjæringstidspunkt = 1.januar,
+                `6G` = Grunnbeløp.`6G`.beløp(1.januar),
+                fastsattÅrsinntekt = 31000.månedlig,
+                gjelder = 1.januar til LocalDate.MAX,
+                refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 31000.månedlig).refusjonsopplysninger
+            ),
+            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+            subsumsjonslogg = Subsumsjonslogg.NullObserver,
+            arbeidsgiverperiode = arbeidsgiverperioder.flatten().grupperSammenhengendePerioder()
+        )
+
+        val subsummering = Utbetalingstidslinjesubsumsjon(jurist, tidslinje)
+        tidslinje.accept(builder)
+        val utbetalingstidslinje = builder.result()
+
+        utbetalingstidslinje.accept(subsummering)
+        utbetalingstidslinje.accept(observatør)
     }
 
     private class Subsumsjonobservatør : Subsumsjonslogg {
@@ -241,7 +271,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         }
     }
 
-    private class Dagobservatør : Arbeidsgiverperiodeoppsamler {
+    private class Dagobservatør : UtbetalingstidslinjeVisitor {
         val dager get() = fridager + arbeidsdager + arbeidsgiverperiodedager + utbetalingsdager + foreldetdager + avvistdager
         var fridager = 0
         var arbeidsdager = 0
@@ -251,40 +281,68 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var foreldetdager = 0
         var avvistdager = 0
 
-        override fun fridag(dato: LocalDate) {
-            fridager += 1
-        }
-
-        override fun fridagOppholdsdag(dato: LocalDate) {
-            fridager += 1
-        }
-
-        override fun arbeidsdag(dato: LocalDate) {
-            arbeidsdager += 1
-        }
-
-        override fun arbeidsgiverperiodedag(
-            dato: LocalDate
+        override fun visit(
+            dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
+            dato: LocalDate,
+            økonomi: Økonomi
         ) {
             arbeidsgiverperiodedager += 1
         }
 
-        override fun arbeidsgiverperiodedagNav(
-            dato: LocalDate
+        override fun visit(
+            dag: Utbetalingsdag.ArbeidsgiverperiodedagNav,
+            dato: LocalDate,
+            økonomi: Økonomi
         ) {
             arbeidsgiverperiodedagerNavAnsvar += 1
         }
 
-        override fun utbetalingsdag(dato: LocalDate) {
+        override fun visit(
+            dag: Utbetalingsdag.NavDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             utbetalingsdager += 1
         }
 
-        override fun foreldetDag(dato: LocalDate) {
-            foreldetdager += 1
+        override fun visit(
+            dag: Utbetalingsdag.NavHelgDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
+            utbetalingsdager += 1
         }
 
-        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
+        override fun visit(
+            dag: Utbetalingsdag.Fridag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
+            fridager += 1
+        }
+
+        override fun visit(
+            dag: Utbetalingsdag.Arbeidsdag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
+            arbeidsdager += 1
+        }
+
+        override fun visit(
+            dag: Utbetalingsdag.AvvistDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
             avvistdager += 1
+        }
+
+        override fun visit(
+            dag: Utbetalingsdag.ForeldetDag,
+            dato: LocalDate,
+            økonomi: Økonomi
+        ) {
+            foreldetdager += 1
         }
     }
 }

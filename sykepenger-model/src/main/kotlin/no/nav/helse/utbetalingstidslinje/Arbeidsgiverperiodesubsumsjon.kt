@@ -4,13 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserAap
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserDagpenger
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserForeldrepenger
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserOmsorgspenger
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserOpplaringspenger
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserPleiepenger
-import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserSvangerskapspenger
 
 internal class Arbeidsgiverperiodesubsumsjon(
     private val other: Arbeidsgiverperiodeoppsamler,
@@ -39,43 +32,28 @@ internal class Arbeidsgiverperiodesubsumsjon(
         other.avvistDag(dato, begrunnelse)
     }
 
-    private fun subsummerAndreYtelser(dato: LocalDate, begrunnelse: Begrunnelse) {
-        if (begrunnelse == AndreYtelserAap) {
-            subsumsjonslogg?.`§ 8-48 ledd 2 punktum 2`(dato, sykdomstidslinjesubsumsjon)
-            return
-        }
-        if (begrunnelse !in AndreYtelser) return
-        subsumsjonslogg?.`Trygderettens kjennelse 2006-4023`(dato, sykdomstidslinjesubsumsjon)
-    }
-
     override fun fridag(dato: LocalDate) {
-        subsumsjonslogg?.also { it.`§ 8-17 ledd 2`(dato, sykdomstidslinjesubsumsjon) }
         tilstand.oppholdsdag(this, dato)
         other.fridag(dato)
     }
 
     override fun fridagOppholdsdag(dato: LocalDate) {
-        subsumsjonslogg?.also { it.`§ 8-17 ledd 2`(dato, sykdomstidslinjesubsumsjon) }
         tilstand.oppholdsdag(this, dato)
         other.fridagOppholdsdag(dato)
     }
 
     override fun arbeidsgiverperiodedag(dato: LocalDate) {
         tilstand.arbeidsgiverperiodedag(this, dato)
-        subsumsjonslogg?.also { it.`§ 8-17 ledd 1 bokstav a`(false, dagen = dato, sykdomstidslinjesubsumsjon) }
-        subsumsjonslogg?.also { it.`§ 8-19 andre ledd`(dato, sykdomstidslinjesubsumsjon) }
         other.arbeidsgiverperiodedag(dato)
     }
 
     override fun arbeidsgiverperiodedagNav(dato: LocalDate) {
-        subsumsjonslogg?.also { it.`§ 8-17 ledd 1`(dato) }
         other.arbeidsgiverperiodedagNav(dato)
     }
 
     override fun utbetalingsdag(dato: LocalDate) {
         // på første navdag etter fullført agp
-        if (dato.erHelg()) subsumsjonslogg?.also { it.`§ 8-11 ledd 1`(dato) }
-        else tilstand.utbetalingsdag(this, dato)
+        if (!dato.erHelg()) tilstand.utbetalingsdag(this, dato)
         other.utbetalingsdag(dato)
     }
 
@@ -106,10 +84,6 @@ internal class Arbeidsgiverperiodesubsumsjon(
         override fun arbeidsgiverperiodedag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate) {
             parent.tilstand = PåbegyntArbeidsgiverperiode
         }
-
-        override fun avvistDag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, begrunnelse: Begrunnelse) {
-            parent.subsummerAndreYtelser(dato, begrunnelse)
-        }
     }
 
     private object Avbrutt : Tilstand {
@@ -119,7 +93,6 @@ internal class Arbeidsgiverperiodesubsumsjon(
         }
 
         override fun avvistDag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, begrunnelse: Begrunnelse) {
-            parent.subsummerAndreYtelser(dato, begrunnelse)
             oppholdsdag(parent, dato)
         }
 
@@ -173,11 +146,5 @@ internal class Arbeidsgiverperiodesubsumsjon(
             parent.subsumsjonslogg?.also { it.`§ 8-17 ledd 1 bokstav a`(true, dagen = dato, parent.sykdomstidslinjesubsumsjon) }
             parent.tilstand = Initiell
         }
-    }
-
-    private companion object {
-        private val AndreYtelser = setOf(
-            AndreYtelserDagpenger, AndreYtelserForeldrepenger, AndreYtelserOmsorgspenger, AndreYtelserOpplaringspenger, AndreYtelserSvangerskapspenger, AndreYtelserPleiepenger
-        )
     }
 }
