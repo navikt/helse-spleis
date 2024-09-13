@@ -64,9 +64,7 @@ internal class Arbeidsgiverperiodeteller private constructor(
     }
 
     private inner class Oppholdsdagobservatør : Teller.Observer {
-        override fun onInc() {
-            observatør.oppholdsdag()
-        }
+        override fun onInc() {}
 
         override fun onGrense() {
             sykedagteller.reset()
@@ -79,7 +77,6 @@ internal class Arbeidsgiverperiodeteller private constructor(
         }
         fun arbeidsgiverperiodeFerdig() {}
         fun arbeidsgiverperiodeAvbrutt() {}
-        fun oppholdsdag() {}
         fun arbeidsgiverperiodedag() {}
         fun sykedag() {}
     }

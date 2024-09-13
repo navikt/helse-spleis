@@ -1594,32 +1594,27 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-19 fjerde ledd - ny agp etter tilstrekkelig opphold`() {
-        nyttVedtak(januar)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
-        håndterSøknad(mars)
-        håndterInntektsmelding(listOf(1.mars til 16.mars))
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
-        håndterYtelser(2.vedtaksperiode)
-
+        håndterSøknad(Sykdom(2.januar, 2.februar, 100.prosent), Arbeid(18.januar, 2.februar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).apply {
-            assertIkkeVurdert(PARAGRAF_8_19, 4.ledd, vedtaksperiodeId = 1.vedtaksperiode)
             assertBeregnet(
                 paragraf = PARAGRAF_8_19,
                 ledd = 4.ledd,
                 versjon = 1.januar(2001),
                 input = mapOf(
                     "beregnetTidslinje" to listOf(
-                        mapOf("fom" to 1.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100),
-                        mapOf("fom" to 1.mars, "tom" to 31.mars, "dagtype" to "SYKEDAG", "grad" to 100),
+                        mapOf("fom" to 2.januar, "tom" to 17.januar, "dagtype" to "SYKEDAG", "grad" to 100)
                     ),
                 ),
                 output = mapOf(
                     "perioder" to listOf(
-                        mapOf("fom" to 16.februar, "tom" to 16.februar),
+                        mapOf("fom" to 2.februar, "tom" to 2.februar),
                     )
                 ),
-                vedtaksperiodeId = 2.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode
             )
         }
     }

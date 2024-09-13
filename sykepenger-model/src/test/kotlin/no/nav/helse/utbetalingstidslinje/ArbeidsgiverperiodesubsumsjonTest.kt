@@ -104,7 +104,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(56, observatør.dager)
         assertEquals(24, observatør.arbeidsgiverperiodedager)
         assertEquals(0, observatør.utbetalingsdager)
-        assertEquals(50, jurist.subsumsjoner)
+        assertEquals(49, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(24, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
         assertEquals(0, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
@@ -112,7 +112,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(24, jurist.`§ 8-19 andre ledd - beregning`)
         assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
         assertEquals(0, jurist.`§ 8-19 tredje ledd - beregning`)
-        assertEquals(1, jurist.`§ 8-19 fjerde ledd - beregning`)
+        assertEquals(0, jurist.`§ 8-19 fjerde ledd - beregning`)
     }
 
     @Test
@@ -189,14 +189,15 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
     }
 
     private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList()) {
-        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-
-        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller, periodebuilder, jurist)
+        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
         val it = Infotrygddekoratør(teller, arbeidsgiverperiodeberegner, infotrygdBetalteDager)
 
         tidslinje.accept(it)
 
-        val arbeidsgiverperioder = periodebuilder.result()
+        val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat()
+        arbeidsgiverperioder.forEach {
+            it.subsummering(jurist, tidslinje)
+        }
 
         val builder = UtbetalingstidslinjeBuilderVedtaksperiode(
             faktaavklarteInntekter = ArbeidsgiverFaktaavklartInntekt(
@@ -208,7 +209,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             ),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonslogg = Subsumsjonslogg.NullObserver,
-            arbeidsgiverperiode = arbeidsgiverperioder.flatten().grupperSammenhengendePerioder()
+            arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder()
         )
 
         val subsummering = Utbetalingstidslinjesubsumsjon(jurist, tidslinje)

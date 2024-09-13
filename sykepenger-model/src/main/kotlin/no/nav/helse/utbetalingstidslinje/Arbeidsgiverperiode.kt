@@ -156,13 +156,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         kjentDag(dato)
     }
 
-    internal fun kopierMed(other: Arbeidsgiverperiode): Arbeidsgiverperiode {
-        this.kjenteDager.addAll(other.kjenteDager)
-        this.utbetalingsdager.addAll(other.utbetalingsdager)
-        this.oppholdsdager.addAll(other.oppholdsdager)
-        return this
-    }
-
     internal fun klinLik(other: Arbeidsgiverperiode?): Boolean {
         if (other == null) return false
         if (this.toSet().containsAll(other.toSet())) return true

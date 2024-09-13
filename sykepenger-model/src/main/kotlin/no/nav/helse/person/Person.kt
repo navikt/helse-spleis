@@ -80,8 +80,9 @@ import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilderBuilder
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import kotlin.math.roundToInt
 
@@ -463,12 +464,12 @@ class Person private constructor(
 
     internal fun arbeidsgiverperiodeFor(
         orgnummer: String,
-        sykdomstidslinje: Sykdomstidslinje,
-        subsumsjonslogg: Subsumsjonslogg?
-    ): List<Arbeidsgiverperiode> {
-        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-        infotrygdhistorikk.beregnArbeidsgiverperioder(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonslogg)
-        return periodebuilder.result()
+        sykdomstidslinje: Sykdomstidslinje
+    ): List<Arbeidsgiverperioderesultat> {
+        val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
+        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
+        infotrygdhistorikk.beregnArbeidsgiverperioder(orgnummer, sykdomstidslinje, arbeidsgiverperiodeberegner, teller)
+        return arbeidsgiverperiodeberegner.resultat()
     }
 
     internal fun annullert(event: PersonObserver.UtbetalingAnnullertEvent) {

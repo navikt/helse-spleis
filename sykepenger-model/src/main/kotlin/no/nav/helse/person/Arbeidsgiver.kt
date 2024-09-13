@@ -79,7 +79,7 @@ import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -704,12 +704,17 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun beregnArbeidsgiverperiode(jurist: Subsumsjonslogg) = { vedtaksperiode: Periode ->
-        person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje(), jurist).finn(vedtaksperiode)?.grupperSammenhengendePerioder() ?: emptyList()
+        person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje())
+            .finn(vedtaksperiode)
+            ?.also { it.subsummering(jurist, sykdomstidslinje().subset(vedtaksperiode)) }
+            ?.arbeidsgiverperiode
+            ?.grupperSammenhengendePerioder()
+            ?: emptyList()
     }
 
     private fun arbeidsgiverperiode(periode: Periode, sykdomstidslinje: Sykdomstidslinje): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje, null)
-        return arbeidsgiverperioder.finn(periode)
+        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje)
+        return arbeidsgiverperioder.finn(periode)?.somArbeidsgiverperiode()
     }
     internal fun arbeidsgiverperiode(periode: Periode) =
         arbeidsgiverperiode(periode, sykdomstidslinje())

@@ -3,7 +3,6 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkUtDto
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.InfotrygdhistorikkVisitor
@@ -16,7 +15,6 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeoppsamler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -100,12 +98,10 @@ internal class Infotrygdhistorikk private constructor(
     internal fun beregnArbeidsgiverperioder(
         organisasjonsnummer: String,
         sykdomstidslinje: Sykdomstidslinje,
-        builder: Arbeidsgiverperiodeoppsamler,
-        subsumsjonslogg: Subsumsjonslogg?,
+        arbeidsgiverperiodeberegner: Arbeidsgiverperiodeberegner,
+        teller: Arbeidsgiverperiodeteller,
         hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null
     ) {
-        val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
-        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller, builder, subsumsjonslogg)
         if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeberegner)
         siste.beregnArbeidsgiverperioder(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeberegner, hendelseskilde)
     }
