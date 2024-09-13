@@ -126,7 +126,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
     }
 
     @Test
-    fun `Noe med tilkommen inntekt`() {
+    fun `Gyldig søknad med inntekt fra nytt arbeidsforhold`() {
         val factory = TestMessageFactory("1", "2", "3", 31000.0, 1.januar(1990))
         val (_, søknad) = factory.lagSøknadNav(
             perioder = listOf(SoknadsperiodeDTO(1.januar, 31.januar, 100)),
