@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson
@@ -67,7 +66,7 @@ import kotlin.reflect.KClass
 internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
     @Test
-    fun `Stuckiness med helg involvert og tidsnære opplysninger ikke biter`() {
+    fun `Stuckiness med helg involvert - da gjenbruker vi tidsnære opplysninger`() {
         a1 { håndterSykmelding(januar) }
         a2 {
             håndterSykmelding(1.januar til fredag(19.januar))
@@ -132,24 +131,24 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(1.januar, inspektør.førsteFraværsdag(1.vedtaksperiode))
 
-            // Perioden som nå er stuck beregner første fraværsdag før skjæringstidspunktet
-            // Første fraværsdag er fortsatt lik som før, så ingenting ble gjenbrukt og perioden er stuck
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertEquals(22.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(1.januar, inspektør.førsteFraværsdag(2.vedtaksperiode))
-
-            val venter = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 2.vedtaksperiode }
-            assertEquals(2.vedtaksperiode, venter.venterPå.vedtaksperiodeId)
-            assertEquals("INNTEKTSMELDING", venter.venterPå.venteårsak.hva)
-            assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venter.venterPå.venteårsak.hvorfor)
-
-            observatør.vedtaksperiodeVenter.clear()
-            håndterPåminnelse(2.vedtaksperiode, AVVENTER_REVURDERING, reberegning = true) // Kicker igang "ny" gjenbruk av tidsnære opplysninger
-            assertTrue(observatør.vedtaksperiodeVenter.isEmpty()) // Nå venter vi på den i avventer vilkårsprøving som ikke har noen venteårsak.
         }
 
         a1 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         }
     }
 
@@ -196,7 +195,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
 
 
     @Test
-    fun `Gjenbruker kun inntekt på én arbeidsgiver, men om alle periodene etter blir andre ytelser, så trengte vi ikke tidsnære opplysninger uansett`() {
+    fun `Først litt gjenbruk av tidsnære opplysninger etterfulgt av overstyring til andre ytelser som gjør at vi ikke trengte dem allikevel`() {
         listOf(a1, a2).nyeVedtak(januar)
         listOf(a1, a2).forlengVedtak(februar)
         a1 {
@@ -220,14 +219,13 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalt()
         }
         a1 {
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         }
         a2 {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertEquals(1.februar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-            val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 2.vedtaksperiode }.venterPå
-            assertEquals("SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING", venterPå.venteårsak.hvorfor)
         }
         a1 {
             håndterOverstyrTidslinje(februar.map { ManuellOverskrivingDag(it, Dagtype.Svangerskapspengerdag) })
@@ -243,7 +241,7 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
     }
 
     @Test
-    fun `kort periode i forkant endrer skjæringstidspunktet tilbake`() {
+    fun `kort periode i forkant endrer skjæringstidspunktet tilbake - da gjenbruker vi tidsnære opplysninger`() {
         a1 {
             håndterSøknad(Sykdom(3.januar, 5.januar, 100.prosent))
             håndterSøknad(Sykdom(6.januar, 31.januar, 100.prosent))
@@ -254,30 +252,21 @@ internal class GjenbrukeTidsnæreOpplysningerTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            observatør.vedtaksperiodeVenter.clear()
             håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
-            observatør.assertVenter(2.vedtaksperiode, venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
 
-            assertForventetFeil(
-                forklaring = "tidsnære opplysninger lagres på første periode etter 1.januar - 2.januar, som er auu uten vilkårsgrunnlag på behandlingen sin",
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                    assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                },
-                ønsket = {
-                    håndterVilkårsgrunnlag(2.vedtaksperiode)
-                    håndterYtelser(2.vedtaksperiode)
-                    håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-                    inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
-                        assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[1.januar])
-                        assertInstanceOf(Dag.Arbeidsdag::class.java, sykdomstidslinjeInspektør[2.januar])
-                    }
-                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                    assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                }
-            )
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
+                assertInstanceOf(Dag.Sykedag::class.java, sykdomstidslinjeInspektør[1.januar])
+                assertInstanceOf(Dag.Sykedag::class.java, sykdomstidslinjeInspektør[2.januar])
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
     }
 

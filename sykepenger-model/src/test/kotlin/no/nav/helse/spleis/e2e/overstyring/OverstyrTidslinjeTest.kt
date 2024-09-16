@@ -43,6 +43,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
+import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -182,7 +183,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av tidslinje som flytter skjæringstidspunkt blant annet`() {
+    fun `overstyring av tidslinje som flytter skjæringstidspunkt blant annet - da gjenbruker vi tidsnære opplysninger`() {
         nyPeriode(1.januar til 10.januar)
         nyPeriode(15.januar til 20.januar)
         håndterInntektsmelding(listOf(15.januar til 30.januar))
@@ -209,19 +210,27 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
 
-        assertForventetFeil(
-            forklaring = "Periode i avventer blokkerende har ikke tilstrekkelig informasjon til utbetaling!",
-            nå = {
-                assertThrows<IllegalStateException> { nyPeriode(11.mars til 20.mars) }
-                assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            },
-            ønsket = {
-                assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            }
-        )
+        nyPeriode(11.mars til 20.mars)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(4.vedtaksperiode)
+        håndterSimulering(4.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(4.vedtaksperiode)
+        håndterUtbetalt()
     }
 
     @Test

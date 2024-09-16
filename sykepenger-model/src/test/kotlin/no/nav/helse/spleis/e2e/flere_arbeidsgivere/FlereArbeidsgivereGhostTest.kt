@@ -108,7 +108,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Søknad og IM fra ghost etter kort gap til A1 - så kommer søknad fra A1 som tetter gapet`() {
+    fun `Søknad og IM fra ghost etter kort gap til A1 - så kommer søknad fra A1 som tetter gapet - da gjenbruker vi tidsnære opplysninger`() {
         val ghost = a2
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -133,8 +133,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertEquals(1.januar, inspektør(ghost).vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_INNTEKTSMELDING, orgnummer = ghost)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = ghost)
+        assertInfo("Kopierte inntekt som lå lagret på 2018-02-10 til 2018-01-01", 1.vedtaksperiode.filter(ghost))
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
     }
 
     @Test

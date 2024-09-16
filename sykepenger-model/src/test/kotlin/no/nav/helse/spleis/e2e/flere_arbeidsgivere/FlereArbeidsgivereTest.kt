@@ -54,6 +54,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.testhelpers.assertNotNull
@@ -312,7 +313,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `mangler refusjonsopplysninger etter at skjæringstidspunktet flyttes`() {
+    fun `mangler refusjonsopplysninger etter at skjæringstidspunktet flyttes - da gjenbruker vi tidsnære opplysninger`() {
         a1 {
             nyPeriode(3.januar til onsdag den 17.januar)
         }
@@ -354,8 +355,9 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_INNTEKTSMELDING)
-            assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSMELDING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertInfo("Kopierte inntekt som lå lagret på 2018-01-19 til 2018-01-22", 2.vedtaksperiode.filter())
+            assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         }
         a2 {
@@ -438,7 +440,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `out of order ag1 - binder sammen skjæringstidspunkt mellom ag1 og ag2`() {
+    fun `out of order ag1 - binder sammen skjæringstidspunkt mellom ag1 og ag2 - da gjenbruker vi tidsnære opplysninger`() {
         val inntekt = 20000.månedlig
         val inntekter = listOf(a1 to inntekt, a2 to inntekt)
         val arbeidsforhold = listOf(
@@ -453,7 +455,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         listOf(a1).forlengVedtak(mars)
 
         a2 {
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
+            assertInfo("Kopierte inntekt som lå lagret på 2018-04-01 til 2018-01-01", 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         }
     }
 

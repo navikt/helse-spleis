@@ -30,10 +30,8 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskj
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbareOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.jurist
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbareOpplysninger
-import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreTidsnæreOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
 import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
-import no.nav.helse.person.Behandlinger.Behandling.Companion.varEllerErRettFør
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
@@ -98,7 +96,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun lagUtbetalingstidslinje(faktaavklarteInntekter: ArbeidsgiverFaktaavklartInntekt, subsumsjonslogg: Subsumsjonslogg) = behandlinger.last().lagUtbetalingstidslinje(faktaavklarteInntekter, subsumsjonslogg)
     internal fun utbetalingstidslinje() = behandlinger.last().utbetalingstidslinje()
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
-    private fun varEllerErRettFør(neste: Behandlinger) = behandlinger.varEllerErRettFør(neste.behandlinger.last())
 
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje()
 
@@ -260,46 +257,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     fun dokumentHåndtert(dokumentsporing: Dokumentsporing) =
         behandlinger.any { it.dokumentHåndtert(dokumentsporing) }
 
-    fun håndterEndringOgLagreTidsnæreOpplysninger(
-        person: Person,
-        arbeidsgiver: Arbeidsgiver,
-        hendelse: SykdomshistorikkHendelse,
-        beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
-        beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
-        periodeFør: Behandlinger?,
-        periodeEtter: Behandlinger?,
-        periodeEtterAktivitetslogg: IAktivitetslogg?,
-        validering: () -> Unit
-    ) {
-        håndterEndring(person, arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, validering)
-        // lagrer opplysninger fra seg selv, om endringen har flyttet eget skjæringstidspunkt
-        lagreTidsnæreopplysninger(arbeidsgiver, hendelse, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, periodeFør)
-
-        // lagrer kun hvis periodene var butt i butt før endringen, eller ble butt i butt etter endring
-        if (periodeEtter == null || !this.varEllerErRettFør(periodeEtter)) return
-        // lagrer opplysninger for neste periode, om endringen har flyttet dens skjæringstidspunkt
-        periodeEtter.lagreTidsnæreopplysninger(arbeidsgiver, hendelse, periodeEtterAktivitetslogg!!, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode, this)
-    }
-
     internal fun harGjenbrukbareOpplysninger(organisasjonsnummer: String) =
         behandlinger.harGjenbrukbareOpplysninger(organisasjonsnummer)
 
     internal fun lagreGjenbrukbareOpplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg) =
         behandlinger.lagreGjenbrukbareOpplysninger(skjæringstidspunkt, organisasjonsnummer, arbeidsgiver, hendelse)
-
-    private fun lagreTidsnæreopplysninger(
-        arbeidsgiver: Arbeidsgiver,
-        hendelse: Hendelse,
-        aktivitetslogg: IAktivitetslogg,
-        beregnSkjæringstidspunkt: () -> Skjæringstidspunkt,
-        beregnArbeidsgiverperiode: (Periode) -> List<Periode>,
-        periodeFør: Behandlinger?
-    ) {
-        // må ha en åpne behandling for å lagre opplysningene siden det kan utløse et varsel
-        sikreNyBehandling(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
-        val skjæringstidspunkt = behandlinger.last().skjæringstidspunkt
-        return behandlinger.lagreTidsnæreOpplysninger(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, periodeFør?.behandlinger?.last())
-    }
 
     fun håndterEndring(person: Person, arbeidsgiver: Arbeidsgiver, hendelse: SykdomshistorikkHendelse, beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>, validering: () -> Unit) {
         behandlinger.last().håndterEndring(arbeidsgiver, hendelse, beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)?.also {
@@ -682,11 +644,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
 
-        private fun endretArbeidsgiverperiode(før: Behandling?): Boolean {
-            if (før == null) return false
-            return før.endringer.last().arbeidsgiverperiodeEndret(this.endringer.last())
-        }
-
         override fun equals(other: Any?): Boolean {
             if (other === this) return true
             if (other !is Behandling) return false
@@ -1062,36 +1019,15 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun List<Behandling>.jurist(jurist: MaskinellJurist, vedtaksperiodeId: UUID) =
                 jurist.medVedtaksperiode(vedtaksperiodeId, dokumentsporing.tilSubsumsjonsformat(), sykmeldingsperiode)
 
-            fun List<Behandling>.lagreTidsnæreOpplysninger(
-                skjæringstidspunkt: LocalDate,
-                arbeidsgiver: Arbeidsgiver,
-                aktivitetslogg: IAktivitetslogg,
-                behandlingFør: Behandling?
-            ) {
-                val nyArbeidsgiverperiode = this.last().endretArbeidsgiverperiode(behandlingFør)
-                forrigeVilkårsgrunnlag()?.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, nyArbeidsgiverperiode)
-            }
-
-            private fun List<Behandling>.forrigeVilkårsgrunnlag() = forrigeEndringMed { it.grunnlagsdata != null }?.grunnlagsdata
-
             internal fun List<Behandling>.harGjenbrukbareOpplysninger(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) != null
             internal fun List<Behandling>.lagreGjenbrukbareOpplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg) {
                 val (forrigeEndring, vilkårsgrunnlag) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) ?: return
-                val sisteEndring = last().endringer.last()
-                val nyArbeidsgiverperiode = forrigeEndring.arbeidsgiverperiodeEndret(sisteEndring)
+                val nyArbeidsgiverperiode = forrigeEndring.arbeidsgiverperiodeEndret(gjeldendeEndring())
                 // Herfra bruker vi "gammel" løype - kanskje noe kan skrus på fra det punktet her om en skulle skru på dette
                 vilkårsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, nyArbeidsgiverperiode)
             }
             private fun List<Behandling>.forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? =
                 forrigeEndringMed { it.grunnlagsdata?.harGjenbrukbareOpplysninger(organisasjonsnummer) == true }?.let { it to it.grunnlagsdata!! }
-
-            internal fun List<Behandling>.varEllerErRettFør(neste: Behandling): Boolean {
-                return this.last().endringer.last().erRettFør(neste.gjeldende) || nestSisteEndring()?.erRettFør(neste.gjeldende) == true
-            }
-
-            private fun List<Behandling>.nestSisteEndring(): Endring? {
-                return flatMap { it.endringer }.dropLast(1).lastOrNull()
-            }
 
             // hvorvidt man delte samme utbetaling før
             fun List<Behandling>.erUtbetaltPåForskjelligeUtbetalinger(other: List<Behandling>): Boolean {

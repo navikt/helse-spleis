@@ -49,6 +49,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.VedtaksperiodeVenterTest.Companion.assertVenter
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -1013,7 +1014,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Out of order som overlapper med annen AG og flytter skjæringstidspunktet - nærmere enn 18 dager fra neste`() {
+    fun `Out of order som overlapper med annen AG og flytter skjæringstidspunktet - nærmere enn 18 dager fra neste - da gjenbruker vi tidsnære opplysninger`() {
         nyPeriode(mars, a1)
         nyPeriode(20.mars til 20.april, a2)
 
@@ -1048,11 +1049,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         // siden perioden slutter på en fredag starter ikke oppholdstelling i arbeidsgiverperioden før mandagen.
         // 10.februar-2.mars hører derfor til samme arbeidsgiverperioden som 20.mars-4.april, ettersom avstanden mellom
         // 5.mars (påfølgende mandag)-20.mars er akkurat 16 dager
-        observatør.vedtaksperiodeVenter.clear()
         nyPeriode(10.februar til 2.mars, a2)
-        observatør.assertVenter(1.vedtaksperiode.id(a2), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
 
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a2)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, a1)
     }

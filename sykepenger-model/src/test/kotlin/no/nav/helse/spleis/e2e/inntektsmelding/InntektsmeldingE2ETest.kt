@@ -2112,7 +2112,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Out of order søknad rett før utbetalt periode tolkes som arbeidsdager`() {
+    fun `Out of order søknad rett før utbetalt periode tolkes som arbeidsdager - da gjenbruker vi tidsnære opplysninger`() {
         håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
         håndterSøknad(Sykdom(17.februar, 28.februar, 100.prosent))
         håndterInntektsmelding(listOf(1.februar til 16.februar))
@@ -2122,24 +2122,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        observatør.vedtaksperiodeVenter.clear()
         håndterSøknad(januar)
-        observatør.assertVenter(2.vedtaksperiode.id(a1), venterPåHva = INNTEKTSMELDING, fordi = SKJÆRINGSTIDSPUNKT_FLYTTET_REVURDERING)
 
         assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-        assertForventetFeil(
-            forklaring = "Januar perioden håndterer også dager fra inntektsmeldingen ettersom den er rett før/ en del av sammenhengende periode",
-            nå = {
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            },
-            ønsket = {
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-            }
-        )
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
     }
 
     @Test

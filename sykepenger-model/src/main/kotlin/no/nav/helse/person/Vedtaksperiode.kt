@@ -411,7 +411,6 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(påminnelse: Påminnelse, arbeidsgivere: List<Arbeidsgiver>): Boolean {
         if (!påminnelse.erRelevant(id)) return false
         kontekst(påminnelse)
-        tilstand.arbeidsgiveropplysningerStrategi.loggGjenbrukbareOpplysninger(this, påminnelse)
         tilstand.påminnelse(this, påminnelse, arbeidsgivere)
         return true
     }
@@ -590,12 +589,6 @@ internal class Vedtaksperiode private constructor(
         event.kontekst(tilstand)
         emitVedtaksperiodeEndret(previousState)
         tilstand.entering(this, event)
-    }
-
-    private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse, validering: () -> Unit) {
-        val periodeFør = arbeidsgiver.finnVedtaksperiodeFør(this)
-        val periodeEtter = arbeidsgiver.finnVedtaksperiodeEtter(this)
-        behandlinger.håndterEndringOgLagreTidsnæreOpplysninger(person, arbeidsgiver, hendelse, person.beregnSkjæringstidspunkt(), arbeidsgiver.beregnArbeidsgiverperiode(jurist), periodeFør?.behandlinger, periodeEtter?.behandlinger, periodeEtter?.aktivitetsloggkopi(hendelse), validering)
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomshistorikkHendelse, validering: () -> Unit) {
@@ -982,6 +975,7 @@ internal class Vedtaksperiode private constructor(
         if (revurdering.ikkeRelevant(periode)) return
         kontekst(revurdering)
         tilstand.igangsettOverstyring(this, revurdering)
+        tilstand.arbeidsgiveropplysningerStrategi.lagreGjenbrukbareOpplysninger(this, revurdering)
     }
 
     internal fun inngåIRevurderingseventyret(
@@ -1216,8 +1210,6 @@ internal class Vedtaksperiode private constructor(
         abstract fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, hendelse: IAktivitetslogg): Boolean
         abstract fun lagreGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg)
 
-        open fun loggGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
-
         protected fun harEksisterendeInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
             harEksisterendeInntekt(vedtaksperiode) && harRefusjonsopplysninger(vedtaksperiode, arbeidsgiverperiode, eksisterendeRefusjonsopplysninger(vedtaksperiode), hendelse)
         // Inntekt vi allerede har i vilkårsgrunnlag/inntektshistorikken på arbeidsgiver
@@ -1244,7 +1236,7 @@ internal class Vedtaksperiode private constructor(
 
     private data object EtterInntektsmelding: ArbeidsgiveropplysningerStrategi() {
         override fun harInntektOgRefusjon(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg) =
-            harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, hendelse)// TODO: || vedtaksperiode.behandlinger.harGjenbrukbareOpplysninger(vedtaksperiode.organisasjonsnummer)
+            harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, hendelse) || vedtaksperiode.behandlinger.harGjenbrukbareOpplysninger(vedtaksperiode.organisasjonsnummer)
         override fun harRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode, arbeidsgiverperiode: Arbeidsgiverperiode, refusjonsopplysninger: Refusjonsopplysninger, hendelse: IAktivitetslogg) =
             Arbeidsgiverperiode.harNødvendigeRefusjonsopplysningerEtterInntektsmelding(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, vedtaksperiode.organisasjonsnummer)
         override fun lagreGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1252,13 +1244,6 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.tilstand == AvventerBlokkerendePeriode && !arbeidsgiverperiode.forventerInntekt(vedtaksperiode.periode)) return // En periode i AvventerBlokkerendePeriode som skal tilbake AvsluttetUtenUtbetaling trenger uansett ikke inntekt og/eller refusjon
             if (harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, hendelse)) return // Trenger ikke lagre gjenbrukbare inntekter om vi har det vi trenger allerede
             vedtaksperiode.behandlinger.lagreGjenbrukbareOpplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer, vedtaksperiode.arbeidsgiver, hendelse) // Ikke 100% at dette lagrer noe. F.eks. revurderinger med Infotryfd-vilkårsgrunnlag har ikke noe å gjenbruke
-        }
-        override fun loggGjenbrukbareOpplysninger(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return
-            if (!arbeidsgiverperiode.forventerInntekt(vedtaksperiode.periode)) return
-            if (harEksisterendeInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, hendelse)) return
-            if (vedtaksperiode.behandlinger.harGjenbrukbareOpplysninger(vedtaksperiode.organisasjonsnummer)) return hendelse.info("Her har vi gjenbrukbare opplysninger")
-            hendelse.info("Her mangler vi gjenbrukbare opplysninger")
         }
     }
 
@@ -1531,14 +1516,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
-        private fun manglerInntektEllerRefusjon(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse): Boolean {
-            val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode() ?: return false
-            return !arbeidsgiveropplysningerStrategi.harInntektOgRefusjon(vedtaksperiode, arbeidsgiverperiode, påminnelse)
-        }
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.skalReberegnes() && manglerInntektEllerRefusjon(vedtaksperiode, påminnelse)) {
-                vedtaksperiode.behandlinger.lagreGjenbrukbareOpplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer, vedtaksperiode.arbeidsgiver, påminnelse)
-            }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
