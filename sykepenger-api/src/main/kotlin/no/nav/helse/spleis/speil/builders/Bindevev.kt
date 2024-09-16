@@ -25,7 +25,8 @@ internal data class IArbeidsgiverinntekt(
         )
     }
 
-    internal fun erTilkommenInntekt() = omregnetÅrsinntekt.kilde == IInntektkilde.Søknad
+    internal fun erTilkommenInntekt(skjæringstidspunkt: LocalDate) =
+        omregnetÅrsinntekt.fom > skjæringstidspunkt
 }
 
 internal data class IArbeidsgiverrefusjon(

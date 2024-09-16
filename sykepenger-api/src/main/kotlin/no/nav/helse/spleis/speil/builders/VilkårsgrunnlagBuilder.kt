@@ -33,34 +33,31 @@ internal abstract class IVilkårsgrunnlag(
     open fun potensiellGhostperiode(
         organisasjonsnummer: String,
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
-    ): GhostPeriodeDTO? {
+    ): Pair<GhostPeriodeDTO?, NyttInntektsforholdPeriodeDTO?>? {
         if (inntekter.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
         val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
         if (inntekten == null) return null
-        if (inntekten.erTilkommenInntekt()) return null
-        val sisteDag = minOf(inntekten.omregnetÅrsinntekt.tom, sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
-        return GhostPeriodeDTO(
-            id = UUID.randomUUID(),
-            fom = inntekten.omregnetÅrsinntekt.fom,
-            tom = sisteDag,
-            skjæringstidspunkt = skjæringstidspunkt,
-            vilkårsgrunnlagId = this.id,
-            deaktivert = inntekten.deaktivert
-        )
+        when {
+            inntekten.erTilkommenInntekt(skjæringstidspunkt) -> return null to NyttInntektsforholdPeriodeDTO(
+                id = UUID.randomUUID(),
+                fom = inntekten.omregnetÅrsinntekt.fom,
+                tom = inntekten.omregnetÅrsinntekt.tom,
+                vilkårsgrunnlagId = id,
+                skjæringstidspunkt = skjæringstidspunkt
+            )
+            else -> {
+                val sisteDag = minOf(inntekten.omregnetÅrsinntekt.tom, sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
+                return GhostPeriodeDTO(
+                    id = UUID.randomUUID(),
+                    fom = inntekten.omregnetÅrsinntekt.fom,
+                    tom = sisteDag,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vilkårsgrunnlagId = this.id,
+                    deaktivert = inntekten.deaktivert
+                ) to null
+            }
+        }
     }
-    open fun nyttInntektsforholdperioder(organisasjonsnummer: String, ): NyttInntektsforholdPeriodeDTO? {
-        val omregnetÅrsinntekt = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer}?.omregnetÅrsinntekt
-        if (omregnetÅrsinntekt == null) return null
-        if (omregnetÅrsinntekt.fom <= skjæringstidspunkt) return null
-        return NyttInntektsforholdPeriodeDTO(
-            id = UUID.randomUUID(),
-            fom = omregnetÅrsinntekt.fom,
-            tom = omregnetÅrsinntekt.tom,
-            vilkårsgrunnlagId = id,
-            skjæringstidspunkt = skjæringstidspunkt
-        )
-    }
-
 }
 
 internal class ISpleisGrunnlag(
@@ -137,7 +134,6 @@ internal class IInfotrygdGrunnlag(
     }
 
     override fun potensiellGhostperiode(organisasjonsnummer: String, sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>) = null
-    override fun nyttInntektsforholdperioder(organisasjonsnummer: String) = null
 }
 
 internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunnlag: List<Map<UUID, IVilkårsgrunnlag>>) {
@@ -151,17 +147,9 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
     ) =
         tilgjengeligeVilkårsgrunnlag.firstOrNull()?.mapNotNull { (_, vilkårsgrunnlag) ->
-            vilkårsgrunnlag.potensiellGhostperiode(organisasjonsnummer, sykefraværstilfeller)
-        } ?: emptyList()
-
-    internal fun nyeInntektsforholdperioder(organisasjonsnummer: String) =
-        tilgjengeligeVilkårsgrunnlag.firstOrNull()?.mapNotNull { (_, vilkårsgrunnlag) ->
-            val periode = vilkårsgrunnlag.nyttInntektsforholdperioder(organisasjonsnummer)
-            if (periode != null) {
-                leggIBøtta(vilkårsgrunnlag.id)
-                return@mapNotNull periode
+            vilkårsgrunnlag.potensiellGhostperiode(organisasjonsnummer, sykefraværstilfeller)?.also { (_, nyttInntektsforholdperiode) ->
+                nyttInntektsforholdperiode?.vilkårsgrunnlagId?.also { leggIBøtta(it) }
             }
-            null
         } ?: emptyList()
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {

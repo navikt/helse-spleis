@@ -25,17 +25,18 @@ data class ArbeidsgiverDTO(
             && generasjoner.isEmpty()
             && vilkårsgrunnlagHistorikk.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer)
 
-    internal fun medGhostperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk, arbeidsgivere: List<ArbeidsgiverDTO>): ArbeidsgiverDTO {
+    internal fun medGhostperioderOgNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk, arbeidsgivere: List<ArbeidsgiverDTO>): ArbeidsgiverDTO {
         val sykefraværstilfeller = arbeidsgivere.sykefraværstilfeller()
-        val ghostsperioder = vilkårsgrunnlagHistorikk
-            .potensielleGhostsperioder(organisasjonsnummer, sykefraværstilfeller)
-            .flatMap { ghostperiode -> fjernDagerMedSykdom(ghostperiode) }
+        val potensiellePerioder = vilkårsgrunnlagHistorikk.potensielleGhostsperioder(organisasjonsnummer, sykefraværstilfeller)
+        val potensielleGhostperioder = potensiellePerioder.mapNotNull { it.first }
+        val potensielleMyttInntektsforholdperioder = potensiellePerioder.mapNotNull { it.second }
 
-        return copy(ghostPerioder = ghostsperioder)
-    }
+        val ghostsperioder = potensielleGhostperioder.flatMap { ghostperiode -> fjernDagerMedSykdom(ghostperiode) }
 
-    internal fun medNyeInntektsforholdperioder(vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
-        return copy(nyeInntektsforhold = vilkårsgrunnlagHistorikk.nyeInntektsforholdperioder(organisasjonsnummer))
+        return copy(
+            ghostPerioder = ghostsperioder,
+            nyeInntektsforhold = potensielleMyttInntektsforholdperioder
+        )
     }
 
     private fun fjernDagerMedSykdom(ghostperiode: GhostPeriodeDTO): List<GhostPeriodeDTO> {
