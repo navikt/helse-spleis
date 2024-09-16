@@ -1072,11 +1072,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 forrigeVilkårsgrunnlag()?.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, aktivitetslogg, nyArbeidsgiverperiode)
             }
 
-            private fun List<Behandling>.forrigeVilkårsgrunnlag(): VilkårsgrunnlagElement? {
-                return this.asReversed().firstNotNullOfOrNull { behandling ->
-                    behandling.endringer.asReversed().firstNotNullOfOrNull { endring -> endring.grunnlagsdata }
-                }
-            }
+            private fun List<Behandling>.forrigeVilkårsgrunnlag() = forrigeEndringMed { it.grunnlagsdata != null }?.grunnlagsdata
 
             internal fun List<Behandling>.harGjenbrukbareOpplysninger(organisasjonsnummer: String) = forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer) != null
             internal fun List<Behandling>.lagreGjenbrukbareOpplysninger(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg) {
@@ -1086,15 +1082,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 // Herfra bruker vi "gammel" løype - kanskje noe kan skrus på fra det punktet her om en skulle skru på dette
                 vilkårsgrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, nyArbeidsgiverperiode)
             }
-            private fun List<Behandling>.forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? {
-                return this.asReversed().firstNotNullOfOrNull { behandling ->
-                    behandling.endringer.asReversed().firstNotNullOfOrNull { endring ->
-                        val vilkårsgrunnlag = endring.grunnlagsdata?.takeIf { it.harGjenbrukbareOpplysninger(organisasjonsnummer) }
-                        if (vilkårsgrunnlag != null) endring to vilkårsgrunnlag
-                        else null
-                    }
-                }
-            }
+            private fun List<Behandling>.forrigeEndringMedGjenbrukbareOpplysninger(organisasjonsnummer: String): Pair<Endring, VilkårsgrunnlagElement>? =
+                forrigeEndringMed { it.grunnlagsdata?.harGjenbrukbareOpplysninger(organisasjonsnummer) == true }?.let { it to it.grunnlagsdata!! }
 
             internal fun List<Behandling>.varEllerErRettFør(neste: Behandling): Boolean {
                 return this.last().endringer.last().erRettFør(neste.gjeldende) || nestSisteEndring()?.erRettFør(neste.gjeldende) == true
@@ -1118,7 +1107,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             private val List<Behandling>.forrigeIverksatte get() = lastOrNull { it.vedtakFattet != null }
 
-            private fun List<Behandling>.gjeldendeEndring() = this.last().endringer.last()
+            private fun List<Behandling>.gjeldendeEndring() = this.last().gjeldende
             private fun List<Behandling>.forrigeEndringMed(predikat: (endring: Endring) -> Boolean) =
                 this.asReversed().firstNotNullOfOrNull { behandling ->
                     behandling.endringer.asReversed().firstNotNullOfOrNull { endring ->
