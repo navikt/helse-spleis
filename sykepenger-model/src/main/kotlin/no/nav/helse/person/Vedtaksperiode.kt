@@ -640,6 +640,8 @@ internal class Vedtaksperiode private constructor(
         else {
             søknad.info("Søknad har trigget en revurdering")
             håndterEgenmeldingsperioderFraOverlappendeSøknad(søknad)
+            val orgnummereMedTilkomneInntekter = søknad.orgnummereMedTilkomneInntekter()
+            if (orgnummereMedTilkomneInntekter.isNotEmpty()) person.oppdaterVilkårsgrunnlagMedInntektene(skjæringstidspunkt, søknad, orgnummereMedTilkomneInntekter, jurist)
             oppdaterHistorikk(søknad) {
                 søknad.valider(vilkårsgrunnlag, jurist)
             }

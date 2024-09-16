@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsmelding
@@ -95,6 +96,34 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertEquals(969.daglig, dagsatsForlengelse)
             // bruker har en tilkommen inntekt på 10K, slik at inntektstapet i perioden er 31K - 10K = 21K.
             // utbetalingen på forlengelsen justeres derfor ned med denne brøken 21/31
+        }
+    }
+
+    @Test
+    fun `bruker korrigerer inn tilkommen inntekt på forlengelse`() {
+        a1 {
+            nyttVedtak(januar, beregnetInntekt = 31000.månedlig)
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a2", beløp = 10000.månedlig)))
+            assertVarsel(Varselkode.RV_SV_5)
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+                assertEquals(31000.månedlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+            }
+        }
+    }
+
+    @Test
+    fun `bruker korrigerer inn tilkommen inntekt slik at det revurderes`() {
+        a1 {
+            nyttVedtak(januar, beregnetInntekt = 31000.månedlig)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = "a2", beløp = 10000.månedlig)))
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
+            assertVarsel(Varselkode.RV_SV_5)
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+                assertEquals(31000.månedlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+            }
         }
     }
 
