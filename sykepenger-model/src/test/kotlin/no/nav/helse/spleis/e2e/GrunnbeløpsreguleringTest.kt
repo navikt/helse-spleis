@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.gjenopprettFraJSONtekst
 import no.nav.helse.hendelser.til
@@ -24,7 +23,6 @@ import no.nav.helse.serde.tilPersonData
 import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -70,11 +68,7 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
-        assertForventetFeil(
-            forklaring = "Perioder som står til godkjenning får ikke tag for grunnbeløpsregulering",
-            nå = { assertFalse(observatør.utkastTilVedtakEventer.last().tags.contains("Grunnbeløpsregulering")) },
-            ønsket = { assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("Grunnbeløpsregulering")) }
-        )
+        assertTrue(observatør.utkastTilVedtakEventer.last().tags.contains("Grunnbeløpsregulering"))
     }
 
     private fun tilGodkjenningMedFeilGrunnbeløp() {

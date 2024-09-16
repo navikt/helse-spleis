@@ -32,6 +32,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Companion.jurist
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreGjenbrukbareOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.lagreTidsnæreOpplysninger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.endretSykdomshistorikkFra
+import no.nav.helse.person.Behandlinger.Behandling.Companion.grunnbeløpsregulert
 import no.nav.helse.person.Behandlinger.Behandling.Companion.varEllerErRettFør
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.dokumentsporing
@@ -151,16 +152,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         harPeriodeRettFør: Boolean
     ) {
         val behandlingerMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map { it.first to it.second.behandlinger.last() }
-        val gregulering = if (behandlinger.size > 1) harBlittGRegulert() else false
-        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør, gregulering)
-    }
-
-    private fun harBlittGRegulert(): Boolean {
-        if (behandlinger.size < 2) return false
-        val sisteBehandling = behandlinger.last()
-        val nestSisteBehandling = behandlinger[behandlinger.size-2]
-        if (sisteBehandling.skjæringstidspunkt != nestSisteBehandling.skjæringstidspunkt) return false
-        return sisteBehandling.harBlittGRegulert(nestSisteBehandling)
+        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør, behandlinger.grunnbeløpsregulert())
     }
 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Utbetaling? {
@@ -1043,13 +1035,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             else hendelse.info("Eksisterende ugyldig behandling på en ferdig behandlet vedtaksperiode: $feil")
         }
 
-        internal fun harBlittGRegulert(nestSisteBehandling: Behandling): Boolean {
-            val grunnlagsdata1 = this.gjeldende.grunnlagsdata
-            val grunnlagsdata2 = nestSisteBehandling.gjeldende.grunnlagsdata
-            if (grunnlagsdata1 == null || grunnlagsdata2 == null) return false
-            return listOf(grunnlagsdata1, grunnlagsdata2).harUlikeGrunnbeløp()
-        }
-
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
             val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
@@ -1133,17 +1118,30 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             private val List<Behandling>.forrigeIverksatte get() = lastOrNull { it.vedtakFattet != null }
 
-            private fun <T> List<T>.nestSiste() = if (size < 2) null else get(size - 2)
+            private fun List<Behandling>.gjeldendeEndring() = this.last().endringer.last()
+            private fun List<Behandling>.forrigeEndringMed(predikat: (endring: Endring) -> Boolean) =
+                this.asReversed().firstNotNullOfOrNull { behandling ->
+                    behandling.endringer.asReversed().firstNotNullOfOrNull { endring ->
+                        endring.takeIf { predikat(it) }
+                    }
+                }
             private fun List<Behandling>.forrigeOgGjeldendeEndring(): Pair<Endring?, Endring> {
-                val gjeldendeEndring = last().endringer.last()
-                val forrigeEndring = last().endringer.nestSiste() ?: nestSiste()?.endringer?.last()
-                return forrigeEndring to gjeldendeEndring
+                val gjeldendeEndring = gjeldendeEndring()
+                return forrigeEndringMed { it.tidsstempel < gjeldendeEndring.tidsstempel } to gjeldendeEndring
             }
+
             internal fun List<Behandling>.endretSykdomshistorikkFra(hendelse: SykdomshistorikkHendelse): Boolean {
                 val (forrigeEndring, gjeldendeEndring) = forrigeOgGjeldendeEndring()
                 if (gjeldendeEndring.dokumentsporing != hendelse.dokumentsporing()) return false
                 if (forrigeEndring == null) return true
                 return !gjeldendeEndring.sykdomstidslinje.funksjoneltLik(forrigeEndring.sykdomstidslinje)
+            }
+
+            internal fun List<Behandling>.grunnbeløpsregulert(): Boolean {
+                val gjeldende = gjeldendeEndring().takeIf { it.grunnlagsdata != null } ?: return false
+                val forrige = forrigeEndringMed { it.tidsstempel < gjeldende.tidsstempel && it.grunnlagsdata != null } ?: return false
+                if (forrige.skjæringstidspunkt != gjeldende.skjæringstidspunkt) return false
+                return listOf(forrige.grunnlagsdata!!, gjeldende.grunnlagsdata!!).harUlikeGrunnbeløp()
             }
 
             internal fun gjenopprett(dto: BehandlingInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Behandling {
