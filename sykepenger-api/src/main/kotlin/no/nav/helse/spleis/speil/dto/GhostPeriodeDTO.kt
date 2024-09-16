@@ -14,18 +14,7 @@ data class GhostPeriodeDTO(
     val deaktivert: Boolean
 ) {
 
-    internal fun brytOpp(tidslinjeperiode: ClosedRange<LocalDate>) = when {
-        // trimmer ingenting
-        tidslinjeperiode.erUtenfor(this) -> listOf(this)
-        // trimmer i midten
-        tidslinjeperiode.erInni(this) -> listOf(this.til(tidslinjeperiode), this.fra(tidslinjeperiode))
-        // trimmer i slutten
-        tidslinjeperiode.overlapperMedHale(this) -> listOf(this.til(tidslinjeperiode))
-        // trimmer i starten
-        tidslinjeperiode.overlapperMedSnute(this) -> listOf(this.fra(tidslinjeperiode))
-        // trimmer hele
-        else -> emptyList()
-    }
+    internal fun brytOpp(tidslinjeperiode: ClosedRange<LocalDate>) = brytOpp(this, fom, tom, tidslinjeperiode, GhostPeriodeDTO::til, GhostPeriodeDTO::fra)
 
     internal fun til(other: ClosedRange<LocalDate>) = copy(
         id = UUID.randomUUID(),
@@ -35,15 +24,29 @@ data class GhostPeriodeDTO(
         id = UUID.randomUUID(),
         fom = other.endInclusive.nesteDag
     )
-
-    private fun ClosedRange<LocalDate>.erUtenfor(other: GhostPeriodeDTO) =
-        maxOf(this.start, other.fom) > minOf(this.endInclusive, other.tom)
-
-    private fun ClosedRange<LocalDate>.erInni(other: GhostPeriodeDTO) =
-        this.start > other.fom && this.endInclusive < other.tom
-    private fun ClosedRange<LocalDate>.overlapperMedHale(other: GhostPeriodeDTO) =
-        this.start > other.fom && this.endInclusive >= other.tom
-
-    private fun ClosedRange<LocalDate>.overlapperMedSnute(other: GhostPeriodeDTO) =
-        this.start <= other.fom && this.endInclusive < other.tom
 }
+
+internal fun <Ting> brytOpp(ting: Ting, fom: LocalDate, tom: LocalDate, tidslinjeperiode: ClosedRange<LocalDate>, tilFunksjon: Ting.(ClosedRange<LocalDate>) -> Ting, fraFunksjon: Ting.(ClosedRange<LocalDate>) -> Ting): List<Ting> = when {
+    // trimmer ingenting
+    tidslinjeperiode.erUtenfor(fom, tom) -> listOf(ting)
+    // trimmer i midten
+    tidslinjeperiode.erInni(fom, tom) -> listOf(ting.tilFunksjon(tidslinjeperiode), ting.fraFunksjon(tidslinjeperiode))
+    // trimmer i slutten
+    tidslinjeperiode.overlapperMedHale(fom, tom) -> listOf(ting.tilFunksjon(tidslinjeperiode))
+    // trimmer i starten
+    tidslinjeperiode.overlapperMedSnute(fom, tom) -> listOf(ting.fraFunksjon(tidslinjeperiode))
+    // trimmer hele
+    else -> emptyList()
+}
+
+internal fun ClosedRange<LocalDate>.erUtenfor(fom: LocalDate, tom: LocalDate) =
+    maxOf(this.start, fom) > minOf(this.endInclusive, tom)
+
+
+internal fun ClosedRange<LocalDate>.erInni(fom: LocalDate, tom: LocalDate) =
+    this.start > fom && this.endInclusive < tom
+internal fun ClosedRange<LocalDate>.overlapperMedHale(fom: LocalDate, tom: LocalDate) =
+    this.start > fom && this.endInclusive >= tom
+
+internal fun ClosedRange<LocalDate>.overlapperMedSnute(fom: LocalDate, tom: LocalDate) =
+    this.start <= fom && this.endInclusive < tom

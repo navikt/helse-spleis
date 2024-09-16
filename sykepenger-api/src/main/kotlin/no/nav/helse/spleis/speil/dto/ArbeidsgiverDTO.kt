@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.speil.dto
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.til
@@ -31,15 +32,20 @@ data class ArbeidsgiverDTO(
         val potensielleGhostperioder = potensiellePerioder.mapNotNull { it.first }
         val potensielleMyttInntektsforholdperioder = potensiellePerioder.mapNotNull { it.second }
 
-        val ghostsperioder = potensielleGhostperioder.flatMap { ghostperiode -> fjernDagerMedSykdom(ghostperiode) }
+        val ghostsperioder = fjernHelgepølser(potensielleGhostperioder.flatMap { ghostperiode ->
+            fjernDagerMedSykdom(ghostperiode, GhostPeriodeDTO::brytOpp)
+        })
+        val nyttInntektsforholdperioder = potensielleMyttInntektsforholdperioder.flatMap { nyttInntektsforholdperiode ->
+            fjernDagerMedSykdom(nyttInntektsforholdperiode, NyttInntektsforholdPeriodeDTO::brytOpp)
+        }
 
         return copy(
             ghostPerioder = ghostsperioder,
-            nyeInntektsforhold = potensielleMyttInntektsforholdperioder
+            nyeInntektsforhold = nyttInntektsforholdperioder
         )
     }
 
-    private fun fjernDagerMedSykdom(ghostperiode: GhostPeriodeDTO): List<GhostPeriodeDTO> {
+    private fun <Ting> fjernDagerMedSykdom(ghostperiode: Ting, oppbrytningsfunksjon: Ting.(ClosedRange<LocalDate>) -> List<Ting>): List<Ting> {
         if (generasjoner.isEmpty()) return listOf(ghostperiode)
         val tidslinjeperioderFraNyesteGenerasjon = generasjoner
             .first()
@@ -49,9 +55,9 @@ data class ArbeidsgiverDTO(
             val tidligereGhostperioder = resultat.dropLast(1)
             val sisteGhostperiode = resultat.lastOrNull()
             val tidslinjeperiode = vedtaksperiode.fom..vedtaksperiode.tom
-            tidligereGhostperioder + (sisteGhostperiode?.brytOpp(tidslinjeperiode) ?: emptyList())
+            tidligereGhostperioder + (sisteGhostperiode?.oppbrytningsfunksjon(tidslinjeperiode) ?: emptyList())
         }
-        return fjernHelgepølser(oppslittetPølser)
+        return oppslittetPølser
     }
 
     private fun fjernHelgepølser(ghostPerioder: List<GhostPeriodeDTO>) = ghostPerioder
