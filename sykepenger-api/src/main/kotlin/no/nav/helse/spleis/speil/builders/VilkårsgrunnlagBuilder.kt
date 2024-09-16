@@ -37,11 +37,11 @@ internal abstract class IVilkårsgrunnlag(
         if (inntekter.size < 2 || this.skjæringstidspunkt !in sykefraværstilfeller) return null
         val inntekten = inntekter.firstOrNull { it.arbeidsgiver == organisasjonsnummer }
         if (inntekten == null) return null
-        val sisteDag = minOf(inntekten.omregnetÅrsinntekt.tom, sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
+        val sisteDag = minOf(inntekten.tom, sykefraværstilfeller.getValue(skjæringstidspunkt).maxOf { it.endInclusive })
         when {
             inntekten.erTilkommenInntekt(skjæringstidspunkt) -> return null to NyttInntektsforholdPeriodeDTO(
                 id = UUID.randomUUID(),
-                fom = inntekten.omregnetÅrsinntekt.fom,
+                fom = inntekten.fom,
                 tom = sisteDag,
                 vilkårsgrunnlagId = id,
                 skjæringstidspunkt = skjæringstidspunkt
@@ -49,7 +49,7 @@ internal abstract class IVilkårsgrunnlag(
             else -> {
                 return GhostPeriodeDTO(
                     id = UUID.randomUUID(),
-                    fom = inntekten.omregnetÅrsinntekt.fom,
+                    fom = inntekten.fom,
                     tom = sisteDag,
                     skjæringstidspunkt = skjæringstidspunkt,
                     vilkårsgrunnlagId = this.id,
@@ -232,12 +232,12 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
 
     private fun mapInntekt(orgnummer: String, fom: LocalDate, tom: LocalDate, io: InntektsopplysningUtDto, deaktivert: Boolean): IArbeidsgiverinntekt {
         val omregnetÅrsinntekt = when (io) {
-            is InntektsopplysningUtDto.IkkeRapportertDto -> IOmregnetÅrsinntekt(IInntektkilde.IkkeRapportert, fom, tom, 0.0, 0.0, null)
-            is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
-            is InntektsopplysningUtDto.InntektsmeldingDto -> IOmregnetÅrsinntekt(IInntektkilde.Inntektsmelding, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
-            is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
+            is InntektsopplysningUtDto.IkkeRapportertDto -> IOmregnetÅrsinntekt(IInntektkilde.IkkeRapportert, 0.0, 0.0, null)
+            is InntektsopplysningUtDto.InfotrygdDto -> IOmregnetÅrsinntekt(IInntektkilde.Infotrygd, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
+            is InntektsopplysningUtDto.InntektsmeldingDto -> IOmregnetÅrsinntekt(IInntektkilde.Inntektsmelding, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
+            is InntektsopplysningUtDto.SaksbehandlerDto -> IOmregnetÅrsinntekt(IInntektkilde.Saksbehandler, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> IOmregnetÅrsinntekt(
-                IInntektkilde.AOrdningen, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, io.inntektsopplysninger
+                IInntektkilde.AOrdningen, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, io.inntektsopplysninger
                 .groupBy { it.måned }
                 .mapValues { (_, verdier) -> verdier.sumOf { it.beløp.beløp } }
                 .map { (måned, månedligSum) ->
@@ -248,12 +248,14 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 }
             )
             is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> inntekter.getValue(io.overstyrtInntekt)
-            is InntektsopplysningUtDto.InntektFraSøknadDto -> IOmregnetÅrsinntekt(IInntektkilde.Søknad, fom, tom, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
+            is InntektsopplysningUtDto.InntektFraSøknadDto -> IOmregnetÅrsinntekt(IInntektkilde.Søknad, io.beløp.årlig.beløp, io.beløp.månedligDouble.beløp, null)
         }.also {
             inntekter[io.id] = it
         }
         return IArbeidsgiverinntekt(
             arbeidsgiver = orgnummer,
+            fom = fom,
+            tom = tom,
             omregnetÅrsinntekt = omregnetÅrsinntekt,
             skjønnsmessigFastsatt = when (io) {
                 is InntektsopplysningUtDto.SkjønnsmessigFastsattDto -> SkjønnsmessigFastsattDTO(

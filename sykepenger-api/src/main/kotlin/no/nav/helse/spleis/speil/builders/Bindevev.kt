@@ -12,6 +12,8 @@ import no.nav.helse.spleis.speil.dto.SkjønnsmessigFastsattDTO
 
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
     val omregnetÅrsinntekt: IOmregnetÅrsinntekt,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsattDTO?,
     val deaktivert: Boolean
@@ -26,7 +28,7 @@ internal data class IArbeidsgiverinntekt(
     }
 
     internal fun erTilkommenInntekt(skjæringstidspunkt: LocalDate) =
-        omregnetÅrsinntekt.fom > skjæringstidspunkt
+        fom > skjæringstidspunkt
 }
 
 internal data class IArbeidsgiverrefusjon(
@@ -43,8 +45,6 @@ internal data class IArbeidsgiverrefusjon(
 
 internal data class IOmregnetÅrsinntekt(
     val kilde: IInntektkilde,
-    val fom: LocalDate,
-    val tom: LocalDate,
     val beløp: Double,
     val månedsbeløp: Double,
     val inntekterFraAOrdningen: List<IInntekterFraAOrdningen>? = null //kun gyldig for A-ordningen
