@@ -1458,11 +1458,7 @@ internal class Vedtaksperiode private constructor(
         }
         override fun håndter(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) {}
 
-        override fun igangsettOverstyring(
-            vedtaksperiode: Vedtaksperiode,
-            revurdering: Revurderingseventyr
-        ) {
-        }
+        override fun igangsettOverstyring(vedtaksperiode: Vedtaksperiode, revurdering: Revurderingseventyr) {}
     }
 
     internal data object AvventerRevurdering : Vedtaksperiodetilstand {
@@ -1494,7 +1490,6 @@ internal class Vedtaksperiode private constructor(
             return vedtaksperiode.vedtaksperiodeVenter(venterPå, arbeidsgivere)
         }
 
-
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
@@ -1517,11 +1512,15 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (påminnelse.skalReberegnes()) {
+                vedtaksperiode.behandlinger.lagreGjenbrukbareOpplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer, vedtaksperiode.arbeidsgiver, påminnelse)
+            }
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
         override fun skalHåndtereDager(vedtaksperiode: Vedtaksperiode, dager: DagerFraInntektsmelding) =
             vedtaksperiode.skalHåndtereDagerRevurdering(dager)
+
         override fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {
             vedtaksperiode.inntektsmeldingHåndtert(hendelse)
         }
