@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
+import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -122,6 +123,13 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         if (periode.start < arbeidsgiverperioden.endInclusive) return
         if (!gjennomført) return
         godkjenningsbehovBuilder.tagIngenNyArbeidsgiverperiode()
+    }
+
+    internal fun berik(builder: UtkastTilVedtakBuilder, periode: Periode, harPeriodeRettFør: Boolean) {
+        if (fiktiv() || harPeriodeRettFør) return
+        if (periode.start < arbeidsgiverperioden.endInclusive) return
+        if (!gjennomført) return
+        builder.ingenNyArbeidsgiverperiode()
     }
 
     override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.førsteKjente == this.førsteKjente

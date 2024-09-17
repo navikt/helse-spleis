@@ -43,6 +43,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver
+import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -114,6 +115,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_38
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
+import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -963,6 +965,25 @@ internal class Vedtaksperiode private constructor(
         val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
         behandlinger.godkjenning(hendelse, erForlengelse(), perioder, arbeidsgiver.kanForkastes(this, Aktivitetslogg()), finnArbeidsgiverperiode(), harPeriodeRettFør)
     }
+
+    @Suppress("unused")
+    private fun utkastTilVedtak(hendelse: IAktivitetslogg) {
+        val builder = UtkastTilVedtakBuilder(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = id,
+            kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
+            erForlengelse = erForlengelse(),
+            harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null,
+            arbeidsgiverperiode = finnArbeidsgiverperiode()
+        )
+        person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .associate { it.id to it.behandlinger }
+            .berik(builder)
+
+        behandlinger.utkastTilVedtak(hendelse, builder)
+    }
+
     internal fun gjenopptaBehandling(hendelse: Hendelse, arbeidsgivere: Iterable<Arbeidsgiver>) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)

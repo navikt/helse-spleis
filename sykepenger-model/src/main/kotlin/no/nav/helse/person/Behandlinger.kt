@@ -25,6 +25,7 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsavgjørelse
 import no.nav.helse.hendelser.utbetaling.avvist
+import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
 import no.nav.helse.person.Behandlinger.Behandling.Companion.erUtbetaltPåForskjelligeUtbetalinger
 import no.nav.helse.person.Behandlinger.Behandling.Companion.harGjenbrukbareOpplysninger
@@ -45,6 +46,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.PeriodeMedSammeSkjæringstidspunkt
+import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
@@ -63,6 +65,7 @@ import no.nav.helse.økonomi.Inntekt
 internal class Behandlinger private constructor(behandlinger: List<Behandling>) {
     internal constructor() : this(emptyList())
     companion object {
+        internal fun Map<UUID, Behandlinger>.berik(builder: UtkastTilVedtakBuilder) = mapValues { (_, behandlinger) -> behandlinger.behandlinger.last() }.berik(builder)
         fun gjenopprett(dto: BehandlingerInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) = Behandlinger(
             behandlinger = dto.behandlinger.map { Behandling.gjenopprett(it, grunnlagsdata, utbetalinger) }
         )
@@ -150,6 +153,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     ) {
         val behandlingerMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map { it.first to it.second.behandlinger.last() }
         behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør, behandlinger.grunnbeløpsregulert())
+    }
+
+    internal fun utkastTilVedtak(hendelse: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
+        if (behandlinger.grunnbeløpsregulert()) builder.grunnbeløpsregulert()
+        behandlinger.last().utkastTilVedtak(hendelse, builder)
     }
 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Utbetaling? {
@@ -622,6 +630,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
             }
 
+            fun utkastTilVedtak(hendelse: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
+                checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved utkast til vedtak" }
+                checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved utkast til vedtak" }
+                builder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling)
+                // TODO: grunnlagsdata.berik(builder)
+                // TODO: Sende godkjenningsbehov & utkastTilVedtak
+            }
+
             internal fun dto(): BehandlingendringUtDto {
                 val vilkårsgrunnlagUtDto = this.grunnlagsdata?.dto()
                 val utbetalingUtDto = this.utbetaling?.dto()
@@ -962,6 +978,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt, arbeidsgiverperiode, harPeriodeRettFør, gregulering)
         }
 
+        internal fun utkastTilVedtak(hendelse: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
+            builder.behandlingId(id).periode(periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
+            gjeldende.utkastTilVedtak(hendelse, builder)
+        }
+
         fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, behandlinger: List<Behandling>): Utbetaling? {
             val sisteVedtak = behandlinger.lastOrNull { it.erFattetVedtak() } ?: return null
             return sisteVedtak.håndterAnnullering(arbeidsgiver, hendelse)
@@ -1067,6 +1088,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 val forrige = forrigeEndringMed { it.tidsstempel < gjeldende.tidsstempel && it.grunnlagsdata != null } ?: return false
                 if (forrige.skjæringstidspunkt != gjeldende.skjæringstidspunkt) return false
                 return listOf(forrige.grunnlagsdata!!, gjeldende.grunnlagsdata!!).harUlikeGrunnbeløp()
+            }
+
+            internal fun Map<UUID, Behandling>.berik(builder: UtkastTilVedtakBuilder) = forEach { (vedtaksperiodeId, behandling) ->
+                builder.relevantPeriode(vedtaksperiodeId, behandling.id, behandling.skjæringstidspunkt, behandling.periode)
             }
 
             internal fun gjenopprett(dto: BehandlingInnDto, grunnlagsdata: Map<UUID, VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>): Behandling {
