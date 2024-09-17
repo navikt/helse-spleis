@@ -1067,8 +1067,8 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje, maksimumSykepenger: Maksdatosituasjon, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) {
-        behandlinger.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
+    private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, maksdatogrunnlag: Utbetalingstidslinje, utbetalingstidslinje: Utbetalingstidslinje, maksimumSykepenger: Maksdatosituasjon, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) {
+        behandlinger.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, maksdatogrunnlag, utbetalingstidslinje)
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.jurist, this.sykdomstidslinje)
         utbetalingstidslinje.accept(subsumsjonen)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, hendelse)
@@ -1138,7 +1138,8 @@ internal class Vedtaksperiode private constructor(
             utbetalingsperioder.forEach { other ->
                 val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.organisasjonsnummer)
                 val maksdatoSituasjon = maksdatofilter.maksimumSykepenger(other.periode, other.jurist)
-                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), utbetalingstidslinje, maksdatoSituasjon, grunnlagsdata)
+                val maksdatogrunnlag = maksdatofilter.beregnetTidslinje
+                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), maksdatogrunnlag, utbetalingstidslinje, maksdatoSituasjon, grunnlagsdata)
             }
             return true
         } catch (err: UtbetalingstidslinjeBuilderException) {

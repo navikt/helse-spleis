@@ -57,6 +57,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderVedtaksperiode
@@ -179,9 +180,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         grunnlagsdata: VilkårsgrunnlagElement,
         hendelse: IAktivitetslogg,
         maksimumSykepenger: Maksdatosituasjon,
+        maksdatogrunnlag: Utbetalingstidslinje,
         utbetalingstidslinje: Utbetalingstidslinje
     ): Utbetalingstidslinje {
-        return behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
+        return behandlinger.last().utbetaling(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, maksdatogrunnlag, utbetalingstidslinje)
     }
 
     internal fun forkast(arbeidsgiver: Arbeidsgiver, hendelse: Hendelse) {
@@ -399,7 +401,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val sykdomstidslinje: Sykdomstidslinje,
             val utbetalingstidslinje: Utbetalingstidslinje,
             val skjæringstidspunkt: LocalDate,
-            val arbeidsgiverperiode: List<Periode>
+            val arbeidsgiverperiode: List<Periode>,
+            val maksdatoresultat: Maksdatoresultat
         ) {
 
             internal constructor(
@@ -411,8 +414,22 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 sykmeldingsperiode: Periode,
                 periode: Periode,
                 skjæringstidspunkt: LocalDate,
-                arbeidsgiverperiode: List<Periode>
-            ) : this(UUID.randomUUID(), LocalDateTime.now(), sykmeldingsperiode, periode, grunnlagsdata, utbetaling, dokumentsporing, sykdomstidslinje, utbetalingstidslinje, skjæringstidspunkt, arbeidsgiverperiode)
+                arbeidsgiverperiode: List<Periode>,
+                maksdatoresultat: Maksdatoresultat
+            ) : this(
+                id = UUID.randomUUID(),
+                tidsstempel = LocalDateTime.now(),
+                sykmeldingsperiode = sykmeldingsperiode,
+                periode = periode,
+                grunnlagsdata = grunnlagsdata,
+                utbetaling = utbetaling,
+                dokumentsporing = dokumentsporing,
+                sykdomstidslinje = sykdomstidslinje,
+                utbetalingstidslinje = utbetalingstidslinje,
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverperiode = arbeidsgiverperiode,
+                maksdatoresultat = maksdatoresultat
+            )
 
             private fun skjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje, periode: Periode = this.periode) =
                 beregnSkjæringstidspunkt().beregnSkjæringstidspunkt(periode, sykdomstidslinje.sykdomsperiode())
@@ -434,7 +451,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje),
                         utbetalingstidslinje = migrerUtbetalingstidslinje(dto, utbetaling, erAvsluttetUtenVedtak),
                         skjæringstidspunkt = dto.skjæringstidspunkt,
-                        arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) }
+                        arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
+                        maksdatoresultat = dto.maksdatoresultat?.let { Maksdatoresultat.gjenopprett(it) } ?: Maksdatoresultat.IkkeVurdert
                     )
                 }
 
@@ -523,7 +541,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     sykmeldingsperiode = this.sykmeldingsperiode,
                     periode = this.periode,
                     skjæringstidspunkt = nyttSkjæringstidspunkt,
-                    arbeidsgiverperiode = arbeidsgiverperiode
+                    arbeidsgiverperiode = arbeidsgiverperiode,
+                    maksdatoresultat = this.maksdatoresultat
                 )
             }
 
@@ -542,7 +561,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = periode,
                 skjæringstidspunkt = skjæringstidspunkt(beregnSkjæringstidspunkt, sykdomstidslinje, periode),
-                arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
+                arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode),
+                maksdatoresultat = Maksdatoresultat.IkkeVurdert
             )
             internal fun kopierUtenUtbetaling(
                 beregnSkjæringstidspunkt: (() -> Skjæringstidspunkt)? = null,
@@ -553,15 +573,17 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje = this.sykdomstidslinje,
                 utbetalingstidslinje = Utbetalingstidslinje(),
+                maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = this.periode,
                 skjæringstidspunkt = beregnSkjæringstidspunkt?.let { skjæringstidspunkt(beregnSkjæringstidspunkt) } ?: this.skjæringstidspunkt,
                 arbeidsgiverperiode = beregnArbeidsgiverperiode(this.periode)
             )
-            internal fun kopierMedUtbetaling(utbetalingstidslinje: Utbetalingstidslinje, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement) = Endring(
+            internal fun kopierMedUtbetaling(maksdatoresultat: Maksdatoresultat, utbetalingstidslinje: Utbetalingstidslinje, utbetaling: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement) = Endring(
                 grunnlagsdata = grunnlagsdata,
                 utbetaling = utbetaling,
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
+                maksdatoresultat = maksdatoresultat,
                 dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje = this.sykdomstidslinje,
                 sykmeldingsperiode = this.sykmeldingsperiode,
@@ -578,7 +600,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = this.periode,
                 skjæringstidspunkt = this.skjæringstidspunkt,
-                arbeidsgiverperiode = this.arbeidsgiverperiode
+                arbeidsgiverperiode = this.arbeidsgiverperiode,
+                maksdatoresultat = this.maksdatoresultat
             )
             internal fun kopierMedUtbetalingstidslinje(utbetalingstidslinje: Utbetalingstidslinje) = Endring(
                 grunnlagsdata = this.grunnlagsdata,
@@ -586,6 +609,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje = this.sykdomstidslinje,
                 utbetalingstidslinje = utbetalingstidslinje.subset(this.periode),
+                maksdatoresultat = this.maksdatoresultat,
                 sykmeldingsperiode = this.sykmeldingsperiode,
                 periode = this.periode,
                 skjæringstidspunkt = this.skjæringstidspunkt,
@@ -653,7 +677,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dokumentsporing = this.dokumentsporing.dto(),
                     sykdomstidslinje = this.sykdomstidslinje.dto(),
                     utbetalingstidslinje = this.utbetalingstidslinje.dto(),
-                    arbeidsgiverperioder = this.arbeidsgiverperiode.map { it.dto() }
+                    arbeidsgiverperioder = this.arbeidsgiverperiode.map { it.dto() },
+                    maksdatoresultat = this.maksdatoresultat.dto()
                 )
             }
         }
@@ -710,9 +735,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             grunnlagsdata: VilkårsgrunnlagElement,
             hendelse: IAktivitetslogg,
             maksimumSykepenger: Maksdatosituasjon,
+            maksdatogrunnlag: Utbetalingstidslinje,
             utbetalingstidslinje: Utbetalingstidslinje
         ): Utbetalingstidslinje {
-            return tilstand.utbetaling(this, vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
+            return tilstand.utbetaling(this, vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, maksdatogrunnlag, utbetalingstidslinje)
         }
 
         private fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling): Utbetaling? {
@@ -727,6 +753,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             grunnlagsdata: VilkårsgrunnlagElement,
             hendelse: IAktivitetslogg,
             maksimumSykepenger: Maksdatosituasjon,
+            maksdatogrunnlag: Utbetalingstidslinje,
             utbetalingstidslinje: Utbetalingstidslinje
         ): Utbetalingstidslinje {
             val strategi = Arbeidsgiver::lagUtbetaling
@@ -737,6 +764,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 grunnlagsdata,
                 hendelse,
                 maksimumSykepenger,
+                maksdatogrunnlag,
                 utbetalingstidslinje,
                 strategi,
                 Tilstand.BeregnetOmgjøring
@@ -749,6 +777,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             grunnlagsdata: VilkårsgrunnlagElement,
             hendelse: IAktivitetslogg,
             maksimumSykepenger: Maksdatosituasjon,
+            maksdatogrunnlag: Utbetalingstidslinje,
             utbetalingstidslinje: Utbetalingstidslinje
         ): Utbetalingstidslinje {
             val strategi = Arbeidsgiver::lagUtbetaling
@@ -760,6 +789,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 grunnlagsdata,
                 hendelse,
                 maksimumSykepenger,
+                maksdatogrunnlag,
                 utbetalingstidslinje,
                 strategi,
                 Tilstand.Beregnet
@@ -772,6 +802,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             grunnlagsdata: VilkårsgrunnlagElement,
             hendelse: IAktivitetslogg,
             maksimumSykepenger: Maksdatosituasjon,
+            maksdatogrunnlag: Utbetalingstidslinje,
             utbetalingstidslinje: Utbetalingstidslinje
         ): Utbetalingstidslinje {
             val strategi = Arbeidsgiver::lagRevurdering
@@ -782,6 +813,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 grunnlagsdata,
                 hendelse,
                 maksimumSykepenger,
+                maksdatogrunnlag,
                 utbetalingstidslinje,
                 strategi,
                 Tilstand.BeregnetRevurdering
@@ -794,13 +826,14 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             grunnlagsdata: VilkårsgrunnlagElement,
             hendelse: IAktivitetslogg,
             maksimumSykepenger: Maksdatosituasjon,
+            maksdatogrunnlag: Utbetalingstidslinje,
             utbetalingstidslinje: Utbetalingstidslinje,
             strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, fødselsnummer: String, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode) -> Utbetaling,
             nyTilstand: Tilstand
         ): Utbetalingstidslinje {
             val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksimumSykepenger.maksdato, maksimumSykepenger.forbrukteDager, maksimumSykepenger.gjenståendeDager, periode)
             denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
-            nyEndring(gjeldende.kopierMedUtbetaling(utbetalingstidslinje, denNyeUtbetalingen, grunnlagsdata))
+            nyEndring(gjeldende.kopierMedUtbetaling(maksimumSykepenger.resultat(maksdatogrunnlag), utbetalingstidslinje, denNyeUtbetalingen, grunnlagsdata))
             tilstand(nyTilstand, hendelse)
             return utbetalingstidslinje.subset(periode)
         }
@@ -907,7 +940,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             return Behandling(
                 observatører = this.observatører,
                 tilstand = Tilstand.AnnullertPeriode,
-                endringer = listOf(this.gjeldende.kopierMedUtbetaling(Utbetalingstidslinje(), annullering, grunnlagsdata)),
+                endringer = listOf(this.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata)),
                 avsluttet = LocalDateTime.now(),
                 kilde = Behandlingkilde(hendelse)
             )
@@ -1031,7 +1064,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                             utbetalingstidslinje = Utbetalingstidslinje(),
                             periode = checkNotNull(sykdomstidslinje.periode()) { "kan ikke opprette behandling på tom sykdomstidslinje" },
                             skjæringstidspunkt = IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT,
-                            arbeidsgiverperiode = emptyList()
+                            arbeidsgiverperiode = emptyList(),
+                            maksdatoresultat = Maksdatoresultat.IkkeVurdert
                         )
                     ),
                     avsluttet = null,
@@ -1151,7 +1185,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             fun utenUtbetaling(behandling: Behandling, hendelse: IAktivitetslogg) {
                 error("Støtter ikke å forkaste utbetaling utbetaling i $this")
             }
-            fun utbetaling(behandling: Behandling, vedtaksperiodeSomLagerUtbetaling: UUID, fødselsnummer: String, arbeidsgiver: Arbeidsgiver, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg, maksimumSykepenger: Maksdatosituasjon, utbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
+            fun utbetaling(behandling: Behandling, vedtaksperiodeSomLagerUtbetaling: UUID, fødselsnummer: String, arbeidsgiver: Arbeidsgiver, grunnlagsdata: VilkårsgrunnlagElement, hendelse: IAktivitetslogg, maksimumSykepenger: Maksdatosituasjon, maksdatogrunnlag: Utbetalingstidslinje, utbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
                 error("Støtter ikke å opprette utbetaling i $this")
             }
             fun oppdaterDokumentsporing(behandling: Behandling, dokument: Dokumentsporing): Boolean {
@@ -1201,9 +1235,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     grunnlagsdata: VilkårsgrunnlagElement,
                     hendelse: IAktivitetslogg,
                     maksimumSykepenger: Maksdatosituasjon,
+                    maksdatogrunnlag: Utbetalingstidslinje,
                     utbetalingstidslinje: Utbetalingstidslinje
                 ): Utbetalingstidslinje {
-                    return behandling.lagUtbetaling(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
+                    return behandling.lagUtbetaling(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, maksdatogrunnlag, utbetalingstidslinje)
                 }
 
                 override fun avsluttUtenVedtak(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg, utbetalingstidslinje: Utbetalingstidslinje) {
@@ -1222,9 +1257,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     grunnlagsdata: VilkårsgrunnlagElement,
                     hendelse: IAktivitetslogg,
                     maksimumSykepenger: Maksdatosituasjon,
+                    maksdatogrunnlag: Utbetalingstidslinje,
                     utbetalingstidslinje: Utbetalingstidslinje
                 ): Utbetalingstidslinje {
-                    return behandling.lagOmgjøring(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
+                    return behandling.lagOmgjøring(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, maksdatogrunnlag, utbetalingstidslinje)
                 }
 
                 override fun kanForkastes(behandling: Behandling, hendelse: IAktivitetslogg, arbeidsgiverUtbetalinger: List<Utbetaling>) =
@@ -1240,7 +1276,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     annullering: Utbetaling,
                     grunnlagsdata: VilkårsgrunnlagElement
                 ): Behandling? {
-                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Utbetalingstidslinje(), annullering, grunnlagsdata))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata))
                     behandling.tilstand(AnnullertPeriode, hendelse)
                     return null
                 }
@@ -1253,9 +1289,10 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     grunnlagsdata: VilkårsgrunnlagElement,
                     hendelse: IAktivitetslogg,
                     maksimumSykepenger: Maksdatosituasjon,
+                    maksdatogrunnlag: Utbetalingstidslinje,
                     utbetalingstidslinje: Utbetalingstidslinje
                 ): Utbetalingstidslinje {
-                    return behandling.lagRevurdering(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, utbetalingstidslinje)
+                    return behandling.lagRevurdering(vedtaksperiodeSomLagerUtbetaling, fødselsnummer, arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, maksdatogrunnlag, utbetalingstidslinje)
                 }
             }
             data object Beregnet : Tilstand {
@@ -1327,7 +1364,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
                 override fun annuller(behandling: Behandling, arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, annullering: Utbetaling, grunnlagsdata: VilkårsgrunnlagElement): Behandling? {
                     behandling.gjeldende.utbetaling!!.forkast(hendelse)
-                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Utbetalingstidslinje(), annullering, grunnlagsdata))
+                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetaling(Maksdatoresultat.IkkeVurdert, Utbetalingstidslinje(), annullering, grunnlagsdata))
                     behandling.tilstand(AnnullertPeriode, hendelse)
                     return null
                 }

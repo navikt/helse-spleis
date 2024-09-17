@@ -20,5 +20,6 @@ data class BehandlingendringUtDto(
     val dokumentsporing: DokumentsporingDto,
     val sykdomstidslinje: SykdomstidslinjeDto,
     val utbetalingstidslinje: UtbetalingstidslinjeUtDto,
-    val arbeidsgiverperioder: List<PeriodeDto>
+    val arbeidsgiverperioder: List<PeriodeDto>,
+    val maksdatoresultat: MaksdatoresultatUtDto,
 )

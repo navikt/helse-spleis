@@ -29,7 +29,7 @@ internal class MaksimumSykepengedagerfilter(
     private var opphold = 0
     private val begrunnelserForAvvisteDager = mutableMapOf<Begrunnelse, MutableSet<LocalDate>>()
     private val avvisteDager get() = begrunnelserForAvvisteDager.values.flatten().toSet()
-    private lateinit var beregnetTidslinje: Utbetalingstidslinje
+    internal lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
     private var subsumsjonslogg: Subsumsjonslogg = NullObserver
 

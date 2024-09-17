@@ -1,0 +1,59 @@
+package no.nav.helse.utbetalingstidslinje
+
+import no.nav.helse.dto.MaksdatobestemmelseDto
+import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
+import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
+import java.time.LocalDate
+
+data class Maksdatoresultat(
+    val vurdertTilOgMed: LocalDate,
+    val bestemmelse: Bestemmelse,
+    val startdatoTreårsvindu: LocalDate,
+    val forbrukteDager: Set<LocalDate>,
+    val maksdato: LocalDate,
+    val gjenståendeDager: Int,
+    val grunnlag: Utbetalingstidslinje
+) {
+    enum class Bestemmelse { IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR }
+    companion object {
+        val IkkeVurdert = Maksdatoresultat(
+            vurdertTilOgMed = LocalDate.MIN,
+            bestemmelse = Bestemmelse.IKKE_VURDERT,
+            startdatoTreårsvindu = LocalDate.MIN,
+            forbrukteDager = emptySet(),
+            maksdato = LocalDate.MIN,
+            gjenståendeDager = 0,
+            grunnlag = Utbetalingstidslinje()
+        )
+
+        fun gjenopprett(dto: MaksdatoresultatInnDto) = Maksdatoresultat(
+            vurdertTilOgMed = dto.vurdertTilOgMed,
+            bestemmelse = when (dto.bestemmelse) {
+                MaksdatobestemmelseDto.IKKE_VURDERT -> Bestemmelse.IKKE_VURDERT
+                MaksdatobestemmelseDto.ORDINÆR_RETT -> Bestemmelse.ORDINÆR_RETT
+                MaksdatobestemmelseDto.BEGRENSET_RETT -> Bestemmelse.BEGRENSET_RETT
+                MaksdatobestemmelseDto.SYTTI_ÅR -> Bestemmelse.SYTTI_ÅR
+            },
+            startdatoTreårsvindu = dto.startdatoTreårsvindu,
+            forbrukteDager = dto.forbrukteDager,
+            maksdato = dto.maksdato,
+            gjenståendeDager = dto.gjenståendeDager,
+            grunnlag = Utbetalingstidslinje.gjenopprett(dto.grunnlag)
+        )
+    }
+
+    fun dto() = MaksdatoresultatUtDto(
+        vurdertTilOgMed = vurdertTilOgMed,
+        bestemmelse = when (bestemmelse) {
+            Bestemmelse.IKKE_VURDERT -> MaksdatobestemmelseDto.IKKE_VURDERT
+            Bestemmelse.ORDINÆR_RETT -> MaksdatobestemmelseDto.ORDINÆR_RETT
+            Bestemmelse.BEGRENSET_RETT -> MaksdatobestemmelseDto.BEGRENSET_RETT
+            Bestemmelse.SYTTI_ÅR -> MaksdatobestemmelseDto.SYTTI_ÅR
+        },
+        startdatoTreårsvindu = startdatoTreårsvindu,
+        forbrukteDager = forbrukteDager,
+        maksdato = maksdato,
+        gjenståendeDager = gjenståendeDager,
+        grunnlag = grunnlag.dto()
+    )
+}

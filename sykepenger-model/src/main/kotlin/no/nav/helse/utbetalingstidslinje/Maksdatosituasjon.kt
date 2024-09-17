@@ -10,6 +10,7 @@ import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.til
 import no.nav.helse.plus
 import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon.Maksdatobestemmelse
@@ -66,6 +67,21 @@ internal class Maksdatosituasjon(
             }
         }
     }
+
+    internal fun resultat(utbetalingstidslinje: Utbetalingstidslinje) = Maksdatoresultat(
+        vurdertTilOgMed = dato,
+        bestemmelse = when {
+            hjemmelsbegrunnelse === Maksdatobestemmelse.OrdinærRett -> Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
+            hjemmelsbegrunnelse === Maksdatobestemmelse.BegrensetRett -> Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
+            hjemmelsbegrunnelse === Maksdatobestemmelse.Over70 -> Maksdatoresultat.Bestemmelse.SYTTI_ÅR
+            else -> error("ukjent bestemmelse")
+        },
+        startdatoTreårsvindu = startdatoTreårsvindu,
+        forbrukteDager = betalteDager,
+        maksdato = maksdato,
+        gjenståendeDager = gjenståendeDager,
+        grunnlag = utbetalingstidslinje.subset(startdatoTreårsvindu til dato)
+    )
 
     internal fun erDagerUnder67ÅrForbrukte() = gjenståendeSykepengedagerUnder67 == 0
     internal fun erDagerOver67ÅrForbrukte() = gjenståendeSykepengedagerOver67 == 0

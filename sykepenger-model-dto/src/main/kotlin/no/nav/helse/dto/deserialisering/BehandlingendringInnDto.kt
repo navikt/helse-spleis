@@ -18,5 +18,6 @@ data class BehandlingendringInnDto(
     val sykdomstidslinje: SykdomstidslinjeDto,
     val utbetalingstidslinje: UtbetalingstidslinjeInnDto?,
     val skjæringstidspunkt: LocalDate,
-    val arbeidsgiverperiode: List<PeriodeDto>
+    val arbeidsgiverperiode: List<PeriodeDto>,
+    val maksdatoresultat: MaksdatoresultatInnDto?
 )

@@ -16,6 +16,7 @@ import no.nav.helse.dto.HendelseskildeDto
 import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
+import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.SatstypeDto
@@ -41,6 +42,7 @@ import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
+import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
@@ -382,7 +384,22 @@ private fun BehandlingendringUtDto.tilPersonData() = PersonData.ArbeidsgiverData
     sykdomstidslinje = sykdomstidslinje.tilPersonData(),
     utbetalingstidslinje = utbetalingstidslinje.tilPersonData(),
     dokumentsporing = dokumentsporing.tilPersonData(),
-    arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) }
+    arbeidsgiverperioder = arbeidsgiverperioder.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    maksdatoresultat = maksdatoresultat.tilPersonData()
+)
+private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
+    vurdertTilOgMed = vurdertTilOgMed,
+    bestemmelse = when (bestemmelse) {
+        MaksdatobestemmelseDto.IKKE_VURDERT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseData.IKKE_VURDERT
+        MaksdatobestemmelseDto.ORDINÆR_RETT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseData.ORDINÆR_RETT
+        MaksdatobestemmelseDto.BEGRENSET_RETT -> PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseData.BEGRENSET_RETT
+        MaksdatobestemmelseDto.SYTTI_ÅR -> PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseData.SYTTI_ÅR
+    },
+    startdatoTreårsvindu = startdatoTreårsvindu,
+    forbrukteDager = forbrukteDager.toList(),
+    maksdato = maksdato,
+    gjenståendeDager = gjenståendeDager,
+    grunnlag = grunnlag.tilPersonData()
 )
 private fun DokumentsporingDto.tilPersonData() = PersonData.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(
     dokumentId = this.id,

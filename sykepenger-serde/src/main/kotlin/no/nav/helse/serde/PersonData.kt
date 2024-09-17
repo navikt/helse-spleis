@@ -25,6 +25,7 @@ import no.nav.helse.dto.InfotrygdFerieperiodeDto
 import no.nav.helse.dto.InntektbeløpDto
 import no.nav.helse.dto.InntekttypeDto
 import no.nav.helse.dto.KlassekodeDto
+import no.nav.helse.dto.MaksdatobestemmelseDto
 import no.nav.helse.dto.OppdragstatusDto
 import no.nav.helse.dto.PeriodeDto
 import no.nav.helse.dto.ProsentdelDto
@@ -56,6 +57,7 @@ import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
 import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
 import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
 import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
 import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
@@ -750,6 +752,33 @@ data class PersonData(
                 opprettet = opprettet,
                 oppdatert = oppdatert
             )
+            enum class MaksdatobestemmelseData {
+                IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR
+            }
+            data class MaksdatoresultatData(
+                val vurdertTilOgMed: LocalDate,
+                val bestemmelse: MaksdatobestemmelseData,
+                val startdatoTreårsvindu: LocalDate,
+                val forbrukteDager: List<LocalDate>,
+                val maksdato: LocalDate,
+                val gjenståendeDager: Int,
+                val grunnlag: UtbetalingstidslinjeData
+            ) {
+                fun tilDto() = MaksdatoresultatInnDto(
+                    vurdertTilOgMed = vurdertTilOgMed,
+                    bestemmelse = when (bestemmelse) {
+                        MaksdatobestemmelseData.IKKE_VURDERT -> MaksdatobestemmelseDto.IKKE_VURDERT
+                        MaksdatobestemmelseData.ORDINÆR_RETT -> MaksdatobestemmelseDto.ORDINÆR_RETT
+                        MaksdatobestemmelseData.BEGRENSET_RETT -> MaksdatobestemmelseDto.BEGRENSET_RETT
+                        MaksdatobestemmelseData.SYTTI_ÅR -> MaksdatobestemmelseDto.SYTTI_ÅR
+                    },
+                    startdatoTreårsvindu = startdatoTreårsvindu,
+                    forbrukteDager = forbrukteDager.toSet(),
+                    maksdato = maksdato,
+                    gjenståendeDager = gjenståendeDager,
+                    grunnlag = grunnlag.tilDto()
+                )
+            }
             data class DokumentsporingData(
                 val dokumentId: UUID,
                 val dokumenttype: DokumentTypeData
@@ -854,7 +883,8 @@ data class PersonData(
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val utbetalingstidslinje: UtbetalingstidslinjeData?,
                     val dokumentsporing: DokumentsporingData,
-                    val arbeidsgiverperioder: List<PeriodeData>
+                    val arbeidsgiverperioder: List<PeriodeData>,
+                    val maksdatoresultat: MaksdatoresultatData?
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -867,7 +897,8 @@ data class PersonData(
                         sykdomstidslinje = this.sykdomstidslinje.tilDto(),
                         utbetalingstidslinje = this.utbetalingstidslinje?.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
-                        arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() }
+                        arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
+                        maksdatoresultat = maksdatoresultat?.tilDto()
                     )
                 }
             }

@@ -16,6 +16,7 @@ import no.nav.helse.dto.serialisering.InfotrygdInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
 import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
+import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
 import no.nav.helse.dto.serialisering.OppdragUtDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
 import no.nav.helse.dto.serialisering.PersonUtDto
@@ -370,6 +371,19 @@ data class SpannerPersonDto(
                 val hvorfor: String?
             )
 
+            enum class MaksdatobestemmelseDto {
+                IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR
+            }
+
+            data class MaksdatoresultatData(
+                val vurdertTilOgMed: LocalDate,
+                val bestemmelse: MaksdatobestemmelseDto,
+                val startdatoTreårsvindu: LocalDate,
+                val forbrukteDager: List<LocalDate>,
+                val maksdato: LocalDate,
+                val gjenståendeDager: Int,
+                val grunnlag: UtbetalingstidslinjeData
+            )
             data class DokumentsporingData(
                 val dokumentId: UUID,
                 val dokumenttype: DokumentTypeData
@@ -425,7 +439,8 @@ data class SpannerPersonDto(
                     val sykdomstidslinje: SykdomstidslinjeData,
                     val utbetalingstidslinje: UtbetalingstidslinjeData,
                     val dokumentsporing: DokumentsporingData,
-                    val arbeidsgiverperiode: List<PeriodeData>
+                    val arbeidsgiverperiode: List<PeriodeData>,
+                    val maksdatoresultat: MaksdatoresultatData
                 )
             }
             data class DataForSimuleringData(
@@ -1003,8 +1018,23 @@ private fun BehandlingendringUtDto.tilPersonData() =
                 it.fom,
                 it.tom
             )
-        }
+        },
+        maksdatoresultat = maksdatoresultat.tilPersonData()
     )
+private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatoresultatData(
+    vurdertTilOgMed = vurdertTilOgMed,
+    bestemmelse = when (bestemmelse) {
+        MaksdatobestemmelseDto.IKKE_VURDERT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.IKKE_VURDERT
+        MaksdatobestemmelseDto.ORDINÆR_RETT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.ORDINÆR_RETT
+        MaksdatobestemmelseDto.BEGRENSET_RETT -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.BEGRENSET_RETT
+        MaksdatobestemmelseDto.SYTTI_ÅR -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.SYTTI_ÅR
+    },
+    startdatoTreårsvindu = startdatoTreårsvindu,
+    forbrukteDager = forbrukteDager.toList(),
+    maksdato = maksdato,
+    gjenståendeDager = gjenståendeDager,
+    grunnlag = grunnlag.tilPersonData()
+)
 private fun DokumentsporingDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.DokumentsporingData(
         dokumentId = this.id,
