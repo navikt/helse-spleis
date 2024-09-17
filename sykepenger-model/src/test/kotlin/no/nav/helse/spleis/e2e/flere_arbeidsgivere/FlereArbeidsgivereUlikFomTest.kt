@@ -497,6 +497,44 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `mursteinspølser og totalgrad`() {
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(21.januar, 10.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = INNTEKT/10)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = INNTEKT)
+
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, orgnummer = a1, inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(
+                arbeidsgivere = listOf(a1 to INNTEKT/10, a2 to INNTEKT),
+                skjæringstidspunkt = 1.januar,
+                arbeidsforhold = emptyList()
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        val utbetalingerA1 = inspektør(a1).utbetalinger
+        val utbetalingerA2 = inspektør(a2).utbetalinger
+        assertEquals(2, utbetalingerA1.size)
+        assertEquals(1, utbetalingerA2.size)
+
+        val sisteUtbetalingA1 = utbetalingerA1.last()
+        assertEquals(1.januar til 10.februar, sisteUtbetalingA1.inspektør.periode)
+        sisteUtbetalingA1.utbetalingstidslinje[31.januar].let { dag ->
+            assertEquals(100, dag.økonomi.inspektør.totalGrad)
+        }
+        sisteUtbetalingA1.utbetalingstidslinje[1.februar].let { dag ->
+            assertEquals(100, dag.økonomi.inspektør.totalGrad)
+        }
+    }
+
+    @Test
     fun `Førstegangsbehandling med ulik fom og første arbeidsgiver er 50 prosent sykmeldt`() {
         håndterSykmelding(Sykmeldingsperiode(28.februar, 31.mars), orgnummer = a1)
         håndterSøknad(Sykdom(28.februar, 31.mars, 50.prosent), orgnummer = a1)

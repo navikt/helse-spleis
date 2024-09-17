@@ -1088,6 +1088,16 @@ internal class Vedtaksperiode private constructor(
             .filter { it.behandlinger.klarForUtbetaling() }
     }
 
+    private fun vedtaksperiodenePerArbeidsgiver(): Map<String, List<Vedtaksperiode>> {
+        val skjæringstidspunkt = this.skjæringstidspunkt
+        return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            .filter { it !== this }
+            .fold(listOf(this), { utbetalingsperioder, vedtaksperiode ->
+                if (utbetalingsperioder.any { vedtaksperiode.periode.overlapperMed(it.periode)}) utbetalingsperioder + vedtaksperiode
+                else utbetalingsperioder
+            }).groupBy { it.organisasjonsnummer }
+    }
+
     private fun erKandidatForUtbetaling(periodeSomBeregner: Vedtaksperiode, skjæringstidspunktet: LocalDate): Boolean {
         if (this === periodeSomBeregner) return true
         if (!forventerInntekt()) return false
@@ -1154,10 +1164,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
-        val vedtaksperiodene = person
-            .vedtaksperioder(OVERLAPPER_MED(this))
-            .filter { it.skjæringstidspunkt == skjæringstidspunkt }
-            .groupBy { it.organisasjonsnummer }
+        val vedtaksperiodene = vedtaksperiodenePerArbeidsgiver()
 
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
         val utbetalingstidslinjer = vedtaksperiodene.mapValues { (arbeidsgiver, vedtaksperioder) ->
@@ -2694,6 +2701,7 @@ internal class Vedtaksperiode private constructor(
         }
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
+
         private fun Vedtaksperiode.erTidligereEnn(other: Vedtaksperiode): Boolean = this <= other || this.skjæringstidspunkt < other.skjæringstidspunkt
 
         private fun Iterable<Vedtaksperiode>.førstePeriode(): Vedtaksperiode? {
