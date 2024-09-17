@@ -68,21 +68,24 @@ internal class Maksdatosituasjon(
         }
     }
 
-    internal fun resultat(utbetalingstidslinje: Utbetalingstidslinje) = Maksdatoresultat(
-        vurdertTilOgMed = dato,
-        bestemmelse = when {
-            hjemmelsbegrunnelse === Maksdatobestemmelse.OrdinærRett -> Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
-            hjemmelsbegrunnelse === Maksdatobestemmelse.BegrensetRett -> Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
-            hjemmelsbegrunnelse === Maksdatobestemmelse.Over70 -> Maksdatoresultat.Bestemmelse.SYTTI_ÅR
-            else -> error("ukjent bestemmelse")
-        },
-        startdatoTreårsvindu = startdatoTreårsvindu,
-        startdatoSykepengerettighet = startdatoSykepengerettighet,
-        forbrukteDager = betalteDager,
-        maksdato = maksdato,
-        gjenståendeDager = gjenståendeDager,
-        grunnlag = utbetalingstidslinje.subset(startdatoTreårsvindu til dato)
-    )
+    internal fun resultat(utbetalingstidslinje: Utbetalingstidslinje): Maksdatoresultat {
+        val tidligsteDag = if (startdatoSykepengerettighet == null) startdatoTreårsvindu else minOf(startdatoTreårsvindu, startdatoSykepengerettighet)
+        return Maksdatoresultat(
+            vurdertTilOgMed = dato,
+            bestemmelse = when {
+                hjemmelsbegrunnelse === Maksdatobestemmelse.OrdinærRett -> Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
+                hjemmelsbegrunnelse === Maksdatobestemmelse.BegrensetRett -> Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
+                hjemmelsbegrunnelse === Maksdatobestemmelse.Over70 -> Maksdatoresultat.Bestemmelse.SYTTI_ÅR
+                else -> error("ukjent bestemmelse")
+            },
+            startdatoTreårsvindu = startdatoTreårsvindu,
+            startdatoSykepengerettighet = startdatoSykepengerettighet,
+            forbrukteDager = betalteDager,
+            maksdato = maksdato,
+            gjenståendeDager = gjenståendeDager,
+            grunnlag = utbetalingstidslinje.subset(tidligsteDag til dato)
+        )
+    }
 
     internal fun erDagerUnder67ÅrForbrukte() = gjenståendeSykepengedagerUnder67 == 0
     internal fun erDagerOver67ÅrForbrukte() = gjenståendeSykepengedagerOver67 == 0
