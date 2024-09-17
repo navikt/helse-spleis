@@ -35,6 +35,8 @@ data class GraphQLArbeidsgiverinntekt(
     val omregnetArsinntekt: GraphQLOmregnetArsinntekt,
     val skjonnsmessigFastsatt: GraphQLSkjonnsmessigFastsatt?, // TODO: speil bruker kun <beløp>, og verdien kunne altså vært foreklet til en <Double?>
     val skjonnsmessigFastsattAarlig: Double?,
+    val fom: LocalDate,
+    val tom: LocalDate?,
     val deaktivert: Boolean? = null,
 )
 

@@ -431,6 +431,8 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
         )
     },
     skjonnsmessigFastsattAarlig = inntekt.skjønnsmessigFastsatt?.årlig,
+    fom = inntekt.fom,
+    tom = inntekt.tom,
     deaktivert = inntekt.deaktivert
 )
 

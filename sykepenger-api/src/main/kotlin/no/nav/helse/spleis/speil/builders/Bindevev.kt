@@ -23,6 +23,8 @@ internal data class IArbeidsgiverinntekt(
             organisasjonsnummer = arbeidsgiver,
             omregnetÅrsinntekt = omregnetÅrsinntekt.toDTO(),
             skjønnsmessigFastsatt = skjønnsmessigFastsatt,
+            fom = fom,
+            tom = tom.takeUnless { it == LocalDate.MAX },
             deaktivert = deaktivert
         )
     }

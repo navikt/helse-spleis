@@ -41,6 +41,8 @@ data class Arbeidsgiverinntekt(
     val organisasjonsnummer: String,
     val omregnetÅrsinntekt: Inntekt,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsattDTO? = null,
+    val fom: LocalDate,
+    val tom: LocalDate?,
     val deaktivert: Boolean
 )
 

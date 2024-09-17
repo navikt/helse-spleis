@@ -718,6 +718,8 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                 "kilde": "Inntektsmelding",
                 "manedsbelop": 31000.0
               },
+              "fom": "2018-01-01",
+              "tom":  null,
               "deaktivert": false, 
               "skjonnsmessigFastsatt": null,
               "skjonnsmessigFastsattAarlig": null
