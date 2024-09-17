@@ -130,7 +130,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
-import no.nav.helse.utbetalingstidslinje.Maksdatosituasjon
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
@@ -1067,8 +1067,8 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, maksdatogrunnlag: Utbetalingstidslinje, utbetalingstidslinje: Utbetalingstidslinje, maksimumSykepenger: Maksdatosituasjon, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) {
-        behandlinger.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, grunnlagsdata, hendelse, maksimumSykepenger, maksdatogrunnlag, utbetalingstidslinje)
+    private fun lagNyUtbetaling(arbeidsgiverSomBeregner: Arbeidsgiver, hendelse: IAktivitetslogg, maksdatoresultat: Maksdatoresultat, utbetalingstidslinje: Utbetalingstidslinje, grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) {
+        behandlinger.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, grunnlagsdata, hendelse, maksdatoresultat, utbetalingstidslinje)
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.jurist, this.sykdomstidslinje)
         utbetalingstidslinje.accept(subsumsjonen)
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, hendelse)
@@ -1139,7 +1139,7 @@ internal class Vedtaksperiode private constructor(
                 val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.organisasjonsnummer)
                 val maksdatoSituasjon = maksdatofilter.maksimumSykepenger(other.periode, other.jurist)
                 val maksdatogrunnlag = maksdatofilter.beregnetTidslinje
-                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), maksdatogrunnlag, utbetalingstidslinje, maksdatoSituasjon, grunnlagsdata)
+                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), maksdatoSituasjon.resultat(maksdatogrunnlag), utbetalingstidslinje, grunnlagsdata)
             }
             return true
         } catch (err: UtbetalingstidslinjeBuilderException) {
