@@ -7,6 +7,7 @@ data class MaksdatoresultatInnDto(
     val vurdertTilOgMed: LocalDate,
     val bestemmelse: MaksdatobestemmelseDto,
     val startdatoTreårsvindu: LocalDate,
+    val startdatoSykepengerettighet: LocalDate?,
     val forbrukteDager: Set<LocalDate>,
     val maksdato: LocalDate,
     val gjenståendeDager: Int,

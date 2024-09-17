@@ -77,6 +77,7 @@ internal class Maksdatosituasjon(
             else -> error("ukjent bestemmelse")
         },
         startdatoTreårsvindu = startdatoTreårsvindu,
+        startdatoSykepengerettighet = startdatoSykepengerettighet,
         forbrukteDager = betalteDager,
         maksdato = maksdato,
         gjenståendeDager = gjenståendeDager,

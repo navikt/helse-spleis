@@ -396,6 +396,7 @@ private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.
         MaksdatobestemmelseDto.SYTTI_ÅR -> PersonData.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseData.SYTTI_ÅR
     },
     startdatoTreårsvindu = startdatoTreårsvindu,
+    startdatoSykepengerettighet = startdatoSykepengerettighet,
     forbrukteDager = forbrukteDager.toList(),
     maksdato = maksdato,
     gjenståendeDager = gjenståendeDager,

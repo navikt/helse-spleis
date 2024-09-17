@@ -759,6 +759,7 @@ data class PersonData(
                 val vurdertTilOgMed: LocalDate,
                 val bestemmelse: MaksdatobestemmelseData,
                 val startdatoTreårsvindu: LocalDate,
+                val startdatoSykepengerettighet: LocalDate?,
                 val forbrukteDager: List<LocalDate>,
                 val maksdato: LocalDate,
                 val gjenståendeDager: Int,
@@ -773,6 +774,7 @@ data class PersonData(
                         MaksdatobestemmelseData.SYTTI_ÅR -> MaksdatobestemmelseDto.SYTTI_ÅR
                     },
                     startdatoTreårsvindu = startdatoTreårsvindu,
+                    startdatoSykepengerettighet = startdatoSykepengerettighet,
                     forbrukteDager = forbrukteDager.toSet(),
                     maksdato = maksdato,
                     gjenståendeDager = gjenståendeDager,

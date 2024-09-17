@@ -379,6 +379,7 @@ data class SpannerPersonDto(
                 val vurdertTilOgMed: LocalDate,
                 val bestemmelse: MaksdatobestemmelseDto,
                 val startdatoTreårsvindu: LocalDate,
+                val startdatoSykepengerettighet: LocalDate?,
                 val forbrukteDager: List<LocalDate>,
                 val maksdato: LocalDate,
                 val gjenståendeDager: Int,
@@ -1030,6 +1031,7 @@ private fun MaksdatoresultatUtDto.tilPersonData() = SpannerPersonDto.Arbeidsgive
         MaksdatobestemmelseDto.SYTTI_ÅR -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.MaksdatobestemmelseDto.SYTTI_ÅR
     },
     startdatoTreårsvindu = startdatoTreårsvindu,
+    startdatoSykepengerettighet = startdatoSykepengerettighet,
     forbrukteDager = forbrukteDager.toList(),
     maksdato = maksdato,
     gjenståendeDager = gjenståendeDager,

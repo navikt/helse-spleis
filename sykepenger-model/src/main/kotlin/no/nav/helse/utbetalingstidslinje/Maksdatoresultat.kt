@@ -9,6 +9,7 @@ data class Maksdatoresultat(
     val vurdertTilOgMed: LocalDate,
     val bestemmelse: Bestemmelse,
     val startdatoTreårsvindu: LocalDate,
+    val startdatoSykepengerettighet: LocalDate?,
     val forbrukteDager: Set<LocalDate>,
     val maksdato: LocalDate,
     val gjenståendeDager: Int,
@@ -19,6 +20,7 @@ data class Maksdatoresultat(
         val IkkeVurdert = Maksdatoresultat(
             vurdertTilOgMed = LocalDate.MIN,
             bestemmelse = Bestemmelse.IKKE_VURDERT,
+            startdatoSykepengerettighet = null,
             startdatoTreårsvindu = LocalDate.MIN,
             forbrukteDager = emptySet(),
             maksdato = LocalDate.MIN,
@@ -34,6 +36,7 @@ data class Maksdatoresultat(
                 MaksdatobestemmelseDto.BEGRENSET_RETT -> Bestemmelse.BEGRENSET_RETT
                 MaksdatobestemmelseDto.SYTTI_ÅR -> Bestemmelse.SYTTI_ÅR
             },
+            startdatoSykepengerettighet = dto.startdatoSykepengerettighet,
             startdatoTreårsvindu = dto.startdatoTreårsvindu,
             forbrukteDager = dto.forbrukteDager,
             maksdato = dto.maksdato,
@@ -50,6 +53,7 @@ data class Maksdatoresultat(
             Bestemmelse.BEGRENSET_RETT -> MaksdatobestemmelseDto.BEGRENSET_RETT
             Bestemmelse.SYTTI_ÅR -> MaksdatobestemmelseDto.SYTTI_ÅR
         },
+        startdatoSykepengerettighet = startdatoSykepengerettighet,
         startdatoTreårsvindu = startdatoTreårsvindu,
         forbrukteDager = forbrukteDager,
         maksdato = maksdato,
