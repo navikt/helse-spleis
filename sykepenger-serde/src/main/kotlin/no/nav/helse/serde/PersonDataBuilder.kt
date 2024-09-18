@@ -397,7 +397,9 @@ private fun MaksdatoresultatUtDto.tilPersonData() = PersonData.ArbeidsgiverData.
     },
     startdatoTreårsvindu = startdatoTreårsvindu,
     startdatoSykepengerettighet = startdatoSykepengerettighet,
-    forbrukteDager = forbrukteDager.toList(),
+    forbrukteDager = forbrukteDager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    oppholdsdager = oppholdsdager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
+    avslåtteDager = avslåtteDager.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
     maksdato = maksdato,
     gjenståendeDager = gjenståendeDager,
     grunnlag = grunnlag.tilPersonData()

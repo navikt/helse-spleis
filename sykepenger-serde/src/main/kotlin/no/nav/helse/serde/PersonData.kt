@@ -760,7 +760,9 @@ data class PersonData(
                 val bestemmelse: MaksdatobestemmelseData,
                 val startdatoTreårsvindu: LocalDate,
                 val startdatoSykepengerettighet: LocalDate?,
-                val forbrukteDager: List<LocalDate>,
+                val forbrukteDager: List<PeriodeData>,
+                val oppholdsdager: List<PeriodeData>,
+                val avslåtteDager: List<PeriodeData>,
                 val maksdato: LocalDate,
                 val gjenståendeDager: Int,
                 val grunnlag: UtbetalingstidslinjeData
@@ -775,7 +777,9 @@ data class PersonData(
                     },
                     startdatoTreårsvindu = startdatoTreårsvindu,
                     startdatoSykepengerettighet = startdatoSykepengerettighet,
-                    forbrukteDager = forbrukteDager.toSet(),
+                    forbrukteDager = forbrukteDager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
+                    oppholdsdager = oppholdsdager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
+                    avslåtteDager = avslåtteDager.map { PeriodeDto(fom = it.fom, tom = it.tom) },
                     maksdato = maksdato,
                     gjenståendeDager = gjenståendeDager,
                     grunnlag = grunnlag.tilDto()
@@ -886,7 +890,7 @@ data class PersonData(
                     val utbetalingstidslinje: UtbetalingstidslinjeData?,
                     val dokumentsporing: DokumentsporingData,
                     val arbeidsgiverperioder: List<PeriodeData>,
-                    val maksdatoresultat: MaksdatoresultatData?
+                    val maksdatoresultat: MaksdatoresultatData
                 ) {
                     fun tilDto() = BehandlingendringInnDto(
                         id = this.id,
@@ -900,7 +904,7 @@ data class PersonData(
                         utbetalingstidslinje = this.utbetalingstidslinje?.tilDto(),
                         skjæringstidspunkt = skjæringstidspunkt,
                         arbeidsgiverperiode = arbeidsgiverperioder.map { it.tilDto() },
-                        maksdatoresultat = maksdatoresultat?.tilDto()
+                        maksdatoresultat = maksdatoresultat.tilDto()
                     )
                 }
             }

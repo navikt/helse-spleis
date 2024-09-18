@@ -462,7 +462,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                         utbetalingstidslinje = migrerUtbetalingstidslinje(dto, utbetaling, erAvsluttetUtenVedtak),
                         skjæringstidspunkt = dto.skjæringstidspunkt,
                         arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) },
-                        maksdatoresultat = dto.maksdatoresultat?.let { Maksdatoresultat.gjenopprett(it) } ?: Maksdatoresultat.IkkeVurdert,
+                        maksdatoresultat = Maksdatoresultat.gjenopprett(dto.maksdatoresultat),
                         inntekter = emptyList() // TODO kanskje legge til noe her
                     )
                 }
@@ -868,7 +868,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             strategi: (Arbeidsgiver, aktivitetslogg: IAktivitetslogg, fødselsnummer: String, utbetalingstidslinje: Utbetalingstidslinje, maksdato: LocalDate, forbrukteSykedager: Int, gjenståendeSykedager: Int, periode: Periode) -> Utbetaling,
             nyTilstand: Tilstand
         ): Utbetalingstidslinje {
-            val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksdatoresultat.maksdato, maksdatoresultat.forbrukteDager.size, maksdatoresultat.gjenståendeDager, periode)
+            val denNyeUtbetalingen = strategi(arbeidsgiver, hendelse, fødselsnummer, utbetalingstidslinje, maksdatoresultat.maksdato, maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, periode)
             denNyeUtbetalingen.nyVedtaksperiodeUtbetaling(vedtaksperiodeSomLagerUtbetaling)
             nyEndring(gjeldende.kopierMedUtbetaling(maksdatoresultat, utbetalingstidslinje, denNyeUtbetalingen, grunnlagsdata))
             tilstand(nyTilstand, hendelse)

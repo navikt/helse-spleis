@@ -198,7 +198,9 @@ internal data class Maksdatokontekst(
             bestemmelse = hjemmelsbegrunnelse,
             startdatoTreårsvindu = startdatoTreårsvindu,
             startdatoSykepengerettighet = startdatoSykepengerettighet.takeUnless { it == LocalDate.MIN },
-            forbrukteDager = betalteDager,
+            forbrukteDager = betalteDager.grupperSammenhengendePerioder(),
+            oppholdsdager = oppholdsdager.grupperSammenhengendePerioder(),
+            avslåtteDager = avslåtteDager.grupperSammenhengendePerioder(),
             maksdato = maksdato,
             gjenståendeDager = gjenståendeDager,
             grunnlag = samletGrunnlagstidslinje.subset(tidligsteDag til vurdertTilOgMed)
