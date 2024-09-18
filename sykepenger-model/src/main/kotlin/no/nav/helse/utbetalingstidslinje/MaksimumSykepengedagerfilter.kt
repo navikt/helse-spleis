@@ -1,21 +1,14 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.DayOfWeek.MONDAY
-import java.time.DayOfWeek.SATURDAY
-import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
-import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
-import no.nav.helse.plus
-import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.State.Karantene
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.State.Syk
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -33,14 +26,8 @@ internal class MaksimumSykepengedagerfilter(
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
     }
 
-    private val maksdatosaker = mutableListOf<Maksdatokontekst>()
-    private val tidligereVurderinger = mutableMapOf<LocalDate, Maksdatokontekst>()
+    internal val maksdatosaker = mutableListOf<Maksdatokontekst>()
     private var sisteVurdering = Maksdatokontekst.TomKontekst
-        set(value) {
-            /* lagrer gammel verdi for å kunne plukke den opp senere, ifm. maksdatovurderinger på tvers av arbeidsgivere med ulike tom */
-            tidligereVurderinger.putIfAbsent(field.vurdertTilOgMed, field)
-            field = value
-        }
 
     private var state: State = State.Initiell
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
@@ -51,121 +38,7 @@ internal class MaksimumSykepengedagerfilter(
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
 
     internal fun maksdatoresultatForVedtaksperiode(periode: Periode, subsumsjonslogg: Subsumsjonslogg): Maksdatoresultat {
-        val sisteVurderingForut = tidligereVurderinger.values
-            .sortedBy { it.vurdertTilOgMed }
-            .lastOrNull { it.vurdertTilOgMed < periode.endInclusive }
-
-        /* pga. mursteins-problematikk så kan vi ikke anta at siste vurdering som er gjort
-            vil være aktuelt for alle vedtaksperiodene. en vedtaksperiode kan strekke seg lengre enn
-            en annen den overlapper med, og siste vurdering vil være knyttet opp til den siste dagen på den samlede
-            utbetalingstidslinjen. Hvis alle overlappende vedtaksperioder sluttet samme dag ville dette ikke vært et problem.
-            det blir også kun lagret en ny vurdering for dager som faktisk betyr noe, derfor er det ikke nødvendigvis
-            vurdering for hver eneste dag. om vi ikke finner en vurdering så vil forrige vurdering forut være riktig (siden
-             det skal verken ha vært opphold eller utbetaling i mellomtiden).
-         */
-        val riktigKontekst = when {
-            // vi har ikke gjort en konkret vurdering, så da strekker vi siste vurdering frem
-            sisteVurdering.vurdertTilOgMed < periode.endInclusive -> sisteVurdering.copy(vurdertTilOgMed = periode.endInclusive)
-            // konkret vurdering for dagen er gjort
-            sisteVurdering.vurdertTilOgMed == periode.endInclusive -> sisteVurdering
-            // konkret vurdering for dagen er gjort
-            periode.endInclusive in tidligereVurderinger -> tidligereVurderinger.getValue(periode.endInclusive)
-            // tar utgangspunkt i siste vurdering før dato, og strekker den frem
-            sisteVurderingForut != null -> sisteVurderingForut.copy(vurdertTilOgMed = periode.endInclusive)
-            else -> error("Finner ikke vurdering for ${periode.endInclusive}")
-        }
-
-        return beregnMaksdatoOgSubsummer(periode, subsumsjonslogg, riktigKontekst, beregnetTidslinje)
-    }
-
-    private fun beregnMaksdatoOgSubsummer(vedtaksperiode: Periode, subsumsjonslogg: Subsumsjonslogg, maksdatokontekst: Maksdatokontekst, samletGrunnlagstidslinje: Utbetalingstidslinje): Maksdatoresultat {
-        fun LocalDate.forrigeVirkedagFør() = minusDays(when (dayOfWeek) {
-            SUNDAY -> 2
-            MONDAY -> 3
-            else -> 1
-        })
-        fun LocalDate.sisteVirkedagInklusiv() = when (dayOfWeek) {
-            SATURDAY -> minusDays(1)
-            SUNDAY -> minusDays(2)
-            else -> this
-        }
-
-        val førSyttiårsdagen = fun (subsumsjonslogg: Subsumsjonslogg, utfallTom: LocalDate) {
-            subsumsjonslogg.`§ 8-3 ledd 1 punktum 2`(
-                oppfylt = true,
-                syttiårsdagen = alder.syttiårsdagen,
-                utfallFom = vedtaksperiode.start,
-                utfallTom = utfallTom,
-                tidslinjeFom = vedtaksperiode.start,
-                tidslinjeTom = vedtaksperiode.endInclusive,
-                avvistePerioder = emptyList()
-            )
-        }
-
-        val harNåddMaks = maksdatokontekst.erDagerOver67ÅrForbrukte(alder, arbeidsgiverRegler) || maksdatokontekst.erDagerUnder67ÅrForbrukte(alder, arbeidsgiverRegler)
-        val forrigeMaksdato = if (harNåddMaks) maksdatokontekst.betalteDager.last() else null
-        val forrigeVirkedag = forrigeMaksdato ?: maksdatokontekst.vurdertTilOgMed.sisteVirkedagInklusiv()
-
-        val maksdatoOrdinærRett = forrigeVirkedag + maksdatokontekst.gjenståendeDagerUnder67År(alder, arbeidsgiverRegler).ukedager
-        val maksdatoBegrensetRett = maxOf(forrigeVirkedag, alder.redusertYtelseAlder.sisteVirkedagInklusiv()) + maksdatokontekst.gjenståendeDagerOver67År(alder, arbeidsgiverRegler).ukedager
-
-        val hjemmelsbegrunnelse: Maksdatoresultat.Bestemmelse
-        val maksdato: LocalDate
-        val gjenståendeDager: Int
-        // maksdato er den dagen som først inntreffer blant ordinær kvote, 67-års-kvoten og 70-årsdagen,
-        // med mindre man allerede har brukt opp alt tidligere
-        when {
-            maksdatoOrdinærRett <= maksdatoBegrensetRett -> {
-                maksdato = maksdatoOrdinærRett
-                gjenståendeDager = maksdatokontekst.gjenståendeDagerUnder67År(alder, arbeidsgiverRegler)
-                hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
-
-                subsumsjonslogg.`§ 8-12 ledd 1 punktum 1`(vedtaksperiode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, gjenståendeDager, maksdatokontekst.betalteDager.size, maksdato, maksdatokontekst.startdatoSykepengerettighet)
-                førSyttiårsdagen(subsumsjonslogg, vedtaksperiode.endInclusive)
-            }
-            maksdatoBegrensetRett <= alder.syttiårsdagen.forrigeVirkedagFør() -> {
-                maksdato = maksdatoBegrensetRett
-                gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
-                hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
-
-                subsumsjonslogg.`§ 8-51 ledd 3`(vedtaksperiode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, gjenståendeDager, maksdatokontekst.betalteDager.size, maksdato, maksdatokontekst.startdatoSykepengerettighet)
-                førSyttiårsdagen(subsumsjonslogg, alder.syttiårsdagen.forrigeDag)
-            }
-            else -> {
-                maksdato = alder.syttiårsdagen.forrigeVirkedagFør()
-                gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
-                hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.SYTTI_ÅR
-
-                if (vedtaksperiode.start < alder.syttiårsdagen) {
-                    førSyttiårsdagen(subsumsjonslogg, alder.syttiårsdagen.forrigeDag)
-                }
-
-                val avvisteDagerFraOgMedSøtti = sisteVurdering.avslåtteDager.filter { alder.mistetSykepengerett(it) }
-                if (avvisteDagerFraOgMedSøtti.isNotEmpty()) {
-                    subsumsjonslogg.`§ 8-3 ledd 1 punktum 2`(
-                        oppfylt = false,
-                        syttiårsdagen = alder.syttiårsdagen,
-                        utfallFom = maxOf(alder.syttiårsdagen, vedtaksperiode.start),
-                        utfallTom = vedtaksperiode.endInclusive,
-                        tidslinjeFom = vedtaksperiode.start,
-                        tidslinjeTom = vedtaksperiode.endInclusive,
-                        avvistePerioder = avvisteDagerFraOgMedSøtti.grupperSammenhengendePerioder()
-                    )
-                }
-            }
-        }
-
-        val tidligsteDag = if (maksdatokontekst.startdatoSykepengerettighet == LocalDate.MIN) maksdatokontekst.startdatoTreårsvindu else minOf(maksdatokontekst.startdatoTreårsvindu, maksdatokontekst.startdatoSykepengerettighet)
-        return Maksdatoresultat(
-            vurdertTilOgMed = maksdatokontekst.vurdertTilOgMed,
-            bestemmelse = hjemmelsbegrunnelse,
-            startdatoTreårsvindu = maksdatokontekst.startdatoTreårsvindu,
-            startdatoSykepengerettighet = maksdatokontekst.startdatoSykepengerettighet.takeUnless { it == LocalDate.MIN },
-            forbrukteDager = maksdatokontekst.betalteDager,
-            maksdato = maksdato,
-            gjenståendeDager = gjenståendeDager,
-            grunnlag = samletGrunnlagstidslinje.subset(tidligsteDag til maksdatokontekst.vurdertTilOgMed)
-        )
+        return sisteVurdering.avgrensTil(periode.endInclusive).beregnMaksdatoOgSubsummer(alder, arbeidsgiverRegler, periode, subsumsjonslogg, beregnetTidslinje, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon)
     }
 
     override fun filter(
@@ -324,7 +197,6 @@ internal class MaksimumSykepengedagerfilter(
         object Initiell : State {
             override fun entering(avgrenser: MaksimumSykepengedagerfilter) {
                 avgrenser.maksdatosaker.add(avgrenser.sisteVurdering)
-                avgrenser.tidligereVurderinger.clear()
                 avgrenser.sisteVurdering = Maksdatokontekst.TomKontekst
             }
 
