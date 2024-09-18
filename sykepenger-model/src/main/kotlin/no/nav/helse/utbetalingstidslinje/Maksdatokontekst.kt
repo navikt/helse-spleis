@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.Alder
+import no.nav.helse.hendelser.Periode
 
 internal data class Maksdatokontekst(
     // dato for vurderingene
@@ -9,11 +10,13 @@ internal data class Maksdatokontekst(
     val startdatoSykepengerettighet: LocalDate,
     val startdatoTreårsvindu: LocalDate,
     val betalteDager: Set<LocalDate>,
-    val oppholdsteller: Int
+    val oppholdsdager: Set<LocalDate>,
+    val avslåtteDager: Set<LocalDate>
 ) {
     companion object {
-        val TomKontekst = Maksdatokontekst(LocalDate.MIN, LocalDate.MIN, LocalDate.MIN, emptySet(), 0)
+        val TomKontekst = Maksdatokontekst(LocalDate.MIN, LocalDate.MIN, LocalDate.MIN, emptySet(), emptySet(), emptySet())
     }
+    internal val oppholdsteller = oppholdsdager.size
     internal val forbrukteDager = betalteDager.size
 
     internal fun erDagerUnder67ÅrForbrukte(alder: Alder, regler: ArbeidsgiverRegler) =
@@ -29,20 +32,48 @@ internal data class Maksdatokontekst(
         return regler.maksSykepengedagerOver67() - forbrukteDagerOver67
     }
 
+    internal fun harNåddMaks(vedtaksperiode: Periode) =
+        avslåtteDager.any { it in vedtaksperiode }
+
+    internal fun datoForTilstrekkeligOppholdOppnådd(tilstrekkeligOpphold: Int) =
+        oppholdsdager.sorted().getOrNull(tilstrekkeligOpphold - 1)
+
+    internal fun fremdelesSykEtterTilstrekkeligOpphold(vedtaksperiode: Periode, tilstrekkeligOpphold: Int): Boolean {
+        val datoForTilstrekkeligOpphold = datoForTilstrekkeligOppholdOppnådd(tilstrekkeligOpphold) ?: return false
+        return avslåtteDager.any { it > datoForTilstrekkeligOpphold && it in vedtaksperiode }
+    }
+    internal fun begrunnelseForAvslåtteDager(alder: Alder, regler: ArbeidsgiverRegler, tilstrekkeligOpphold: Int): List<Pair<Begrunnelse, LocalDate>> {
+        val datoForTilstrekkeligOppholdOppnådd = datoForTilstrekkeligOppholdOppnådd(tilstrekkeligOpphold)
+        return avslåtteDager.map { avslåttDag ->
+            val begrunnelseForAvslåttDag = when {
+                alder.mistetSykepengerett(avslåttDag) -> Begrunnelse.Over70
+                datoForTilstrekkeligOppholdOppnådd != null && avslåttDag > datoForTilstrekkeligOppholdOppnådd -> Begrunnelse.NyVilkårsprøvingNødvendig
+                erDagerUnder67ÅrForbrukte(alder, regler) -> Begrunnelse.SykepengedagerOppbrukt
+                else -> Begrunnelse.SykepengedagerOppbruktOver67
+            }
+            begrunnelseForAvslåttDag to avslåttDag
+        }
+    }
+
     internal fun inkrementer(dato: LocalDate) = copy(
         vurdertTilOgMed = dato,
         betalteDager = betalteDager.plus(dato),
-        oppholdsteller = 0
+        oppholdsdager = emptySet()
     )
     // tilgir forbrukte dager som følge av at treårsvinduet forskyves
     internal fun dekrementer(dato: LocalDate, nyStartdatoTreårsvindu: LocalDate) = copy(
         vurdertTilOgMed = dato,
         startdatoTreårsvindu = nyStartdatoTreårsvindu,
         betalteDager = betalteDager.filter { it >= nyStartdatoTreårsvindu }.toSet() + dato,
-        oppholdsteller = 0
+        oppholdsdager = emptySet()
     )
-    internal fun økOppholdstelling(dato: LocalDate) = copy(
+    internal fun medOppholdsdag(dato: LocalDate) = copy(
         vurdertTilOgMed = dato,
-        oppholdsteller = this.oppholdsteller + 1
+        oppholdsdager = oppholdsdager + dato
+    )
+    internal fun medAvslåttDag(dato: LocalDate) = copy(
+        vurdertTilOgMed = dato,
+        avslåtteDager = this.avslåtteDager + dato,
+        oppholdsdager = oppholdsdager + dato
     )
 }

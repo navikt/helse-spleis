@@ -65,8 +65,9 @@ internal class MaksimumSykepengedagerfilterTest {
         val a1 = tidslinjeOf(16.AP, 248.NAVDAGER)
         val a2 = tidslinjeOf(16.AP, 250.NAVDAGER, 182.ARB, 10.NAV)
         val avvisteDager = listOf(a1, a2).utbetalingsavgrenser(UNG_PERSON_FNR_2018, a1.periode())
-        assertEquals(28.desember, maksdato)
         assertEquals(listOf(31.desember, 1.januar(2019)), avvisteDager)
+        // gir ikke helt mening å asserte på én konkret maksdato når tidslinjene representerer to ulike maksdatosaker
+        // assertEquals(28.desember, maksdato)
     }
 
     @Test
