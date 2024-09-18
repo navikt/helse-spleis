@@ -706,10 +706,10 @@ internal class MaksimumSykepengedagerfilterTest {
             Periode::plus)
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, NormalArbeidstaker, personTidslinje)
         avvisteTidslinjer = maksimumSykepengedagerfilter.filter(this, filterperiode, aktivitetslogg, NullObserver)
-        val maksdatosituasjon = maksimumSykepengedagerfilter.maksimumSykepenger(filterperiode, NullObserver)
-        maksdato = maksdatosituasjon.maksdato
-        forbrukteDager = maksdatosituasjon.forbrukteDager
-        gjenståendeDager = maksdatosituasjon.gjenståendeDager
+        val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode, NullObserver)
+        maksdato = maksdatoresultat.maksdato
+        forbrukteDager = maksdatoresultat.antallForbrukteDager
+        gjenståendeDager = maksdatoresultat.gjenståendeDager
         return avvisteTidslinjer.flatMap { it.inspektør.avvistedatoer }
     }
 }

@@ -1147,9 +1147,8 @@ internal class Vedtaksperiode private constructor(
         try {
             utbetalingsperioder.forEach { other ->
                 val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.organisasjonsnummer)
-                val maksdatoSituasjon = maksdatofilter.maksimumSykepenger(other.periode, other.jurist)
-                val maksdatogrunnlag = maksdatofilter.beregnetTidslinje
-                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), maksdatoSituasjon.resultat(maksdatogrunnlag), utbetalingstidslinje, grunnlagsdata)
+                val maksdatoresultat = maksdatofilter.maksdatoresultatForVedtaksperiode(other.periode, other.jurist)
+                other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), maksdatoresultat, utbetalingstidslinje, grunnlagsdata)
             }
             return true
         } catch (err: UtbetalingstidslinjeBuilderException) {

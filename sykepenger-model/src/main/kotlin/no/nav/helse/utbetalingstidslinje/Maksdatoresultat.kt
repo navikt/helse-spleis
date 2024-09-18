@@ -15,6 +15,8 @@ data class Maksdatoresultat(
     val gjenståendeDager: Int,
     val grunnlag: Utbetalingstidslinje
 ) {
+    val antallForbrukteDager = forbrukteDager.size
+
     enum class Bestemmelse { IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR }
     companion object {
         val IkkeVurdert = Maksdatoresultat(
