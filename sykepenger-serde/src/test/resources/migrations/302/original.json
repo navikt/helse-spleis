@@ -1,0 +1,91 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {}
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "2024-10-16",
+                    "bestemmelse": "ORDINÆR_RETT",
+                    "startdatoTreårsvindu": "2021-10-02",
+                    "startdatoSykepengerettighet": "2024-08-19",
+                    "forbrukteDager": [
+                      "2024-08-19",
+                      "2024-08-20"
+                    ],
+                    "maksdato": "2025-08-15",
+                    "gjenståendeDager": 217,
+                    "grunnlag": {
+                      "dager": [
+                        {
+                          "enDagType": "her"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "behandlinger": [
+              {
+                "endringer": [
+                  {}
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "behandlinger": [
+              {
+                "endringer": [
+                  {
+                    "maksdatoresultat": {
+                      "vurdertTilOgMed": "2024-10-16",
+                      "bestemmelse": "ORDINÆR_RETT",
+                      "startdatoTreårsvindu": "2021-10-02",
+                      "startdatoSykepengerettighet": "2024-08-19",
+                      "forbrukteDager": [
+                        "2024-08-19",
+                        "2024-08-20"
+                      ],
+                      "maksdato": "2025-08-15",
+                      "gjenståendeDager": 217,
+                      "grunnlag": {
+                        "dager": [
+                          {
+                            "enDagType": "her"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 299
+}
