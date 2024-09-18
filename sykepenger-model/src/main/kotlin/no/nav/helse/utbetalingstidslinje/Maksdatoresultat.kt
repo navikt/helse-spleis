@@ -47,7 +47,7 @@ data class Maksdatoresultat(
             startdatoTreårsvindu = dto.startdatoTreårsvindu,
             forbrukteDager = dto.forbrukteDager.map { Periode.gjenopprett(it) },
             oppholdsdager = dto.oppholdsdager.map { Periode.gjenopprett(it) },
-            avslåtteDager = dto.oppholdsdager.map { Periode.gjenopprett(it) },
+            avslåtteDager = dto.avslåtteDager.map { Periode.gjenopprett(it) },
             maksdato = dto.maksdato,
             gjenståendeDager = dto.gjenståendeDager,
             grunnlag = Utbetalingstidslinje.gjenopprett(dto.grunnlag)

@@ -1,12 +1,10 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
-import no.nav.helse.serde.serdeObjectMapper
 
-internal class V300MaksdatoresultatPåBehandling: JsonMigration(version = 300) {
+internal class V301MaksdatoresultatPåBehandling: JsonMigration(version = 301) {
     override val description = "lagrer maksdatoresultat på behandling"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
