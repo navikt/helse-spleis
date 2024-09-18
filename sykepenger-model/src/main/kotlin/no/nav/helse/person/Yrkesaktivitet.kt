@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Vedtaksperiode.Companion.tilkomneInntekter
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
@@ -36,6 +37,13 @@ internal sealed interface Yrkesaktivitet {
         throw NotImplementedError("Støtter ikke å avklare sykepengegrunnlag for ${this.identifikator()}")
     }
 
+    fun tilkomneInntekter(
+        aktivitetslogg: IAktivitetslogg,
+        vedtaksperioder: List<Vedtaksperiode>
+    ): List<ArbeidsgiverInntektsopplysning> {
+        throw NotImplementedError("Støtter ikke å finne tilkomne inntekter for ${this.identifikator()}")
+    }
+
     fun identifikator(): String
 
     fun jurist(other: MaskinellJurist): MaskinellJurist =
@@ -59,6 +67,13 @@ internal sealed interface Yrkesaktivitet {
                 inntektsopplysning = inntektsopplysning,
                 refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt, aktivitetslogg)
             )
+        }
+
+        override fun tilkomneInntekter(
+            aktivitetslogg: IAktivitetslogg,
+            vedtaksperioder: List<Vedtaksperiode>
+        ): List<ArbeidsgiverInntektsopplysning> {
+            return vedtaksperioder.tilkomneInntekter()
         }
 
         override fun hashCode(): Int {
@@ -125,6 +140,13 @@ internal sealed interface Yrkesaktivitet {
         ): ArbeidsgiverInntektsopplysning? {
             val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag) ?: return null
             return super.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
+        }
+
+        override fun tilkomneInntekter(
+            aktivitetslogg: IAktivitetslogg,
+            vedtaksperioder: List<Vedtaksperiode>
+        ): List<ArbeidsgiverInntektsopplysning> {
+            return emptyList()
         }
 
         override fun hashCode(): Int {

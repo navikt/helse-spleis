@@ -64,6 +64,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Vedtaksperiode.Companion.tilkomneInntekter
 import no.nav.helse.person.Venteårsak.Companion.fordi
 import no.nav.helse.person.Venteårsak.Companion.utenBegrunnelse
 import no.nav.helse.person.Venteårsak.Hva.BEREGNING
@@ -2595,6 +2596,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.egenmeldingsperioder(): List<Periode> = flatMap { it.egenmeldingsperioder }
         internal fun List<Vedtaksperiode>.arbeidsgiverperioder() = map { it.behandlinger.arbeidsgiverperiode() }
+        internal fun List<Vedtaksperiode>.tilkomneInntekter() = flatMap { it.behandlinger.tilkomneInntekter() }
 
         private fun Iterable<Iterable<Vedtaksperiode>>.annenArbeidsgiver(vedtaksperiode: Vedtaksperiode) = this
             .asSequence()

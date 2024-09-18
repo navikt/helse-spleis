@@ -144,6 +144,13 @@ class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.finn(orgnummer: String) = firstOrNull { it.gjelder(orgnummer) }
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.bareUnikeArbeidsgivere() = size == distinctBy { it.orgnummer }.size
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.finnesI(other: List<ArbeidsgiverInntektsopplysning>): Boolean {
+            return any { inntekt -> other.any { it.gjelder(inntekt.orgnummer) } }
+        }
+
+
         internal fun List<ArbeidsgiverInntektsopplysning>.deaktiver(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonslogg: Subsumsjonslogg) =
             this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonslogg)
 

@@ -47,8 +47,11 @@ import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.PeriodeMedSammeSkjæringstidspunkt
 import no.nav.helse.person.behandling.Behandlingsinntekt
+import no.nav.helse.person.behandling.TilkommenInntekt
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
@@ -102,6 +105,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     internal fun skjæringstidspunkt() = behandlinger.last().skjæringstidspunkt
 
     internal fun sykdomstidslinje() = behandlinger.last().sykdomstidslinje()
+    internal fun tilkomneInntekter() = behandlinger.last().tilkomneInntekter()
 
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
     internal fun utbetales() = behandlinger.any { it.erInFlight() }
@@ -709,7 +713,22 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
         }
 
-        internal fun sykdomstidslinje() = endringer.last().sykdomstidslinje
+        internal fun sykdomstidslinje() = gjeldende.sykdomstidslinje
+
+        internal fun tilkomneInntekter() = gjeldende.inntekter.filterIsInstance<TilkommenInntekt>().map { tilkommenInntekt ->
+            ArbeidsgiverInntektsopplysning(
+                orgnummer = tilkommenInntekt.orgnummer,
+                gjelder = tilkommenInntekt.periode,
+                inntektsopplysning = InntektFraSøknad(
+                    id = UUID.randomUUID(),
+                    dato = tilkommenInntekt.periode.start,
+                    hendelseId = tilkommenInntekt.hendelseId,
+                    beløp = tilkommenInntekt.beløp,
+                    tidsstempel = tilkommenInntekt.tidsstempel
+                ),
+                refusjonsopplysninger = Refusjonsopplysninger()
+            )
+        }
 
         override fun equals(other: Any?): Boolean {
             if (other === this) return true

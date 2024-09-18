@@ -82,23 +82,8 @@ internal class TilkommenInntektTest : AbstractDslTest() {
 
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
 
-            assertForventetFeil(
-                forklaring = "burde vi støtte at en tilkommen inntekt kommer midt i en førstegangssøknad?",
-                nå = {
-                    assertEquals(
-                        utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp,
-                        utbetalingstidslinje[22.januar].økonomi.inspektør.arbeidsgiverbeløp
-                    )
-                    assertFalse(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.any { it.inspektør.orgnummer == a2 } == true)
-                },
-                ønsket = {
-                    assertNotEquals(
-                        utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp,
-                        utbetalingstidslinje[22.januar].økonomi.inspektør.arbeidsgiverbeløp
-                    )
-                    assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.any { it.inspektør.orgnummer == a2 } == true)
-                }
-            )
+            assertNotEquals(utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp, utbetalingstidslinje[22.januar].økonomi.inspektør.arbeidsgiverbeløp)
+            assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.any { it.inspektør.orgnummer == a2 } == true)
         }
     }
 
