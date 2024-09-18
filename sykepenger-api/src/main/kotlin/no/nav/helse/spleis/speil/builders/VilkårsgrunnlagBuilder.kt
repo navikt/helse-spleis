@@ -147,9 +147,7 @@ internal class IVilkårsgrunnlagHistorikk(private val tilgjengeligeVilkårsgrunn
         sykefraværstilfeller: Map<LocalDate, List<ClosedRange<LocalDate>>>
     ) =
         tilgjengeligeVilkårsgrunnlag.firstOrNull()?.mapNotNull { (_, vilkårsgrunnlag) ->
-            vilkårsgrunnlag.potensiellGhostperiode(organisasjonsnummer, sykefraværstilfeller)?.also { (_, nyttInntektsforholdperiode) ->
-                nyttInntektsforholdperiode?.vilkårsgrunnlagId?.also { leggIBøtta(it) }
-            }
+            vilkårsgrunnlag.potensiellGhostperiode(organisasjonsnummer, sykefraværstilfeller)
         } ?: emptyList()
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> {

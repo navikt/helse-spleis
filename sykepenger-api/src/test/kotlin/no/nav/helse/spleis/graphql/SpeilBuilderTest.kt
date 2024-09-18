@@ -33,6 +33,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -94,8 +95,8 @@ internal class SpeilBuilderTest : AbstractE2ETest() {
         val vilkårsgrunnlagIdFørstegangssøknad = førstegangs.vilkårsgrunnlagId
         val vilkårsgrunnlagIdTilkommen = nyeInntektsforholdPølser.vilkårsgrunnlagId
         val vilkårsgrunnlag = speilApi().vilkårsgrunnlag.keys
-        assertEquals(2, vilkårsgrunnlag.size)
-        assertTrue(vilkårsgrunnlagIdTilkommen in vilkårsgrunnlag)
+        assertEquals(1, vilkårsgrunnlag.size)
+        assertFalse(vilkårsgrunnlagIdTilkommen in vilkårsgrunnlag)
         assertTrue(vilkårsgrunnlagIdFørstegangssøknad in vilkårsgrunnlag)
     }
 
