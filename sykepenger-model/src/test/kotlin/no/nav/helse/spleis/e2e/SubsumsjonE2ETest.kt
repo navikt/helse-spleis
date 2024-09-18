@@ -805,10 +805,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.desember(2018)))
+        håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 30.desember(2018)))
         håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))))
         håndterSøknad(
-            Sykdom(1.januar(2018), 31.desember(2018), 100.prosent),
+            Sykdom(1.januar(2018), 30.desember(2018), 100.prosent),
             sendtTilNAVEllerArbeidsgiver = 1.januar(2018)
         )
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -822,6 +822,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             Sykdom(1.januar(2019), 31.januar(2019), 100.prosent),
             sendtTilNAVEllerArbeidsgiver = 31.januar(2019)
         )
+        håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))), førsteFraværsdag = 1.januar(2019))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt()
@@ -831,21 +833,25 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_2,
             versjon = 21.mai(2021),
             input = mapOf(
-                "dato" to 28.desember,
+                "dato" to 31.desember,
                 "tilstrekkeligOppholdISykedager" to 182,
                 "tidslinjegrunnlag" to listOf(
                     listOf(
+                        mapOf("fom" to 1.januar(2019), "tom" to 31.januar(2019), "dagtype" to "NAVDAG", "grad" to 100)
+                    ),
+                    listOf(
                         mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                        mapOf("fom" to 17.januar, "tom" to 31.desember, "dagtype" to "NAVDAG", "grad" to 100)
+                        mapOf("fom" to 17.januar, "tom" to 30.desember, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
                 "beregnetTidslinje" to listOf(
                     mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 100),
-                    mapOf("fom" to 17.januar, "tom" to 31.desember, "dagtype" to "NAVDAG", "grad" to 100)
+                    mapOf("fom" to 17.januar, "tom" to 30.desember, "dagtype" to "NAVDAG", "grad" to 100),
+                    mapOf("fom" to 1.januar(2019), "tom" to 31.januar(2019), "dagtype" to "NAVDAG", "grad" to 100)
                 )
             ),
             output = emptyMap(),
-            vedtaksperiodeId = 1.vedtaksperiode
+            vedtaksperiodeId = 2.vedtaksperiode
         )
     }
 
