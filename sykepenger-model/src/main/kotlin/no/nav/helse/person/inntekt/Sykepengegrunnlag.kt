@@ -28,8 +28,10 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
+import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
+import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.faktaavklarteInntekter
@@ -415,6 +417,14 @@ internal class Sykepengegrunnlag private constructor(
         }.build()
         builder.sykepengegrunnlagsfakta(fakta)
     }
+
+    internal fun berik(builder: UtkastTilVedtakBuilder) {
+        if (vurdertInfotrygd) builder.inngangsvilkårFraInfotrygd()
+        else builder.seksG(`6G`.reflection { årlig, _, _, _ -> årlig })
+        builder.totalOmregnetÅrsinntekt(omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig })
+        arbeidsgiverInntektsopplysninger.berik(builder)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false
         return sykepengegrunnlag == other.sykepengegrunnlag

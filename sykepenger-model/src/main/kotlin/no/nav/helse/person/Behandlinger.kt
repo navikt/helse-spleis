@@ -690,7 +690,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved utkast til vedtak" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved utkast til vedtak" }
                 builder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling)
-                // TODO: grunnlagsdata.berik(builder)
+                grunnlagsdata.berik(builder)
                 // TODO: Sende godkjenningsbehov & utkastTilVedtak
             }
 

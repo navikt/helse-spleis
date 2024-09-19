@@ -16,6 +16,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.Inntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
@@ -270,6 +271,16 @@ class ArbeidsgiverInntektsopplysning(
                 )
             }
         }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.berik(builder: UtkastTilVedtakBuilder) = this
+            .forEach { arbeidsgiver ->
+                builder.arbeidsgiverinntekt(
+                    arbeidsgiver = arbeidsgiver.orgnummer,
+                    omregnedeÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+                    skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig } else null,
+                    gjelder = arbeidsgiver.gjelder
+                )
+            }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
             singleOrNull { it.orgnummer == organisasjonsnummer } != null

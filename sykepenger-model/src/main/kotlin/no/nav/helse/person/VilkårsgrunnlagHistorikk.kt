@@ -30,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
+import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -336,6 +337,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             builder.vilkårsgrunnlagId(vilkårsgrunnlagId)
             this.build(builder)
             sykepengegrunnlag.byggGodkjenningsbehov(builder)
+        }
+
+        internal fun berik(builder: UtkastTilVedtakBuilder) {
+            builder.vilkårsgrunnlagId(vilkårsgrunnlagId)
+            sykepengegrunnlag.berik(builder)
         }
 
         internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): VilkårsgrunnlagElement? {

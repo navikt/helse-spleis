@@ -9,6 +9,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Økonomi
+import kotlin.properties.Delegates
 
 internal class UtkastTilVedtakBuilder(
     private val fødselsnummer: String,
@@ -79,6 +80,19 @@ internal class UtkastTilVedtakBuilder(
         val behandlingsresultat = UtbetalingstidslinjeInfo(utbetalingstidslinje).behandlingsresultat()
         tags.add(behandlingsresultat)
     }
+
+    private var totalOmregnetÅrsinntekt by Delegates.notNull<Double>()
+    internal fun totalOmregnetÅrsinntekt(totalOmregnetÅrsinntekt: Double) = apply { this.totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt }
+
+    private var seksG by Delegates.notNull<Double>()
+    internal fun seksG(seksG: Double) = apply { this.seksG = seksG }
+
+    private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode)
+    private val arbeidsgiverinntekter = mutableSetOf<Arbeidsgiverinntekt>()
+    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Double, skjønnsfastsatt: Double?, gjelder: Periode) {
+        arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt, skjønnsfastsatt, gjelder))
+    }
+
     private class UtbetalingstidslinjeInfo(utbetalingstidslinje: Utbetalingstidslinje): UtbetalingstidslinjeVisitor {
         init { utbetalingstidslinje.accept(this) }
 
