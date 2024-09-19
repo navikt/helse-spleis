@@ -43,8 +43,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.beregnSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
-import no.nav.helse.person.Vedtaksperiode.Companion.førsteOverlappendePeriodeSomTrengerRefusjonsopplysninger
-import no.nav.helse.person.Vedtaksperiode.Companion.førstePeriodeSomTrengerInntektTilVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Companion.harIngenSporingTilInntektsmeldingISykefraværet
 import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
@@ -196,19 +194,6 @@ internal class Arbeidsgiver private constructor(
             ) }
         }
 
-        private fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektTilVilkårsprøving(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
-            return this
-                .map { it.vedtaksperioder }
-                .førstePeriodeSomTrengerInntektTilVilkårsprøving(vedtaksperiode)
-        }
-        private fun Iterable<Arbeidsgiver>.førsteOverlappendePeriodeSomTrengerRefusjonsopplysninger(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
-            return this
-                .map { it.vedtaksperioder }
-                .førsteOverlappendePeriodeSomTrengerRefusjonsopplysninger(vedtaksperiode)
-        }
-        internal fun Iterable<Arbeidsgiver>.førstePeriodeSomTrengerInntektsmeldingAnnenArbeidsgiver(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
-            return this.førstePeriodeSomTrengerInntektTilVilkårsprøving(vedtaksperiode) ?: this.førsteOverlappendePeriodeSomTrengerRefusjonsopplysninger(vedtaksperiode)
-        }
 
         internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
             .any { it.sykmeldingsperioder.avventerSøknad(periode) }
