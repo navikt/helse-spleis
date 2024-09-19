@@ -386,7 +386,9 @@ data class SpannerPersonDto(
                 val maksdato: LocalDate,
                 val gjenståendeDager: Int,
                 val grunnlag: UtbetalingstidslinjeData
-            )
+            ) {
+                val forbrukteDagerAntall = forbrukteDager.sumOf { it.fom.datesUntil(it.tom).count() + 1 }
+            }
             data class DokumentsporingData(
                 val dokumentId: UUID,
                 val dokumenttype: DokumentTypeData
