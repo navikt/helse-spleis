@@ -28,6 +28,7 @@ import no.nav.helse.serde.migration.V297IdentifiserFerdigBehandledePerioderMedÅ
 import no.nav.helse.serde.migration.V298EgenmeldingsdagerPåVedtaksperiode
 import no.nav.helse.serde.migration.V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode
 import no.nav.helse.serde.migration.V302MaksdatoresultatPåBehandling
+import no.nav.helse.serde.migration.V303KopiereMaksdatoFraUtbetalingTilBehandling
 import no.nav.helse.serde.migration.migrate
 
 class SerialisertPerson(val json: String) {
@@ -55,7 +56,8 @@ class SerialisertPerson(val json: String) {
             V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling(),
             V298EgenmeldingsdagerPåVedtaksperiode(),
             V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode(),
-            V302MaksdatoresultatPåBehandling()
+            V302MaksdatoresultatPåBehandling(),
+            V303KopiereMaksdatoFraUtbetalingTilBehandling()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

@@ -1,0 +1,136 @@
+{
+  "fødselsdato": "1994-02-28",
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "id": "574ed86b-dc78-49ed-973b-7a59e976cd4d",
+          "korrelasjonsId": "60e1144d-fde7-4550-ac8b-2c2c4c354ba3",
+          "maksdato": "2018-05-17",
+          "forbrukteSykedager": 25,
+          "gjenståendeSykedager": 223,
+          "tidsstempel": "2018-01-20T13:29:09.688064422",
+          "type": "UTBETALING",
+          "status": "UTBETALT",
+          "tom": "2018-10-16",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "type": "NavDag",
+                "dato": "2018-01-01"
+              }
+            ]
+          }
+        },
+        {
+          "id": "b2c79cc7-127c-4770-a4b7-20928965921f",
+          "korrelasjonsId": "aee6898e-10e1-4cfa-b73f-49fb99e58fd0",
+          "maksdato": "2018-12-17",
+          "forbrukteSykedager": 20,
+          "gjenståendeSykedager": 228,
+          "tidsstempel": "2018-08-20T13:29:09.688064422",
+          "type": "REVURDERING",
+          "status": "OVERFØRT",
+          "tom": "2018-10-16",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "type": "NavDag",
+                "dato": "2018-01-01"
+              },
+              {
+                "type": "NavDag",
+                "dato": "2018-01-02"
+              }
+            ]
+          }
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "tom": "2018-03-01",
+                  "utbetalingId": null,
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0,
+                    "grunnlag": {
+                      "dager": []
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "behandlinger": [
+            {
+              "endringer": [
+                {
+                  "tom": "2018-04-01",
+                  "utbetalingId": "574ed86b-dc78-49ed-973b-7a59e976cd4d",
+                  "maksdatoresultat": {
+                    "vurdertTilOgMed": "-999999999-01-01",
+                    "bestemmelse": "IKKE_VURDERT",
+                    "startdatoTreårsvindu": "-999999999-01-01",
+                    "startdatoSykepengerettighet": null,
+                    "forbrukteDager": [],
+                    "oppholdsdager": [],
+                    "avslåtteDager": [],
+                    "maksdato": "-999999999-01-01",
+                    "gjenståendeDager": 0,
+                    "grunnlag": {
+                      "dager": []
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode":  {
+            "behandlinger": [
+              {
+                "endringer": [
+                  {
+                    "tom": "2018-05-01",
+                    "utbetalingId": "b2c79cc7-127c-4770-a4b7-20928965921f",
+                    "maksdatoresultat": {
+                      "vurdertTilOgMed": "-999999999-01-01",
+                      "bestemmelse": "IKKE_VURDERT",
+                      "startdatoTreårsvindu": "-999999999-01-01",
+                      "startdatoSykepengerettighet": null,
+                      "forbrukteDager": [],
+                      "oppholdsdager": [],
+                      "avslåtteDager": [],
+                      "maksdato": "-999999999-01-01",
+                      "gjenståendeDager": 0,
+                      "grunnlag": {
+                        "dager": []
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 302
+}
