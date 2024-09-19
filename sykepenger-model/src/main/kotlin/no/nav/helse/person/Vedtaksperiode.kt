@@ -1080,21 +1080,19 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg.info("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere")
     }
 
-    private fun beregningsperioder() = person.nåværendeVedtaksperioder { it.erKandidatForUtbetaling(this, this.skjæringstidspunkt) }
-
-    private fun utbetalingsperioder(): List<Vedtaksperiode> {
+    private fun perioderDetSkalBeregnesUtbetalingFor(): List<Vedtaksperiode> {
         // lag utbetaling for seg selv + andre overlappende perioder hos andre arbeidsgivere (som ikke er utbetalt/avsluttet allerede)
-        return beregningsperioder().filter { it.behandlinger.klarForUtbetaling() }
+        return person.nåværendeVedtaksperioder { it.erKandidatForUtbetaling(this, this.skjæringstidspunkt) }.filter { it.behandlinger.klarForUtbetaling() }
     }
 
-    private fun vedtaksperiodenePerArbeidsgiver(): Map<String, List<Vedtaksperiode>> {
+    private fun perioderSomMåHensyntasVedBeregning(): List<Vedtaksperiode> {
         val skjæringstidspunkt = this.skjæringstidspunkt
         return person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .filter { it !== this }
             .fold(listOf(this)) { utbetalingsperioder, vedtaksperiode ->
                 if (utbetalingsperioder.any { vedtaksperiode.periode.overlapperMed(it.periode) }) utbetalingsperioder + vedtaksperiode
                 else utbetalingsperioder
-            }.groupBy { it.organisasjonsnummer }
+            }
     }
 
     private fun erKandidatForUtbetaling(periodeSomBeregner: Vedtaksperiode, skjæringstidspunktet: LocalDate): Boolean {
@@ -1115,7 +1113,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun førstePeriodeAnnenArbeidsgiverSomTrengerRefusjonsopplysninger(): Vedtaksperiode? {
-        val bereningsperiode = beregningsperioder().periode()
+        val bereningsperiode = perioderSomMåHensyntasVedBeregning().periode()
         return person.vedtaksperioder {
             it.organisasjonsnummer != organisasjonsnummer &&
             it.skjæringstidspunkt == skjæringstidspunkt &&
@@ -1151,9 +1149,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun beregnUtbetalinger(hendelse: IAktivitetslogg): Boolean {
-        val utbetalingsperioder = utbetalingsperioder()
+        val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
 
-        check(utbetalingsperioder.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
+        check(perioderDetSkalBeregnesUtbetalingFor.all { it.skjæringstidspunkt == this.skjæringstidspunkt }) {
             "ugyldig situasjon: skal beregne utbetaling for vedtaksperioder med ulike skjæringstidspunkter"
         }
         val grunnlagsdata = checkNotNull(vilkårsgrunnlag) {
@@ -1163,7 +1161,7 @@ internal class Vedtaksperiode private constructor(
         val (maksdatofilter, beregnetTidslinjePerArbeidsgiver) = beregnUtbetalingstidslinjeForOverlappendeVedtaksperioder(hendelse, grunnlagsdata)
 
         try {
-            utbetalingsperioder.forEach { other ->
+            perioderDetSkalBeregnesUtbetalingFor.forEach { other ->
                 val utbetalingstidslinje = beregnetTidslinjePerArbeidsgiver.getValue(other.organisasjonsnummer)
                 val maksdatoresultat = maksdatofilter.maksdatoresultatForVedtaksperiode(other.periode, other.jurist)
                 other.lagNyUtbetaling(this.arbeidsgiver, other.aktivitetsloggkopi(hendelse), maksdatoresultat, utbetalingstidslinje, grunnlagsdata)
@@ -1181,10 +1179,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun utbetalingstidslinjePerArbeidsgiver(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement): Map<String, Utbetalingstidslinje> {
-        val vedtaksperiodene = vedtaksperiodenePerArbeidsgiver()
+        val perioderSomMåHensyntasVedBeregning = perioderSomMåHensyntasVedBeregning().groupBy { it.organisasjonsnummer }
 
         val faktaavklarteInntekter = grunnlagsdata.faktaavklarteInntekter()
-        val utbetalingstidslinjer = vedtaksperiodene.mapValues { (arbeidsgiver, vedtaksperioder) ->
+        val utbetalingstidslinjer = perioderSomMåHensyntasVedBeregning.mapValues { (arbeidsgiver, vedtaksperioder) ->
             val inntektForArbeidsgiver = faktaavklarteInntekter.forArbeidsgiver(arbeidsgiver)
             vedtaksperioder.map { it.lagUtbetalingstidslinje(inntektForArbeidsgiver) }
         }
@@ -2638,10 +2636,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         private val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
-
-        internal val OVERLAPPER_MED = { other: Vedtaksperiode ->
-            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.periode.overlapperMed(other.periode) }
-        }
 
         internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }

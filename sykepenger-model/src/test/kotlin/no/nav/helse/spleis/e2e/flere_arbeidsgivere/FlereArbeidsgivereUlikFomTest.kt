@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -572,15 +571,11 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         // Ettersom vi nå må ha inntektsmelding fra a2 for refusjonsopplysninger 22.januar
         håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT*1.1)))
 
-        assertForventetFeil(
-            forklaring = "Har ikke mottatt inntektsmelding på a2. Er dette noe vi trenger for å gå frem med a1?",
-            nå = {
-                assertEquals("Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-01-22", assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode, orgnummer = a1) }.message)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
-            }
-        )
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
+        val venterPå = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == 1.vedtaksperiode.id(a1) }.venterPå
+        assertEquals("INNTEKTSMELDING", venterPå.venteårsak.hva)
+        assertEquals(a2, venterPå.organisasjonsnummer)
+        assertEquals(2.vedtaksperiode.id(a2), venterPå.vedtaksperiodeId)
     }
 
     @Test
