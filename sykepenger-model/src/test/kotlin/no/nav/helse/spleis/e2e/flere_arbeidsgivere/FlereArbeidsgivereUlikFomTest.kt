@@ -43,6 +43,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -53,6 +54,7 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsgiveropplysninger
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -76,7 +78,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
@@ -554,17 +555,31 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterSøknad(Sykdom(5.januar, 21.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(21.januar, 5.februar, 100.prosent), orgnummer = a1)
+        nullstillTilstandsendringer()
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterSøknad(Sykdom(5.januar, 21.januar, 100.prosent), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        nullstillTilstandsendringer()
+        // Perioden som står i AvventerGodkjenningRevurdering får ikke noe signal om overstyring igangsatt ettersom disse periodene er _etter_ 1.vedtaksperiode
+        // Allikevel kan den ikke beregnes på nytt, fordi mursteinssituasjonen som nå har oppstått gjør at vi mangler refusjonsopplysninger på 22.januar
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        håndterSøknad(Sykdom(21.januar, 5.februar, 100.prosent), orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+
+        // Om f.eks. saksbehandler overstyrer perioden som står i AvventerGodkjenningRevurdering blir den sittende fast i AvventerRevurdering
+        // Ettersom vi nå må ha inntektsmelding fra a2 for refusjonsopplysninger 22.januar
+        håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT*1.1)))
+
         assertForventetFeil(
             forklaring = "Har ikke mottatt inntektsmelding på a2. Er dette noe vi trenger for å gå frem med a1?",
             nå = {
-                assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode, orgnummer = a1) }
+                assertEquals("Har ingen refusjonsopplysninger på vilkårsgrunnlag for utbetalingsdag 2018-01-22", assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode, orgnummer = a1) }.message)
             },
-            ønsket = { assertDoesNotThrow { håndterYtelser(1.vedtaksperiode, orgnummer = a1) } }
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, orgnummer = a1)
+            }
         )
     }
 
