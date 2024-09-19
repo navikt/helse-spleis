@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -75,6 +76,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
@@ -532,6 +535,37 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         sisteUtbetalingA1.utbetalingstidslinje[1.februar].let { dag ->
             assertEquals(100, dag.økonomi.inspektør.totalGrad)
         }
+    }
+
+    @Test
+    fun `mursteinspølser og manglende inntektsmelding på a2`() {
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(listOf(a1 to INNTEKT, a2 to INNTEKT), 1.januar),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
+            )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSøknad(Sykdom(5.januar, 21.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(21.januar, 5.februar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        assertForventetFeil(
+            forklaring = "Har ikke mottatt inntektsmelding på a2. Er dette noe vi trenger for å gå frem med a1?",
+            nå = {
+                assertThrows<IllegalStateException> { håndterYtelser(1.vedtaksperiode, orgnummer = a1) }
+            },
+            ønsket = { assertDoesNotThrow { håndterYtelser(1.vedtaksperiode, orgnummer = a1) } }
+        )
     }
 
     @Test
