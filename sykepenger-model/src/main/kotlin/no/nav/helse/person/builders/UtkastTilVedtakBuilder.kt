@@ -111,4 +111,6 @@ internal class UtkastTilVedtakBuilder(
             else -> "Innvilget"
         }
     }
+
+    internal fun sammenlign(godkjenningsbehov: Map<String, Any>) {}
 }

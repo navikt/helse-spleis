@@ -258,8 +258,8 @@ sealed class Aktivitet(
                 )
             }
 
-            fun godkjenning(aktivitetslogg: IAktivitetslogg, builder: GodkjenningsbehovBuilder) {
-                aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", builder.build())
+            fun godkjenning(aktivitetslogg: IAktivitetslogg, godkjenningsbehov: Map<String, Any>) {
+                aktivitetslogg.behov(Behovtype.Godkjenning, "Forespør godkjenning fra saksbehandler", godkjenningsbehov)
             }
         }
 

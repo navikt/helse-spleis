@@ -971,11 +971,11 @@ internal class Vedtaksperiode private constructor(
         val perioder = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
             .map { it.id to it.behandlinger }
         val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
-        behandlinger.godkjenning(hendelse, erForlengelse(), perioder, arbeidsgiver.kanForkastes(this, Aktivitetslogg()), finnArbeidsgiverperiode(), harPeriodeRettFør)
+        behandlinger.godkjenning(hendelse, erForlengelse(), perioder, arbeidsgiver.kanForkastes(this, Aktivitetslogg()), finnArbeidsgiverperiode(), harPeriodeRettFør, utkastTilVedtakBuilder())
     }
 
-    @Suppress("unused")
-    private fun utkastTilVedtak(hendelse: IAktivitetslogg) {
+
+    private fun utkastTilVedtakBuilder(): UtkastTilVedtakBuilder {
         val builder = UtkastTilVedtakBuilder(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -989,7 +989,7 @@ internal class Vedtaksperiode private constructor(
             .associate { it.id to it.behandlinger }
             .berik(builder)
 
-        behandlinger.utkastTilVedtak(hendelse, builder)
+        return builder
     }
 
     internal fun gjenopptaBehandling(hendelse: Hendelse, arbeidsgivere: Iterable<Arbeidsgiver>) {
