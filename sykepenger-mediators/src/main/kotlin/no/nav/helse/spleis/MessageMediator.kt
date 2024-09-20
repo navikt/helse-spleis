@@ -38,6 +38,7 @@ import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
 import no.nav.helse.spleis.meldinger.SendtSelvstendigSøknaderRiver
 import no.nav.helse.spleis.meldinger.SimuleringerRiver
 import no.nav.helse.spleis.meldinger.SkjønnsmessigFastsettelseRiver
+import no.nav.helse.spleis.meldinger.SykepengegrunnlagForArbeidsgiverRiver
 import no.nav.helse.spleis.meldinger.UtbetalingerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingpåminnelserRiver
 import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
@@ -77,6 +78,7 @@ internal class MessageMediator(
             UtbetalingshistorikkRiver(it, this)
             UtbetalingshistorikkForFeriepengerRiver(it, this)
             YtelserRiver(it, this)
+            SykepengegrunnlagForArbeidsgiverRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
             UtbetalingsgodkjenningerRiver(it, this)
             UtbetalingerRiver(it, this)

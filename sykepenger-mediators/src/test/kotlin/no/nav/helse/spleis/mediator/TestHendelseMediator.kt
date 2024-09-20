@@ -32,6 +32,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
@@ -66,6 +67,7 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
+import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
@@ -221,6 +223,14 @@ internal class TestHendelseMediator : IHendelseMediator {
         historiskeFolkeregisteridenter: Set<Personidentifikator>
     ) {
         lestNySøknadArbeidsledigVerdi.set(true)
+    }
+
+    override fun behandle(
+        message: SykepengegrunnlagForArbeidsgiverMessage,
+        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
+        context: MessageContext
+    ) {
+
     }
 
     override fun behandle(

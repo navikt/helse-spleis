@@ -103,7 +103,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         mediator.behandle(this, vilkårsgrunnlag, context)
     }
 
-    private companion object {
+    internal companion object {
 
         private fun JsonNode.asInntekttype() = when (this.asText()) {
             "LOENNSINNTEKT" -> Inntekttype.LØNNSINNTEKT
@@ -120,7 +120,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             else -> error("Mangler arbeidsgiver for inntekt i hendelse")
         }
 
-        private fun mapSkatteopplysninger(opplysninger: JsonNode) =
+        fun mapSkatteopplysninger(opplysninger: JsonNode) =
             opplysninger.flatMap { måned ->
                 måned["inntektsliste"].map { opplysning ->
                     (opplysning as ObjectNode).put("årMåned", måned.path("årMåned").asText())

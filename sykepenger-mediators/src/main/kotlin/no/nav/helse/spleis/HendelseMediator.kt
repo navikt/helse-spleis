@@ -24,6 +24,7 @@ import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -72,6 +73,7 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
+import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
@@ -253,6 +255,16 @@ internal class HendelseMediator(
         hentPersonOgHåndter(message, ytelser, context) { person ->
             HendelseProbe.onYtelser()
             person.håndter(ytelser)
+        }
+    }
+
+    override fun behandle(
+        message: SykepengegrunnlagForArbeidsgiverMessage,
+        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
+        context: MessageContext
+    ) {
+        hentPersonOgHåndter(message, sykepengegrunnlagForArbeidsgiver, context) { person ->
+            person.håndter(sykepengegrunnlagForArbeidsgiver)
         }
     }
 
@@ -618,6 +630,7 @@ internal interface IHendelseMediator {
     fun behandle(message: UtbetalingshistorikkMessage, utbetalingshistorikk: Utbetalingshistorikk, context: MessageContext)
     fun behandle(message: UtbetalingshistorikkForFeriepengerMessage, utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger, context: MessageContext)
     fun behandle(message: YtelserMessage, ytelser: Ytelser, context: MessageContext)
+    fun behandle(message: SykepengegrunnlagForArbeidsgiverMessage, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver, context: MessageContext)
     fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag, context: MessageContext)
     fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: MessageContext)
     fun behandle(message: UtbetalingMessage, utbetaling: UtbetalingHendelse, context: MessageContext)

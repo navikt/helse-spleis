@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 
 // Understands a JSON message representing a Need with solution
-internal abstract class BehovMessage(packet: JsonMessage) : HendelseMessage(packet) {
+internal sealed class BehovMessage(packet: JsonMessage) : HendelseMessage(packet) {
     override val fødselsnummer = packet["fødselsnummer"].asText()
 
     override fun additionalTracinginfo(packet: JsonMessage): Map<String, Any> {

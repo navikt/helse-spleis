@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.mediator.etterlevelse
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
@@ -9,7 +10,6 @@ import no.nav.helse.januar
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.spleis.SubsumsjonMediator
-import no.nav.helse.spleis.mediator.TestHendelseMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.spleis.meldinger.model.MigrateMessage
 
 internal class SubsumsjonsmeldingTest {
     private val fnr = "12029240045"
@@ -33,7 +34,15 @@ internal class SubsumsjonsmeldingTest {
             .medFødselsnummer(fnr)
             .medOrganisasjonsnummer("123456789")
             .medVedtaksperiode(UUID.randomUUID(), emptyMap(), Periode(1.januar, 31.januar))
-        subsumsjonMediator = SubsumsjonMediator(jurist, fnr, TestHendelseMessage(fnr), versjonAvKode)
+        val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", mapOf(
+            "aktørId" to "1",
+            "fødselsnummer" to fnr,
+        )).also {
+            it.requireKey("@event_name")
+            it.requireKey("aktørId")
+            it.requireKey("fødselsnummer")
+        })
+        subsumsjonMediator = SubsumsjonMediator(jurist, fnr, eksempelmelding, versjonAvKode)
         testRapid = TestRapid()
     }
 

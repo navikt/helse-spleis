@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.db
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
@@ -37,6 +34,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_SELVSTENDIG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SKJØNNSMESSIG_FASTSETTELSE
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
@@ -46,6 +44,7 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
+import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
@@ -75,6 +74,7 @@ import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
 import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
+import no.nav.helse.spleis.meldinger.model.SykepengegrunnlagForArbeidsgiverMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
@@ -83,18 +83,8 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMes
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
-import org.slf4j.LoggerFactory
 
 internal class HendelseRepository(private val dataSource: DataSource) {
-
-    private companion object {
-        private val log = LoggerFactory.getLogger(HendelseRepository::class.java)
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
-
     fun lagreMelding(melding: HendelseMessage) {
         melding.lagreMelding(this)
     }
@@ -162,13 +152,14 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is AvbruttSøknadMessage -> AVBRUTT_SØKNAD
         is InntektsmeldingerReplayMessage -> INNTEKTSMELDINGER_REPLAY
         is MinimumSykdomsgradVurdertMessage -> MINIMUM_SYKDOMSGRAD_VURDERT
+        is SykepengegrunnlagForArbeidsgiverMessage -> SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
         is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
         is PåminnelseMessage,
         is UtbetalingshistorikkMessage,
-        is InfotrygdendringMessage -> null // Disse trenger vi ikke å lagre
-        else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
+        is InfotrygdendringMessage,
+        is AvbruttArbeidsledigSøknadMessage -> null // Disse trenger vi ikke å lagre
     }
 
     internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Pair<Navn, Json>> {
@@ -223,6 +214,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         SKJØNNSMESSIG_FASTSETTELSE,
         AVBRUTT_SØKNAD,
         INNTEKTSMELDINGER_REPLAY,
-        MINIMUM_SYKDOMSGRAD_VURDERT
+        MINIMUM_SYKDOMSGRAD_VURDERT,
+        SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER
     }
 }

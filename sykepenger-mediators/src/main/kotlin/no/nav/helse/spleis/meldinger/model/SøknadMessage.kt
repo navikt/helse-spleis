@@ -11,7 +11,7 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
 
 // Understands a JSON message representing a Søknad
-internal abstract class SøknadMessage(
+internal sealed class SøknadMessage(
     private val packet: JsonMessage,
     private val builder: SøknadBuilder,
     private val organisasjonsnummer: String = packet["arbeidsgiver.orgnummer"].asText()

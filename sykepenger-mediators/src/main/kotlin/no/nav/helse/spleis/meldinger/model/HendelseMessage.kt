@@ -12,7 +12,7 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import org.slf4j.Logger
 
-internal abstract class HendelseMessage(private val packet: JsonMessage) {
+internal sealed class HendelseMessage(private val packet: JsonMessage) {
     internal val id: UUID = UUID.fromString(packet["@id"].asText())
     private val navn = packet["@event_name"].asText()
     protected val opprettet = packet["@opprettet"].asLocalDateTime()
