@@ -420,7 +420,8 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun berik(builder: UtkastTilVedtakBuilder) {
         if (vurdertInfotrygd) builder.inngangsvilkårFraInfotrygd()
-        else builder.seksG(`6G`.reflection { årlig, _, _, _ -> årlig })
+        else builder.seksG(`6G`.reflection { årlig, _, _, _ -> årlig }, begrensning == ER_6G_BEGRENSET)
+        if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) builder.sykepengegrunnlagUnder2G()
         builder.totalOmregnetÅrsinntekt(omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig })
         arbeidsgiverInntektsopplysninger.berik(builder)
     }

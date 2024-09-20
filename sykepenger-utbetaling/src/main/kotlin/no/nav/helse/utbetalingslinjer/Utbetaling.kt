@@ -49,7 +49,7 @@ class Utbetaling private constructor(
     private val personOppdrag: Oppdrag,
     private val tidsstempel: LocalDateTime,
     private var tilstand: Tilstand,
-    private val type: Utbetalingtype,
+    val type: Utbetalingtype,
     private val maksdato: LocalDate,
     private val forbrukteSykedager: Int?,
     private val gjenståendeSykedager: Int?,

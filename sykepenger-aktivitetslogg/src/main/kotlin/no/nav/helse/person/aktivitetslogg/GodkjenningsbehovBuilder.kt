@@ -121,7 +121,7 @@ class GodkjenningsbehovBuilder(
             "utbetalingtype" to utbetalingtype,
             "inntektskilde" to inntektskilde.name,
             "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
-            "tags" to tags,
+            "tags" to tags.sorted().toSet(),
             "kanAvvises" to kanAvvises,
             "omregnedeÅrsinntekter" to omregnedeÅrsinntekter,
             "behandlingId" to behandlingId.toString(),
