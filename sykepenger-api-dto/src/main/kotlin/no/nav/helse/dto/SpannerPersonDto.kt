@@ -156,7 +156,8 @@ data class SpannerPersonDto(
                 val subsumsjon: SubsumsjonData?,
                 val tidsstempel: LocalDateTime,
                 val overstyrtInntektId: UUID?,
-                val skatteopplysninger: List<SkatteopplysningData>?
+                val skatteopplysninger: List<SkatteopplysningData>?,
+                val inntektsmeldingkilde: ArbeidsgiverData.InntektsmeldingData.KildeData?
             ) {
                 data class SubsumsjonData(
                     val paragraf: String,
@@ -225,8 +226,13 @@ data class SpannerPersonDto(
             val dato: LocalDate,
             val hendelseId: UUID,
             val beløp: InntektDto,
-            val tidsstempel: LocalDateTime
-        )
+            val tidsstempel: LocalDateTime,
+            val kilde: KildeData
+        ) {
+            enum class KildeData {
+                Arbeidsgiver, AOrdningen
+            }
+        }
 
         data class RefusjonsopplysningData(
             val meldingsreferanseId: UUID,
@@ -692,7 +698,11 @@ private fun InntektsopplysningUtDto.InntektsmeldingDto.tilPersonData() =
         dato = this.dato,
         hendelseId = this.hendelseId,
         beløp = this.beløp.tilPersonData(),
-        tidsstempel = this.tidsstempel
+        tidsstempel = this.tidsstempel,
+        kilde = when (this.kilde) {
+            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
+            InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
+        }
     )
 
 private fun SykdomshistorikkElementDto.tilPersonData() = SpannerPersonDto.SykdomshistorikkData(
@@ -1480,6 +1490,13 @@ private fun InntektsopplysningUtDto.tilPersonData() =
         },
         skatteopplysninger = when (this) {
             is InntektsopplysningUtDto.SkattSykepengegrunnlagDto -> this.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+            else -> null
+        },
+        inntektsmeldingkilde = when (this) {
+            is InntektsopplysningUtDto.InntektsmeldingDto -> when (this.kilde) {
+                InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.Arbeidsgiver
+                InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen -> SpannerPersonDto.ArbeidsgiverData.InntektsmeldingData.KildeData.AOrdningen
+            }
             else -> null
         }
     )
