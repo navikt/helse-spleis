@@ -18,8 +18,6 @@ internal val Behandlinger.Behandling.inspektør get() = BehandlingInspektør(thi
 
 internal class BehandlingInspektør(behandling: Behandlinger.Behandling) : BehandlingVisitor {
 
-    internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID>
-        private set
     internal lateinit var behandling: Behandling
         private set
     internal val arbeidsgiverperiode get() = behandling.endringer.last().arbeidsgiverperiode
@@ -128,9 +126,6 @@ internal class BehandlingInspektør(behandling: Behandlinger.Behandling) : Behan
                 sykmeldingsperiode = sykmeldingsperiode,
             ))
         )
-        val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId ?: return
-        val utbetalingId = utbetaling!!.inspektør.utbetalingId
-        utbetalingIdTilVilkårsgrunnlagId = utbetalingId to vilkårsgrunnlagId
     }
 
     override fun visitBehandlingkilde(
@@ -142,9 +137,5 @@ internal class BehandlingInspektør(behandling: Behandlinger.Behandling) : Behan
         behandling = behandling.copy(
             kilde = Behandling.Behandlingkilde(meldingsreferanseId, innsendt, registrert, avsender)
         )
-    }
-
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
-        // this.utbetalingstidslinje = tidslinje
     }
 }
