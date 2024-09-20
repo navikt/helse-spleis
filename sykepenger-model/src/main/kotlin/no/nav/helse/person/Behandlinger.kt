@@ -311,7 +311,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
     ) {
         constructor(hendelse: Hendelse): this(hendelse.meldingsreferanseId(), hendelse.innsendt(), hendelse.registrert(), hendelse.avsender())
 
-        internal fun accept(visitor: BehandlingerVisitor) {
+        internal fun accept(visitor: BehandlingVisitor) {
             visitor.visitBehandlingkilde(meldingsreferanseId, innsendt, registert, avsender)
         }
 
@@ -372,7 +372,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
         override fun toString() = "$periode - $tilstand"
 
-        fun accept(visitor: BehandlingerVisitor) {
+        fun accept(visitor: BehandlingVisitor) {
             visitor.preVisitBehandling(id, tidsstempel, tilstand, periode, vedtakFattet, avsluttet, kilde)
             endringer.forEach { it.accept(visitor) }
             kilde.accept(visitor)
@@ -509,7 +509,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 return this.dokumentsporing == other.dokumentsporing
             }
 
-            internal fun accept(visitor: BehandlingerVisitor) {
+            internal fun accept(visitor: BehandlingVisitor) {
                 visitor.preVisitBehandlingendring(
                     id,
                     tidsstempel,
@@ -520,7 +520,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dokumentsporing,
                     sykdomstidslinje,
                     skjæringstidspunkt,
-                    arbeidsgiverperiode
+                    arbeidsgiverperiode,
+                    utbetalingstidslinje
                 )
                 grunnlagsdata?.accept(visitor)
                 utbetaling?.accept(visitor)
@@ -535,7 +536,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     dokumentsporing,
                     sykdomstidslinje,
                     skjæringstidspunkt,
-                    arbeidsgiverperiode
+                    arbeidsgiverperiode,
+                    utbetalingstidslinje
                 )
             }
 

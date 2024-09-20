@@ -13,7 +13,7 @@ import no.nav.helse.onsdag
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.*
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.*
 import no.nav.helse.søndag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals

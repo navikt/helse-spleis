@@ -33,6 +33,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
@@ -342,7 +343,8 @@ internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje,
         skjæringstidspunkt: LocalDate,
-        arbeidsgiverperiode: List<Periode>
+        arbeidsgiverperiode: List<Periode>,
+        utbetalingstidslinje: Utbetalingstidslinje
     ) {}
     fun postVisitBehandlingendring(
         id: UUID,
@@ -354,7 +356,8 @@ internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         dokumentsporing: Dokumentsporing,
         sykdomstidslinje: Sykdomstidslinje,
         skjæringstidspunkt: LocalDate,
-        arbeidsgiverperiode: List<Periode>
+        arbeidsgiverperiode: List<Periode>,
+        utbetalingstidslinje: Utbetalingstidslinje
     ) {}
     fun visitBehandlingkilde(
         meldingsreferanseId: UUID,

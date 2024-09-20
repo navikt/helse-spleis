@@ -3,10 +3,10 @@ package no.nav.helse.dsl
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.overlapper
-import no.nav.helse.inspectors.VedtaksperiodeInspektør
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.TIL_INFOTRYGD
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.VEDTAK_IVERKSATT
+import no.nav.helse.inspectors.BehandlingInspektør
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.TIL_INFOTRYGD
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.VEDTAK_IVERKSATT
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
@@ -227,10 +227,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         }
     }
 
-    private fun VedtaksperiodeInspektør.Behandling.gyldigTilInfotrygd() = tilstand == TIL_INFOTRYGD && avsluttet != null && vedtakFattet == null
-    private fun VedtaksperiodeInspektør.Behandling.gyldigAvsluttetUtenUtbetaling() = tilstand == AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
-    private fun VedtaksperiodeInspektør.Behandling.gyldigAvsluttet() = tilstand == VEDTAK_IVERKSATT && avsluttet != null && vedtakFattet != null
-    private val VedtaksperiodeInspektør.Behandling.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
+    private fun BehandlingInspektør.Behandling.gyldigTilInfotrygd() = tilstand == TIL_INFOTRYGD && avsluttet != null && vedtakFattet == null
+    private fun BehandlingInspektør.Behandling.gyldigAvsluttetUtenUtbetaling() = tilstand == AVSLUTTET_UTEN_VEDTAK && avsluttet != null && vedtakFattet == null
+    private fun BehandlingInspektør.Behandling.gyldigAvsluttet() = tilstand == VEDTAK_IVERKSATT && avsluttet != null && vedtakFattet != null
+    private val BehandlingInspektør.Behandling.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
     private fun validerTilstandPåSisteBehandlingForFerdigbehandledePerioder() {
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver.inspektør.aktiveVedtaksperioder()
@@ -254,10 +254,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         }
     }
 
-    private val VedtaksperiodeInspektør.Behandling.Behandlingendring.unormalSykdomstidslinje get() =
+    private val BehandlingInspektør.Behandling.Behandlingendring.unormalSykdomstidslinje get() =
         periode.start != sykdomstidslinje.inspektør.førsteIkkeUkjenteDag
 
-    private val VedtaksperiodeInspektør.Behandling.Behandlingendring.førsteIkkeUkjenteDagErSykedagNav get() =
+    private val BehandlingInspektør.Behandling.Behandlingendring.førsteIkkeUkjenteDagErSykedagNav get() =
         sykdomstidslinje.inspektør.dager[sykdomstidslinje.inspektør.førsteIkkeUkjenteDag] is Dag.SykedagNav
 
     private fun bekreftIngenOverlappende() {

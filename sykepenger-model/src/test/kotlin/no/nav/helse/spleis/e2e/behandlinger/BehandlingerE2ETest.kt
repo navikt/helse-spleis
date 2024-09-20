@@ -24,13 +24,13 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingkilde
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.ANNULLERT_PERIODE
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.REVURDERT_VEDTAK_AVVIST
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.UBEREGNET_REVURDERING
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.VEDTAK_FATTET
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.VEDTAK_IVERKSATT
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingkilde
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.ANNULLERT_PERIODE
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.REVURDERT_VEDTAK_AVVIST
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.UBEREGNET_REVURDERING
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.VEDTAK_FATTET
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.VEDTAK_IVERKSATT
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -371,7 +371,7 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
                 assertEquals(1, behandlinger.size)
                 behandlinger[0].also { behandling ->
                     assertEquals(7, behandling.endringer.size)
-                    assertEquals(no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.BEREGNET, behandling.tilstand)
+                    assertEquals(no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.BEREGNET, behandling.tilstand)
                 }
             }
         }

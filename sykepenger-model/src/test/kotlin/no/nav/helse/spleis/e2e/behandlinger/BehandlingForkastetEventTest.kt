@@ -6,8 +6,8 @@ import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.ANNULLERT_PERIODE
-import no.nav.helse.inspectors.VedtaksperiodeInspektør.Behandling.Behandlingtilstand.TIL_INFOTRYGD
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.ANNULLERT_PERIODE
+import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstand.TIL_INFOTRYGD
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest.Companion.UNG_PERSON_FNR_2018
