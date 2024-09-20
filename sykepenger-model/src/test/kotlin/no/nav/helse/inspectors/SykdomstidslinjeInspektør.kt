@@ -47,7 +47,7 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     }
 
     private fun set(dag: Dag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        this.grader[dato] = økonomi.inspektør.grad.toDouble().toInt()
+        this.grader[dato] = økonomi.inspektør.gradProsent.toInt()
         set(dag, dato, kilde)
     }
 

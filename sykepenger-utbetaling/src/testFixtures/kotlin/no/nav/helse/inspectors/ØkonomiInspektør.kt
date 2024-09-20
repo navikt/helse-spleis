@@ -18,7 +18,7 @@ private class ØkonomiInspektørBuilder(økonomi: Økonomi) : ØkonomiBuilder() 
     }
 
     fun build() = ØkonomiInspektør(
-        grad.prosent,
+        grad,
         arbeidsgiverRefusjonsbeløp?.daglig ?: INGEN,
         dekningsgrunnlag?.daglig ?: INGEN,
         totalGrad?.toInt() ?: 0,
@@ -29,11 +29,13 @@ private class ØkonomiInspektørBuilder(økonomi: Økonomi) : ØkonomiBuilder() 
 }
 
 class ØkonomiInspektør(
-    val grad: Prosentdel,
+    val gradProsent: Double,
     val arbeidsgiverRefusjonsbeløp: Inntekt,
     val dekningsgrunnlag: Inntekt,
     val totalGrad: Int,
     val aktuellDagsinntekt: Inntekt,
     val arbeidsgiverbeløp: Inntekt?,
     val personbeløp: Inntekt?
-)
+) {
+    val grad get() = gradProsent.prosent
+}
