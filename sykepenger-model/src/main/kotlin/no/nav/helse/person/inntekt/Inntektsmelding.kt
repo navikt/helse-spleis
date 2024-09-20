@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
+import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto.InntektsmeldingDto.KildeDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.person.Person
@@ -20,15 +21,15 @@ class Inntektsmelding internal constructor(
     hendelseId: UUID,
     beløp: Inntekt,
     tidsstempel: LocalDateTime,
-    private val kilde: Kilde = Kilde.Arbeidsgiver
+    private val kilde: Kilde
 ) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
-    internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel)
+    internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, kilde: Kilde = Kilde.Arbeidsgiver, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel, kilde)
 
     override fun accept(visitor: InntektsopplysningVisitor) {
         accept(visitor as InntektsmeldingVisitor)
     }
 
-    override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, tidsstempel) }?: this
+    override fun gjenbrukbarInntekt(beløp: Inntekt?) = beløp?.let { Inntektsmelding(dato, hendelseId, it, kilde, tidsstempel) }?: this
 
     internal fun accept(visitor: InntektsmeldingVisitor) {
         visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
@@ -90,7 +91,7 @@ class Inntektsmelding internal constructor(
             hendelse.info("Det er ny arbeidsgiverperiode, og dette utløser varsel om gjenbruk. Forrige inntektdato var ${this.dato} og ny inntektdato er $nyDato")
             hendelse.varsel(RV_IV_7)
         }
-        inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, tidsstempel))
+        inntektshistorikk.leggTil(Inntektsmelding(nyDato, hendelseId, beløp, kilde, tidsstempel))
         hendelse.info("Kopierte inntekt som lå lagret på ${this.dato} til $nyDato")
     }
 
@@ -112,6 +113,13 @@ class Inntektsmelding internal constructor(
             Arbeidsgiver -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
             AOrdningen -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen
         }
+
+        companion object {
+            fun gjenopprett(dto: KildeDto) = when (dto) {
+                KildeDto.Arbeidsgiver -> Arbeidsgiver
+                KildeDto.AOrdningen -> AOrdningen
+            }
+        }
     }
 
     internal companion object {
@@ -122,7 +130,7 @@ class Inntektsmelding internal constructor(
                 hendelseId = dto.hendelseId,
                 beløp = Inntekt.gjenopprett(dto.beløp),
                 tidsstempel = dto.tidsstempel,
-                kilde = Kilde.Arbeidsgiver,
+                kilde = Kilde.gjenopprett(dto.kilde),
             )
         }
     }

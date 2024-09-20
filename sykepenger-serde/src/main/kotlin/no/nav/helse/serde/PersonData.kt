@@ -77,6 +77,7 @@ import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
 import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.InntektsopplysningData.InntektsmeldingKildeDto
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import kotlin.streams.asSequence
 
@@ -325,8 +326,13 @@ data class PersonData(
                 val subsumsjon: SubsumsjonData?,
                 val tidsstempel: LocalDateTime,
                 val overstyrtInntektId: UUID?,
-                val skatteopplysninger: List<SkatteopplysningData>?
+                val skatteopplysninger: List<SkatteopplysningData>?,
+                val inntektsmeldingkilde: InntektsmeldingKildeDto?
             ) {
+                enum class InntektsmeldingKildeDto {
+                    Arbeidsgiver,
+                    AOrdningen
+                }
                 fun tilDto() = when (kilde.let(Inntektsopplysningskilde::valueOf)) {
                     Inntektsopplysningskilde.INFOTRYGD -> InntektsopplysningInnDto.InfotrygdDto(
                         id = this.id,
@@ -347,6 +353,12 @@ data class PersonData(
                         hendelseId = this.hendelseId,
                         dato = this.dato,
                         beløp = InntektbeløpDto.MånedligDouble(beløp = beløp!!),
+                        kilde = this.inntektsmeldingkilde?.let {
+                            when (it) {
+                                InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
+                                InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
+                            }
+                        } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver, // todo: denne trenger ikke være nullable etter 20. oktober 2024..
                         tidsstempel = this.tidsstempel
                     )
                     Inntektsopplysningskilde.IKKE_RAPPORTERT -> InntektsopplysningInnDto.IkkeRapportertDto(
@@ -494,6 +506,7 @@ data class PersonData(
             val dato: LocalDate,
             val hendelseId: UUID,
             val beløp: Double,
+            val kilde: InntektsmeldingKildeDto?, // todo: denne trenger ikke være nullable etter 20. oktober 2024..
             val tidsstempel: LocalDateTime
         ) {
             fun tilDto() = InntektsopplysningInnDto.InntektsmeldingDto(
@@ -501,6 +514,12 @@ data class PersonData(
                 hendelseId = this.hendelseId,
                 dato = this.dato,
                 beløp = InntektbeløpDto.MånedligDouble(beløp = this.beløp),
+                kilde = kilde?.let {
+                    when (it) {
+                        InntektsmeldingKildeDto.Arbeidsgiver -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
+                        InntektsmeldingKildeDto.AOrdningen -> InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.AOrdningen
+                    }
+                } ?: InntektsopplysningInnDto.InntektsmeldingDto.KildeDto.Arbeidsgiver,
                 tidsstempel = this.tidsstempel
             )
         }

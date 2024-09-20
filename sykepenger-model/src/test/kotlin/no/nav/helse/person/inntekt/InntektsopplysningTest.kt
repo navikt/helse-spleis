@@ -20,8 +20,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun overstyres() {
-        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
+        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
         val saksbehandler1 = im1.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now()))
         val saksbehandler2 = Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val saksbehandler3 = Saksbehandler(20.januar, UUID.randomUUID(), 30000.månedlig, "", null, LocalDateTime.now())
@@ -38,7 +38,7 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `opphøre, gjøre om, avvikle, tilbakestille eller kansellere`() {
-        val im = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
         val saksbehandler = im.overstyresAv(Saksbehandler(20.januar, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now()))
         val skjønnsmessigFastsatt1 = im.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
         val skjønnsmessigFastsatt2 = saksbehandler.overstyresAv(SkjønnsmessigFastsatt(1.januar, UUID.randomUUID(), 20000.månedlig, LocalDateTime.now()))
@@ -58,8 +58,8 @@ internal class InntektsopplysningTest {
     @Test
     fun `inntektsmelding-likhet`() {
         val hendelsesId = UUID.randomUUID()
-        val im1 = Inntektsmelding(1.januar, hendelsesId, INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(1.januar, hendelsesId, INNTEKT, LocalDateTime.now())
+        val im1 = Inntektsmelding(1.januar, hendelsesId, INNTEKT)
+        val im2 = Inntektsmelding(1.januar, hendelsesId, INNTEKT)
 
         assertEquals(im1, im2)
         assertFalse(im1.kanLagres(im2))
@@ -69,8 +69,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `inntektsmelding-ulikhet`() {
-        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(2.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT)
+        val im2 = Inntektsmelding(2.januar, UUID.randomUUID(), INNTEKT)
 
         assertNotEquals(im1, im2)
         assertTrue(im1.kanLagres(im2))
@@ -87,8 +87,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - inntektsmelding vs inntektsmelding`() {
-        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
-        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, LocalDateTime.now().plusSeconds(1))
+        val im1 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now())
+        val im2 = Inntektsmelding(1.januar, UUID.randomUUID(), INNTEKT, Inntektsmelding.Kilde.Arbeidsgiver, LocalDateTime.now().plusSeconds(1))
 
         assertEquals(im2, im1.beste(im2))
         assertEquals(im2, im2.beste(im1))
@@ -96,7 +96,7 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - skatt vs inntektsmelding`() {
-        val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT)
         val skatt1 = SkattSykepengegrunnlag(UUID.randomUUID(), 1.februar, emptyList(), emptyList())
         val skatt2 = SkattSykepengegrunnlag(UUID.randomUUID(), 31.januar, emptyList(), emptyList())
 
@@ -109,7 +109,7 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `turnering - ikkeRapportert vs inntektsmelding`() {
-        val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT, LocalDateTime.now())
+        val im = Inntektsmelding(10.februar, UUID.randomUUID(), INNTEKT)
         val ikkeRapportert1 = IkkeRapportert(1.februar, UUID.randomUUID(), LocalDateTime.now())
         val ikkeRapportert2 = IkkeRapportert(31.januar, UUID.randomUUID(), LocalDateTime.now())
 

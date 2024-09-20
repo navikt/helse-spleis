@@ -65,8 +65,14 @@ sealed class InntektsopplysningInnDto {
         override val hendelseId: UUID,
         override val dato: LocalDate,
         override val beløp: InntektbeløpDto.MånedligDouble,
-        override val tidsstempel: LocalDateTime
-    ) : InntektsopplysningInnDto()
+        override val tidsstempel: LocalDateTime,
+        val kilde: KildeDto
+    ) : InntektsopplysningInnDto() {
+        enum class KildeDto {
+            Arbeidsgiver,
+            AOrdningen
+        }
+    }
     data class SkattSykepengegrunnlagDto(
         override val id: UUID,
         override val hendelseId: UUID,
