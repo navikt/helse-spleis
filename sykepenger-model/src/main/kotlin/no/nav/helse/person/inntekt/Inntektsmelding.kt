@@ -20,7 +20,7 @@ class Inntektsmelding internal constructor(
     hendelseId: UUID,
     beløp: Inntekt,
     tidsstempel: LocalDateTime,
-    kilde: Kilde = Kilde.Arbeidsgiver
+    private val kilde: Kilde = Kilde.Arbeidsgiver
 ) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel)
 
@@ -100,12 +100,18 @@ class Inntektsmelding internal constructor(
             hendelseId = hendelseId,
             dato = dato,
             beløp = beløp.dto(),
-            tidsstempel = tidsstempel
+            tidsstempel = tidsstempel,
+            kilde = kilde.dto()
         )
 
     internal enum class Kilde {
         Arbeidsgiver,
-        AOrdningen
+        AOrdningen;
+
+        fun dto() = when(this) {
+            Arbeidsgiver -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.Arbeidsgiver
+            AOrdningen -> InntektsopplysningUtDto.InntektsmeldingDto.KildeDto.AOrdningen
+        }
     }
 
     internal companion object {
@@ -115,7 +121,8 @@ class Inntektsmelding internal constructor(
                 dato = dto.dato,
                 hendelseId = dto.hendelseId,
                 beløp = Inntekt.gjenopprett(dto.beløp),
-                tidsstempel = dto.tidsstempel
+                tidsstempel = dto.tidsstempel,
+                kilde = Kilde.Arbeidsgiver,
             )
         }
     }
