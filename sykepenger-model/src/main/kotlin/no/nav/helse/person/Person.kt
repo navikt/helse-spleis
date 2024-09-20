@@ -33,6 +33,7 @@ import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -376,6 +377,12 @@ class Person private constructor(
         registrer(kanIkkeBehandlesHer, "Behandler kan ikke behandles her")
         finnArbeidsgiver(kanIkkeBehandlesHer).håndter(kanIkkeBehandlesHer)
         håndterGjenoppta(kanIkkeBehandlesHer)
+    }
+
+    fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver) {
+        registrer(sykepengegrunnlagForArbeidsgiver, "Behandler sykepengegrunnlag for arbeidsgiver")
+        finnArbeidsgiver(sykepengegrunnlagForArbeidsgiver).håndter(sykepengegrunnlagForArbeidsgiver)
+        håndterGjenoppta(sykepengegrunnlagForArbeidsgiver)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {

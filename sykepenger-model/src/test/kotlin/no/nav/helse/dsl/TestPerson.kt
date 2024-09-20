@@ -15,6 +15,7 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
@@ -367,6 +368,15 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagIdentOpphørt().håndter {
                 håndter(it, nyttFnr, nyAktørId)
             }
+        }
+
+        internal fun håndterSykepengegrunnlagForArbeidsgiver(
+            vedtaksperiodeId: UUID,
+            skjæringstidspunkt: LocalDate,
+            inntekter: List<MånedligInntekt>
+        ) {
+            arbeidsgiverHendelsefabrikk.lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId, skjæringstidspunkt, inntekter)
+                .håndter(Person::håndter)
         }
 
         internal fun håndterPåminnelse(

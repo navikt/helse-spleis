@@ -170,9 +170,10 @@ internal abstract class AbstractDslTest {
         vedtaksperiodeId: UUID,
         forventetArbeidsgiverbeløp: Int,
         forventetArbeidsgiverRefusjonsbeløp: Int,
+        forventetPersonbeløp: Int = 0,
         subset: Periode? = null
     ) {
-        testArbeidsgiverAsserter.assertUtbetalingsbeløp(vedtaksperiodeId, forventetArbeidsgiverbeløp, forventetArbeidsgiverRefusjonsbeløp, subset)
+        testArbeidsgiverAsserter.assertUtbetalingsbeløp(vedtaksperiodeId, forventetArbeidsgiverbeløp, forventetArbeidsgiverRefusjonsbeløp, forventetPersonbeløp, subset)
     }
     protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, orgnummer: String = a1) {
         testArbeidsgiverAsserter.assertForkastetPeriodeTilstander(id, *tilstand)

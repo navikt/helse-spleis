@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
@@ -483,6 +484,15 @@ internal class Arbeidsgiver private constructor(
         utbetalingsavgjørelse.kontekst(this)
         utbetalinger.forEach { it.håndter(utbetalingsavgjørelse) }
         håndter(utbetalingsavgjørelse, Vedtaksperiode::håndter)
+    }
+
+    internal fun lagreInntekt(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver) {
+        sykepengegrunnlagForArbeidsgiver.lagreInntekt(inntektshistorikk, refusjonshistorikk)
+    }
+
+    internal fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver) {
+        sykepengegrunnlagForArbeidsgiver.kontekst(this)
+        håndter(sykepengegrunnlagForArbeidsgiver, Vedtaksperiode::håndter)
     }
 
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {

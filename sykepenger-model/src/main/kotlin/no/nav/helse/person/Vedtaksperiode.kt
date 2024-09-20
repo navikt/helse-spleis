@@ -29,6 +29,7 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.PersonHendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Validation.Companion.validation
@@ -384,6 +385,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(person, arbeidsgiver, this, utbetalingsavgjørelse)
     }
 
+    internal fun håndter(sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver) {
+        if (!sykepengegrunnlagForArbeidsgiver.erRelevant(id, skjæringstidspunkt)) return
+        kontekst(sykepengegrunnlagForArbeidsgiver)
+        tilstand.håndter(this, sykepengegrunnlagForArbeidsgiver)
+    }
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         if (!vilkårsgrunnlag.erRelevant(id, skjæringstidspunkt)) return
         kontekst(vilkårsgrunnlag)
@@ -1358,6 +1364,9 @@ internal class Vedtaksperiode private constructor(
 
         fun håndtertInntektPåSkjæringstidspunktet(vedtaksperiode: Vedtaksperiode, hendelse: Inntektsmelding) {}
 
+        fun håndter(vedtaksperiode: Vedtaksperiode, sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver) {
+            sykepengegrunnlagForArbeidsgiver.info("Forventet ikke sykepengegrunnlag for arbeidsgiver i %s".format(type.name))
+        }
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
             vilkårsgrunnlag.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
         }
@@ -1799,6 +1808,15 @@ internal class Vedtaksperiode private constructor(
                     infotrygdhistorikk.valider(this, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.organisasjonsnummer)
                 }
             }
+        }
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver
+        ) {
+            sykepengegrunnlagForArbeidsgiver.info("Håndterer sykepengegrunnlag for arbeidsgiver")
+            vedtaksperiode.arbeidsgiver.lagreInntekt(sykepengegrunnlagForArbeidsgiver)
+            vedtaksperiode.tilstand(sykepengegrunnlagForArbeidsgiver, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {

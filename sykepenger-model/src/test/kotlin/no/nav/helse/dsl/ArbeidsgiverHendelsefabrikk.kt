@@ -9,6 +9,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Foreldrepenger
@@ -33,6 +34,7 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -341,6 +343,17 @@ internal class ArbeidsgiverHendelsefabrikk(
             besvart = LocalDateTime.now()
         )
 
+    internal fun lagSykepengegrunnlagForArbeidsgiver(vedtaksperiodeId: UUID, skjæringstidspunkt: LocalDate, inntekter: List<ArbeidsgiverInntekt.MånedligInntekt>): SykepengegrunnlagForArbeidsgiver {
+        return SykepengegrunnlagForArbeidsgiver(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            skjæringstidspunkt = skjæringstidspunkt,
+            aktørId = aktørId,
+            personidentifikator = personidentifikator,
+            orgnummer = organisasjonsnummer,
+            inntekter = ArbeidsgiverInntekt(organisasjonsnummer, inntekter)
+        )
+    }
 
     internal fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
