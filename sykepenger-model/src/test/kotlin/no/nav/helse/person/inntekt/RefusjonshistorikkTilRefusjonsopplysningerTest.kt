@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -78,6 +79,24 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
         }
         assertEquals(listOf(Refusjonsopplysning(im, 4.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(20.januar).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `første fraværsdag etter opphør av refusjon`() {
+        val im = UUID.randomUUID()
+        val refusjonshistorikk = Refusjonshistorikk().apply {
+            leggTilRefusjon(Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = im,
+                førsteFraværsdag = 5.august,
+                arbeidsgiverperioder = listOf(5.januar til 20.januar),
+                beløp = 2345.daglig,
+                sisteRefusjonsdag = 4.april,
+                endringerIRefusjon = emptyList(),
+                tidsstempel = LocalDateTime.now(),
+            ))
+        }
+        val refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(5.august).inspektør.refusjonsopplysninger
+        assertEquals(listOf(Refusjonsopplysning(im, 5.april, null, 0.daglig)), refusjonsopplysninger)
     }
 
     @Test
