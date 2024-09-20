@@ -988,6 +988,7 @@ internal class Vedtaksperiode private constructor(
         val builder = UtkastTilVedtakBuilder(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
+            arbeidsgiver = organisasjonsnummer,
             vedtaksperiodeId = id,
             kanForkastes = arbeidsgiver.kanForkastes(this, Aktivitetslogg()),
             erForlengelse = erForlengelse(),

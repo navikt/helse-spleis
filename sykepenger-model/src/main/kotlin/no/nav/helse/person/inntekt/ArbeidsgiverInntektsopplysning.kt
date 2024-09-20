@@ -276,8 +276,8 @@ class ArbeidsgiverInntektsopplysning(
             .forEach { arbeidsgiver ->
                 builder.arbeidsgiverinntekt(
                     arbeidsgiver = arbeidsgiver.orgnummer,
-                    omregnedeÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
-                    skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig } else null,
+                    omregnedeÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt(),
+                    skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt() else null,
                     gjelder = arbeidsgiver.gjelder
                 )
             }

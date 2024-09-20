@@ -1,6 +1,8 @@
 package no.nav.helse.person.builders
 
+import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
@@ -11,6 +13,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
@@ -19,6 +22,7 @@ internal class UtkastTilVedtakBuilder(
     private val fødselsnummer: String,
     private val aktørId: String,
     private val vedtaksperiodeId: UUID,
+    private val arbeidsgiver: String,
     private val kanForkastes: Boolean,
     private val erForlengelse: Boolean,
     private val harPeriodeRettFør: Boolean,
@@ -50,12 +54,6 @@ internal class UtkastTilVedtakBuilder(
     private lateinit var skjæringstidspunkt: LocalDate
     internal fun skjæringstidspunkt(skjæringstidspunkt: LocalDate) = apply {
         this.skjæringstidspunkt = skjæringstidspunkt
-    }
-
-    private var inngangsvilkårFraInfotrygd = false
-    internal fun inngangsvilkårFraInfotrygd() = apply {
-        tags.add("InngangsvilkårFraInfotrygd")
-        inngangsvilkårFraInfotrygd = true
     }
 
     private lateinit var vilkårsgrunnlagId: UUID
@@ -94,24 +92,28 @@ internal class UtkastTilVedtakBuilder(
         tags.add(behandlingsresultat)
     }
 
+    private var sykepengegrunnlag by Delegates.notNull<Double>()
+    private lateinit var beregningsgrunnlag: Inntekt
     private var totalOmregnetÅrsinntekt by Delegates.notNull<Double>()
-    internal fun totalOmregnetÅrsinntekt(totalOmregnetÅrsinntekt: Double) = apply { this.totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt }
-
     private var seksG by Delegates.notNull<Double>()
     private var seksGBegrenset by Delegates.notNull<Boolean>()
-    internal fun seksG(seksG: Double, begrenset: Boolean) = apply {
-        this.seksG = seksG
-        this.seksGBegrenset = begrenset
-    }
-
-    internal fun sykepengegrunnlagUnder2G() {
-        tags.add("SykepengegrunnlagUnder2G")
+    private var inngangsvilkårFraInfotrygd by Delegates.notNull<Boolean>()
+    internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt, beregningsgrunnlag: Inntekt, totalOmregnetÅrsinntekt: Inntekt, seksG: Inntekt, toG: Inntekt, inngangsvilkårFraInfotrygd: Boolean) = apply {
+        this.sykepengegrunnlag = sykepengegrunnlag.årlig
+        this.beregningsgrunnlag = beregningsgrunnlag
+        this.totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt.årlig
+        this.seksGBegrenset = !inngangsvilkårFraInfotrygd && beregningsgrunnlag > seksG
+        this.seksG = seksG.årlig
+        if (seksGBegrenset) tags.add("6GBegrenset")
+        if (sykepengegrunnlag < toG) tags.add("SykepengegrunnlagUnder2G")
+        if (inngangsvilkårFraInfotrygd) tags.add("InngangsvilkårFraInfotrygd")
+        this.inngangsvilkårFraInfotrygd = inngangsvilkårFraInfotrygd
     }
 
     private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode)
     private val arbeidsgiverinntekter = mutableSetOf<Arbeidsgiverinntekt>()
-    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Double, skjønnsfastsatt: Double?, gjelder: Periode) {
-        arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt, skjønnsfastsatt, gjelder))
+    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode) {
+        arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder))
     }
 
     private class UtbetalingstidslinjeInfo(utbetalingstidslinje: Utbetalingstidslinje): UtbetalingstidslinjeVisitor {
@@ -147,7 +149,7 @@ internal class UtkastTilVedtakBuilder(
     internal fun sammenlign(utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent) {
         try {
             if (utkastTilVedtak == build.utkastTilVedtak) return
-            sikkerlogg.warn("Disse utkastene tilvedtak var jo ikke helt like:\nDagens:\n\t$utkastTilVedtak\nNytt:\n\t${build.utkastTilVedtak}")
+            sikkerlogg.warn("Disse utkastene til vedtak var jo ikke helt like:\nDagens:\n\t$utkastTilVedtak\nNytt:\n\t${build.utkastTilVedtak}")
         } catch (exception: Exception) {
             sikkerlogg.error("Nei, nå gikk det over stokk og styr med nytt utkast til vedtak:\nDagens:\n\t$utkastTilVedtak", exception)
         }
@@ -177,10 +179,6 @@ internal class UtkastTilVedtakBuilder(
 
             if (enArbeidsgiver) tags.add("EnArbeidsgiver")
             else tags.add("FlereArbeidsgivere")
-
-            if (!inngangsvilkårFraInfotrygd) {
-                if (seksGBegrenset) tags.add("6GBegrenset")
-            }
         }
 
         private val sykepengegrunnlagsfakta: PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta = when {
@@ -286,5 +284,8 @@ internal class UtkastTilVedtakBuilder(
 
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private val Inntekt.årlig get() = reflection { årlig, _, _, _ -> årlig }
+        private val Inntekt.månedlig get() = reflection { _, månedlig, _, _ -> månedlig }
+        private val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
     }
 }
