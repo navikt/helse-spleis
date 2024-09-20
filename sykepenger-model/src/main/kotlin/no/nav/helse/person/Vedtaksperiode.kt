@@ -926,7 +926,7 @@ internal class Vedtaksperiode private constructor(
         person.nyBehandling(event)
     }
 
-    override fun utkastTilVedtak(id: UUID, tags: Set<String>, `6G`: Double?) {
+    override fun utkastTilVedtak(id: UUID, tags: Set<String>, `6G`: Double?, builder: UtkastTilVedtakBuilder) {
         val event = PersonObserver.UtkastTilVedtakEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -936,6 +936,9 @@ internal class Vedtaksperiode private constructor(
             tags = tags,
             `6G`= `6G`
         )
+
+        builder.sammenlign(event)
+
         person.utkastTilVedtak(event)
     }
 

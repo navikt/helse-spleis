@@ -144,10 +144,24 @@ internal class UtkastTilVedtakBuilder(
         }
     }
 
+    internal fun sammenlign(utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent) {
+        try {
+            if (utkastTilVedtak == build.utkastTilVedtak) return
+            sikkerlogg.warn("Disse utkastene tilvedtak var jo ikke helt like:\nDagens:\n\t$utkastTilVedtak\nNytt:\n\t${build.utkastTilVedtak}")
+        } catch (exception: Exception) {
+            sikkerlogg.error("Nei, nå gikk det over stokk og styr med nytt utkast til vedtak:\nDagens:\n\t$utkastTilVedtak", exception)
+        }
+    }
+
     private inner class Build {
         private val arbeidsgiverinntekterPåSkjæringstidspunktet = arbeidsgiverinntekter.filter { it.gjelder.start == skjæringstidspunkt }
         private val skjønnsmessigeFastsattArbeidsgiverinntekterPåSkjæringstidspunktet = arbeidsgiverinntekterPåSkjæringstidspunktet.filter { it.skjønnsfastsatt != null }
         private val perioderMedSammeSkjæringstidspunkt = relevantePerioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }
+
+        // Til ettertanke: Nå tagges flere arbeidsgivere også ved tilkommen. Er det gæli?
+        // Men beholder den tolkningen om det er bøgg eller ei.
+        // Om vi her bytter til arbeidsgiverinntekterPåSkjæringstidspunktet.size så tar vi ikke med tilkommen.
+        private val enArbeidsgiver = arbeidsgiverinntekter.size == 1
 
         init {
             check(arbeidsgiverinntekterPåSkjæringstidspunktet.isNotEmpty()) {
@@ -160,6 +174,9 @@ internal class UtkastTilVedtakBuilder(
             else tags.add("Førstegangsbehandling")
 
             if (arbeidsgiverinntekter.any { it.gjelder.start > skjæringstidspunkt }) tags.add("TilkommenInntekt")
+
+            if (enArbeidsgiver) tags.add("EnArbeidsgiver")
+            else tags.add("FlereArbeidsgivere")
 
             if (!inngangsvilkårFraInfotrygd) {
                 if (seksGBegrenset) tags.add("6GBegrenset")
@@ -198,13 +215,6 @@ internal class UtkastTilVedtakBuilder(
             }
         }
 
-        // Til ettertanke: Nå tagges flere arbeidsgivere også ved tilkommen. Er det gæli?
-        // Men beholder den tolkningen om det er bøgg eller ei.
-        // Om vi her bytter til arbeidsgiverinntekterPåSkjæringstidspunktet.size så tar vi ikke med tilkommen.
-        private val inntektskilde =
-            if (arbeidsgiverinntekter.size == 1) "EN_ARBEIDSGIVER".also { tags.add("EnArbeidsgiver") }
-            else "FLERE_ARBEIDSGIVERE".also { tags.add("FlereArbeidsgivere") }
-
         val godkjenningsbehov = mapOf(
             "periodeFom" to periode.start.toString(),
             "periodeTom" to periode.endInclusive.toString(),
@@ -213,7 +223,7 @@ internal class UtkastTilVedtakBuilder(
             "periodetype" to periodetype,
             "førstegangsbehandling" to !erForlengelse,
             "utbetalingtype" to if (revurdering) "REVURDERING" else "UTBETALING",
-            "inntektskilde" to inntektskilde,
+            "inntektskilde" to if (enArbeidsgiver) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
             "orgnummereMedRelevanteArbeidsforhold" to arbeidsgiverinntekter.map { it.arbeidsgiver },
             "tags" to tags.sorted(),
             "kanAvvises" to kanForkastes,
@@ -261,6 +271,16 @@ internal class UtkastTilVedtakBuilder(
                     "skjønnsfastsatt" to sykepengegrunnlagsfakta.skjønnsfastsatt
                 )
             }
+        )
+
+        val utkastTilVedtak = PersonObserver.UtkastTilVedtakEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            behandlingId = behandlingId,
+            tags = tags,
+            `6G`= if (inngangsvilkårFraInfotrygd) null else seksG
         )
     }
 

@@ -685,7 +685,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 val godkjenningsbehov = builder.build()
                 utkastTilVedtakBuilder.sammenlign(godkjenningsbehov)
 
-                behandling.observatører.forEach { it.utkastTilVedtak(behandling.id, builder.tags(), builder.`6G`()) }
+                behandling.observatører.forEach { it.utkastTilVedtak(behandling.id, builder.tags(), builder.`6G`(), utkastTilVedtakBuilder) }
                 Aktivitet.Behov.godkjenning(hendelse, godkjenningsbehov)
             }
 
