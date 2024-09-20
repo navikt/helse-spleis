@@ -25,7 +25,8 @@ internal interface BehandlingObserver {
         dokumentsporing: Set<UUID>,
         utbetalingId: UUID,
         vedtakFattetTidspunkt: LocalDateTime,
-        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        behandling: Behandlinger.Behandling
     )
     fun vedtakAnnullert(hendelse: IAktivitetslogg, behandlingId: UUID)
     fun behandlingLukket(behandlingId: UUID)

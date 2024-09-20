@@ -140,18 +140,27 @@ internal class UtkastTilVedtakBuilder(
     internal fun sammenlign(godkjenningsbehov: Map<String, Any>) {
         try {
             if ("$godkjenningsbehov" == "${build.godkjenningsbehov}") return
-            sikkerlogg.warn("Disse godkjenningsbehovene var jo ikke helt like:\nDagens:\n\t$godkjenningsbehov\nNytt:\n\t${build.godkjenningsbehov}")
+            sikkerlogg.warn("UtkastTilVedtakBuilder: Disse godkjenningsbehovene var jo ikke helt like:\nDagens:\n\t$godkjenningsbehov\nNytt:\n\t${build.godkjenningsbehov}")
         } catch (exception: Exception) {
-            sikkerlogg.error("Nei, nå gikk det over stokk og styr med nytt godkjenningsbehov:\nDagens:\n\t$godkjenningsbehov", exception)
+            sikkerlogg.error("UtkastTilVedtakBuilder: Nei, nå gikk det over stokk og styr med nytt godkjenningsbehov:\nDagens:\n\t$godkjenningsbehov", exception)
         }
     }
 
     internal fun sammenlign(utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent) {
         try {
             if (utkastTilVedtak == build.utkastTilVedtak) return
-            sikkerlogg.warn("Disse utkastene til vedtak var jo ikke helt like:\nDagens:\n\t$utkastTilVedtak\nNytt:\n\t${build.utkastTilVedtak}")
+            sikkerlogg.warn("UtkastTilVedtakBuilder: Disse utkastene til vedtak var jo ikke helt like:\nDagens:\n\t$utkastTilVedtak\nNytt:\n\t${build.utkastTilVedtak}")
         } catch (exception: Exception) {
-            sikkerlogg.error("Nei, nå gikk det over stokk og styr med nytt utkast til vedtak:\nDagens:\n\t$utkastTilVedtak", exception)
+            sikkerlogg.error("UtkastTilVedtakBuilder: Nei, nå gikk det over stokk og styr med nytt utkast til vedtak:\nDagens:\n\t$utkastTilVedtak", exception)
+        }
+    }
+    internal fun sammenlign(avsluttetMedVedtak: PersonObserver.AvsluttetMedVedtakEvent) {
+        try {
+            val nyttAvsluttetMedVedtak = build.avsluttetMedVedtak(avsluttetMedVedtak.vedtakFattetTidspunkt)
+            if (avsluttetMedVedtak == nyttAvsluttetMedVedtak) return
+            sikkerlogg.warn("UtkastTilVedtakBuilder: Disse avsluttet med vedtak var jo ikke helt like:\nDagens:\n\t$avsluttetMedVedtak\nNytt:\n\t${nyttAvsluttetMedVedtak}")
+        } catch (exception: Exception) {
+            sikkerlogg.error("UtkastTilVedtakBuilder: Nei, nå gikk det over stokk og styr med nytt avsluttet med vedtak:\nDagens:\n\t$avsluttetMedVedtak", exception)
         }
     }
 
@@ -279,6 +288,61 @@ internal class UtkastTilVedtakBuilder(
             behandlingId = behandlingId,
             tags = tags,
             `6G`= if (inngangsvilkårFraInfotrygd) null else seksG
+        )
+
+        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime) = PersonObserver.AvsluttetMedVedtakEvent(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = arbeidsgiver,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            periode = periode,
+            hendelseIder = hendelseIder,
+            skjæringstidspunkt = skjæringstidspunkt,
+            sykepengegrunnlag = sykepengegrunnlag,
+            beregningsgrunnlag = beregningsgrunnlag.årlig,
+            // Til ettertanke: Den var jo uventet, men er jo slik det har vært 🤷‍
+            // Til ettertanke: Denne hentet data fra sykepengegrunnlagsfakta som har to desimaler
+            omregnetÅrsinntektPerArbeidsgiver = when {
+                inngangsvilkårFraInfotrygd -> emptyMap()
+                else -> arbeidsgiverinntekterPåSkjæringstidspunktet
+                    .associateBy { it.arbeidsgiver }
+                    .mapValues { (_, arbeidsgiver) -> arbeidsgiver.skjønnsfastsatt?.toDesimaler ?: arbeidsgiver.omregnedeÅrsinntekt.toDesimaler
+                }
+            },
+            inntekt = beregningsgrunnlag.månedlig, // Til ettertanke: What? 👀
+            utbetalingId = utbetalingId, // Til ettertanke: Hvorfor er denne optional?
+            sykepengegrunnlagsbegrensning = when {
+                inngangsvilkårFraInfotrygd -> "VURDERT_I_INFOTRYGD"
+                seksGBegrenset -> "ER_6G_BEGRENSET"
+                else -> "ER_IKKE_6G_BEGRENSET"
+            },
+            vedtakFattetTidspunkt = vedtakFattet,
+            // Til ettertanke: Akkurat i avsluttet i vedtak blir beløp i sykepengegrunnlagsfakta avrundet til to desimaler.
+            // TODO: Bruke PersonObserver.UtkastTilVedtakEvent-klassene istedenfor denne teite mappingen
+            sykepengegrunnlagsfakta = when (val fakta = sykepengegrunnlagsfakta) {
+                is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> PersonObserver.AvsluttetMedVedtakEvent.FastsattIInfotrygd(
+                    omregnetÅrsinntekt = totalOmregnetÅrsinntekt.toDesimaler
+                )
+                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil(
+                    omregnetÅrsinntekt = fakta.omregnetÅrsinntekt.toDesimaler,
+                    `6G`= fakta.`6G`.toDesimaler,
+                    arbeidsgivere = fakta.arbeidsgivere.map { PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil.Arbeidsgiver(
+                        arbeidsgiver = it.arbeidsgiver,
+                        omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler,
+                        skjønnsfastsatt = null
+                    )}
+                )
+                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil(
+                    omregnetÅrsinntekt = fakta.omregnetÅrsinntekt.toDesimaler,
+                    `6G`= fakta.`6G`.toDesimaler,
+                    arbeidsgivere = fakta.arbeidsgivere.map { PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil.Arbeidsgiver(
+                        arbeidsgiver = it.arbeidsgiver,
+                        omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler,
+                        skjønnsfastsatt = it.skjønnsfastsatt.toDesimaler
+                    )}
+                )
+            }
         )
     }
 

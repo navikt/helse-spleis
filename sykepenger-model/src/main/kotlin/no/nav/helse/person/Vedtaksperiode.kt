@@ -862,15 +862,23 @@ internal class Vedtaksperiode private constructor(
         dokumentsporing: Set<UUID>,
         utbetalingId: UUID,
         vedtakFattetTidspunkt: LocalDateTime,
-        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
+        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        behandling: Behandlinger.Behandling
     ) {
-        val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id,
-            behandlingId, periode, hendelseIder, skjæringstidspunkt)
-        arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
+        val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id, behandlingId, periode, hendelseIder, skjæringstidspunkt)
+
+        val utkastTilVedtakBuilder = utkastTilVedtakBuilder()
+        // Til ettertanke: Her er vi aldri innom "behandlinger"-nivå, så får ikke "Grunnbeløpsregulering"-tag, men AvsluttetMedVedtak har jo ikke tags nå uansett.
+        behandling.berik(utkastTilVedtakBuilder)
+        // Til ettertanke: AvsluttetMedVedtak har alle hendelseId'er ever på vedtaksperioden, mens godkjenningsbehov/utkast_til_vedtak har kun behandlingens
+        utkastTilVedtakBuilder.hendelseIder(hendelseIder)
+
         builder.utbetalingId(utbetalingId)
         builder.utbetalingVurdert(vedtakFattetTidspunkt)
         vilkårsgrunnlag.build(builder)
-        person.avsluttetMedVedtak(builder.result())
+        val avsluttetMedVedtak = builder.result()
+        utkastTilVedtakBuilder.sammenlign(avsluttetMedVedtak)
+        person.avsluttetMedVedtak(avsluttetMedVedtak)
         person.gjenopptaBehandling(hendelse)
     }
 

@@ -689,6 +689,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 Aktivitet.Behov.godkjenning(hendelse, godkjenningsbehov)
             }
 
+            internal fun berik(builder: UtkastTilVedtakBuilder) {
+                checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved utkast til vedtak" }
+                checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved utkast til vedtak" }
+                builder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling)
+                grunnlagsdata.berik(builder)
+            }
+
             internal fun dto(): BehandlingendringUtDto {
                 val vilkårsgrunnlagUtDto = this.grunnlagsdata?.dto()
                 val utbetalingUtDto = this.utbetaling?.dto()
@@ -1012,7 +1019,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
         private fun vedtakIverksatt(hendelse: IAktivitetslogg) {
             check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
-            observatører.forEach { it.vedtakIverksatt(hendelse, id, avsluttet!!, periode, dokumentsporing.ider(), utbetaling()!!.id, vedtakFattet!!, gjeldende.grunnlagsdata!!) }
+            observatører.forEach { it.vedtakIverksatt(hendelse, id, avsluttet!!, periode, dokumentsporing.ider(), utbetaling()!!.id, vedtakFattet!!, gjeldende.grunnlagsdata!!, this) }
         }
 
         private fun avsluttetUtenVedtak(hendelse: IAktivitetslogg) {
@@ -1050,6 +1057,11 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             val perioderMedSammeSkjæringstidspunkt = behandlingerMedSammeSkjæringstidspunkt.map { Triple(it.first, it.second.id, it.second.periode) }
             builder.behandlingId(id).periode(periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
             gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt, arbeidsgiverperiode, harPeriodeRettFør, gregulering, builder)
+        }
+
+        internal fun berik(builder: UtkastTilVedtakBuilder) {
+            builder.behandlingId(id).periode(periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
+            gjeldende.berik(builder)
         }
 
         fun annuller(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, behandlinger: List<Behandling>): Utbetaling? {
