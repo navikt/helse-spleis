@@ -11,6 +11,8 @@ import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.aktivitetslogg.Aktivitet
+import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test
 
@@ -50,6 +52,7 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             ))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_IV_10, 1.vedtaksperiode.filter())
             assertUtbetalingsbeløp(1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 0,
                 forventetArbeidsgiverRefusjonsbeløp = 0,
