@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.INNTEKTSMELDING
@@ -20,7 +19,8 @@ class Inntektsmelding internal constructor(
     dato: LocalDate,
     hendelseId: UUID,
     beløp: Inntekt,
-    tidsstempel: LocalDateTime
+    tidsstempel: LocalDateTime,
+    kilde: Kilde = Kilde.Arbeidsgiver
 ) : AvklarbarSykepengegrunnlag(id, hendelseId, dato, beløp, tidsstempel) {
     internal constructor(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime = LocalDateTime.now()) : this(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel)
 
@@ -102,6 +102,11 @@ class Inntektsmelding internal constructor(
             beløp = beløp.dto(),
             tidsstempel = tidsstempel
         )
+
+    internal enum class Kilde {
+        Arbeidsgiver,
+        AOrdningen
+    }
 
     internal companion object {
         internal fun gjenopprett(dto: InntektsopplysningInnDto.InntektsmeldingDto): Inntektsmelding {

@@ -60,3 +60,5 @@ spec:
     value: "true"
   - name: TILKOMMEN_ARBEIDSGIVER
     value: "true"
+  - name: INNTEKTSMELDING_SOM_IKKEKOMMER
+    value: "true"

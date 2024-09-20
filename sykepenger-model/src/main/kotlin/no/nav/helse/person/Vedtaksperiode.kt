@@ -81,6 +81,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForOpptjeningsvurdering
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlag
+import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.inntekterForSykepengegrunnlagForArbeidsgiver
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.institusjonsopphold
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
@@ -712,6 +713,13 @@ internal class Vedtaksperiode private constructor(
         inntekterForOpptjeningsvurdering(hendelse, skjæringstidspunkt, beregningSlutt, beregningSlutt)
         arbeidsforhold(hendelse, skjæringstidspunkt)
         medlemskap(hendelse, skjæringstidspunkt, periode.start, periode.endInclusive)
+    }
+
+    private fun trengerInntektFraSkatt(hendelse: IAktivitetslogg) {
+        if (Toggle.InntektsmeldingSomIkkeKommer.enabled) {
+            val beregningSlutt = YearMonth.from(skjæringstidspunkt).minusMonths(1)
+            inntekterForSykepengegrunnlagForArbeidsgiver(hendelse, skjæringstidspunkt, organisasjonsnummer, beregningSlutt.minusMonths(2), beregningSlutt)
+        }
     }
 
     private fun sjekkTrengerArbeidsgiveropplysninger(hendelse:IAktivitetslogg): Boolean {
@@ -1801,6 +1809,7 @@ internal class Vedtaksperiode private constructor(
             }
             if (påminnelse.harVentet3MånederEllerMer()) {
                 påminnelse.info("Her ønsker vi å hente inntekt fra skatt")
+                return vedtaksperiode.trengerInntektFraSkatt(påminnelse)
             }
             if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(påminnelse)) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()

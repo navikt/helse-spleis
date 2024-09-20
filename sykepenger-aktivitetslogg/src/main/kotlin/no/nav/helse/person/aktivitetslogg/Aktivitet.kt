@@ -188,6 +188,25 @@ sealed class Aktivitet(
                 )
             }
 
+            fun inntekterForSykepengegrunnlagForArbeidsgiver(
+                aktivitetslogg: IAktivitetslogg,
+                skjæringstidspunkt: LocalDate,
+                organisasjonsnummer: String,
+                beregningStart: YearMonth,
+                beregningSlutt: YearMonth
+            ) {
+                aktivitetslogg.behov(
+                    Behovtype.InntekterForSykepengegrunnlagForArbeidsgiver,
+                    "Trenger inntekter for sykepengegrunnlag for arbeidsgiver",
+                    mapOf(
+                        "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+                        "organisasjonsnummer" to organisasjonsnummer.toString(),
+                        "beregningStart" to beregningStart.toString(),
+                        "beregningSlutt" to beregningSlutt.toString()
+                    )
+                )
+            }
+
             fun inntekterForOpptjeningsvurdering(
                 aktivitetslogg: IAktivitetslogg,
                 skjæringstidspunkt: LocalDate,
@@ -263,6 +282,7 @@ sealed class Aktivitet(
             Simulering,
             Utbetaling,
             InntekterForSykepengegrunnlag,
+            InntekterForSykepengegrunnlagForArbeidsgiver,
             InntekterForOpptjeningsvurdering,
 
             Dagpenger,
