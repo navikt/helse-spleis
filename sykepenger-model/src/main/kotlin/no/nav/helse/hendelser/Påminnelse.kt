@@ -1,14 +1,12 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDateTime
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender.SYSTEM
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Revurderingseventyr
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 
 class Påminnelse(
@@ -50,6 +48,8 @@ class Påminnelse(
             info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
     }
+
+    internal fun harVentet3MånederEllerMer() = nå.minusMonths(3) >=  tilstandsendringstidspunkt
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(

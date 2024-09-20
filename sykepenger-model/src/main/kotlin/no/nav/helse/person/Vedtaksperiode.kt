@@ -1799,6 +1799,9 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.behandlinger.forkastUtbetaling(påminnelse)
                 return vurderOmKanGåVidere(vedtaksperiode, påminnelse)
             }
+            if (påminnelse.harVentet3MånederEllerMer()) {
+                påminnelse.info("Her ønsker vi å hente inntekt fra skatt")
+            }
             if (vedtaksperiode.sjekkTrengerArbeidsgiveropplysninger(påminnelse)) {
                 vedtaksperiode.sendTrengerArbeidsgiveropplysninger()
             }
