@@ -522,19 +522,26 @@ internal class ArbeidsgiverHendelsefabrikk(
             fødselsnummer = personidentifikator.toString()
         )
 
-    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime, reberegning: Boolean = false) =
+    internal fun lagPåminnelse(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        tilstandsendringstidspunkt: LocalDateTime,
+        nåtidspunkt: LocalDateTime = LocalDateTime.now(),
+        reberegning: Boolean = false
+    ) =
         Påminnelse(
-            UUID.randomUUID(),
-            aktørId,
-            personidentifikator.toString(),
-            organisasjonsnummer,
-            vedtaksperiodeId.toString(),
-            0,
-            tilstand,
-            tilstandsendringstidspunkt,
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            opprettet = LocalDateTime.now(),
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = personidentifikator.toString(),
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            antallGangerPåminnet = 0,
+            tilstand = tilstand,
+            tilstandsendringstidspunkt = tilstandsendringstidspunkt,
+            nå = nåtidspunkt,
+            påminnelsestidspunkt = nåtidspunkt,
+            nestePåminnelsestidspunkt = nåtidspunkt,
+            opprettet = nåtidspunkt,
             ønskerReberegning = reberegning
         )
 

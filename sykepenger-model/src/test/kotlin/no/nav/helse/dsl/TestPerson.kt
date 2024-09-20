@@ -369,8 +369,14 @@ internal class TestPerson(
             }
         }
 
-        internal fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(), reberegning: Boolean = false) {
-            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, reberegning = reberegning)
+        internal fun håndterPåminnelse(
+            vedtaksperiodeId: UUID,
+            tilstand: TilstandType,
+            tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
+            nåtidspunkt: LocalDateTime = LocalDateTime.now(),
+            reberegning: Boolean = false
+        ) {
+            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt, nåtidspunkt, reberegning = reberegning)
                 .håndter(Person::håndter)
         }
 

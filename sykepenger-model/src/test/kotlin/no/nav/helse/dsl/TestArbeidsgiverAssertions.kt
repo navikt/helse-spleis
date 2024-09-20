@@ -2,11 +2,13 @@ package no.nav.helse.dsl
 
 import java.util.UUID
 import no.nav.helse.erHelg
+import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -104,6 +106,12 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     internal fun assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
         val errors = collectFunksjonelleFeil(*filtre)
         assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
+    }
+    internal fun assertIngenBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {
+        assertTrue(personInspektør.aktivitetslogg.etterspurteBehov(vedtaksperiode).none { it.type == behovtype } )
+    }
+    internal fun assertBehov(vedtaksperiode: UUID, behovtype: Aktivitet.Behov.Behovtype) {
+        assertTrue(personInspektør.aktivitetslogg.etterspurteBehov(vedtaksperiode).any { it.type == behovtype } )
     }
 
     private fun funksjonelleFeilFørOgEtter(block: () -> Unit): Pair<Map<String,Int>, Map<String, Int>>{

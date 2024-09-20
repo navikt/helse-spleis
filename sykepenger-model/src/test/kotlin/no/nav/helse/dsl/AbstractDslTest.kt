@@ -30,6 +30,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.serde.assertPersonEquals
 import no.nav.helse.serde.tilPersonData
@@ -210,7 +211,10 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertIngenInfo(forventet, *filtre)
     protected fun TestPerson.TestArbeidsgiver.assertIngenInfoSomInneholder(forventet: String, vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertIngenInfoSomInneholder(forventet, *filtre)
-
+    protected fun TestPerson.TestArbeidsgiver.assertIngenBehov(vedtaksperiodeId: UUID, behovtype: Aktivitet.Behov.Behovtype) =
+        testArbeidsgiverAsserter.assertIngenBehov(vedtaksperiodeId, behovtype)
+    protected fun TestPerson.TestArbeidsgiver.assertBehov(vedtaksperiodeId: UUID, behovtype: Aktivitet.Behov.Behovtype) =
+        testArbeidsgiverAsserter.assertBehov(vedtaksperiodeId, behovtype)
     protected fun nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
         testperson.nyPeriode(periode, *orgnummer, grad = grad)
     }
