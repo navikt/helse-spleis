@@ -112,14 +112,26 @@ class Oppdrag private constructor(
         tidsstempel = LocalDateTime.now()
     )
 
+    fun detaljer(): OppdragDetaljer {
+        val linjene = map { it.detaljer() }
+        return OppdragDetaljer(
+            fagsystemId = fagsystemId,
+            fagområde = fagområde.verdi,
+            mottaker = mottaker,
+            nettoBeløp = nettoBeløp,
+            stønadsdager = stønadsdager(),
+            fom = linjene.firstOrNull()?.fom ?: LocalDate.MIN,
+            tom = linjene.lastOrNull()?.tom ?: LocalDate.MIN,
+            linjer = linjene
+        )
+    }
+
     fun accept(visitor: OppdragVisitor) {
         visitor.preVisitOppdrag(
             this,
             fagområde,
             fagsystemId,
             mottaker,
-            stønadsdager(),
-            totalbeløp(),
             nettoBeløp,
             tidsstempel,
             endringskode,
@@ -135,8 +147,6 @@ class Oppdrag private constructor(
             fagområde,
             fagsystemId,
             mottaker,
-            stønadsdager(),
-            totalbeløp(),
             nettoBeløp,
             tidsstempel,
             endringskode,

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
@@ -190,8 +189,6 @@ internal class TestArbeidsgiverInspektør(
         fagområde: Fagområde,
         fagsystemId: String,
         mottaker: String,
-        stønadsdager: Int,
-        totalBeløp: Int,
         nettoBeløp: Int,
         tidsstempel: LocalDateTime,
         endringskode: Endringskode,
@@ -204,7 +201,7 @@ internal class TestArbeidsgiverInspektør(
         if (inFeriepengeutbetaling) feriepengeoppdrag.add(Feriepengeoppdrag(oppdrag.fagsystemId()))
 
         if (oppdrag != arbeidsgiverOppdrag.lastOrNull()) return
-        this.totalBeløp.add(totalBeløp)
+        this.totalBeløp.add(oppdrag.totalbeløp())
         this.nettoBeløp.add(nettoBeløp)
     }
 
@@ -212,8 +209,6 @@ internal class TestArbeidsgiverInspektør(
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
-        stønadsdager: Int,
-        totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
         grad: Int?,
@@ -270,7 +265,6 @@ internal class TestArbeidsgiverInspektør(
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,
@@ -304,7 +298,6 @@ internal class TestArbeidsgiverInspektør(
         maksdato: LocalDate,
         forbrukteSykedager: Int?,
         gjenståendeSykedager: Int?,
-        stønadsdager: Int,
         overføringstidspunkt: LocalDateTime?,
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?,

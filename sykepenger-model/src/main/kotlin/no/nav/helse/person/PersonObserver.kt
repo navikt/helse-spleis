@@ -14,6 +14,7 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.OppdragDetaljer
 import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
@@ -319,56 +320,28 @@ interface PersonObserver {
             )
 
             companion object {
-                fun mapOppdrag(oppdrag: Oppdrag): OppdragEventDetaljer {
-                    val builder = Builder()
-                    oppdrag.accept(builder)
-                    return builder.build()
-                }
-            }
-            private class Builder : OppdragVisitor {
-                private lateinit var dto: OppdragEventDetaljer
-                private val linjene = mutableListOf<OppdragEventLinjeDetaljer>()
-
-                fun build() = dto
-
-                override fun visitUtbetalingslinje(
-                    linje: Utbetalingslinje,
-                    fom: LocalDate,
-                    tom: LocalDate,
-                    stønadsdager: Int,
-                    totalbeløp: Int,
-                    satstype: Satstype,
-                    beløp: Int?,
-                    grad: Int?,
-                    delytelseId: Int,
-                    refDelytelseId: Int?,
-                    refFagsystemId: String?,
-                    endringskode: Endringskode,
-                    datoStatusFom: LocalDate?,
-                    statuskode: String?,
-                    klassekode: Klassekode
-                ) {
-                    linjene.add(OppdragEventLinjeDetaljer(fom, tom, beløp ?: error("mangler beløp for linje"), grad?.toDouble() ?: error("mangler grad for linje"), stønadsdager, totalbeløp, statuskode))
-                }
-
-                override fun postVisitOppdrag(
-                    oppdrag: Oppdrag,
-                    fagområde: Fagområde,
-                    fagsystemId: String,
-                    mottaker: String,
-                    stønadsdager: Int,
-                    totalBeløp: Int,
-                    nettoBeløp: Int,
-                    tidsstempel: LocalDateTime,
-                    endringskode: Endringskode,
-                    avstemmingsnøkkel: Long?,
-                    status: Oppdragstatus?,
-                    overføringstidspunkt: LocalDateTime?,
-                    erSimulert: Boolean,
-                    simuleringsResultat: SimuleringResultatDto?
-                ) {
-                    dto = OppdragEventDetaljer(fagsystemId, fagområde.verdi, mottaker, nettoBeløp, stønadsdager, linjene.firstOrNull()?.fom ?: LocalDate.MIN, linjene.lastOrNull()?.tom ?: LocalDate.MIN, linjene)
-                }
+                fun mapOppdrag(oppdrag: Oppdrag) = mapOppdragdetaljer(oppdrag.detaljer())
+                private fun mapOppdragdetaljer(detaljer: OppdragDetaljer) =
+                    OppdragEventDetaljer(
+                        fagsystemId = detaljer.fagsystemId,
+                        fagområde = detaljer.fagområde,
+                        mottaker = detaljer.mottaker,
+                        nettoBeløp = detaljer.nettoBeløp,
+                        stønadsdager = detaljer.stønadsdager,
+                        fom = detaljer.fom,
+                        tom = detaljer.tom,
+                        linjer = detaljer.linjer.map {
+                            OppdragEventLinjeDetaljer(
+                                fom = it.fom,
+                                tom = it.tom,
+                                sats = it.sats,
+                                grad = it.grad ?: error("mangler grad for linje"),
+                                stønadsdager = it.stønadsdager,
+                                totalbeløp = it.totalbeløp,
+                                statuskode = it.statuskode
+                            )
+                        }
+                    )
             }
         }
     }
@@ -456,56 +429,21 @@ interface PersonObserver {
             )
 
             companion object {
-                fun mapOppdrag(oppdrag: Oppdrag): OppdragEventDetaljer {
-                    val builder = Builder()
-                    oppdrag.accept(builder)
-                    return builder.build()
-                }
-            }
-            private class Builder : OppdragVisitor {
-                private lateinit var dto: OppdragEventDetaljer
-                private val linjene = mutableListOf<OppdragEventLinjeDetaljer>()
-
-                fun build() = dto
-
-                override fun visitUtbetalingslinje(
-                    linje: Utbetalingslinje,
-                    fom: LocalDate,
-                    tom: LocalDate,
-                    stønadsdager: Int,
-                    totalbeløp: Int,
-                    satstype: Satstype,
-                    beløp: Int?,
-                    grad: Int?,
-                    delytelseId: Int,
-                    refDelytelseId: Int?,
-                    refFagsystemId: String?,
-                    endringskode: Endringskode,
-                    datoStatusFom: LocalDate?,
-                    statuskode: String?,
-                    klassekode: Klassekode
-                ) {
-                    linjene.add(OppdragEventLinjeDetaljer(fom, tom, totalbeløp))
-                }
-
-                override fun postVisitOppdrag(
-                    oppdrag: Oppdrag,
-                    fagområde: Fagområde,
-                    fagsystemId: String,
-                    mottaker: String,
-                    stønadsdager: Int,
-                    totalBeløp: Int,
-                    nettoBeløp: Int,
-                    tidsstempel: LocalDateTime,
-                    endringskode: Endringskode,
-                    avstemmingsnøkkel: Long?,
-                    status: Oppdragstatus?,
-                    overføringstidspunkt: LocalDateTime?,
-                    erSimulert: Boolean,
-                    simuleringsResultat: SimuleringResultatDto?
-                ) {
-                    dto = OppdragEventDetaljer(fagsystemId, mottaker, linjene.firstOrNull()?.fom ?: LocalDate.MIN, linjene.lastOrNull()?.tom ?: LocalDate.MIN, linjene)
-                }
+                fun mapOppdrag(oppdrag: Oppdrag) = mapDetaljer(oppdrag.detaljer())
+                private fun mapDetaljer(detaljer: OppdragDetaljer) =
+                    OppdragEventDetaljer(
+                        fagsystemId = detaljer.fagsystemId,
+                        mottaker = detaljer.mottaker,
+                        fom = detaljer.fom,
+                        tom = detaljer.tom,
+                        linjer = detaljer.linjer.map {
+                            OppdragEventLinjeDetaljer(
+                                fom = it.fom,
+                                tom = it.tom,
+                                totalbeløp = it.totalbeløp
+                            )
+                        }
+                    )
             }
         }
     }

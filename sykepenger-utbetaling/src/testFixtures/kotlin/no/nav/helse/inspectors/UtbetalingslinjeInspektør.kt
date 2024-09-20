@@ -51,8 +51,6 @@ class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : OppdragVi
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
-        stønadsdager: Int,
-        totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
         grad: Int?,

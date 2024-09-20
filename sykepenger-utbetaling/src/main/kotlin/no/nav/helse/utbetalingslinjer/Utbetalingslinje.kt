@@ -106,13 +106,22 @@ class Utbetalingslinje(
 
     override fun toString() = "$fom til $tom $endringskode $grad ${datoStatusFom?.let { "opphører fom $it" }}"
 
+    internal fun detaljer() =
+        OppdragDetaljer.LinjeDetaljer(
+            fom = fom,
+            tom = tom,
+            sats = beløp ?: error("mangler beløp for linje"),
+            grad = grad?.toDouble(),
+            stønadsdager = stønadsdager(),
+            totalbeløp = totalbeløp(),
+            statuskode = statuskode
+        )
+
     fun accept(visitor: UtbetalingslinjeVisitor) {
         visitor.visitUtbetalingslinje(
             this,
             fom,
             tom,
-            stønadsdager(),
-            totalbeløp(),
             satstype,
             beløp,
             grad,
@@ -295,8 +304,6 @@ interface UtbetalingslinjeVisitor {
         linje: Utbetalingslinje,
         fom: LocalDate,
         tom: LocalDate,
-        stønadsdager: Int,
-        totalbeløp: Int,
         satstype: Satstype,
         beløp: Int?,
         grad: Int?,
