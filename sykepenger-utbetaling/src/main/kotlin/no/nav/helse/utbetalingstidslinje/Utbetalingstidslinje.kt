@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.util.SortedMap
 import no.nav.helse.dto.BegrunnelseDto
 import no.nav.helse.dto.deserialisering.UtbetalingstidslinjeInnDto
 import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
@@ -9,6 +10,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
+import no.nav.helse.nesteDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNav
@@ -24,18 +26,17 @@ import no.nav.helse.økonomi.Økonomi
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
  */
 
-class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Collection<Utbetalingsdag> by utbetalingsdager {
-    private val utbetalingsdager = utbetalingsdager.toList()
-    private val førsteDato get() = utbetalingsdager.first().dato
-    private val sisteDato get() = utbetalingsdager.last().dato
+class Utbetalingstidslinje private constructor(private val utbetalingsdager: SortedMap<LocalDate, Utbetalingsdag>): Collection<Utbetalingsdag> by utbetalingsdager.values {
 
-    constructor() : this(mutableListOf())
+    private val førsteDato get() = utbetalingsdager.firstKey()
+    private val sisteDato get() = utbetalingsdager.lastKey()
 
-    init {
+    constructor(utbetalingsdager: Collection<Utbetalingsdag>) : this(utbetalingsdager.associateBy { it.dato }.toSortedMap()) {
         check(utbetalingsdager.distinctBy { it.dato }.size == utbetalingsdager.size) {
             "Utbetalingstidslinjen består av minst én dato som pekes på av mer enn én Utbetalingsdag"
         }
     }
+    constructor() : this(mutableListOf())
 
     companion object {
         fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
@@ -68,7 +69,7 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
     }
 
     fun er6GBegrenset(): Boolean {
-        return utbetalingsdager.any {
+        return utbetalingsdager.any { (_, it) ->
             it.økonomi.er6GBegrenset()
         }
     }
@@ -78,14 +79,14 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
             true -> null
             else -> this.periode()
         })
-        utbetalingsdager.forEach { it.accept(visitor) }
+        utbetalingsdager.forEach { (_, it)  -> it.accept(visitor) }
         visitor.postVisitUtbetalingstidslinje()
     }
 
     private fun avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>): Utbetalingstidslinje {
         if (begrunnelser.isEmpty()) return this
-        return Utbetalingstidslinje(utbetalingsdager.map { utbetalingsdag ->
-            val avvistDag = if (utbetalingsdag.dato in avvistePerioder) utbetalingsdag.avvis(begrunnelser) else null
+        return Utbetalingstidslinje(utbetalingsdager.map { (dato, utbetalingsdag) ->
+            val avvistDag = if (dato in avvistePerioder) utbetalingsdag.avvis(begrunnelser) else null
             avvistDag ?: utbetalingsdag
         })
     }
@@ -96,8 +97,8 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
         val tidligsteDato = this.tidligsteDato(other)
         val sisteDato = this.sisteDato(other)
         val nyeDager = (tidligsteDato til sisteDato).map { dag ->
-            val venstre = this.utbetalingsdager.firstOrNull { it.dato == dag }
-            val høyre = other.utbetalingsdager.firstOrNull { it.dato == dag }
+            val venstre = this.utbetalingsdager[dag]
+            val høyre = other.utbetalingsdager[dag]
             when {
                 venstre == null && høyre == null -> when (dag.erHelg()) {
                     true -> Fridag(dag, Økonomi.ikkeBetalt())
@@ -113,7 +114,7 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
 
     fun harUtbetalingsdager() = sykepengeperiode() != null
 
-    override fun iterator() = this.utbetalingsdager.iterator()
+    override fun iterator() = this.utbetalingsdager.values.iterator()
 
     private fun tidligsteDato(other: Utbetalingstidslinje) =
         minOf(this.førsteDato, other.førsteDato)
@@ -124,25 +125,26 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
     fun periode() = Periode(førsteDato, sisteDato)
 
     fun sykepengeperiode(): Periode? {
-        val første = utbetalingsdager.firstOrNull { it is NavDag }?.dato ?: return null
-        val siste = utbetalingsdager.last { it is NavDag }.dato
+        val første = utbetalingsdager.values.firstOrNull { it is NavDag }?.dato ?: return null
+        val siste = utbetalingsdager.values.last { it is NavDag }.dato
         return første til siste
     }
 
     fun subset(periode: Periode): Utbetalingstidslinje {
         if (isEmpty()) return Utbetalingstidslinje()
         if (periode == periode()) return this
-        return Utbetalingstidslinje(utbetalingsdager.filter { it.dato in periode }.toMutableList())
+        val subMap = utbetalingsdager.subMap(periode.start, periode.endInclusive.nesteDag)
+        return Utbetalingstidslinje(subMap.toSortedMap())
     }
 
-    fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
+    fun fraOgMed(fom: LocalDate) = Utbetalingstidslinje(utbetalingsdager.tailMap(fom).toSortedMap())
+    fun fremTilOgMed(sisteDato: LocalDate) = Utbetalingstidslinje(utbetalingsdager.headMap(sisteDato.nesteDag).toSortedMap())
 
     operator fun get(dato: LocalDate) =
-        if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt())
-        else utbetalingsdager.first { it.dato == dato }
+        utbetalingsdager[dato] ?: UkjentDag(dato, Økonomi.ikkeBetalt())
 
     override fun toString(): String {
-        return utbetalingsdager.joinToString(separator = "") {
+        return utbetalingsdager.values.joinToString(separator = "") {
             (if (it.dato.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
                 when (it::class) {
                     NavDag::class -> "N"
@@ -210,7 +212,7 @@ class Utbetalingstidslinje(utbetalingsdager: Collection<Utbetalingsdag>) : Colle
     private val Utbetalingsdag.avslag get() = this is AvvistDag || this is ForeldetDag
     fun behandlingsresultat(periode: Periode): String {
         val relevantUtbetalingstidslinje = this.subset(periode)
-        val relevanteDager = relevantUtbetalingstidslinje.utbetalingsdager.filter { it is NavDag || it.avslag }
+        val relevanteDager = relevantUtbetalingstidslinje.utbetalingsdager.values.filter { it is NavDag || it.avslag }
         return when {
             relevanteDager.isEmpty() -> "Avslag"
             relevanteDager.all { it.avslag } -> "Avslag"

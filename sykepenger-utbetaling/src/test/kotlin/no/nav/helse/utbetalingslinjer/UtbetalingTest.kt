@@ -3,7 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.dto.SimuleringResultatDto
@@ -29,7 +28,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
 import no.nav.helse.utbetalingslinjer.Endringskode.NY
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.ANNULLERT
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus.FORKASTET
@@ -501,7 +499,7 @@ internal class UtbetalingTest {
     @Test
     fun `forlenge en utbetaling uten utbetaling`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV).betale()
-        val første = opprettUtbetaling(tidslinje.kutt(16.januar))
+        val første = opprettUtbetaling(tidslinje.fremTilOgMed(16.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertEquals(første.inspektør.korrelasjonsId, andre.inspektør.korrelasjonsId)
@@ -540,8 +538,8 @@ internal class UtbetalingTest {
             startDato = 1.januar(2020)
         ).betale()
 
-        val tidligere = opprettUtbetaling(tidslinje.kutt(19.januar(2020)))
-        val utbetaling = opprettUtbetaling(tidslinje.kutt(24.januar(2020)), tidligere = tidligere)
+        val tidligere = opprettUtbetaling(tidslinje.fremTilOgMed(19.januar(2020)))
+        val utbetaling = opprettUtbetaling(tidslinje.fremTilOgMed(24.januar(2020)), tidligere = tidligere)
 
         assertEquals(tidligere.inspektør.korrelasjonsId, utbetaling.inspektør.korrelasjonsId)
         utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.also { inspektør ->
@@ -610,8 +608,8 @@ internal class UtbetalingTest {
     @Test
     fun `kan forkaste utbetalt utbetaling dersom den er annullert`() {
         val tidslinje = tidslinjeOf(16.AP, 32.NAV).betale()
-        val utbetaling = opprettUtbetaling(tidslinje.kutt(31.januar))
-        val annullert = opprettUtbetaling(tidslinje.kutt(17.februar), tidligere = utbetaling).let {
+        val utbetaling = opprettUtbetaling(tidslinje.fremTilOgMed(31.januar))
+        val annullert = opprettUtbetaling(tidslinje.fremTilOgMed(17.februar), tidligere = utbetaling).let {
             annuller(it)
         } ?: fail { "Kunne ikke annullere" }
         assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullert)))
@@ -681,7 +679,7 @@ internal class UtbetalingTest {
     @Test
     fun `annullere utbetaling med full refusjon, så null refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 5.NAV, 10.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 600)).betale()
-        val første = opprettUtbetaling(tidslinje.kutt(21.januar))
+        val første = opprettUtbetaling(tidslinje.fremTilOgMed(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         val annullering = annuller(andre) ?: fail { "forventet utbetaling" }
         assertTrue(annullering.inspektør.arbeidsgiverOppdrag.last().erOpphør())
@@ -691,7 +689,7 @@ internal class UtbetalingTest {
     @Test
     fun `null refusjon`() {
         val tidslinje = tidslinjeOf(16.AP, 30.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)).betale()
-        val første = opprettUtbetaling(tidslinje.kutt(31.januar))
+        val første = opprettUtbetaling(tidslinje.fremTilOgMed(31.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertFalse(første.harDelvisRefusjon())
         assertTrue(første.harUtbetalinger())
@@ -702,7 +700,7 @@ internal class UtbetalingTest {
     fun `korrelasjonsId er lik på brukerutbetalinger direkte fra Infotrygd`() {
         val tidslinje =
             beregnUtbetalinger(tidslinjeOf(5.UKJ, 26.NAV(dekningsgrunnlag = 1000, refusjonsbeløp = 0)))
-        val første = opprettUtbetaling(tidslinje.kutt(21.januar))
+        val første = opprettUtbetaling(tidslinje.fremTilOgMed(21.januar))
         val andre = opprettUtbetaling(tidslinje, første)
         assertEquals(første.inspektør.personOppdrag.fagsystemId(), andre.inspektør.personOppdrag.fagsystemId())
         assertEquals(første.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), andre.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())

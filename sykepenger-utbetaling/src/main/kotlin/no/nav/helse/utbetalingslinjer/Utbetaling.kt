@@ -13,7 +13,6 @@ import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
@@ -269,8 +268,8 @@ class Utbetaling private constructor(
         val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, utbetalingsaken, this.personOppdrag, kladd.personoppdrag)
 
         val nyereUtbetalingstidslinje = this.utbetalingstidslinje.subset(kladd.utbetalingsperiode)
-        val tidligereUtbetalingstidslinje = nyereUtbetalingstidslinje.kutt(vedtaksperiode.start.forrigeDag)
-        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + kladd.utbetalingstidslinje + nyereUtbetalingstidslinje.subset(vedtaksperiode.endInclusive.nesteDag til LocalDate.MAX)
+        val tidligereUtbetalingstidslinje = nyereUtbetalingstidslinje.fremTilOgMed(vedtaksperiode.start.forrigeDag)
+        val nyUtbetalingstidslinje = tidligereUtbetalingstidslinje + kladd.utbetalingstidslinje + nyereUtbetalingstidslinje.fraOgMed(vedtaksperiode.endInclusive.nesteDag)
 
         return Utbetaling(
             korrelerendeUtbetaling = this,

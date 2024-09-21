@@ -5,6 +5,7 @@ import no.nav.helse.desember
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.februar
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -15,11 +16,40 @@ import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class UtbetalingstidslinjeTest {
+
+    @Test
+    fun subsetting() {
+        assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).subset(1.januar til 5.januar).periode())
+        assertEquals(4.januar.somPeriode(), tidslinjeOf(5.NAV).subset(4.januar.somPeriode()).periode())
+        assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).subset(31.desember(2017) til 6.januar).periode())
+        assertTrue(tidslinjeOf(5.NAV).subset(6.januar til 6.januar).isEmpty())
+    }
+
+    @Test
+    fun fraOgMed() {
+        assertEquals(3.januar til 5.januar, tidslinjeOf(5.NAV).fraOgMed(3.januar).periode())
+        assertEquals(0, tidslinjeOf(5.NAV).fraOgMed(6.januar).size)
+        assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).fraOgMed(31.desember(2017)).periode())
+    }
+
+    @Test
+    fun fremTilOgMed() {
+        assertEquals(1.januar til 2.januar, tidslinjeOf(5.NAV).fremTilOgMed(2.januar).periode())
+        assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).fremTilOgMed(6.januar).periode())
+        assertEquals(0, tidslinjeOf(5.NAV).fremTilOgMed(31.desember(2017)).size)
+    }
+
+    @Test
+    fun plus() {
+        assertEquals(0, (tidslinjeOf() + tidslinjeOf()).size)
+        assertEquals(1.januar til 5.januar, (tidslinjeOf() + tidslinjeOf(5.NAV)).periode())
+        assertEquals(1.januar til 10.januar, (tidslinjeOf(3.NAV) + tidslinjeOf(5.NAV, startDato = 6.januar)).periode())
+    }
 
     @Test
     fun `avviser perioder med flere begrunnelser`() {
