@@ -5,17 +5,19 @@ import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.nesteDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 data class Arbeidsgiverperioderesultat(
     // perioden som dekkes av arbeidsgiverperioden, fra første kjente dag til siste kjente dag
     val omsluttendePeriode: Periode,
     // dager som tolkes som del av arbeidsgiverperioden
-    val arbeidsgiverperiode: Set<LocalDate>,
+    val arbeidsgiverperiode: List<Periode>,
     // perioder hvor det er registrert utbetaling
-    val utbetalingsperioder: Set<LocalDate>,
+    val utbetalingsperioder: List<Periode>,
     // perioder hvor det er registrert oppholdsdager
-    val oppholdsperioder: Set<LocalDate>,
+    val oppholdsperioder: List<Periode>,
     // hvorvidt arbeidsgiverperiodetellingen er komplett, aka. 16 dager.
     // hvis tellingen er fullstendig så er arbeidsgiverperiode.last() dag nr. 16.
     val fullstendig: Boolean,
@@ -33,9 +35,9 @@ data class Arbeidsgiverperioderesultat(
     ): Arbeidsgiverperioderesultat {
         return this.copy(
             omsluttendePeriode = this.omsluttendePeriode.oppdaterTom(dato),
-            arbeidsgiverperiode = this.arbeidsgiverperiode.plus(setOfNotNull(arbeidsgiverperiode)),
-            utbetalingsperioder = this.utbetalingsperioder.plus(setOfNotNull(utbetalingsperiode)),
-            oppholdsperioder = this.oppholdsperioder.plus(setOfNotNull(oppholdsperiode)),
+            arbeidsgiverperiode = this.arbeidsgiverperiode.leggTil(arbeidsgiverperiode),
+            utbetalingsperioder = this.utbetalingsperioder.leggTil(utbetalingsperiode),
+            oppholdsperioder = this.oppholdsperioder.leggTil(oppholdsperiode),
             fullstendig = fullstendig ?: this.fullstendig,
             sisteDag = sisteDag ?: this.sisteDag
         )
@@ -51,16 +53,16 @@ data class Arbeidsgiverperioderesultat(
         val sykdomstidslinjesubsumsjon = sykdomstidslinje.subsumsjonsformat()
 
         // første agp-dag i hver brudd-periode skal subsummeres med § 8-19 tredje ledd
-        arbeidsgiverperiode.grupperSammenhengendePerioder().drop(1).forEach {
+        arbeidsgiverperiode.drop(1).forEach {
             if (it.start in vedtaksperiode) subsumsjonslogg.`§ 8-19 tredje ledd`(it.start, sykdomstidslinjesubsumsjon)
         }
 
         // siste 16. agp-dag skal subsummeres med § 8-19 første ledd
-        if (fullstendig && arbeidsgiverperiode.last() in vedtaksperiode)
-            subsumsjonslogg.`§ 8-19 første ledd`(arbeidsgiverperiode.last(), sykdomstidslinjesubsumsjon)
+        if (fullstendig && arbeidsgiverperiode.last().endInclusive in vedtaksperiode)
+            subsumsjonslogg.`§ 8-19 første ledd`(arbeidsgiverperiode.last().endInclusive, sykdomstidslinjesubsumsjon)
 
         // første utbetalingsdag skal subsummeres med § 8-17 ledd 1 bokstav a (oppfylt = true)
-        utbetalingsperioder.firstOrNull { !it.erHelg() }?.takeIf { it in vedtaksperiode }?.also {
+        utbetalingsperioder.firstOrNull()?.firstOrNull { !it.erHelg() }?.takeIf { it in vedtaksperiode }?.also {
             subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = it, sykdomstidslinjesubsumsjon)
         }
 
@@ -72,16 +74,31 @@ data class Arbeidsgiverperioderesultat(
     internal fun somArbeidsgiverperiode(): Arbeidsgiverperiode {
         val agp =
             if (arbeidsgiverperiode.isEmpty() && utbetalingsperioder.isNotEmpty())
-                Arbeidsgiverperiode.fiktiv(utbetalingsperioder.first())
+                Arbeidsgiverperiode.fiktiv(utbetalingsperioder.first().start)
             else
-                Arbeidsgiverperiode(arbeidsgiverperiode.grupperSammenhengendePerioder())
-        utbetalingsperioder.forEach { agp.utbetalingsdag(it) }
-        oppholdsperioder.forEach { agp.oppholdsdag(it) }
+                Arbeidsgiverperiode(arbeidsgiverperiode)
+        utbetalingsperioder.flatten().forEach { agp.utbetalingsdag(it) }
+        oppholdsperioder.flatten().forEach { agp.oppholdsdag(it) }
         omsluttendePeriode.forEach { agp.kjentDag(it) }
         return agp
     }
 
     companion object {
+        // utvider liste av perioder med ny dato. antar at listen er sortert i stigende rekkefølge,
+        // og at <dato> må være nyere enn forrige periode. strekker altså -ikke- periodene eventuelt tilbake i tid, kun frem
+        private fun List<Periode>.leggTil(dato: LocalDate?): List<Periode> {
+            return when {
+                dato == null -> return this
+                // tom liste
+                isEmpty() -> return listOf(dato.somPeriode())
+                // dagen er dekket av en tidligere periode
+                dato <= last().endInclusive -> return this
+                // dagen utvider ikke siste datoperiode
+                dato > last().endInclusive.nesteDag -> return this + listOf(dato.somPeriode())
+                // dagen utvider siste periode
+                else -> return dropLast(1) + listOf(last().oppdaterTom(dato))
+            }
+        }
         internal fun Iterable<Arbeidsgiverperioderesultat>.finn(periode: Periode) = lastOrNull { arbeidsgiverperiode ->
             periode.overlapperMed(arbeidsgiverperiode.omsluttendePeriode)
         }

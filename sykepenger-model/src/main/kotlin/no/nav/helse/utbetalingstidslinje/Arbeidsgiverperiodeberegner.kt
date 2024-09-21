@@ -27,9 +27,9 @@ internal class Arbeidsgiverperiodeberegner(
     private fun arbeidsgiverperiodeResultatet(dato: LocalDate): Arbeidsgiverperioderesultat {
         return aktivArbeidsgiverperioderesultat ?: Arbeidsgiverperioderesultat(
             omsluttendePeriode = dato.somPeriode(),
-            arbeidsgiverperiode = emptySet(),
-            utbetalingsperioder = emptySet(),
-            oppholdsperioder = emptySet(),
+            arbeidsgiverperiode = emptyList(),
+            utbetalingsperioder = emptyList(),
+            oppholdsperioder = emptyList(),
             fullstendig = false,
             sisteDag = null
         ).also { aktivArbeidsgiverperioderesultat = it }
