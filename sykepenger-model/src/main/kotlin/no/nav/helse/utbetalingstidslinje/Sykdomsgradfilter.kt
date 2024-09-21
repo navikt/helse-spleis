@@ -22,7 +22,7 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
     ): List<Utbetalingstidslinje> {
         val tidslinjerForSubsumsjon = tidslinjer.subsumsjonsformat()
 
-        val oppdaterte = Utbetalingsdag.totalSykdomsgrad(tidslinjer)
+        val oppdaterte = Utbetalingstidslinje.totalSykdomsgrad(tidslinjer)
 
         val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(oppdaterte)
         val avvistePerioder = minimumSykdomsgradsvurdering.fjernDagerSomSkalUtbetalesLikevel(tentativtAvvistePerioder)

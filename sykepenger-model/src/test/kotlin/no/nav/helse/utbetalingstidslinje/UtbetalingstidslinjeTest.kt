@@ -17,6 +17,7 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -52,6 +53,17 @@ internal class UtbetalingstidslinjeTest {
     }
 
     @Test
+    fun betale() {
+        val input = listOf(tidslinjeOf(1.NAV(1000)), tidslinjeOf(1.NAV(1000)))
+        val result = Utbetalingstidslinje.betale(input)
+
+        input.forEachIndexed { index, input ->
+            assertNull(input[1.januar].økonomi.inspektør.arbeidsgiverbeløp) { "den uberegnede listen skal ikke modifiseres" }
+            assertEquals(1000, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, _, dagligInt -> dagligInt })
+        }
+    }
+
+    @Test
     fun `avviser perioder med flere begrunnelser`() {
         val periode = 1.januar til 5.januar
         tidslinjeOf(5.NAV).also {
@@ -80,7 +92,7 @@ internal class UtbetalingstidslinjeTest {
         val ag1 = tidslinjeOf(5.NAV(dekningsgrunnlag = 1000, grad = 50))
         val ag2 = tidslinjeOf(1.FRI(dekningsgrunnlag = 2000), 4.NAV(dekningsgrunnlag = 2000, grad = 100))
         val tidslinjer = listOf(ag1, ag2)
-        val result = Utbetalingsdag.totalSykdomsgrad(tidslinjer)
+        val result = Utbetalingstidslinje.totalSykdomsgrad(tidslinjer)
 
         // totalgrad = 16.6666666666...
         1.januar.also { dato ->
@@ -107,7 +119,7 @@ internal class UtbetalingstidslinjeTest {
         val ag1 = tidslinjeOf(1.NAV(dekningsgrunnlag = 1000, grad = 50))
         val ag2 = tidslinjeOf()
         val tidslinjer = listOf(ag1, ag2)
-        val result = Utbetalingsdag.totalSykdomsgrad(tidslinjer)
+        val result = Utbetalingstidslinje.totalSykdomsgrad(tidslinjer)
 
         1.januar.also { dato ->
             val expected = 50

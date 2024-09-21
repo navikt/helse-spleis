@@ -7,10 +7,8 @@ import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
-import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.Økonomi.Companion.erUnderGrensen
-import no.nav.helse.økonomi.ØkonomiVisitor
 
 sealed class Utbetalingsdag(
     val dato: LocalDate,
@@ -30,7 +28,7 @@ sealed class Utbetalingsdag(
         ?.let(::avvisDag)
 
     protected open fun avvisDag(begrunnelser: List<Begrunnelse>) = AvvistDag(dato, økonomi, begrunnelser)
-    protected abstract fun kopierMed(økonomi: Økonomi): Utbetalingsdag
+    internal abstract fun kopierMed(økonomi: Økonomi): Utbetalingsdag
 
     abstract fun accept(visitor: UtbetalingsdagVisitor)
 
@@ -201,34 +199,6 @@ sealed class Utbetalingsdag(
                 ?.filter { dato -> tidslinjer.map { it[dato].økonomi }.erUnderGrensen() }
                 ?.grupperSammenhengendePerioder()
                 ?: emptyList()
-        }
-
-        fun betale(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return periode(tidslinjer)?.fold(tidslinjer) { resultat, dato ->
-                try {
-                    tidslinjer
-                        .map { it[dato].økonomi }
-                        .betal()
-                        .mapIndexed { index, økonomi ->
-                            Utbetalingstidslinje(resultat[index].map {
-                                if (it.dato == dato) it.kopierMed(økonomi) else it
-                            })
-                        }
-                } catch (err: Exception) {
-                    throw IllegalArgumentException("Klarte ikke å utbetale for dag=$dato, fordi: ${err.message}", err)
-                }
-            } ?: tidslinjer
-        }
-
-        fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return periode(tidslinjer)?.fold(tidslinjer) { tidslinjer1, dagen ->
-                // regner ut totalgrad for alle økonomi på samme dag
-                val dager = Økonomi.totalSykdomsgrad(tidslinjer1.map { it[dagen].økonomi })
-                // oppdaterer tidslinjen til hver ag med nytt økonomiobjekt
-                tidslinjer1.zip(dager) { tidslinjen, økonomi ->
-                    Utbetalingstidslinje(tidslinjen.map { if (it.dato == dagen) it.kopierMed(økonomi) else it })
-                }
-            } ?: tidslinjer
         }
 
         fun gjenopprett(dto: UtbetalingsdagInnDto): Utbetalingsdag {

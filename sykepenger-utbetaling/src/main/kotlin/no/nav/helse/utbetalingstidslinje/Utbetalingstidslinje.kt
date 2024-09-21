@@ -58,7 +58,33 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
         ) = tidslinjer.flatMap { it.subset(periode) }.mapNotNull { it.erAvvistMed(begrunnelse) }
 
         fun betale(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-            return Utbetalingsdag.betale(tidslinjer)
+            return beregnDagForDag(tidslinjer, Økonomi::betal)
+        }
+
+        fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
+            return beregnDagForDag(tidslinjer, Økonomi::totalSykdomsgrad)
+        }
+
+        fun beregnDagForDag(tidslinjer: List<Utbetalingstidslinje>, operasjon: (List<Økonomi>) -> List<Økonomi>): List<Utbetalingstidslinje> {
+            /**
+             * beregn dag-for-dag, lagre resultatet tilbake i listen
+             */
+            val samletPeriode = periode(tidslinjer) ?: return emptyList()
+
+            // lager kopi for ikke å modifisere på input-tidslinjene
+            var result = tidslinjer.map { it.utbetalingsdager.toSortedMap() }
+            samletPeriode.forEach { dato ->
+                val uberegnet = tidslinjer.map { it[dato].økonomi }
+                val beregnet = operasjon(uberegnet)
+                // modifiserer kopien
+                result.forEachIndexed { index, utbetalingsdager ->
+                    val økonomi = beregnet[index]
+                    val dagen = utbetalingsdager[dato]
+                    if (dagen != null) utbetalingsdager[dato] = dagen.kopierMed(økonomi)
+                }
+            }
+            // nye tidslinjer fra kopi
+            return result.map { Utbetalingstidslinje(it) }
         }
 
         fun gjenopprett(dto: UtbetalingstidslinjeInnDto): Utbetalingstidslinje {
@@ -293,5 +319,4 @@ sealed class Begrunnelse {
             }
         }
     }
-
 }
