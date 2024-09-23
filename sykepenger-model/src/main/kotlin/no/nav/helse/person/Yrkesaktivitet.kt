@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Vedtaksperiode.Companion.tilkomneInntekter
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -49,6 +50,10 @@ internal sealed interface Yrkesaktivitet {
     fun jurist(other: MaskinellJurist): MaskinellJurist =
         other.medOrganisasjonsnummer(this.toString())
     fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean
+
+    fun håndter(sykmelding: Sykmelding, sykmeldingsperioder: Sykmeldingsperioder) {
+        sykmeldingsperioder.lagre(sykmelding)
+    }
 
     class Arbeidstaker(private val organisasjonsnummer: String) : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg) = false
@@ -128,6 +133,10 @@ internal sealed interface Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean {
             hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
+        }
+
+        override fun håndter(sykmelding: Sykmelding, sykmeldingsperioder: Sykmeldingsperioder) {
+            sykmelding.info("Lagrer _ikke_ sykmeldingsperiode ${sykmelding.periode()} ettersom det er en sykmelding som arbeidsledig.")
         }
 
         override fun avklarSykepengegrunnlag(

@@ -395,7 +395,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         håndter(sykmelding, Vedtaksperiode::håndter)
-        sykmeldingsperioder.lagre(sykmelding)
+        yrkesaktivitet.håndter(sykmelding, sykmeldingsperioder)
     }
 
     internal fun håndter(avbruttSøknad: AvbruttSøknad) {
