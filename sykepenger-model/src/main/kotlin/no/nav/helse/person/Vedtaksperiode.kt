@@ -1064,6 +1064,7 @@ internal class Vedtaksperiode private constructor(
         behandlinger.nyUtbetaling(this.id, this.fødselsnummer, this.arbeidsgiver, grunnlagsdata, hendelse, maksdatoresultat, utbetalingstidslinje)
         val subsumsjonen = Utbetalingstidslinjesubsumsjon(this.jurist, this.sykdomstidslinje)
         utbetalingstidslinje.accept(subsumsjonen)
+        subsumsjonen.subsummer()
         loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(arbeidsgiverSomBeregner, hendelse)
     }
 

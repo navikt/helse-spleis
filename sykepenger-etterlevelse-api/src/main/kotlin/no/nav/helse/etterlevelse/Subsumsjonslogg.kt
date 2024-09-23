@@ -107,7 +107,7 @@ interface Subsumsjonslogg {
      *
      * @param dato dagen vilkåret ikke er oppfylt for
      */
-    fun `§ 8-11 ledd 1`(dato: LocalDate) {}
+    fun `§ 8-11 ledd 1`(dato: ClosedRange<LocalDate>) {}
 
     /**
      * Vurdering av maksimalt antall sykepengedager
@@ -209,7 +209,7 @@ interface Subsumsjonslogg {
      * @param oppfylt **true** dersom [dagen] er etter arbeidsgiverperioden
      * @param dagen aktuelle dagen for vurdering
      */
-    fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
+    fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: ClosedRange<LocalDate>, sykdomstidslinje: List<Tidslinjedag>) {}
 
     /**
      * Vurdering av når utbetaling av sykepenger tidligst skal starte
@@ -219,7 +219,7 @@ interface Subsumsjonslogg {
      * @param periode arbeidsgiversøknad-perioden
      */
     fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(
-        periode: Iterable<LocalDate>,
+        periode: ClosedRange<LocalDate>,
         sykdomstidslinje: List<Tidslinjedag>
     ) {}
 
@@ -231,7 +231,7 @@ interface Subsumsjonslogg {
      * @param dato Nav utbetaler første 16 dager
      */
     fun `§ 8-17 ledd 1`(
-        dato: LocalDate
+        dato: ClosedRange<LocalDate>
     ) {}
 
     /**
@@ -241,7 +241,7 @@ interface Subsumsjonslogg {
      *
      * @param dato dagen vilkåret blir vurdert for
      */
-    fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
+    fun `§ 8-17 ledd 2`(dato: ClosedRange<LocalDate>, sykdomstidslinje: List<Tidslinjedag>) {}
 
     /**
      * Arbeidsgiverperioden teller 16 sykedager
@@ -261,7 +261,7 @@ interface Subsumsjonslogg {
      * @param dato for en dag som anses som en agp-dag
      * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
      */
-    fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
+    fun `§ 8-19 andre ledd`(dato: ClosedRange<LocalDate>, beregnetTidslinje: List<Tidslinjedag>) {}
 
     /**
      * Når det er gått mindre enn 16 kalenderdager siden forrige sykefravær,
@@ -482,14 +482,14 @@ interface Subsumsjonslogg {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-48)
      */
-    fun `§ 8-48 ledd 2 punktum 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
+    fun `§ 8-48 ledd 2 punktum 2`(dato: ClosedRange<LocalDate>, sykdomstidslinje: List<Tidslinjedag>) {}
 
     /**
      * Annen livsoppsoppholdsytelse istedenfor sykepenger
      *
      *  Lovdata: [lenke](https://lovdata.no/dokument/TRR/avgjorelse/trr-2006-4023)
      */
-    fun `Trygderettens kjennelse 2006-4023`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
+    fun `Trygderettens kjennelse 2006-4023`(dato: ClosedRange<LocalDate>, sykdomstidslinje: List<Tidslinjedag>) {}
 
     class SammenligningsgrunnlagDTO(
         val sammenligningsgrunnlag: Double,

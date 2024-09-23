@@ -63,7 +63,7 @@ data class Arbeidsgiverperioderesultat(
 
         // første utbetalingsdag skal subsummeres med § 8-17 ledd 1 bokstav a (oppfylt = true)
         utbetalingsperioder.firstOrNull()?.firstOrNull { !it.erHelg() }?.takeIf { it in vedtaksperiode }?.also {
-            subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = it, sykdomstidslinjesubsumsjon)
+            subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = it.rangeTo(it), sykdomstidslinjesubsumsjon)
         }
 
         // siste oppholdsdag som medfører at agp avbrytes subsummeres med § 8-19 fjerde ledd

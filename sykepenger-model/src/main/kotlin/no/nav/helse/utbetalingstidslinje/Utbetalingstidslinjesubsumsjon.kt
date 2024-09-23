@@ -5,6 +5,8 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.nesteDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserAap
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.AndreYtelserDagpenger
@@ -22,6 +24,34 @@ internal class Utbetalingstidslinjesubsumsjon(
 
     // private val tidslinjesubsumsjonsformat = mutableListOf<Tidslinjedag>()
     private val tidslinjesubsumsjonsformat = sykdomstidslinje.subsumsjonsformat()
+    private val arbeidsgiverperiodedager = mutableListOf<Periode>()
+    private val arbeidsgiverperiodeNavdager = mutableListOf<Periode>()
+    private val helger = mutableListOf<Periode>()
+    private val fridager = mutableListOf<Periode>()
+    private val aap = mutableListOf<Periode>()
+    private val andreYtelser = mutableListOf<Periode>()
+
+    fun subsummer() {
+        arbeidsgiverperiodedager.forEach { periode ->
+            subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(false, dagen = periode, tidslinjesubsumsjonsformat)
+            subsumsjonslogg.`§ 8-19 andre ledd`(periode, tidslinjesubsumsjonsformat)
+        }
+        arbeidsgiverperiodeNavdager.forEach { periode ->
+            subsumsjonslogg.`§ 8-17 ledd 1`(periode)
+        }
+        helger.forEach { periode ->
+            subsumsjonslogg.`§ 8-11 ledd 1`(periode)
+        }
+        fridager.forEach { periode ->
+            subsumsjonslogg.`§ 8-17 ledd 2`(periode, tidslinjesubsumsjonsformat)
+        }
+        aap.forEach { periode ->
+            subsumsjonslogg.`§ 8-48 ledd 2 punktum 2`(periode, tidslinjesubsumsjonsformat)
+        }
+        andreYtelser.forEach { periode ->
+            subsumsjonslogg.`Trygderettens kjennelse 2006-4023`(periode, tidslinjesubsumsjonsformat)
+        }
+    }
 
     override fun preVisitUtbetalingstidslinje(
         tidslinje: Utbetalingstidslinje,
@@ -36,8 +66,7 @@ internal class Utbetalingstidslinjesubsumsjon(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(false, dagen = dato, tidslinjesubsumsjonsformat)
-        subsumsjonslogg.`§ 8-19 andre ledd`(dato, tidslinjesubsumsjonsformat)
+        arbeidsgiverperiodedager.leggTil(dato)
     }
 
     override fun visit(
@@ -45,7 +74,7 @@ internal class Utbetalingstidslinjesubsumsjon(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        subsumsjonslogg.`§ 8-17 ledd 1`(dato)
+        arbeidsgiverperiodeNavdager.leggTil(dato)
     }
 
     override fun visit(
@@ -53,7 +82,7 @@ internal class Utbetalingstidslinjesubsumsjon(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        subsumsjonslogg.`§ 8-11 ledd 1`(dato)
+        helger.leggTil(dato)
     }
 
     override fun visit(
@@ -61,7 +90,7 @@ internal class Utbetalingstidslinjesubsumsjon(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        subsumsjonslogg.`§ 8-17 ledd 2`(dato, tidslinjesubsumsjonsformat)
+       fridager.leggTil(dato)
     }
 
     override fun visit(
@@ -69,11 +98,24 @@ internal class Utbetalingstidslinjesubsumsjon(
         dato: LocalDate,
         økonomi: Økonomi
     ) {
-        if (AndreYtelserAap in dag.begrunnelser) subsumsjonslogg.`§ 8-48 ledd 2 punktum 2`(dato, tidslinjesubsumsjonsformat)
+        if (AndreYtelserAap in dag.begrunnelser) aap.leggTil(dato)
         val andreYtelser = setOf(
             AndreYtelserDagpenger, AndreYtelserForeldrepenger, AndreYtelserOmsorgspenger, AndreYtelserOpplaringspenger, AndreYtelserSvangerskapspenger, AndreYtelserPleiepenger
         )
         if (dag.begrunnelser.none { it in andreYtelser }) return
-        subsumsjonslogg.`Trygderettens kjennelse 2006-4023`(dato, tidslinjesubsumsjonsformat)
+        this.andreYtelser.leggTil(dato)
+    }
+
+    private companion object {
+        // utvider liste av perioder med ny dato. antar at listen er sortert i stigende rekkefølge,
+        // og at <dato> må være nyere enn forrige periode. strekker altså -ikke- periodene eventuelt tilbake i tid, kun frem
+        private fun MutableList<Periode>.leggTil(dato: LocalDate) {
+            when {
+                // tom liste eller dagen utvider ikke siste datoperiode
+                isEmpty() || dato > last().endInclusive.nesteDag -> add(dato.somPeriode())
+                // dagen utvider siste periode
+                else -> removeLast().also { add(it.oppdaterTom(dato)) }
+            }
+        }
     }
 }

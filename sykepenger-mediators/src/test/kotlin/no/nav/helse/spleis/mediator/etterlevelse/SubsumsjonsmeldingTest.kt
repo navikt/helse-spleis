@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 
 internal class SubsumsjonsmeldingTest {
@@ -48,7 +49,7 @@ internal class SubsumsjonsmeldingTest {
 
     @Test
     fun `en melding på gyldig format`() {
-        jurist.`§ 8-17 ledd 2`(1.januar(2018), MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) })
+        jurist.`§ 8-17 ledd 2`(1.januar(2018).somPeriode(), MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) })
         subsumsjonMediator.ferdigstill(testRapid)
         assertSubsumsjonsmelding(testRapid.inspektør.message(0)["subsumsjon"])
     }

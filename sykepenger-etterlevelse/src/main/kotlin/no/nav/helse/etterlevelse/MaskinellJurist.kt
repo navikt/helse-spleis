@@ -221,7 +221,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-11 ledd 1`(dato: LocalDate) {
+    override fun `§ 8-11 ledd 1`(dato: ClosedRange<LocalDate>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -424,7 +424,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-17 ledd 1 bokstav a`(
         oppfylt: Boolean,
-        dagen: LocalDate,
+        dagen: ClosedRange<LocalDate>,
         sykdomstidslinje: List<Tidslinjedag>
     ) {
         leggTil(
@@ -443,7 +443,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-17 ledd 1`(dato: LocalDate) {
+    override fun `§ 8-17 ledd 1`(dato: ClosedRange<LocalDate>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -460,15 +460,13 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(
-        periode: Iterable<LocalDate>,
+        periode: ClosedRange<LocalDate>,
         sykdomstidslinje: List<Tidslinjedag>
     ) {
-        periode.forEach {
-            `§ 8-17 ledd 1 bokstav a`(false, it, sykdomstidslinje)
-        }
+        `§ 8-17 ledd 1 bokstav a`(false, periode, sykdomstidslinje)
     }
 
-    override fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {
+    override fun `§ 8-17 ledd 2`(dato: ClosedRange<LocalDate>, sykdomstidslinje: List<Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -505,7 +503,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
+    override fun `§ 8-19 andre ledd`(dato: ClosedRange<LocalDate>, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -853,7 +851,7 @@ class MaskinellJurist private constructor(
         ))
     }
 
-    override fun `§ 8-48 ledd 2 punktum 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {
+    override fun `§ 8-48 ledd 2 punktum 2`(dato: ClosedRange<LocalDate>, sykdomstidslinje: List<Tidslinjedag>) {
         leggTil(GrupperbarSubsumsjon(
             dato = dato,
             utfall = VILKAR_IKKE_OPPFYLT,
@@ -868,7 +866,7 @@ class MaskinellJurist private constructor(
         ))
     }
 
-    override fun `Trygderettens kjennelse 2006-4023`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {
+    override fun `Trygderettens kjennelse 2006-4023`(dato: ClosedRange<LocalDate>, sykdomstidslinje: List<Tidslinjedag>) {
         leggTil(GrupperbarSubsumsjon(
             dato = dato,
             utfall = VILKAR_IKKE_OPPFYLT,
