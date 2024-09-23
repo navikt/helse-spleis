@@ -21,12 +21,10 @@ import no.nav.helse.hendelser.utbetaling.valider
 import no.nav.helse.hendelser.utbetaling.vurdering
 import no.nav.helse.nesteDag
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_12
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_21
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_6
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_7
@@ -163,11 +161,6 @@ class Utbetaling private constructor(
     fun simuler(hendelse: IAktivitetslogg) {
         hendelse.kontekst(this)
         tilstand.simuler(this, hendelse)
-    }
-
-    fun byggGodkjenningsbehov(hendelse: IAktivitetslogg, periode: Periode, builder: GodkjenningsbehovBuilder) {
-        hendelse.kontekst(this)
-        tilstand.byggGodkjenningsbehov(this, hendelse, periode, builder)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -567,16 +560,6 @@ class Utbetaling private constructor(
             aktivitetslogg.funksjonellFeil(RV_UT_12)
         }
 
-        fun byggGodkjenningsbehov(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg,
-            periode: Periode,
-            builder: GodkjenningsbehovBuilder
-        ) {
-            hendelse.info("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-            hendelse.funksjonellFeil(RV_UT_13)
-        }
-
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
     }
 
@@ -609,24 +592,6 @@ class Utbetaling private constructor(
             aktivitetslogg.kontekst(utbetaling)
             utbetaling.arbeidsgiverOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
             utbetaling.personOppdrag.simuler(aktivitetslogg, utbetaling.maksdato, systemident)
-        }
-
-        override fun byggGodkjenningsbehov(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg,
-            periode: Periode,
-            builder: GodkjenningsbehovBuilder
-        ) {
-            builder.utbetalingtype(utbetaling.type.name)
-            tags(builder, utbetaling, periode)
-        }
-
-        private fun tags(builder: GodkjenningsbehovBuilder, utbetaling: Utbetaling, periode: Periode): GodkjenningsbehovBuilder {
-            val arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag.nettoBeløp()
-            val personNettoBeløp = utbetaling.personOppdrag.nettoBeløp()
-            builder.tagUtbetaling(arbeidsgiverNettoBeløp, personNettoBeløp)
-            builder.tagBehandlingsresultat(utbetaling.utbetalingstidslinje.behandlingsresultat(periode))
-            return builder
         }
     }
 

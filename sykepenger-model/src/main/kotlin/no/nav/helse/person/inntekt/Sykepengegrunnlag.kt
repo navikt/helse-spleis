@@ -23,7 +23,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.SykepengegrunnlagVisitor
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -45,12 +44,10 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.inge
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.lagreTidsnæreInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.markerFlereArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.måHaRegistrertOpptjeningForArbeidsgivere
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.omregnedeÅrsinntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.sjekkForNyArbeidsgiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subsummer
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.tilkomneInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -405,19 +402,6 @@ internal class Sykepengegrunnlag private constructor(
             .sykepengegrunnlagsfakta(fakta)
     }
 
-    internal fun build(builder: GodkjenningsbehovBuilder) {
-        val fakta = when (vurdertInfotrygd) {
-            true -> GodkjenningsbehovBuilder.FastsattIInfotrygdBuilder(omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig })
-            false -> GodkjenningsbehovBuilder.FastsattISpleisBuilder(
-                omregnetÅrsinntekt.reflection { årlig, _, _, _ -> årlig },
-                `6G`.reflection { årlig, _, _, _ -> årlig }
-            ).apply {
-                arbeidsgiverInntektsopplysninger.build(this, skjæringstidspunkt)
-            }
-        }.build()
-        builder.sykepengegrunnlagsfakta(fakta)
-    }
-
     internal fun berik(builder: UtkastTilVedtakBuilder) {
         builder.sykepengegrunnlag(
             sykepengegrunnlag = sykepengegrunnlag,
@@ -465,18 +449,6 @@ internal class Sykepengegrunnlag private constructor(
 
     fun lagreTidsnæreInntekter(skjæringstidspunkt: LocalDate, arbeidsgiver: Arbeidsgiver, hendelse: IAktivitetslogg, nyArbeidsgiverperiode: Boolean) {
         arbeidsgiverInntektsopplysninger.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, nyArbeidsgiverperiode)
-    }
-
-    internal fun byggGodkjenningsbehov(builder: GodkjenningsbehovBuilder) {
-        builder.inntektskilde(inntektskilde())
-        builder.tagFlereArbeidsgivere(arbeidsgiverInntektsopplysninger.size)
-        arbeidsgiverInntektsopplysninger.omregnedeÅrsinntekter(skjæringstidspunkt, builder)
-        arbeidsgiverInntektsopplysninger.tilkomneInntekter(skjæringstidspunkt, builder)
-        if (`2G`.beløp(skjæringstidspunkt, LocalDate.now()) > this.sykepengegrunnlag) {
-            builder.tagSykepengegrunnlagErUnder2G()
-        } else if (begrensning == ER_6G_BEGRENSET) {
-            builder.tagSykepengegrunnlagEr6GBegrenset()
-        }
     }
 
     enum class Begrensning {

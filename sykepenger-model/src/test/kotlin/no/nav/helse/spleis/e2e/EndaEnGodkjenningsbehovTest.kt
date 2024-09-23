@@ -23,7 +23,6 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -34,7 +33,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
+internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
     private fun IdInnhenter.sisteBehandlingId(orgnr: String) = inspektør(orgnr).vedtaksperioder(this).inspektør.behandlinger.last().id
 
     @Test
@@ -64,7 +63,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 480000.0,
                 "6G" to 561804.0,
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+                "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -87,7 +86,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 240000.0,
                 "6G" to 561804.0,
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+                "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -107,7 +106,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 1200000.0,
                 "6G" to 561804.0,
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+                "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -150,7 +149,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 372000.0,
                 "6G" to 561804.0,
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+                "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -184,7 +183,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 10000.månedlig.reflection { årlig, _, _, _ ->  årlig }.toDouble(),
                 "6G" to 561804.0,
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+                "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -241,7 +240,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         assertSykepengegrunnlagsfakta(
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to INNTEKT.reflection { årlig, _, _, _ ->  årlig }.toDouble(),
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.IInfotrygd.name
+                "fastsatt" to "IInfotrygd"
             ),
             vedtaksperiodeId = 2.vedtaksperiode.id(a1)
         )
@@ -342,7 +341,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to INNTEKT.reflection { årlig, _, _, _ -> årlig }.toDouble(),
                 "6G" to 561804.0,
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+                "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -395,7 +394,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 40000.månedlig.reflection { årlig, _, _, _ -> årlig }.toDouble(),
                 "6G" to 561804.0,
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+                "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -535,7 +534,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
             sykepengegrunnlagsfakta = mapOf(
                 "omregnetÅrsinntektTotalt" to 480000.0,
                 "6G" to 561804.0,
-                "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterSkjønn.name,
+                "fastsatt" to "EtterSkjønn",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
@@ -599,7 +598,7 @@ internal class GodkjenningsbehovBuilderTest : AbstractEndToEndTest() {
         sykepengegrunnlagsfakta: Map<String, Any> = mapOf(
             "omregnetÅrsinntektTotalt" to INNTEKT.reflection { årlig, _, _, _ -> årlig }.toDouble(),
             "6G" to 561804.0,
-            "fastsatt" to GodkjenningsbehovBuilder.Fastsatt.EtterHovedregel.name,
+            "fastsatt" to "EtterHovedregel",
             "arbeidsgivere" to listOf(
                 mapOf(
                     "arbeidsgiver" to a1,

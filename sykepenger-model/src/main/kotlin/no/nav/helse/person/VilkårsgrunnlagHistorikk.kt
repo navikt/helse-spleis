@@ -27,7 +27,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -229,10 +228,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag.build(builder)
         }
 
-        internal fun build(builder: GodkjenningsbehovBuilder) {
-            sykepengegrunnlag.build(builder)
-        }
-
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
 
         internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode) =
@@ -329,14 +324,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             nyArbeidsgiverperiode: Boolean
         ) {
             sykepengegrunnlag.lagreTidsnæreInntekter(skjæringstidspunkt, arbeidsgiver, hendelse, nyArbeidsgiverperiode)
-        }
-
-        internal fun byggGodkjenningsbehov(builder: GodkjenningsbehovBuilder) {
-            builder.erInfotrygd(this is InfotrygdVilkårsgrunnlag)
-            builder.skjæringstidspunkt(skjæringstidspunkt)
-            builder.vilkårsgrunnlagId(vilkårsgrunnlagId)
-            this.build(builder)
-            sykepengegrunnlag.byggGodkjenningsbehov(builder)
         }
 
         internal fun berik(builder: UtkastTilVedtakBuilder) {

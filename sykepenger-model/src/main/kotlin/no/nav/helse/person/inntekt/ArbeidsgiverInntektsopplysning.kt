@@ -13,7 +13,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -54,11 +53,6 @@ class ArbeidsgiverInntektsopplysning(
     private fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
         if (!gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return INGEN
         return inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt()
-    }
-
-    private fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, builder: GodkjenningsbehovBuilder) {
-        if (!gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return
-        builder.omregnedeÅrsinntekter(orgnummer, inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig })
     }
 
     internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
@@ -261,17 +255,6 @@ class ArbeidsgiverInntektsopplysning(
             }
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: GodkjenningsbehovBuilder.FastsattISpleisBuilder, skjæringstidspunkt: LocalDate) {
-            forEach { arbeidsgiver ->
-                if (!arbeidsgiver.gjelderPåSkjæringstidspunktet(skjæringstidspunkt)) return@forEach
-                builder.arbeidsgiver(
-                    arbeidsgiver = arbeidsgiver.orgnummer,
-                    omregnetÅrsinntekt = arbeidsgiver.inntektsopplysning.omregnetÅrsinntekt().fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
-                    skjønnsfastsatt = if (arbeidsgiver.inntektsopplysning is SkjønnsmessigFastsatt) arbeidsgiver.inntektsopplysning.fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig } else null
-                )
-            }
-        }
-
         internal fun List<ArbeidsgiverInntektsopplysning>.berik(builder: UtkastTilVedtakBuilder) = this
             .forEach { arbeidsgiver ->
                 builder.arbeidsgiverinntekt(
@@ -329,17 +312,6 @@ class ArbeidsgiverInntektsopplysning(
                     it.refusjonsopplysninger,
                     it.orgnummer
                 )
-            }
-        }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.omregnedeÅrsinntekter(skjæringstidspunkt: LocalDate, builder: GodkjenningsbehovBuilder) {
-            builder.orgnummereMedRelevanteArbeidsforhold(this.map { it.orgnummer }.toSet())
-            this.forEach { it.omregnetÅrsinntekt(skjæringstidspunkt, builder) }
-        }
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.tilkomneInntekter(skjæringstidspunkt: LocalDate, builder: GodkjenningsbehovBuilder) {
-            if (any { it.gjelder.start > skjæringstidspunkt }) {
-                builder.tagTilkommenInntekt()
             }
         }
 
