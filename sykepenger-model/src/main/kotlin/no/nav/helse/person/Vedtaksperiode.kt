@@ -976,11 +976,11 @@ internal class Vedtaksperiode private constructor(
         return builder
     }
 
-    internal fun gjenopptaBehandling(hendelse: Hendelse, arbeidsgivere: Iterable<Arbeidsgiver>) {
+    internal fun gjenopptaBehandling(hendelse: Hendelse) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
         hendelse.info("Forsøker å gjenoppta $this")
-        tilstand.gjenopptaBehandling(this, arbeidsgivere, hendelse)
+        tilstand.gjenopptaBehandling(this, hendelse)
     }
 
 
@@ -1393,7 +1393,6 @@ internal class Vedtaksperiode private constructor(
 
         fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: Hendelse
         ) {
             hendelse.info("Tidligere periode ferdigbehandlet, men gjør ingen tilstandsendring.")
@@ -1454,11 +1453,7 @@ internal class Vedtaksperiode private constructor(
         override val arbeidsgiveropplysningerStrategi get(): ArbeidsgiveropplysningerStrategi = FørInntektsmelding
 
         override fun venteårsak(vedtaksperiode: Vedtaksperiode) = null
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            hendelse: Hendelse
-        ) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             vedtaksperiode.person.trengerHistorikkFraInfotrygd(hendelse)
         }
 
@@ -1520,11 +1515,7 @@ internal class Vedtaksperiode private constructor(
             return vedtaksperiode.vedtaksperiodeVenter(venterPå)
         }
 
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            hendelse: Hendelse
-        ) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             tilstand(vedtaksperiode, hendelse).gjenopptaBehandling(vedtaksperiode, hendelse)
         }
 
@@ -1794,7 +1785,7 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: Hendelse) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             vurderOmKanGåVidere(vedtaksperiode, hendelse)
         }
 
@@ -1868,11 +1859,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndtertInntektPåSkjæringstidspunktetOgVurderVarsel(hendelse)
         }
 
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            hendelse: Hendelse
-        ) = tilstand(hendelse, vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse)
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) =
+            tilstand(hendelse, vedtaksperiode).gjenopptaBehandling(vedtaksperiode, hendelse)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmelding)
@@ -2513,11 +2501,7 @@ internal class Vedtaksperiode private constructor(
             throw IllegalStateException("Kan ikke håndtere søknad mens perioden er i RevurderingFeilet")
         }
 
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            hendelse: Hendelse
-        ) {
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
             if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode, Aktivitetslogg())) return hendelse.info("Gjenopptar ikke revurdering feilet fordi perioden har tidligere avsluttede utbetalinger. Må behandles manuelt vha annullering.")
             hendelse.funksjonellFeil(RV_RV_2)
             vedtaksperiode.forkast(hendelse)

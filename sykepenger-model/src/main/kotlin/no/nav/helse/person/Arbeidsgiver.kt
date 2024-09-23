@@ -206,7 +206,7 @@ internal class Arbeidsgiver private constructor(
             if (harPågåeneUtbetaling()) return hendelse.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             val periodeSomSkalGjenopptas = periodeSomSkalGjenopptas() ?: return
             checkBareEnPeriodeTilGodkjenningSamtidig(periodeSomSkalGjenopptas)
-            periodeSomSkalGjenopptas.gjenopptaBehandling(hendelse, this)
+            periodeSomSkalGjenopptas.gjenopptaBehandling(hendelse)
         }
 
         internal fun Iterable<Arbeidsgiver>.nestemann() = sistePeriodeSomHarPågåendeUtbetaling() ?: periodeSomSkalGjenopptas() ?: førsteAuuSomVilUtbetales()
