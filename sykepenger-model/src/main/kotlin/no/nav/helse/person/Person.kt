@@ -76,7 +76,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.bareUnikeArbeidsgivere
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnesI
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
@@ -419,7 +418,7 @@ class Person private constructor(
     fun håndter(påminnelse: Påminnelse) {
         try {
             påminnelse.kontekst(aktivitetslogg, this)
-            if (finnArbeidsgiver(påminnelse).håndter(påminnelse, arbeidsgivere.toList())) return håndterGjenoppta(påminnelse)
+            if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return håndterGjenoppta(påminnelse)
         } catch (err: Aktivitetslogg.AktivitetException) {
             påminnelse.funksjonellFeil(RV_AG_1)
         }
@@ -851,7 +850,6 @@ class Person private constructor(
         val event = PersonObserver.VedtaksperiodeOpprettet(vedtaksperiodeId, organisasjonsnummer, periode, skjæringstidspunkt, opprettet)
         observers.forEach { it.vedtaksperiodeOpprettet(event) }
     }
-    internal fun makstid(vedtaksperiode: Vedtaksperiode) = vedtaksperiode.makstid(arbeidsgivere)
 
     internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean {
         return infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
@@ -865,7 +863,7 @@ class Person private constructor(
         aktørId = aktørId,
         fødselsnummer = personidentifikator.toString(),
         alder = alder.dto(),
-        arbeidsgivere = arbeidsgivere.map { it.dto(arbeidsgivere.nestemann(), arbeidsgivere.toList()) },
+        arbeidsgivere = arbeidsgivere.map { it.dto(arbeidsgivere.nestemann()) },
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.dto(),
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.dto(),

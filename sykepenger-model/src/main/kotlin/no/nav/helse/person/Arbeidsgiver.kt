@@ -133,7 +133,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.venter(nestemann: Vedtaksperiode) {
             forEach { arbeidsgiver ->
-                arbeidsgiver.vedtaksperioder.venter(this, nestemann)
+                arbeidsgiver.vedtaksperioder.venter(nestemann)
             }
         }
 
@@ -541,9 +541,9 @@ internal class Arbeidsgiver private constructor(
         utbetalinger.forEach { it.håndter(påminnelse) }
     }
 
-    internal fun håndter(påminnelse: Påminnelse, arbeidsgivere: List<Arbeidsgiver>): Boolean {
+    internal fun håndter(påminnelse: Påminnelse): Boolean {
         påminnelse.kontekst(this)
-        return énHarHåndtert(påminnelse) { håndter(it, arbeidsgivere) }
+        return énHarHåndtert(påminnelse) { håndter(it) }
     }
 
     override fun utbetalingUtbetalt(
@@ -917,13 +917,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun vedtaksperioderEtter(dato: LocalDate) = vedtaksperioder.filter { it.slutterEtter(dato) }
 
-    internal fun dto(nestemann: Vedtaksperiode?, arbeidsgivere: List<Arbeidsgiver>) = ArbeidsgiverUtDto(
+    internal fun dto(nestemann: Vedtaksperiode?) = ArbeidsgiverUtDto(
         id = id,
         organisasjonsnummer = organisasjonsnummer,
         inntektshistorikk = inntektshistorikk.dto(),
         sykdomshistorikk = sykdomshistorikk.dto(),
         sykmeldingsperioder = sykmeldingsperioder.dto(),
-        vedtaksperioder = vedtaksperioder.map { it.dto(nestemann, arbeidsgivere) },
+        vedtaksperioder = vedtaksperioder.map { it.dto(nestemann) },
         forkastede = forkastede.map { it.dto() },
         utbetalinger = utbetalinger.map { it.dto() },
         feriepengeutbetalinger = feriepengeutbetalinger.map { it.dto() },
