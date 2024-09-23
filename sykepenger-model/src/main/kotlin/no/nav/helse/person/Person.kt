@@ -48,6 +48,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Arbeidsgiver.Companion.avklarSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.avventerSøknad
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSkjæringstidspunkter
@@ -639,6 +640,7 @@ class Person private constructor(
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
         arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
+    internal fun avventerSøknad(periode: Periode) = arbeidsgivere.avventerSøknad(periode)
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
     internal fun førsteFraværsdager(skjæringstidspunkt: LocalDate) = arbeidsgivere.førsteFraværsdager(skjæringstidspunkt)
 
