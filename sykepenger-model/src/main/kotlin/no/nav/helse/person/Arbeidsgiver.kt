@@ -424,7 +424,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
         søknad.kontekst(this)
-        søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
+        arbeidsgivere.forEach { it.yrkesaktivitet.slettSykmeldingsperioderSomDekkes(søknad, it.sykmeldingsperioder) }
         opprettVedtaksperiodeOgHåndter(søknad, arbeidsgivere, infotrygdhistorikk)
     }
 

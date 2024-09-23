@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Vedtaksperiode.Companion.tilkomneInntekter
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -50,6 +51,8 @@ internal sealed interface Yrkesaktivitet {
         other.medOrganisasjonsnummer(this.toString())
     fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean
 
+    fun slettSykmeldingsperioderSomDekkes(søknad: Søknad, sykmeldingsperioder: Sykmeldingsperioder)
+
     class Arbeidstaker(private val organisasjonsnummer: String) : Yrkesaktivitet {
         override fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg) = false
         override fun avklarSykepengegrunnlag(
@@ -76,6 +79,11 @@ internal sealed interface Yrkesaktivitet {
             return vedtaksperioder.tilkomneInntekter()
         }
 
+        override fun slettSykmeldingsperioderSomDekkes(søknad: Søknad, sykmeldingsperioder: Sykmeldingsperioder) {
+            if (søknad.organisasjonsnummer() != organisasjonsnummer) return
+            søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
+        }
+
         override fun hashCode(): Int {
             throw NotImplementedError()
         }
@@ -95,6 +103,8 @@ internal sealed interface Yrkesaktivitet {
             return true
         }
 
+        override fun slettSykmeldingsperioderSomDekkes(søknad: Søknad, sykmeldingsperioder: Sykmeldingsperioder) {}
+
         override fun hashCode(): Int {
             throw NotImplementedError()
         }
@@ -112,6 +122,8 @@ internal sealed interface Yrkesaktivitet {
             hendelse.funksjonellFeil(Varselkode.RV_SØ_39)
             return true
         }
+
+        override fun slettSykmeldingsperioderSomDekkes(søknad: Søknad, sykmeldingsperioder: Sykmeldingsperioder) {}
 
         override fun hashCode(): Int {
             throw NotImplementedError()
@@ -140,6 +152,10 @@ internal sealed interface Yrkesaktivitet {
         ): ArbeidsgiverInntektsopplysning? {
             val inntektsopplysning = inntektshistorikk.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, skattSykepengegrunnlag) ?: return null
             return super.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
+        }
+
+        override fun slettSykmeldingsperioderSomDekkes(søknad: Søknad, sykmeldingsperioder: Sykmeldingsperioder) {
+            søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder)
         }
 
         override fun tilkomneInntekter(

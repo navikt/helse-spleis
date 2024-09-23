@@ -1,14 +1,11 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -22,16 +19,7 @@ internal class ArbeidsledigTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertForventetFeil(
-                forklaring = "Nå funker ikke dette",
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                    assertEquals("SØKNAD", observatør.vedtaksperiodeVenter.last().venterPå.venteårsak.hva)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-                }
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
