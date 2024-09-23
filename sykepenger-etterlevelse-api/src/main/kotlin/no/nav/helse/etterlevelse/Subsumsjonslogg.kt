@@ -162,7 +162,7 @@ interface Subsumsjonslogg {
      * @param avvisteDager dager som vilkåret ikke er oppfylt for, hvis noen
      * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
      */
-    fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: SortedSet<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {}
+    fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<ClosedRange<LocalDate>>, tidslinjer: List<List<Tidslinjedag>>) {}
 
     /**
      * Vurdering av sykepengenes størrelse

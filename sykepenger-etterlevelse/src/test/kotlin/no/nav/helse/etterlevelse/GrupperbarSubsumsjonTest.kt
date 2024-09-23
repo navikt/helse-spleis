@@ -185,7 +185,7 @@ internal class GrupperbarSubsumsjonTest {
 
     private fun nyVurdering(dato: LocalDate, lovverk: String = "folketrygdloven", input: Map<String, Any> = emptyMap(), output: Map<String, Any> = emptyMap()) {
         GrupperbarSubsumsjon(
-            dato = dato,
+            dato = dato.rangeTo(dato),
             lovverk = lovverk,
             input = input,
             output = output,

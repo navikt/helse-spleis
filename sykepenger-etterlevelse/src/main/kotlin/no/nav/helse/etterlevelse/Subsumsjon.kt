@@ -118,20 +118,6 @@ class GrupperbarSubsumsjon private constructor(
         kontekster: Map<String, KontekstType>
     ) : this(mutableListOf(dato), lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
 
-    constructor(
-        dato: LocalDate,
-        lovverk: String,
-        input: Map<String, Any>,
-        output: Map<String, Any>,
-        utfall: Utfall,
-        versjon: LocalDate,
-        paragraf: Paragraf,
-        ledd: Ledd?,
-        punktum: Punktum? = null,
-        bokstav: Bokstav? = null,
-        kontekster: Map<String, KontekstType>
-    ) : this(dato.rangeTo(dato), lovverk, input, output, utfall, versjon, paragraf, ledd, punktum, bokstav, kontekster)
-
     override fun output(): Map<String, Any> {
         return originalOutput.toMutableMap().apply {
             this["perioder"] = perioder.map {

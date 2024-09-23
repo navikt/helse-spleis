@@ -5,7 +5,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Year
 import java.time.format.DateTimeFormatter
-import java.util.SortedSet
 import java.util.UUID
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
@@ -33,8 +32,6 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
-import no.nav.helse.etterlevelse.RangeIterator.Companion.forEach
-import no.nav.helse.etterlevelse.RangeIterator.Companion.iterator
 import no.nav.helse.etterlevelse.RangeIterator.Companion.trim
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
@@ -162,21 +159,17 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperiode: ClosedRange<LocalDate>, søknadsperioder: List<Map<String, Serializable>>) {
-        utlandsperiode.forEach {
-            leggTil(
-                GrupperbarSubsumsjon(
-                    dato = it,
-                    lovverk = "folketrygdloven",
-                    utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                    versjon = LocalDate.of(2021, 6, 1),
-                    paragraf = PARAGRAF_8_9,
-                    ledd = LEDD_1,
-                    input = mapOf( "soknadsPerioder" to søknadsperioder),
-                    output = emptyMap(),
-                    kontekster = kontekster()
-                )
-            )
-        }
+        leggTil(GrupperbarSubsumsjon(
+            dato = utlandsperiode,
+            lovverk = "folketrygdloven",
+            utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+            versjon = LocalDate.of(2021, 6, 1),
+            paragraf = PARAGRAF_8_9,
+            ledd = LEDD_1,
+            input = mapOf( "soknadsPerioder" to søknadsperioder),
+            output = emptyMap(),
+            kontekster = kontekster()
+        ))
     }
 
     override fun `§ 8-10 ledd 2 punktum 1`(
@@ -313,12 +306,12 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: SortedSet<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {
-        fun logg(utfall: Utfall, dager: Iterable<LocalDate>) {
-            dager.forEach { dagen ->
+    override fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<ClosedRange<LocalDate>>, tidslinjer: List<List<Tidslinjedag>>) {
+        fun logg(utfall: Utfall, dager: Collection<ClosedRange<LocalDate>>) {
+            dager.forEach { utfallperiode ->
                 leggTil(
                     GrupperbarSubsumsjon(
-                        dato = dagen,
+                        dato = utfallperiode,
                         lovverk = "folketrygdloven",
                         utfall = utfall,
                         paragraf = PARAGRAF_8_13,
@@ -334,7 +327,7 @@ class MaskinellJurist private constructor(
             }
         }
 
-        val oppfylteDager = periode.trim(avvisteDager).flatMap { it.iterator().asSequence().toList() }
+        val oppfylteDager = avvisteDager.trim(periode)
         if (oppfylteDager.isNotEmpty()) logg(VILKAR_OPPFYLT, oppfylteDager)
         if (avvisteDager.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, avvisteDager)
     }
@@ -352,26 +345,24 @@ class MaskinellJurist private constructor(
                 "tom" to it.endInclusive
             )
         }
-        periode.forEach { dagen ->
-            leggTil(
-                GrupperbarSubsumsjon(
-                    dato = dagen,
-                    lovverk = "folketrygdloven",
-                    utfall = VILKAR_BEREGNET,
-                    paragraf = PARAGRAF_8_13,
-                    ledd = LEDD_2,
-                    versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-                    input = mapOf(
-                        "tidslinjegrunnlag" to tidslinjegrunnlag,
-                        "grense" to grense
-                    ),
-                    output = mapOf(
-                        "dagerUnderGrensen" to dagerUnderGrensenMap
-                    ),
-                    kontekster = kontekster()
-                )
+        leggTil(
+            GrupperbarSubsumsjon(
+                dato = periode,
+                lovverk = "folketrygdloven",
+                utfall = VILKAR_BEREGNET,
+                paragraf = PARAGRAF_8_13,
+                ledd = LEDD_2,
+                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                input = mapOf(
+                    "tidslinjegrunnlag" to tidslinjegrunnlag,
+                    "grense" to grense
+                ),
+                output = mapOf(
+                    "dagerUnderGrensen" to dagerUnderGrensenMap
+                ),
+                kontekster = kontekster()
             )
-        }
+        )
     }
 
     override fun `§ 8-15`(
@@ -407,9 +398,11 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
+        // todo: denne burde kanskje blitt subsummert på en slik måte
+        // at vi kan ta inn en ClosedRange<LocalDate> med en gang
         leggTil(
             GrupperbarSubsumsjon(
-                dato = dato,
+                dato = dato.rangeTo(dato),
                 lovverk = "folketrygdloven",
                 input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
                 output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
@@ -524,7 +517,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-19 tredje ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
-                dato = dato,
+                dato = dato.rangeTo(dato),
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
                 versjon = LocalDate.of(2001, 1, 1),
@@ -542,7 +535,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
-                dato = dato,
+                dato = dato.rangeTo(dato),
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
                 versjon = LocalDate.of(2001, 1, 1),
@@ -967,26 +960,21 @@ internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iter
 
     internal companion object {
         // forutsetter at <other> er sortert
-        fun ClosedRange<LocalDate>.trim(other: SortedSet<LocalDate>): List<ClosedRange<LocalDate>> {
-            return other.fold(listOf(this)) { result, date ->
-                val siste = result.last()
-                // ingen trim
-                if (date !in siste) result
-                // trimmer hele
-                else {
-                    val matcherSiste = date == siste.endInclusive
-                    val matcherFørste = date == siste.start
-                    if (matcherFørste && matcherSiste) result.dropLast(1)
-                    else {
-                        val nye = mutableListOf<ClosedRange<LocalDate>>()
-                        // trimmer slutten eller inni
-                        if (matcherSiste || !matcherFørste) nye.add(siste.start.rangeTo(date.minusDays(1)))
-                        // trimmer starten eller inni
-                        if (matcherFørste || !matcherSiste) nye.add(date.plusDays(1).rangeTo(siste.endInclusive))
-                        result.dropLast(1) + nye
-                    }
-                }
+        fun Collection<ClosedRange<LocalDate>>.trim(other: ClosedRange<LocalDate>): List<ClosedRange<LocalDate>> {
+            return fold(listOf(other)) { result, trimperiode ->
+                result.dropLast(1) + (result.lastOrNull()?.trim(trimperiode) ?: emptyList())
             }
+        }
+
+        private fun ClosedRange<LocalDate>.trim(periodeSomSkalTrimmesBort: ClosedRange<LocalDate>): List<ClosedRange<LocalDate>> {
+            // fullstendig overlapp
+            if (periodeSomSkalTrimmesBort.start <= this.start && periodeSomSkalTrimmesBort.endInclusive >= this.endInclusive) return emptyList()
+            // <periodeSomSkalTrimmesBort> kan nå enten trimme bort hale, snuten eller midten av <this>. i sistnevnte
+            // situasjon så vil resultatet være to perioder.
+            val result = mutableListOf<ClosedRange<LocalDate>>()
+            if (this.start < periodeSomSkalTrimmesBort.start) result.add(this.start..periodeSomSkalTrimmesBort.start.minusDays(1))
+            if (this.endInclusive > periodeSomSkalTrimmesBort.endInclusive) result.add(periodeSomSkalTrimmesBort.endInclusive.plusDays(1)..this.endInclusive)
+            return result
         }
         // utvider perioden hvis <dato> ligger inntil, foran eller bak, (inkl. helg)
         fun ClosedRange<LocalDate>.utvide(dato: LocalDate): ClosedRange<LocalDate>? {
