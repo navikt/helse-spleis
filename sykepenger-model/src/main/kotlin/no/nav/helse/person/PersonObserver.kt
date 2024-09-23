@@ -7,18 +7,10 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
-import no.nav.helse.utbetalingslinjer.OppdragVisitor
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 interface PersonObserver {
@@ -563,34 +555,11 @@ interface PersonObserver {
         val beregningsgrunnlag: Double,
         val omregnetÅrsinntektPerArbeidsgiver: Map<String, Double>,
         val inntekt: Double,
-        val utbetalingId: UUID?,
+        val utbetalingId: UUID,
         val sykepengegrunnlagsbegrensning: String,
         val vedtakFattetTidspunkt: LocalDateTime,
-        val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta?
-    ) {
-        enum class Fastsatt {
-            EtterHovedregel,
-            EtterSkjønn,
-            IInfotrygd
-        }
-
-        sealed class Sykepengegrunnlagsfakta {
-            abstract val fastsatt: Fastsatt
-            abstract val omregnetÅrsinntekt: Double
-        }
-        data class FastsattIInfotrygd(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta() {
-            override val fastsatt = Fastsatt.IInfotrygd
-        }
-        data class FastsattISpeil(
-            override val omregnetÅrsinntekt: Double,
-            val `6G`: Double,
-            val arbeidsgivere: List<Arbeidsgiver>
-        ) : Sykepengegrunnlagsfakta() {
-            val skjønnsfastsatt: Double? = arbeidsgivere.mapNotNull { it.skjønnsfastsatt }.takeIf(List<*>::isNotEmpty)?.sum()
-            override val fastsatt = if (skjønnsfastsatt == null) Fastsatt.EtterHovedregel else Fastsatt.EtterSkjønn
-            data class Arbeidsgiver(val arbeidsgiver: String, val omregnetÅrsinntekt: Double, val skjønnsfastsatt: Double?)
-        }
-    }
+        val sykepengegrunnlagsfakta: UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
+    )
 
     data class OverstyringIgangsatt(
         val årsak: String,

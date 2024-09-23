@@ -15,7 +15,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
-import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 internal class UtkastTilVedtakBuilder(
@@ -139,16 +138,7 @@ internal class UtkastTilVedtakBuilder(
 
     internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
     internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
-
-    internal fun sammenlign(avsluttetMedVedtak: PersonObserver.AvsluttetMedVedtakEvent) {
-        try {
-            val nyttAvsluttetMedVedtak = build.avsluttetMedVedtak(avsluttetMedVedtak.vedtakFattetTidspunkt)
-            if (avsluttetMedVedtak == nyttAvsluttetMedVedtak) return
-            sikkerlogg.warn("UtkastTilVedtakBuilder: Disse avsluttet med vedtak var jo ikke helt like:\nDagens:\n\t$avsluttetMedVedtak\nNytt:\n\t${nyttAvsluttetMedVedtak}")
-        } catch (exception: Exception) {
-            sikkerlogg.error("UtkastTilVedtakBuilder: Nei, nå gikk det over stokk og styr med nytt avsluttet med vedtak:\nDagens:\n\t$avsluttetMedVedtak", exception)
-        }
-    }
+    internal fun buildAvsluttedMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = build.avsluttetMedVedtak(vedtakFattet, historiskeHendelseIder)
 
     private inner class Build {
         private val arbeidsgiverinntekterPåSkjæringstidspunktet = arbeidsgiverinntekter.filter { it.gjelder.start == skjæringstidspunkt }
@@ -276,14 +266,15 @@ internal class UtkastTilVedtakBuilder(
             `6G`= if (inngangsvilkårFraInfotrygd) null else seksG
         )
 
-        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime) = PersonObserver.AvsluttetMedVedtakEvent(
+        fun avsluttetMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = PersonObserver.AvsluttetMedVedtakEvent(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = arbeidsgiver,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             periode = periode,
-            hendelseIder = hendelseIder,
+            // Til ettertanke: AvsluttetMedVedtak har alle hendelseId'er ever på vedtaksperioden, mens godkjenningsbehov/utkast_til_vedtak har kun behandlingens
+            hendelseIder = hendelseIder + historiskeHendelseIder,
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag,
             beregningsgrunnlag = beregningsgrunnlag.årlig,
@@ -297,7 +288,7 @@ internal class UtkastTilVedtakBuilder(
                 }
             },
             inntekt = beregningsgrunnlag.månedlig, // Til ettertanke: What? 👀
-            utbetalingId = utbetalingId, // Til ettertanke: Hvorfor er denne optional?
+            utbetalingId = utbetalingId,
             sykepengegrunnlagsbegrensning = when {
                 inngangsvilkårFraInfotrygd -> "VURDERT_I_INFOTRYGD"
                 seksGBegrenset -> "ER_6G_BEGRENSET"
@@ -305,35 +296,23 @@ internal class UtkastTilVedtakBuilder(
             },
             vedtakFattetTidspunkt = vedtakFattet,
             // Til ettertanke: Akkurat i avsluttet i vedtak blir beløp i sykepengegrunnlagsfakta avrundet til to desimaler.
-            // TODO: Bruke PersonObserver.UtkastTilVedtakEvent-klassene istedenfor denne teite mappingen
             sykepengegrunnlagsfakta = when (val fakta = sykepengegrunnlagsfakta) {
-                is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> PersonObserver.AvsluttetMedVedtakEvent.FastsattIInfotrygd(
-                    omregnetÅrsinntekt = totalOmregnetÅrsinntekt.toDesimaler
-                )
-                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil(
+                is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> fakta.copy(omregnetÅrsinntekt = fakta.omregnetÅrsinntekt.toDesimaler)
+                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> fakta.copy(
                     omregnetÅrsinntekt = fakta.omregnetÅrsinntekt.toDesimaler,
-                    `6G`= fakta.`6G`.toDesimaler,
-                    arbeidsgivere = fakta.arbeidsgivere.map { PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil.Arbeidsgiver(
-                        arbeidsgiver = it.arbeidsgiver,
-                        omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler,
-                        skjønnsfastsatt = null
-                    )}
+                    `6G` = fakta.`6G`.toDesimaler,
+                    arbeidsgivere = fakta.arbeidsgivere.map { it.copy(omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler) }
                 )
-                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil(
+                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.copy(
                     omregnetÅrsinntekt = fakta.omregnetÅrsinntekt.toDesimaler,
-                    `6G`= fakta.`6G`.toDesimaler,
-                    arbeidsgivere = fakta.arbeidsgivere.map { PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil.Arbeidsgiver(
-                        arbeidsgiver = it.arbeidsgiver,
-                        omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler,
-                        skjønnsfastsatt = it.skjønnsfastsatt.toDesimaler
-                    )}
+                    `6G` = fakta.`6G`.toDesimaler,
+                    arbeidsgivere = fakta.arbeidsgivere.map { it.copy(omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler, skjønnsfastsatt = it.skjønnsfastsatt.toDesimaler) }
                 )
             }
         )
     }
 
     private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private val Inntekt.årlig get() = reflection { årlig, _, _, _ -> årlig }
         private val Inntekt.månedlig get() = reflection { _, månedlig, _, _ -> månedlig }
         private val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()

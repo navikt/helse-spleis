@@ -117,7 +117,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_5
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VT_1
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
@@ -856,29 +855,13 @@ internal class Vedtaksperiode private constructor(
 
     override fun vedtakIverksatt(
         hendelse: IAktivitetslogg,
-        behandlingId: UUID,
-        tidsstempel: LocalDateTime,
-        periode: Periode,
-        dokumentsporing: Set<UUID>,
-        utbetalingId: UUID,
         vedtakFattetTidspunkt: LocalDateTime,
-        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         behandling: Behandlinger.Behandling
     ) {
-        val builder = VedtakFattetBuilder(fødselsnummer, aktørId, organisasjonsnummer, id, behandlingId, periode, hendelseIder, skjæringstidspunkt)
-
         val utkastTilVedtakBuilder = utkastTilVedtakBuilder()
         // Til ettertanke: Her er vi aldri innom "behandlinger"-nivå, så får ikke "Grunnbeløpsregulering"-tag, men AvsluttetMedVedtak har jo ikke tags nå uansett.
         behandling.berik(utkastTilVedtakBuilder)
-        // Til ettertanke: AvsluttetMedVedtak har alle hendelseId'er ever på vedtaksperioden, mens godkjenningsbehov/utkast_til_vedtak har kun behandlingens
-        utkastTilVedtakBuilder.hendelseIder(hendelseIder)
-
-        builder.utbetalingId(utbetalingId)
-        builder.utbetalingVurdert(vedtakFattetTidspunkt)
-        vilkårsgrunnlag.build(builder)
-        val avsluttetMedVedtak = builder.result()
-        utkastTilVedtakBuilder.sammenlign(avsluttetMedVedtak)
-        person.avsluttetMedVedtak(avsluttetMedVedtak)
+        person.avsluttetMedVedtak(utkastTilVedtakBuilder.buildAvsluttedMedVedtak(vedtakFattetTidspunkt, hendelseIder))
         person.gjenopptaBehandling(hendelse)
     }
 

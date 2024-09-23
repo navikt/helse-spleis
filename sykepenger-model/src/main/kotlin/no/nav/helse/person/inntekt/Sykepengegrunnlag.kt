@@ -28,10 +28,8 @@ import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.berik
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.faktaavklarteInntekter
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.fastsattÅrsinntekt
@@ -386,21 +384,6 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) } || sammenligningsgrunnlag.erRelevant(organisasjonsnummer)
-
-    internal fun build(builder: VedtakFattetBuilder) {
-        val fakta = when (vurdertInfotrygd) {
-            true -> VedtakFattetBuilder.FastsattIInfotrygdBuilder(omregnetÅrsinntekt)
-            false -> VedtakFattetBuilder.FastsattISpleisBuilder(omregnetÅrsinntekt, `6G`).apply {
-                arbeidsgiverInntektsopplysninger.build(this, skjæringstidspunkt)
-            }
-        }.build()
-        // TODO: alt sykepengegrunnlagrelatert burde kanskje vært inni én fakta-ting
-        builder
-            .sykepengegrunnlag(this.sykepengegrunnlag)
-            .beregningsgrunnlag(this.beregningsgrunnlag)
-            .begrensning(this.begrensning)
-            .sykepengegrunnlagsfakta(fakta)
-    }
 
     internal fun berik(builder: UtkastTilVedtakBuilder) {
         builder.sykepengegrunnlag(

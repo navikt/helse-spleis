@@ -369,7 +369,7 @@ internal class PersonMediator(
     }
 
     override fun avsluttetMedVedtak(event: PersonObserver.AvsluttetMedVedtakEvent) {
-        queueMessage(JsonMessage.newMessage("avsluttet_med_vedtak", mutableMapOf(
+        queueMessage(JsonMessage.newMessage("avsluttet_med_vedtak", mapOf(
             "organisasjonsnummer" to event.organisasjonsnummer,
             "vedtaksperiodeId" to event.vedtaksperiodeId,
             "behandlingId" to event.behandlingId,
@@ -382,32 +382,39 @@ internal class PersonMediator(
             "grunnlagForSykepengegrunnlagPerArbeidsgiver" to event.omregnetÅrsinntektPerArbeidsgiver,
             "begrensning" to event.sykepengegrunnlagsbegrensning,
             "inntekt" to event.inntekt,
-            "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt
-        ).apply {
-            event.utbetalingId?.let { this["utbetalingId"] = it }
-            event.sykepengegrunnlagsfakta?.let {
-                this["sykepengegrunnlagsfakta"] = when (it) {
-                    is PersonObserver.AvsluttetMedVedtakEvent.FastsattISpeil -> mutableMapOf(
-                        "fastsatt" to it.fastsatt,
-                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                        "6G" to it.`6G`,
-                        "arbeidsgivere" to it.arbeidsgivere.map { arbeidsgiver ->
-                            val skjønnsfastsatt = if (arbeidsgiver.skjønnsfastsatt != null) mapOf("skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt) else emptyMap()
-                            mapOf(
-                                "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
-                                "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt
-                            ) + skjønnsfastsatt
-                        }
-                    ).apply {
-                        compute("skjønnsfastsatt") { _, _ -> it.skjønnsfastsatt }
+            "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt,
+            "utbetalingId" to event.utbetalingId,
+            "sykepengegrunnlagsfakta" to when (val fakta = event.sykepengegrunnlagsfakta) {
+                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
+                    "fastsatt" to fakta.fastsatt,
+                    "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                    "6G" to fakta.`6G`,
+                    "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
+                        mapOf(
+                            "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt
+                        )
                     }
-                    is PersonObserver.AvsluttetMedVedtakEvent.FastsattIInfotrygd -> mapOf(
-                        "fastsatt" to it.fastsatt,
-                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt
-                    )
-                }
+                )
+                is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> mutableMapOf(
+                    "fastsatt" to fakta.fastsatt,
+                    "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt,
+                    "6G" to fakta.`6G`,
+                    "arbeidsgivere" to fakta.arbeidsgivere.map { arbeidsgiver ->
+                        mapOf(
+                            "arbeidsgiver" to arbeidsgiver.arbeidsgiver,
+                            "omregnetÅrsinntekt" to arbeidsgiver.omregnetÅrsinntekt,
+                            "skjønnsfastsatt" to arbeidsgiver.skjønnsfastsatt
+                        )
+                    },
+                    "skjønnsfastsatt" to fakta.skjønnsfastsatt
+                )
+                is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd-> mapOf(
+                    "fastsatt" to fakta.fastsatt,
+                    "omregnetÅrsinntekt" to fakta.omregnetÅrsinntekt
+                )
             }
-        }))
+        )))
     }
 
     override fun vedtaksperiodeIkkeFunnet(event: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {

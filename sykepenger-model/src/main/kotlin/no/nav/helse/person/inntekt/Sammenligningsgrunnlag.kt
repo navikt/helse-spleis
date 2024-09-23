@@ -3,7 +3,6 @@ package no.nav.helse.person.inntekt
 import no.nav.helse.dto.deserialisering.SammenligningsgrunnlagInnDto
 import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
 import no.nav.helse.person.SammenligningsgrunnlagVisitor
-import no.nav.helse.person.builders.VedtakFattetBuilder.FastsattISpleisBuilder
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 
@@ -28,10 +27,6 @@ internal class Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
         visitor.postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
         visitor.postVisitSammenligningsgrunnlag(this, sammenligningsgrunnlag)
-    }
-
-    internal fun build(builder: FastsattISpleisBuilder) {
-        builder.innrapportertÅrsinntekt(sammenligningsgrunnlag)
     }
 
     internal fun dto() = SammenligningsgrunnlagUtDto(

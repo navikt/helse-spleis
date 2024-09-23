@@ -30,7 +30,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.inntekt.Inntektsopplysning
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag.Companion.harUlikeGrunnbeløp
@@ -223,10 +222,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = sykepengegrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
-
-        internal fun build(builder: VedtakFattetBuilder) {
-            sykepengegrunnlag.build(builder)
-        }
 
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
 

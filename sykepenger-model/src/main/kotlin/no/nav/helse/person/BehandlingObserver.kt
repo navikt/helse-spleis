@@ -18,13 +18,7 @@ internal interface BehandlingObserver {
     )
     fun vedtakIverksatt(
         hendelse: IAktivitetslogg,
-        behandlingId: UUID,
-        tidsstempel: LocalDateTime,
-        periode: Periode,
-        dokumentsporing: Set<UUID>,
-        utbetalingId: UUID,
         vedtakFattetTidspunkt: LocalDateTime,
-        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         behandling: Behandlinger.Behandling
     )
     fun vedtakAnnullert(hendelse: IAktivitetslogg, behandlingId: UUID)

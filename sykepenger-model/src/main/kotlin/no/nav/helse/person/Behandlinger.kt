@@ -643,7 +643,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 utkastTilVedtakBuilder: UtkastTilVedtakBuilder
             ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
-                checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
+                checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjenningsbehov" }
                 hendelse.kontekst(utbetaling)
                 utkastTilVedtakBuilder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling)
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
@@ -981,7 +981,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
         }
         private fun vedtakIverksatt(hendelse: IAktivitetslogg) {
             check(observatører.isNotEmpty()) { "behandlingen har ingen registrert observatør" }
-            observatører.forEach { it.vedtakIverksatt(hendelse, id, avsluttet!!, periode, dokumentsporing.ider(), utbetaling()!!.id, vedtakFattet!!, gjeldende.grunnlagsdata!!, this) }
+            observatører.forEach { it.vedtakIverksatt(hendelse, vedtakFattet!!, this) }
         }
 
         private fun avsluttetUtenVedtak(hendelse: IAktivitetslogg) {
