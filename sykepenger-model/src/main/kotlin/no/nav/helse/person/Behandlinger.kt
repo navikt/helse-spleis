@@ -43,9 +43,7 @@ import no.nav.helse.person.Dokumentsporing.Companion.tilSubsumsjonsformat
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitet
-import no.nav.helse.person.aktivitetslogg.GodkjenningsbehovBuilder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.aktivitetslogg.PeriodeMedSammeSkjæringstidspunkt
 import no.nav.helse.person.behandling.Behandlingsinntekt
 import no.nav.helse.person.behandling.TilkommenInntekt
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
@@ -59,7 +57,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverFaktaavklartInntekt
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeForVedtaksperiode
 import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -152,19 +149,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
 
-    internal fun godkjenning(
-        hendelse: IAktivitetslogg,
-        erForlengelse: Boolean,
-        perioderMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandlinger>>,
-        kanForkastes: Boolean,
-        arbeidsgiverperiode: Arbeidsgiverperiode?,
-        harPeriodeRettFør: Boolean,
-        builder: UtkastTilVedtakBuilder
-    ) {
-        val behandlingerMedSammeSkjæringstidspunkt = perioderMedSammeSkjæringstidspunkt.map { it.first to it.second.behandlinger.last() }
-        val grunnbeløpsregulert = behandlinger.grunnbeløpsregulert()
-        if (grunnbeløpsregulert) builder.grunnbeløpsregulert()
-        behandlinger.last().godkjenning(hendelse, erForlengelse, behandlingerMedSammeSkjæringstidspunkt, kanForkastes, arbeidsgiverperiode, harPeriodeRettFør, grunnbeløpsregulert, builder)
+    internal fun godkjenning(hendelse: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
+        if (behandlinger.grunnbeløpsregulert()) builder.grunnbeløpsregulert()
+        behandlinger.last().godkjenning(hendelse, builder)
     }
 
     internal fun håndterAnnullering(arbeidsgiver: Arbeidsgiver, hendelse: AnnullerUtbetaling, andreBehandlinger: List<Behandlinger>): Utbetaling? {
@@ -652,41 +639,16 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
 
             fun godkjenning(
                 hendelse: IAktivitetslogg,
-                erForlengelse: Boolean,
-                kanForkastes: Boolean,
                 behandling: Behandling,
-                perioderMedSammeSkjæringstidspunkt: List<Triple<UUID, UUID, Periode>>,
-                arbeidsgiverperiode: Arbeidsgiverperiode?,
-                harPeriodeRettFør: Boolean,
-                gregulering: Boolean,
                 utkastTilVedtakBuilder: UtkastTilVedtakBuilder
             ) {
                 checkNotNull(utbetaling) { "Forventet ikke manglende utbetaling ved godkjenningsbehov" }
                 checkNotNull(grunnlagsdata) { "Forventet ikke manglende vilkårsgrunnlag ved godkjennignsbehov" }
-                val hendelser = behandling.dokumentsporing.ider()
-                val builder = GodkjenningsbehovBuilder(
-                    erForlengelse,
-                    kanForkastes,
-                    periode,
-                    behandling.id,
-                    perioderMedSammeSkjæringstidspunkt.map { (vedtaksperiodeId, behandlingId, periode) ->
-                        PeriodeMedSammeSkjæringstidspunkt(vedtaksperiodeId, behandlingId, periode)
-                    },
-                    hendelser,
-                    gregulering
-                )
-                grunnlagsdata.byggGodkjenningsbehov(builder)
-                utbetaling.byggGodkjenningsbehov(hendelse, periode, builder)
-                arbeidsgiverperiode?.tags(this.periode, builder, harPeriodeRettFør)
-
+                hendelse.kontekst(utbetaling)
                 utkastTilVedtakBuilder.utbetalingstidslinje(utbetalingstidslinje).utbetaling(utbetaling)
                 grunnlagsdata.berik(utkastTilVedtakBuilder)
-
-                val godkjenningsbehov = builder.build()
-                utkastTilVedtakBuilder.sammenlign(godkjenningsbehov)
-
-                behandling.observatører.forEach { it.utkastTilVedtak(behandling.id, builder.tags(), builder.`6G`(), utkastTilVedtakBuilder) }
-                Aktivitet.Behov.godkjenning(hendelse, godkjenningsbehov)
+                behandling.observatører.forEach { it.utkastTilVedtak(utkastTilVedtakBuilder.buildUtkastTilVedtak()) }
+                Aktivitet.Behov.godkjenning(hendelse, utkastTilVedtakBuilder.buildGodkjenningsbehov())
             }
 
             internal fun berik(builder: UtkastTilVedtakBuilder) {
@@ -1044,19 +1006,9 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             observatører.forEach { it.vedtakAnnullert(hendelse, id) }
         }
 
-        internal fun godkjenning(
-            hendelse: IAktivitetslogg,
-            erForlengelse: Boolean,
-            behandlingerMedSammeSkjæringstidspunkt: List<Pair<UUID, Behandling>>,
-            kanForkastes: Boolean,
-            arbeidsgiverperiode: Arbeidsgiverperiode?,
-            harPeriodeRettFør: Boolean,
-            gregulering: Boolean,
-            builder: UtkastTilVedtakBuilder
-        ) {
-            val perioderMedSammeSkjæringstidspunkt = behandlingerMedSammeSkjæringstidspunkt.map { Triple(it.first, it.second.id, it.second.periode) }
+        internal fun godkjenning(hendelse: IAktivitetslogg, builder: UtkastTilVedtakBuilder) {
             builder.behandlingId(id).periode(periode).hendelseIder(dokumentsporing.ider()).skjæringstidspunkt(skjæringstidspunkt)
-            gjeldende.godkjenning(hendelse, erForlengelse, kanForkastes, this, perioderMedSammeSkjæringstidspunkt, arbeidsgiverperiode, harPeriodeRettFør, gregulering, builder)
+            gjeldende.godkjenning(hendelse, this, builder)
         }
 
         internal fun berik(builder: UtkastTilVedtakBuilder) {

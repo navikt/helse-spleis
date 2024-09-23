@@ -940,20 +940,8 @@ internal class Vedtaksperiode private constructor(
         person.nyBehandling(event)
     }
 
-    override fun utkastTilVedtak(id: UUID, tags: Set<String>, `6G`: Double?, builder: UtkastTilVedtakBuilder) {
-        val event = PersonObserver.UtkastTilVedtakEvent(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            vedtaksperiodeId = this.id,
-            skjæringstidspunkt = skjæringstidspunkt,
-            behandlingId = id,
-            tags = tags,
-            `6G`= `6G`
-        )
-
-        builder.sammenlign(event)
-
-        person.utkastTilVedtak(event)
+    override fun utkastTilVedtak(utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent) {
+        person.utkastTilVedtak(utkastTilVedtak)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, simuleringtilstand: Vedtaksperiodetilstand, godkjenningtilstand: Vedtaksperiodetilstand) = when {
@@ -985,12 +973,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        val perioder = person.vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
-            .map { it.id to it.behandlinger }
-        val harPeriodeRettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
-        behandlinger.godkjenning(hendelse, erForlengelse(), perioder, arbeidsgiver.kanForkastes(this, Aktivitetslogg()), finnArbeidsgiverperiode(), harPeriodeRettFør, utkastTilVedtakBuilder())
+        behandlinger.godkjenning(hendelse, utkastTilVedtakBuilder())
     }
-
 
     private fun utkastTilVedtakBuilder(): UtkastTilVedtakBuilder {
         val builder = UtkastTilVedtakBuilder(

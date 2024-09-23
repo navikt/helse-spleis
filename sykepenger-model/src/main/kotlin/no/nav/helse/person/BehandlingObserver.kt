@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.builders.UtkastTilVedtakBuilder
 
 internal interface BehandlingObserver {
 
@@ -44,9 +43,6 @@ internal interface BehandlingObserver {
     )
 
     fun utkastTilVedtak(
-        id: UUID,
-        tags: Set<String>,
-        `6G`: Double?,
-        builder: UtkastTilVedtakBuilder
+        utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent
     )
 }

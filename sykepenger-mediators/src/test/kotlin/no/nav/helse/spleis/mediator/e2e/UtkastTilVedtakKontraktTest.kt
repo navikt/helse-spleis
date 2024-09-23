@@ -22,10 +22,10 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "tags": [
-                "Førstegangsbehandling",
-                "EnArbeidsgiver",
+                "Innvilget",
                 "Arbeidsgiverutbetaling",
-                "Innvilget"
+                "Førstegangsbehandling",
+                "EnArbeidsgiver"
             ]
         }
         """

@@ -137,23 +137,9 @@ internal class UtkastTilVedtakBuilder(
 
     private val build by lazy { Build() }
 
-    internal fun sammenlign(godkjenningsbehov: Map<String, Any>) {
-        try {
-            if ("$godkjenningsbehov" == "${build.godkjenningsbehov}") return
-            sikkerlogg.warn("UtkastTilVedtakBuilder: Disse godkjenningsbehovene var jo ikke helt like:\nDagens:\n\t$godkjenningsbehov\nNytt:\n\t${build.godkjenningsbehov}")
-        } catch (exception: Exception) {
-            sikkerlogg.error("UtkastTilVedtakBuilder: Nei, nå gikk det over stokk og styr med nytt godkjenningsbehov:\nDagens:\n\t$godkjenningsbehov", exception)
-        }
-    }
+    internal fun buildGodkjenningsbehov() = build.godkjenningsbehov
+    internal fun buildUtkastTilVedtak() = build.utkastTilVedtak
 
-    internal fun sammenlign(utkastTilVedtak: PersonObserver.UtkastTilVedtakEvent) {
-        try {
-            if (utkastTilVedtak == build.utkastTilVedtak) return
-            sikkerlogg.warn("UtkastTilVedtakBuilder: Disse utkastene til vedtak var jo ikke helt like:\nDagens:\n\t$utkastTilVedtak\nNytt:\n\t${build.utkastTilVedtak}")
-        } catch (exception: Exception) {
-            sikkerlogg.error("UtkastTilVedtakBuilder: Nei, nå gikk det over stokk og styr med nytt utkast til vedtak:\nDagens:\n\t$utkastTilVedtak", exception)
-        }
-    }
     internal fun sammenlign(avsluttetMedVedtak: PersonObserver.AvsluttetMedVedtakEvent) {
         try {
             val nyttAvsluttetMedVedtak = build.avsluttetMedVedtak(avsluttetMedVedtak.vedtakFattetTidspunkt)
@@ -231,8 +217,8 @@ internal class UtkastTilVedtakBuilder(
             "førstegangsbehandling" to !erForlengelse,
             "utbetalingtype" to if (revurdering) "REVURDERING" else "UTBETALING",
             "inntektskilde" to if (enArbeidsgiver) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
-            "orgnummereMedRelevanteArbeidsforhold" to arbeidsgiverinntekter.map { it.arbeidsgiver },
-            "tags" to tags.sorted(),
+            "orgnummereMedRelevanteArbeidsforhold" to (arbeidsgiverinntekter.map { it.arbeidsgiver }).toSet(),
+            "tags" to tags,
             "kanAvvises" to kanForkastes,
             "omregnedeÅrsinntekter" to arbeidsgiverinntekterPåSkjæringstidspunktet.map {
                 mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnedeÅrsinntekt)
