@@ -1864,7 +1864,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (påminnelse.skalReberegnes()) return vedtaksperiode.tilstand(påminnelse, AvventerInntektsmelding)
-            tilstand(påminnelse, vedtaksperiode).påminnelse(vedtaksperiode, påminnelse)
             vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
 
@@ -1908,7 +1907,6 @@ internal class Vedtaksperiode private constructor(
             fun venteårsak(): Venteårsak? = null
             fun venterPå(): Vedtaksperiode? = null
             fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse)
-            fun påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
         }
         private data object TrengerInntektsmeldingLæll: Tilstand {
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
@@ -1920,10 +1918,6 @@ internal class Vedtaksperiode private constructor(
             override fun venteårsak() = SØKNAD.utenBegrunnelse
             override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, hendelse: Hendelse) {
                 hendelse.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
-            }
-
-            override fun påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-                if (vedtaksperiode.person.venterKunPåArbeidsledigsøknad(vedtaksperiode.periode)) påminnelse.info("Denne perioden venter kun på overlappende arbeidsledig-søknad.")
             }
         }
         private data object ForventerIkkeInntekt: Tilstand {

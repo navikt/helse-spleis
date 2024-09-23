@@ -196,12 +196,8 @@ internal class Arbeidsgiver private constructor(
         }
 
 
-        internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = any { it.sykmeldingsperioder.avventerSøknad(periode) }
-        internal fun Iterable<Arbeidsgiver>.venterKunPåArbeidsledigsøknad(periode: Periode): Boolean {
-            val venter = filter { it.sykmeldingsperioder.avventerSøknad(periode) }
-            if (venter.size != 1) return false
-            return venter.single().yrkesaktivitet is Yrkesaktivitet.Arbeidsledig
-        }
+        internal fun Iterable<Arbeidsgiver>.avventerSøknad(periode: Periode) = this
+            .any { it.sykmeldingsperioder.avventerSøknad(periode) }
 
         private fun Iterable<Arbeidsgiver>.sistePeriodeSomHarPågåendeUtbetaling() = vedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).maxOrNull()
         private fun Iterable<Arbeidsgiver>.harPågåeneUtbetaling() = any { it.utbetalinger.any { utbetaling -> utbetaling.erInFlight() } }

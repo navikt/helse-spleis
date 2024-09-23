@@ -65,7 +65,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.tilkomneInntekter
 import no.nav.helse.person.Arbeidsgiver.Companion.validerTilstand
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
-import no.nav.helse.person.Arbeidsgiver.Companion.venterKunPåArbeidsledigsøknad
 import no.nav.helse.person.PersonObserver.FørsteFraværsdag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.tilYrkesaktivitet
@@ -641,7 +640,6 @@ class Person private constructor(
         arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
     internal fun avventerSøknad(periode: Periode) = arbeidsgivere.avventerSøknad(periode)
-    internal fun venterKunPåArbeidsledigsøknad(periode: Periode) = arbeidsgivere.venterKunPåArbeidsledigsøknad(periode)
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
     internal fun førsteFraværsdager(skjæringstidspunkt: LocalDate) = arbeidsgivere.førsteFraværsdager(skjæringstidspunkt)
 
