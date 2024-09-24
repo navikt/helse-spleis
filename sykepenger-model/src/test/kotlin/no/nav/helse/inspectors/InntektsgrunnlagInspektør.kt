@@ -4,15 +4,15 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Avviksprosent
 import kotlin.properties.Delegates
 
-internal val Sykepengegrunnlag.inspektør get() = SykepengegrunnlagInspektør(this)
+internal val Inntektsgrunnlag.inspektør get() = InntektsgrunnlagInspektør(this)
 
-internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag) : VilkårsgrunnlagHistorikkVisitor {
+internal class InntektsgrunnlagInspektør(inntektsgrunnlag: Inntektsgrunnlag) : VilkårsgrunnlagHistorikkVisitor {
     lateinit var minsteinntekt: Inntekt
     var oppfyllerMinsteinntektskrav: Boolean by Delegates.notNull<Boolean>()
     lateinit var sykepengegrunnlag: Inntekt
@@ -29,18 +29,18 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         private set
 
     init {
-        sykepengegrunnlag.accept(this)
+        inntektsgrunnlag.accept(this)
     }
 
-    override fun preVisitSykepengegrunnlag(
-        sykepengegrunnlag1: Sykepengegrunnlag,
+    override fun preVisitInntektsgrunnlag(
+        inntektsgrunnlag1: Inntektsgrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
         avviksprosent: Avviksprosent,
         totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
-        begrensning: Sykepengegrunnlag.Begrensning,
+        begrensning: Inntektsgrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean
@@ -51,7 +51,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         this.sykepengegrunnlag = sykepengegrunnlag
         this.beregningsgrunnlag = beregningsgrunnlag
         this.omregnetÅrsinntekt = totalOmregnetÅrsinntekt
-        this.inntektskilde = sykepengegrunnlag1.inntektskilde()
+        this.inntektskilde = inntektsgrunnlag1.inntektskilde()
     }
 
     override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {

@@ -67,7 +67,7 @@ import no.nav.helse.dto.deserialisering.RefusjonshistorikkInnDto
 import no.nav.helse.dto.deserialisering.RefusjonsopplysningInnDto
 import no.nav.helse.dto.deserialisering.RefusjonsopplysningerInnDto
 import no.nav.helse.dto.deserialisering.SammenligningsgrunnlagInnDto
-import no.nav.helse.dto.deserialisering.SykepengegrunnlagInnDto
+import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
@@ -209,7 +209,7 @@ data class PersonData(
     data class VilkårsgrunnlagElementData(
         val skjæringstidspunkt: LocalDate,
         val type: GrunnlagsdataType,
-        val sykepengegrunnlag: SykepengegrunnlagData,
+        val inntektsgrunnlag: InntektsgrunnlagData,
         val opptjening: OpptjeningData?,
         val medlemskapstatus: JsonMedlemskapstatus?,
         val vurdertOk: Boolean?,
@@ -220,12 +220,12 @@ data class PersonData(
             GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagInnDto.Infotrygd(
                 vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                 skjæringstidspunkt = this.skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.tilInfotrygdDto()
+                inntektsgrunnlag = inntektsgrunnlag.tilInfotrygdDto()
             )
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagInnDto.Spleis(
                 vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                 skjæringstidspunkt = this.skjæringstidspunkt,
-                sykepengegrunnlag = this.sykepengegrunnlag.tilSpleisDto(),
+                inntektsgrunnlag = this.inntektsgrunnlag.tilSpleisDto(),
                 opptjening = this.opptjening!!.tilDto(),
                 medlemskapstatus = this.medlemskapstatus!!.tilDto(),
                 vurdertOk = this.vurdertOk!!,
@@ -238,21 +238,21 @@ data class PersonData(
             Vilkårsprøving
         }
 
-        data class SykepengegrunnlagData(
+        data class InntektsgrunnlagData(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
             val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             val vurdertInfotrygd: Boolean
         ) {
-            fun tilSpleisDto() = SykepengegrunnlagInnDto(
+            fun tilSpleisDto() = InntektsgrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 vurdertInfotrygd = this.vurdertInfotrygd,
                 sammenligningsgrunnlag = this.sammenligningsgrunnlag!!.tilDto(),
                 `6G` = InntektbeløpDto.Årlig(grunnbeløp!!)
             )
-            fun tilInfotrygdDto() = SykepengegrunnlagInnDto(
+            fun tilInfotrygdDto() = InntektsgrunnlagInnDto(
                 arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilDto() },
                 deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.tilDto() },
                 vurdertInfotrygd = this.vurdertInfotrygd,

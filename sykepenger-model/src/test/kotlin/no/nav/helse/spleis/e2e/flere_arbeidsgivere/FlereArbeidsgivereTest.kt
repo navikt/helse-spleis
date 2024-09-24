@@ -54,7 +54,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.testhelpers.assertNotNull
@@ -93,7 +92,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                     Arbeidsforhold(a3, LocalDate.EPOCH, type = Arbeidsforholdtype.ORDINÆRT),
                 ), orgnummer = a1
             )
-            val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger ?: emptyList()
+            val inntekter = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger ?: emptyList()
             assertEquals(3, inntekter.size)
             assertTrue(inntekter.single { it.gjelder(a1) }.inspektør.inntektsopplysning is no.nav.helse.person.inntekt.Inntektsmelding)
             assertTrue(inntekter.single { it.gjelder(a2) }.inspektør.inntektsopplysning is no.nav.helse.person.inntekt.Inntektsmelding)
@@ -1539,7 +1538,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
     private val Utbetalingsdag.arbeidsgiverbeløp get() = this.økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, _, dagligInt -> dagligInt } ?: 0
     private val Utbetalingsdag.personbeløp get() = this.økonomi.inspektør.personbeløp?.reflection { _, _, _, dagligInt -> dagligInt } ?: 0
-    private fun TestArbeidsgiverInspektør.inntektsopplysning(vedtaksperiode: UUID, orgnr: String) = vilkårsgrunnlag(vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(orgnr) }.inspektør.inntektsopplysning
+    private fun TestArbeidsgiverInspektør.inntektsopplysning(vedtaksperiode: UUID, orgnr: String) = vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(orgnr) }.inspektør.inntektsopplysning
     private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(vedtaksperiode: UUID, skjæringstidspunkt: LocalDate = 1.januar, inntekt: Inntekt = INNTEKT) {
         håndterVilkårsgrunnlag(
             vedtaksperiode,

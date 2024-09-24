@@ -7,12 +7,12 @@ import no.nav.helse.dto.MedlemskapsvurderingDto
 sealed class VilkårsgrunnlagUtDto {
     abstract val vilkårsgrunnlagId: UUID
     abstract val skjæringstidspunkt: LocalDate
-    abstract val sykepengegrunnlag: SykepengegrunnlagUtDto
+    abstract val inntektsgrunnlag: InntektsgrunnlagUtDto
 
     data class Spleis(
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,
-        override val sykepengegrunnlag: SykepengegrunnlagUtDto,
+        override val inntektsgrunnlag: InntektsgrunnlagUtDto,
         val opptjening: OpptjeningUtDto,
         val medlemskapstatus: MedlemskapsvurderingDto,
         val vurdertOk: Boolean,
@@ -21,6 +21,6 @@ sealed class VilkårsgrunnlagUtDto {
     data class Infotrygd(
         override val vilkårsgrunnlagId: UUID,
         override val skjæringstidspunkt: LocalDate,
-        override val sykepengegrunnlag: SykepengegrunnlagUtDto
+        override val inntektsgrunnlag: InntektsgrunnlagUtDto
     ) : VilkårsgrunnlagUtDto()
 }

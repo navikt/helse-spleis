@@ -76,7 +76,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), id = søknad, orgnummer = a2)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(3.vedtaksperiode)?.inspektør ?: fail { "må ha vilkårsgrunnlag" }
-        val inntektsopplysninger = vilkårsgrunnlag.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
+        val inntektsopplysninger = vilkårsgrunnlag.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver
 
         assertEquals(2, inntektsopplysninger.size)
         val a1Inspektør = inntektsopplysninger.getValue(a1).inspektør
@@ -277,7 +277,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2) // a2 sent til festen, men med ting liggende i vilkårsgrunnlaget
-        val sykepengegrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(INNTEKT, it.inntektsopplysning.fastsattÅrsinntekt())
             assertEquals(Refusjonsopplysning(imId, 1.januar, null, beløp = INNTEKT), it.refusjonsopplysninger.inspektør.refusjonsopplysninger.single())

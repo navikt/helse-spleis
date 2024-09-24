@@ -15,18 +15,18 @@ import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.Com
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Inntekttype.LØNNSINNTEKT
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 
-internal val Inntekt.sykepengegrunnlag get() = sykepengegrunnlag(AbstractPersonTest.ORGNUMMER)
+internal val Inntekt.sykepengegrunnlag get() = inntektsgrunnlag(AbstractPersonTest.ORGNUMMER)
 
-internal fun Inntekt.sykepengegrunnlag(orgnr: String) = sykepengegrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, orgnr, 1.januar)
-internal fun Inntekt.sykepengegrunnlag(alder: Alder) = sykepengegrunnlag(alder, AbstractPersonTest.ORGNUMMER, 1.januar)
-internal fun Inntekt.sykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-    sykepengegrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, AbstractPersonTest.ORGNUMMER, skjæringstidspunkt)
+internal fun Inntekt.inntektsgrunnlag(orgnr: String) = inntektsgrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, orgnr, 1.januar)
+internal fun Inntekt.inntektsgrunnlag(alder: Alder) = inntektsgrunnlag(alder, AbstractPersonTest.ORGNUMMER, 1.januar)
+internal fun Inntekt.inntektsgrunnlag(skjæringstidspunkt: LocalDate) =
+    inntektsgrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, AbstractPersonTest.ORGNUMMER, skjæringstidspunkt)
 
-internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.NullObserver, skattInntekt: Inntekt? = null, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
-    Sykepengegrunnlag(
+internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.NullObserver, skattInntekt: Inntekt? = null, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
+    Inntektsgrunnlag(
         alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
@@ -44,8 +44,8 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
         } ?: emptyList()),
         subsumsjonslogg = subsumsjonslogg
     )
-internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
-    Sykepengegrunnlag.ferdigSykepengegrunnlag(
+internal fun Inntekt.inntektsgrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
+    Inntektsgrunnlag.ferdigSykepengegrunnlag(
         alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiverInntektsopplysninger = listOf(

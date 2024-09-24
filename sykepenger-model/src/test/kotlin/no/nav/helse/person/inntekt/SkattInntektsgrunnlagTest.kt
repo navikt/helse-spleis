@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SkattSykepengegrunnlagTest {
+internal class SkattInntektsgrunnlagTest {
 
     @Test
     fun `setter negativt omregnet årsinntekt til 0`() {

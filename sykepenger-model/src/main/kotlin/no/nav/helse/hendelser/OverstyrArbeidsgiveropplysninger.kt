@@ -10,7 +10,7 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Inntektsopplysningstype.SAKSBEHANDLER
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 
 class OverstyrArbeidsgiveropplysninger(
     private val meldingsreferanseId: UUID,
@@ -20,7 +20,7 @@ class OverstyrArbeidsgiveropplysninger(
     private val arbeidsgiveropplysninger: List<ArbeidsgiverInntektsopplysning>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     private val opprettet: LocalDateTime
-) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg), OverstyrSykepengegrunnlag {
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg), OverstyrInntektsgrunnlag {
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
     override fun dokumentsporing() = Dokumentsporing.overstyrArbeidsgiveropplysninger(meldingsreferanseId())
 
@@ -35,7 +35,7 @@ class OverstyrArbeidsgiveropplysninger(
     override fun innsendt() = opprettet
     override fun avsender() = Avsender.SAKSBEHANDLER
 
-    internal fun overstyr(builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer) {
+    internal fun overstyr(builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer) {
         arbeidsgiveropplysninger.forEach { builder.leggTilInntekt(it) }
     }
 

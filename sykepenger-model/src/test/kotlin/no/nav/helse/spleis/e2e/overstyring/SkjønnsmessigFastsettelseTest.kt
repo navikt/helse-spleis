@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.overstyring
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -96,7 +95,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         }
 
         a1 {
-            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
+            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.inntektsgrunnlag?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
 
             sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
                 assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
@@ -134,7 +133,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         a1 {
             val im = håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, refusjon = Refusjon(20000.månedlig, opphørsdato = 31.januar))
 
-            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
+            val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.januar)?.inspektør?.inntektsgrunnlag?.inspektør ?: fail { "forventer vilkårsgrunnlag" }
 
             sykepengegrunnlag.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also { arbeidsgiverInntektsopplysning ->
                 assertInstanceOf(SkjønnsmessigFastsatt::class.java, arbeidsgiverInntektsopplysning.inntektsopplysning)
@@ -171,7 +170,7 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
         nyttVedtak(januar)
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør
+        val sykepengegrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør
         val inntektsopplysning = inspektør.inntektsopplysningISykepengegrunnlaget(1.januar)
         assertTrue(inntektsopplysning is SkjønnsmessigFastsatt)
         assertEquals(INNTEKT * 2, sykepengegrunnlag.beregningsgrunnlag)
@@ -378,6 +377,6 @@ internal class SkjønnsmessigFastsettelseTest: AbstractDslTest() {
     }
 
     private fun TestArbeidsgiverInspektør.inntektsopplysningISykepengegrunnlaget(skjæringstidspunkt: LocalDate, orgnr: String = a1) =
-        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning
+        vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(orgnr) }.inspektør.inntektsopplysning
 
 }

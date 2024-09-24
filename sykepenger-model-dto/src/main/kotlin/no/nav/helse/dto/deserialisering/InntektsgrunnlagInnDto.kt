@@ -2,7 +2,7 @@ package no.nav.helse.dto.deserialisering
 
 import no.nav.helse.dto.InntektbeløpDto
 
-data class SykepengegrunnlagInnDto(
+data class InntektsgrunnlagInnDto(
     val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningInnDto>,
     val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningInnDto>,
     val vurdertInfotrygd: Boolean,

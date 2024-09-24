@@ -77,7 +77,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -659,9 +659,9 @@ class Person private constructor(
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         skatteopplysninger: Map<String, SkattSykepengegrunnlag>,
         subsumsjonslogg: Subsumsjonslogg
-    ): Sykepengegrunnlag {
+    ): Inntektsgrunnlag {
         skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), hendelse) } // oppretter evt. nye arbeidsgivere
-        return Sykepengegrunnlag.opprett(
+        return Inntektsgrunnlag.opprett(
             alder,
             arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,

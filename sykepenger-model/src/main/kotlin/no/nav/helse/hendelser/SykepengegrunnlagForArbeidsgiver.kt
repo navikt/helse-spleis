@@ -1,22 +1,10 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsgrunnlag
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Person
-import no.nav.helse.person.Vedtaksperiode.Companion.arbeidsgiverperioder
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.person.inntekt.AnsattPeriode
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk
-import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 class SykepengegrunnlagForArbeidsgiver(

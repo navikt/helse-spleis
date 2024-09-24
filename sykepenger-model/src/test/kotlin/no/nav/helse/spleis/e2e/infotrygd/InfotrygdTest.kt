@@ -101,8 +101,8 @@ internal class InfotrygdTest : AbstractEndToEndTest() {
     }
 
     private fun refusjonsopplysninger(vedtaksperiode: IdInnhenter) =
-        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.sykepengegrunnlag.refusjonsopplysninger(a1).inspektør.refusjonsopplysninger
+        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.refusjonsopplysninger(a1).inspektør.refusjonsopplysninger
 
     private fun inntektsopplysning(vedtaksperiode: IdInnhenter) =
-        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a1) }.inspektør.inntektsopplysning
+        inspektør.vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.gjelder(a1) }.inspektør.inntektsopplysning
 }

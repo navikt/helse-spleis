@@ -49,7 +49,7 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.RefusjonUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
+import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
@@ -712,7 +712,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagE
         is VilkårsgrunnlagUtDto.Infotrygd -> PersonData.VilkårsgrunnlagElementData.GrunnlagsdataType.Infotrygd
         is VilkårsgrunnlagUtDto.Spleis -> PersonData.VilkårsgrunnlagElementData.GrunnlagsdataType.Vilkårsprøving
     },
-    sykepengegrunnlag = this.sykepengegrunnlag.tilPersonData(),
+    inntektsgrunnlag = this.inntektsgrunnlag.tilPersonData(),
     opptjening = when (this) {
         is VilkårsgrunnlagUtDto.Spleis -> this.opptjening.tilPersonData()
         is VilkårsgrunnlagUtDto.Infotrygd -> null
@@ -753,7 +753,7 @@ private fun OpptjeningUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElement
         )
     }
 )
-private fun SykepengegrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.SykepengegrunnlagData(
+private fun InntektsgrunnlagUtDto.tilPersonData() = PersonData.VilkårsgrunnlagElementData.InntektsgrunnlagData(
     grunnbeløp = this.`6G`.årlig.beløp,
     arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
     sammenligningsgrunnlag = this.sammenligningsgrunnlag.tilPersonData(),

@@ -13,7 +13,7 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Skatteopplysning
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 class ArbeidsgiverInntekt(
@@ -46,7 +46,7 @@ class ArbeidsgiverInntekt(
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             meldingsreferanseId: UUID,
             subsumsjonslogg: Subsumsjonslogg
-        ): Sykepengegrunnlag {
+        ): Inntektsgrunnlag {
             val rapporterteInntekter = this.associateBy({ it.arbeidsgiver }) { it.tilSykepengegrunnlag(skjæringstidspunkt, meldingsreferanseId) }
             // tar utgangspunktet i inntekter som bare stammer fra orgnr vedkommende har registrert arbeidsforhold
             val inntekterMedOpptjening = rapporterteArbeidsforhold.mapValues { (orgnummer, ikkeRapportert) -> ikkeRapportert + rapporterteInntekter[orgnummer] }

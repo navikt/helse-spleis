@@ -70,7 +70,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
-        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
         sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
             ?.also {
                 assertEquals(overstyrtInntekt, it.inntektsopplysning.inspektør.beløp)
@@ -102,7 +102,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             OverstyrtArbeidsgiveropplysning(a2, 500.daglig, "retter opp ikke-rapportert-inntekt", null, emptyList())
         ))
         val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
-        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.inntektsgrunnlag?.inspektør
         val a2Opplysninger = sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(a2)?.inspektør ?: fail { "må ha inntekt for a2" }
         assertEquals(500.daglig, a2Opplysninger.inntektsopplysning.inspektør.beløp)
         assertEquals(Saksbehandler::class, a2Opplysninger.inntektsopplysning::class)

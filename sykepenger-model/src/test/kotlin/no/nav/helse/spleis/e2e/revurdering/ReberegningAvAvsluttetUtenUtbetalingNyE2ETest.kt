@@ -927,14 +927,14 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertNotNull(vilkårsgrunnlag)
 
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør
 
         sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(riktigInntekt, it.inntektsopplysning.inspektør.beløp)
             assertEquals(Inntektsmelding::class, it.inntektsopplysning::class)
         }
 
-        assertEquals(riktigInntekt, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(riktigInntekt, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)
 
         val utbetaling = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode)
         val utbetalingInspektør = utbetaling.inspektør

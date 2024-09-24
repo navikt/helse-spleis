@@ -30,7 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke s�
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Refusjonsopplysning
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
@@ -181,7 +181,7 @@ class Søknad(
     internal fun orgnummereMedTilkomneInntekter() = tilkomneInntekter.orgnummereMedTilkomneInntekter()
 
     internal fun nyeInntekter(
-        builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
+        builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
         skjæringstidspunkt: LocalDate
     ) {
         tilkomneInntekter.forEach { inntekt ->
@@ -213,7 +213,7 @@ class Søknad(
         private fun gjelder() = fom til tom
 
         internal fun nyInntekt(
-            builder: Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
+            builder: Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer,
             skjæringstidspunkt: LocalDate,
             meldingsreferanseId: UUID,
             registrert: LocalDateTime

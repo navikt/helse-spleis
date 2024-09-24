@@ -32,13 +32,13 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
     fun `Grunnbeløpsregulering med allerede riktig G-beløp`() {
         nyttVedtak(januar)
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-        assertEquals(561804.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.`6G`)
+        assertEquals(561804.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
         nullstillTilstandsendringer()
         inspektør.vilkårsgrunnlagHistorikkInnslag()
         håndterGrunnbeløpsregulering(1.januar)
         assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         assertInfo("Grunnbeløpet i sykepengegrunnlaget 2018-01-01 er allerede korrekt.", 1.vedtaksperiode.filter())
-        assertEquals(561804.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.`6G`)
+        assertEquals(561804.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
         assertTilstander(1.vedtaksperiode, AVSLUTTET)
         assertEquals(0, observatør.sykefraværstilfelleIkkeFunnet.size)
     }
@@ -77,9 +77,9 @@ internal class GrunnbeløpsreguleringTest: AbstractEndToEndTest() {
         håndterSøknad(januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 3)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
-        assertEquals(riktig6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.`6G`)
+        assertEquals(riktig6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
         hackGrunnbeløp(fra = riktig6G, til = feil6G) // Hacker inn 2017-G
-        assertEquals(feil6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.`6G`)
+        assertEquals(feil6G.årlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.`6G`)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)

@@ -103,7 +103,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)

@@ -77,7 +77,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
@@ -191,7 +190,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(612000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -251,7 +250,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(576000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -306,7 +305,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(624000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -1281,7 +1280,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(624000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -1324,7 +1323,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(612000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -1402,7 +1401,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(756000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -1603,7 +1602,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
-        vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
+        vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
             assertEquals(2, inntekter.size)
             assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a1).inspektør.inntektsopplysning::class)
             assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a2).inspektør.inntektsopplysning::class)
@@ -1635,7 +1634,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode) ?: fail { "forventer vilkårsgrunnlag" }
-        vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
+        vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.also { inntekter ->
             assertEquals(2, inntekter.size)
             assertEquals(SkattSykepengegrunnlag::class, inntekter.getValue(a1).inspektør.inntektsopplysning::class)
             assertEquals(IkkeRapportert::class, inntekter.getValue(a2).inspektør.inntektsopplysning::class)

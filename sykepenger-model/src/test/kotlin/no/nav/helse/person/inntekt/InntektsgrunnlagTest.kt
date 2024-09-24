@@ -32,6 +32,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
+import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.assertNotNull
@@ -48,7 +49,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.properties.Delegates
 
-internal class SykepengegrunnlagTest {
+internal class InntektsgrunnlagTest {
     private companion object {
         private val fødseldato67år =  1.februar(1954)
     }
@@ -59,8 +60,8 @@ internal class SykepengegrunnlagTest {
         assertEquals(sykepengegrunnlag, sykepengegrunnlag)
         assertEquals(sykepengegrunnlag, INNTEKT.sykepengegrunnlag)
         assertEquals(INNTEKT.sykepengegrunnlag, INNTEKT.sykepengegrunnlag)
-        assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.sykepengegrunnlag("annet orgnr"))
-        assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.sykepengegrunnlag(31.desember))
+        assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.inntektsgrunnlag("annet orgnr"))
+        assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.inntektsgrunnlag(31.desember))
     }
 
     @Test
@@ -70,7 +71,7 @@ internal class SykepengegrunnlagTest {
         val halvG = Grunnbeløp.halvG.beløp(skjæringstidspunkt)
 
         var observer = MinsteinntektSubsumsjonObservatør()
-        val sykepengegrunnlag = halvG.sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
+        val sykepengegrunnlag = halvG.inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
         var aktivitetslogg = Aktivitetslogg()
         var validert = sykepengegrunnlag.valider(aktivitetslogg)
         assertTrue(validert)
@@ -81,7 +82,7 @@ internal class SykepengegrunnlagTest {
 
         observer = MinsteinntektSubsumsjonObservatør()
         aktivitetslogg = Aktivitetslogg()
-        val forLiteSykepengegrunnlag = (halvG - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
+        val forLiteSykepengegrunnlag = (halvG - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
         validert = forLiteSykepengegrunnlag.valider(aktivitetslogg)
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(halvG, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
@@ -98,7 +99,7 @@ internal class SykepengegrunnlagTest {
 
         var observer = MinsteinntektSubsumsjonObservatør()
         var aktivitetslogg = Aktivitetslogg()
-        val sykepengegrunnlag = (`2G`).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
+        val sykepengegrunnlag = (`2G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
         var validert = sykepengegrunnlag.valider(aktivitetslogg)
         assertTrue(sykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G`, sykepengegrunnlag.inspektør.minsteinntekt)
@@ -108,7 +109,7 @@ internal class SykepengegrunnlagTest {
 
         observer = MinsteinntektSubsumsjonObservatør()
         aktivitetslogg = Aktivitetslogg()
-        val forLiteSykepengegrunnlag = (`2G` - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
+        val forLiteSykepengegrunnlag = (`2G` - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
         validert = forLiteSykepengegrunnlag.valider(aktivitetslogg)
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
@@ -122,7 +123,7 @@ internal class SykepengegrunnlagTest {
         val alder = fødseldato67år.alder
         val skjæringstidspunkt = 1.februar(2021)
         val forLitenInntekt = Grunnbeløp.halvG.beløp(skjæringstidspunkt) - 1.daglig
-        val sykepengegrunnlag = (forLitenInntekt).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (forLitenInntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = 1.januar)
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, MaskinellJurist())
@@ -135,7 +136,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.januar(2021)
         val forLitenInntekt = Grunnbeløp.halvG.beløp(skjæringstidspunkt) - 1.daglig
 
-        val sykepengegrunnlag = (forLitenInntekt).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (forLitenInntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, MaskinellJurist()).single()
@@ -160,7 +161,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.mars(2021)
         val `1G` = Grunnbeløp.`1G`.beløp(skjæringstidspunkt)
 
-        val sykepengegrunnlag = (`1G`).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
 
         val tidslinje = tidslinjeOf(20.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, MaskinellJurist()).single()
@@ -176,7 +177,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.januar(2021)
         val `1G` = Grunnbeløp.`1G`.beløp(skjæringstidspunkt)
 
-        val sykepengegrunnlag = (`1G`).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, MaskinellJurist()).single()
@@ -192,7 +193,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.januar(2021)
         val `1G` = Grunnbeløp.`1G`.beløp(skjæringstidspunkt)
 
-        val sykepengegrunnlag = (`1G`).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til 31.januar(2021), skjæringstidspunkt til skjæringstidspunkt, MaskinellJurist()).single()
@@ -208,7 +209,7 @@ internal class SykepengegrunnlagTest {
 
         val observer = MinsteinntektSubsumsjonObservatør()
         var aktivitetslogg = Aktivitetslogg()
-        val sykepengegrunnlag = (`2G_2021`).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
+        val sykepengegrunnlag = (`2G_2021`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
         var validert = sykepengegrunnlag.valider(aktivitetslogg)
         assertEquals(`2G_2020`, Grunnbeløp.`2G`.minsteinntekt(skjæringstidspunkt))
         assertTrue(sykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
@@ -218,7 +219,7 @@ internal class SykepengegrunnlagTest {
         assertTrue(observer.`§ 8-51 ledd 2`)
 
         aktivitetslogg = Aktivitetslogg()
-        val forLiteSykepengegrunnlag = (`2G_2021` - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
+        val forLiteSykepengegrunnlag = (`2G_2021` - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
         validert = forLiteSykepengegrunnlag.valider(aktivitetslogg)
         assertTrue(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G_2020`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
@@ -232,7 +233,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 24.mai(2021)
         val `2G_2021` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
         var aktivitetslogg = Aktivitetslogg()
-        val sykepengegrunnlag = (`2G_2021`).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
+        val sykepengegrunnlag = (`2G_2021`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
         var validert = sykepengegrunnlag.valider(aktivitetslogg)
         assertEquals(`2G_2021`, Grunnbeløp.`2G`.minsteinntekt(skjæringstidspunkt))
         assertTrue(sykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
@@ -241,7 +242,7 @@ internal class SykepengegrunnlagTest {
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
 
         aktivitetslogg = Aktivitetslogg()
-        val forLiteSykepengegrunnlag = (`2G_2021` - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
+        val forLiteSykepengegrunnlag = (`2G_2021` - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
         validert = forLiteSykepengegrunnlag.valider(aktivitetslogg)
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G_2021`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
@@ -254,7 +255,7 @@ internal class SykepengegrunnlagTest {
         val alder = fødseldato67år.alder
         val skjæringstidspunkt = 1.februar(2021)
         val inntekt = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
-        val sykepengegrunnlag = (inntekt).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
+        val sykepengegrunnlag = (inntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt,  MaskinellJurist()).single()
@@ -267,7 +268,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.februar(2021)
         val halvG = Grunnbeløp.halvG.beløp(skjæringstidspunkt)
 
-        val sykepengegrunnlag = (halvG - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
+        val sykepengegrunnlag = (halvG - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt, MaskinellJurist()).single()
@@ -291,7 +292,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 2.februar(2021)
         val `2G` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
 
-        val sykepengegrunnlag = (`2G` - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
+        val sykepengegrunnlag = (`2G` - 1.daglig).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt)
 
         val tidslinje = tidslinjeOf(27.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX,skjæringstidspunkt til skjæringstidspunkt, MaskinellJurist()).single()
@@ -306,7 +307,7 @@ internal class SykepengegrunnlagTest {
 
     @Test
     fun `justerer grunnbeløpet`() {
-        val sykepengegrunnlag = 60000.månedlig.sykepengegrunnlag("orgnr", 1.mai(2020), 1.mai(2020))
+        val sykepengegrunnlag = 60000.månedlig.inntektsgrunnlag("orgnr", 1.mai(2020), 1.mai(2020))
         val justert = sykepengegrunnlag.grunnbeløpsregulering()
         assertNotEquals(sykepengegrunnlag, justert)
         assertNotEquals(sykepengegrunnlag.inspektør.sykepengegrunnlag, justert.inspektør.sykepengegrunnlag)
@@ -344,15 +345,15 @@ internal class SykepengegrunnlagTest {
             }.build()),
         )
 
-        val sykepengegrunnlag = Sykepengegrunnlag(
+        val inntektsgrunnlag = Inntektsgrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             arbeidsgiverInntektsopplysninger = inntekter,
             skjæringstidspunkt = skjæringstidspunkt,
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             subsumsjonslogg = NullObserver
         )
-        assertEquals(a1Inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(a1Inntekt, sykepengegrunnlag.inspektør.beregningsgrunnlag)
+        assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.beregningsgrunnlag)
     }
 
     @Test
@@ -366,7 +367,7 @@ internal class SykepengegrunnlagTest {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, INGEN), LocalDateTime.now())
             }.build()),
         )
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidsounkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidsounkt, opprinnelig, null, NullObserver)
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Saksbehandler(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
         }.build())
@@ -389,7 +390,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 2000.månedlig), LocalDateTime.now())
         }.build()
@@ -414,7 +415,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -442,7 +443,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -469,7 +470,7 @@ internal class SykepengegrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Sykepengegrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
 
         val a3EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a3EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -502,7 +503,7 @@ internal class SykepengegrunnlagTest {
         val sluttdatoA1 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(1)
         val startdatoA2 = skjæringstidspunkt.minusMonths(1).withDayOfMonth(2)
 
-        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
+        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -562,12 +563,12 @@ internal class SykepengegrunnlagTest {
         ), skjæringstidspunkt, true, NullObserver)
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
+            inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
             aktivitetslogg.assertVarsel(RV_VV_8)
         }
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a2)
+            inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a2)
             aktivitetslogg.assertIngenVarsel(RV_VV_8)
         }
     }
@@ -578,7 +579,7 @@ internal class SykepengegrunnlagTest {
         val a2 = "a2"
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
-        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
+        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -622,7 +623,7 @@ internal class SykepengegrunnlagTest {
 
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
+            inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
             aktivitetslogg.assertVarsel(RV_VV_2)
         }
     }
@@ -634,7 +635,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt.nesteDag
-        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
+        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -668,7 +669,7 @@ internal class SykepengegrunnlagTest {
 
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
+            inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
             aktivitetslogg.assertVarsel(RV_VV_2)
         }
     }
@@ -678,7 +679,7 @@ internal class SykepengegrunnlagTest {
         val a1 = "a1"
         val a2 = "a2"
         val skjæringstidspunkt = 1.mars
-        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
+        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -737,12 +738,12 @@ internal class SykepengegrunnlagTest {
         ), skjæringstidspunkt, true, NullObserver)
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningUtenA2)
+            inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningUtenA2)
             aktivitetslogg.assertVarsel(RV_VV_1)
         }
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningMedA2)
+            inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningMedA2)
             aktivitetslogg.assertIngenVarsel(RV_VV_1)
         }
     }
@@ -754,7 +755,7 @@ internal class SykepengegrunnlagTest {
         val skjæringstidspunkt = 1.mars
         val førsteFraværsdagAG1 = skjæringstidspunkt
         val førsteFraværsdagAG2 = skjæringstidspunkt
-        val sykepengegrunnlag = Sykepengegrunnlag.ferdigSykepengegrunnlag(
+        val inntektsgrunnlag = Inntektsgrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -788,7 +789,7 @@ internal class SykepengegrunnlagTest {
 
 
         Aktivitetslogg().also { aktivitetslogg ->
-            sykepengegrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
+            inntektsgrunnlag.markerFlereArbeidsgivere(aktivitetslogg)
             aktivitetslogg.assertIngenVarsel(RV_VV_2)
         }
     }
@@ -798,7 +799,7 @@ internal class SykepengegrunnlagTest {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
-        val sykepengegrunnlag1 = Sykepengegrunnlag.ferdigSykepengegrunnlag(
+        val inntektsgrunnlag1 = Inntektsgrunnlag.ferdigSykepengegrunnlag(
             alder = UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
@@ -820,10 +821,10 @@ internal class SykepengegrunnlagTest {
             vurdertInfotrygd = false
         )
 
-        assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.grunnbeløpsregulering()) { "grunnbeløpet trenger ikke justering" }
+        assertEquals(inntektsgrunnlag1, inntektsgrunnlag1.grunnbeløpsregulering()) { "grunnbeløpet trenger ikke justering" }
         assertNotEquals(
-            sykepengegrunnlag1,
-            Sykepengegrunnlag.ferdigSykepengegrunnlag(
+            inntektsgrunnlag1,
+            Inntektsgrunnlag.ferdigSykepengegrunnlag(
                 alder = UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(

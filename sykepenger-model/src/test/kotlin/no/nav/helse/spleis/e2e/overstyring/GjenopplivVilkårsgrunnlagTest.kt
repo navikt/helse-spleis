@@ -117,10 +117,10 @@ internal class GjenopplivVilkårsgrunnlagTest : AbstractDslTest() {
     }
 
     private fun TestPerson.TestArbeidsgiver.refusjonsopplysninger(skjæringstidspunkt: LocalDate) =
-        inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == this.orgnummer }.inspektør.refusjonsopplysninger
+        inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == this.orgnummer }.inspektør.refusjonsopplysninger
 
     private fun TestPerson.TestArbeidsgiver.inntektGjelder(skjæringstidspunkt: LocalDate) =
-        inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == this.orgnummer }.inspektør.gjelder
+        inspektør.vilkårsgrunnlag(skjæringstidspunkt)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.single { it.inspektør.orgnummer == this.orgnummer }.inspektør.gjelder
 
     private fun Refusjonsopplysninger(vararg refusjonsopplysninger: Refusjonsopplysning): Refusjonsopplysning.Refusjonsopplysninger {
         val refusjonsopplysningerBuilder = Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder()

@@ -23,7 +23,7 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.dto.serialisering.RefusjonUtDto
 import no.nav.helse.dto.serialisering.RefusjonsopplysningUtDto
 import no.nav.helse.dto.serialisering.SammenligningsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
+import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
@@ -94,7 +94,7 @@ data class SpannerPersonDto(
     data class VilkårsgrunnlagElementData(
         val skjæringstidspunkt: LocalDate,
         val type: GrunnlagsdataType,
-        val sykepengegrunnlag: SykepengegrunnlagData,
+        val inntektsgrunnlag: InntektsgrunnlagData,
         val opptjening: OpptjeningData?,
         val medlemskapstatus: MedlemskapstatusDto?,
         val vurdertOk: Boolean?,
@@ -104,7 +104,7 @@ data class SpannerPersonDto(
         enum class MedlemskapstatusDto { JA, VET_IKKE, NEI, UAVKLART_MED_BRUKERSPØRSMÅL }
         enum class GrunnlagsdataType { Infotrygd, Vilkårsprøving }
 
-        data class SykepengegrunnlagData(
+        data class InntektsgrunnlagData(
             val grunnbeløp: Double?,
             val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
@@ -1375,7 +1375,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() = SpannerPersonDto.Vilkårsgru
         is VilkårsgrunnlagUtDto.Infotrygd -> SpannerPersonDto.VilkårsgrunnlagElementData.GrunnlagsdataType.Infotrygd
         is VilkårsgrunnlagUtDto.Spleis -> SpannerPersonDto.VilkårsgrunnlagElementData.GrunnlagsdataType.Vilkårsprøving
     },
-    sykepengegrunnlag = this.sykepengegrunnlag.tilPersonData(),
+    inntektsgrunnlag = this.inntektsgrunnlag.tilPersonData(),
     opptjening = when (this) {
         is VilkårsgrunnlagUtDto.Spleis -> this.opptjening.tilPersonData()
         is VilkårsgrunnlagUtDto.Infotrygd -> null
@@ -1418,8 +1418,8 @@ private fun OpptjeningUtDto.tilPersonData() =
             )
         }
     )
-private fun SykepengegrunnlagUtDto.tilPersonData() =
-    SpannerPersonDto.VilkårsgrunnlagElementData.SykepengegrunnlagData(
+private fun InntektsgrunnlagUtDto.tilPersonData() =
+    SpannerPersonDto.VilkårsgrunnlagElementData.InntektsgrunnlagData(
         grunnbeløp = this.`6G`.årlig.beløp,
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.tilPersonData() },
         sammenligningsgrunnlag = this.sammenligningsgrunnlag.tilPersonData(),

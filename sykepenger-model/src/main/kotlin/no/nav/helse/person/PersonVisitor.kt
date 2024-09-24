@@ -23,7 +23,7 @@ import no.nav.helse.person.inntekt.InntektsmeldingVisitor
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeDagVisitor
@@ -125,16 +125,16 @@ interface RefusjonsopplysningerVisitor {
     fun postVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger) {}
 }
 
-internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisitor, SammenligningsgrunnlagVisitor {
-    fun preVisitSykepengegrunnlag(
-        sykepengegrunnlag1: Sykepengegrunnlag,
+internal interface InntektsgrunnlagVisitor : ArbeidsgiverInntektsopplysningVisitor, SammenligningsgrunnlagVisitor {
+    fun preVisitInntektsgrunnlag(
+        inntektsgrunnlag1: Inntektsgrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
         avviksprosent: Avviksprosent,
         totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
-        begrensning: Sykepengegrunnlag.Begrensning,
+        begrensning: Inntektsgrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean
@@ -147,15 +147,15 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
 
     fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {}
 
-    fun postVisitSykepengegrunnlag(
-        sykepengegrunnlag1: Sykepengegrunnlag,
+    fun postVisitInntektsgrunnlag(
+        inntektsgrunnlag1: Inntektsgrunnlag,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
         avviksprosent: Avviksprosent,
         totalOmregnetÅrsinntekt: Inntekt,
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
-        begrensning: Sykepengegrunnlag.Begrensning,
+        begrensning: Inntektsgrunnlag.Begrensning,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean
@@ -186,7 +186,7 @@ internal interface OpptjeningVisitor {
     fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
 }
 
-internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, SykepengegrunnlagVisitor {
+internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, InntektsgrunnlagVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
@@ -194,7 +194,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Sykepen
     fun preVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -204,7 +204,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Sykepen
     fun postVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -213,7 +213,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Sykepen
     fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         vilkårsgrunnlagId: UUID
     ) {
     }
@@ -221,7 +221,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Sykepen
     fun postVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         vilkårsgrunnlagId: UUID
     ) {}
 }

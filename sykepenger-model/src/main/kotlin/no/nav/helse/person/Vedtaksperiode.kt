@@ -20,7 +20,7 @@ import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
+import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
@@ -426,11 +426,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.nyAnnullering(this, hendelse)
     }
 
-    internal fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag): Boolean {
-        if (!overstyrSykepengegrunnlag.erRelevant(skjæringstidspunkt)) return false
+    internal fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag): Boolean {
+        if (!overstyrInntektsgrunnlag.erRelevant(skjæringstidspunkt)) return false
         if (vilkårsgrunnlag?.erArbeidsgiverRelevant(organisasjonsnummer) != true) return false
-        kontekst(overstyrSykepengegrunnlag)
-        overstyrSykepengegrunnlag.vilkårsprøvEtterNyInformasjonFraSaksbehandler(person, jurist)
+        kontekst(overstyrInntektsgrunnlag)
+        overstyrInntektsgrunnlag.vilkårsprøvEtterNyInformasjonFraSaksbehandler(person, jurist)
         return true
     }
 

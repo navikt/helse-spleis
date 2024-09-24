@@ -360,8 +360,8 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         historikk.historikk[5].also { innslag ->
             assertEquals(1, innslag.vilkårsgrunnlag.size)
             innslag.vilkårsgrunnlag[0].also { vilkårsgrunnlagDto ->
-                assertEquals(2, vilkårsgrunnlagDto.sykepengegrunnlag.arbeidsgiverInntektsopplysninger.size)
-                vilkårsgrunnlagDto.sykepengegrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
+                assertEquals(2, vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
+                vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
                     assertInstanceOf<InntektsopplysningUtDto.InntektsmeldingDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
                     assertEquals(InntektDto(
                         InntektbeløpDto.Årlig(beløp = 372000.0),
@@ -370,7 +370,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                         InntektbeløpDto.DagligInt(beløp = 1430)
                     ), arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp)
                 }
-                vilkårsgrunnlagDto.sykepengegrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
+                vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
                     assertInstanceOf<InntektsopplysningUtDto.IkkeRapportertDto>(arbeidsgiverInntektsopplysningDto.inntektsopplysning)
                     assertNull(arbeidsgiverInntektsopplysningDto.inntektsopplysning.beløp)
                 }

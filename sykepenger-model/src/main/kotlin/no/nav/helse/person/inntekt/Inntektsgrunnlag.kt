@@ -7,8 +7,8 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.Toggle
-import no.nav.helse.dto.deserialisering.SykepengegrunnlagInnDto
-import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
+import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
+import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -22,7 +22,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.SykepengegrunnlagVisitor
+import no.nav.helse.person.InntektsgrunnlagVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -49,15 +49,15 @@ import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.subs
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.totalOmregnetÅrsinntekt
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.validerSkjønnsmessigAltEllerIntet
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
-import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
-import no.nav.helse.person.inntekt.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
+import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_6G_BEGRENSET
+import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.inntekt.Inntektsgrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.VilkårsprøvdSkjæringstidspunkt
 import no.nav.helse.økonomi.Inntekt
 
-internal class Sykepengegrunnlag private constructor(
+internal class Inntektsgrunnlag private constructor(
     private val alder: Alder,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
@@ -126,7 +126,7 @@ internal class Sykepengegrunnlag private constructor(
 
     internal companion object {
 
-        internal fun List<Sykepengegrunnlag>.harUlikeGrunnbeløp(): Boolean {
+        internal fun List<Inntektsgrunnlag>.harUlikeGrunnbeløp(): Boolean {
             return map { it.`6G` }.distinct().size > 1
         }
 
@@ -136,8 +136,8 @@ internal class Sykepengegrunnlag private constructor(
             skjæringstidspunkt: LocalDate,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             subsumsjonslogg: Subsumsjonslogg
-        ): Sykepengegrunnlag {
-            return Sykepengegrunnlag(
+        ): Inntektsgrunnlag {
+            return Inntektsgrunnlag(
                 alder,
                 arbeidsgiverInntektsopplysninger,
                 skjæringstidspunkt,
@@ -154,12 +154,12 @@ internal class Sykepengegrunnlag private constructor(
             vurdertInfotrygd: Boolean,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             `6G`: Inntekt? = null
-        ): Sykepengegrunnlag {
-            return Sykepengegrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag, `6G`)
+        ): Inntektsgrunnlag {
+            return Inntektsgrunnlag(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd, sammenligningsgrunnlag, `6G`)
         }
 
-        fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: SykepengegrunnlagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Sykepengegrunnlag {
-            return Sykepengegrunnlag(
+        fun gjenopprett(alder: Alder, skjæringstidspunkt: LocalDate, dto: InntektsgrunnlagInnDto, inntekter: MutableMap<UUID, Inntektsopplysning>): Inntektsgrunnlag {
+            return Inntektsgrunnlag(
                 alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map { ArbeidsgiverInntektsopplysning.gjenopprett(it, inntekter) },
@@ -246,11 +246,11 @@ internal class Sykepengegrunnlag private constructor(
                 )
             }
 
-    internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
+    internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         return hendelse.overstyr(this, subsumsjonslogg)
     }
 
-    internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
+    internal fun overstyrArbeidsgiveropplysninger(person: Person, hendelse: OverstyrArbeidsgiveropplysninger, opptjening: Opptjening?, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonslogg)
         hendelse.overstyr(builder)
         val (resultat, harTilkommetInntekter) = builder.resultat(Toggle.TilkommenArbeidsgiver.enabled)
@@ -258,7 +258,7 @@ internal class Sykepengegrunnlag private constructor(
         return kopierSykepengegrunnlagOgValiderMinsteinntekt(resultat, deaktiverteArbeidsforhold, subsumsjonslogg)
     }
 
-    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, nyttSkjæringstidspunkt: LocalDate?): Sykepengegrunnlag? {
+    internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, nyttSkjæringstidspunkt: LocalDate?): Inntektsgrunnlag? {
         val skjæringstidspunkt = nyttSkjæringstidspunkt ?: this.skjæringstidspunkt
         val nyeArbeidsgiverInntektsopplysninger = hendelse.arbeidsgiverinntektsopplysninger(skjæringstidspunkt)
         if (arbeidsgiverInntektsopplysninger.isNotEmpty() && nyeArbeidsgiverInntektsopplysninger.isNotEmpty()) {
@@ -275,7 +275,7 @@ internal class Sykepengegrunnlag private constructor(
         return kopierSykepengegrunnlag(gjenopplivetArbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt)
     }
 
-    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
+    internal fun skjønnsmessigFastsettelse(hendelse: SkjønnsmessigFastsettelse, opptjening: Opptjening?, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, opptjening, subsumsjonslogg)
         hendelse.overstyr(builder)
         val (resultat, harTilkommetInntekter) = builder.resultat(kandidatForTilkommenInntekt = false)
@@ -285,7 +285,7 @@ internal class Sykepengegrunnlag private constructor(
     internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
         arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
 
-    fun tilkomneInntekterFraSøknaden(søknad: Søknad, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
+    fun tilkomneInntekterFraSøknaden(søknad: Søknad, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, null, subsumsjonslogg)
         søknad.nyeInntekter(builder, skjæringstidspunkt)
         val (resultat, harTilkommetInntekter) = builder.resultat(kandidatForTilkommenInntekt = true)
@@ -300,7 +300,7 @@ internal class Sykepengegrunnlag private constructor(
         person: Person,
         inntektsmelding: Inntektsmelding,
         subsumsjonslogg: Subsumsjonslogg
-    ): Sykepengegrunnlag {
+    ): Inntektsgrunnlag {
         val builder = ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, null, subsumsjonslogg)
         inntektsmelding.nyeArbeidsgiverInntektsopplysninger(builder, skjæringstidspunkt)
         val (resultat, harTilkommetInntekter) = builder.resultat(Toggle.TilkommenArbeidsgiver.enabled)
@@ -317,7 +317,7 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         subsumsjonslogg: Subsumsjonslogg
-    ): Sykepengegrunnlag {
+    ): Inntektsgrunnlag {
         return kopierSykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold).apply {
            subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, subsumsjonslogg)
         }
@@ -327,7 +327,7 @@ internal class Sykepengegrunnlag private constructor(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>,
         nyttSkjæringstidspunkt: LocalDate = skjæringstidspunkt
-    ) = Sykepengegrunnlag(
+    ) = Inntektsgrunnlag(
             alder = alder,
             skjæringstidspunkt = nyttSkjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
@@ -341,8 +341,8 @@ internal class Sykepengegrunnlag private constructor(
         deaktiverteArbeidsforhold
     )
 
-    internal fun accept(visitor: SykepengegrunnlagVisitor) {
-        visitor.preVisitSykepengegrunnlag(
+    internal fun accept(visitor: InntektsgrunnlagVisitor) {
+        visitor.preVisitInntektsgrunnlag(
             this,
             skjæringstidspunkt,
             sykepengegrunnlag,
@@ -362,7 +362,7 @@ internal class Sykepengegrunnlag private constructor(
         visitor.preVisitDeaktiverteArbeidsgiverInntektsopplysninger(deaktiverteArbeidsforhold)
         deaktiverteArbeidsforhold.forEach { it.accept(visitor) }
         visitor.postVisitDeaktiverteArbeidsgiverInntektsopplysninger(deaktiverteArbeidsforhold)
-        visitor.postVisitSykepengegrunnlag(
+        visitor.postVisitInntektsgrunnlag(
             this,
             skjæringstidspunkt,
             sykepengegrunnlag,
@@ -398,7 +398,7 @@ internal class Sykepengegrunnlag private constructor(
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other !is Sykepengegrunnlag) return false
+        if (other !is Inntektsgrunnlag) return false
         return sykepengegrunnlag == other.sykepengegrunnlag
                  && arbeidsgiverInntektsopplysninger == other.arbeidsgiverInntektsopplysninger
                  && beregningsgrunnlag == other.beregningsgrunnlag
@@ -420,7 +420,7 @@ internal class Sykepengegrunnlag private constructor(
 
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
 
-    internal fun finnEndringsdato(other: Sykepengegrunnlag): LocalDate {
+    internal fun finnEndringsdato(other: Inntektsgrunnlag): LocalDate {
         check(this.skjæringstidspunkt == other.skjæringstidspunkt) {
             "Skal bare sammenlikne med samme skjæringstidspunkt"
         }
@@ -460,7 +460,7 @@ internal class Sykepengegrunnlag private constructor(
     internal fun forespurtInntektOgRefusjonsopplysninger(organisasjonsnummer: String, periode: Periode) =
         arbeidsgiverInntektsopplysninger.forespurtInntektOgRefusjonsopplysninger(skjæringstidspunkt, organisasjonsnummer, periode)
 
-    internal fun dto() = SykepengegrunnlagUtDto(
+    internal fun dto() = InntektsgrunnlagUtDto(
         arbeidsgiverInntektsopplysninger = this.arbeidsgiverInntektsopplysninger.map { it.dto() },
         deaktiverteArbeidsforhold = this.deaktiverteArbeidsforhold.map { it.dto() },
         vurdertInfotrygd = this.vurdertInfotrygd,

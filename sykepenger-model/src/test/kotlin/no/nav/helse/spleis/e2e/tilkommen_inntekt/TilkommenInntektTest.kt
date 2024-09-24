@@ -41,7 +41,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
 
             håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(fom = 1.februar, tom = 28.februar, orgnummer = a2, beløp = 4.K.månedlig)))
             håndterYtelser(2.vedtaksperiode)
-            val tilkommenInntekt = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(a2) }.inspektør.inntektsopplysning
+            val tilkommenInntekt = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(a2) }.inspektør.inntektsopplysning
             assertTrue(tilkommenInntekt is InntektFraSøknad)
             assertEquals(4.K.månedlig, tilkommenInntekt.fastsattÅrsinntekt())
 
@@ -51,10 +51,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             assertForventetFeil(
                 forklaring = "Den korrigerende søknaden skal fjerne tilkommen inntekt fra vilkårsgrunnlaget",
                 ønsket = {
-                    assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.firstOrNull { it.gjelder(a2) })
+                    assertNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.firstOrNull { it.gjelder(a2) })
                 },
                 nå = {
-                    val korrigertTilkommenInntekt = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(a2) }.inspektør.inntektsopplysning
+                    val korrigertTilkommenInntekt = inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(a2) }.inspektør.inntektsopplysning
                     assertTrue(korrigertTilkommenInntekt is InntektFraSøknad)
                     assertEquals(4.K.månedlig, korrigertTilkommenInntekt.fastsattÅrsinntekt())
                 }
@@ -89,14 +89,14 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                         utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp,
                         utbetalingstidslinje[22.januar].økonomi.inspektør.arbeidsgiverbeløp
                     )
-                    assertFalse(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.any { it.inspektør.orgnummer == a2 } == true)
+                    assertFalse(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.any { it.inspektør.orgnummer == a2 } == true)
                 },
                 ønsket = {
                     assertNotEquals(
                         utbetalingstidslinje[17.januar].økonomi.inspektør.arbeidsgiverbeløp,
                         utbetalingstidslinje[22.januar].økonomi.inspektør.arbeidsgiverbeløp
                     )
-                    assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.any { it.inspektør.orgnummer == a2 } == true)
+                    assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.any { it.inspektør.orgnummer == a2 } == true)
                 }
             )
         }
@@ -119,7 +119,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             )
             assertVarsel(Varselkode.RV_SV_5)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(31000.månedlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 val inntektA1 = sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]
@@ -180,7 +180,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 )
             )
             assertVarsel(Varselkode.RV_SV_5)
-            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(31000.månedlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             }
@@ -204,7 +204,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             )
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
             assertVarsel(Varselkode.RV_SV_5)
-            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(1.januar)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(31000.månedlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
             }
@@ -248,7 +248,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     )
                 )
             )
-            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a2]!!.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
@@ -284,7 +284,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 )
             )
             assertVarsel(Varselkode.RV_SV_5)
-            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a2]!!.inspektør.inntektsopplysning is SkattSykepengegrunnlag)
@@ -320,7 +320,7 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 )
             )
             assertVarsel(Varselkode.RV_SV_5)
-            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.sykepengegrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
+            inspektør.vilkårsgrunnlag(2.vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.let { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a1]!!.inspektør.inntektsopplysning is Inntektsmelding)
                 assertTrue(sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[a2]!!.inspektør.inntektsopplysning is Inntektsmelding)

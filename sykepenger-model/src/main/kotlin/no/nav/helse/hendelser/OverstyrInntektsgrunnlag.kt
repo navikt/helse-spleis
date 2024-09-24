@@ -6,7 +6,7 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
-internal interface OverstyrSykepengegrunnlag : IAktivitetslogg {
+internal interface OverstyrInntektsgrunnlag : IAktivitetslogg {
     fun erRelevant(skjæringstidspunkt: LocalDate): Boolean
     fun dokumentsporing(): Dokumentsporing
     fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: MaskinellJurist)

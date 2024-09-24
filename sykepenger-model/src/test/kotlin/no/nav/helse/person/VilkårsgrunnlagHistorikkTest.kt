@@ -26,6 +26,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Com
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykepengegrunnlag
+import no.nav.helse.inntektsgrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
@@ -67,7 +68,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             val inntekt = 31000.månedlig
             VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
+                inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
                 opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt, true, NullObserver),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
@@ -95,7 +96,7 @@ internal class VilkårsgrunnlagHistorikkTest {
 
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = gammeltSkjæringstidspunkt,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
+            inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
             opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -118,7 +119,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val inntekt = 21000.månedlig
         val grunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
+            inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
             opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -134,7 +135,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val inntekt = 21000.månedlig
         val grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
+            inntektsgrunnlag = inntekt.inntektsgrunnlag(ORGNR),
             opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
@@ -150,7 +151,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val inntekt = 21000.månedlig
         val grunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag("et annet orgnr"),
+            inntektsgrunnlag = inntekt.inntektsgrunnlag("et annet orgnr"),
             opptjening = Opptjening.nyOpptjening(arbeidsforholdFraHistorikk, 1.januar, true, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
@@ -439,7 +440,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            10.månedlig.sykepengegrunnlag(fødselsdato.alder),
+            10.månedlig.inntektsgrunnlag(fødselsdato.alder),
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
@@ -463,31 +464,31 @@ internal class VilkårsgrunnlagHistorikkTest {
         val sykepengegrunnlag = 25000.månedlig.sykepengegrunnlag
         val element1 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = sykepengegrunnlag
+            inntektsgrunnlag = sykepengegrunnlag
         )
         assertEquals(element1, element1)
         assertEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = 1.januar,
-                sykepengegrunnlag = sykepengegrunnlag
+                inntektsgrunnlag = sykepengegrunnlag
             )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = 2.januar,
-                sykepengegrunnlag = sykepengegrunnlag
+                inntektsgrunnlag = sykepengegrunnlag
             )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = 5.februar,
-                sykepengegrunnlag = 25000.månedlig.sykepengegrunnlag
+                inntektsgrunnlag = 25000.månedlig.sykepengegrunnlag
             )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = 1.januar,
-                sykepengegrunnlag = 30900.månedlig.sykepengegrunnlag
+                inntektsgrunnlag = 30900.månedlig.sykepengegrunnlag
             )
         )
     }

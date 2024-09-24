@@ -15,7 +15,7 @@ class Grunnbeløpsregulering(
     fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val opprettet: LocalDateTime
-): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()), OverstyrSykepengegrunnlag {
+): PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()), OverstyrInntektsgrunnlag {
 
     override fun erRelevant(skjæringstidspunkt: LocalDate) =
         this.skjæringstidspunkt == skjæringstidspunkt

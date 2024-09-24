@@ -12,14 +12,14 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
+import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
@@ -131,7 +131,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         val inntekt = if (!harMinimumInntekt) 2000.månedlig else 25000.månedlig
         return VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = Sykepengegrunnlag.opprett(
+            inntektsgrunnlag = Inntektsgrunnlag.opprett(
                 ALDER, listOf(
                     ArbeidsgiverInntektsopplysning(
                         "orgnr",
@@ -177,7 +177,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
             override fun kopierMed(
                 hendelse: IAktivitetslogg,
-                sykepengegrunnlag: Sykepengegrunnlag,
+                inntektsgrunnlag: Inntektsgrunnlag,
                 opptjening: Opptjening?,
                 subsumsjonslogg: Subsumsjonslogg,
                 nyttSkjæringstidspunkt: LocalDate?
@@ -188,7 +188,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun dto(
                 vilkårsgrunnlagId: UUID,
                 skjæringstidspunkt: LocalDate,
-                sykepengegrunnlag: SykepengegrunnlagUtDto
+                sykepengegrunnlag: InntektsgrunnlagUtDto
             ): VilkårsgrunnlagUtDto {
                 throw IllegalStateException()
             }

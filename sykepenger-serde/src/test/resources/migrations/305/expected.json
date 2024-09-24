@@ -1,0 +1,144 @@
+{
+  "aktørId": "42",
+  "fødselsnummer": "12029240045",
+  "fødselsdato": "1992-02-12",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "b12a2a7c-99e4-4eec-98a3-14c2a171e17f",
+      "opprettet": "2024-09-24T14:26:02.576053",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561805.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "fom": "2018-01-01",
+                "tom": "+999999999-12-31",
+                "inntektsopplysning": {
+                  "id": "f16db908-d573-4da4-9892-404dc0b37d25",
+                  "dato": "2018-01-01",
+                  "hendelseId": "a56fe51e-527a-4543-9ee0-d306d2325763",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "forklaring": null,
+                  "subsumsjon": null,
+                  "tidsstempel": "2024-09-24T14:40:48.584853",
+                  "overstyrtInntektId": null,
+                  "skatteopplysninger": null,
+                  "inntektsmeldingkilde": "Arbeidsgiver"
+                },
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "a56fe51e-527a-4543-9ee0-d306d2325763",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 31000.0
+                  }
+                ]
+              }
+            ],
+            "sammenligningsgrunnlag": {
+              "sammenligningsgrunnlag": 0.0,
+              "arbeidsgiverInntektsopplysninger": []
+            },
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          }
+        },
+        {
+          "skjæringstidspunkt": "2018-02-01",
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561806.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "fom": "2018-01-01",
+                "tom": "+999999999-12-31",
+                "inntektsopplysning": {
+                  "id": "f16db908-d573-4da4-9892-404dc0b37d25",
+                  "dato": "2018-01-01",
+                  "hendelseId": "a56fe51e-527a-4543-9ee0-d306d2325763",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "forklaring": null,
+                  "subsumsjon": null,
+                  "tidsstempel": "2024-09-24T14:40:48.584853",
+                  "overstyrtInntektId": null,
+                  "skatteopplysninger": null,
+                  "inntektsmeldingkilde": "Arbeidsgiver"
+                },
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "a56fe51e-527a-4543-9ee0-d306d2325763",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 31000.0
+                  }
+                ]
+              }
+            ],
+            "sammenligningsgrunnlag": {
+              "sammenligningsgrunnlag": 0.0,
+              "arbeidsgiverInntektsopplysninger": []
+            },
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "b12a2a7c-99e4-4eec-98a3-14c2a171e17f",
+      "opprettet": "2024-09-24T14:26:02.576053",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "inntektsgrunnlag": {
+            "grunnbeløp": 561807.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "fom": "2018-01-01",
+                "tom": "+999999999-12-31",
+                "inntektsopplysning": {
+                  "id": "f16db908-d573-4da4-9892-404dc0b37d25",
+                  "dato": "2018-01-01",
+                  "hendelseId": "a56fe51e-527a-4543-9ee0-d306d2325763",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "forklaring": null,
+                  "subsumsjon": null,
+                  "tidsstempel": "2024-09-24T14:40:48.584853",
+                  "overstyrtInntektId": null,
+                  "skatteopplysninger": null,
+                  "inntektsmeldingkilde": "Arbeidsgiver"
+                },
+                "refusjonsopplysninger": [
+                  {
+                    "meldingsreferanseId": "a56fe51e-527a-4543-9ee0-d306d2325763",
+                    "fom": "2018-01-01",
+                    "tom": null,
+                    "beløp": 31000.0
+                  }
+                ]
+              }
+            ],
+            "sammenligningsgrunnlag": {
+              "sammenligningsgrunnlag": 0.0,
+              "arbeidsgiverInntektsopplysninger": []
+            },
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false
+          }
+        }
+      ]
+    }
+  ],
+  "dødsdato": null,
+  "skjemaVersjon": 305
+}

@@ -121,8 +121,8 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
 
         val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.januar) ?: fail { "forventet vilkårsgrunnlag" }
 
-        assertEquals(25000.månedlig, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.beløp)
-        assertEquals(4900.månedlig, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.inntektsopplysning.inspektør.beløp)
+        assertEquals(25000.månedlig, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.inntektsopplysning.inspektør.beløp)
+        assertEquals(4900.månedlig, vilkårsgrunnlag.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.inntektsopplysning.inspektør.beløp)
     }
 
     @Test
@@ -147,7 +147,7 @@ internal class VedtaksperioderForFlereArbeidsgivereTest : AbstractEndToEndTest()
         ).håndter(Person::håndter)
 
         val grunnlagsdataInspektør = person.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "fant ikke vilkårsgrunnlag" }
-        assertEquals(552000.årlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(552000.årlig, grunnlagsdataInspektør.inntektsgrunnlag.inspektør.sykepengegrunnlag)
     }
 
     @Test

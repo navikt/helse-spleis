@@ -8,7 +8,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.aktivitetslogg.UtbetalingInntektskilde
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.fail
@@ -46,7 +46,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     override fun preVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -62,7 +62,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     override fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         vilkårsgrunnlagId: UUID
     ) {
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
@@ -86,7 +86,7 @@ internal class VilkårgrunnlagInnslagInspektør(innslag: VilkårsgrunnlagHistori
     override fun preVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -99,7 +99,7 @@ internal class VilkårgrunnlagInnslagInspektør(innslag: VilkårsgrunnlagHistori
     override fun preVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         vilkårsgrunnlagId: UUID
     ) {
         elementer.add(infotrygdVilkårsgrunnlag)
@@ -111,7 +111,7 @@ internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() 
 internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) : VilkårsgrunnlagHistorikkVisitor {
     internal lateinit var skjæringstidspunkt: LocalDate
         private set
-    internal lateinit var sykepengegrunnlag: Sykepengegrunnlag
+    internal lateinit var inntektsgrunnlag: Inntektsgrunnlag
         private set
     internal lateinit var sammenligningsgrunnlag: Sammenligningsgrunnlag
         private set
@@ -137,7 +137,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
     override fun preVisitGrunnlagsdata(
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         opptjening: Opptjening,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -145,13 +145,13 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         this.skjæringstidspunkt = skjæringstidspunkt
-        this.sykepengegrunnlag = sykepengegrunnlag
+        this.inntektsgrunnlag = inntektsgrunnlag
         this.opptjening = opptjening
         this.meldingsreferanseId = meldingsreferanseId
         this.harMinimumInntekt = harMinimumInntekt
         this.vurdertOk = vurdertOk
         this.opptjening = opptjening
-        this.inntektskilde = sykepengegrunnlag.inntektskilde()
+        this.inntektskilde = inntektsgrunnlag.inntektskilde()
         this.vilkårsgrunnlagId = vilkårsgrunnlagId
         this.type = "Spleis"
     }
@@ -159,11 +159,11 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
     override fun postVisitInfotrygdVilkårsgrunnlag(
         infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        sykepengegrunnlag: Sykepengegrunnlag,
+        inntektsgrunnlag: Inntektsgrunnlag,
         vilkårsgrunnlagId: UUID
     ) {
         this.skjæringstidspunkt = skjæringstidspunkt
-        this.sykepengegrunnlag = sykepengegrunnlag
+        this.inntektsgrunnlag = inntektsgrunnlag
         this.vilkårsgrunnlagId = vilkårsgrunnlagId
         this.type = "Infotrygd"
     }

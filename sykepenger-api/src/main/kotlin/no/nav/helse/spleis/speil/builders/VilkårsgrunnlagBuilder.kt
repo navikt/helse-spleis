@@ -8,7 +8,7 @@ import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
-import no.nav.helse.dto.serialisering.SykepengegrunnlagUtDto
+import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.spleis.speil.dto.GhostPeriodeDTO
@@ -188,8 +188,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             MedlemskapsvurderingDto.VetIkke -> null
         }
 
-        val begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(grunnlagsdata.sykepengegrunnlag.`6G`)
-        val overstyringer = grunnlagsdata.sykepengegrunnlag.arbeidsgiverInntektsopplysninger.mapNotNull {
+        val begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(grunnlagsdata.inntektsgrunnlag.`6G`)
+        val overstyringer = grunnlagsdata.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.mapNotNull {
             when (it.inntektsopplysning) {
                 is InntektsopplysningUtDto.IkkeRapportertDto -> null
                 is InntektsopplysningUtDto.InfotrygdDto -> null
@@ -204,23 +204,23 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         return ISpleisGrunnlag(
             skjæringstidspunkt = grunnlagsdata.skjæringstidspunkt,
             overstyringer = overstyringer,
-            beregningsgrunnlag = grunnlagsdata.sykepengegrunnlag.beregningsgrunnlag.årlig.beløp,
-            omregnetÅrsinntekt = grunnlagsdata.sykepengegrunnlag.totalOmregnetÅrsinntekt.årlig.beløp,
-            inntekter = inntekter(grunnlagsdata.sykepengegrunnlag),
-            refusjonsopplysningerPerArbeidsgiver = refusjonsopplysninger(grunnlagsdata.sykepengegrunnlag),
-            sykepengegrunnlag = grunnlagsdata.sykepengegrunnlag.sykepengegrunnlag.årlig.beløp,
+            beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag.årlig.beløp,
+            omregnetÅrsinntekt = grunnlagsdata.inntektsgrunnlag.totalOmregnetÅrsinntekt.årlig.beløp,
+            inntekter = inntekter(grunnlagsdata.inntektsgrunnlag),
+            refusjonsopplysningerPerArbeidsgiver = refusjonsopplysninger(grunnlagsdata.inntektsgrunnlag),
+            sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             grunnbeløp = begrensning.grunnbeløp,
             sykepengegrunnlagsgrense = begrensning,
             meldingsreferanseId = grunnlagsdata.meldingsreferanseId,
             antallOpptjeningsdagerErMinst = grunnlagsdata.opptjening.opptjeningsdager,
-            oppfyllerKravOmMinstelønn = grunnlagsdata.sykepengegrunnlag.oppfyllerMinsteinntektskrav,
+            oppfyllerKravOmMinstelønn = grunnlagsdata.inntektsgrunnlag.oppfyllerMinsteinntektskrav,
             oppfyllerKravOmOpptjening = grunnlagsdata.opptjening.erOppfylt,
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
             id = grunnlagsdata.vilkårsgrunnlagId
         )
     }
 
-    private fun inntekter(dto: SykepengegrunnlagUtDto): List<IArbeidsgiverinntekt> {
+    private fun inntekter(dto: InntektsgrunnlagUtDto): List<IArbeidsgiverinntekt> {
         return dto.arbeidsgiverInntektsopplysninger.map { mapInntekt(it) } + dto.deaktiverteArbeidsforhold.map { mapInntekt(it, true) }
     }
 
@@ -266,7 +266,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         )
     }
 
-    private fun refusjonsopplysninger(dto: SykepengegrunnlagUtDto) =
+    private fun refusjonsopplysninger(dto: InntektsgrunnlagUtDto) =
         dto.arbeidsgiverInntektsopplysninger.map {
             IArbeidsgiverrefusjon(
                 arbeidsgiver = it.orgnummer,
@@ -284,10 +284,10 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
     private fun mapInfotrygd(infotrygdVilkårsgrunnlag: VilkårsgrunnlagUtDto.Infotrygd): IVilkårsgrunnlag {
         return IInfotrygdGrunnlag(
             skjæringstidspunkt = infotrygdVilkårsgrunnlag.skjæringstidspunkt,
-            beregningsgrunnlag = infotrygdVilkårsgrunnlag.sykepengegrunnlag.beregningsgrunnlag.årlig.beløp,
-            inntekter = inntekter(infotrygdVilkårsgrunnlag.sykepengegrunnlag),
-            refusjonsopplysningerPerArbeidsgiver = refusjonsopplysninger(infotrygdVilkårsgrunnlag.sykepengegrunnlag),
-            sykepengegrunnlag = infotrygdVilkårsgrunnlag.sykepengegrunnlag.sykepengegrunnlag.årlig.beløp,
+            beregningsgrunnlag = infotrygdVilkårsgrunnlag.inntektsgrunnlag.beregningsgrunnlag.årlig.beløp,
+            inntekter = inntekter(infotrygdVilkårsgrunnlag.inntektsgrunnlag),
+            refusjonsopplysningerPerArbeidsgiver = refusjonsopplysninger(infotrygdVilkårsgrunnlag.inntektsgrunnlag),
+            sykepengegrunnlag = infotrygdVilkårsgrunnlag.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             id = infotrygdVilkårsgrunnlag.vilkårsgrunnlagId
         )
     }

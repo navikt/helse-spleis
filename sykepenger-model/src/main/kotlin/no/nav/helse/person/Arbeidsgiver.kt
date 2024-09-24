@@ -16,7 +16,7 @@ import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.OverstyrSykepengegrunnlag
+import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -158,8 +158,8 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
-        internal fun List<Arbeidsgiver>.håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag) =
-            any { it.håndter(overstyrSykepengegrunnlag) }
+        internal fun List<Arbeidsgiver>.håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag) =
+            any { it.håndter(overstyrInntektsgrunnlag) }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -678,9 +678,9 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse, Vedtaksperiode::håndter)
     }
 
-    private fun håndter(overstyrSykepengegrunnlag: OverstyrSykepengegrunnlag): Boolean {
-        overstyrSykepengegrunnlag.kontekst(this)
-        return énHarHåndtert(overstyrSykepengegrunnlag) { håndter(it) }
+    private fun håndter(overstyrInntektsgrunnlag: OverstyrInntektsgrunnlag): Boolean {
+        overstyrInntektsgrunnlag.kontekst(this)
+        return énHarHåndtert(overstyrInntektsgrunnlag) { håndter(it) }
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {

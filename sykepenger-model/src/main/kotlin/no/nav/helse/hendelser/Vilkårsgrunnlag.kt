@@ -13,7 +13,7 @@ import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.AnsattPeriode
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
-import no.nav.helse.person.inntekt.Sykepengegrunnlag
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 
 class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
@@ -50,7 +50,7 @@ class Vilkårsgrunnlag(
         )
     }
 
-    internal fun avklarSykepengegrunnlag(person: Person, subsumsjonslogg: Subsumsjonslogg): Sykepengegrunnlag {
+    internal fun avklarSykepengegrunnlag(person: Person, subsumsjonslogg: Subsumsjonslogg): Inntektsgrunnlag {
         val rapporterteArbeidsforhold = opptjeningsgrunnlag.mapValues { (_, ansattPerioder) ->
             SkattSykepengegrunnlag(
                 hendelseId = meldingsreferanseId(),
@@ -62,8 +62,8 @@ class Vilkårsgrunnlag(
         return inntektsvurderingForSykepengegrunnlag.avklarSykepengegrunnlag(this, person, rapporterteArbeidsforhold, skjæringstidspunkt, Sammenligningsgrunnlag(emptyList()), meldingsreferanseId(), subsumsjonslogg)
     }
 
-    internal fun valider(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
-        val sykepengegrunnlagOk = sykepengegrunnlag.valider(this)
+    internal fun valider(inntektsgrunnlag: Inntektsgrunnlag, subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
+        val sykepengegrunnlagOk = inntektsgrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.valider(this)
         arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
         val opptjening = opptjening(subsumsjonslogg)
@@ -77,7 +77,7 @@ class Vilkårsgrunnlag(
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag,
+            inntektsgrunnlag = inntektsgrunnlag,
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             vurdertOk = sykepengegrunnlagOk && opptjeningvurderingOk && medlemskapsvurderingOk,

@@ -538,7 +538,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         }
 
         (inspiser(personInspektør).vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)?.inspektør ?: Assertions.fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
-            val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+            val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
             assertEquals(300000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
             assertEquals(300000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
             assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)

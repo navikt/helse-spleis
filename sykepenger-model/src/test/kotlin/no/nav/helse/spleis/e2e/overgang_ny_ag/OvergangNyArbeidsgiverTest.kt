@@ -66,7 +66,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            checkNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode)).inspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
+            checkNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode)).inspektør.inntektsgrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
                 assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
                 assertEquals(forventetSykepengegrunnlag, sykepengegrunnlagInspektør.sykepengegrunnlag)
                 assertEquals(inntektA1, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -135,7 +135,7 @@ internal class OvergangNyArbeidsgiverTest : AbstractDslTest() {
             håndterUtbetalt()
 
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.inspektør.also { grunnlagsdataInspektør ->
-                grunnlagsdataInspektør.sykepengegrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
+                grunnlagsdataInspektør.inntektsgrunnlag.inspektør.also { sykepengegrunnlagInspektør ->
                     assertEquals(forventetSykepengegrunnlag, sykepengegrunnlagInspektør.sykepengegrunnlag)
                     assertEquals(inntektA1, sykepengegrunnlagInspektør.omregnetÅrsinntekt)
                 }

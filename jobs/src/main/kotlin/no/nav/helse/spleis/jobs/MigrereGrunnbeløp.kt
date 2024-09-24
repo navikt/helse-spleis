@@ -58,10 +58,10 @@ private fun finnGrunnbeløp(person: PersonInnDto): List<Grunnbeløp> {
     val historikk = person.vilkårsgrunnlagHistorikk.historikk
     if (historikk.isEmpty()) return emptyList()
     val siste = historikk.first()
-    return siste.vilkårsgrunnlag.filterNot { it.sykepengegrunnlag.vurdertInfotrygd }.map {
+    return siste.vilkårsgrunnlag.filterNot { it.inntektsgrunnlag.vurdertInfotrygd }.map {
         spleisVilkårsgrunnlag -> Grunnbeløp(
             skjæringstidspunkt = spleisVilkårsgrunnlag.skjæringstidspunkt,
-            `6G` = spleisVilkårsgrunnlag.sykepengegrunnlag.`6G`.beløp
+            `6G` = spleisVilkårsgrunnlag.inntektsgrunnlag.`6G`.beløp
         )
     }
 }

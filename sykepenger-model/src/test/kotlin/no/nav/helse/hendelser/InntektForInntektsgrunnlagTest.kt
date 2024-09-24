@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class InntektForSykepengegrunnlagTest {
+internal class InntektForInntektsgrunnlagTest {
 
     @Test
     fun `Beregner riktig antall måneder mellom første og siste inntektsmåned i sykepengegrunnlaget`() {

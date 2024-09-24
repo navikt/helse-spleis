@@ -60,7 +60,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(378000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(378000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
@@ -118,7 +118,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
-        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
         assertEquals(378000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
         assertEquals(378000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
