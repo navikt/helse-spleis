@@ -61,7 +61,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.igangsettOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.nestemann
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.tidligsteDato
-import no.nav.helse.person.Arbeidsgiver.Companion.tilkomneInntekter
 import no.nav.helse.person.Arbeidsgiver.Companion.validerTilstand
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.venter
@@ -76,8 +75,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AG_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_10
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.bareUnikeArbeidsgivere
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning.Companion.finnesI
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
 import no.nav.helse.person.inntekt.Sykepengegrunnlag
@@ -664,16 +661,9 @@ class Person private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ): Sykepengegrunnlag {
         skatteopplysninger.keys.forEach { orgnr -> finnEllerOpprettArbeidsgiver(orgnr.tilYrkesaktivitet(), hendelse) } // oppretter evt. nye arbeidsgivere
-        val inntekterPåSkjæringstidspunktet = arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger)
-        val potensielleTilkomneInntekter = arbeidsgivere.tilkomneInntekter(hendelse, skjæringstidspunkt)
-        val tilkomneInntekter = when {
-            !potensielleTilkomneInntekter.bareUnikeArbeidsgivere() -> emptyList()
-            potensielleTilkomneInntekter.finnesI(inntekterPåSkjæringstidspunktet) -> emptyList()
-            else -> potensielleTilkomneInntekter
-        }
         return Sykepengegrunnlag.opprett(
             alder,
-            inntekterPåSkjæringstidspunktet + tilkomneInntekter,
+            arbeidsgivere.avklarSykepengegrunnlag(hendelse, skjæringstidspunkt, skatteopplysninger),
             skjæringstidspunkt,
             sammenligningsgrunnlag,
             subsumsjonslogg
@@ -871,3 +861,4 @@ class Person private constructor(
     )
 
 }
+

@@ -2541,7 +2541,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.egenmeldingsperioder(): List<Periode> = flatMap { it.egenmeldingsperioder }
         internal fun List<Vedtaksperiode>.arbeidsgiverperioder() = map { it.behandlinger.arbeidsgiverperiode() }
-        internal fun List<Vedtaksperiode>.tilkomneInntekter() = flatMap { it.behandlinger.tilkomneInntekter() }
 
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {

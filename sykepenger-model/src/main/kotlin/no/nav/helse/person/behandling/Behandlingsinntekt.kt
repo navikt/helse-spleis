@@ -14,6 +14,6 @@ data class TilkommenInntekt(
     override val hendelseId: UUID,
     override val beløp: no.nav.helse.økonomi.Inntekt,
     override val tidsstempel: LocalDateTime,
-    val orgnummer: String,
-    val periode: Periode
+    private val orgnummer: String,
+    private val periode: Periode
 ) : Behandlingsinntekt

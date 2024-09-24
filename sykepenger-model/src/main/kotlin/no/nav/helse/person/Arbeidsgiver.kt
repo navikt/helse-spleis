@@ -176,9 +176,6 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.avklarSykepengegrunnlag(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, skatteopplysninger: Map<String, SkattSykepengegrunnlag>) =
             mapNotNull { arbeidsgiver -> arbeidsgiver.avklarSykepengegrunnlag(skjæringstidspunkt, skatteopplysninger[arbeidsgiver.organisasjonsnummer], aktivitetslogg) }
 
-        internal fun List<Arbeidsgiver>.tilkomneInntekter(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate) =
-            flatMap { arbeidsgiver -> arbeidsgiver.tilkomneInntekter(aktivitetslogg, arbeidsgiver.vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))) }
-
         internal fun List<Arbeidsgiver>.validerTilstand(hendelse: Hendelse) = forEach { it.vedtaksperioder.validerTilstand(hendelse) }
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
@@ -268,13 +265,6 @@ internal class Arbeidsgiver private constructor(
     internal fun avklarSykepengegrunnlag(skjæringstidspunkt: LocalDate, skattSykepengegrunnlag: SkattSykepengegrunnlag? = null, aktivitetslogg: IAktivitetslogg? = null) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         return yrkesaktivitet.avklarSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag, inntektshistorikk, skattSykepengegrunnlag, refusjonshistorikk, aktivitetslogg)
-    }
-
-    internal fun tilkomneInntekter(
-        aktivitetslogg: IAktivitetslogg,
-        vedtaksperioder: List<Vedtaksperiode>
-    ) : List<ArbeidsgiverInntektsopplysning> {
-        return yrkesaktivitet.tilkomneInntekter(aktivitetslogg, vedtaksperioder)
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
