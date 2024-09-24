@@ -1,9 +1,8 @@
 package no.nav.helse.etterlevelse
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.RangeIterator.Companion.merge
 
-abstract class Subsumsjon {
+sealed class Subsumsjon {
 
     enum class Utfall {
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
@@ -29,16 +28,6 @@ abstract class Subsumsjon {
     }
 
     protected abstract fun acceptSpesifikk(visitor: SubsumsjonVisitor)
-
-    fun sammenstill(subsumsjoner: List<Subsumsjon>): Boolean {
-        if (!skalSammenstille()) return true
-        val medSammeDatagrunnlag = subsumsjoner.firstOrNull { it == this } ?: return false
-        medSammeDatagrunnlag.sammenstillMed(this)
-        return true
-    }
-
-    protected open fun sammenstillMed(ny: Subsumsjon) {}
-    protected open fun skalSammenstille() = true
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -91,8 +80,8 @@ class EnkelSubsumsjon(
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
 }
 
-class GrupperbarSubsumsjon private constructor(
-    private var perioder: List<ClosedRange<LocalDate>>,
+class PeriodisertSubsumsjon(
+    private val perioder: Collection<ClosedRange<LocalDate>>,
     override val lovverk: String,
     override val utfall: Utfall,
     override val versjon: LocalDate,
@@ -100,24 +89,10 @@ class GrupperbarSubsumsjon private constructor(
     override val ledd: Ledd?,
     override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
-    private val originalOutput: Map<String, Any>,
+    private val originalOutput: Map<String, Any> = emptyMap(),
     override val input: Map<String, Any>,
     override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
-    constructor(
-        dato: ClosedRange<LocalDate>,
-        lovverk: String,
-        input: Map<String, Any>,
-        output: Map<String, Any>,
-        utfall: Utfall,
-        versjon: LocalDate,
-        paragraf: Paragraf,
-        ledd: Ledd?,
-        punktum: Punktum? = null,
-        bokstav: Bokstav? = null,
-        kontekster: Map<String, KontekstType>
-    ) : this(mutableListOf(dato), lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
-
     override fun output(): Map<String, Any> {
         return originalOutput.toMutableMap().apply {
             this["perioder"] = perioder.map {
@@ -130,38 +105,11 @@ class GrupperbarSubsumsjon private constructor(
     }
 
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {
-        visitor.visitGrupperbarSubsumsjon(perioder)
+        visitor.visitGrupperbarSubsumsjon(perioder.toList())
     }
 
     override fun ekstraEquals(other: Subsumsjon): Boolean {
-        if (other !is GrupperbarSubsumsjon) return false
+        if (other !is PeriodisertSubsumsjon) return false
         return originalOutput == other.originalOutput
-    }
-
-    override fun sammenstillMed(ny: Subsumsjon) {
-        check(ny is GrupperbarSubsumsjon)
-        this.perioder = this.perioder.plusElement(ny.perioder.single()).merge()
-    }
-}
-
-class BetingetSubsumsjon(
-    private val funnetRelevant: Boolean,
-    override val lovverk: String,
-    override val utfall: Utfall,
-    override val versjon: LocalDate,
-    override val paragraf: Paragraf,
-    override val ledd: Ledd?,
-    override val punktum: Punktum? = null,
-    override val bokstav: Bokstav? = null,
-    override val input: Map<String, Any>,
-    private val output: Map<String, Any>,
-    override val kontekster: Map<String, KontekstType>
-) : Subsumsjon() {
-    override fun output() = output
-
-    override fun skalSammenstille() = funnetRelevant
-
-    override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {
-        visitor.visitBetingetSubsumsjon(funnetRelevant)
     }
 }

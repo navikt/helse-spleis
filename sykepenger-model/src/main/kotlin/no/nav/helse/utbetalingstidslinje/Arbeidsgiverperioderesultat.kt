@@ -53,9 +53,12 @@ data class Arbeidsgiverperioderesultat(
         val sykdomstidslinjesubsumsjon = sykdomstidslinje.subsumsjonsformat()
 
         // første agp-dag i hver brudd-periode skal subsummeres med § 8-19 tredje ledd
-        arbeidsgiverperiode.drop(1).forEach {
-            if (it.start in vedtaksperiode) subsumsjonslogg.`§ 8-19 tredje ledd`(it.start, sykdomstidslinjesubsumsjon)
-        }
+        arbeidsgiverperiode.drop(1)
+            .filter { it.start in vedtaksperiode }
+            .map { it.start }
+            .also {
+                subsumsjonslogg.`§ 8-19 tredje ledd`(it, sykdomstidslinjesubsumsjon)
+            }
 
         // siste 16. agp-dag skal subsummeres med § 8-19 første ledd
         if (fullstendig && arbeidsgiverperiode.last().endInclusive in vedtaksperiode)
@@ -63,7 +66,7 @@ data class Arbeidsgiverperioderesultat(
 
         // første utbetalingsdag skal subsummeres med § 8-17 ledd 1 bokstav a (oppfylt = true)
         utbetalingsperioder.firstOrNull()?.firstOrNull { !it.erHelg() }?.takeIf { it in vedtaksperiode }?.also {
-            subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = it.rangeTo(it), sykdomstidslinjesubsumsjon)
+            subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = listOf(it.rangeTo(it)), sykdomstidslinjesubsumsjon)
         }
 
         // siste oppholdsdag som medfører at agp avbrytes subsummeres med § 8-19 fjerde ledd

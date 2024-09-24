@@ -2,6 +2,7 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -419,6 +420,11 @@ class Økonomi private constructor(
         }
     }
 
+    fun subsumsjonsdata() = Dekningsgrunnlagsubsumsjon(
+        årligInntekt = aktuellDagsinntekt.reflection { årlig, _, _, _ -> årlig },
+        årligDekningsgrunnlag = dekningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+    )
+
     fun dto() = ØkonomiUtDto(
         grad = grad.dto(),
         totalGrad = totalGrad.dto(),
@@ -432,6 +438,11 @@ class Økonomi private constructor(
         er6GBegrenset = er6GBegrenset
     )
 }
+
+data class Dekningsgrunnlagsubsumsjon(
+    val årligInntekt: Double,
+    val årligDekningsgrunnlag: Double
+)
 
 abstract class ØkonomiBuilder {
     protected var grad by Delegates.notNull<Double>()

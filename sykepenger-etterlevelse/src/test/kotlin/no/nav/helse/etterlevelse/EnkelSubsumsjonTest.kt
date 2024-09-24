@@ -6,7 +6,6 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -22,14 +21,6 @@ internal class EnkelSubsumsjonTest {
     @Test
     fun `enkel vurdering`() {
         nyVurdering()
-        assertEquals(1, vurderinger.size)
-    }
-
-    @Test
-    fun `enkel vurdering som gjøres flere ganger innenfor samme hendelse forekommer kun en gang`() {
-        nyVurdering()
-        nyVurdering()
-
         assertEquals(1, vurderinger.size)
     }
 
@@ -56,11 +47,9 @@ internal class EnkelSubsumsjonTest {
 
         val enkel = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
         val enkelKopi = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
-        val betinget = BetingetSubsumsjon(true, lovverk, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
 
         assertEquals(enkel, enkel)
         assertEquals(enkel, enkelKopi)
-        assertNotEquals(enkel, betinget)
     }
 
     private fun nyVurdering(
@@ -76,7 +65,7 @@ internal class EnkelSubsumsjonTest {
         kontekster: Map<String, KontekstType> = emptyMap()
     ) {
         EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
-            if (!it.sammenstill(vurderinger)) vurderinger.add(it)
+            vurderinger.add(it)
         }
     }
 }

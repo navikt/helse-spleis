@@ -35,6 +35,7 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.februar
@@ -1343,8 +1344,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
-        SubsumsjonInspektør(jurist).assertOppfylt(
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
             paragraf = PARAGRAF_8_17,
+            index = 0,
+            forventetAntall = 2,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
@@ -1360,7 +1363,30 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 17.januar, "tom" to 17.januar))
-            )
+            ),
+            utfall = VILKAR_OPPFYLT
+        )
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
+            paragraf = PARAGRAF_8_17,
+            index = 1,
+            forventetAntall = 2,
+            ledd = 1.ledd,
+            bokstav = BOKSTAV_A,
+            versjon = 1.januar,
+            input = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    )
+                )
+            ),
+            output = mapOf(
+                "perioder" to listOf(mapOf("fom" to 17.januar, "tom" to 17.januar))
+            ),
+            utfall = VILKAR_OPPFYLT
         )
     }
 
@@ -1372,8 +1398,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
-        SubsumsjonInspektør(jurist).assertOppfylt(
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
             paragraf = PARAGRAF_8_17,
+            index = 0,
+            forventetAntall = 2,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
@@ -1389,7 +1417,30 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 22.januar, "tom" to 22.januar))
-            )
+            ),
+            utfall = VILKAR_OPPFYLT,
+        )
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
+            paragraf = PARAGRAF_8_17,
+            index = 1,
+            forventetAntall = 2,
+            ledd = 1.ledd,
+            bokstav = BOKSTAV_A,
+            versjon = 1.januar,
+            input = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf(
+                        "fom" to 4.januar,
+                        "tom" to 22.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    )
+                )
+            ),
+            output = mapOf(
+                "perioder" to listOf(mapOf("fom" to 22.januar, "tom" to 22.januar))
+            ),
+            utfall = VILKAR_OPPFYLT,
         )
     }
 
@@ -1528,8 +1579,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
 
-        SubsumsjonInspektør(jurist).assertBeregnet(
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
             paragraf = PARAGRAF_8_19,
+            index = 0,
+            forventetAntall = 2,
             versjon = 1.januar(2001),
             ledd = 1.ledd,
             input = mapOf(
@@ -1539,7 +1592,24 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             output = mapOf(
                 "sisteDagIArbeidsgiverperioden" to 19.januar,
-            )
+            ),
+            utfall = Utfall.VILKAR_BEREGNET,
+        )
+        SubsumsjonInspektør(jurist).assertPaaIndeks(
+            paragraf = PARAGRAF_8_19,
+            index = 1,
+            forventetAntall = 2,
+            versjon = 1.januar(2001),
+            ledd = 1.ledd,
+            input = mapOf(
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 4.januar, "tom" to 22.januar, "dagtype" to "SYKEDAG", "grad" to 100),
+                ),
+            ),
+            output = mapOf(
+                "sisteDagIArbeidsgiverperioden" to 19.januar,
+            ),
+            utfall = Utfall.VILKAR_BEREGNET
         )
     }
 
@@ -1606,8 +1676,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         SubsumsjonInspektør(jurist).apply {
-            assertBeregnet(
+            assertPaaIndeks(
                 paragraf = PARAGRAF_8_19,
+                index = 0,
+                forventetAntall = 2,
                 ledd = 4.ledd,
                 versjon = 1.januar(2001),
                 input = mapOf(
@@ -1620,7 +1692,27 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                         mapOf("fom" to 2.februar, "tom" to 2.februar),
                     )
                 ),
-                vedtaksperiodeId = 1.vedtaksperiode
+                vedtaksperiodeId = 1.vedtaksperiode,
+                utfall = Utfall.VILKAR_BEREGNET
+            )
+            assertPaaIndeks(
+                paragraf = PARAGRAF_8_19,
+                index = 1,
+                forventetAntall = 2,
+                ledd = 4.ledd,
+                versjon = 1.januar(2001),
+                input = mapOf(
+                    "beregnetTidslinje" to listOf(
+                        mapOf("fom" to 2.januar, "tom" to 17.januar, "dagtype" to "SYKEDAG", "grad" to 100)
+                    ),
+                ),
+                output = mapOf(
+                    "perioder" to listOf(
+                        mapOf("fom" to 2.februar, "tom" to 2.februar),
+                    )
+                ),
+                vedtaksperiodeId = 1.vedtaksperiode,
+                utfall = Utfall.VILKAR_BEREGNET
             )
         }
     }

@@ -117,18 +117,5 @@ internal class SubsumsjonTest {
         input: Map<String, Any> = mapOf(),
         output: Map<String, Any> = mapOf(),
         kontekster: Map<String, KontekstType> = mapOf()
-    ) = object : Subsumsjon() {
-        override val lovverk = lovverk
-        override val utfall = utfall
-        override val versjon = versjon
-        override val paragraf = paragraf
-        override val ledd: Ledd = ledd
-        override val bokstav: Bokstav? = bokstav
-        override val punktum: Punktum? = punktum
-        override val input = input
-        override val kontekster = kontekster
-
-        override fun output() = output
-        override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
-    }
+    ) = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
 }

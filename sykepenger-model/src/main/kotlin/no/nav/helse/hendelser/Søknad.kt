@@ -115,7 +115,8 @@ class Søknad(
     }
 
     private fun valider(subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
-        perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonslogg) }
+        val utlandsopphold = perioder.filterIsInstance<Søknadsperiode.Utlandsopphold>().map { it.periode }
+        subsumsjonslogg.`§ 8-9 ledd 1`(false, utlandsopphold, this.perioder.subsumsjonsFormat())
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
         if (tilkomneInntekter.isNotEmpty()) varsel(RV_SV_5)
@@ -276,7 +277,7 @@ class Søknad(
     }
 
     sealed class Søknadsperiode(fom: LocalDate, tom: LocalDate, private val navn: String) {
-        protected val periode = Periode(fom, tom)
+        val periode = Periode(fom, tom)
 
         internal companion object {
             fun sykdomsperiode(liste: List<Søknadsperiode>) =
@@ -310,8 +311,6 @@ class Søknad(
         internal fun valider(søknad: Søknad, varselkode: Varselkode) {
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(varselkode)
         }
-
-        internal open fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonslogg: Subsumsjonslogg) {}
 
         class Sykdom(
             fom: LocalDate,
@@ -367,10 +366,6 @@ class Søknad(
             override fun valider(søknad: Søknad) {
                 if (alleUtlandsdagerErFerie(søknad)) return
                 søknad.varsel(RV_SØ_8)
-            }
-
-            override fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonslogg: Subsumsjonslogg) {
-                subsumsjonslogg.`§ 8-9 ledd 1`(false, periode, søknadsperioder)
             }
 
             private fun alleUtlandsdagerErFerie(søknad:Søknad):Boolean {

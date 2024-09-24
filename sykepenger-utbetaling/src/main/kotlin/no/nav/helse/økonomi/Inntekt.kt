@@ -1,9 +1,7 @@
 package no.nav.helse.økonomi
 
-import java.time.LocalDate
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.InntektbeløpDto
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.memoize
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.roundToInt
@@ -72,12 +70,6 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     private fun tilMånedligDouble() = tilMånedligDoubleMemoized(årlig)
     fun rundTilDaglig() = rundTilDagligMemoized(årlig)
     fun rundNedTilDaglig() = rundNedTilDagligMemoized(årlig)
-
-    fun dekningsgrunnlag(dagen: LocalDate, regler: DekningsgradKilde, subsumsjonslogg: Subsumsjonslogg): Inntekt {
-        val dekningsgrunnlag = Inntekt(this.årlig * regler.dekningsgrad())
-        subsumsjonslogg.`§ 8-16 ledd 1`(dagen, regler.dekningsgrad(), this.årlig, dekningsgrunnlag.årlig)
-        return dekningsgrunnlag
-    }
 
     operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
 

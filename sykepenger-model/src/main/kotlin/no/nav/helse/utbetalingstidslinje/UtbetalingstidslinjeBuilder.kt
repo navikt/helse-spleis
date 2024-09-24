@@ -107,7 +107,7 @@ internal class ArbeidsgiverFaktaavklartInntekt(
         return økonomi.inntekt(
             aktuellDagsinntekt = aktuellDagsinntekt,
             beregningsgrunnlag = beregningsgrunnlag(skjæringstidspunkt),
-            dekningsgrunnlag = aktuellDagsinntekt.dekningsgrunnlag(dato, regler, subsumsjonslogg),
+            dekningsgrunnlag = aktuellDagsinntekt * regler.dekningsgrad(),
             `6G` = if (dato < skjæringstidspunkt) INGEN else `6G`,
             refusjonsbeløp = refusjonsbeløp
         )

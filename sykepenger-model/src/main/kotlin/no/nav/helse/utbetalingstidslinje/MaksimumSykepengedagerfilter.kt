@@ -153,15 +153,19 @@ internal class MaksimumSykepengedagerfilter(
     private fun subsummerTilstrekkeligOppholdNådd(dagen: LocalDate, oppholdFørDagen: Int = sisteVurdering.oppholdsteller): Boolean {
         // Nok opphold? 🤔
         val harTilstrekkeligOpphold = oppholdFørDagen >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
-        subsumsjonslogg.`§ 8-12 ledd 2`(
-            oppfylt = harTilstrekkeligOpphold,
-            dato = dagen,
-            gjenståendeSykepengedager = sisteVurdering.gjenståendeDagerUnder67År(alder, arbeidsgiverRegler),
-            beregnetAntallOppholdsdager = oppholdFørDagen,
-            tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-            tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
-            beregnetTidslinje = beregnetTidslinjesubsumsjon,
-        )
+        val gjenståendeSykepengedager = sisteVurdering.gjenståendeDagerUnder67År(alder, arbeidsgiverRegler)
+        // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
+        if (harTilstrekkeligOpphold || gjenståendeSykepengedager == 0) {
+            subsumsjonslogg.`§ 8-12 ledd 2`(
+                oppfylt = harTilstrekkeligOpphold,
+                dato = dagen,
+                gjenståendeSykepengedager = gjenståendeSykepengedager,
+                beregnetAntallOppholdsdager = oppholdFørDagen,
+                tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
+                tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
+                beregnetTidslinje = beregnetTidslinjesubsumsjon,
+            )
+        }
         return harTilstrekkeligOpphold
     }
 
