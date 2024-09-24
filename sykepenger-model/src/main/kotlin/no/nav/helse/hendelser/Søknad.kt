@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
-import no.nav.helse.hendelser.Søknad.TilkommenInntekt.Companion.inntekter
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt.Companion.orgnummereMedTilkomneInntekter
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
@@ -190,8 +189,6 @@ class Søknad(
         }
     }
 
-    internal fun inntekter() = tilkomneInntekter.inntekter(meldingsreferanseId(), registrert)
-
     class Merknad(private val type: String) {
         private companion object {
             private val tilbakedateringer = setOf(
@@ -239,14 +236,6 @@ class Søknad(
 
         companion object {
             fun List<TilkommenInntekt>.orgnummereMedTilkomneInntekter() = map { it.orgnummer }
-
-            fun List<TilkommenInntekt>.inntekter(meldingsreferanseId: UUID, registrert: LocalDateTime) = map { no.nav.helse.person.behandling.TilkommenInntekt(
-                hendelseId = meldingsreferanseId,
-                beløp = it.beløp,
-                tidsstempel = registrert,
-                orgnummer = it.orgnummer,
-                periode = it.gjelder()
-            ) }
         }
     }
 
