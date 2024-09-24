@@ -46,7 +46,7 @@ enum class Ledd(val nummer: Int) {
     }
 }
 
-enum class Punktum(private val nummer: Int) {
+enum class Punktum(val nummer: Int) {
     PUNKTUM_1(1),
     PUNKTUM_2(2),
     PUNKTUM_3(3),
@@ -63,8 +63,6 @@ enum class Punktum(private val nummer: Int) {
         return "$nummer. punktum"
     }
 
-    fun toJson(): Int = nummer
-
     companion object {
         val Int.punktum get() = enumValues<Punktum>().first { it.nummer == this }
         val IntRange.punktum get() = enumValues<Punktum>().filter { it.nummer in this }
@@ -80,8 +78,6 @@ enum class Bokstav(val ref: Char) {
         val regex = "[a-zæøå]".toRegex()
         require(regex.matches(ref.toString())) { "En bokstav må være en bokstav i det norske alfabetet" }
     }
-
-    fun toJson() = ref
 }
 
 val FOLKETRYGDLOVENS_OPPRINNELSESDATO: LocalDate = LocalDate.of(1997, 2, 28)

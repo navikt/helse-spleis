@@ -12,13 +12,12 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.etterlevelse.SubsumsjonVisitor
 import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
 
 
-internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor {
+internal class SubsumsjonInspektør(jurist: MaskinellJurist) {
 
     private val subsumsjoner = mutableListOf<Subsumsjon>()
 
@@ -38,7 +37,20 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     }
 
     init {
-        jurist.subsumsjoner().forEach { it.accept(this) }
+        jurist.subsumsjoner().forEach { subsumsjon ->
+            subsumsjoner.add(Subsumsjon(
+                lovverk = subsumsjon.lovverk,
+                paragraf = subsumsjon.paragraf,
+                ledd = subsumsjon.ledd,
+                punktum = subsumsjon.punktum,
+                bokstav = subsumsjon.bokstav,
+                versjon = subsumsjon.versjon,
+                sporing = subsumsjon.kontekster,
+                utfall = subsumsjon.utfall,
+                input = subsumsjon.input,
+                output = subsumsjon.output
+            ))
+        }
     }
 
     private fun finnSubsumsjoner(
@@ -234,20 +246,5 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     private fun assertResultat(inputdata: Map<String, Any>?, outputdata: Map<String, Any>?, resultat: Subsumsjon) {
         assertEquals(inputdata, resultat.input)
         assertEquals(outputdata, resultat.output)
-    }
-
-    override fun visitSubsumsjon(
-        utfall: Utfall,
-        lovverk: String,
-        versjon: LocalDate,
-        paragraf: Paragraf,
-        ledd: Ledd?,
-        punktum: Punktum?,
-        bokstav: Bokstav?,
-        input: Map<String, Any>,
-        output: Map<String, Any>,
-        kontekster: Map<String, KontekstType>
-    ) {
-        subsumsjoner.add(Subsumsjon(lovverk, paragraf, ledd, punktum, bokstav, versjon, kontekster, utfall, input, output))
     }
 }

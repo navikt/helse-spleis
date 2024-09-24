@@ -47,32 +47,9 @@ internal class MaskinellJuristTest {
     }
 
     private fun assertKontekster(subsumsjon: Subsumsjon, vararg kontekster: Pair<String, KontekstType>) {
-        val inspektør = object : SubsumsjonVisitor {
-            lateinit var kontekster: Map<String, KontekstType>
-
-            init {
-                subsumsjon.accept(this)
-            }
-
-            override fun visitSubsumsjon(
-                utfall: Subsumsjon.Utfall,
-                lovverk: String,
-                versjon: LocalDate,
-                paragraf: Paragraf,
-                ledd: Ledd?,
-                punktum: Punktum?,
-                bokstav: Bokstav?,
-                input: Map<String, Any>,
-                output: Map<String, Any>,
-                kontekster: Map<String, KontekstType>
-            ) {
-                this.kontekster = kontekster
-            }
-        }
-
         assertEquals(
             kontekster.toList().sortedBy { it.first },
-            inspektør.kontekster.toList().sortedBy { it.first }
+            subsumsjon.kontekster.toList().sortedBy { it.first }
         )
     }
 }

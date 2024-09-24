@@ -15,6 +15,7 @@ import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
 import no.nav.helse.etterlevelse.Ledd.LEDD_3
 import no.nav.helse.etterlevelse.Ledd.LEDD_5
+import no.nav.helse.etterlevelse.MaskinellJurist.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
 import no.nav.helse.etterlevelse.Paragraf.KJENNELSE_2006_4023
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
@@ -862,7 +863,30 @@ class MaskinellJurist private constructor(
 
     fun subsumsjoner() = subsumsjoner.toList()
 
-    fun events() = subsumsjoner.map(SubsumsjonEvent.Companion::fraSubsumsjon)
+    fun events() = subsumsjoner.map { subsumsjon ->
+        SubsumsjonEvent(
+            sporing = subsumsjon.kontekster.toMutableMap()
+                .filterNot { it.value == KontekstType.Fødselsnummer }
+                .toList()
+                .fold(mutableMapOf()) { acc, kontekst ->
+                    acc.compute(kontekst.second) { _, value ->
+                        value?.plus(
+                            kontekst.first
+                        ) ?: mutableListOf(kontekst.first)
+                    }
+                    acc
+                },
+            lovverk = subsumsjon.lovverk,
+            ikrafttredelse = paragrafVersjonFormaterer.format(subsumsjon.versjon),
+            paragraf = subsumsjon.paragraf.ref,
+            ledd = subsumsjon.ledd?.nummer,
+            punktum = subsumsjon.punktum?.nummer,
+            bokstav = subsumsjon.bokstav?.ref,
+            input = subsumsjon.input,
+            output = subsumsjon.output,
+            utfall = subsumsjon.utfall.name
+        )
+    }
 
     data class SubsumsjonEvent(
         val id: UUID = UUID.randomUUID(),
@@ -879,54 +903,7 @@ class MaskinellJurist private constructor(
     ) {
 
         companion object {
-
-            private val paragrafVersjonFormaterer = DateTimeFormatter.ISO_DATE
-
-            internal fun fraSubsumsjon(subsumsjon: Subsumsjon): SubsumsjonEvent {
-                return object : SubsumsjonVisitor {
-                    lateinit var event: SubsumsjonEvent
-
-                    init {
-                        subsumsjon.accept(this)
-                    }
-
-                    override fun visitSubsumsjon(
-                        utfall: Utfall,
-                        lovverk: String,
-                        versjon: LocalDate,
-                        paragraf: Paragraf,
-                        ledd: Ledd?,
-                        punktum: Punktum?,
-                        bokstav: Bokstav?,
-                        input: Map<String, Any>,
-                        output: Map<String, Any>,
-                        kontekster: Map<String, KontekstType>
-                    ) {
-                        event = SubsumsjonEvent(
-                            sporing = kontekster.toMutableMap()
-                                .filterNot { it.value == KontekstType.Fødselsnummer }
-                                .toList()
-                                .fold(mutableMapOf()) { acc, kontekst ->
-                                    acc.compute(kontekst.second) { _, value ->
-                                        value?.plus(
-                                            kontekst.first
-                                        ) ?: mutableListOf(kontekst.first)
-                                    }
-                                    acc
-                                },
-                            lovverk = lovverk,
-                            ikrafttredelse = paragrafVersjonFormaterer.format(versjon),
-                            paragraf = paragraf.ref,
-                            ledd = ledd?.nummer,
-                            punktum = punktum?.toJson(),
-                            bokstav = bokstav?.toJson(),
-                            input = input,
-                            output = output,
-                            utfall = utfall.name
-                        )
-                    }
-                }.event
-            }
+            val paragrafVersjonFormaterer = DateTimeFormatter.ISO_DATE
         }
     }
 }

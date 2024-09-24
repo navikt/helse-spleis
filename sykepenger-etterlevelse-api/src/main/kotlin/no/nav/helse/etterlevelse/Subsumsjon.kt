@@ -86,10 +86,6 @@ data class Subsumsjon(
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
     }
 
-    fun accept(visitor: SubsumsjonVisitor) {
-        visitor.visitSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
-    }
-
     override fun toString(): String {
         return "$paragraf $ledd ${if (punktum == null) "" else punktum} ${if (bokstav == null) "" else bokstav} [$utfall]"
     }
