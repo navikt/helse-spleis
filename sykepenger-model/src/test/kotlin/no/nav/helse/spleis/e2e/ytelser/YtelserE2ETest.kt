@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.ytelser
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.fredag
@@ -33,7 +32,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_11
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_4
@@ -76,8 +77,36 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class YtelserE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Det er fotsatt mulig å bli en AUU som vil omgjøres om man kombinerer snax som begrunnelseForReduksjonEllerIkkeUtbetalt og andre ytelser`() {
+        håndterSøknad(1.januar til 15.januar) // Denne må være kortere enn 16 dager
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "noe") // Denn må jo være satt da
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+
+        val forlengelse = 16.januar til 31.januar
+        håndterSøknad(forlengelse)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        håndterOverstyrTidslinje(forlengelse.map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        observatør.vedtaksperiodeVenter.clear()
+        assertThrows<IllegalStateException> { håndterSøknad(februar) } // Denne kastes fra UgyldigeSituasjonerObservatør
+        val venter = observatør.vedtaksperiodeVenter.single { it.vedtaksperiodeId == 2.vedtaksperiode.id(ORGNUMMER) }
+        assertEquals("HJELP", venter.venterPå.venteårsak.hva)
+        assertEquals("VIL_OMGJØRES", venter.venterPå.venteårsak.hvorfor)
+    }
 
     @Test
     fun `Foreldrepenger påvirker skjæringstidspunkt for senere perioder`() {
