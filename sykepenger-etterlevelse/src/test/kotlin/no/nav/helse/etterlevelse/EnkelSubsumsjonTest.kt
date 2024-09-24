@@ -32,26 +32,6 @@ internal class EnkelSubsumsjonTest {
         assertEquals(2, vurderinger.size)
     }
 
-    @Test
-    fun equality() {
-        val utfall = VILKAR_OPPFYLT
-        val lovverk = "folketrygdloven"
-        val versjon = LocalDate.MAX
-        val paragraf = Paragraf.PARAGRAF_8_2
-        val ledd  = 1.ledd
-        val punktum: Punktum = Punktum.PUNKTUM_1
-        val bokstav = Bokstav.BOKSTAV_A
-        val input = mapOf("foo" to "bar")
-        val output = mapOf("bar" to "baz")
-        val kontekster = emptyMap<String, KontekstType>()
-
-        val enkel = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
-        val enkelKopi = EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
-
-        assertEquals(enkel, enkel)
-        assertEquals(enkel, enkelKopi)
-    }
-
     private fun nyVurdering(
         utfall: Utfall = VILKAR_OPPFYLT,
         lovverk: String = "folketrygdloven",
@@ -64,7 +44,7 @@ internal class EnkelSubsumsjonTest {
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, KontekstType> = emptyMap()
     ) {
-        EnkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
+        Subsumsjon.enkelSubsumsjon(utfall, lovverk, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).also {
             vurderinger.add(it)
         }
     }

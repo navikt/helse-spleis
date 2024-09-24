@@ -90,7 +90,7 @@ class MaskinellJurist private constructor(
         antallOpptjeningsdager: Int
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 lovverk = "folketrygdloven",
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2020, 6, 12),
@@ -117,7 +117,7 @@ class MaskinellJurist private constructor(
         avvistePerioder: Collection<ClosedRange<LocalDate>>
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2011, 12, 16),
@@ -139,7 +139,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlagÅrlig: Double, minimumInntektÅrlig: Double) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2011, 12, 16),
@@ -159,7 +159,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<LocalDate>>, søknadsperioder: List<Map<String, Serializable>>) {
         if (utlandsperioder.isEmpty()) return
-        leggTil(PeriodisertSubsumsjon(
+        leggTil(Subsumsjon.periodisertSubsumsjon(
             perioder = utlandsperioder,
             lovverk = "folketrygdloven",
             utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
@@ -178,7 +178,7 @@ class MaskinellJurist private constructor(
         beregningsgrunnlagÅrlig: Double
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2020, 1, 1),
@@ -200,7 +200,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2020, 1, 1),
@@ -216,7 +216,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-11 ledd 1`(dato: Collection<ClosedRange<LocalDate>>) {
         if (dato.isEmpty()) return
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 lovverk = "folketrygdloven",
                 perioder = dato,
                 paragraf = PARAGRAF_8_11,
@@ -246,7 +246,7 @@ class MaskinellJurist private constructor(
 
         fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {
             leggTil(
-                EnkelSubsumsjon(
+                Subsumsjon.enkelSubsumsjon(
                     utfall = utfall,
                     lovverk = "folketrygdloven",
                     versjon = LocalDate.of(2021, 5, 21),
@@ -284,7 +284,7 @@ class MaskinellJurist private constructor(
         beregnetTidslinje: List<Tidslinjedag>
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 lovverk = "folketrygdloven",
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2021, 5, 21),
@@ -307,7 +307,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<ClosedRange<LocalDate>>, tidslinjer: List<List<Tidslinjedag>>) {
         fun logg(utfall: Utfall, dager: Collection<ClosedRange<LocalDate>>) {
             leggTil(
-                PeriodisertSubsumsjon(
+                Subsumsjon.periodisertSubsumsjon(
                     perioder = dager,
                     lovverk = "folketrygdloven",
                     utfall = utfall,
@@ -341,7 +341,7 @@ class MaskinellJurist private constructor(
             )
         }
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 perioder = listOf(periode),
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
@@ -352,7 +352,7 @@ class MaskinellJurist private constructor(
                     "tidslinjegrunnlag" to tidslinjegrunnlag,
                     "grense" to grense
                 ),
-                originalOutput = mapOf(
+                output = mapOf(
                     "dagerUnderGrensen" to dagerUnderGrensenMap
                 ),
                 kontekster = kontekster()
@@ -368,7 +368,7 @@ class MaskinellJurist private constructor(
         oppfylt: Boolean
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(1998, 12, 18),
@@ -395,11 +395,11 @@ class MaskinellJurist private constructor(
     override fun `§ 8-16 ledd 1`(dato: Collection<ClosedRange<LocalDate>>, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
         if (dato.isEmpty()) return
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 perioder = dato,
                 lovverk = "folketrygdloven",
                 input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
-                originalOutput = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
+                output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
                 utfall = VILKAR_BEREGNET,
                 paragraf = PARAGRAF_8_16,
                 ledd = 1.ledd,
@@ -416,7 +416,7 @@ class MaskinellJurist private constructor(
     ) {
         if (dagen.isEmpty()) return
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 perioder = dagen,
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 lovverk = "folketrygdloven",
@@ -433,7 +433,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-17 ledd 1`(dato: Collection<ClosedRange<LocalDate>>) {
         if (dato.isEmpty()) return
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 perioder = dato,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2018, 1, 1),
@@ -456,7 +456,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-17 ledd 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {
         if (dato.isEmpty()) return
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 perioder = dato,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2018, 1, 1),
@@ -473,7 +473,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2001, 1, 1),
@@ -493,7 +493,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-19 andre ledd`(dato: Collection<ClosedRange<LocalDate>>, beregnetTidslinje: List<Tidslinjedag>) {
         if (dato.isEmpty()) return
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 perioder = dato,
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
@@ -511,7 +511,7 @@ class MaskinellJurist private constructor(
     override fun `§ 8-19 tredje ledd`(dato: Collection<LocalDate>, beregnetTidslinje: List<Tidslinjedag>) {
         if (dato.isEmpty()) return
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 perioder = dato.map { it..it },
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
@@ -528,7 +528,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
         leggTil(
-            PeriodisertSubsumsjon(
+            Subsumsjon.periodisertSubsumsjon(
                 perioder = listOf(dato.rangeTo(dato)),
                 lovverk = "folketrygdloven",
                 utfall = VILKAR_BEREGNET,
@@ -551,7 +551,7 @@ class MaskinellJurist private constructor(
         skjæringstidspunkt: LocalDate
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
@@ -582,7 +582,7 @@ class MaskinellJurist private constructor(
         grunnlagForSykepengegrunnlagMånedlig: Double
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
@@ -614,7 +614,7 @@ class MaskinellJurist private constructor(
         grunnlagForSykepengegrunnlagMånedlig: Double
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
@@ -645,7 +645,7 @@ class MaskinellJurist private constructor(
         grunnlagForSykepengegrunnlagMånedlig: Double,
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
@@ -673,7 +673,7 @@ class MaskinellJurist private constructor(
         organisasjonsnummer: String
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2019, 1, 1),
@@ -708,7 +708,7 @@ class MaskinellJurist private constructor(
         minimumInntektÅrlig: Double
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2011, 12, 16),
@@ -737,7 +737,7 @@ class MaskinellJurist private constructor(
         minimumInntektÅrlig: Double
     ) {
         leggTil(
-            EnkelSubsumsjon(
+            Subsumsjon.enkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 lovverk = "folketrygdloven",
                 versjon = LocalDate.of(2011, 12, 16),
@@ -773,7 +773,7 @@ class MaskinellJurist private constructor(
 
         fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {
             leggTil(
-                EnkelSubsumsjon(
+                Subsumsjon.enkelSubsumsjon(
                     utfall = utfall,
                     versjon = LocalDate.of(2011, 12, 16),
                     lovverk = "folketrygdloven",
@@ -802,7 +802,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: Collection<ClosedRange<LocalDate>>) {
         if (perioder.isEmpty()) return
-        leggTil(PeriodisertSubsumsjon(
+        leggTil(Subsumsjon.periodisertSubsumsjon(
             perioder = perioder,
             utfall = VILKAR_IKKE_OPPFYLT,
             lovverk = "folketrygdloven",
@@ -817,7 +817,7 @@ class MaskinellJurist private constructor(
     }
 
     override fun `fvl § 35 ledd 1`() {
-        leggTil(EnkelSubsumsjon(
+        leggTil(Subsumsjon.enkelSubsumsjon(
             utfall = VILKAR_OPPFYLT,
             lovverk = "forvaltningsloven",
             versjon = LocalDate.of(2021, 6, 1),
@@ -833,7 +833,7 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-48 ledd 2 punktum 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {
         if (dato.isEmpty()) return
-        leggTil(PeriodisertSubsumsjon(
+        leggTil(Subsumsjon.periodisertSubsumsjon(
             perioder = dato,
             utfall = VILKAR_IKKE_OPPFYLT,
             lovverk = "folketrygdloven",
@@ -848,7 +848,7 @@ class MaskinellJurist private constructor(
 
     override fun `Trygderettens kjennelse 2006-4023`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {
         if (dato.isEmpty()) return
-        leggTil(PeriodisertSubsumsjon(
+        leggTil(Subsumsjon.periodisertSubsumsjon(
             perioder = dato,
             utfall = VILKAR_IKKE_OPPFYLT,
             lovverk = "trygderetten",
@@ -890,7 +890,7 @@ class MaskinellJurist private constructor(
                         subsumsjon.accept(this)
                     }
 
-                    override fun preVisitSubsumsjon(
+                    override fun visitSubsumsjon(
                         utfall: Utfall,
                         lovverk: String,
                         versjon: LocalDate,

@@ -54,7 +54,7 @@ internal class MaskinellJuristTest {
                 subsumsjon.accept(this)
             }
 
-            override fun preVisitSubsumsjon(
+            override fun visitSubsumsjon(
                 utfall: Subsumsjon.Utfall,
                 lovverk: String,
                 versjon: LocalDate,

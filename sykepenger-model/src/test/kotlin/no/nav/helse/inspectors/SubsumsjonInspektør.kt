@@ -236,7 +236,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         assertEquals(outputdata, resultat.output)
     }
 
-    override fun preVisitSubsumsjon(
+    override fun visitSubsumsjon(
         utfall: Utfall,
         lovverk: String,
         versjon: LocalDate,
