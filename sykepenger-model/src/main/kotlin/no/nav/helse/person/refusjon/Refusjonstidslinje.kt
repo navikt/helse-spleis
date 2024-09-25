@@ -8,7 +8,7 @@ import no.nav.helse.økonomi.Inntekt
 data class Refusjonstidslinje private constructor(
     private val dager: SortedMap<LocalDate, EtBeløpMedKildePåSeg>
 ) {
-    internal constructor(vararg dager: Pair<LocalDate, EtBeløpMedKildePåSeg>): this(dager.toMap())
+    internal constructor(vararg perioder: Pair<Periode, EtBeløpMedKildePåSeg>): this(perioder.flatMap { (periode, etBeløp) -> periode.map { it to etBeløp } }.toMap())
 
     internal constructor(periode: Periode, etBeløpMedKildePåSeg: EtBeløpMedKildePåSeg): this(periode.associateWith { etBeløpMedKildePåSeg })
 

@@ -29,6 +29,7 @@ import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysni
 import no.nav.helse.person.refusjon.Kilde
 import no.nav.helse.person.refusjon.Refusjonsfaktabøtte.Refusjonsfakta
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -174,7 +175,9 @@ class Inntektsmelding(
                     return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
                 }
                 internal fun List<EndringIRefusjon>.refusjonsfakta(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, beløp: Inntekt?, opphørsdato: LocalDate?, mottatt: LocalDateTime): List<Refusjonsfakta> {
-                    return listOf(Refusjonsfakta(startskuddet(førsteFraværsdag, arbeidsgiverperioder), null, beløp!!, Kilde(meldingsreferanseId, ARBEIDSGIVER), mottatt))
+                    val refusjonsfakta = listOf(Refusjonsfakta(startskuddet(førsteFraværsdag, arbeidsgiverperioder), opphørsdato, beløp ?: INGEN, Kilde(meldingsreferanseId, ARBEIDSGIVER), mottatt))
+                    if (opphørsdato == null) return refusjonsfakta
+                    return refusjonsfakta + Refusjonsfakta(opphørsdato.nesteDag, null, INGEN, Kilde(meldingsreferanseId, ARBEIDSGIVER), mottatt)
                 }
             }
         }
