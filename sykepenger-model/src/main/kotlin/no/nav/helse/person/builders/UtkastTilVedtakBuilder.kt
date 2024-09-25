@@ -15,6 +15,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
+import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 internal class UtkastTilVedtakBuilder(
@@ -277,9 +278,14 @@ internal class UtkastTilVedtakBuilder(
             hendelseIder = hendelseIder + historiskeHendelseIder,
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag,
-            beregningsgrunnlag = beregningsgrunnlag.årlig,
+            // Til ettertanke: Denne mappes ut i JSON som "grunnlagForSykepengegrunnlag"
+            beregningsgrunnlag = beregningsgrunnlag.årlig.also {
+                val fraSykepengegrunnlagsfakta = sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak()
+                if (it != fraSykepengegrunnlagsfakta) sikkerlogg.warn("beregningsgrunnlag=$it, fraSykepengegrunnlagsfakta=$fraSykepengegrunnlagsfakta på aktørId=$aktørId")
+            },
             // Til ettertanke: Den var jo uventet, men er jo slik det har vært 🤷‍
             // Til ettertanke: Denne hentet data fra sykepengegrunnlagsfakta som har to desimaler
+            // Til ettertanke: Denne mapps ut i JSOM som "grunnlagForSykepengegrunnlagPerArbeidsgiver"
             omregnetÅrsinntektPerArbeidsgiver = when {
                 inngangsvilkårFraInfotrygd -> emptyMap()
                 else -> arbeidsgiverinntekterPåSkjæringstidspunktet
@@ -316,5 +322,12 @@ internal class UtkastTilVedtakBuilder(
         private val Inntekt.årlig get() = reflection { årlig, _, _, _ -> årlig }
         private val Inntekt.månedlig get() = reflection { _, månedlig, _, _ -> månedlig }
         private val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
+
+        private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak() = when (val fakta = this) {
+            is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.skjønnsfastsatt
+            else -> fakta.omregnetÅrsinntekt
+        }
+
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
