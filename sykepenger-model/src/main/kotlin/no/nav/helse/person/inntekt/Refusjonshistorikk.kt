@@ -10,14 +10,10 @@ import no.nav.helse.dto.serialisering.RefusjonUtDto
 import no.nav.helse.dto.serialisering.RefusjonshistorikkUtDto
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.RefusjonshistorikkVisitor
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somOverlapperMedArbeidsgiverperiode
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somTilstøterArbeidsgiverperiode
-import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.Companion.somTrefferFørsteFraværsdag
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
@@ -35,12 +31,6 @@ internal class Refusjonshistorikk {
         visitor.preVisitRefusjonshistorikk(this)
         refusjoner.forEach { it.accept(visitor) }
         visitor.postVisitRefusjonshistorikk(this)
-    }
-
-    internal fun finnRefusjon(periode: Periode, aktivitetslogg: IAktivitetslogg): Refusjon? {
-        return refusjoner.somTrefferFørsteFraværsdag(periode, aktivitetslogg)
-            ?: refusjoner.somTilstøterArbeidsgiverperiode(periode, aktivitetslogg)
-            ?: refusjoner.somOverlapperMedArbeidsgiverperiode(periode, aktivitetslogg)
     }
 
     internal class Refusjon(
@@ -62,26 +52,6 @@ internal class Refusjonshistorikk {
             }
 
             private fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }
-
-            private fun Iterable<Refusjon>.nyesteMedFørsteFraværsdagFørFørsteUtbetalingsdag(førsteUtbetalingsdag: LocalDate) =
-                filter { it.utledetFørsteFraværsdag() < førsteUtbetalingsdag }.maxByOrNull { it.tidsstempel }
-
-            internal fun Iterable<Refusjon>.somOverlapperMedArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg): Refusjon? {
-                val utvidetPeriode = periode.start.minusDays(16) til periode.endInclusive
-                return filter { refusjon ->
-                    refusjon.arbeidsgiverperioder.any { it.overlapperMed(utvidetPeriode) }
-                }.nyesteMedFørsteFraværsdagFørFørsteUtbetalingsdag(periode.start)
-                    ?.also { aktivitetslogg.info("Fant refusjon ved å gå 16 dager tilbake fra første utbetalingsdag i sammenhengende utbetaling") }
-            }
-
-            internal fun Iterable<Refusjon>.somTrefferFørsteFraværsdag(periode: Periode, aktivitetslogg: IAktivitetslogg) = filter { refusjon ->
-                refusjon.utledetFørsteFraværsdag() in periode
-            }.maxByOrNull { it.tidsstempel }?.also { aktivitetslogg.info("Fant refusjon ved å sjekke om første fraværsdag er i sammenhengende utbetaling") }
-
-            internal fun Iterable<Refusjon>.somTilstøterArbeidsgiverperiode(periode: Periode, aktivitetslogg: IAktivitetslogg) = filter { refusjon ->
-                refusjon.arbeidsgiverperioder.maxByOrNull { it.endInclusive }?.erRettFør(periode) ?: false
-            }.nyesteMedFørsteFraværsdagFørFørsteUtbetalingsdag(periode.start)
-                ?.also { aktivitetslogg.info("Fant refusjon ved å finne tilstøtende arbeidsgiverperiode for første utbetalingsdag i sammenhengende utbetaling") }
 
             internal fun gjenopprett(dto: RefusjonInnDto): Refusjon {
                 return Refusjon(
@@ -149,8 +119,6 @@ internal class Refusjonshistorikk {
                     aktuelle.leggTilRefusjonsopplysninger(refusjonsopplysningBuilder)
                     return refusjonsopplysningBuilder.build()
                 }
-
-                internal fun Refusjonshistorikk.erTom() = refusjoner.isEmpty()
 
                 internal fun Refusjon.refusjonsopplysninger(): Refusjonsopplysninger {
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
