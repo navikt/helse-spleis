@@ -13,7 +13,7 @@ data class Subsumsjon(
     val bokstav: Bokstav? = null,
     val input: Map<String, Any>,
     val output: Map<String, Any>,
-    val kontekster: Map<String, KontekstType>
+    val kontekster: List<Subsumsjonskontekst>
 ) {
     companion object {
         fun enkelSubsumsjon(
@@ -26,7 +26,7 @@ data class Subsumsjon(
             bokstav: Bokstav? = null,
             input: Map<String, Any>,
             output: Map<String, Any>,
-            kontekster: Map<String, KontekstType>
+            kontekster: List<Subsumsjonskontekst>
         ): Subsumsjon {
             return Subsumsjon(
                 type = Subsumsjonstype.ENKEL,
@@ -53,7 +53,7 @@ data class Subsumsjon(
             bokstav: Bokstav? = null,
             output: Map<String, Any> = emptyMap(),
             input: Map<String, Any>,
-            kontekster: Map<String, KontekstType>
+            kontekster: List<Subsumsjonskontekst>
         ): Subsumsjon {
             val outputMedPerioder = output + mapOf(
                 "perioder" to perioder.map {
@@ -76,6 +76,20 @@ data class Subsumsjon(
                 output = outputMedPerioder,
                 kontekster = kontekster
             )
+        }
+    }
+
+    init {
+        val kritiskeTyper = setOf(KontekstType.Fødselsnummer, KontekstType.Organisasjonsnummer)
+        check(kritiskeTyper.all { kritiskType ->
+            kontekster.count { it.type == kritiskType } == 1
+        }) {
+            "en av $kritiskeTyper mangler/har duplikat:\n${kontekster.joinToString(separator = "\n")}"
+        }
+        // todo: sjekker for mindre enn 1 også ettersom noen subsumsjoner skjer på arbeidsgivernivå. det burde vi forsøke å flytte/fikse slik at
+        // alt kan subsummeres i kontekst av en behandling.
+        check(kontekster.count { it.type == KontekstType.Vedtaksperiode } <= 1) {
+            "det er flere kontekster av ${KontekstType.Vedtaksperiode}:\n${kontekster.joinToString(separator = "\n")}"
         }
     }
 

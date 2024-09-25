@@ -28,6 +28,11 @@ import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiverInntektsopplysningTest {
 
+    private val jurist = MaskinellJurist()
+        .medFødselsnummer("fnr")
+        .medOrganisasjonsnummer("orgnr")
+        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
+
     @Test
     fun `overstyr inntekter`() {
         val skjæringstidspunkt = 1.januar
@@ -170,7 +175,6 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a1Opplysning = ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
         val a1Overstyrt = ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), overstyrtBeløp, "Jeg bare måtte gjøre det", subsumsjon, LocalDateTime.now()), Refusjonsopplysninger())
 
-        val jurist = MaskinellJurist()
         listOf(a1Opplysning).overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
@@ -223,7 +227,6 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()), Refusjonsopplysninger())
 
-        val jurist = MaskinellJurist()
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
         val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", jurist)
         assertEquals(a1Opplysning, aktive.single())
@@ -250,7 +253,6 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()), Refusjonsopplysninger())
 
-        val jurist = MaskinellJurist()
         val opprinneligAktive = listOf(a1Opplysning)
         val opprinneligDeaktiverte = listOf(a2Opplysning)
 

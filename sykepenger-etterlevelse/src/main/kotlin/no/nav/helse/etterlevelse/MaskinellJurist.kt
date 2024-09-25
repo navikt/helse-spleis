@@ -42,7 +42,7 @@ import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
 
 class MaskinellJurist private constructor(
     private val parent: MaskinellJurist?,
-    private val kontekster: Map<String, KontekstType>,
+    private val kontekster: List<Subsumsjonskontekst>,
     vedtaksperiode: ClosedRange<LocalDate>? = null
 ) : Subsumsjonslogg {
 
@@ -55,33 +55,26 @@ class MaskinellJurist private constructor(
 
     private val subsumsjoner = mutableListOf<Subsumsjon>()
 
-    constructor() : this(null, emptyMap())
+    constructor() : this(null, emptyList())
 
     private fun leggTil(subsumsjon: Subsumsjon) {
         subsumsjoner.add(subsumsjon)
         parent?.leggTil(subsumsjon)
     }
 
-    private fun kontekster(): Map<String, KontekstType> = this.kontekster.toMap()
-
     fun medFødselsnummer(personidentifikator: String) =
-        kopierMedKontekst(mapOf(personidentifikator to KontekstType.Fødselsnummer) + kontekster.filterNot { it.value == KontekstType.Fødselsnummer })
+        kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Fødselsnummer, personidentifikator)))
 
     fun medOrganisasjonsnummer(organisasjonsnummer: String) =
-        kopierMedKontekst(mapOf(organisasjonsnummer to KontekstType.Organisasjonsnummer) + kontekster.filterNot { it.value == KontekstType.Organisasjonsnummer })
+        kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)))
 
-    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Map<UUID, KontekstType>, periode: ClosedRange<LocalDate>) =
-        kopierMedKontekst(
-            mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder
-                .map { it.key.toString() to it.value } + kontekster,
-            periode
-        )
+    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<Subsumsjonskontekst>, periode: ClosedRange<LocalDate>) =
+        kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Vedtaksperiode, vedtaksperiodeId.toString())) + hendelseIder, periode)
 
-    fun medInntektsmelding(inntektsmeldingId: UUID) = kopierMedKontekst(mapOf(
-        inntektsmeldingId.toString() to KontekstType.Inntektsmelding
-    ) + kontekster)
+    fun medInntektsmelding(inntektsmeldingId: UUID) = kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Inntektsmelding, inntektsmeldingId.toString())))
 
-    private fun kopierMedKontekst(kontekster: Map<String, KontekstType>, periode: ClosedRange<LocalDate>? = null) = MaskinellJurist(this, kontekster, periode)
+    private fun kopierMedKontekst(kontekster: List<Subsumsjonskontekst>, periode: ClosedRange<LocalDate>? = null) =
+        MaskinellJurist(this, this.kontekster + kontekster, periode)
 
     override fun `§ 8-2 ledd 1`(
         oppfylt: Boolean,
@@ -103,7 +96,7 @@ class MaskinellJurist private constructor(
                     "arbeidsforhold" to arbeidsforhold
                 ),
                 output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -133,7 +126,7 @@ class MaskinellJurist private constructor(
                     "tidslinjeTom" to tidslinjeTom
                 ),
                 output = mapOf("avvisteDager" to avvistePerioder),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -153,7 +146,7 @@ class MaskinellJurist private constructor(
                     "minimumInntekt" to minimumInntektÅrlig
                 ),
                 output = emptyMap(),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -168,7 +161,7 @@ class MaskinellJurist private constructor(
             paragraf = PARAGRAF_8_9,
             ledd = LEDD_1,
             input = mapOf( "soknadsPerioder" to søknadsperioder),
-            kontekster = kontekster()
+            kontekster = kontekster
         ))
     }
 
@@ -194,7 +187,7 @@ class MaskinellJurist private constructor(
                 output = mapOf(
                     "erBegrenset" to erBegrenset
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -209,7 +202,7 @@ class MaskinellJurist private constructor(
                 ledd = 3.ledd,
                 input = mapOf("årligInntekt" to årsinntekt),
                 output = mapOf("dagligInntekt" to inntektOmregnetTilDaglig),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -225,7 +218,7 @@ class MaskinellJurist private constructor(
                 utfall = VILKAR_IKKE_OPPFYLT,
                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                 input = mapOf("periode" to mapOf( "fom" to periode().start, "tom" to periode().endInclusive)),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -267,7 +260,7 @@ class MaskinellJurist private constructor(
                         "forbrukteSykedager" to forbrukteSykedager,
                         "maksdato" to maksdato,
                     ),
-                    kontekster = kontekster()
+                    kontekster = kontekster
                 )
             )
         }
@@ -300,7 +293,7 @@ class MaskinellJurist private constructor(
                     "beregnetTidslinje" to beregnetTidslinje.dager()
                 ),
                 output = emptyMap(),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -318,7 +311,7 @@ class MaskinellJurist private constructor(
                     input = mapOf(
                         "tidslinjegrunnlag" to tidslinjer.map { it.dager(periode) }
                     ),
-                    kontekster = kontekster()
+                    kontekster = kontekster
                 )
             )
         }
@@ -356,7 +349,7 @@ class MaskinellJurist private constructor(
                 output = mapOf(
                     "dagerUnderGrensen" to dagerUnderGrensenMap
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -383,7 +376,7 @@ class MaskinellJurist private constructor(
                     "inntekterSisteTreMåneder" to inntekterSisteTreMåneder.subsumsjonsformat(),
                     "forklaring" to forklaring
                 ),
-                kontekster = kontekster(),
+                kontekster = kontekster,
                 output = if (oppfylt) {
                     mapOf("arbeidsforholdAvbrutt" to organisasjonsnummer)
                 } else {
@@ -405,7 +398,7 @@ class MaskinellJurist private constructor(
                 paragraf = PARAGRAF_8_16,
                 ledd = 1.ledd,
                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -426,7 +419,7 @@ class MaskinellJurist private constructor(
                 ledd = 1.ledd,
                 bokstav = BOKSTAV_A,
                 input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager(periode())),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -442,7 +435,7 @@ class MaskinellJurist private constructor(
                 paragraf = PARAGRAF_8_17,
                 ledd = LEDD_1,
                 input = emptyMap(),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -467,7 +460,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "beregnetTidslinje" to sykdomstidslinje.dager(periode())
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -486,7 +479,7 @@ class MaskinellJurist private constructor(
                 output = mapOf(
                     "sisteDagIArbeidsgiverperioden" to dato
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -504,7 +497,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "beregnetTidslinje" to beregnetTidslinje.dager()
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -522,7 +515,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "beregnetTidslinje" to beregnetTidslinje.dager()
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -539,7 +532,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "beregnetTidslinje" to beregnetTidslinje.dager()
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -568,7 +561,7 @@ class MaskinellJurist private constructor(
                     "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
                     "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -601,7 +594,7 @@ class MaskinellJurist private constructor(
                     "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
                     "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -632,7 +625,7 @@ class MaskinellJurist private constructor(
                     "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
                     "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -662,7 +655,7 @@ class MaskinellJurist private constructor(
                     "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
                     "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -688,7 +681,7 @@ class MaskinellJurist private constructor(
                 output = mapOf(
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlagÅrlig
                 ),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -722,7 +715,7 @@ class MaskinellJurist private constructor(
                     "minimumInntekt" to minimumInntektÅrlig
                 ),
                 output = emptyMap(),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -754,7 +747,7 @@ class MaskinellJurist private constructor(
                     "minimumInntekt" to minimumInntektÅrlig
                 ),
                 output = emptyMap(),
-                kontekster = kontekster()
+                kontekster = kontekster
             )
         )
     }
@@ -793,7 +786,7 @@ class MaskinellJurist private constructor(
                         "forbrukteSykedager" to forbrukteSykedager,
                         "maksdato" to maksdato,
                     ),
-                    kontekster = kontekster()
+                    kontekster = kontekster
                 )
             )
         }
@@ -813,7 +806,7 @@ class MaskinellJurist private constructor(
             input = mapOf(
                 "avskjæringsdato" to avskjæringsdato
             ),
-            kontekster = kontekster()
+            kontekster = kontekster
         ))
     }
 
@@ -828,7 +821,7 @@ class MaskinellJurist private constructor(
                 "stadfesting" to true
             ),
             output = emptyMap(),
-            kontekster = kontekster()
+            kontekster = kontekster
         ))
     }
 
@@ -843,7 +836,7 @@ class MaskinellJurist private constructor(
             ledd = LEDD_2,
             punktum = Punktum.PUNKTUM_2,
             input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager(periode())),
-            kontekster = kontekster()
+            kontekster = kontekster
         ))
     }
 
@@ -857,7 +850,7 @@ class MaskinellJurist private constructor(
             paragraf = KJENNELSE_2006_4023,
             ledd = null,
             input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager(periode())),
-            kontekster = kontekster()
+            kontekster = kontekster
         ))
     }
 
@@ -865,17 +858,9 @@ class MaskinellJurist private constructor(
 
     fun events() = subsumsjoner.map { subsumsjon ->
         SubsumsjonEvent(
-            sporing = subsumsjon.kontekster.toMutableMap()
-                .filterNot { it.value == KontekstType.Fødselsnummer }
-                .toList()
-                .fold(mutableMapOf()) { acc, kontekst ->
-                    acc.compute(kontekst.second) { _, value ->
-                        value?.plus(
-                            kontekst.first
-                        ) ?: mutableListOf(kontekst.first)
-                    }
-                    acc
-                },
+            sporing = subsumsjon.kontekster
+                .filterNot { it.type == KontekstType.Fødselsnummer }
+                .groupBy({ it.type }) { it.verdi },
             lovverk = subsumsjon.lovverk,
             ikrafttredelse = paragrafVersjonFormaterer.format(subsumsjon.versjon),
             paragraf = subsumsjon.paragraf.ref,

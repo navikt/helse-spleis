@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
@@ -14,6 +15,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class GrunnbeløpTest {
+
+    private val jurist = MaskinellJurist()
+        .medFødselsnummer("fnr")
+        .medOrganisasjonsnummer("orgnr")
+        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
 
     @Test
     fun dagsats() {
@@ -152,7 +158,7 @@ internal class GrunnbeløpTest {
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
-            subsumsjonslogg = MaskinellJurist()
+            subsumsjonslogg = jurist
         )
     )
 
@@ -166,7 +172,7 @@ internal class GrunnbeløpTest {
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
-            subsumsjonslogg = MaskinellJurist()
+            subsumsjonslogg = jurist
         )
     )
 
@@ -179,7 +185,7 @@ internal class GrunnbeløpTest {
             skjæringstidspunkt = skjæringstidspunkt,
             inntekt = inntekt,
             alder = alder,
-            subsumsjonslogg = MaskinellJurist()
+            subsumsjonslogg = jurist
         )
     )
 

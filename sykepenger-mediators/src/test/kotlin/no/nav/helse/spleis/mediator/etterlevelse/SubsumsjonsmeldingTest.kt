@@ -34,7 +34,7 @@ internal class SubsumsjonsmeldingTest {
         jurist = MaskinellJurist()
             .medFødselsnummer(fnr)
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.randomUUID(), emptyMap(), Periode(1.januar, 31.januar))
+            .medVedtaksperiode(UUID.randomUUID(), emptyList(), Periode(1.januar, 31.januar))
         val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", mapOf(
             "aktørId" to "1",
             "fødselsnummer" to fnr,

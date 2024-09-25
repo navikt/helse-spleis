@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.dto.DokumentsporingDto
 import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.etterlevelse.KontekstType
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 
 class Dokumentsporing private constructor(private val id: UUID, private val dokumentType: DokumentType) {
 
@@ -27,20 +28,23 @@ class Dokumentsporing private constructor(private val id: UUID, private val doku
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingDagerId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingDager }?.id
         internal fun Iterable<Dokumentsporing>.sisteInntektsmeldingInntektId() = lastOrNull { it.dokumentType == DokumentType.InntektsmeldingInntekt }?.id
 
-        internal fun Iterable<Dokumentsporing>.tilSubsumsjonsformat() = associate {
-            it.id to when (it.dokumentType) {
-                DokumentType.Sykmelding -> KontekstType.Sykmelding
-                DokumentType.Søknad -> KontekstType.Søknad
-                DokumentType.InntektsmeldingDager -> KontekstType.Inntektsmelding
-                DokumentType.InntektsmeldingInntekt -> KontekstType.Inntektsmelding
-                DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
-                DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
-                DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
-                DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
-                DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
-                DokumentType.SkjønnsmessigFastsettelse -> KontekstType.SkjønnsmessigFastsettelse
-                DokumentType.AndreYtelser -> KontekstType.AndreYtelser
-            }
+        internal fun Iterable<Dokumentsporing>.tilSubsumsjonsformat() = map {
+            Subsumsjonskontekst(
+                type = when (it.dokumentType) {
+                    DokumentType.Sykmelding -> KontekstType.Sykmelding
+                    DokumentType.Søknad -> KontekstType.Søknad
+                    DokumentType.InntektsmeldingDager -> KontekstType.Inntektsmelding
+                    DokumentType.InntektsmeldingInntekt -> KontekstType.Inntektsmelding
+                    DokumentType.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
+                    DokumentType.OverstyrInntekt -> KontekstType.OverstyrInntekt
+                    DokumentType.OverstyrRefusjon -> KontekstType.OverstyrRefusjon
+                    DokumentType.OverstyrArbeidsgiveropplysninger -> KontekstType.OverstyrArbeidsgiveropplysninger
+                    DokumentType.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
+                    DokumentType.SkjønnsmessigFastsettelse -> KontekstType.SkjønnsmessigFastsettelse
+                    DokumentType.AndreYtelser -> KontekstType.AndreYtelser
+                },
+                verdi = it.id.toString()
+            )
         }
 
         internal fun gjenopprett(dto: DokumentsporingDto): Dokumentsporing {

@@ -12,6 +12,7 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,12 +29,12 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) {
         val punktum: Punktum?,
         val bokstav: Bokstav?,
         val versjon: LocalDate,
-        val sporing: Map<String, KontekstType>,
+        val sporing: List<Subsumsjonskontekst>,
         val utfall: Utfall,
         val input: Map<String, Any>,
         val output: Map<String, Any>
     ) {
-        fun vedtaksperiodeIdFraSporing(): UUID = UUID.fromString(sporing.filter { it.value == KontekstType.Vedtaksperiode }.keys.first())
+        fun vedtaksperiodeIdFraSporing(): UUID = UUID.fromString(sporing.first { it.type == KontekstType.Vedtaksperiode }.verdi)
     }
 
     init {
@@ -93,7 +94,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        sporing: Map<String, KontekstType>? = null,
+        sporing: List<Subsumsjonskontekst>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
@@ -110,7 +111,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) {
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        sporing: Map<String, KontekstType>? = null,
+        sporing: List<Subsumsjonskontekst>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER,
         lovverk: String = "folketrygdloven"
@@ -118,13 +119,12 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) {
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(forventetAntall, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat[index]
+
         sporing?.also { forventet ->
-            forventet.forEach { (key, value) ->
-                assertEquals(value, subsumsjon.sporing[key]) {
-                    "Fant ikke forventet sporing. Har dette:\n${subsumsjon.sporing.entries.joinToString(separator = "\n") { (key, value) ->
-                        "$key: $value"
-                    }}\n"
-                }
+            assertEquals(forventet, subsumsjon.sporing) {
+                "Fant ikke forventet sporing. Har dette:\n${subsumsjon.sporing.joinToString(separator = "\n") { (key, value) ->
+                    "$key: $value"
+                }}\n"
             }
         }
         assertEquals(VILKAR_BEREGNET, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }

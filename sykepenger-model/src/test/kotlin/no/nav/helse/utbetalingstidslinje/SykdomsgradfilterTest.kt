@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
@@ -17,6 +18,11 @@ internal class SykdomsgradfilterTest {
 
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
     private lateinit var aktivitetslogg: Aktivitetslogg
+
+    private val jurist = MaskinellJurist()
+        .medFødselsnummer("fnr")
+        .medOrganisasjonsnummer("orgnr")
+        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
 
     @Test
     fun `sykdomsgrad over 20 prosent`() {
@@ -125,7 +131,7 @@ internal class SykdomsgradfilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering()).filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
+        val resultat = Sykdomsgradfilter(MinimumSykdomsgradsvurdering()).filter(tidslinjer, periode, aktivitetslogg, jurist)
         inspektør = resultat.inspektør(0)
         return resultat
     }

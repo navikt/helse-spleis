@@ -48,6 +48,10 @@ import org.junit.jupiter.api.Test
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
+    private val jurist = MaskinellJurist()
+        .medFødselsnummer("fnr")
+        .medOrganisasjonsnummer("orgnr")
+        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
 
     companion object {
         private const val ORGNR = "123456789"
@@ -178,7 +182,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            MaskinellJurist()
+            jurist
         )
         historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
@@ -202,7 +206,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        val jurist = MaskinellJurist()
+        val jurist = jurist
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
             jurist
@@ -239,11 +243,11 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag1.valider(
             10000.månedlig.sykepengegrunnlag,
-            MaskinellJurist()
+            jurist
         )
         vilkårsgrunnlag2.valider(
             10000.månedlig.sykepengegrunnlag,
-            MaskinellJurist()
+            jurist
         )
 
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
@@ -287,8 +291,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        vilkårsgrunnlag1.valider(10000.månedlig.sykepengegrunnlag, MaskinellJurist())
-        vilkårsgrunnlag2.valider(10000.månedlig.sykepengegrunnlag, MaskinellJurist())
+        vilkårsgrunnlag1.valider(10000.månedlig.sykepengegrunnlag, jurist)
+        vilkårsgrunnlag2.valider(10000.månedlig.sykepengegrunnlag, jurist)
         historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
@@ -312,7 +316,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            MaskinellJurist()
+            jurist
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
@@ -337,7 +341,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10000.månedlig.sykepengegrunnlag,
-            MaskinellJurist()
+            jurist
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
@@ -363,7 +367,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag1.valider(
             10000.månedlig.sykepengegrunnlag,
-            MaskinellJurist()
+            jurist
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
@@ -379,12 +383,12 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag2.valider(
             10000.månedlig.sykepengegrunnlag,
-            MaskinellJurist()
+            jurist
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, MaskinellJurist()).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
         assertEquals(8, resultat.filterIsInstance<Utbetalingsdag.NavDag>().size)
     }
 
@@ -405,14 +409,14 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10.månedlig.sykepengegrunnlag,
-            MaskinellJurist()
+            jurist
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, MaskinellJurist()).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
         resultat.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)
             avvisteDager.forEach {
@@ -441,14 +445,14 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlag.valider(
             10.månedlig.inntektsgrunnlag(fødselsdato.alder),
-            MaskinellJurist()
+            jurist
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, MaskinellJurist()).single()
+        val resultat = vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), 1.januar til 1.januar, jurist).single()
 
         resultat.filterIsInstance<Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)

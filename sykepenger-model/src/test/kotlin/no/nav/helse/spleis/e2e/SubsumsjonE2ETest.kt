@@ -38,6 +38,7 @@ import no.nav.helse.etterlevelse.Punktum.Companion.punktum
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -585,8 +586,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             paragraf = PARAGRAF_8_10,
             ledd = LEDD_3,
             versjon = 1.januar(2020),
-            sporing = mapOf(
-                im.toString() to KontekstType.Inntektsmelding
+            sporing = listOf(
+                Subsumsjonskontekst(KontekstType.Fødselsnummer, UNG_PERSON_FNR_2018.toString()),
+                Subsumsjonskontekst(KontekstType.Organisasjonsnummer, ORGNUMMER),
+                Subsumsjonskontekst(KontekstType.Inntektsmelding, im.toString())
             ),
             input = mapOf("årligInntekt" to 260000.0),
             output = mapOf("dagligInntekt" to 1000.0)
