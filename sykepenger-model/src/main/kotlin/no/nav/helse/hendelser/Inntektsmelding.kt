@@ -25,6 +25,8 @@ import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
+import no.nav.helse.person.refusjon.Kilde
+import no.nav.helse.person.refusjon.Refusjonsfaktabøtte
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsmelding(
@@ -101,6 +103,10 @@ class Inntektsmelding(
         refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
     }
 
+    internal fun leggIBøtta(bøtta: Refusjonsfaktabøtte) {
+        refusjon.leggIBøtta(bøtta, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder, innsendt())
+    }
+
     internal fun leggTil(behandlinger: Behandlinger): Boolean {
         håndtertInntekt = true
         return behandlinger.oppdaterDokumentsporing(dokumentsporing)
@@ -149,6 +155,23 @@ class Inntektsmelding(
         ) {
             val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, endringerIRefusjon.map { it.tilEndring() })
             refusjonshistorikk.leggTilRefusjon(refusjon)
+        }
+
+        internal fun leggIBøtta(
+            bøtte: Refusjonsfaktabøtte,
+            meldingsreferanseId: UUID,
+            førsteFraværsdag: LocalDate?,
+            arbeidsgiverperioder: List<Periode>,
+            tidsstempel: LocalDateTime
+        ) {
+            bøtte.leggTil(
+                Refusjonsfaktabøtte.Refusjonsfakta(
+                fom = førsteFraværsdag!!,
+                tom = null,
+                beløp = beløp!!,
+                kilde = Kilde(meldingsreferanseId, ARBEIDSGIVER),
+                tidsstempel = tidsstempel
+            ))
         }
 
         class EndringIRefusjon(
