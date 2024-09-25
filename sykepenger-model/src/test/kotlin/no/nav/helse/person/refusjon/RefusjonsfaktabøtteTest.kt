@@ -35,6 +35,26 @@ internal class RefusjonsfaktabøtteTest {
         assertEquals(avklartRefusjonstidslinje, bøtte.avklar(1.januar til 31.desember))
     }
 
+    @Test
+    fun `en inntektsmelding uten første fraværsdag går oppi bøtta kan avklare en Refusjonstidslinje`() {
+        val bøtte = Refusjonsfaktabøtte()
+        val inntektsmelding = arbeidsgiverHendelsefabrikk.lagInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            beregnetInntekt = Inntekt.INGEN,
+            førsteFraværsdag = null,
+            refusjon = Inntektsmelding.Refusjon(
+                beløp = INNTEKT,
+                opphørsdato = null,
+                endringerIRefusjon = emptyList()
+            )
+        )
+        bøtte.leggTil(inntektsmelding)
+        val avklartRefusjonstidslinje = Refusjonstidslinje(
+            1.januar til 31.desember, EtBeløpMedKildePåSeg(INNTEKT, Kilde(inntektsmelding.meldingsreferanseId(), Avsender.ARBEIDSGIVER))
+        )
+        assertEquals(avklartRefusjonstidslinje, bøtte.avklar(1.januar til 31.desember))
+    }
+
     private companion object {
         val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk("1", "11111111111".somPersonidentifikator(), "a1")
 

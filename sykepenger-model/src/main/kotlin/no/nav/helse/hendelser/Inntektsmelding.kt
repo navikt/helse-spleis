@@ -27,7 +27,6 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
 import no.nav.helse.person.refusjon.Kilde
-import no.nav.helse.person.refusjon.Refusjonsfaktabøtte
 import no.nav.helse.person.refusjon.Refusjonsfaktabøtte.Refusjonsfakta
 import no.nav.helse.økonomi.Inntekt
 
@@ -169,8 +168,13 @@ class Inntektsmelding(
             internal companion object {
                 internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
                     (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
+
+                private fun startskuddet(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): LocalDate {
+                    if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
+                    return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
+                }
                 internal fun List<EndringIRefusjon>.refusjonsfakta(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, beløp: Inntekt?, opphørsdato: LocalDate?, mottatt: LocalDateTime): List<Refusjonsfakta> {
-                    return listOf(Refusjonsfakta(førsteFraværsdag!!, null, beløp!!, Kilde(meldingsreferanseId, ARBEIDSGIVER), mottatt))
+                    return listOf(Refusjonsfakta(startskuddet(førsteFraværsdag, arbeidsgiverperioder), null, beløp!!, Kilde(meldingsreferanseId, ARBEIDSGIVER), mottatt))
                 }
             }
         }
