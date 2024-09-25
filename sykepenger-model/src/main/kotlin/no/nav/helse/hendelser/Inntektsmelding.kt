@@ -7,6 +7,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonsfakta
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.nesteDag
@@ -27,6 +28,7 @@ import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.
 import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
 import no.nav.helse.person.refusjon.Kilde
 import no.nav.helse.person.refusjon.Refusjonsfaktabøtte
+import no.nav.helse.person.refusjon.Refusjonsfaktabøtte.Refusjonsfakta
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsmelding(
@@ -70,6 +72,7 @@ class Inntektsmelding(
         }
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
     }
+    internal val refusjonsfakta = refusjon.refusjonsfakta(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, mottatt)
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val dager = DagerFraInntektsmelding(
@@ -101,10 +104,6 @@ class Inntektsmelding(
 
     internal fun leggTilRefusjon(refusjonshistorikk: Refusjonshistorikk) {
         refusjon.leggTilRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
-    }
-
-    internal fun leggIBøtta(bøtta: Refusjonsfaktabøtte) {
-        refusjon.leggIBøtta(bøtta, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder, innsendt())
     }
 
     internal fun leggTil(behandlinger: Behandlinger): Boolean {
@@ -147,6 +146,9 @@ class Inntektsmelding(
         private val opphørsdato: LocalDate?,
         private val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
+        internal fun refusjonsfakta(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, mottatt: LocalDateTime) =
+            endringerIRefusjon.refusjonsfakta(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, mottatt)
+
         internal fun leggTilRefusjon(
             refusjonshistorikk: Refusjonshistorikk,
             meldingsreferanseId: UUID,
@@ -155,23 +157,6 @@ class Inntektsmelding(
         ) {
             val refusjon = Refusjonshistorikk.Refusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, endringerIRefusjon.map { it.tilEndring() })
             refusjonshistorikk.leggTilRefusjon(refusjon)
-        }
-
-        internal fun leggIBøtta(
-            bøtte: Refusjonsfaktabøtte,
-            meldingsreferanseId: UUID,
-            førsteFraværsdag: LocalDate?,
-            arbeidsgiverperioder: List<Periode>,
-            tidsstempel: LocalDateTime
-        ) {
-            bøtte.leggTil(
-                Refusjonsfaktabøtte.Refusjonsfakta(
-                fom = førsteFraværsdag!!,
-                tom = null,
-                beløp = beløp!!,
-                kilde = Kilde(meldingsreferanseId, ARBEIDSGIVER),
-                tidsstempel = tidsstempel
-            ))
         }
 
         class EndringIRefusjon(
@@ -184,6 +169,9 @@ class Inntektsmelding(
             internal companion object {
                 internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
                     (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
+                internal fun List<EndringIRefusjon>.refusjonsfakta(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, beløp: Inntekt?, opphørsdato: LocalDate?, mottatt: LocalDateTime): List<Refusjonsfakta> {
+                    return listOf(Refusjonsfakta(førsteFraværsdag!!, null, beløp!!, Kilde(meldingsreferanseId, ARBEIDSGIVER), mottatt))
+                }
             }
         }
     }

@@ -11,12 +11,8 @@ import no.nav.helse.økonomi.Inntekt
 class Refusjonsfaktabøtte {
     private val refusjonsfakta = mutableListOf<Refusjonsfakta>()
 
-    internal fun leggTil(refusjonsfakta: Refusjonsfakta) {
-        this.refusjonsfakta.add(refusjonsfakta)
-    }
-
     internal fun leggTil(inntektsmelding: Inntektsmelding) {
-         inntektsmelding.leggIBøtta(this)
+        refusjonsfakta.addAll(inntektsmelding.refusjonsfakta)
      }
 
     internal fun leggTil(arbeidsgiveropplysninger: OverstyrArbeidsgiveropplysninger) {
