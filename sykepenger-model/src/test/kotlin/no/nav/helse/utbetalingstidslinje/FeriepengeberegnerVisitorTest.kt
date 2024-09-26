@@ -41,13 +41,17 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         private val a2 = "789456213"
     }
 
+    private fun feriepengerFor(opptjeningsår: Year, historikk: UtbetalingshistorikkForFeriepenger, sisteInfotrygdkjøring: LocalDate = LocalDate.MAX) =
+        Feriepengeberegner(alder, opptjeningsår, grunnlagFraInfotrygd = historikk.grunnlagForFeriepenger(sisteInfotrygdkjøring), grunnlagFraSpleis = person.grunnlagForFeriepenger())
+
+
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk = utbetalingshistorikkForFeriepenger(
             listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 7.mars, 1000, 7.mars))
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(48, beregner.feriepengedatoer().size)
     }
 
@@ -57,7 +61,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 8.mars, 1000, 8.mars))
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(48, beregner.feriepengedatoer().size)
     }
 
@@ -67,7 +71,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(ORGNUMMER, 1.januar, 6.mars, 1000, 6.mars))
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(47, beregner.feriepengedatoer().size)
     }
 
@@ -85,7 +89,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             )
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(23, beregner.feriepengedatoer().size)
     }
 
@@ -103,7 +107,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             )
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        val beregner = feriepengerFor(Year.of(2018), historikk, sisteInfotrygdkjøring = 24.august(2024))
         assertEquals(0, beregner.feriepengedatoer().size)
     }
 
@@ -129,7 +133,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             )
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(0, beregner.feriepengedatoer().size)
     }
 
@@ -162,7 +166,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             )
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals(0.0, beregner.beregnFeriepengerForInfotrygdPerson())
     }
 
@@ -200,7 +204,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             )
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), historikk, person)
+        val beregner = feriepengerFor(Year.of(2018), historikk)
         assertEquals((17.januar(2018) til 23.mars(2018)).filterNot { it.erHelg() }, beregner.feriepengedatoer())
         assertEquals(0.0, beregner.beregnFeriepengerForInfotrygdPerson())
     }
@@ -212,7 +216,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             syktil = 7.mars(2018)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
 
         assertEquals(48, beregner.feriepengedatoer().size)
     }
@@ -224,7 +228,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             syktil = 8.mars(2018)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
 
         assertEquals(48, beregner.feriepengedatoer().size)
     }
@@ -236,7 +240,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             syktil = 6.mars(2018)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
 
         assertEquals(47, beregner.feriepengedatoer().size)
     }
@@ -248,7 +252,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             syktil = 13.juli(2018)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
 
         assertEquals(48, beregner.feriepengedatoer().size)
     }
@@ -272,7 +276,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             syktil = 21.juli(2018)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
 
         assertEquals(47, beregner.feriepengedatoer().size)
     }
@@ -296,7 +300,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             syktil = 23.juli(2018)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
 
         assertEquals(48, beregner.feriepengedatoer().size)
     }
@@ -308,7 +312,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             syktil = 13.juli(2018)
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
 
         assertEquals(48, beregner.feriepengedatoer().size)
     }
@@ -326,7 +330,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
 
         assertEquals(44, beregner.feriepengedatoer().size)
     }
@@ -334,7 +338,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
     @Test
     fun `Teller ikke med dager fra annullerte utbetalinger i feriepengeberegneren`() {
         byggPersonMedAnnullering()
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = feriepengerFor(Year.of(2018), utbetalingshistorikkForFeriepenger())
         assertEquals(0, beregner.feriepengedatoer().size)
     }
 

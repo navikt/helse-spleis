@@ -69,10 +69,12 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
+import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.grunnlagForFeriepenger
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
@@ -291,6 +293,11 @@ internal class Arbeidsgiver private constructor(
     internal fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun utbetaling() = utbetalinger.lastOrNull()
+
+    internal fun grunnlagForFeriepenger() = Arbeidsgiverferiepengegrunnlag(
+        orgnummer = organisasjonsnummer,
+        utbetalinger = utbetalinger.grunnlagForFeriepenger()
+    )
 
     internal fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,

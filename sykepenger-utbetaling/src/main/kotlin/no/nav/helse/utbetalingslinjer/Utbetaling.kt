@@ -351,12 +351,21 @@ class Utbetaling private constructor(
             return utbetalingen to annulleringer
         }
 
+        fun Collection<Utbetaling>.grunnlagForFeriepenger() = this
+            .grupperUtbetalinger(Utbetaling::erAktiv)
+            .map {
+                Feriepengegrunnlag(
+                    arbeidsgiverUtbetalteDager = it.arbeidsgiverOppdrag.betalteDager(),
+                    personUtbetalteDager = it.personOppdrag.betalteDager()
+                )
+            }
+
         fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
         private fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
         fun List<Utbetaling>.aktive(periode: Periode) = this
             .aktive()
             .filter { utbetaling -> utbetaling.periode.overlapperMed(periode) }
-        private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
+        private fun Collection<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this
                 .asSequence()
                 .filter { it.gyldig() }

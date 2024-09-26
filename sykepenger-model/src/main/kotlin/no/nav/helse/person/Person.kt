@@ -96,7 +96,7 @@ class Person private constructor(
     private val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     internal val infotrygdhistorikk: Infotrygdhistorikk,
-    internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val jurist: MaskinellJurist,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     internal val regler: ArbeidsgiverRegler = NormalArbeidstaker,
@@ -315,11 +315,14 @@ class Person private constructor(
             return
         }
 
+        // Hardkodet dato skal være datoen Infotrygd sist kjørte feriepenger
+        val DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD = LocalDate.of(2024, 8, 24)
+
         val feriepengeberegner = Feriepengeberegner(
             alder = alder,
             opptjeningsår = utbetalingshistorikk.opptjeningsår,
-            utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
-            person = this
+            grunnlagFraInfotrygd = utbetalingshistorikk.grunnlagForFeriepenger(DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD),
+            grunnlagFraSpleis = grunnlagForFeriepenger()
         )
 
         val feriepengepengebeløpPersonUtbetaltAvInfotrygd = utbetalingshistorikk.utbetalteFeriepengerTilPerson()
@@ -589,6 +592,8 @@ class Person private constructor(
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
         observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }
     }
+
+    internal fun grunnlagForFeriepenger() = arbeidsgivere.map { it.grunnlagForFeriepenger() }
 
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg) {
         infotrygdhistorikk.oppfriskNødvendig(hendelse, arbeidsgivere.tidligsteDato())

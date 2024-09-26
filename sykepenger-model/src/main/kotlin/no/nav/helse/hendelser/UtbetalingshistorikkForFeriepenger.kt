@@ -1,18 +1,21 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.time.Year
+import java.util.*
+import no.nav.helse.erHelg
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode.Companion.kodeForDato
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import java.time.LocalDate
-import java.time.Year
-import java.util.*
+import no.nav.helse.utbetalingslinjer.Arbeidsgiverferiepengegrunnlag
+import no.nav.helse.utbetalingslinjer.Feriepengegrunnlag
 
 class UtbetalingshistorikkForFeriepenger(
     meldingsreferanseId: UUID,
     aktørId: String,
     fødselsnummer: String,
-    val utbetalinger: List<Utbetalingsperiode>,
+    private val utbetalinger: List<Utbetalingsperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
@@ -29,6 +32,41 @@ class UtbetalingshistorikkForFeriepenger(
 
     internal fun sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver: (String) -> Unit) {
         utbetalinger.forEach { it.sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver) }
+    }
+
+    private fun erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd: LocalDate, utbetalt: LocalDate) = sisteKjøringIInfotrygd <= utbetalt
+
+    internal fun grunnlagForFeriepenger(sisteKjøringIInfotrygd: LocalDate): List<Arbeidsgiverferiepengegrunnlag> {
+        return utbetalinger
+            .filterNot { dag -> erUtbetaltEtterFeriepengekjøringIT(sisteKjøringIInfotrygd, dag.utbetalt) }
+            .groupBy { it.orgnr }
+            .map { (arbeidsgiver, dager) ->
+                val arbeidsgiverdager = dager.filterIsInstance<Utbetalingsperiode.Arbeidsgiverutbetalingsperiode>()
+                val persondager = dager.filterIsInstance<Utbetalingsperiode.Personutbetalingsperiode>()
+
+                val grunnlag = Feriepengegrunnlag(
+                    arbeidsgiverUtbetalteDager = arbeidsgiverdager.flatMap { periode ->
+                        periode.periode
+                            .asSequence()
+                            .filterNot { it.erHelg() }
+                            .filter { harRettPåFeriepenger(it, periode.orgnr) }
+                            .map { dato -> Feriepengegrunnlag.UtbetaltDag(dato, periode.beløp) }
+                    },
+                    personUtbetalteDager = persondager.flatMap { periode ->
+                        periode.periode
+                            .asSequence()
+                            .filterNot { it.erHelg() }
+                            .filter { harRettPåFeriepenger(it, periode.orgnr) }
+                            .map { dato -> Feriepengegrunnlag.UtbetaltDag(dato, periode.beløp) }
+
+                    }
+                )
+
+                Arbeidsgiverferiepengegrunnlag(
+                    orgnummer = arbeidsgiver,
+                    utbetalinger = listOf(grunnlag)
+                )
+            }
     }
 
     class Feriepenger(
