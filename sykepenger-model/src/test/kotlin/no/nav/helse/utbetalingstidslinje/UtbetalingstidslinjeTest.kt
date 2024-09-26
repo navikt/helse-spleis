@@ -59,7 +59,7 @@ internal class UtbetalingstidslinjeTest {
 
         input.forEachIndexed { index, input ->
             assertNull(input[1.januar].økonomi.inspektør.arbeidsgiverbeløp) { "den uberegnede listen skal ikke modifiseres" }
-            assertEquals(1000, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, _, dagligInt -> dagligInt })
+            assertEquals(1000, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.dagligInt)
         }
     }
 

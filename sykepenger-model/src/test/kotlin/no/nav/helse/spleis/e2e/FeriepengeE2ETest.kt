@@ -47,7 +47,7 @@ import kotlin.math.roundToInt
 @Isolated
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     private companion object {
-        val DAGSINNTEKT = INNTEKT.rundTilDaglig().reflection { _, _, _, dagligInt -> dagligInt }
+        val DAGSINNTEKT = INNTEKT.rundTilDaglig().dagligInt
     }
 
     private fun fangLoggmeldinger(vararg filter: String, block: () -> Any): List<String> {
@@ -97,7 +97,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
-        val dagsatsIT = (INNTEKT/2).reflection { _, _, _, dagligInt -> dagligInt }
+        val dagsatsIT = (INNTEKT/2).dagligInt
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(
@@ -122,7 +122,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             assertEquals(1, utbetalingInspektør.arbeidsgiverOppdrag.size)
             assertEquals(1, utbetalingInspektør.personOppdrag.size)
         }
-        val dagsatsIT = (INNTEKT/2).reflection { _, _, _, dagligInt -> dagligInt }
+        val dagsatsIT = (INNTEKT/2).dagligInt
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2022),
             utbetalinger = listOf(

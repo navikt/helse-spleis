@@ -131,7 +131,7 @@ class Økonomi private constructor(
         // fordeler 1 kr til hver av arbeidsgiverne som har mest i differanse i beløp
         private fun List<Triple<Økonomi, Inntekt, Double>>.fordel1Kr(grense: Inntekt, total: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi): List<Økonomi> {
             val maksimalt = total.coerceAtMost(grense)
-            val rest = (maksimalt - map { it.second }.summer()).reflection { _, _, _, dagligInt -> dagligInt }
+            val rest = (maksimalt - map { it.second }.summer()).dagligInt
             val sortertEtterTap = sortedByDescending { (_, _, differanse) -> differanse }.take(rest)
             return map { (økonomi, beløp) ->
                 val ekstra = if (sortertEtterTap.any { (other) -> other === økonomi }) 1.daglig else INGEN

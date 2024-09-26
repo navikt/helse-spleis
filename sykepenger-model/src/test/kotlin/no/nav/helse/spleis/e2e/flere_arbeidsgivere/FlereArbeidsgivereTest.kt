@@ -1536,8 +1536,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
     }
 
-    private val Utbetalingsdag.arbeidsgiverbeløp get() = this.økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, _, dagligInt -> dagligInt } ?: 0
-    private val Utbetalingsdag.personbeløp get() = this.økonomi.inspektør.personbeløp?.reflection { _, _, _, dagligInt -> dagligInt } ?: 0
+    private val Utbetalingsdag.arbeidsgiverbeløp get() = this.økonomi.inspektør.arbeidsgiverbeløp?.dagligInt ?: 0
+    private val Utbetalingsdag.personbeløp get() = this.økonomi.inspektør.personbeløp?.dagligInt ?: 0
     private fun TestArbeidsgiverInspektør.inntektsopplysning(vedtaksperiode: UUID, orgnr: String) = vilkårsgrunnlag(vedtaksperiode)!!.inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysninger.first { it.gjelder(orgnr) }.inspektør.inntektsopplysning
     private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(vedtaksperiode: UUID, skjæringstidspunkt: LocalDate = 1.januar, inntekt: Inntekt = INNTEKT) {
         håndterVilkårsgrunnlag(

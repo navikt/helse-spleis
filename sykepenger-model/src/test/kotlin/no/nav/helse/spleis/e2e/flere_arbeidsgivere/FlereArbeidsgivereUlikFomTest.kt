@@ -376,7 +376,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(21.mars, a2Linje.fom)
         assertEquals(30.mars, a2Linje.tom)
-        assertEquals(20000.månedlig.reflection { _, _, _, dagligInt -> dagligInt }, a2Linje.beløp)
+        assertEquals(20000.månedlig.dagligInt, a2Linje.beløp)
     }
 
     @Test

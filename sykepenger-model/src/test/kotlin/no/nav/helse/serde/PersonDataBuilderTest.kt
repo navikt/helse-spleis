@@ -295,7 +295,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 assertEquals(forventetInntekt.årlig, inntektsmelding.beløp.årlig.beløp)
                 assertEquals(forventetInntekt.månedlig, inntektsmelding.beløp.månedligDouble.beløp)
                 assertEquals(forventetInntekt.daglig, inntektsmelding.beløp.dagligDouble.beløp)
-                assertEquals(forventetInntekt.reflection { _, _, _, dagligInt -> dagligInt }, inntektsmelding.beløp.dagligInt.beløp)
+                assertEquals(forventetInntekt.dagligInt, inntektsmelding.beløp.dagligInt.beløp)
             }
             assertEquals(3, arbeidsgiver.sykdomshistorikk.elementer.size)
             arbeidsgiver.sykdomshistorikk.elementer[2].also { sykdomshistorikkElement ->
