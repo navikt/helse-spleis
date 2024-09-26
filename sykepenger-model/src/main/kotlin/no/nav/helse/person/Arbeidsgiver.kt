@@ -553,8 +553,7 @@ internal class Arbeidsgiver private constructor(
         utbetalingstidslinje: Utbetalingstidslinje,
         ident: String,
     ) {
-        val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje())
-        utbetalingstidslinje.accept(builder)
+        val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje(), utbetalingstidslinje)
         person.utbetalingUtbetalt(
             PersonObserver.UtbetalingUtbetaltEvent(
                 organisasjonsnummer = organisasjonsnummer,
@@ -595,8 +594,7 @@ internal class Arbeidsgiver private constructor(
         utbetalingstidslinje: Utbetalingstidslinje,
         epost: String,
     ) {
-        val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje())
-        utbetalingstidslinje.accept(builder)
+        val builder = UtbetalingsdagerBuilder(sykdomshistorikk.sykdomstidslinje(), utbetalingstidslinje)
         person.utbetalingUtenUtbetaling(
             PersonObserver.UtbetalingUtbetaltEvent(
                 organisasjonsnummer = organisasjonsnummer,

@@ -212,13 +212,12 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder()
         )
 
-        val subsummering = Utbetalingstidslinjesubsumsjon(jurist, tidslinje)
         tidslinje.accept(builder)
         val utbetalingstidslinje = builder.result()
 
-        utbetalingstidslinje.accept(subsummering)
         utbetalingstidslinje.accept(observatør)
 
+        val subsummering = Utbetalingstidslinjesubsumsjon(jurist, tidslinje, utbetalingstidslinje)
         subsummering.subsummer(ArbeidsgiverRegler.Companion.NormalArbeidstaker)
     }
 

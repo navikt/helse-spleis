@@ -12,9 +12,7 @@ import no.nav.helse.utbetalingslinjer.Utbetalingtype.UTBETALING
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Økonomi
 import kotlin.properties.Delegates
 
 internal class UtkastTilVedtakBuilder(
@@ -114,17 +112,25 @@ internal class UtkastTilVedtakBuilder(
         arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder))
     }
 
-    private class UtbetalingstidslinjeInfo(utbetalingstidslinje: Utbetalingstidslinje): UtbetalingstidslinjeVisitor {
-        init { utbetalingstidslinje.accept(this) }
-
+    private class UtbetalingstidslinjeInfo(utbetalingstidslinje: Utbetalingstidslinje) {
         private var avvistDag = false
         private var navDag = false
 
-        override fun visit(dag: Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) { avvistDag = true }
-
-        override fun visit(dag: Utbetalingsdag.ForeldetDag, dato: LocalDate, økonomi: Økonomi) { avvistDag = true }
-
-        override fun visit(dag: Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) { navDag = true }
+        init {
+            utbetalingstidslinje.forEach { dag ->
+                when (dag) {
+                    is Utbetalingsdag.AvvistDag -> avvistDag = true
+                    is Utbetalingsdag.ForeldetDag -> avvistDag = true
+                    is Utbetalingsdag.NavDag -> navDag = true
+                    is Utbetalingsdag.Arbeidsdag,
+                    is Utbetalingsdag.ArbeidsgiverperiodeDag,
+                    is Utbetalingsdag.ArbeidsgiverperiodedagNav,
+                    is Utbetalingsdag.Fridag,
+                    is Utbetalingsdag.NavHelgDag,
+                    is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */ }
+                }
+            }
+        }
 
         fun behandlingsresultat() = when {
             !navDag -> "Avslag"

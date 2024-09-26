@@ -41,9 +41,8 @@ internal class UtbetalingsdagerBuilderTest {
 
     @Test
     fun `bygger utbetalingsdager`() {
-        val builder = UtbetalingsdagerBuilder(Sykdomstidslinje())
         val utbetalingstidslinje = tidslinjeOf(1.AP, 1.NAV, 1.HELG, 1.ARB, 1.FRI, 1.FOR, 1.AVV)
-        utbetalingstidslinje.accept(builder)
+        val builder = UtbetalingsdagerBuilder(Sykdomstidslinje(), utbetalingstidslinje)
         assertEquals(
             listOf(
                 Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag),
@@ -59,9 +58,8 @@ internal class UtbetalingsdagerBuilderTest {
 
     @Test
     fun `tidslinje med fridager`() {
-        val builder = UtbetalingsdagerBuilder(1.P + 3.F + 1.AIG + 1.UK)
         val utbetalingstidslinje = tidslinjeOf(6.FRI)
-        utbetalingstidslinje.accept(builder)
+        val builder = UtbetalingsdagerBuilder(1.P + 3.F + 1.AIG + 1.UK, utbetalingstidslinje)
         assertEquals(
             listOf(
                 Utbetalingsdag(1.januar, Permisjonsdag),
@@ -76,9 +74,8 @@ internal class UtbetalingsdagerBuilderTest {
 
     @Test
     fun `tidslinje med ArbeidsgiverperiodeDagerNav`() {
-        val builder = UtbetalingsdagerBuilder(6.S)
         val utbetalingstidslinje = tidslinjeOf(6.NAP)
-        utbetalingstidslinje.accept(builder)
+        val builder = UtbetalingsdagerBuilder(6.S, utbetalingstidslinje)
         assertEquals(
             listOf(
                 Utbetalingsdag(1.januar, ArbeidsgiverperiodeDag),

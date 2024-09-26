@@ -19,8 +19,9 @@ import kotlin.collections.last
 
 internal class Utbetalingstidslinjesubsumsjon(
     private val subsumsjonslogg: Subsumsjonslogg,
-    private val sykdomstidslinje: Sykdomstidslinje
-) : UtbetalingstidslinjeVisitor {
+    private val sykdomstidslinje: Sykdomstidslinje,
+    utbetalingstidslinje: Utbetalingstidslinje
+) {
 
     // private val tidslinjesubsumsjonsformat = mutableListOf<Tidslinjedag>()
     private val tidslinjesubsumsjonsformat = sykdomstidslinje.subsumsjonsformat()
@@ -31,6 +32,46 @@ internal class Utbetalingstidslinjesubsumsjon(
     private val aap = mutableListOf<Periode>()
     private val andreYtelser = mutableListOf<Periode>()
     private val dekningsgrunnlag = mutableListOf<Dekningsgrunnlag>()
+
+    init {
+        utbetalingstidslinje.forEach { dag ->
+            when (dag) {
+                is Utbetalingsdag.ArbeidsgiverperiodeDag -> {
+                    arbeidsgiverperiodedager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
+                    dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
+                }
+                is Utbetalingsdag.ArbeidsgiverperiodedagNav -> {
+                    arbeidsgiverperiodeNavdager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
+                    dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
+                }
+                is Utbetalingsdag.AvvistDag -> {
+                    if (AndreYtelserAap in dag.begrunnelser) aap.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
+                    val andreYtelser = setOf(
+                        AndreYtelserDagpenger, AndreYtelserForeldrepenger, AndreYtelserOmsorgspenger, AndreYtelserOpplaringspenger, AndreYtelserSvangerskapspenger, AndreYtelserPleiepenger
+                    )
+                    if (dag.begrunnelser.any { it in andreYtelser }) {
+                        this.andreYtelser.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
+                    }
+                }
+                is Utbetalingsdag.ForeldetDag -> {
+                    dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
+                }
+                is Utbetalingsdag.Fridag -> {
+                    fridager.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
+                    dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
+                }
+                is Utbetalingsdag.NavDag -> {
+                    dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
+                }
+                is Utbetalingsdag.NavHelgDag -> {
+                    helger.utvidForrigeDatoperiodeEllerLeggTil(dag.dato)
+                    dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dag.dato, dag.økonomi)
+                }
+                is Utbetalingsdag.Arbeidsdag,
+                is Utbetalingsdag.UkjentDag -> { /* gjør ingenting */ }
+            }
+        }
+    }
 
     fun subsummer(regler: ArbeidsgiverRegler) {
         subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(false, arbeidsgiverperiodedager, tidslinjesubsumsjonsformat)
@@ -48,79 +89,6 @@ internal class Utbetalingstidslinjesubsumsjon(
             .forEach { (inntekt, perioder) ->
                 subsumsjonslogg.`§ 8-16 ledd 1`(perioder.map { it.periode }, regler.dekningsgrad(), inntekt.årligInntekt, inntekt.årligDekningsgrunnlag)
             }
-    }
-
-    override fun preVisitUtbetalingstidslinje(
-        tidslinje: Utbetalingstidslinje,
-        gjeldendePeriode: Periode?
-    ) {
-        //tidslinjesubsumsjonsformat.clear()
-        //tidslinjesubsumsjonsformat.addAll(UtbetalingstidslinjeBuilder(tidslinje).dager())
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        arbeidsgiverperiodedager.utvidForrigeDatoperiodeEllerLeggTil(dato)
-        dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dato, økonomi)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.ArbeidsgiverperiodedagNav,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        arbeidsgiverperiodeNavdager.utvidForrigeDatoperiodeEllerLeggTil(dato)
-        dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dato, økonomi)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.NavDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dato, økonomi)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.ForeldetDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dato, økonomi)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.NavHelgDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        helger.utvidForrigeDatoperiodeEllerLeggTil(dato)
-        dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dato, økonomi)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.Fridag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        fridager.utvidForrigeDatoperiodeEllerLeggTil(dato)
-        dekningsgrunnlag.utvidForrigeDatoperiodeEllerLeggTil(dato, økonomi)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.AvvistDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        if (AndreYtelserAap in dag.begrunnelser) aap.utvidForrigeDatoperiodeEllerLeggTil(dato)
-        val andreYtelser = setOf(
-            AndreYtelserDagpenger, AndreYtelserForeldrepenger, AndreYtelserOmsorgspenger, AndreYtelserOpplaringspenger, AndreYtelserSvangerskapspenger, AndreYtelserPleiepenger
-        )
-        if (dag.begrunnelser.none { it in andreYtelser }) return
-        this.andreYtelser.utvidForrigeDatoperiodeEllerLeggTil(dato)
     }
 
     private data class Dekningsgrunnlag(

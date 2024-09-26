@@ -1,6 +1,5 @@
 package no.nav.helse.person.builders
 
-import java.time.LocalDate
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.AndreYtelser
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.ArbeidIkkeGjenopptattDag
@@ -10,46 +9,48 @@ import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
-import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstidslinje) : UtbetalingstidslinjeVisitor {
+internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstidslinje, utbetalingstidslinje: Utbetalingstidslinje) {
 
-    private val utbetalingsdager = mutableListOf<PersonObserver.Utbetalingsdag>()
+    private val utbetalingsdager = utbetalingstidslinje.map { dag ->
+        when (dag) {
+            is Utbetalingsdag.Arbeidsdag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.Arbeidsdag)
+            is Utbetalingsdag.ArbeidsgiverperiodeDag,
+            is Utbetalingsdag.ArbeidsgiverperiodedagNav -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag)
+            is Utbetalingsdag.NavDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.NavDag)
+            is Utbetalingsdag.NavHelgDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag)
+            is Utbetalingsdag.Fridag -> {
+                val (dagtype, begrunnelse) = when (sykdomstidslinje[dag.dato]) {
+                    is Dag.Permisjonsdag -> Permisjonsdag to null
+                    is Dag.Feriedag -> Feriedag to null
+                    is Dag.ArbeidIkkeGjenopptattDag -> ArbeidIkkeGjenopptattDag to null
+                    is Dag.AndreYtelser -> AndreYtelser to eksternBegrunnelse(sykdomstidslinje[dag.dato])?.let { listOf(it) }
+                    is Dag.Arbeidsdag,
+                    is Dag.ArbeidsgiverHelgedag,
+                    is Dag.Arbeidsgiverdag,
+                    is Dag.ForeldetSykedag,
+                    is Dag.FriskHelgedag,
+                    is Dag.ProblemDag,
+                    is Dag.SykHelgedag,
+                    is Dag.Sykedag,
+                    is Dag.SykedagNav,
+                    is Dag.UkjentDag -> Fridag to null
+                }
+                PersonObserver.Utbetalingsdag(dag.dato, dagtype, begrunnelse)
+            }
+            is Utbetalingsdag.AvvistDag -> {
+                PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.AvvistDag, dag.begrunnelser.map {
+                    PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.fraBegrunnelse(it)
+                })
+            }
+            is Utbetalingsdag.ForeldetDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.ForeldetDag)
+            is Utbetalingsdag.UkjentDag -> PersonObserver.Utbetalingsdag(dag.dato, PersonObserver.Utbetalingsdag.Dagtype.UkjentDag)
+        }
+    }
 
     internal fun result() : List<PersonObserver.Utbetalingsdag> {
         return utbetalingsdager
-    }
-
-    override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodeDag, dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag))
-    }
-
-    override fun visit(dag: Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.NavDag))
-    }
-
-    override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag))
-    }
-
-    override fun visit(dag: Utbetalingsdag.NavHelgDag, dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.NavHelgDag))
-    }
-
-    override fun visit(dag: Utbetalingsdag.Arbeidsdag, dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.Arbeidsdag))
-    }
-
-    override fun visit(dag: Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
-        val (dagtype, begrunnelse) = when (sykdomstidslinje[dato]) {
-            is Dag.Permisjonsdag -> Permisjonsdag to null
-            is Dag.Feriedag -> Feriedag to null
-            is Dag.ArbeidIkkeGjenopptattDag -> ArbeidIkkeGjenopptattDag to null
-            is Dag.AndreYtelser -> AndreYtelser to eksternBegrunnelse(sykdomstidslinje[dato])?.let { listOf(it) }
-            else -> Fridag to null
-        }
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, dagtype, begrunnelse))
     }
 
     private fun eksternBegrunnelse(dag: Dag): PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO? {
@@ -57,19 +58,5 @@ internal class UtbetalingsdagerBuilder(private val sykdomstidslinje: Sykdomstids
             is Dag.AndreYtelser -> dag.tilEksternBegrunnelse()
             else -> null
         }
-    }
-
-    override fun visit(dag: Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.AvvistDag, dag.begrunnelser.map {
-            PersonObserver.Utbetalingsdag.EksternBegrunnelseDTO.fraBegrunnelse(it)
-        }))
-    }
-
-    override fun visit(dag: Utbetalingsdag.ForeldetDag, dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.ForeldetDag))
-    }
-
-    override fun visit(dag: Utbetalingsdag.UkjentDag, dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(PersonObserver.Utbetalingsdag(dato, PersonObserver.Utbetalingsdag.Dagtype.UkjentDag))
     }
 }
