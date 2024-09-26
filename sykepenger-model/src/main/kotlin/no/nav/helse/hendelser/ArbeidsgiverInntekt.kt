@@ -96,7 +96,7 @@ class ArbeidsgiverInntekt(
 
             internal fun List<MånedligInntekt>.somEksterneSkatteinntekter(): List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> {
                 return map {
-                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.yearMonth, it.inntekt.reflection { _, månedlig, _, _ ->  månedlig})
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.yearMonth, it.inntekt.månedlig)
                 }
             }
 

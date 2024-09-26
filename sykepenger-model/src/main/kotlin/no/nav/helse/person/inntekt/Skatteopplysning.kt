@@ -83,7 +83,7 @@ class Skatteopplysning(
 
         fun List<Skatteopplysning>.subsumsjonsformat() = this.map {
             Inntektsubsumsjon(
-                beløp = it.beløp.reflection { _, månedlig, _, _ -> månedlig },
+                beløp = it.beløp.månedlig,
                 årMåned = it.måned,
                 type = it.type.toString(),
                 fordel = it.fordel,

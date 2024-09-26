@@ -60,11 +60,11 @@ class Saksbehandler internal constructor(
             subsumsjonslogg.`§ 8-28 ledd 3 bokstav b`(
                 organisasjonsnummer = organisasjonsnummer,
                 startdatoArbeidsforhold = startdatoArbeidsforhold,
-                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
+                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
+                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
             && subsumsjon.ledd == Ledd.LEDD_3.nummer
@@ -72,20 +72,20 @@ class Saksbehandler internal constructor(
         ) {
             subsumsjonslogg.`§ 8-28 ledd 3 bokstav c`(
                 organisasjonsnummer = organisasjonsnummer,
-                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
+                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
+                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer) {
             subsumsjonslogg.`§ 8-28 ledd 5`(
                 organisasjonsnummer = organisasjonsnummer,
-                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
+                overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
+                grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
             )
         }
     }

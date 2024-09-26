@@ -223,7 +223,7 @@ class ArbeidsgiverInntektsopplysning(
             return PersonObserver.Inntektsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 kilde = type,
-                beløp = originalInntektsopplysning.fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig })
+                beløp = originalInntektsopplysning.fastsattÅrsinntekt().månedlig)
         }
 
         private fun List<ArbeidsgiverInntektsopplysning>.finnEndredeInntektsopplysninger(forrige: List<ArbeidsgiverInntektsopplysning>): List<ArbeidsgiverInntektsopplysning> {

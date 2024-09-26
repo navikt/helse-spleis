@@ -293,7 +293,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 assertEquals(1.januar, inntektsmelding.dato)
                 val forventetInntekt = INNTEKT
                 assertEquals(forventetInntekt.årlig, inntektsmelding.beløp.årlig.beløp)
-                assertEquals(forventetInntekt.reflection { _, månedligDouble, _, _ -> månedligDouble }, inntektsmelding.beløp.månedligDouble.beløp)
+                assertEquals(forventetInntekt.månedlig, inntektsmelding.beløp.månedligDouble.beløp)
                 assertEquals(forventetInntekt.reflection { _, _, dagligDouble, _ -> dagligDouble }, inntektsmelding.beløp.dagligDouble.beløp)
                 assertEquals(forventetInntekt.reflection { _, _, _, dagligInt -> dagligInt }, inntektsmelding.beløp.dagligInt.beløp)
             }

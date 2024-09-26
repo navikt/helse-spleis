@@ -101,7 +101,7 @@ internal class SkattSykepengegrunnlag private constructor(
             skjæringstidspunkt = dato,
             inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
             grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
-            grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
+            grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
         )
         subsumsjonslogg.`§ 8-29`(
             skjæringstidspunkt = dato,

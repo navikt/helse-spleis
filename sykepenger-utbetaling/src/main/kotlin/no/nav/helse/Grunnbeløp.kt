@@ -145,7 +145,7 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
             val antallMånederSomDekkesAvGrunnbeløpet = gyldighetsperiode.subset(periode)
                 .let { it.endInclusive.monthValue - it.start.monthValue + 1}
             return beløp(antallMånederSomDekkesAvGrunnbeløpet.toDouble())
-                .reflection { _, månedlig, _, _ ->  månedlig }
+                .månedlig
                 .årlig
         }
 
