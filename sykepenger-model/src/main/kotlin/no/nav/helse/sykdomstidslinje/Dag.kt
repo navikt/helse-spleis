@@ -349,7 +349,7 @@ internal sealed class Dag(
     internal class AndreYtelser(
         dato: LocalDate,
         kilde: Hendelseskilde,
-        private val ytelse: AnnenYtelse,
+        val ytelse: AnnenYtelse,
     ) : Dag(dato, kilde) {
         enum class AnnenYtelse {
             Foreldrepenger, AAP, Omsorgspenger, Pleiepenger, Svangerskapspenger, Opplæringspenger, Dagpenger;

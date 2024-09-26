@@ -376,8 +376,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 subsumsjonslogg = subsumsjonslogg,
                 arbeidsgiverperiode = arbeidsgiverperiode
             )
-            sykdomstidslinje().accept(builder)
-            return builder.result()
+            return builder.result(sykdomstidslinje())
         }
 
         internal fun sendSkatteinntekterLagtTilGrunn(
@@ -471,8 +470,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                                 subsumsjonslogg = Subsumsjonslogg.NullObserver,
                                 arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) }
                             )
-                            Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje).accept(builder)
-                            return builder.result()
+                            return builder.result(Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje))
                         } catch (err: Exception) {
                             // svelger denne
                         }

@@ -122,10 +122,13 @@ internal class Sykdomstidslinje private constructor(
         check(låstePerioder.none { it.overlapperMed(periode) }) { "hele eller deler av $periode er låst" }
     }
 
-    override operator fun iterator() = object : Iterator<Dag> {
-        private val periodeIterator = periode?.iterator()
-        override fun hasNext() = periodeIterator?.hasNext() ?: false
-        override fun next() = this@Sykdomstidslinje[periodeIterator?.next() ?: throw NoSuchElementException()]
+    override operator fun iterator(): Iterator<Dag> {
+        if (periode == null) return emptyList<Nothing>().iterator()
+        return object : Iterator<Dag> {
+            private val periodeIterator = periode.iterator()
+            override fun hasNext() = periodeIterator.hasNext()
+            override fun next() = this@Sykdomstidslinje[periodeIterator.next()]
+        }
     }
 
     internal fun sisteSkjæringstidspunkt(periode: Periode? = null): LocalDate? {

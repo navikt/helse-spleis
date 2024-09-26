@@ -212,8 +212,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder()
         )
 
-        tidslinje.accept(builder)
-        val utbetalingstidslinje = builder.result()
+        val utbetalingstidslinje = builder.result(tidslinje)
 
         utbetalingstidslinje.accept(observatør)
 

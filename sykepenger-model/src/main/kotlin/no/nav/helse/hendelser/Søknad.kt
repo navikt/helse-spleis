@@ -29,8 +29,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke f�
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.InntektFraSøknad
-import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
+import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
@@ -40,7 +40,6 @@ import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Økonomi
 
 class Søknad(
     meldingsreferanseId: UUID,
@@ -365,15 +364,8 @@ class Søknad(
     }
 
     private class ForeldetSubsumsjonsgrunnlag(sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
-        private val foreldedeDager = mutableListOf<LocalDate>()
-        init {
-            sykdomstidslinje.accept(this)
-        }
+        private val foreldedeDager = sykdomstidslinje.filterIsInstance<Dag.ForeldetSykedag>().map { it.dato }
 
         fun build() = foreldedeDager.grupperSammenhengendePerioder()
-
-        override fun visitDag(dag: Dag.ForeldetSykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-            foreldedeDager.add(dato)
-        }
     }
 }

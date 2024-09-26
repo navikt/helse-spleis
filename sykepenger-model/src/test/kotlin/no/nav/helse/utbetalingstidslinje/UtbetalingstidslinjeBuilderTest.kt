@@ -958,9 +958,7 @@ internal class UtbetalingstidslinjeBuilderTest {
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder()
         )
 
-        tidslinje.accept(builder)
-
-        utbetalingstidslinje = builder.result()
+        utbetalingstidslinje = builder.result(tidslinje)
         inspektør = utbetalingstidslinje.inspektør
     }
 
