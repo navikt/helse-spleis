@@ -272,7 +272,15 @@ internal class Feriepengeberegner(
         private val utbetalteDager = mutableListOf<UtbetaltDag>()
 
         init {
-            utbetalingshistorikkForFeriepenger.accept(InfotrygdUtbetalteDagerVisitor())
+            val infotrygdUtbetalteDager = InfotrygdUtbetalteDagerVisitor()
+            utbetalingshistorikkForFeriepenger.utbetalinger.forEach { dag ->
+                when (dag) {
+                    is UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode ->
+                        infotrygdUtbetalteDager.visitArbeidsgiverutbetalingsperiode(dag.orgnr, dag.periode, dag.beløp, dag.utbetalt)
+                    is UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode ->
+                        infotrygdUtbetalteDager.visitPersonutbetalingsperiode(dag.orgnr, dag.periode, dag.beløp, dag.utbetalt)
+                }
+            }
             person.accept(SpleisUtbetalteDagerVisitor())
         }
 
@@ -283,11 +291,11 @@ internal class Feriepengeberegner(
             private val DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD = LocalDate.of(2024, 8, 24)
         }
 
-        private inner class InfotrygdUtbetalteDagerVisitor : FeriepengeutbetalingsperiodeVisitor {
+        private inner class InfotrygdUtbetalteDagerVisitor {
 
             private fun erUtbetaltEtterFeriepengekjøringIT(utbetalt: LocalDate) = DATO_FOR_SISTE_FERIEPENGEKJØRING_I_INFOTRYGD <= utbetalt
 
-            override fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
+            fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
                 if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
                 utbetalteDager.addAll(periode
                     .filterNot { it.erHelg() }
@@ -295,7 +303,7 @@ internal class Feriepengeberegner(
                     .map { UtbetaltDag.InfotrygdPerson(orgnr, it, beløp) })
             }
 
-            override fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
+            fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {
                 if(erUtbetaltEtterFeriepengekjøringIT(utbetalt)) return
                 utbetalteDager.addAll(periode
                     .filterNot { it.erHelg() }

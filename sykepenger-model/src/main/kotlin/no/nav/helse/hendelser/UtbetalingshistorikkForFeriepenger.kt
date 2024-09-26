@@ -4,7 +4,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategori
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilArbeidsgiver
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger.Companion.utbetalteFeriepengerTilPerson
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.FeriepengeutbetalingsperiodeVisitor
 import java.time.LocalDate
 import java.time.Year
 import java.util.*
@@ -13,17 +12,13 @@ class UtbetalingshistorikkForFeriepenger(
     meldingsreferanseId: UUID,
     aktørId: String,
     fødselsnummer: String,
-    private val utbetalinger: List<Utbetalingsperiode>,
+    val utbetalinger: List<Utbetalingsperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
     internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
 ) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg) {
-    internal fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
-        utbetalinger.forEach { it.accept(visitor) }
-    }
-
     internal fun utbetalteFeriepengerTilPerson() =
         feriepengehistorikk.utbetalteFeriepengerTilPerson(opptjeningsår)
 
@@ -52,15 +47,13 @@ class UtbetalingshistorikkForFeriepenger(
     }
 
     sealed class Utbetalingsperiode(
-        protected val orgnr: String,
+        val orgnr: String,
         fom: LocalDate,
         tom: LocalDate,
-        protected val beløp: Int,
-        protected val utbetalt: LocalDate
+        val beløp: Int,
+        val utbetalt: LocalDate
     ) {
-        protected val periode: Periode = fom til tom
-
-        internal abstract fun accept(visitor: FeriepengeutbetalingsperiodeVisitor)
+        val periode: Periode = fom til tom
 
         internal fun sikreAtArbeidsgivereEksisterer(opprettManglendeArbeidsgiver: (String) -> Unit) {
             opprettManglendeArbeidsgiver(orgnr)
@@ -72,11 +65,7 @@ class UtbetalingshistorikkForFeriepenger(
             tom: LocalDate,
             beløp: Int,
             utbetalt: LocalDate
-        ) : Utbetalingsperiode(orgnr, fom, tom, beløp, utbetalt) {
-            override fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
-                visitor.visitPersonutbetalingsperiode(orgnr, periode, beløp, utbetalt)
-            }
-        }
+        ) : Utbetalingsperiode(orgnr, fom, tom, beløp, utbetalt)
 
         class Arbeidsgiverutbetalingsperiode(
             orgnr: String,
@@ -84,11 +73,7 @@ class UtbetalingshistorikkForFeriepenger(
             tom: LocalDate,
             beløp: Int,
             utbetalt: LocalDate
-        ) : Utbetalingsperiode(orgnr, fom, tom, beløp, utbetalt) {
-            override fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
-                visitor.visitArbeidsgiverutbetalingsperiode(orgnr, periode, beløp, utbetalt)
-            }
-        }
+        ) : Utbetalingsperiode(orgnr, fom, tom, beløp, utbetalt)
     }
 
     class Arbeidskategorikoder(
