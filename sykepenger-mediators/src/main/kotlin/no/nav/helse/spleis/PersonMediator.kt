@@ -431,6 +431,10 @@ internal class PersonMediator(
         )))
     }
 
+    override fun skatteinntekterLagtTilGrunn(event: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
+        queueMessage(JsonMessage.newMessage("skatteinntekter_lagt_til_grunn", event.toJsonMap()))
+    }
+
     override fun trengerArbeidsgiveropplysninger(event: PersonObserver.TrengerArbeidsgiveropplysningerEvent) {
         queueMessage(JsonMessage.newMessage("trenger_opplysninger_fra_arbeidsgiver", event.toJsonMap()))
     }

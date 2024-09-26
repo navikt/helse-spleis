@@ -14,7 +14,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class SykepengegrunnlagLagtTilGrunnE2ETest : AbstractDslTest() {
+internal class SkatteinntekterlagLagtTilGrunnE2ETest : AbstractDslTest() {
 
     @Test
     fun `event om at vi bruker skatteopplysninger`() = Toggle.InntektsmeldingSomIkkeKommer.enable {

@@ -834,6 +834,48 @@ internal class TestMessageFactory(
         )
     }
 
+    fun lagSykepengegrunnlagForArbeidsgiver(
+        vedtaksperiodeId: UUID,
+        orgnummer: String = organisasjonsnummer,
+        skjæringstidspunkt: LocalDate,
+        tilstand: TilstandType,
+        inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning>
+    ): Pair<String, String> {
+        return lagBehovMedLøsning(
+            behov = listOf("InntekterForSykepengegrunnlagForArbeidsgiver"),
+            tilstand = tilstand,
+            vedtaksperiodeId = vedtaksperiodeId,
+            orgnummer = orgnummer,
+            løsninger = mapOf(
+                "InntekterForSykepengegrunnlagForArbeidsgiver" to inntekterForSykepengegrunnlag
+                    .map {
+                        mapOf(
+                            "årMåned" to it.måned,
+                            "inntektsliste" to it.inntekter.map { inntekt ->
+                                mapOf(
+                                    "beløp" to inntekt.beløp,
+                                    "inntektstype" to "LOENNSINNTEKT",
+                                    "orgnummer" to inntekt.orgnummer,
+                                    "fordel" to "kontantytelse",
+                                    "beskrivelse" to "fastloenn"
+                                )
+                            },
+                            "arbeidsforholdliste" to it.arbeidsforhold.map { arbeidsforhold ->
+                                mapOf(
+                                    "orgnummer" to arbeidsforhold.orgnummer,
+                                    "type" to arbeidsforhold.type
+                                )
+                            }
+                        )
+                    }
+            ),
+            ekstraFelter = mapOf(
+                "InntekterForSykepengegrunnlagForArbeidsgiver" to mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt
+                ))
+        )
+    }
+
     fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,

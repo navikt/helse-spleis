@@ -474,6 +474,26 @@ internal abstract class AbstractEndToEndMediatorTest() {
         testRapid.sendTestMessage(message)
     }
 
+    protected fun sendSykepengegrunnlagForArbeidsgiver(
+        vedtaksperiodeIndeks: Int = -1,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        orgnummer: String = ORGNUMMER,
+        inntekterForSykepengegrunnlag: List<InntekterForSykepengegrunnlagFraLøsning> = sykepengegrunnlag(
+            skjæringstidspunkt = skjæringstidspunkt,
+            inntekter = listOf(InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, orgnummer))
+        ),
+    ) {
+        val vedtaksperiodeId = if (vedtaksperiodeIndeks == -1) UUID.randomUUID() else testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
+        val (_, message) = meldingsfabrikk.lagSykepengegrunnlagForArbeidsgiver(
+            vedtaksperiodeId = vedtaksperiodeId,
+            orgnummer = orgnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            tilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
+            inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag
+        )
+        testRapid.sendTestMessage(message)
+    }
+
     protected fun sendVilkårsgrunnlag(
         vedtaksperiodeIndeks: Int,
         skjæringstidspunkt: LocalDate = 1.januar,

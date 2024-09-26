@@ -9,7 +9,6 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
-import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
@@ -119,6 +118,20 @@ interface PersonObserver {
             val måned: YearMonth,
             val beløp: Double
         )
+
+        fun toJsonMap(): Map<String, Any> =
+            mapOf(
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "behandlingId" to behandlingId,
+                "omregnetÅrsinntekt" to omregnetÅrsinntekt,
+                "skatteinntekter" to skatteinntekter.map {
+                    mapOf(
+                        "måned" to it.måned,
+                        "beløp" to it.beløp
+                    )
+                }
+            )
     }
 
     data class TrengerArbeidsgiveropplysningerEvent(
@@ -656,7 +669,7 @@ interface PersonObserver {
     fun inntektsmeldingFørSøknad(event: InntektsmeldingFørSøknadEvent) {}
     fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {}
     fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
-    fun skatteinntekterLagtTilGrunn(skatteinntekter: SkatteinntekterLagtTilGrunnEvent) {}
+    fun skatteinntekterLagtTilGrunn(event: SkatteinntekterLagtTilGrunnEvent) {}
     fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun behandlingUtført() {}
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}

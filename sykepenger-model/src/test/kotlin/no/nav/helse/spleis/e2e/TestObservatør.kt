@@ -206,8 +206,8 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         inntektsmeldingHåndtert.add(inntektsmeldingId to vedtaksperiodeId)
     }
 
-    override fun skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
-        skatteinntekterLagtTilGrunnEventer.add(skatteinntekterLagtTilGrunnEvent)
+    override fun skatteinntekterLagtTilGrunn(event: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
+        skatteinntekterLagtTilGrunnEventer.add(event)
     }
 
     override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
