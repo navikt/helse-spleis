@@ -13,13 +13,12 @@ import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.State.Kara
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter.State.Syk
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import no.nav.helse.økonomi.Økonomi
 
 internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
     private val arbeidsgiverRegler: ArbeidsgiverRegler,
     private val infotrygdtidslinje: Utbetalingstidslinje
-): UtbetalingstidslinjerFilter, UtbetalingstidslinjeVisitor {
+): UtbetalingstidslinjerFilter {
 
     private companion object {
         const val TILSTREKKELIG_OPPHOLD_I_SYKEDAGER = 26 * 7
@@ -50,7 +49,26 @@ internal class MaksimumSykepengedagerfilter(
         this.subsumsjonslogg = subsumsjonslogg
         tidslinjegrunnlag = tidslinjer + listOf(infotrygdtidslinje)
         beregnetTidslinje = tidslinjegrunnlag.reduce(Utbetalingstidslinje::plus)
-        beregnetTidslinje.accept(this)
+
+        beregnetTidslinje.forEach { dag ->
+            when (dag) {
+                is Utbetalingsdag.Arbeidsdag -> state.oppholdsdag(this, dag.dato)
+                is Utbetalingsdag.ArbeidsgiverperiodeDag -> state.oppholdsdag(this, dag.dato)
+                is Utbetalingsdag.ArbeidsgiverperiodedagNav -> state.oppholdsdag(this, dag.dato)
+                is Utbetalingsdag.AvvistDag -> state.avvistDag(this, dag.dato)
+                is Utbetalingsdag.ForeldetDag -> state.oppholdsdag(this, dag.dato)
+                is Utbetalingsdag.Fridag -> state.fridag(this, dag.dato)
+                is NavDag -> {
+                    if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
+                    state.betalbarDag(this, dag.dato)
+                }
+                is Utbetalingsdag.NavHelgDag -> {
+                    if (alder.mistetSykepengerett(dag.dato)) state(State.ForGammel)
+                    state.sykdomshelg(this, dag.dato)
+                }
+                is UkjentDag -> state.oppholdsdag(this, dag.dato)
+            }
+        }
 
         /** går gjennom alle maksdato-sakene og avslår dager. EGENTLIG er det nok å avslå dagene
          *  fra sisteVurdering, men det er noen enhetstester som tester veldig lange
@@ -80,72 +98,6 @@ internal class MaksimumSykepengedagerfilter(
         state.leaving(this)
         state = nyState
         state.entering(this)
-    }
-
-    override fun visit(dag: Utbetalingsdag.ForeldetDag, dato: LocalDate, økonomi: Økonomi) {
-        state.oppholdsdag(this, dato)
-    }
-
-    override fun visit(
-        dag: NavDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        if (alder.mistetSykepengerett(dato)) state(State.ForGammel)
-        state.betalbarDag(this, dato)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.NavHelgDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        if (alder.mistetSykepengerett(dato)) state(State.ForGammel)
-        state.sykdomshelg(this, dato)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.Arbeidsdag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        state.oppholdsdag(this, dato)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.ArbeidsgiverperiodeDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        state.oppholdsdag(this, dato)
-    }
-
-    override fun visit(dag: Utbetalingsdag.ArbeidsgiverperiodedagNav, dato: LocalDate, økonomi: Økonomi) {
-        state.oppholdsdag(this, dato)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.Fridag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        state.fridag(this, dato)
-    }
-
-    override fun visit(
-        dag: Utbetalingsdag.AvvistDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        state.avvistDag(this, dato)
-    }
-
-    override fun visit(
-        dag: UkjentDag,
-        dato: LocalDate,
-        økonomi: Økonomi
-    ) {
-        state.oppholdsdag(this, dato)
     }
 
     private fun økOppholdstelling(dato: LocalDate) {
