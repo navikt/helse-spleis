@@ -170,7 +170,7 @@ class Grunnbeløp private constructor(private val multiplier: Double) {
                 return grunnbeløper
                     .map { it.snitt(år, grunnbeløper) }
                     .summer()
-                    .reflection { årlig, _, _, _ -> årlig.roundToInt() }
+                    .årlig.roundToInt()
                     .årlig
             }
         }

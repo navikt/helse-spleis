@@ -96,9 +96,9 @@ internal class Inntektsgrunnlag private constructor(
             arbeidsgiverInntektsopplysninger.subsummer(this, forrige = emptyList())
             `§ 8-10 ledd 2 punktum 1`(
                 erBegrenset = begrensning == ER_6G_BEGRENSET,
-                maksimaltSykepengegrunnlagÅrlig = `6G`.reflection { årlig, _, _, _ -> årlig },
+                maksimaltSykepengegrunnlagÅrlig = `6G`.årlig,
                 skjæringstidspunkt = skjæringstidspunkt,
-                beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+                beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig
             )
             subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, this)
         }
@@ -114,14 +114,14 @@ internal class Inntektsgrunnlag private constructor(
                 oppfylt = oppfyllerMinsteinntektskrav,
                 skjæringstidspunkt = skjæringstidspunkt,
                 alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
-                beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
+                beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
+                minimumInntektÅrlig = minsteinntekt.årlig)
         else
             subsumsjonslogg.`§ 8-3 ledd 2 punktum 1`(
                 oppfylt = oppfyllerMinsteinntektskrav,
                 skjæringstidspunkt = skjæringstidspunkt,
-                beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                minimumInntektÅrlig = minsteinntekt.reflection { årlig, _, _, _ -> årlig })
+                beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
+                minimumInntektÅrlig = minsteinntekt.årlig)
     }
 
     internal companion object {
@@ -190,8 +190,8 @@ internal class Inntektsgrunnlag private constructor(
                 utfallTom = avvisteDagerOver67.max(),
                 periodeFom = periode.start,
                 periodeTom = periode.endInclusive,
-                beregningsgrunnlagÅrlig = beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
-                minimumInntektÅrlig = `2G`.minsteinntekt(avvisteDagerOver67.min()).reflection { årlig, _, _, _ -> årlig },
+                beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
+                minimumInntektÅrlig = `2G`.minsteinntekt(avvisteDagerOver67.min()).årlig,
                 jurist = subsumsjonslogg
             )
         }

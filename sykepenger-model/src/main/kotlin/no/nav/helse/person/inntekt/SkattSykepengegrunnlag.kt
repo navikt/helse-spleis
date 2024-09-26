@@ -100,12 +100,12 @@ internal class SkattSykepengegrunnlag private constructor(
             organisasjonsnummer = organisasjonsnummer,
             skjæringstidspunkt = dato,
             inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
-            grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+            grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
             grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
         )
         subsumsjonslogg.`§ 8-29`(
             skjæringstidspunkt = dato,
-            grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+            grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
             inntektsopplysninger = inntektsopplysninger.subsumsjonsformat(),
             organisasjonsnummer = organisasjonsnummer
         )

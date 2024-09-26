@@ -169,7 +169,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             periodeFom = 10.februar,
             periodeTom = 20.februar,
             vedtaksperiodeId = 2.vedtaksperiode.id(a1),
-            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 10000.månedlig.reflection { årlig, _, _, _ ->  årlig })),
+            omregnedeÅrsinntekter = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to 10000.månedlig.årlig)),
             behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
             tags = setOf("IngenNyArbeidsgiverperiode", "SykepengegrunnlagUnder2G"),
             perioderMedSammeSkjæringstidspunkt= listOf(
@@ -181,7 +181,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 ),
             ),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 10000.månedlig.reflection { årlig, _, _, _ ->  årlig }.toDouble(),
+                "omregnetÅrsinntektTotalt" to 10000.månedlig.årlig,
                 "6G" to 561804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
@@ -239,7 +239,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         assertIngenTag("IngenNyArbeidsgiverperiode", 2.vedtaksperiode.id(a1))
         assertSykepengegrunnlagsfakta(
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to INNTEKT.reflection { årlig, _, _, _ ->  årlig }.toDouble(),
+                "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
                 "fastsatt" to "IInfotrygd"
             ),
             vedtaksperiodeId = 2.vedtaksperiode.id(a1)
@@ -339,13 +339,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 2.vedtaksperiode.id(a1).toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.februar.toString(), "tom" to 28.februar.toString())
             ),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to INNTEKT.reflection { årlig, _, _, _ -> årlig }.toDouble(),
+                "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
                 "6G" to 561804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to INNTEKT.reflection { årlig, _, _, _ -> årlig }.toDouble()
+                        "omregnetÅrsinntekt" to INNTEKT.årlig
                     )
                 )
             )
@@ -392,17 +392,17 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
                 mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a2).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a2).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString())
             ),
             sykepengegrunnlagsfakta = mapOf(
-                "omregnetÅrsinntektTotalt" to 40000.månedlig.reflection { årlig, _, _, _ -> årlig }.toDouble(),
+                "omregnetÅrsinntektTotalt" to 40000.månedlig.årlig,
                 "6G" to 561804.0,
                 "fastsatt" to "EtterHovedregel",
                 "arbeidsgivere" to listOf (
                     mapOf(
                         "arbeidsgiver" to a1,
-                        "omregnetÅrsinntekt" to 20000.månedlig.reflection { årlig, _, _, _ -> årlig }.toDouble()
+                        "omregnetÅrsinntekt" to 20000.månedlig.årlig
                     ),
                     mapOf (
                         "arbeidsgiver" to a2,
-                        "omregnetÅrsinntekt" to 20000.månedlig.reflection { årlig, _, _, _ -> årlig }.toDouble()
+                        "omregnetÅrsinntekt" to 20000.månedlig.årlig
                     )
                 )
             )
@@ -590,19 +590,19 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
         førstegangsbehandling: Boolean = true,
         utbetalingstype: String = "UTBETALING",
         inntektskilde: String = "EN_ARBEIDSGIVER",
-        omregnedeÅrsinntekter: List<Map<String, Any>> = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.reflection { årlig, _, _, _ ->  årlig })),
+        omregnedeÅrsinntekter: List<Map<String, Any>> = listOf(mapOf("organisasjonsnummer" to a1, "beløp" to INNTEKT.årlig)),
         behandlingId: UUID = inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.behandlinger.last().id,
         perioderMedSammeSkjæringstidspunkt: List<Map<String, String>> = listOf(
             mapOf("vedtaksperiodeId" to 1.vedtaksperiode.id(a1).toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
         ),
         sykepengegrunnlagsfakta: Map<String, Any> = mapOf(
-            "omregnetÅrsinntektTotalt" to INNTEKT.reflection { årlig, _, _, _ -> årlig }.toDouble(),
+            "omregnetÅrsinntektTotalt" to INNTEKT.årlig,
             "6G" to 561804.0,
             "fastsatt" to "EtterHovedregel",
             "arbeidsgivere" to listOf(
                 mapOf(
                     "arbeidsgiver" to a1,
-                    "omregnetÅrsinntekt" to INNTEKT.reflection { årlig, _, _, _ -> årlig }.toDouble()
+                    "omregnetÅrsinntekt" to INNTEKT.årlig
                 )
             )
         )

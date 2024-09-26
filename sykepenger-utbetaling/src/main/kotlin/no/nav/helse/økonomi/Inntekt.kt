@@ -6,7 +6,7 @@ import no.nav.helse.memoize
 import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.roundToInt
 
-class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt> {
+class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
 
     init {
         require(

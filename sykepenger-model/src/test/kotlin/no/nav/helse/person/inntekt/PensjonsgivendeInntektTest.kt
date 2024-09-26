@@ -46,17 +46,17 @@ internal class PensjonsgivendeInntektTest {
         )
 
         val skjæringstidspunkt = 12.mai
-        val expected = (`2G`.beløp(skjæringstidspunkt) + `2G`.beløp(skjæringstidspunkt) / 3).reflection { årlig, _, _, _ -> årlig.toInt() }.årlig
+        val expected = (`2G`.beløp(skjæringstidspunkt) + `2G`.beløp(skjæringstidspunkt) / 3).årlig.toInt().årlig
         assertEquals(expected, SelvstendigNæringsdrivende(inntekter).fastsattÅrsinntekt(skjæringstidspunkt))
     }
 }
 
 private class SelvstendigNæringsdrivende(private val inntekter: List<PensjonsgivendeInntekt>) {
-    internal fun fastsattÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
+    fun fastsattÅrsinntekt(skjæringstidspunkt: LocalDate): Inntekt {
         return inntekter
             .map { it.omregnetÅrsinntekt(skjæringstidspunkt) }
             .summer()
-            .reflection { årlig, _, _, _ -> årlig.toInt() }
+            .årlig.toInt()
             .årlig
     }
 }

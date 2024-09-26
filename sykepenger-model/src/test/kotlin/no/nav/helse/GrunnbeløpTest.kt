@@ -204,16 +204,16 @@ internal class GrunnbeløpTest {
                 oppfylt = oppfylt,
                 skjæringstidspunkt = skjæringstidspunkt,
                 alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
-                beregningsgrunnlagÅrlig = inntekt.reflection { årlig, _, _, _ -> årlig },
-                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).reflection { årlig, _, _, _ -> årlig })
+                beregningsgrunnlagÅrlig = inntekt.årlig,
+                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig)
             if (oppfylt) return null
             return Begrunnelse.MinimumInntektOver67
         }
         subsumsjonslogg.`§ 8-3 ledd 2 punktum 1`(
             oppfylt = oppfylt,
             skjæringstidspunkt = skjæringstidspunkt,
-            beregningsgrunnlagÅrlig = inntekt.reflection { årlig, _, _, _ -> årlig },
-            minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).reflection { årlig, _, _, _ -> årlig })
+            beregningsgrunnlagÅrlig = inntekt.årlig,
+            minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig)
         if (oppfylt) return null
         return Begrunnelse.MinimumInntekt
     }

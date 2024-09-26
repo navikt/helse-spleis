@@ -335,7 +335,6 @@ internal class UtkastTilVedtakBuilder(
     }
 
     private companion object {
-        private val Inntekt.årlig get() = reflection { årlig, _, _, _ -> årlig }
         private val Inntekt.månedlig get() = reflection { _, månedlig, _, _ -> månedlig }
         private val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
         private val Set<Tag>.utgående get() = map { it.name }.toSet()

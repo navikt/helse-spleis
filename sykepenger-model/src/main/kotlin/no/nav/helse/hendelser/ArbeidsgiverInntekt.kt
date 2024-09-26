@@ -41,7 +41,7 @@ class ArbeidsgiverInntekt(
 
     internal fun somEksterneSkatteinntekter() = inntekter.somEksterneSkatteinntekter()
 
-    internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }).reflection { årlig, _, _, _ -> årlig }
+    internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }).årlig
 
     internal companion object {
         internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(

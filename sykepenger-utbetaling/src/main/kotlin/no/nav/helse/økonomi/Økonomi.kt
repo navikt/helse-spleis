@@ -211,7 +211,7 @@ class Økonomi private constructor(
             .arbeidsgiverbeløp(arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig })
             .personbeløp(personbeløp?.reflection { _, _, daglig, _ -> daglig })
             .er6GBegrenset(er6GBegrenset)
-            .grunnbeløpsgrense(grunnbeløpgrense?.reflection { årlig, _, _, _ -> årlig })
+            .grunnbeløpsgrense(grunnbeløpgrense?.årlig)
             .tilstand(tilstand)
     }
 
@@ -421,8 +421,8 @@ class Økonomi private constructor(
     }
 
     fun subsumsjonsdata() = Dekningsgrunnlagsubsumsjon(
-        årligInntekt = aktuellDagsinntekt.reflection { årlig, _, _, _ -> årlig },
-        årligDekningsgrunnlag = dekningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+        årligInntekt = aktuellDagsinntekt.årlig,
+        årligDekningsgrunnlag = dekningsgrunnlag.årlig
     )
 
     fun dto() = ØkonomiUtDto(

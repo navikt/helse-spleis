@@ -196,7 +196,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 "forklaring" to "Jeg bare måtte gjøre det"
             ),
             output = mapOf(
-                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to overstyrtBeløp.reflection { årlig, _, _, _ -> årlig},
+                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to overstyrtBeløp.årlig,
                 "beregnetGrunnlagForSykepengegrunnlagPrMåned" to overstyrtBeløp.reflection { _, månedlig, _, _ -> månedlig }
             )
         )

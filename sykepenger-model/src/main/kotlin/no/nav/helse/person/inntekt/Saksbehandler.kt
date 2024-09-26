@@ -63,7 +63,7 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
@@ -75,7 +75,7 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
             )
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer) {
@@ -84,7 +84,7 @@ class Saksbehandler internal constructor(
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
-                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().reflection { årlig, _, _, _ -> årlig },
+                grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().reflection { _, månedlig, _, _ -> månedlig }
             )
         }
