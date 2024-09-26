@@ -21,14 +21,18 @@ internal class UtkastTilVedtakBuilder(
     private val vedtaksperiodeId: UUID,
     private val arbeidsgiver: String,
     private val kanForkastes: Boolean,
-    private val erForlengelse: Boolean,
+    erForlengelse: Boolean,
     private val harPeriodeRettFør: Boolean,
     private val arbeidsgiverperiode: Arbeidsgiverperiode?
 ) {
-    private val tags = mutableSetOf<String>()
+    private val tags = mutableSetOf<Tag>()
+    init {
+        if (erForlengelse) tags.add(Tag.Forlengelse)
+        else tags.add(Tag.Førstegangsbehandling)
+    }
 
-    internal fun ingenNyArbeidsgiverperiode() = apply { tags.add("IngenNyArbeidsgiverperiode") }
-    internal fun grunnbeløpsregulert() = apply { tags.add("Grunnbeløpsregulering") }
+    internal fun ingenNyArbeidsgiverperiode() = apply { tags.add(Tag.IngenNyArbeidsgiverperiode) }
+    internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
 
     private data class RelevantPeriode(val vedtaksperiodeId: UUID, val behandlingId: UUID, val skjæringstidspunkt: LocalDate, val periode: Periode)
     private val relevantePerioder = mutableSetOf<RelevantPeriode>()
@@ -71,13 +75,13 @@ internal class UtkastTilVedtakBuilder(
         val arbeidsgiverNettoBeløp = utbetaling.arbeidsgiverOppdrag().nettoBeløp()
         val personNettoBeløp = utbetaling.personOppdrag().nettoBeløp()
 
-        if (arbeidsgiverNettoBeløp > 0) tags.add("Arbeidsgiverutbetaling")
-        else if (arbeidsgiverNettoBeløp < 0) tags.add("NegativArbeidsgiverutbetaling")
+        if (arbeidsgiverNettoBeløp > 0) tags.add(Tag.Arbeidsgiverutbetaling)
+        else if (arbeidsgiverNettoBeløp < 0) tags.add(Tag.NegativArbeidsgiverutbetaling)
 
-        if (personNettoBeløp > 0) tags.add("Personutbetaling")
-        else if (personNettoBeløp < 0) tags.add("NegativPersonutbetaling")
+        if (personNettoBeløp > 0) tags.add(Tag.Personutbetaling)
+        else if (personNettoBeløp < 0) tags.add(Tag.NegativPersonutbetaling)
 
-        if (arbeidsgiverNettoBeløp == 0 && personNettoBeløp == 0) tags.add("IngenUtbetaling")
+        if (arbeidsgiverNettoBeløp == 0 && personNettoBeløp == 0) tags.add(Tag.IngenUtbetaling)
 
         check(tags.size > antallTagsFør) {
             "arbeidsgiverNettoBeløp=$arbeidsgiverNettoBeløp, personNettoBeløp=$personNettoBeløp burde bli minst én ny tag."
@@ -101,9 +105,9 @@ internal class UtkastTilVedtakBuilder(
         this.seksG = seksG.årlig
         this.inngangsvilkårFraInfotrygd = inngangsvilkårFraInfotrygd
 
-        if (!inngangsvilkårFraInfotrygd && beregningsgrunnlag > seksG) tags.add("6GBegrenset")
-        if (sykepengegrunnlag < toG) tags.add("SykepengegrunnlagUnder2G")
-        if (inngangsvilkårFraInfotrygd) tags.add("InngangsvilkårFraInfotrygd")
+        if (!inngangsvilkårFraInfotrygd && beregningsgrunnlag > seksG) tags.add(Tag.`6GBegrenset`)
+        if (sykepengegrunnlag < toG) tags.add(Tag.SykepengegrunnlagUnder2G)
+        if (inngangsvilkårFraInfotrygd) tags.add(Tag.InngangsvilkårFraInfotrygd)
     }
 
     private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode)
@@ -133,9 +137,9 @@ internal class UtkastTilVedtakBuilder(
         }
 
         fun behandlingsresultat() = when {
-            !navDag -> "Avslag"
-            navDag && avvistDag -> "DelvisInnvilget"
-            else -> "Innvilget"
+            !navDag -> Tag.Avslag
+            navDag && avvistDag -> Tag.DelvisInnvilget
+            else -> Tag.Innvilget
         }
     }
 
@@ -162,13 +166,11 @@ internal class UtkastTilVedtakBuilder(
             check(emptyList<Arbeidsgiverinntekt>() == skjønnsmessigeFastsattArbeidsgiverinntekterPåSkjæringstidspunktet || arbeidsgiverinntekterPåSkjæringstidspunktet == skjønnsmessigeFastsattArbeidsgiverinntekterPåSkjæringstidspunktet) {
                 "Enten må ingen eller alle arbeidsgiverinntekter på skjæringstidspunktet være skjønnsmessig fastsatt"
             }
-            if (erForlengelse) tags.add("Forlengelse")
-            else tags.add("Førstegangsbehandling")
 
-            if (arbeidsgiverinntekter.any { it.gjelder.start > skjæringstidspunkt }) tags.add("TilkommenInntekt")
+            if (arbeidsgiverinntekter.any { it.gjelder.start > skjæringstidspunkt }) tags.add(Tag.TilkommenInntekt)
 
-            if (enArbeidsgiver) tags.add("EnArbeidsgiver")
-            else tags.add("FlereArbeidsgivere")
+            if (enArbeidsgiver) tags.add(Tag.EnArbeidsgiver)
+            else tags.add(Tag.FlereArbeidsgivere)
         }
 
         private val sykepengegrunnlagsfakta: PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta = when {
@@ -203,16 +205,16 @@ internal class UtkastTilVedtakBuilder(
         private val periodetypeForGodkjenningsbehov = sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags)
 
         val godkjenningsbehov = mapOf(
-            "periodeFom" to periode.start.toString(),
-            "periodeTom" to periode.endInclusive.toString(),
-            "skjæringstidspunkt" to skjæringstidspunkt.toString(),
-            "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
+            "periodeFom" to "${periode.start}",
+            "periodeTom" to "${periode.endInclusive}",
+            "skjæringstidspunkt" to "$skjæringstidspunkt",
+            "vilkårsgrunnlagId" to "$vilkårsgrunnlagId",
             "periodetype" to periodetypeForGodkjenningsbehov,
-            "førstegangsbehandling" to !erForlengelse,
+            "førstegangsbehandling" to tags.contains(Tag.Førstegangsbehandling),
             "utbetalingtype" to if (revurdering) "REVURDERING" else "UTBETALING",
             "inntektskilde" to if (enArbeidsgiver) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
             "orgnummereMedRelevanteArbeidsforhold" to (arbeidsgiverinntekter.map { it.arbeidsgiver }).toSet(),
-            "tags" to tags,
+            "tags" to tags.utgående,
             "kanAvvises" to kanForkastes,
             "omregnedeÅrsinntekter" to arbeidsgiverinntekterPåSkjæringstidspunktet.map {
                 mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnedeÅrsinntekt)
@@ -229,12 +231,11 @@ internal class UtkastTilVedtakBuilder(
             },
             "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {
                 is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> mapOf(
-                    "omregnetÅrsinntektTotalt" to totalOmregnetÅrsinntekt,
+                    "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
                     "fastsatt" to sykepengegrunnlagsfakta.fastsatt
                 )
-
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> mapOf(
-                    "omregnetÅrsinntektTotalt" to totalOmregnetÅrsinntekt,
+                    "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
                     "6G" to seksG,
                     "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
                     "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
@@ -245,7 +246,7 @@ internal class UtkastTilVedtakBuilder(
                     }
                 )
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> mapOf(
-                    "omregnetÅrsinntektTotalt" to totalOmregnetÅrsinntekt,
+                    "omregnetÅrsinntektTotalt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
                     "6G" to seksG,
                     "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
                     "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
@@ -266,7 +267,7 @@ internal class UtkastTilVedtakBuilder(
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             behandlingId = behandlingId,
-            tags = tags,
+            tags = tags.utgående,
             `6G`= when (val fakta = sykepengegrunnlagsfakta) {
                 is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> null
                 is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> fakta.`6G`
@@ -289,6 +290,7 @@ internal class UtkastTilVedtakBuilder(
             beregningsgrunnlag = beregningsgrunnlagForAvsluttetMedVedtak,
             // Til ettertanke: Den var jo uventet, men er jo slik det har vært 🤷‍
             // Til ettertanke: Denne hentet data fra sykepengegrunnlagsfakta som har to desimaler
+            // Til ettertanke: Denne mappes ut i JSON som "grunnlagForSykepengegrunnlagPerArbeidsgiver"
             omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiverForAvsluttedMedVedtak,
             inntekt = beregningsgrunnlag.månedlig, // TODO: Til ettertanke: What? 👀 Denne håper jeg ingen bruker
             utbetalingId = utbetalingId,
@@ -311,10 +313,32 @@ internal class UtkastTilVedtakBuilder(
         )
     }
 
+    private enum class Tag {
+        Forlengelse,
+        Førstegangsbehandling,
+        IngenNyArbeidsgiverperiode,
+        Grunnbeløpsregulering,
+        EnArbeidsgiver,
+        FlereArbeidsgivere,
+        `6GBegrenset`,
+        Arbeidsgiverutbetaling,
+        NegativArbeidsgiverutbetaling,
+        Personutbetaling,
+        NegativPersonutbetaling,
+        IngenUtbetaling,
+        SykepengegrunnlagUnder2G,
+        InngangsvilkårFraInfotrygd,
+        Avslag,
+        DelvisInnvilget,
+        Innvilget,
+        TilkommenInntekt
+    }
+
     private companion object {
         private val Inntekt.årlig get() = reflection { årlig, _, _, _ -> årlig }
         private val Inntekt.månedlig get() = reflection { _, månedlig, _, _ -> månedlig }
         private val Double.toDesimaler get() = toBigDecimal().setScale(2, RoundingMode.HALF_UP).toDouble()
+        private val Set<Tag>.utgående get() = map { it.name }.toSet()
 
         private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak() = when (val fakta = this) {
             is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.skjønnsfastsatt
@@ -327,14 +351,14 @@ internal class UtkastTilVedtakBuilder(
             is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.arbeidsgivere.associate { it.arbeidsgiver to it.skjønnsfastsatt.toDesimaler }
         }
 
-        private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.sykepengegrunnlagsbegrensningForAvsluttedMedVedtak(tags: Set<String>) = when {
+        private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.sykepengegrunnlagsbegrensningForAvsluttedMedVedtak(tags: Set<Tag>) = when {
             this is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> "VURDERT_I_INFOTRYGD"
-            tags.contains("6GBegrenset") -> "ER_6G_BEGRENSET"
+            tags.contains(Tag.`6GBegrenset`) -> "ER_6G_BEGRENSET"
             else -> "ER_IKKE_6G_BEGRENSET"
         }
 
-        private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags: Set<String>): String {
-            val erForlengelse = tags.contains("Forlengelse")
+        private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags: Set<Tag>): String {
+            val erForlengelse = tags.contains(Tag.Forlengelse)
             return when {
                 this is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> if (erForlengelse) "INFOTRYGDFORLENGELSE" else "OVERGANG_FRA_IT"
                 else -> if (erForlengelse) "FORLENGELSE" else "FØRSTEGANGSBEHANDLING"

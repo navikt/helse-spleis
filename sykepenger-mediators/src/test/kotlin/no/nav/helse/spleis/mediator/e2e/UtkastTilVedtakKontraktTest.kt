@@ -8,7 +8,6 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `utkast til vedtak`() {
-        nyttVedtak()
         @Language("JSON")
         val forventet = """
         {
@@ -22,13 +21,14 @@ internal class UtkastTilVedtakKontraktTest : AbstractEndToEndMediatorTest() {
             "aktørId": "$AKTØRID",
             "fødselsnummer": "$UNG_PERSON_FNR_2018",
             "tags": [
+                "Førstegangsbehandling",
                 "Innvilget",
                 "Arbeidsgiverutbetaling",
-                "Førstegangsbehandling",
                 "EnArbeidsgiver"
             ]
         }
         """
+        nyttVedtak()
         testRapid.assertUtgåendeMelding(forventet)
     }
 }
