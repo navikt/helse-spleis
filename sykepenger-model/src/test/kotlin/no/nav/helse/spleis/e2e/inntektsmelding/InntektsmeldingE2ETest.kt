@@ -4,6 +4,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
@@ -27,6 +28,7 @@ import no.nav.helse.inspectors.BehandlingInspektør.Behandling.Behandlingtilstan
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mandag
 import no.nav.helse.mars
@@ -109,6 +111,14 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `altinn-inntektsmelding oppgir opphør av refusjon tilbake i tid i forhold til første fraværsdag`() {
+        nyttVedtak(1.juni til 30.juni)
+        nyPeriode(1.august til 31.august)
+        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 1.august, beregnetInntekt = INNTEKT, refusjon = Refusjon(INNTEKT, 30.juni))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+    }
 
     @Test
     fun `Manglende sporing av IM ved langt gap mellom AGP og FF når IM kommer før søknad`() {

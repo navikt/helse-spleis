@@ -78,7 +78,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = LocalDateTime.now(),
             ))
         }
-        assertEquals(listOf(Refusjonsopplysning(im, 4.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(20.januar).inspektør.refusjonsopplysninger)
+        assertEquals(listOf(Refusjonsopplysning(im, 20.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(20.januar).inspektør.refusjonsopplysninger)
     }
 
     @Test
@@ -96,7 +96,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
         }
         val refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(5.august).inspektør.refusjonsopplysninger
-        assertEquals(listOf(Refusjonsopplysning(im, 5.april, null, 0.daglig)), refusjonsopplysninger)
+        assertEquals(listOf(Refusjonsopplysning(im, 5.august, null, 0.daglig)), refusjonsopplysninger)
     }
 
     @Test
@@ -113,7 +113,7 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 tidsstempel = LocalDateTime.now(),
             ))
         }
-        assertEquals(listOf(Refusjonsopplysning(im, 7.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(10.januar).inspektør.refusjonsopplysninger)
+        assertEquals(listOf(Refusjonsopplysning(im, 10.januar, null, 0.daglig)), refusjonshistorikk.refusjonsopplysninger(10.januar).inspektør.refusjonsopplysninger)
     }
 
     @Test

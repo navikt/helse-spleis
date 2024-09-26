@@ -130,6 +130,8 @@ internal class Refusjonshistorikk {
                     forEach { it.leggTilRefusjoneropplysninger(refusjonsopplysningerBuilder) }
 
                 private fun Refusjon.leggTilRefusjoneropplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) {
+                    // håndterer at inntektsmeldinger oppgir opphørsdato for refusjon til en dato FØR startskuddet
+                    val sisteRefusjonsdag = sisteRefusjonsdag?.let { maxOf(it, startskuddet().forrigeDag) }
                     val hovedRefusjonsopplysning = EndringIRefusjon(beløp ?: INGEN, startskuddet())
 
                     (endringerIRefusjon + hovedRefusjonsopplysning)
