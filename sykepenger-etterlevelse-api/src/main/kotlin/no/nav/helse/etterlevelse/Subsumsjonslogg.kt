@@ -3,28 +3,14 @@ package no.nav.helse.etterlevelse
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.Year
-import java.util.SortedSet
+import no.nav.helse.etterlevelse.Ledd.Companion.ledd
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 
 interface Subsumsjonslogg {
 
-    /**
-     * Vurdering av opptjeningstid
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-2)
-     *
-     * @param oppfylt hvorvidt sykmeldte har oppfylt krav om opptjeningstid
-     * @param skjæringstidspunkt dato som antall opptjeningsdager regnes mot
-     * @param tilstrekkeligAntallOpptjeningsdager antall opptjeningsdager som kreves for at vilkåret skal være [oppfylt]
-     * @param arbeidsforhold hvilke arbeidsforhold det er tatt utgangspunkt i ved beregning av opptjeningstid
-     * @param antallOpptjeningsdager antall opptjeningsdager sykmeldte faktisk har på [skjæringstidspunkt]
-     */
-    fun `§ 8-2 ledd 1`(
-        oppfylt: Boolean,
-        skjæringstidspunkt: LocalDate,
-        tilstrekkeligAntallOpptjeningsdager: Int,
-        arbeidsforhold: List<Map<String, Any?>>,
-        antallOpptjeningsdager: Int
-    ) {}
+    fun logg(subsumsjon: Subsumsjon)
 
     /**
      * Vurdering av rett til sykepenger ved fylte 70 år
@@ -497,6 +483,40 @@ interface Subsumsjonslogg {
     )
 
     companion object {
-        val NullObserver = object : Subsumsjonslogg {}
+        val NullObserver = object : Subsumsjonslogg {
+            override fun logg(subsumsjon: Subsumsjon) {}
+        }
     }
 }
+
+/**
+ * Vurdering av opptjeningstid
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-2)
+ *
+ * @param oppfylt hvorvidt sykmeldte har oppfylt krav om opptjeningstid
+ * @param skjæringstidspunkt dato som antall opptjeningsdager regnes mot
+ * @param tilstrekkeligAntallOpptjeningsdager antall opptjeningsdager som kreves for at vilkåret skal være [oppfylt]
+ * @param arbeidsforhold hvilke arbeidsforhold det er tatt utgangspunkt i ved beregning av opptjeningstid
+ * @param antallOpptjeningsdager antall opptjeningsdager sykmeldte faktisk har på [skjæringstidspunkt]
+ */
+fun `§ 8-2 ledd 1`(
+    oppfylt: Boolean,
+    skjæringstidspunkt: LocalDate,
+    tilstrekkeligAntallOpptjeningsdager: Int,
+    arbeidsforhold: List<Map<String, Any?>>,
+    antallOpptjeningsdager: Int
+) = Subsumsjon.enkelSubsumsjon(
+    lovverk = "folketrygdloven",
+    utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+    versjon = LocalDate.of(2020, 6, 12),
+    paragraf = PARAGRAF_8_2,
+    ledd = 1.ledd,
+    input = mapOf(
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
+        "arbeidsforhold" to arbeidsforhold
+    ),
+    output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager),
+    kontekster = emptyList()
+)

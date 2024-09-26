@@ -39,9 +39,9 @@ class OverstyrArbeidsforhold(
         }
     }
 
-    internal fun overstyr(opptjening: Opptjening, subsumsjonslogg: Subsumsjonslogg): Opptjening {
+    internal fun overstyr(opptjening: Opptjening): Opptjening {
         return overstyrteArbeidsforhold.fold(opptjening) { acc, overstyring ->
-            overstyring.overstyr(acc, subsumsjonslogg)
+            overstyring.overstyr(acc)
         }
     }
 
@@ -55,9 +55,9 @@ class OverstyrArbeidsforhold(
             else -> inntektsgrunnlag.aktiver(orgnummer, forklaring, subsumsjonslogg)
         }
 
-        internal fun overstyr(opptjening: Opptjening, subsumsjonslogg: Subsumsjonslogg) = when (deaktivert) {
-            true -> opptjening.deaktiver(orgnummer, subsumsjonslogg)
-            else -> opptjening.aktiver(orgnummer, subsumsjonslogg)
+        internal fun overstyr(opptjening: Opptjening) = when (deaktivert) {
+            true -> opptjening.deaktiver(orgnummer)
+            else -> opptjening.aktiver(orgnummer)
         }
     }
 }

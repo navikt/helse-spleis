@@ -79,20 +79,6 @@ data class Subsumsjon(
         }
     }
 
-    init {
-        val kritiskeTyper = setOf(KontekstType.Fødselsnummer, KontekstType.Organisasjonsnummer)
-        check(kritiskeTyper.all { kritiskType ->
-            kontekster.count { it.type == kritiskType } == 1
-        }) {
-            "en av $kritiskeTyper mangler/har duplikat:\n${kontekster.joinToString(separator = "\n")}"
-        }
-        // todo: sjekker for mindre enn 1 også ettersom noen subsumsjoner skjer på arbeidsgivernivå. det burde vi forsøke å flytte/fikse slik at
-        // alt kan subsummeres i kontekst av en behandling.
-        check(kontekster.count { it.type == KontekstType.Vedtaksperiode } <= 1) {
-            "det er flere kontekster av ${KontekstType.Vedtaksperiode}:\n${kontekster.joinToString(separator = "\n")}"
-        }
-    }
-
     enum class Subsumsjonstype {
         ENKEL, PERIODISERT
     }

@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
@@ -11,6 +10,7 @@ import no.nav.helse.dto.ArbeidsforholdDto
 import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
 import no.nav.helse.dto.deserialisering.OpptjeningInnDto
 import no.nav.helse.dto.serialisering.OpptjeningUtDto
+import no.nav.helse.etterlevelse.`§ 8-2 ledd 1`
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
@@ -31,6 +31,13 @@ internal class Opptjening private constructor(
     private val opptjeningsperiode: Periode
 ) {
     private val opptjeningsdager by lazy { opptjeningsperiode.count() }
+    val subsumsjon = `§ 8-2 ledd 1`(
+        oppfylt = harTilstrekkeligAntallOpptjeningsdager(),
+        skjæringstidspunkt = skjæringstidspunkt,
+        tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
+        arbeidsforhold = arbeidsforhold.arbeidsforholdForJurist(),
+        antallOpptjeningsdager = opptjeningsdager
+    )
 
     internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
         arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
@@ -62,16 +69,16 @@ internal class Opptjening private constructor(
 
     internal fun opptjeningFom() = opptjeningsperiode.start
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)
-    internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjonslogg: Subsumsjonslogg): Opptjening {
-        return hendelse.overstyr(this, subsumsjonslogg)
+    internal fun overstyrArbeidsforhold(hendelse: OverstyrArbeidsforhold): Opptjening {
+        return hendelse.overstyr(this)
     }
 
-    internal fun deaktiver(orgnummer: String, subsumsjonslogg: Subsumsjonslogg): Opptjening {
-        return Opptjening.nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt, subsumsjonslogg)
+    internal fun deaktiver(orgnummer: String): Opptjening {
+        return Opptjening.nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt)
     }
 
-    internal fun aktiver(orgnummer: String, subsumsjonslogg: Subsumsjonslogg): Opptjening {
-        return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt, subsumsjonslogg)
+    internal fun aktiver(orgnummer: String): Opptjening {
+        return Opptjening.nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt)
     }
 
     internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforhold>) {
@@ -225,19 +232,10 @@ internal class Opptjening private constructor(
             )
         }
 
-        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, harInntektMånedenFørSkjæringstidspunkt: Boolean?, subsumsjonslogg: Subsumsjonslogg): Opptjening {
+        internal fun nyOpptjening(grunnlag: List<ArbeidsgiverOpptjeningsgrunnlag>, skjæringstidspunkt: LocalDate, harInntektMånedenFørSkjæringstidspunkt: Boolean?): Opptjening {
             val opptjeningsperiode = grunnlag.opptjeningsperiode(skjæringstidspunkt)
             val arbeidsforhold = grunnlag.inngårIOpptjening(opptjeningsperiode)
-
             val opptjening = Opptjening(skjæringstidspunkt, harInntektMånedenFørSkjæringstidspunkt, arbeidsforhold, opptjeningsperiode)
-            val arbeidsforholdForJurist = arbeidsforhold.arbeidsforholdForJurist()
-            subsumsjonslogg.`§ 8-2 ledd 1`(
-                oppfylt = opptjening.harTilstrekkeligAntallOpptjeningsdager(),
-                skjæringstidspunkt = skjæringstidspunkt,
-                tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,
-                arbeidsforhold = arbeidsforholdForJurist,
-                antallOpptjeningsdager = opptjening.opptjeningsdager
-            )
             return opptjening
         }
     }

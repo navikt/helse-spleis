@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.hendelser.Periode
@@ -229,6 +230,8 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
 
         private fun ClosedRange<LocalDate>.antallDager() = start.datesUntil(endInclusive.nesteDag).count().toInt()
         private fun Collection<ClosedRange<LocalDate>>.antallDager() = sumOf { it.antallDager() }
+
+        override fun logg(subsumsjon: Subsumsjon) {}
 
         override fun `§ 8-17 ledd 1 bokstav a`(
             oppfylt: Boolean,

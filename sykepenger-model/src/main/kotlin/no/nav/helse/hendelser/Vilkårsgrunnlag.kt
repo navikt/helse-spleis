@@ -39,14 +39,13 @@ class Vilkårsgrunnlag(
         return false
     }
 
-    private fun opptjening(subsumsjonslogg: Subsumsjonslogg): Opptjening {
+    private fun opptjening(): Opptjening {
         return Opptjening.nyOpptjening(
             grunnlag = opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
                 Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
             },
             skjæringstidspunkt = skjæringstidspunkt,
-            harInntektMånedenFørSkjæringstidspunkt = harInntektMånedenFørSkjæringstidspunkt,
-            subsumsjonslogg = subsumsjonslogg
+            harInntektMånedenFørSkjæringstidspunkt = harInntektMånedenFørSkjæringstidspunkt
         )
     }
 
@@ -66,7 +65,8 @@ class Vilkårsgrunnlag(
         val sykepengegrunnlagOk = inntektsgrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.valider(this)
         arbeidsforhold.forEach { it.loggFrilans(this, skjæringstidspunkt, arbeidsforhold) }
-        val opptjening = opptjening(subsumsjonslogg)
+        val opptjening = opptjening()
+        subsumsjonslogg.logg(opptjening.subsumsjon)
         opptjening.validerInntektMånedenFørSkjæringstidspunkt(this).also {
             if (harInntektMånedenFørSkjæringstidspunkt && !inntektsvurderingForSykepengegrunnlag.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
                 // Varsel spart

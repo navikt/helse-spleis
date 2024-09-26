@@ -9,6 +9,7 @@ import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.februar
@@ -564,7 +565,8 @@ internal class InntektsgrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, true, NullObserver)
+        ), skjæringstidspunkt, true
+        )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.sjekkForNyArbeidsgiver(aktivitetslogg, opptjening, a1)
@@ -723,7 +725,8 @@ internal class InntektsgrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, true, NullObserver)
+        ), skjæringstidspunkt, true
+        )
         val opptjeningMedA2 = Opptjening.nyOpptjening(listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(
                 Arbeidsforhold(
@@ -739,7 +742,8 @@ internal class InntektsgrunnlagTest {
                     deaktivert = false
                 )
             ))
-        ), skjæringstidspunkt, true, NullObserver)
+        ), skjæringstidspunkt, true
+        )
 
         Aktivitetslogg().also { aktivitetslogg ->
             inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjeningUtenA2)
@@ -868,6 +872,8 @@ internal class InntektsgrunnlagTest {
     private class MinsteinntektSubsumsjonObservatør : Subsumsjonslogg {
         var `§ 8-3 ledd 2 punktum 1` by Delegates.notNull<Boolean>()
         var `§ 8-51 ledd 2` by Delegates.notNull<Boolean>()
+
+        override fun logg(subsumsjon: Subsumsjon) {}
 
         override fun `§ 8-3 ledd 2 punktum 1`(
             oppfylt: Boolean,

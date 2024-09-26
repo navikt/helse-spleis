@@ -36,7 +36,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `overstyr inntekter`() {
         val skjæringstidspunkt = 1.januar
-        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, true, NullObserver)
+        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, true)
         val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig), Refusjonsopplysninger())
         val a1Overstyrt = ArbeidsgiverInntektsopplysning("a1", skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig, "", null, LocalDateTime.now()), Refusjonsopplysninger())
@@ -88,7 +88,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `ny inntektsmelding uten endring i beløp endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
         val skjæringstidspunkt = 1.januar
-        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, true, NullObserver)
+        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, true)
         val inntektsmeldingA1 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig)
         val inntektsmeldingA2 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 2000.månedlig)
         val inntektsmeldingA3 = Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 3000.månedlig)
@@ -118,7 +118,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
     @Test
     fun `ny inntektsmelding uten endring i beløp i forhold Skatt endrer kun omregnet årsinntekt for skjønnsmessig fastsatt`() {
         val skjæringstidspunkt = 1.januar
-        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, true, NullObserver)
+        val opptjening = Opptjening.nyOpptjening(emptyList(), skjæringstidspunkt, true)
         val skattA1 = SkattSykepengegrunnlag(UUID.randomUUID(), skjæringstidspunkt, listOf(
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(1).yearMonth, LØNNSINNTEKT, "", ""),
             Skatteopplysning(UUID.randomUUID(), 1000.månedlig, skjæringstidspunkt.minusMonths(2).yearMonth, LØNNSINNTEKT, "", ""),
@@ -163,7 +163,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
                     false
                 )
             ))
-        ), skjæringstidspunkt, true, NullObserver)
+        ), skjæringstidspunkt, true
+        )
 
 
         val paragraf = Paragraf.PARAGRAF_8_28

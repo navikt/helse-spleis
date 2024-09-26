@@ -57,9 +57,28 @@ class MaskinellJurist private constructor(
 
     constructor() : this(null, emptyList())
 
+    override fun logg(subsumsjon: Subsumsjon) {
+        sjekkKontekster()
+        leggTil(subsumsjon.copy(kontekster = kontekster))
+    }
+
     private fun leggTil(subsumsjon: Subsumsjon) {
         subsumsjoner.add(subsumsjon)
         parent?.leggTil(subsumsjon)
+    }
+
+    private fun sjekkKontekster() {
+        val kritiskeTyper = setOf(KontekstType.Fødselsnummer, KontekstType.Organisasjonsnummer)
+        check(kritiskeTyper.all { kritiskType ->
+            kontekster.count { it.type == kritiskType } == 1
+        }) {
+            "en av $kritiskeTyper mangler/har duplikat:\n${kontekster.joinToString(separator = "\n")}"
+        }
+        // todo: sjekker for mindre enn 1 også ettersom noen subsumsjoner skjer på arbeidsgivernivå. det burde vi forsøke å flytte/fikse slik at
+        // alt kan subsummeres i kontekst av en behandling.
+        check(kontekster.count { it.type == KontekstType.Vedtaksperiode } <= 1) {
+            "det er flere kontekster av ${KontekstType.Vedtaksperiode}:\n${kontekster.joinToString(separator = "\n")}"
+        }
     }
 
     fun medFødselsnummer(personidentifikator: String) =
@@ -75,31 +94,6 @@ class MaskinellJurist private constructor(
 
     private fun kopierMedKontekst(kontekster: List<Subsumsjonskontekst>, periode: ClosedRange<LocalDate>? = null) =
         MaskinellJurist(this, this.kontekster + kontekster, periode)
-
-    override fun `§ 8-2 ledd 1`(
-        oppfylt: Boolean,
-        skjæringstidspunkt: LocalDate,
-        tilstrekkeligAntallOpptjeningsdager: Int,
-        arbeidsforhold: List<Map<String, Any?>>,
-        antallOpptjeningsdager: Int
-    ) {
-        leggTil(
-            Subsumsjon.enkelSubsumsjon(
-                lovverk = "folketrygdloven",
-                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                versjon = LocalDate.of(2020, 6, 12),
-                paragraf = PARAGRAF_8_2,
-                ledd = 1.ledd,
-                input = mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt,
-                    "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
-                    "arbeidsforhold" to arbeidsforhold
-                ),
-                output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager),
-                kontekster = kontekster
-            )
-        )
-    }
 
     override fun `§ 8-3 ledd 1 punktum 2`(
         oppfylt: Boolean,

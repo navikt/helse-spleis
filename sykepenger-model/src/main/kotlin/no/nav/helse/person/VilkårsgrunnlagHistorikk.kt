@@ -426,7 +426,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ) = kopierMed(
             hendelse = hendelse,
             inntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
-            opptjening = opptjening.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
+            opptjening = opptjening.overstyrArbeidsforhold(hendelse).also {
+                subsumsjonslogg.logg(it.subsumsjon)
+            },
             subsumsjonslogg = subsumsjonslogg,
         )
 
