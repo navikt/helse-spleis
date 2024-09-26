@@ -1762,6 +1762,7 @@ internal class Vedtaksperiode private constructor(
             sykepengegrunnlagForArbeidsgiver.info("Håndterer sykepengegrunnlag for arbeidsgiver")
             sykepengegrunnlagForArbeidsgiver.varsel(Varselkode.RV_IV_10)
             vedtaksperiode.arbeidsgiver.lagreInntekt(sykepengegrunnlagForArbeidsgiver)
+            vedtaksperiode.behandlinger.sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver, vedtaksperiode.person)
             vedtaksperiode.tilstand(sykepengegrunnlagForArbeidsgiver, AvventerBlokkerendePeriode)
         }
 

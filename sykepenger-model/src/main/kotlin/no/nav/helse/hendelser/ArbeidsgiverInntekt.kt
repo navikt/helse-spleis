@@ -7,7 +7,9 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.somEksterneSkatteinntekter
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
@@ -36,6 +38,10 @@ class ArbeidsgiverInntekt(
             beløp = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }),
             kilde = Inntektsmelding.Kilde.AOrdningen
         )
+
+    internal fun somEksterneSkatteinntekter() = inntekter.somEksterneSkatteinntekter()
+
+    internal fun omregnetÅrsinntekt(meldingsreferanseId: UUID) = Skatteopplysning.omregnetÅrsinntekt(inntekter.map { it.somInntekt(meldingsreferanseId) }).reflection { årlig, _, _, _ -> årlig }
 
     internal companion object {
         internal fun List<ArbeidsgiverInntekt>.avklarSykepengegrunnlag(
@@ -87,6 +93,12 @@ class ArbeidsgiverInntekt(
 
         companion object {
             internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned && it.inntekt > Inntekt.INGEN}
+
+            internal fun List<MånedligInntekt>.somEksterneSkatteinntekter(): List<PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt> {
+                return map {
+                    PersonObserver.SkatteinntekterLagtTilGrunnEvent.Skatteinntekt(it.yearMonth, it.inntekt.reflection { _, månedlig, _, _ ->  månedlig})
+                }
+            }
 
             internal fun antallMåneder(inntekter: List<MånedligInntekt>): Long {
                 if (inntekter.isEmpty()) return 0

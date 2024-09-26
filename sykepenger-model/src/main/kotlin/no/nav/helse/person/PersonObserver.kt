@@ -2,12 +2,14 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.PersonObserver.ForespurtOpplysning.Companion.toJsonMap
+import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.OppdragDetaljer
@@ -105,6 +107,19 @@ interface PersonObserver {
         val relevanteSykmeldingsperioder: List<Periode>,
         val organisasjonsnummer: String
     )
+
+    data class SkatteinntekterLagtTilGrunnEvent(
+        val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val skatteinntekter: List<Skatteinntekt>,
+        val omregnetÅrsinntekt: Double
+    ) {
+        data class Skatteinntekt(
+            val måned: YearMonth,
+            val beløp: Double
+        )
+    }
 
     data class TrengerArbeidsgiveropplysningerEvent(
         val organisasjonsnummer: String,
@@ -641,6 +656,7 @@ interface PersonObserver {
     fun inntektsmeldingFørSøknad(event: InntektsmeldingFørSøknadEvent) {}
     fun inntektsmeldingIkkeHåndtert(inntektsmeldingId: UUID, organisasjonsnummer: String, harPeriodeInnenfor16Dager: Boolean) {}
     fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
+    fun skatteinntekterLagtTilGrunn(skatteinntekter: SkatteinntekterLagtTilGrunnEvent) {}
     fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {}
     fun behandlingUtført() {}
     fun vedtaksperiodeAnnullert(vedtaksperiodeAnnullertEvent: VedtaksperiodeAnnullertEvent) {}

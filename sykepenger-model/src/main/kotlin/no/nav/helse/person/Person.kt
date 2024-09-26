@@ -705,6 +705,13 @@ class Person private constructor(
             it.inntektsmeldingHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)
         }
     }
+
+    internal fun sendSkatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
+        observers.forEach {
+            it.skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent)
+        }
+    }
+
     internal fun emitSøknadHåndtert(meldingsreferanseId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
         observers.forEach {
             it.søknadHåndtert(meldingsreferanseId, vedtaksperiodeId, organisasjonsnummer)

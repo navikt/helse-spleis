@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SykepengegrunnlagForArbeidsgiver
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
@@ -271,6 +272,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             ?.let { revurderingseventyr -> person.igangsettOverstyring(revurderingseventyr) }
     }
 
+    internal fun sendSkatteinntekterLagtTilGrunn(
+        sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
+        person: Person
+    ) {
+        behandlinger.last().sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver, person)
+    }
+
     fun beregnSkjæringstidspunkt(beregnSkjæringstidspunkt: () -> Skjæringstidspunkt, beregnArbeidsgiverperiode: (Periode) -> List<Periode>) {
         behandlinger.last().beregnSkjæringstidspunkt(beregnSkjæringstidspunkt, beregnArbeidsgiverperiode)
     }
@@ -370,6 +378,13 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             )
             sykdomstidslinje().accept(builder)
             return builder.result()
+        }
+
+        internal fun sendSkatteinntekterLagtTilGrunn(
+            sykepengegrunnlagForArbeidsgiver: SykepengegrunnlagForArbeidsgiver,
+            person: Person
+        ) {
+            person.sendSkatteinntekterLagtTilGrunn(sykepengegrunnlagForArbeidsgiver.skatteinntekterLagtTilGrunnEvent(this.id))
         }
 
         // TODO: se på om det er nødvendig å støtte Dokumentsporing som et sett; eventuelt om Behandling må ha et sett

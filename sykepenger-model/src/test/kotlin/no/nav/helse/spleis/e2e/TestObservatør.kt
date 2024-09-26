@@ -41,6 +41,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val inntektsmeldingFørSøknad = mutableListOf<PersonObserver.InntektsmeldingFørSøknadEvent>()
     val inntektsmeldingIkkeHåndtert = mutableListOf<InntektsmeldingId>()
     val inntektsmeldingHåndtert = mutableListOf<Pair<InntektsmeldingId, VedtaksperiodeId>>()
+    val skatteinntekterLagtTilGrunnEventer = mutableListOf<PersonObserver.SkatteinntekterLagtTilGrunnEvent>()
     val søknadHåndtert = mutableListOf<Pair<UUID, UUID>>()
     val vedtaksperiodeAnnullertEventer = mutableListOf<PersonObserver.VedtaksperiodeAnnullertEvent>()
     val vedtaksperiodeOpprettetEventer = mutableListOf<PersonObserver.VedtaksperiodeOpprettet>()
@@ -203,6 +204,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun inntektsmeldingHåndtert(inntektsmeldingId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
         inntektsmeldingHåndtert.add(inntektsmeldingId to vedtaksperiodeId)
+    }
+
+    override fun skatteinntekterLagtTilGrunn(skatteinntekterLagtTilGrunnEvent: PersonObserver.SkatteinntekterLagtTilGrunnEvent) {
+        skatteinntekterLagtTilGrunnEventer.add(skatteinntekterLagtTilGrunnEvent)
     }
 
     override fun søknadHåndtert(søknadId: UUID, vedtaksperiodeId: UUID, organisasjonsnummer: String) {
