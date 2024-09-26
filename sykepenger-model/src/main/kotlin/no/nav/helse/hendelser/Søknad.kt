@@ -363,7 +363,7 @@ class Søknad(
         }
     }
 
-    private class ForeldetSubsumsjonsgrunnlag(sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
+    private class ForeldetSubsumsjonsgrunnlag(sykdomstidslinje: Sykdomstidslinje) {
         private val foreldedeDager = sykdomstidslinje.filterIsInstance<Dag.ForeldetSykedag>().map { it.dato }
 
         fun build() = foreldedeDager.grupperSammenhengendePerioder()
