@@ -28,8 +28,8 @@ import no.nav.helse.økonomi.Økonomi
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
 
 internal sealed class Dag(
-    protected val dato: LocalDate,
-    protected val kilde: Hendelseskilde
+    val dato: LocalDate,
+    val kilde: Hendelseskilde
 ) {
     private fun name() = javaClass.canonicalName.split('.').last()
 
@@ -114,13 +114,11 @@ internal sealed class Dag(
 
     override fun toString() = "${this::class.java.simpleName} ($dato) $kilde"
 
-    internal open fun accept(visitor: SykdomstidslinjeDagVisitor) {}
-
     internal class UkjentDag(
         dato: LocalDate,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.UkjentDagDto(dato, kilde)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.UkjentDagDto): UkjentDag {
@@ -136,7 +134,7 @@ internal sealed class Dag(
         dato: LocalDate,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsdagDto(dato, kilde)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsdagDto): Arbeidsdag {
@@ -150,11 +148,11 @@ internal sealed class Dag(
 
     internal class Arbeidsgiverdag(
         dato: LocalDate,
-        private val økonomi: Økonomi,
+        val økonomi: Økonomi,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is Arbeidsgiverdag && sammeGrad(økonomi, other.økonomi)
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsgiverdagDto(dato, kilde, økonomi.dto().grad)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsgiverdagDto): Arbeidsgiverdag {
@@ -171,7 +169,7 @@ internal sealed class Dag(
         dato: LocalDate,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.FeriedagDto(dato, kilde)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.FeriedagDto): Feriedag {
@@ -187,7 +185,7 @@ internal sealed class Dag(
         dato: LocalDate,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto(dato, kilde)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto): ArbeidIkkeGjenopptattDag {
@@ -203,7 +201,7 @@ internal sealed class Dag(
         dato: LocalDate,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.FriskHelgedagDto(dato, kilde)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.FriskHelgedagDto): FriskHelgedag {
@@ -217,11 +215,11 @@ internal sealed class Dag(
 
     internal class ArbeidsgiverHelgedag(
         dato: LocalDate,
-        private val økonomi: Økonomi,
+        val økonomi: Økonomi,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is ArbeidsgiverHelgedag && sammeGrad(økonomi, other.økonomi)
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto(dato, kilde, økonomi.dto().grad)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto): ArbeidsgiverHelgedag {
@@ -236,11 +234,11 @@ internal sealed class Dag(
 
     internal class Sykedag(
         dato: LocalDate,
-        private val økonomi: Økonomi,
+        val økonomi: Økonomi,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is Sykedag && sammeGrad(økonomi, other.økonomi)
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagDto(dato, kilde, økonomi.dto().grad)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.SykedagDto): Sykedag {
@@ -255,11 +253,11 @@ internal sealed class Dag(
 
     internal class ForeldetSykedag(
         dato: LocalDate,
-        private val økonomi: Økonomi,
+        val økonomi: Økonomi,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is ForeldetSykedag && sammeGrad(økonomi, other.økonomi)
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ForeldetSykedagDto(dato, kilde, økonomi.dto().grad)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ForeldetSykedagDto): ForeldetSykedag {
@@ -274,11 +272,11 @@ internal sealed class Dag(
 
     internal class SykHelgedag(
         dato: LocalDate,
-        private val økonomi: Økonomi,
+        val økonomi: Økonomi,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is SykHelgedag && sammeGrad(økonomi, other.økonomi)
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykHelgedagDto(dato, kilde, økonomi.dto().grad)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.SykHelgedagDto): SykHelgedag {
@@ -293,11 +291,11 @@ internal sealed class Dag(
 
     internal class SykedagNav(
         dato: LocalDate,
-        private val økonomi: Økonomi,
+        val økonomi: Økonomi,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is SykedagNav && sammeGrad(økonomi, other.økonomi)
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, økonomi, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.SykedagNavDto(dato, kilde, økonomi.dto().grad)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.SykedagNavDto): SykedagNav {
@@ -314,7 +312,7 @@ internal sealed class Dag(
         dato: LocalDate,
         kilde: Hendelseskilde
     ) : Dag(dato, kilde) {
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.PermisjonsdagDto(dato, kilde)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.PermisjonsdagDto): Permisjonsdag {
@@ -334,7 +332,7 @@ internal sealed class Dag(
     ) : Dag(dato, kilde) {
         internal constructor(dato: LocalDate, kilde: Hendelseskilde, melding: String) : this(dato, kilde, kilde, melding)
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is ProblemDag && melding == other.melding
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde, other, melding)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde, other, melding)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.ProblemDagDto(dato, kilde, other.dto(), melding)
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.ProblemDagDto): ProblemDag {
@@ -378,7 +376,7 @@ internal sealed class Dag(
             }
         }
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is AndreYtelser && ytelse == other.ytelse
-        override fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde, ytelse)
+        fun accept(visitor: SykdomstidslinjeDagVisitor) = visitor.visitDag(this, dato, kilde, ytelse)
         override fun dto(dato: LocalDate, kilde: HendelseskildeDto) = SykdomstidslinjeDagDto.AndreYtelserDto(dato, kilde, ytelse.dto())
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.AndreYtelserDto): AndreYtelser {

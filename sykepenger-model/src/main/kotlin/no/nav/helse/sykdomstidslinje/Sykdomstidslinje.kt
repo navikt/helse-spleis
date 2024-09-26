@@ -141,7 +141,24 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun accept(visitor: SykdomstidslinjeVisitor) {
         visitor.preVisitSykdomstidslinje(this, låstePerioder)
-        periode?.forEach { this[it].accept(visitor) }
+        periode?.forEach {
+            when (val dag = this[it]) {
+                is AndreYtelser -> dag.accept(visitor)
+                is ArbeidIkkeGjenopptattDag -> dag.accept(visitor)
+                is Arbeidsdag -> dag.accept(visitor)
+                is ArbeidsgiverHelgedag -> dag.accept(visitor)
+                is Arbeidsgiverdag -> dag.accept(visitor)
+                is Feriedag -> dag.accept(visitor)
+                is ForeldetSykedag -> dag.accept(visitor)
+                is FriskHelgedag -> dag.accept(visitor)
+                is Permisjonsdag -> dag.accept(visitor)
+                is ProblemDag -> dag.accept(visitor)
+                is SykHelgedag -> dag.accept(visitor)
+                is Sykedag -> dag.accept(visitor)
+                is SykedagNav -> dag.accept(visitor)
+                is UkjentDag -> dag.accept(visitor)
+            }
+        }
         visitor.postVisitSykdomstidslinje(this, låstePerioder)
     }
 

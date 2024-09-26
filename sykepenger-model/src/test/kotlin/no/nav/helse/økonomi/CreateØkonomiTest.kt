@@ -1,17 +1,13 @@
 package no.nav.helse.økonomi
 
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -137,31 +133,24 @@ internal class CreateØkonomiTest {
     )
 
     private fun createØkonomi(dagData: UtbetalingstidslinjeData.UtbetalingsdagData): Økonomi {
-        lateinit var fangetØkonomi: Økonomi
-        dagData.tilDto().map { Utbetalingsdag.gjenopprett(it) }.single().accept(object : UtbetalingsdagVisitor {
-            override fun visit(
-                dag: Utbetalingsdag.NavDag,
-                dato: LocalDate,
-                økonomi: Økonomi
-            ) {
-                fangetØkonomi = økonomi
-            }
-        })
-        return fangetØkonomi
+        val dagtype = dagData.tilDto()
+            .map { Utbetalingsdag.gjenopprett(it) }
+            .single()
+
+        return when (dagtype) {
+            is Utbetalingsdag.NavDag -> dagtype.økonomi
+            else -> error("Finner ikke økonomi for $dagtype, denne when-blokka er jo ikke exhaustive!")
+        }
     }
 
     private fun createØkonomi(dagData: PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData): Økonomi {
-        lateinit var fangetØkonomi: Økonomi
-        dagData.tilDto().map { Dag.gjenopprett(it) }.single().accept(object : SykdomstidslinjeVisitor {
-            override fun visitDag(
-                dag: Dag.Sykedag,
-                dato: LocalDate,
-                økonomi: Økonomi,
-                kilde: SykdomshistorikkHendelse.Hendelseskilde
-            ) {
-                fangetØkonomi = økonomi
-            }
-        })
-        return fangetØkonomi
+        val dagtype = dagData.tilDto()
+            .map { Dag.gjenopprett(it) }
+            .single()
+
+        return when (dagtype) {
+            is Dag.Sykedag -> dagtype.økonomi
+            else -> error("Finner ikke økonomi for $dagtype, denne when-blokka er jo ikke exhaustive!")
+        }
     }
 }

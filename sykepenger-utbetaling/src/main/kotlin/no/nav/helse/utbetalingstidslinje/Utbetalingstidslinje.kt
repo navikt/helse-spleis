@@ -105,7 +105,17 @@ class Utbetalingstidslinje private constructor(private val utbetalingsdager: Sor
             true -> null
             else -> this.periode()
         })
-        utbetalingsdager.forEach { (_, it)  -> it.accept(visitor) }
+        utbetalingsdager.forEach { (_, it)  -> when (it) {
+            is Arbeidsdag -> it.accept(visitor)
+            is ArbeidsgiverperiodeDag -> it.accept(visitor)
+            is ArbeidsgiverperiodedagNav -> it.accept(visitor)
+            is AvvistDag -> it.accept(visitor)
+            is ForeldetDag -> it.accept(visitor)
+            is Fridag -> it.accept(visitor)
+            is NavDag -> it.accept(visitor)
+            is NavHelgDag -> it.accept(visitor)
+            is UkjentDag -> it.accept(visitor)
+        } }
         visitor.postVisitUtbetalingstidslinje()
     }
 
