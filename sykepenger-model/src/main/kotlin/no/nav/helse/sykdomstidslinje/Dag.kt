@@ -327,8 +327,8 @@ internal sealed class Dag(
     internal class ProblemDag(
         dato: LocalDate,
         kilde: Hendelseskilde,
-        private val other: Hendelseskilde,
-        private val melding: String
+        val other: Hendelseskilde,
+        val melding: String
     ) : Dag(dato, kilde) {
         internal constructor(dato: LocalDate, kilde: Hendelseskilde, melding: String) : this(dato, kilde, kilde, melding)
         override fun funksjoneltLik(other: Dag) = dato == other.dato && other is ProblemDag && melding == other.melding

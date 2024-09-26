@@ -11,11 +11,8 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Infotrygdhistorikk private constructor(
@@ -63,6 +60,11 @@ internal class Infotrygdhistorikk private constructor(
         return Sykdomstidslinje.beregnSkjæringstidspunkt(tidslinjer + listOf(sykdomstidslinje()))
     }
 
+    internal fun sykdomstidslinje(orgnummer: String): Sykdomstidslinje {
+        if (!harHistorikk()) return Sykdomstidslinje()
+        return siste.sykdomstidslinje(orgnummer)
+    }
+
     private fun sykdomstidslinje(): Sykdomstidslinje {
         if (!harHistorikk()) return Sykdomstidslinje()
         return siste.sykdomstidslinje()
@@ -93,17 +95,6 @@ internal class Infotrygdhistorikk private constructor(
         visitor.preVisitInfotrygdhistorikk()
         elementer.forEach { it.accept(visitor) }
         visitor.postVisitInfotrygdhistorikk()
-    }
-
-    internal fun beregnArbeidsgiverperioder(
-        organisasjonsnummer: String,
-        sykdomstidslinje: Sykdomstidslinje,
-        arbeidsgiverperiodeberegner: Arbeidsgiverperiodeberegner,
-        teller: Arbeidsgiverperiodeteller,
-        hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null
-    ) {
-        if (!harHistorikk()) return sykdomstidslinje.accept(arbeidsgiverperiodeberegner)
-        siste.beregnArbeidsgiverperioder(organisasjonsnummer, sykdomstidslinje, teller, arbeidsgiverperiodeberegner, hendelseskilde)
     }
 
     internal fun betaltePerioder(orgnummer: String? = null) =

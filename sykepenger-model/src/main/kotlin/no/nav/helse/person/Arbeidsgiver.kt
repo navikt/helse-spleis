@@ -80,7 +80,10 @@ import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeberegner
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperioderesultat.Companion.finn
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -703,8 +706,18 @@ internal class Arbeidsgiver private constructor(
             .merge(sykdomstidslinje(), replace)
     }
 
+    private fun arbeidsgiverperiodeFor(sykdomstidslinje: Sykdomstidslinje): List<Arbeidsgiverperioderesultat> {
+        val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
+        val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
+        // hensyntar historikk fra infotrygd, men spleis-tidslinjen overskriver eventuell overlappende info
+        val samletTidslinje = person.infotrygdhistorikk
+            .sykdomstidslinje(organisasjonsnummer)
+            .merge(sykdomstidslinje, replace)
+        return arbeidsgiverperiodeberegner.resultat(samletTidslinje, person.infotrygdhistorikk.betaltePerioder(organisasjonsnummer))
+    }
+
     internal fun beregnArbeidsgiverperiode(jurist: Subsumsjonslogg) = { vedtaksperiode: Periode ->
-        person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje())
+        arbeidsgiverperiodeFor(sykdomstidslinje())
             .finn(vedtaksperiode)
             ?.also { it.subsummering(jurist, sykdomstidslinje().subset(vedtaksperiode)) }
             ?.arbeidsgiverperiode
@@ -713,7 +726,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun arbeidsgiverperiode(periode: Periode, sykdomstidslinje: Sykdomstidslinje): Arbeidsgiverperiode? {
-        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomstidslinje)
+        val arbeidsgiverperioder = arbeidsgiverperiodeFor(sykdomstidslinje)
         return arbeidsgiverperioder.finn(periode)?.somArbeidsgiverperiode()
     }
     internal fun arbeidsgiverperiode(periode: Periode) =

@@ -938,11 +938,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private fun undersøke(tidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode> = emptyList()) {
         val arbeidsgiverperiodeberegner = Arbeidsgiverperiodeberegner(teller)
-        val it = Infotrygddekoratør(teller, arbeidsgiverperiodeberegner, infotrygdBetalteDager)
-
-        tidslinje.accept(it)
-
-        val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat()
+        val arbeidsgiverperioder = arbeidsgiverperiodeberegner.resultat(tidslinje, infotrygdBetalteDager)
         perioder.addAll(arbeidsgiverperioder)
 
         val builder = UtbetalingstidslinjeBuilderVedtaksperiode(

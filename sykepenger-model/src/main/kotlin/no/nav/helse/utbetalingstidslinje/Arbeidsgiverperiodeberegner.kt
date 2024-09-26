@@ -4,16 +4,12 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
-import no.nav.helse.økonomi.Økonomi
 
 internal class Arbeidsgiverperiodeberegner(
     private val arbeidsgiverperiodeteller: Arbeidsgiverperiodeteller,
-) : SykdomstidslinjeVisitor,
-    Arbeidsgiverperiodeteller.Observatør {
+) : Arbeidsgiverperiodeteller.Observatør {
 
     private val arbeidsgiverperioder = mutableListOf<Arbeidsgiverperioderesultat>()
     private var aktivArbeidsgiverperioderesultat: Arbeidsgiverperioderesultat? = null
@@ -35,14 +31,39 @@ internal class Arbeidsgiverperiodeberegner(
         ).also { aktivArbeidsgiverperioderesultat = it }
     }
 
-    internal fun resultat(): List<Arbeidsgiverperioderesultat> {
+    internal fun resultat(sykdomstidslinje: Sykdomstidslinje, infotrygdBetalteDager: List<Periode>): List<Arbeidsgiverperioderesultat> {
+        sykdomstidslinje.forEach { dag ->
+            when (dag) {
+                is Dag.AndreYtelser -> tilstand.andreYtelser(this, dag.dato)
+                is Dag.ArbeidIkkeGjenopptattDag -> tilstand.feriedag(this, dag.dato)
+                is Dag.Arbeidsdag -> arbeidsdag(dag.dato)
+                is Dag.ArbeidsgiverHelgedag -> sykedag(dag.dato)
+                is Dag.Arbeidsgiverdag -> egenmeldingsdag(dag.dato)
+                is Dag.Feriedag -> feriedagMedSykmelding(dag.dato)
+                is Dag.ForeldetSykedag -> foreldetDag(dag.dato)
+                is Dag.FriskHelgedag -> arbeidsdag(dag.dato)
+                is Dag.Permisjonsdag -> tilstand.feriedag(this, dag.dato)
+                is Dag.ProblemDag -> throw UtbetalingstidslinjeBuilderException.ProblemdagException(dag.melding)
+                is Dag.SykHelgedag -> {
+                    ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager, dag.dato)
+                    sykedag(dag.dato)
+                }
+                is Dag.Sykedag -> {
+                    ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager, dag.dato)
+                    sykedag(dag.dato)
+                }
+                is Dag.SykedagNav -> sykedagNav(dag.dato)
+                is Dag.UkjentDag -> {
+                    if (dag.dato.erHelg()) tilstand.feriedag(this, dag.dato)
+                    else arbeidsdag(dag.dato)
+                }
+            }
+        }
+        fridager.somFerieOppholdsdager()
+
         return aktivArbeidsgiverperioderesultat
             ?.let { arbeidsgiverperioder.toList() + it }
             ?: arbeidsgiverperioder.toList()
-    }
-
-    override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {
-        fridager.somFerieOppholdsdager()
     }
 
     private fun tilstand(tilstand: Tilstand) {
@@ -50,6 +71,10 @@ internal class Arbeidsgiverperiodeberegner(
         this.tilstand.leaving(this)
         this.tilstand = tilstand
         this.tilstand.entering(this)
+    }
+
+    private fun ferdigstillTellingHvisInfotrygdHarUtbetalt(infotrygdBetalteDager: List<Periode>, dato: LocalDate) {
+        if (infotrygdBetalteDager.any { dato in it }) arbeidsgiverperiodeteller.fullfør()
     }
 
     override fun arbeidsgiverperiodeFerdig() {
@@ -68,7 +93,7 @@ internal class Arbeidsgiverperiodeberegner(
         tilstand(ArbeidsgiverperiodeAvbrutt)
     }
 
-    private fun MutableList<LocalDate>.somSykedager(kilde: Hendelseskilde) {
+    private fun MutableList<LocalDate>.somSykedager() {
         onEach {
             arbeidsgiverperiodeteller.inc()
             tilstand.feriedagSomSyk(this@Arbeidsgiverperiodeberegner, it)
@@ -82,92 +107,38 @@ internal class Arbeidsgiverperiodeberegner(
         }.clear()
     }
 
-    override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        fridager.somSykedager(kilde)
+    private fun sykedag(dato: LocalDate) {
+        fridager.somSykedager()
         arbeidsgiverperiodeteller.inc()
         tilstand.sykdomsdag(this, dato)
     }
 
-    override fun visitDag(dag: Dag.SykedagNav, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        fridager.somSykedager(kilde)
+    private fun sykedagNav(dato: LocalDate) {
+        fridager.somSykedager()
         arbeidsgiverperiodeteller.inc()
         tilstand.sykdomsdagNav(this, dato)
     }
 
-    override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        fridager.somSykedager(kilde)
-        arbeidsgiverperiodeteller.inc()
-        tilstand.sykdomsdag(this, dato)
-    }
-
-    override fun visitDag(dag: Dag.Arbeidsgiverdag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        fridager.somSykedager(kilde)
+    private fun egenmeldingsdag(dato: LocalDate) {
+        fridager.somSykedager()
         arbeidsgiverperiodeteller.inc()
         tilstand.egenmeldingsdag(this, dato)
     }
 
-    override fun visitDag(dag: Dag.ArbeidsgiverHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        fridager.somSykedager(kilde)
-        arbeidsgiverperiodeteller.inc()
-        tilstand.sykdomsdag(this, dato)
-    }
-
-    override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: Hendelseskilde) {
-        fridager.somSykedager(kilde)
+    private fun feriedagMedSykmelding(dato: LocalDate) {
+        fridager.somSykedager()
         tilstand.feriedagMedSykmelding(this, dato)
     }
 
-    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
-        tilstand.feriedag(this, dato)
-    }
-
-    override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) {
-        tilstand.feriedag(this, dato)
-    }
-
-    override fun visitDag(
-        dag: Dag.ProblemDag,
-        dato: LocalDate,
-        kilde: Hendelseskilde,
-        other: Hendelseskilde?,
-        melding: String
-    ) {
-        throw UtbetalingstidslinjeBuilderException.ProblemdagException(melding)
-    }
-
-    override fun visitDag(
-        dag: Dag.AndreYtelser,
-        dato: LocalDate,
-        kilde: Hendelseskilde,
-        ytelse: Dag.AndreYtelser.AnnenYtelse
-    ) {
-        tilstand.andreYtelser(this, dato)
-    }
-
-    override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) {
+    private fun arbeidsdag(dato: LocalDate) {
         fridager.somFerieOppholdsdager()
         arbeidsgiverperiodeteller.dec()
         tilstand.oppholdsdag(this, dato)
         tilstand(Initiell)
     }
 
-    override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) {
-        fridager.somFerieOppholdsdager()
-        arbeidsgiverperiodeteller.dec()
-        tilstand.oppholdsdag(this, dato)
-        tilstand(Initiell)
-    }
-
-    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: Hendelseskilde) {
-        if (dato.erHelg()) return tilstand.feriedag(this, dato)
-        fridager.somFerieOppholdsdager()
-        arbeidsgiverperiodeteller.dec()
-        tilstand.oppholdsdag(this, dato)
-        tilstand(Initiell)
-    }
-
-    override fun visitDag(dag: Dag.ForeldetSykedag, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        fridager.somSykedager(kilde)
+    private fun foreldetDag(dato: LocalDate) {
+        fridager.somSykedager()
         arbeidsgiverperiodeteller.inc()
         tilstand.foreldetDag(this, dato)
     }

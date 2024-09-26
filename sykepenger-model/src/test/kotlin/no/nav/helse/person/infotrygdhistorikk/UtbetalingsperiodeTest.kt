@@ -109,35 +109,4 @@ internal class UtbetalingsperiodeTest {
         assertTrue(inspektør.dager.values.all { it is Dag.Sykedag || it is Dag.SykHelgedag })
         assertEquals(10, inspektør.dager.size)
     }
-
-    @Test
-    fun `historikk for - ferie`() {
-        val periode = Friperiode(1.januar, 10.januar)
-        val inspektør = periode.historikkFor("orgnr", Sykdomstidslinje(), kilde).inspektør
-        assertTrue(inspektør.dager.values.all { it is Dag.Feriedag })
-        assertEquals(10, inspektør.dager.size)
-    }
-
-    @Test
-    fun `historikk for - utbetaling`() {
-        val periode = ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig)
-        val inspektør = periode.historikkFor("ag1", Sykdomstidslinje(), kilde).inspektør
-        assertTrue(inspektør.dager.values.all { it is Dag.Sykedag || it is Dag.SykHelgedag })
-        assertEquals(10, inspektør.dager.size)
-    }
-
-    @Test
-    fun `historikk for - infotrygddager erstatter spleisdager`() {
-        val periode = ArbeidsgiverUtbetalingsperiode("ag1", 5.januar, 10.januar, 100.prosent, 25000.månedlig)
-        val inspektør = periode.historikkFor("ag1", Sykdomstidslinje.arbeidsdager(1.januar til 10.januar, kilde), kilde).inspektør
-        assertTrue(inspektør.dager.filter { (dato, _) -> dato < 5.januar }.values.all { it is Dag.Arbeidsdag })
-        assertTrue(inspektør.dager.filter { (dato, _) -> dato >= 5.januar }.values.all { it is Dag.Sykedag || it is Dag.SykHelgedag })
-        assertEquals(10, inspektør.dager.size)
-    }
-
-    @Test
-    fun `historikk for annet orgnr - utbetaling`() {
-        val periode = ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig)
-        assertTrue(periode.historikkFor("noe helt annet", Sykdomstidslinje(), kilde).inspektør.dager.isEmpty())
-    }
 }

@@ -18,9 +18,6 @@ import no.nav.helse.spleis.e2e.assertIngenFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -159,53 +156,6 @@ internal class InfotrygdhistorikkElementTest {
         )
         val tidslinje = element.sykdomstidslinje()
         assertTrue(tidslinje.inspektør.dager.values.none { it is Dag.UkjentDag })
-    }
-
-    @Test
-    fun `historikk for overskriver`() {
-        val sykdomstidslinje = 10.A + 5.opphold + 5.S
-        val element = nyttHistorikkelement(
-            listOf(
-                ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 10.januar, 100.prosent, 25000.månedlig),
-                Friperiode(11.januar, 15.januar)
-            )
-        )
-        val inspektør = element.historikkFor("ag1", sykdomstidslinje).inspektør
-        assertEquals(0, inspektør.dager.filter { it.value is Dag.Arbeidsdag }.size)
-        assertEquals(0, inspektør.dager.filter { it.value is Dag.FriskHelgedag }.size)
-        assertEquals(5, inspektør.dager.filter { it.value is Dag.Feriedag }.size)
-        assertEquals(12, inspektør.dager.filter { it.value is Dag.Sykedag }.size)
-        assertEquals(3, inspektør.dager.filter { it.value is Dag.SykHelgedag }.size)
-    }
-
-    @Test
-    fun `historikk for overskriver selv om periode er låst`() {
-        val sykdomstidslinje = 28.S + 3.A + 16.S
-        sykdomstidslinje.lås(januar)
-        val element = nyttHistorikkelement(
-            listOf(
-                ArbeidsgiverUtbetalingsperiode("ag1", 29.januar, 31.januar, 100.prosent, 25000.månedlig)
-            )
-        )
-        val inspektør = element.historikkFor("ag1", sykdomstidslinje).inspektør
-        assertEquals(0, inspektør.dager.filter { it.value is Dag.Arbeidsdag }.size)
-        assertEquals(0, inspektør.dager.filter { it.value is Dag.FriskHelgedag }.size)
-        assertEquals(0, inspektør.dager.filter { it.value is Dag.Feriedag }.size)
-        assertEquals(35, inspektør.dager.filter { it.value is Dag.Sykedag }.size)
-        assertEquals(12, inspektør.dager.filter { it.value is Dag.SykHelgedag }.size)
-    }
-
-    @Test
-    fun `historikk for utvider ikke`() {
-        val sykdomstidslinje = 10.S
-        val element = nyttHistorikkelement(
-            listOf(
-                ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 31.januar, 100.prosent, 25000.månedlig),
-                Friperiode(1.februar, 28.februar)
-            )
-        )
-        val tidslinje = element.historikkFor("ag1", sykdomstidslinje)
-        assertEquals(1.januar til 28.februar, tidslinje.periode())
     }
 
     @Test

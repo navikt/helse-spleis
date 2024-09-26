@@ -8,7 +8,6 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
-import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -48,11 +47,6 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) {
         if (!gjelder(organisasjonsnummer)) return
         if (this.periode.start <= periode.endInclusive) return
         aktivitetslogg.varsel(Varselkode.RV_IT_1)
-    }
-
-    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kilde: Hendelseskilde): Sykdomstidslinje {
-        if (!gjelder(orgnummer)) return sykdomstidslinje
-        return sykdomstidslinje.merge(sykdomstidslinje(kilde), sammenhengendeSykdom)
     }
 
     internal fun overlapperMed(other: Periode) = periode.overlapperMed(other)

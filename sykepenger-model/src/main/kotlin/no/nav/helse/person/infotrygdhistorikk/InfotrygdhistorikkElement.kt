@@ -9,19 +9,15 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IT_14
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBetaltRettFør
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
-import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
-import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 class InfotrygdhistorikkElement private constructor(
@@ -76,24 +72,14 @@ class InfotrygdhistorikkElement private constructor(
         }
     }
 
-    internal fun beregnArbeidsgiverperioder(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor, hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null) {
-        val dekoratør = Infotrygddekoratør(teller, builder, perioder.utbetalingsperioder(organisasjonsnummer))
-        historikkFor(organisasjonsnummer, sykdomstidslinje, hendelseskilde).accept(dekoratør)
-    }
-
     internal fun betaltePerioder(orgnummer: String? = null): List<Periode> = perioder.utbetalingsperioder(orgnummer)
 
-    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null): Sykdomstidslinje {
-        if (sykdomstidslinje.periode() == null) return sykdomstidslinje
-        val ulåst = Sykdomstidslinje().merge(sykdomstidslinje, replace)
-        return sykdomstidslinje(orgnummer, ulåst, hendelseskilde)
-    }
-
-    internal fun sykdomstidslinje(orgnummer: String, sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(), hendelseskilde: SykdomshistorikkHendelse.Hendelseskilde? = null): Sykdomstidslinje {
-        val kilde = hendelseskilde ?: this.kilde
-        return perioder.fold(sykdomstidslinje) { result, periode ->
-            periode.historikkFor(orgnummer, result, kilde)
-        }
+    internal fun sykdomstidslinje(orgnummer: String): Sykdomstidslinje {
+        return perioder
+            .filter { it.gjelder(orgnummer) }
+            .fold(Sykdomstidslinje()) { result, periode ->
+                result.merge(periode.sykdomstidslinje(kilde), sammenhengendeSykdom)
+            }
     }
 
     internal fun sykdomstidslinje(): Sykdomstidslinje {
