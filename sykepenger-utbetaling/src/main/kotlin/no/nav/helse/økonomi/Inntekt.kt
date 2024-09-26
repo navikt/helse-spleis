@@ -27,7 +27,7 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
         }
 
         fun fraGradert(inntekt: Inntekt, grad: Prosentdel): Inntekt {
-            return grad.gradér(inntekt.tilDagligDouble()).daglig
+            return grad.gradér(inntekt.daglig).daglig
         }
 
         val Number.K get() = this.toDouble() * 1000
@@ -58,19 +58,9 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
         }
     }
 
-    fun <R> reflection(block: (årlig: Double, månedlig: Double, daglig: Double, dagligInt: Int) -> R) = block(
-        årlig,
-        tilMånedligDouble(),
-        tilDagligDouble(),
-        tilDagligInt()
-    )
-
-    private fun tilDagligInt() = tilDagligIntMemoized(årlig)
-    private fun tilDagligDouble() = tilDagligDoubleMemoized(årlig)
-    private fun tilMånedligDouble() = tilMånedligDoubleMemoized(årlig)
-    val månedlig get(): Double = tilMånedligDouble()
-    val daglig get(): Double = tilDagligDouble()
-    val dagligInt get(): Int = tilDagligInt()
+    val månedlig get(): Double = tilMånedligDoubleMemoized(årlig)
+    val daglig get(): Double = tilDagligDoubleMemoized(årlig)
+    val dagligInt get(): Int = tilDagligIntMemoized(årlig)
     fun rundTilDaglig() = rundTilDagligMemoized(årlig)
     fun rundNedTilDaglig() = rundNedTilDagligMemoized(årlig)
 
@@ -95,7 +85,7 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
     override fun compareTo(other: Inntekt) = if (this == other) 0 else this.årlig.compareTo(other.årlig)
 
     override fun toString(): String {
-        return "[Årlig: $årlig, Månedlig: ${tilMånedligDouble()}, Daglig: ${tilDagligDouble()}]"
+        return "[Årlig: $årlig, Månedlig: ${månedlig}, Daglig: ${daglig}]"
     }
 
     fun avviksprosent(other: Inntekt) = Avviksprosent.avvik(this.årlig, other.årlig)
@@ -107,9 +97,9 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
         dagligDouble = dtoDagligDouble()
     )
     private fun dtoÅrlig() = InntektbeløpDto.Årlig(this.årlig)
-    fun dtoMånedligDouble() = InntektbeløpDto.MånedligDouble(tilMånedligDouble())
-    private fun dtoDagligDouble() = InntektbeløpDto.DagligDouble(tilDagligDouble())
-    private fun dtoDagligInt() = InntektbeløpDto.DagligInt(tilDagligInt())
+    fun dtoMånedligDouble() = InntektbeløpDto.MånedligDouble(månedlig)
+    private fun dtoDagligDouble() = InntektbeløpDto.DagligDouble(daglig)
+    private fun dtoDagligInt() = InntektbeløpDto.DagligInt(dagligInt)
 }
 
 interface DekningsgradKilde {
