@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 internal class InntekterFraSkattLagtTilGrunnKontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `utkast til vedtak`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
+    fun `skatteinntekter lagt til grunn`() = Toggle.InntektsmeldingSomIkkeKommer.enable {
         @Language("JSON")
         val forventet = """
         {
