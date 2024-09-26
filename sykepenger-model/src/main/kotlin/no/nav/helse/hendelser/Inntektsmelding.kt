@@ -96,8 +96,7 @@ class Inntektsmelding(
     }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
-        val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
-        subsumsjonslogg.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
+        subsumsjonslogg.`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig)
         inntektshistorikk.leggTil(Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt))
         return beregnetInntektsdato
     }

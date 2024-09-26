@@ -123,7 +123,7 @@ class Økonomi private constructor(
             return map {
                 val redusertBeløp = getter(it).times(ratio)
                 val rundetNed = redusertBeløp.rundNedTilDaglig()
-                val differanse = (redusertBeløp - rundetNed).reflection { _, _, daglig, _ -> daglig }
+                val differanse = (redusertBeløp - rundetNed).daglig
                 Triple(it, rundetNed, differanse)
             }
         }
@@ -203,13 +203,13 @@ class Økonomi private constructor(
 
     private fun _build(builder: ØkonomiBuilder) {
         builder.grad(grad.toDouble())
-            .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp.reflection { _, _, daglig, _ -> daglig })
-            .dekningsgrunnlag(dekningsgrunnlag.reflection { _, _, daglig, _ -> daglig })
+            .arbeidsgiverRefusjonsbeløp(arbeidsgiverRefusjonsbeløp.daglig)
+            .dekningsgrunnlag(dekningsgrunnlag.daglig)
             .totalGrad(totalGrad.toDouble())
-            .aktuellDagsinntekt(aktuellDagsinntekt.reflection { _, _, daglig, _ -> daglig })
-            .beregningsgrunnlag(beregningsgrunnlag.reflection { _, _, daglig, _ -> daglig })
-            .arbeidsgiverbeløp(arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig })
-            .personbeløp(personbeløp?.reflection { _, _, daglig, _ -> daglig })
+            .aktuellDagsinntekt(aktuellDagsinntekt.daglig)
+            .beregningsgrunnlag(beregningsgrunnlag.daglig)
+            .arbeidsgiverbeløp(arbeidsgiverbeløp?.daglig)
+            .personbeløp(personbeløp?.daglig)
             .er6GBegrenset(er6GBegrenset)
             .grunnbeløpsgrense(grunnbeløpgrense?.årlig)
             .tilstand(tilstand)
@@ -222,8 +222,8 @@ class Økonomi private constructor(
 
     fun accept(visitor: ØkonomiVisitor) {
         visitor.visitAvrundetØkonomi(
-            arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() },
-            personbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() }
+            arbeidsgiverbeløp?.daglig?.toInt(),
+            personbeløp?.daglig?.toInt()
         )
     }
 
@@ -248,8 +248,8 @@ class Økonomi private constructor(
     fun ikkeBetalt() = kopierMed(tilstand = Tilstand.IkkeBetalt)
 
     internal fun dagligBeløpForFagområde(område: Fagområde): Int? = when(område) {
-        Fagområde.SykepengerRefusjon -> arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() }
-        Fagområde.Sykepenger -> personbeløp?.reflection { _, _, daglig, _ -> daglig.toInt() }
+        Fagområde.SykepengerRefusjon -> arbeidsgiverbeløp?.daglig?.toInt()
+        Fagområde.Sykepenger -> personbeløp?.daglig?.toInt()
     }
 
     private fun kopierMed(

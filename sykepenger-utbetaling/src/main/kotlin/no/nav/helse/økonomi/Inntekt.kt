@@ -69,6 +69,7 @@ class Inntekt private constructor(val årlig: Double) : Comparable<Inntekt> {
     private fun tilDagligDouble() = tilDagligDoubleMemoized(årlig)
     private fun tilMånedligDouble() = tilMånedligDoubleMemoized(årlig)
     val månedlig get(): Double = tilMånedligDouble()
+    val daglig get(): Double = tilDagligDouble()
     fun rundTilDaglig() = rundTilDagligMemoized(årlig)
     fun rundNedTilDaglig() = rundNedTilDagligMemoized(årlig)
 
