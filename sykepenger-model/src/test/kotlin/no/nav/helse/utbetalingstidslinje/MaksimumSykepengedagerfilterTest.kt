@@ -13,6 +13,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
@@ -142,6 +143,30 @@ internal class MaksimumSykepengedagerfilterTest {
         assertEquals((17.januar til 26.januar).toList(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
         assertEquals(1, forbrukteDager)
         assertEquals(247, gjenståendeDager)
+    }
+
+    @Test
+    fun `avviste dager før maksdato, etter syk, teller som opphold`() {
+        val tidslinje = tidslinjeOf(240.NAVDAGER, 182.AVV, 10.NAVDAGER)
+        assertEquals((1.desember til 31.mai(2019)).toList(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(10, forbrukteDager)
+        assertEquals(238, gjenståendeDager)
+    }
+
+    @Test
+    fun `avviste dager før maksdato, etter opphold, teller som opphold`() {
+        val tidslinje = tidslinjeOf(240.NAVDAGER, 1.ARB, 181.AVV, 10.NAVDAGER)
+        assertEquals((2.desember til 31.mai(2019)).toList(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(10, forbrukteDager)
+        assertEquals(238, gjenståendeDager)
+    }
+
+    @Test
+    fun `avviste dager før maksdato, etter fri, teller som opphold`() {
+        val tidslinje = tidslinjeOf(240.NAVDAGER, 1.FRI, 181.AVV, 10.NAVDAGER)
+        assertEquals((2.desember til 31.mai(2019)).toList(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(10, forbrukteDager)
+        assertEquals(238, gjenståendeDager)
     }
 
     @Test

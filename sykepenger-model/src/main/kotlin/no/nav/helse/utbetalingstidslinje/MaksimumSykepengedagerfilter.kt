@@ -190,10 +190,10 @@ internal class MaksimumSykepengedagerfilter(
     }
 
     private interface State {
-        fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-        fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-        fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
-        fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+        fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate)
+        fun avvistDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
+        fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate)
+        fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate)
         fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) = oppholdsdag(avgrenser, dagen)
         fun entering(avgrenser: MaksimumSykepengedagerfilter) {}
         fun leaving(avgrenser: MaksimumSykepengedagerfilter) {}
@@ -203,6 +203,9 @@ internal class MaksimumSykepengedagerfilter(
                 avgrenser.maksdatosaker.add(avgrenser.sisteVurdering)
                 avgrenser.sisteVurdering = Maksdatokontekst.TomKontekst
             }
+
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
+            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 /* starter en helt ny maksdatosak 😊 */
@@ -225,6 +228,10 @@ internal class MaksimumSykepengedagerfilter(
 
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.håndterBetalbarDag(dagen)
+            }
+
+            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                /* verken forbrukt dag eller oppholdsdag 😌 */
             }
 
             override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
@@ -259,6 +266,10 @@ internal class MaksimumSykepengedagerfilter(
         object OppholdFri : State {
             override fun betalbarDag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 avgrenser.håndterBetalbarDagEtterFerie(dagen)
+            }
+
+            override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
+                /* verken forbrukt dag eller oppholdsdag 😌 */
             }
 
             override fun fridag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
@@ -339,6 +350,8 @@ internal class MaksimumSykepengedagerfilter(
             override fun sykdomshelg(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {
                 over70(avgrenser, dagen)
             }
+
+            override fun oppholdsdag(avgrenser: MaksimumSykepengedagerfilter, dagen: LocalDate) {}
 
             override fun leaving(avgrenser: MaksimumSykepengedagerfilter) = throw IllegalStateException("Kan ikke gå ut fra state ForGammel")
 
