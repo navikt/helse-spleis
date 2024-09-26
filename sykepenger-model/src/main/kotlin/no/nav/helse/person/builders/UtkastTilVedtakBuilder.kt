@@ -15,7 +15,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeVisitor
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
-import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 internal class UtkastTilVedtakBuilder(
@@ -188,6 +187,10 @@ internal class UtkastTilVedtakBuilder(
             )
         }
 
+        private val beregningsgrunnlagForAvsluttetMedVedtak: Double = sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak().also {
+            check(it == beregningsgrunnlag.årlig) { "Beregningsgrunnlag ${beregningsgrunnlag.årlig} er noe annet enn beregningsgrunnlag beregnet fra sykepengegrunnlagsfakta $it" }
+        }
+
         private val periodetype = when (erForlengelse) {
             true -> when (inngangsvilkårFraInfotrygd) {
                 true -> "INFOTRYGDFORLENGELSE"
@@ -279,13 +282,10 @@ internal class UtkastTilVedtakBuilder(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag,
             // Til ettertanke: Denne mappes ut i JSON som "grunnlagForSykepengegrunnlag"
-            beregningsgrunnlag = beregningsgrunnlag.årlig.also {
-                val fraSykepengegrunnlagsfakta = sykepengegrunnlagsfakta.beregningsgrunnlagForAvsluttetMedVedtak()
-                if (it != fraSykepengegrunnlagsfakta) sikkerlogg.warn("beregningsgrunnlag=$it, fraSykepengegrunnlagsfakta=$fraSykepengegrunnlagsfakta på aktørId=$aktørId")
-            },
+            beregningsgrunnlag = beregningsgrunnlagForAvsluttetMedVedtak,
             // Til ettertanke: Den var jo uventet, men er jo slik det har vært 🤷‍
             // Til ettertanke: Denne hentet data fra sykepengegrunnlagsfakta som har to desimaler
-            // Til ettertanke: Denne mapps ut i JSOM som "grunnlagForSykepengegrunnlagPerArbeidsgiver"
+            // Til ettertanke: Denne mapps ut i JSON som "grunnlagForSykepengegrunnlagPerArbeidsgiver"
             omregnetÅrsinntektPerArbeidsgiver = when {
                 inngangsvilkårFraInfotrygd -> emptyMap()
                 else -> arbeidsgiverinntekterPåSkjæringstidspunktet
@@ -293,7 +293,7 @@ internal class UtkastTilVedtakBuilder(
                     .mapValues { (_, arbeidsgiver) -> arbeidsgiver.skjønnsfastsatt?.toDesimaler ?: arbeidsgiver.omregnedeÅrsinntekt.toDesimaler
                 }
             },
-            inntekt = beregningsgrunnlag.månedlig, // Til ettertanke: What? 👀
+            inntekt = beregningsgrunnlag.månedlig, // TODO: Til ettertanke: What? 👀 Denne håper jeg ingen bruker
             utbetalingId = utbetalingId,
             sykepengegrunnlagsbegrensning = when {
                 inngangsvilkårFraInfotrygd -> "VURDERT_I_INFOTRYGD"
@@ -327,7 +327,5 @@ internal class UtkastTilVedtakBuilder(
             is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.skjønnsfastsatt
             else -> fakta.omregnetÅrsinntekt
         }
-
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
