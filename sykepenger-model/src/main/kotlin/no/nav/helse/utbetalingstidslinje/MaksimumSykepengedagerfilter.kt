@@ -82,7 +82,9 @@ internal class MaksimumSykepengedagerfilter(
         state.entering(this)
     }
 
-    override fun visit(dag: Utbetalingsdag.ForeldetDag, dato: LocalDate, økonomi: Økonomi) {}
+    override fun visit(dag: Utbetalingsdag.ForeldetDag, dato: LocalDate, økonomi: Økonomi) {
+        state.oppholdsdag(this, dato)
+    }
 
     override fun visit(
         dag: NavDag,

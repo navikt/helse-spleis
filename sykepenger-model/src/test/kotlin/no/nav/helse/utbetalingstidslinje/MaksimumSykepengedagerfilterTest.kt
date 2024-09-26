@@ -23,6 +23,7 @@ import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.HELG
 import no.nav.helse.testhelpers.NAP
@@ -165,6 +166,30 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `avviste dager før maksdato, etter fri, teller som opphold`() {
         val tidslinje = tidslinjeOf(240.NAVDAGER, 1.FRI, 181.AVV, 10.NAVDAGER)
         assertEquals((2.desember til 31.mai(2019)).toList(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(10, forbrukteDager)
+        assertEquals(238, gjenståendeDager)
+    }
+
+    @Test
+    fun `foreldet dager før maksdato, etter syk, teller som opphold`() {
+        val tidslinje = tidslinjeOf(240.NAVDAGER, 182.FOR, 10.NAVDAGER)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(10, forbrukteDager)
+        assertEquals(238, gjenståendeDager)
+    }
+
+    @Test
+    fun `foreldet dager før maksdato, etter opphold, teller som opphold`() {
+        val tidslinje = tidslinjeOf(240.NAVDAGER, 1.ARB, 181.FOR, 10.NAVDAGER)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(10, forbrukteDager)
+        assertEquals(238, gjenståendeDager)
+    }
+
+    @Test
+    fun `foreldet dager før maksdato, etter fri, teller som opphold`() {
+        val tidslinje = tidslinjeOf(240.NAVDAGER, 1.FRI, 181.FOR, 10.NAVDAGER)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
         assertEquals(10, forbrukteDager)
         assertEquals(238, gjenståendeDager)
     }
