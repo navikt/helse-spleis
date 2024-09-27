@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -29,7 +29,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     @Test
     fun `legger inn beregnet inntekt i inntekthistorikk`() {
         val inntekthistorikk = Inntektshistorikk()
-        inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar).let { it.addInntekt(inntekthistorikk, NullObserver) }
+        inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar).let { it.addInntekt(inntekthistorikk, EmptyLog) }
         assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.avklarSykepengegrunnlag(1.januar, 1.januar, null)?.inspektør?.beløp)
     }
 

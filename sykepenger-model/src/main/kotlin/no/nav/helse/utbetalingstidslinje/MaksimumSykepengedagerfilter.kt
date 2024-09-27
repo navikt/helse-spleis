@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.`§ 8-12 ledd 2`
 import no.nav.helse.hendelser.Periode
@@ -32,7 +32,7 @@ internal class MaksimumSykepengedagerfilter(
     private var state: State = State.Initiell
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
-    private var subsumsjonslogg: Subsumsjonslogg = NullObserver
+    private var subsumsjonslogg: Subsumsjonslogg = EmptyLog
 
     private val tidslinjegrunnlagsubsumsjon by lazy { tidslinjegrunnlag.subsumsjonsformat() }
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }

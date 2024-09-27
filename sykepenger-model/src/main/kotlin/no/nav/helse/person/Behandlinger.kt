@@ -467,7 +467,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                                     refusjonsopplysninger = Refusjonsopplysninger()
                                 ),
                                 regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-                                subsumsjonslogg = Subsumsjonslogg.NullObserver,
+                                subsumsjonslogg = Subsumsjonslogg.EmptyLog,
                                 arbeidsgiverperiode = dto.arbeidsgiverperiode.map { Periode.gjenopprett(it) }
                             )
                             return builder.result(Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje))

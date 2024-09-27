@@ -25,7 +25,7 @@ internal fun Inntekt.inntektsgrunnlag(alder: Alder) = inntektsgrunnlag(alder, Ab
 internal fun Inntekt.inntektsgrunnlag(skjæringstidspunkt: LocalDate) =
     inntektsgrunnlag(AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder, AbstractPersonTest.ORGNUMMER, skjæringstidspunkt)
 
-internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.NullObserver, skattInntekt: Inntekt? = null, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
+internal fun Inntekt.inntektsgrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonslogg: Subsumsjonslogg = Subsumsjonslogg.EmptyLog, skattInntekt: Inntekt? = null, refusjonsopplysninger: Refusjonsopplysninger = Refusjonsopplysninger()) =
     Inntektsgrunnlag(
         alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(

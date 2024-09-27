@@ -13,7 +13,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Grunnbeløpsregulering
@@ -281,7 +281,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun tilkomneInntekterFraSøknaden(søknad: Søknad, subsumsjonslogg: Subsumsjonslogg): VilkårsgrunnlagElement {
             val sykepengegrunnlag = inntektsgrunnlag.tilkomneInntekterFraSøknaden(søknad, subsumsjonslogg)
-            return kopierMed(søknad, sykepengegrunnlag, opptjening, NullObserver)
+            return kopierMed(søknad, sykepengegrunnlag, opptjening, EmptyLog)
         }
 
         internal fun nyeArbeidsgiverInntektsopplysninger(
@@ -296,7 +296,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
             val endringsdato = sykepengegrunnlag.finnEndringsdato(this.inntektsgrunnlag)
             val eventyr = Revurderingseventyr.korrigertInntektsmeldingInntektsopplysninger(inntektsmelding, skjæringstidspunkt, endringsdato)
-            return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, NullObserver) to eventyr
+            return kopierMed(inntektsmelding, sykepengegrunnlag, opptjening, EmptyLog) to eventyr
         }
 
         protected abstract fun vilkårsgrunnlagtype(): String
@@ -329,7 +329,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun gjenoppliv(hendelse: GjenopplivVilkårsgrunnlag, vilkårsgrunnlagId: UUID, nyttSkjæringstidspunkt: LocalDate?): VilkårsgrunnlagElement? {
             if (this.vilkårsgrunnlagId != vilkårsgrunnlagId) return null
             val gjenopplivetSykepengegrunnlag = this.inntektsgrunnlag.gjenoppliv(hendelse, nyttSkjæringstidspunkt) ?: return null
-            return kopierMed(hendelse, gjenopplivetSykepengegrunnlag, this.opptjening, NullObserver, nyttSkjæringstidspunkt)
+            return kopierMed(hendelse, gjenopplivetSykepengegrunnlag, this.opptjening, EmptyLog, nyttSkjæringstidspunkt)
         }
 
         internal companion object {

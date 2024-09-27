@@ -5,7 +5,7 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -755,10 +755,10 @@ internal class MaksimumSykepengedagerfilterTest {
             Utbetalingstidslinje::periode).reduce(
             Periode::plus)
         val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsdato.alder, NormalArbeidstaker, personTidslinje)
-        avvisteTidslinjer = maksimumSykepengedagerfilter.filter(this, filterperiode, aktivitetslogg, NullObserver)
-        val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode, NullObserver)
+        avvisteTidslinjer = maksimumSykepengedagerfilter.filter(this, filterperiode, aktivitetslogg, EmptyLog)
+        val maksdatoresultat = maksimumSykepengedagerfilter.maksdatoresultatForVedtaksperiode(filterperiode, EmptyLog)
         maksdatoer = maksimumSykepengedagerfilter.maksdatosaker
-            .map { it.beregnMaksdatoOgSubsummer(fødselsdato.alder, NormalArbeidstaker, filterperiode, NullObserver, Utbetalingstidslinje(), emptyList(), emptyList())}
+            .map { it.beregnMaksdatoOgSubsummer(fødselsdato.alder, NormalArbeidstaker, filterperiode, EmptyLog, Utbetalingstidslinje(), emptyList(), emptyList())}
             .map { it.maksdato }
             .plusElement(maksdatoresultat.maksdato)
             .toSet()

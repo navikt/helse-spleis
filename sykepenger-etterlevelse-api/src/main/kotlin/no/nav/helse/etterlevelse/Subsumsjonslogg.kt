@@ -45,7 +45,7 @@ interface Subsumsjonslogg {
     )
 
     companion object {
-        val NullObserver = object : Subsumsjonslogg {
+        val EmptyLog = object : Subsumsjonslogg {
             override fun logg(subsumsjon: Subsumsjon) {}
         }
     }

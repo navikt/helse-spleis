@@ -8,7 +8,7 @@ import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
@@ -50,7 +50,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             skjæringstidspunkt,
             opptjening,
             listOf(a1Overstyrt, a1Overstyrt),
-            NullObserver,
+            EmptyLog,
             kandidatForTilkommenInntekt = true
         )) { "kan ikke velge mellom inntekter for samme orgnr" }
 
@@ -58,21 +58,21 @@ internal class ArbeidsgiverInntektsopplysningTest {
             skjæringstidspunkt,
             opptjening,
             new,
-            NullObserver,
+            EmptyLog,
             kandidatForTilkommenInntekt = true
         ))
         assertEquals(expected, original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             emptyList(),
-            NullObserver,
+            EmptyLog,
             kandidatForTilkommenInntekt = true
         ))
         assertEquals(listOf(a1Overstyrt, a2Opplysning) to false, original.overstyrInntekter(
             skjæringstidspunkt,
             opptjening,
             new,
-            NullObserver,
+            EmptyLog,
             kandidatForTilkommenInntekt = true
         ))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
@@ -80,7 +80,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             skjæringstidspunkt,
             opptjening,
             forMange,
-            NullObserver,
+            EmptyLog,
             kandidatForTilkommenInntekt = true
         ))
     }
@@ -109,7 +109,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             skjæringstidspunkt,
             opptjening,
             new,
-            NullObserver,
+            EmptyLog,
             kandidatForTilkommenInntekt = false
         )
         assertEquals(expected, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
@@ -143,7 +143,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
             skjæringstidspunkt,
             opptjening,
             new,
-            NullObserver,
+            EmptyLog,
             kandidatForTilkommenInntekt = false
         )
         assertEquals(expected to false, actual) { "kan ikke velge mellom inntekter for samme orgnr" }
@@ -210,16 +210,16 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, IkkeRapportert(skjæringstidspunkt, UUID.randomUUID(), LocalDateTime.now()), Refusjonsopplysninger())
 
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
-        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", NullObserver)
+        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", EmptyLog)
         assertEquals(a1Opplysning, aktive.single())
         assertEquals(a2Opplysning, deaktiverte.single())
 
-        val (nyDeaktivert, nyAktivert) = deaktiverte.aktiver(aktive, "a2", "Jeg gjorde en feil, jeg angrer!", NullObserver)
+        val (nyDeaktivert, nyAktivert) = deaktiverte.aktiver(aktive, "a2", "Jeg gjorde en feil, jeg angrer!", EmptyLog)
         assertEquals(0, nyDeaktivert.size)
         assertEquals(opprinnelig, nyAktivert)
 
-        assertThrows<RuntimeException> { opprinnelig.deaktiver(emptyList(), "a3", "jeg vil deaktivere noe som ikke finnes", NullObserver) }
-        assertThrows<RuntimeException> { emptyList<ArbeidsgiverInntektsopplysning>().aktiver(opprinnelig, "a3", "jeg vil aktivere noe som ikke finnes", NullObserver) }
+        assertThrows<RuntimeException> { opprinnelig.deaktiver(emptyList(), "a3", "jeg vil deaktivere noe som ikke finnes", EmptyLog) }
+        assertThrows<RuntimeException> { emptyList<ArbeidsgiverInntektsopplysning>().aktiver(opprinnelig, "a3", "jeg vil aktivere noe som ikke finnes", EmptyLog) }
     }
 
     @Test

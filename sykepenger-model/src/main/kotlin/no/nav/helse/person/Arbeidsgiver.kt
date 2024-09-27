@@ -147,7 +147,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.beregnSkjæringstidspunkter(infotrygdhistorikk: Infotrygdhistorikk) {
-            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt(infotrygdhistorikk), it.beregnArbeidsgiverperiode(Subsumsjonslogg.NullObserver)) }
+            forEach { it.vedtaksperioder.beregnSkjæringstidspunkter(beregnSkjæringstidspunkt(infotrygdhistorikk), it.beregnArbeidsgiverperiode(Subsumsjonslogg.EmptyLog)) }
         }
 
         internal fun List<Arbeidsgiver>.aktiveSkjæringstidspunkter(): Set<LocalDate> {

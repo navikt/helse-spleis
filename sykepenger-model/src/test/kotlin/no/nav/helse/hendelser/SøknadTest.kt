@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -274,14 +274,14 @@ internal class SøknadTest {
     @Test
     fun `ikke jobbet siste 14 dager i annet arbeidsforhold`() {
         søknad(Sykdom(1.januar, 20.januar, 100.prosent), ikkeJobbetIDetSisteFraAnnetArbeidsforhold = true)
-        søknad.valider(null, NullObserver)
+        søknad.valider(null, EmptyLog)
         aktivitetslogg.assertVarsel(RV_SØ_44)
     }
 
     @Test
     fun `jobbet siste 14 dager i annet arbeidsforhold`() {
         søknad(Sykdom(1.januar, 20.januar, 100.prosent), ikkeJobbetIDetSisteFraAnnetArbeidsforhold = false)
-        søknad.valider(null, NullObserver)
+        søknad.valider(null, EmptyLog)
         aktivitetslogg.assertIngenVarsler()
     }
 

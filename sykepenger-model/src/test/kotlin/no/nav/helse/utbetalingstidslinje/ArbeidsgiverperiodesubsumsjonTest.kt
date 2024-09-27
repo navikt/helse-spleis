@@ -7,7 +7,6 @@ import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.annetLedd
 import no.nav.helse.etterlevelse.bokstavA
 import no.nav.helse.etterlevelse.fjerdeLedd
@@ -214,7 +213,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
                 refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 31000.månedlig).refusjonsopplysninger
             ),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonslogg = Subsumsjonslogg.NullObserver,
+            subsumsjonslogg = Subsumsjonslogg.EmptyLog,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder()
         )
 

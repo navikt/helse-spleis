@@ -25,7 +25,7 @@ import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
 import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -174,7 +174,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             1.AVV(dekningsgrunnlag = 500, begrunnelse = Begrunnelse.MinimumInntekt),
             1.UKJ
         )
-        val tidslinje = MaksimumUtbetalingFilter().filter(listOf(input), input.periode(), Aktivitetslogg(), NullObserver).single()
+        val tidslinje = MaksimumUtbetalingFilter().filter(listOf(input), input.periode(), Aktivitetslogg(), EmptyLog).single()
         val dto = tidslinje.dto()
         assertEquals(10, dto.dager.size)
         dto.dager[0].also { dag ->

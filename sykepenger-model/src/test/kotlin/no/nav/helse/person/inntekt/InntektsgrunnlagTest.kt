@@ -8,14 +8,12 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.annetLedd
 import no.nav.helse.etterlevelse.folketrygdloven
 import no.nav.helse.etterlevelse.førstePunktum
@@ -136,7 +134,7 @@ internal class InntektsgrunnlagTest {
         val alder = fødseldato67år.alder
         val skjæringstidspunkt = 1.februar(2021)
         val forLitenInntekt = Grunnbeløp.halvG.beløp(skjæringstidspunkt) - 1.daglig
-        val sykepengegrunnlag = (forLitenInntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (forLitenInntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = 1.januar)
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist)
@@ -149,7 +147,7 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.januar(2021)
         val forLitenInntekt = Grunnbeløp.halvG.beløp(skjæringstidspunkt) - 1.daglig
 
-        val sykepengegrunnlag = (forLitenInntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (forLitenInntekt).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
@@ -174,7 +172,7 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.mars(2021)
         val `1G` = Grunnbeløp.`1G`.beløp(skjæringstidspunkt)
 
-        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(20.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
@@ -190,7 +188,7 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.januar(2021)
         val `1G` = Grunnbeløp.`1G`.beløp(skjæringstidspunkt)
 
-        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til LocalDate.MAX, skjæringstidspunkt til skjæringstidspunkt, jurist).single()
@@ -206,7 +204,7 @@ internal class InntektsgrunnlagTest {
         val skjæringstidspunkt = 1.januar(2021)
         val `1G` = Grunnbeløp.`1G`.beløp(skjæringstidspunkt)
 
-        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+        val sykepengegrunnlag = (`1G`).inntektsgrunnlag(alder, "orgnr", skjæringstidspunkt, EmptyLog)
 
         val tidslinje = tidslinjeOf(31.NAV, 28.NAVDAGER, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
         val resultat = sykepengegrunnlag.avvis(listOf(tidslinje), skjæringstidspunkt til 31.januar(2021), skjæringstidspunkt til skjæringstidspunkt, jurist).single()
@@ -363,7 +361,7 @@ internal class InntektsgrunnlagTest {
             arbeidsgiverInntektsopplysninger = inntekter,
             skjæringstidspunkt = skjæringstidspunkt,
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
-            subsumsjonslogg = NullObserver
+            subsumsjonslogg = EmptyLog
         )
         assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(a1Inntekt, inntektsgrunnlag.inspektør.beregningsgrunnlag)
@@ -380,7 +378,7 @@ internal class InntektsgrunnlagTest {
                 leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, INGEN), LocalDateTime.now())
             }.build()),
         )
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidsounkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidsounkt, opprinnelig, null, EmptyLog)
         val endretOpplysning = ArbeidsgiverInntektsopplysning("a1", skjæringstidsounkt til LocalDate.MAX, Saksbehandler(skjæringstidsounkt, UUID.randomUUID(), 25000.månedlig, "", null, LocalDateTime.now()), RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidsounkt, null, 25000.månedlig), LocalDateTime.now())
         }.build())
@@ -403,7 +401,7 @@ internal class InntektsgrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
             leggTil(Refusjonsopplysning(UUID.randomUUID(), skjæringstidspunkt, null, 2000.månedlig), LocalDateTime.now())
         }.build()
@@ -428,7 +426,7 @@ internal class InntektsgrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -456,7 +454,7 @@ internal class InntektsgrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a1EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a1EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {
@@ -483,7 +481,7 @@ internal class InntektsgrunnlagTest {
         val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", skjæringstidspunkt til LocalDate.MAX, a2Inntektsopplysning, a2Refusjonsopplysninger)
         val opprinnelig = listOf(a1Opplysning, a2Opplysning)
 
-        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, NullObserver)
+        val overstyring = Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer(skjæringstidspunkt, opprinnelig, null, EmptyLog)
 
         val a3EndretInntektsopplysning = Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), 20000.månedlig, "", null, LocalDateTime.now())
         val a3EndretRefusjonsopplysninger = RefusjonsopplysningerBuilder().apply {

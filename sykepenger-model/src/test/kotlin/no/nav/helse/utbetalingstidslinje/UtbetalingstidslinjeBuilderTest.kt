@@ -950,7 +950,7 @@ internal class UtbetalingstidslinjeBuilderTest {
                 refusjonsopplysninger = Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 31000.månedlig).refusjonsopplysninger
             ),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonslogg = Subsumsjonslogg.NullObserver,
+            subsumsjonslogg = Subsumsjonslogg.EmptyLog,
             arbeidsgiverperiode = arbeidsgiverperioder.flatMap { it.arbeidsgiverperiode }.grupperSammenhengendePerioder()
         )
 
