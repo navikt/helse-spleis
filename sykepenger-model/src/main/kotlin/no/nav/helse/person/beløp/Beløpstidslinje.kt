@@ -8,11 +8,13 @@ import no.nav.helse.økonomi.Inntekt
 data class Beløpstidslinje private constructor(private val dager: SortedMap<LocalDate, Beløpsdag>) : Iterable<Dag> {
     private constructor(dager: Map<LocalDate, Beløpsdag>): this(dager.toSortedMap())
 
-    private val periode = if (dager.isEmpty()) null else dager.firstKey() til dager.lastKey()
-
-    internal constructor(dager: List<Beløpsdag>): this(dager.associateBy { it.dato }.toSortedMap().also {
+    internal constructor(dager: List<Beløpsdag> = emptyList()): this(dager.associateBy { it.dato }.toSortedMap().also {
         require(dager.size == it.size) { "Forsøkte å opprette en beløpstidslinje med duplikate datoer. Det blir for rart for meg." }
     })
+
+    internal constructor(vararg dager: Beløpsdag):this(dager.toList())
+
+    private val periode = if (dager.isEmpty()) null else dager.firstKey() til dager.lastKey()
 
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag
 
