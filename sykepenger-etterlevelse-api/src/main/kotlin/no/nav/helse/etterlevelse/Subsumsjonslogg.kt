@@ -15,6 +15,7 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_13
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_15
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_16
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_17
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_19
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
@@ -28,49 +29,6 @@ import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
 interface Subsumsjonslogg {
 
     fun logg(subsumsjon: Subsumsjon)
-
-    /**
-     * Arbeidsgiverperioden teller 16 sykedager
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
-     *
-     * @param dato dagen vilkåret blir vurdert for
-     * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
-     */
-    fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
-
-    /**
-     * Arbeidsgiverperioden regnes fra og med første hele fraværsdag
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
-     *
-     * @param dato for en dag som anses som en agp-dag
-     * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
-     */
-    fun `§ 8-19 andre ledd`(dato: Collection<ClosedRange<LocalDate>>, beregnetTidslinje: List<Tidslinjedag>) {}
-
-    /**
-     * Når det er gått mindre enn 16 kalenderdager siden forrige sykefravær,
-     * skal et nytt sykefravær regnes med i samme arbeidsgiverperiode.
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
-     *
-     * @param dato for en dag som anses som en agp-dag
-     * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
-     */
-    fun `§ 8-19 tredje ledd`(dato: Collection<LocalDate>, beregnetTidslinje: List<Tidslinjedag>) {}
-
-    /**
-     * Når arbeidsgiveren har utbetalt sykepenger i en full arbeidsgiverperiode,
-     * skal det inntre ny arbeidsgiverperiode ved sykdom som inntreffer 16 dager
-     * etter at vedkommende arbeidstaker har gjenopptatt arbeidet.
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
-     *
-     * @param dato for den 16. oppholdsdag
-     * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
-     */
-    fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
 
     /**
      * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer
@@ -775,6 +733,98 @@ fun `§ 8-17 ledd 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje:
         kontekster = emptyList()
     )
 
+/**
+ * Arbeidsgiverperioden teller 16 sykedager
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
+ *
+ * @param dato dagen vilkåret blir vurdert for
+ * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
+ */
+fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = VILKAR_BEREGNET,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2001, 1, 1),
+        paragraf = PARAGRAF_8_19,
+        ledd = 1.ledd,
+        input = mapOf(
+            "beregnetTidslinje" to beregnetTidslinje.dager()
+        ),
+        output = mapOf(
+            "sisteDagIArbeidsgiverperioden" to dato
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * Arbeidsgiverperioden regnes fra og med første hele fraværsdag
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
+ *
+ * @param dato for en dag som anses som en agp-dag
+ * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
+ */
+fun `§ 8-19 andre ledd`(dato: Collection<ClosedRange<LocalDate>>, beregnetTidslinje: List<Tidslinjedag>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = dato,
+        lovverk = "folketrygdloven",
+        utfall = VILKAR_BEREGNET,
+        versjon = LocalDate.of(2001, 1, 1),
+        paragraf = PARAGRAF_8_19,
+        ledd = 2.ledd,
+        input = mapOf(
+            "beregnetTidslinje" to beregnetTidslinje.dager()
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * Når det er gått mindre enn 16 kalenderdager siden forrige sykefravær,
+ * skal et nytt sykefravær regnes med i samme arbeidsgiverperiode.
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
+ *
+ * @param dato for en dag som anses som en agp-dag
+ * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
+ */
+fun `§ 8-19 tredje ledd`(dato: Collection<LocalDate>, beregnetTidslinje: List<Tidslinjedag>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = dato.map { it..it },
+        lovverk = "folketrygdloven",
+        utfall = VILKAR_BEREGNET,
+        versjon = LocalDate.of(2001, 1, 1),
+        paragraf = PARAGRAF_8_19,
+        ledd = 3.ledd,
+        input = mapOf(
+            "beregnetTidslinje" to beregnetTidslinje.dager()
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * Når arbeidsgiveren har utbetalt sykepenger i en full arbeidsgiverperiode,
+ * skal det inntre ny arbeidsgiverperiode ved sykdom som inntreffer 16 dager
+ * etter at vedkommende arbeidstaker har gjenopptatt arbeidet.
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
+ *
+ * @param dato for den 16. oppholdsdag
+ * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
+ */
+fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = listOf(dato.rangeTo(dato)),
+        lovverk = "folketrygdloven",
+        utfall = VILKAR_BEREGNET,
+        versjon = LocalDate.of(2001, 1, 1),
+        paragraf = PARAGRAF_8_19,
+        ledd = 4.ledd,
+        input = mapOf(
+            "beregnetTidslinje" to beregnetTidslinje.dager()
+        ),
+        kontekster = emptyList()
+    )
 
 
 internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iterator<LocalDate> {

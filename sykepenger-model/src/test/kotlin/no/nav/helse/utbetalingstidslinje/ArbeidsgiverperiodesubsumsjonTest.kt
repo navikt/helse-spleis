@@ -10,9 +10,11 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.annetLedd
 import no.nav.helse.etterlevelse.bokstavA
+import no.nav.helse.etterlevelse.fjerdeLedd
 import no.nav.helse.etterlevelse.folketrygdloven
 import no.nav.helse.etterlevelse.førsteLedd
 import no.nav.helse.etterlevelse.paragraf
+import no.nav.helse.etterlevelse.tredjeLedd
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
@@ -235,6 +237,9 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var `§ 8-19 tredje ledd - beregning` = 0
         var `§ 8-19 fjerde ledd - beregning` = 0
 
+        private val sykepengerFraTrygden = folketrygdloven.paragraf(Paragraf.PARAGRAF_8_17)
+        private val beregningAvArbeidsgiverperiode = folketrygdloven.paragraf(Paragraf.PARAGRAF_8_19)
+
         private fun ClosedRange<LocalDate>.antallDager() = start.datesUntil(endInclusive.nesteDag).count().toInt()
         private fun Collection<ClosedRange<LocalDate>>.antallDager() = sumOf { it.antallDager() }
         private val Subsumsjon.perioder get() = output["perioder"]
@@ -253,36 +258,32 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
                     subsumsjoner += 1
                     `§ 8-11 første ledd` += subsumsjon.perioder.antallDager()
                 }
-                subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_17).førsteLedd.bokstavA) -> {
+                subsumsjon.er(sykepengerFraTrygden.førsteLedd.bokstavA) -> {
                     subsumsjoner += 1
                     if (subsumsjon.utfall == Utfall.VILKAR_OPPFYLT) `§ 8-17 første ledd bokstav a - oppfylt` += subsumsjon.perioder.antallDager()
                     else `§ 8-17 første ledd bokstav a - ikke oppfylt` += subsumsjon.perioder.antallDager()
                 }
-                subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_17).annetLedd) -> {
+                subsumsjon.er(sykepengerFraTrygden.annetLedd) -> {
                     subsumsjoner += 1
                     `§ 8-17 ledd 2` += subsumsjon.perioder.antallDager()
                 }
+                subsumsjon.er(beregningAvArbeidsgiverperiode.førsteLedd) -> {
+                    subsumsjoner += 1
+                    `§ 8-19 første ledd - beregning` += 1
+                }
+                subsumsjon.er(beregningAvArbeidsgiverperiode.annetLedd) -> {
+                    subsumsjoner += 1
+                    `§ 8-19 andre ledd - beregning` += subsumsjon.perioder.antallDager()
+                }
+                subsumsjon.er(beregningAvArbeidsgiverperiode.tredjeLedd) -> {
+                    subsumsjoner += 1
+                    `§ 8-19 tredje ledd - beregning` += subsumsjon.perioder.antallDager()
+                }
+                subsumsjon.er(beregningAvArbeidsgiverperiode.fjerdeLedd) -> {
+                    subsumsjoner += 1
+                    `§ 8-19 fjerde ledd - beregning` += 1
+                }
             }
-        }
-
-        override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
-            subsumsjoner += 1
-            `§ 8-19 første ledd - beregning` += 1
-        }
-
-        override fun `§ 8-19 andre ledd`(dato: Collection<ClosedRange<LocalDate>>, beregnetTidslinje: List<Tidslinjedag>) {
-            subsumsjoner += 1
-            `§ 8-19 andre ledd - beregning` += dato.antallDager()
-        }
-
-        override fun `§ 8-19 tredje ledd`(dato: Collection<LocalDate>, beregnetTidslinje: List<Tidslinjedag>) {
-            subsumsjoner += 1
-            `§ 8-19 tredje ledd - beregning` += dato.size
-        }
-
-        override fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {
-            subsumsjoner += 1
-            `§ 8-19 fjerde ledd - beregning` += 1
         }
     }
 

@@ -4,6 +4,9 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a`
+import no.nav.helse.etterlevelse.`§ 8-19 fjerde ledd`
+import no.nav.helse.etterlevelse.`§ 8-19 første ledd`
+import no.nav.helse.etterlevelse.`§ 8-19 tredje ledd`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.somPeriode
@@ -58,12 +61,12 @@ data class Arbeidsgiverperioderesultat(
             .filter { it.start in vedtaksperiode }
             .map { it.start }
             .also {
-                subsumsjonslogg.`§ 8-19 tredje ledd`(it, sykdomstidslinjesubsumsjon)
+                subsumsjonslogg.logg(`§ 8-19 tredje ledd`(it, sykdomstidslinjesubsumsjon))
             }
 
         // siste 16. agp-dag skal subsummeres med § 8-19 første ledd
         if (fullstendig && arbeidsgiverperiode.last().endInclusive in vedtaksperiode)
-            subsumsjonslogg.`§ 8-19 første ledd`(arbeidsgiverperiode.last().endInclusive, sykdomstidslinjesubsumsjon)
+            subsumsjonslogg.logg(`§ 8-19 første ledd`(arbeidsgiverperiode.last().endInclusive, sykdomstidslinjesubsumsjon))
 
         // første utbetalingsdag skal subsummeres med § 8-17 ledd 1 bokstav a (oppfylt = true)
         utbetalingsperioder.firstOrNull()?.firstOrNull { !it.erHelg() }?.takeIf { it in vedtaksperiode }?.also {
@@ -72,7 +75,7 @@ data class Arbeidsgiverperioderesultat(
 
         // siste oppholdsdag som medfører at agp avbrytes subsummeres med § 8-19 fjerde ledd
         if (fullstendig && sisteDag != null && sisteDag in vedtaksperiode)
-            subsumsjonslogg.`§ 8-19 fjerde ledd`(sisteDag, sykdomstidslinjesubsumsjon)
+            subsumsjonslogg.logg(`§ 8-19 fjerde ledd`(sisteDag, sykdomstidslinjesubsumsjon))
     }
 
     internal fun somArbeidsgiverperiode(): Arbeidsgiverperiode {

@@ -8,6 +8,7 @@ import no.nav.helse.etterlevelse.`§ 8-16 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
+import no.nav.helse.etterlevelse.`§ 8-19 andre ledd`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -80,7 +81,7 @@ internal class Utbetalingstidslinjesubsumsjon(
 
     fun subsummer(vedtaksperiode: Periode, regler: ArbeidsgiverRegler) {
         subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(false, arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
-        subsumsjonslogg.`§ 8-19 andre ledd`(arbeidsgiverperiodedager, tidslinjesubsumsjonsformat)
+        subsumsjonslogg.logg(`§ 8-19 andre ledd`(arbeidsgiverperiodedager, tidslinjesubsumsjonsformat))
         subsumsjonslogg.logg(`§ 8-17 ledd 1`(arbeidsgiverperiodeNavdager))
         subsumsjonslogg.logg(`§ 8-11 ledd 1`(vedtaksperiode, helger))
         subsumsjonslogg.logg(`§ 8-17 ledd 2`(fridager, tidslinjesubsumsjonsformat))
