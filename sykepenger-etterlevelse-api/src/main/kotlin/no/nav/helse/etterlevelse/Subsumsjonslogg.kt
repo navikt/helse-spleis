@@ -39,11 +39,6 @@ interface Subsumsjonslogg {
 
     fun logg(subsumsjon: Subsumsjon)
 
-    class SammenligningsgrunnlagDTO(
-        val sammenligningsgrunnlag: Double,
-        val inntekterFraAOrdningen: Map<String, List<Map<String, Any>>>
-    )
-
     companion object {
         val EmptyLog = object : Subsumsjonslogg {
             override fun logg(subsumsjon: Subsumsjon) {}
