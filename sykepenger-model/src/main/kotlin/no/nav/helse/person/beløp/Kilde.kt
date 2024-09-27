@@ -1,4 +1,4 @@
-package no.nav.helse.person.refusjon
+package no.nav.helse.person.beløp
 
 import java.util.UUID
 import no.nav.helse.hendelser.Avsender
