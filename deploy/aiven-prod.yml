@@ -241,3 +241,6 @@ spec:
         - team: tbd
           application: spregulering
           access: readwrite
+        - team: tbd
+          application: spre-sykmeldt
+          access: readwrite
