@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 
 internal class AvvisDagerEtterDødsdatofilterTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
@@ -91,7 +91,7 @@ internal class AvvisDagerEtterDødsdatofilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode): List<Utbetalingstidslinje> {
         aktivitetslogg = Aktivitetslogg()
-        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato)).filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
+        val resultat = AvvisDagerEtterDødsdatofilter(Alder(EPOCH, dødsdato)).filter(tidslinjer, periode, aktivitetslogg, EmptyLog)
         inspektør = resultat.first().inspektør
         return resultat
     }

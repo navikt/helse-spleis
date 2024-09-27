@@ -4,10 +4,13 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.desember
+import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.lagStandardInntekterForOpptjeningsvurdering
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -48,10 +51,12 @@ import org.junit.jupiter.api.Test
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
-    private val jurist = MaskinellJurist()
-        .medFødselsnummer("fnr")
-        .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList())
+    private val subsumsjonslogg = SubsumsjonsListLog()
+    private val jurist = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
+        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
+    ))
 
     companion object {
         private const val ORGNR = "123456789"
@@ -206,12 +211,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
 
-        val jurist = jurist
-        vilkårsgrunnlag.valider(
-            10000.månedlig.sykepengegrunnlag,
-            jurist
-        )
-        SubsumsjonInspektør(jurist).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
+        vilkårsgrunnlag.valider(10000.månedlig.sykepengegrunnlag, jurist)
+        SubsumsjonInspektør(subsumsjonslogg).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
     }
 
     @Test

@@ -5,7 +5,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
@@ -15,7 +16,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
@@ -28,7 +28,6 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
@@ -41,7 +40,7 @@ import org.junit.jupiter.api.Test
 
 internal class LagUtbetalingForRevurderingTest {
 
-    private lateinit var maskinellJurist: MaskinellJurist
+    private lateinit var maskinellJurist: Subsumsjonslogg
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
@@ -59,7 +58,7 @@ internal class LagUtbetalingForRevurderingTest {
 
     @BeforeEach
     fun beforeEach() {
-        maskinellJurist = MaskinellJurist()
+        maskinellJurist = EmptyLog
         aktivitetslogg = Aktivitetslogg()
     }
 
@@ -205,7 +204,7 @@ internal class LagUtbetalingForRevurderingTest {
     }
 
     private fun beregnUtbetalinger(tidslinje: Utbetalingstidslinje) =
-        MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()).single()
+        MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, EmptyLog).single()
 
     private fun vedtaksperiode(periode: Periode = januar, organisasjonsnummer: String = ORGNUMMER): Vedtaksperiode {
         val søknad = søknad(periode)
@@ -226,7 +225,7 @@ internal class LagUtbetalingForRevurderingTest {
             sykdomstidslinje = Sykdomstidslinje(sykdomstidslinje),
             dokumentsporing = Dokumentsporing.søknad(SØKNAD),
             sykmeldingsperiode = periode,
-            jurist = maskinellJurist
+            subsumsjonslogg = maskinellJurist
         )
     }
 

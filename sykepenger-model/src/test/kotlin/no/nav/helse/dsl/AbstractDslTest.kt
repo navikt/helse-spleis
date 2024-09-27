@@ -6,7 +6,7 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.GradertPeriode
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -79,7 +79,7 @@ internal abstract class AbstractDslTest {
         @JvmStatic
         protected infix fun List<String>.og(annen: String) = this.plus(annen)
     }
-    protected lateinit var jurist: MaskinellJurist
+    protected lateinit var jurist: SubsumsjonsListLog
     protected lateinit var observatør: TestObservatør
     private lateinit var testperson: TestPerson
     @Suppress("unused") private val person get() = testperson.person // Hen brukes av @OpenInSpanner
@@ -488,8 +488,8 @@ protected fun håndterInntektsmeldingPortal(
 
     protected fun assertGjenoppbygget(dto: PersonUtDto) {
         val serialisertPerson = dto.tilPersonData().tilSerialisertPerson()
-        val gjenoppbyggetPersonViaPersonData = Person.gjenopprett(MaskinellJurist(), serialisertPerson.tilPersonDto())
-        val gjenoppbyggetPersonViaPersonDto = Person.gjenopprett(MaskinellJurist(), dto.tilPersonData().tilPersonDto())
+        val gjenoppbyggetPersonViaPersonData = Person.gjenopprett(EmptyLog, serialisertPerson.tilPersonDto())
+        val gjenoppbyggetPersonViaPersonDto = Person.gjenopprett(EmptyLog, dto.tilPersonData().tilPersonDto())
 
         val dtoFraPersonViaPersonData = gjenoppbyggetPersonViaPersonData.dto()
         val dtoFraPersonViaPersonDto = gjenoppbyggetPersonViaPersonDto.dto()
@@ -524,7 +524,7 @@ protected fun håndterInntektsmeldingPortal(
 
     @BeforeEach
     fun setup() {
-        jurist = MaskinellJurist()
+        jurist = SubsumsjonsListLog()
         observatør = TestObservatør()
         deferredLog = DeferredLog()
         testperson = TestPerson(observatør = observatør, deferredLog = deferredLog, jurist = jurist)

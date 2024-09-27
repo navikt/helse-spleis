@@ -11,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.tilPersonData
@@ -83,7 +83,7 @@ private fun migrateV2Task(arbeidId: String) {
                 log.info("[$migreringCounter] Utfører migrering")
                 val time = measureTimeMillis {
                     val dto = SerialisertPerson(data).tilPersonDto()
-                    val gjenopprettetPerson = Person.gjenopprett(MaskinellJurist(), dto)
+                    val gjenopprettetPerson = Person.gjenopprett(EmptyLog, dto)
                     val resultat = gjenopprettetPerson.dto().tilPersonData().tilSerialisertPerson()
                     check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
                         "skjemaversjon" to resultat.skjemaVersjon,

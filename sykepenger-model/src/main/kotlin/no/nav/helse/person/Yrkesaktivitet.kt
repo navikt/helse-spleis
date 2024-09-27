@@ -1,7 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -39,7 +39,7 @@ internal sealed interface Yrkesaktivitet {
 
     fun identifikator(): String
 
-    fun jurist(other: MaskinellJurist): MaskinellJurist =
+    fun jurist(other: BehandlingSubsumsjonslogg): BehandlingSubsumsjonslogg =
         other.medOrganisasjonsnummer(this.toString())
     fun erYrkesaktivitetenIkkeStøttet(hendelse: IAktivitetslogg): Boolean
 

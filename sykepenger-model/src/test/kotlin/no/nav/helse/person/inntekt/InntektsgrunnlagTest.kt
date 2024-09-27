@@ -8,10 +8,12 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.etterlevelse.annetLedd
@@ -60,10 +62,11 @@ internal class InntektsgrunnlagTest {
     private companion object {
         private val fødseldato67år =  1.februar(1954)
     }
-    private val jurist = MaskinellJurist()
-        .medFødselsnummer("fnr")
-        .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList())
+    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
+    ))
 
     @Test
     fun equality() {

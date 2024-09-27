@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
 import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
@@ -158,7 +157,7 @@ class Søknad(
         (opprinneligSendt ?: sendtTilNAVEllerArbeidsgiver).toLocalDate().minusMonths(3).withDayOfMonth(1)
 
 
-    internal fun lagVedtaksperiode(person: Person, arbeidsgiver: Arbeidsgiver, jurist: MaskinellJurist): Vedtaksperiode {
+    internal fun lagVedtaksperiode(person: Person, arbeidsgiver: Arbeidsgiver, subsumsjonslogg: Subsumsjonslogg): Vedtaksperiode {
         requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
         return Vedtaksperiode(
             søknad = this,
@@ -170,7 +169,7 @@ class Søknad(
             sykdomstidslinje = sykdomstidslinje,
             dokumentsporing = Dokumentsporing.søknad(meldingsreferanseId()),
             sykmeldingsperiode = sykdomsperiode,
-            jurist = jurist
+            subsumsjonslogg = subsumsjonslogg
         )
     }
 

@@ -7,12 +7,13 @@ import java.time.YearMonth
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedDeque
 import no.nav.helse.Alder
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -70,10 +71,10 @@ internal abstract class AbstractE2ETest {
     private lateinit var hendelselogg: IAktivitetslogg
     private val ubesvarteBehov = ConcurrentLinkedDeque<Aktivitet.Behov>()
 
-    private fun createTestPerson(creator: (MaskinellJurist) -> Person) {
+    private fun createTestPerson(creator: (Subsumsjonslogg) -> Person) {
         observatør = TestObservatør()
         spekemat = Spekemat()
-        person = creator(MaskinellJurist())
+        person = creator(EmptyLog)
         person.addObserver(observatør)
         person.addObserver(spekemat)
     }
@@ -216,7 +217,7 @@ internal abstract class AbstractE2ETest {
     protected fun håndterVilkårsgrunnlag(arbeidsgivere: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT)) {
         håndterVilkårsgrunnlag(inntekter = arbeidsgivere, arbeidsforhold = arbeidsgivere.map { (orgnr, _) -> orgnr to EPOCH })
     }
-    protected fun håndterVilkårsgrunnlag(inntekter: List<Pair<String, no.nav.helse.økonomi.Inntekt>> = listOf(a1 to INNTEKT), arbeidsforhold: List<Pair<String, LocalDate>> = listOf(a1 to EPOCH)) {
+    protected fun håndterVilkårsgrunnlag(inntekter: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT), arbeidsforhold: List<Pair<String, LocalDate>> = listOf(a1 to EPOCH)) {
         val behov = hendelselogg.vilkårsgrunnlagbehov() ?: error("Fant ikke vilkårsgrunnlagbehov")
         håndterVilkårsgrunnlag(
             vedtaksperiodeId = behov.vedtaksperiodeId.vedtaksperiode,

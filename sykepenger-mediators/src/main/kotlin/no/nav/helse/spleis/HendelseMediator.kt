@@ -3,7 +3,8 @@ package no.nav.helse.spleis
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AvbruttSøknad
 import no.nav.helse.hendelser.Dødsmelding
@@ -13,9 +14,9 @@ import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
 import no.nav.helse.hendelser.Migrate
+import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -41,7 +42,6 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
-import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvbruttArbeidsledigSøknadMessage
@@ -57,6 +57,7 @@ import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
 import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
 import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
@@ -333,7 +334,7 @@ internal class HendelseMediator(
     }
 
     override fun behandle(message: AvstemmingMessage, personidentifikator: Personidentifikator, aktørId: String, context: MessageContext) {
-        person(personidentifikator, message, aktørId, emptySet(), MaskinellJurist(), null) { person  ->
+        person(personidentifikator, message, aktørId, emptySet(), EmptyLog, null) { person  ->
             val dto = person.dto()
             val avstemmer = Avstemmer(dto)
             context.publish(avstemmer.tilJsonMessage().toJson().also {
@@ -514,11 +515,10 @@ internal class HendelseMediator(
         historiskeFolkeregisteridenter: Set<Personidentifikator> = emptySet(),
         handler: (Person) -> Unit
     ) {
-        val jurist = MaskinellJurist()
+        val subsumsjonMediator = SubsumsjonMediator(hendelse.fødselsnummer(), message, versjonAvKode)
         val personMediator = PersonMediator(message, hendelse)
         val datadelingMediator = DatadelingMediator(hendelse)
-        val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
-        person(personidentifikator, message, hendelse.aktørId(), historiskeFolkeregisteridenter, jurist, personopplysninger) { person  ->
+        person(personidentifikator, message, hendelse.aktørId(), historiskeFolkeregisteridenter, subsumsjonMediator, personopplysninger) { person  ->
             person.addObserver(personMediator)
             person.addObserver(VedtaksperiodeProbe)
             handler(person)
@@ -526,15 +526,15 @@ internal class HendelseMediator(
         ferdigstill(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
-    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, aktørId: String, historiskeFolkeregisteridenter: Set<Personidentifikator>, jurist: MaskinellJurist, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
+    private fun person(personidentifikator: Personidentifikator, message: HendelseMessage, aktørId: String, historiskeFolkeregisteridenter: Set<Personidentifikator>, subsumsjonslogg: Subsumsjonslogg, personopplysninger: Personopplysninger?, block: (Person) -> Unit) {
         personDao.hentEllerOpprettPerson(
-            jurist = jurist,
+            subsumsjonslogg = subsumsjonslogg,
             personidentifikator = personidentifikator,
             historiskeFolkeregisteridenter = historiskeFolkeregisteridenter,
             aktørId = aktørId,
             message = message,
             hendelseRepository = hendelseRepository,
-            lagNyPerson = { personopplysninger?.person(jurist) },
+            lagNyPerson = { personopplysninger?.person(subsumsjonslogg) },
             håndterPerson = { person -> person.also(block) }
         )
     }

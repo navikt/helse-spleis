@@ -4,10 +4,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
@@ -28,10 +31,12 @@ import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiverInntektsopplysningTest {
 
-    private val jurist = MaskinellJurist()
-        .medFødselsnummer("fnr")
-        .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList())
+    private val subsumsjonslogg = SubsumsjonsListLog()
+    private val jurist = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
+        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
+    ))
 
     @Test
     fun `overstyr inntekter`() {
@@ -176,14 +181,8 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val a1Opplysning = ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, Inntektsmelding(skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig), Refusjonsopplysninger())
         val a1Overstyrt = ArbeidsgiverInntektsopplysning(orgnummer, skjæringstidspunkt til LocalDate.MAX, Saksbehandler(skjæringstidspunkt, UUID.randomUUID(), overstyrtBeløp, "Jeg bare måtte gjøre det", subsumsjon, LocalDateTime.now()), Refusjonsopplysninger())
 
-        listOf(a1Opplysning).overstyrInntekter(
-            skjæringstidspunkt,
-            opptjening,
-            listOf(a1Overstyrt),
-            jurist,
-            kandidatForTilkommenInntekt = false
-        )
-        SubsumsjonInspektør(jurist).assertBeregnet(
+        listOf(a1Opplysning).overstyrInntekter(skjæringstidspunkt, opptjening, listOf(a1Overstyrt), jurist, kandidatForTilkommenInntekt = false)
+        SubsumsjonInspektør(subsumsjonslogg).assertBeregnet(
             paragraf = paragraf,
             versjon = LocalDate.of(2019, 1, 1),
             ledd = ledd,
@@ -232,7 +231,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", jurist)
         assertEquals(a1Opplysning, aktive.single())
         assertEquals(a2Opplysning, deaktiverte.single())
-        SubsumsjonInspektør(jurist).assertOppfylt(
+        SubsumsjonInspektør(subsumsjonslogg).assertOppfylt(
             paragraf = Paragraf.PARAGRAF_8_15,
             versjon = LocalDate.of(1998, 12, 18),
             ledd = null,
@@ -260,7 +259,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         val (deaktiverte, aktive) = opprinneligDeaktiverte.aktiver(opprinneligAktive, "a2", "Denne må tilbake", jurist)
         assertEquals(listOf(a1Opplysning, a2Opplysning), aktive)
         assertEquals(0, deaktiverte.size)
-        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+        SubsumsjonInspektør(subsumsjonslogg).assertIkkeOppfylt(
             paragraf = Paragraf.PARAGRAF_8_15,
             versjon = LocalDate.of(1998, 12, 18),
             ledd = null,

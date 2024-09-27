@@ -1,8 +1,8 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -54,5 +54,5 @@ internal class MaksimumUtbetalingFilterHendelseTest {
     }
 
     private fun Utbetalingstidslinje.betal() =
-        MaksimumUtbetalingFilter().betal(listOf(this), this.periode(), aktivitetslogg, MaskinellJurist()).single()
+        MaksimumUtbetalingFilter().betal(listOf(this), this.periode(), aktivitetslogg, EmptyLog).single()
 }

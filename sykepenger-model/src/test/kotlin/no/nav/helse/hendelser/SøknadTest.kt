@@ -5,7 +5,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.etterlevelse.KontekstType
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Merknad
@@ -61,10 +63,11 @@ internal class SøknadTest {
 
     private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var søknad: Søknad
-    private val jurist = MaskinellJurist()
-        .medFødselsnummer("fnr")
-        .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList())
+    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
+    ))
 
     @Test
     fun `søknad med bare sykdom`() {

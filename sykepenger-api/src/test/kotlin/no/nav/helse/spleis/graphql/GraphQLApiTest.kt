@@ -29,7 +29,7 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.serde.tilPersonData
@@ -94,7 +94,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @Test
     fun `Det Spesialist faktisk henter`() {
         val spekemat = Spekemat()
-        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
+        person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         person.addObserver(spekemat)
 
         val spekematClient = mockk<SpekematClient>()

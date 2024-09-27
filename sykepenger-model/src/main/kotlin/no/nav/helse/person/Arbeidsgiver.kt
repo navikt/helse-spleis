@@ -8,7 +8,9 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.etterlevelse.KontekstType
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AvbruttSøknad
@@ -102,9 +104,9 @@ internal class Arbeidsgiver private constructor(
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
     private val refusjonshistorikk: Refusjonshistorikk,
     private val yrkesaktivitet: Yrkesaktivitet,
-    private val jurist: MaskinellJurist
+    private val subsumsjonslogg: Subsumsjonslogg
 ) : Aktivitetskontekst, UtbetalingObserver {
-    internal constructor(person: Person, yrkesaktivitet: Yrkesaktivitet, jurist: MaskinellJurist) : this(
+    internal constructor(person: Person, yrkesaktivitet: Yrkesaktivitet, subsumsjonslogg: Subsumsjonslogg) : this(
         person = person,
         organisasjonsnummer = yrkesaktivitet.identifikator(),
         id = UUID.randomUUID(),
@@ -117,7 +119,7 @@ internal class Arbeidsgiver private constructor(
         feriepengeutbetalinger = mutableListOf(),
         refusjonshistorikk = Refusjonshistorikk(),
         yrkesaktivitet = yrkesaktivitet,
-        jurist = yrkesaktivitet.jurist(jurist)
+        subsumsjonslogg = subsumsjonslogg
     )
 
     init {
@@ -233,10 +235,9 @@ internal class Arbeidsgiver private constructor(
             aktørId: String,
             fødselsnummer: String,
             dto: ArbeidsgiverInnDto,
-            personJurist: MaskinellJurist,
+            subsumsjonslogg: Subsumsjonslogg,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>
         ): Arbeidsgiver {
-            val arbeidsgiverJurist = personJurist.medOrganisasjonsnummer(dto.organisasjonsnummer)
             val vedtaksperioder = mutableListOf<Vedtaksperiode>()
             val forkastede = mutableListOf<ForkastetVedtaksperiode>()
             val utbetalinger = dto.utbetalinger.fold(emptyList<Utbetaling>()) { result, utbetaling ->
@@ -255,11 +256,11 @@ internal class Arbeidsgiver private constructor(
                 feriepengeutbetalinger = dto.feriepengeutbetalinger.map { Feriepengeutbetaling.gjenopprett(alder, it) }.toMutableList(),
                 refusjonshistorikk = Refusjonshistorikk.gjenopprett(dto.refusjonshistorikk),
                 yrkesaktivitet = dto.organisasjonsnummer.tilYrkesaktivitet(),
-                jurist = arbeidsgiverJurist
+                subsumsjonslogg = subsumsjonslogg
             )
             val utbetalingerMap = utbetalinger.associateBy(Utbetaling::id)
-            vedtaksperioder.addAll(dto.vedtaksperioder.map { Vedtaksperiode.gjenopprett(person, aktørId, fødselsnummer, arbeidsgiver, dto.organisasjonsnummer, it, arbeidsgiverJurist, grunnlagsdata, utbetalingerMap) })
-            forkastede.addAll(dto.forkastede.map { ForkastetVedtaksperiode.gjenopprett(person, aktørId, fødselsnummer, arbeidsgiver, dto.organisasjonsnummer, it, arbeidsgiverJurist, grunnlagsdata, utbetalingerMap) })
+            vedtaksperioder.addAll(dto.vedtaksperioder.map { Vedtaksperiode.gjenopprett(person, aktørId, fødselsnummer, arbeidsgiver, dto.organisasjonsnummer, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
+            forkastede.addAll(dto.forkastede.map { ForkastetVedtaksperiode.gjenopprett(person, aktørId, fødselsnummer, arbeidsgiver, dto.organisasjonsnummer, it, subsumsjonslogg, grunnlagsdata, utbetalingerMap) })
             return arbeidsgiver
         }
     }
@@ -434,7 +435,7 @@ internal class Arbeidsgiver private constructor(
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad, arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) {
         håndter(søknad) { håndter(søknad, arbeidsgivere, infotrygdhistorikk) }
         if (søknad.noenHarHåndtert() && !søknad.harFunksjonelleFeilEllerVerre()) return
-        val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
+        val vedtaksperiode = søknad.lagVedtaksperiode(person, this, subsumsjonslogg)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
             return
@@ -771,7 +772,11 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun addInntektsmelding(inntektsmelding: Inntektsmelding, dagoverstyring: Revurderingseventyr?) {
-        val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, inntektsmelding.jurist(jurist))
+        val subsumsjonsloggMedInntektsmeldingkontekst = BehandlingSubsumsjonslogg(subsumsjonslogg, listOf(
+            Subsumsjonskontekst(KontekstType.Fødselsnummer, person.personidentifikator.toString()),
+            Subsumsjonskontekst(KontekstType.Organisasjonsnummer, organisasjonsnummer)
+        ) + inntektsmelding.subsumsjonskontekst())
+        val inntektsdato = inntektsmelding.addInntekt(inntektshistorikk, subsumsjonsloggMedInntektsmeldingkontekst)
         inntektsmelding.leggTilRefusjon(refusjonshistorikk)
         val sykdomstidslinjeperiode = sykdomstidslinje().periode()
         val skjæringstidspunkt = person.beregnSkjæringstidspunkt()().beregnSkjæringstidspunkt(inntektsdato.somPeriode(), null)
@@ -784,7 +789,7 @@ internal class Arbeidsgiver private constructor(
         finnAlternativInntektsdato(inntektsdato, skjæringstidspunkt)?.let {
             inntektsmelding.addInntekt(inntektshistorikk, it)
         }
-        val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, jurist)
+        val inntektoverstyring = person.nyeArbeidsgiverInntektsopplysninger(skjæringstidspunkt, inntektsmelding, subsumsjonsloggMedInntektsmeldingkontekst)
         val overstyringFraInntektsmelding = Revurderingseventyr.tidligsteEventyr(inntektoverstyring, dagoverstyring)
         if (overstyringFraInntektsmelding != null) person.igangsettOverstyring(overstyringFraInntektsmelding)
         håndter(inntektsmelding) { håndtertInntektPåSkjæringstidspunktet(skjæringstidspunkt, inntektsmelding) }

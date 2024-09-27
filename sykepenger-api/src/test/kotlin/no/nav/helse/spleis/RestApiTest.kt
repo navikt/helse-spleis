@@ -9,7 +9,7 @@ import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Alder.Companion.alder
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -119,7 +119,7 @@ internal class RestApiTest {
             vedtaksperiodeId = UUID.randomUUID(),
             mottatt = LocalDateTime.now()
         )
-        val person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
+        val person = Person(AKTØRID, UNG_PERSON_FNR.somPersonidentifikator(), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         person.håndter(sykmelding)
         person.håndter(inntektsmelding)
         testDataSource.ds.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)

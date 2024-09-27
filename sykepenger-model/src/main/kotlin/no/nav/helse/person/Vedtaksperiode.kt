@@ -11,7 +11,7 @@ import no.nav.helse.dto.LazyVedtaksperiodeVenterDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.hendelser.AnmodningOmForkasting
@@ -156,7 +156,7 @@ internal class Vedtaksperiode private constructor(
     private var egenmeldingsperioder: List<Periode>,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
-    private val arbeidsgiverjurist: MaskinellJurist
+    private val subsumsjonslogg: Subsumsjonslogg
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode>, BehandlingObserver {
 
     internal constructor(
@@ -169,7 +169,7 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje: Sykdomstidslinje,
         dokumentsporing: Dokumentsporing,
         sykmeldingsperiode: Periode,
-        jurist: MaskinellJurist
+        subsumsjonslogg: Subsumsjonslogg
     ) : this(
         person = person,
         arbeidsgiver = arbeidsgiver,
@@ -181,7 +181,7 @@ internal class Vedtaksperiode private constructor(
         behandlinger = Behandlinger(),
         egenmeldingsperioder = søknad.egenmeldingsperioder(),
         opprettet = LocalDateTime.now(),
-        arbeidsgiverjurist = jurist
+        subsumsjonslogg = subsumsjonslogg
     ) {
         kontekst(søknad)
         val periode = checkNotNull(sykdomstidslinje.periode()) { "sykdomstidslinjen er tom" }
@@ -192,7 +192,7 @@ internal class Vedtaksperiode private constructor(
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
     private val periode get() = behandlinger.periode()
     private val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
-    private val jurist get() = behandlinger.jurist(arbeidsgiverjurist, id)
+    private val jurist get() = behandlinger.subsumsjonslogg(subsumsjonslogg, id, fødselsnummer, organisasjonsnummer)
     private val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
     private val hendelseIder get() = behandlinger.dokumentsporing()
@@ -2727,7 +2727,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiver: Arbeidsgiver,
             organisasjonsnummer: String,
             dto: VedtaksperiodeInnDto,
-            arbeidsgiverjurist: MaskinellJurist,
+            subsumsjonslogg: Subsumsjonslogg,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
             utbetalinger: Map<UUID, Utbetaling>
         ): Vedtaksperiode {
@@ -2762,7 +2762,7 @@ internal class Vedtaksperiode private constructor(
                 egenmeldingsperioder = dto.egenmeldingsperioder.map { egenmeldingsperiode -> egenmeldingsperiode.fom til egenmeldingsperiode.tom },
                 opprettet = dto.opprettet,
                 oppdatert = dto.oppdatert,
-                arbeidsgiverjurist = arbeidsgiverjurist
+                subsumsjonslogg = subsumsjonslogg
             )
         }
     }

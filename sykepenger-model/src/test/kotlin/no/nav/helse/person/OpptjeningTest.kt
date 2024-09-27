@@ -5,21 +5,20 @@ import java.time.LocalDate.EPOCH
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
-import no.nav.helse.etterlevelse.MaskinellJurist
-import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
+import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.fredag
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
-import no.nav.helse.juni
 import no.nav.helse.lørdag
 import no.nav.helse.mai
 import no.nav.helse.mandag
@@ -38,10 +37,11 @@ import org.junit.jupiter.api.Test
 
 internal class OpptjeningTest {
 
-    private val jurist = MaskinellJurist()
-        .medFødselsnummer("fnr")
-        .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList())
+    private val jurist = BehandlingSubsumsjonslogg(EmptyLog, listOf(
+        Subsumsjonskontekst(KontekstType.Fødselsnummer, "fnr"),
+        Subsumsjonskontekst(KontekstType.Organisasjonsnummer, "orgnr"),
+        Subsumsjonskontekst(KontekstType.Vedtaksperiode, "${UUID.randomUUID()}"),
+    ))
 
     @Test
     fun `konkret opptjeningsperiode`() {

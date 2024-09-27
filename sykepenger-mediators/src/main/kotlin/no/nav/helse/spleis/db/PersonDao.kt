@@ -5,7 +5,7 @@ import kotliquery.Session
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.tilPersonData
@@ -20,7 +20,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
     fun hentEllerOpprettPerson(
-        jurist: MaskinellJurist,
+        subsumsjonslogg: Subsumsjonslogg,
         personidentifikator: Personidentifikator,
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
         aktørId: String,
@@ -46,7 +46,7 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
          */
         sessionOf(dataSource, returnGeneratedKey = true).use {
             it.transaction { txSession ->
-                val (personId, person) = hentPersonEllerOpprettNy(txSession, jurist, hendelseRepository, personidentifikator, aktørId, lagNyPerson, historiskeFolkeregisteridenter)
+                val (personId, person) = hentPersonEllerOpprettNy(txSession, subsumsjonslogg, hendelseRepository, personidentifikator, aktørId, lagNyPerson, historiskeFolkeregisteridenter)
                     ?: return fantIkkePerson(personidentifikator)
 
                 knyttPersonTilHistoriskeIdenter(txSession, personId, personidentifikator, historiskeFolkeregisteridenter)
@@ -62,17 +62,17 @@ internal class PersonDao(private val dataSource: DataSource, private val STØTTE
         }
     }
 
-    private fun hentPersonEllerOpprettNy(txSession: Session, jurist: MaskinellJurist, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> Person?, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
-        return gjenopprettFraTidligereBehandling(txSession, jurist, hendelseRepository, personidentifikator, historiskeFolkeregisteridenter) ?: opprettNyPerson(txSession, personidentifikator, aktørId, lagNyPerson)
+    private fun hentPersonEllerOpprettNy(txSession: Session, subsumsjonslogg: Subsumsjonslogg, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> Person?, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
+        return gjenopprettFraTidligereBehandling(txSession, subsumsjonslogg, hendelseRepository, personidentifikator, historiskeFolkeregisteridenter) ?: opprettNyPerson(txSession, personidentifikator, aktørId, lagNyPerson)
     }
 
-    private fun gjenopprettFraTidligereBehandling(txSession: Session, jurist: MaskinellJurist, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
+    private fun gjenopprettFraTidligereBehandling(txSession: Session, subsumsjonslogg: Subsumsjonslogg, hendelseRepository: HendelseRepository, personidentifikator: Personidentifikator, historiskeFolkeregisteridenter: Set<Personidentifikator>): Pair<Long, Person>? {
         val (personId, serialisertPerson, tidligerePersoner) = hentPersonOgLåsPersonForBehandling(txSession, personidentifikator, historiskeFolkeregisteridenter)
             ?: hentPersonFraHistoriskeIdenter(txSession, personidentifikator, historiskeFolkeregisteridenter)
             ?: return null
-        val tidligereBehandlinger = tidligerePersoner.map { tidligerePerson -> Person.gjenopprett(jurist, tidligerePerson.tilPersonDto()) }
+        val tidligereBehandlinger = tidligerePersoner.map { tidligerePerson -> Person.gjenopprett(subsumsjonslogg, tidligerePerson.tilPersonDto()) }
         val personInn = serialisertPerson.tilPersonDto { hendelseRepository.hentAlleHendelser(personidentifikator) }
-        return personId to Person.gjenopprett(jurist, personInn, tidligereBehandlinger)
+        return personId to Person.gjenopprett(subsumsjonslogg, personInn, tidligereBehandlinger)
     }
 
     private fun opprettNyPerson(txSession: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> Person?): Pair<Long, Person>? {

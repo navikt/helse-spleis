@@ -8,7 +8,6 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
@@ -87,25 +86,24 @@ import kotlin.math.roundToInt
 
 class Person private constructor(
     private var aktørId: String,
-    private var personidentifikator: Personidentifikator,
+    personidentifikator: Personidentifikator,
     internal var alder: Alder,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     private val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     internal val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-    private val jurist: MaskinellJurist,
+    private val jurist: Subsumsjonslogg,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     internal val regler: ArbeidsgiverRegler = NormalArbeidstaker,
     internal val minimumSykdomsgradsvurdering: MinimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering()
 ) : Aktivitetskontekst {
     companion object {
         fun gjenopprett(
-            jurist: MaskinellJurist,
+            subsumsjonslogg: Subsumsjonslogg,
             dto: PersonInnDto,
             tidligereBehandlinger: List<Person> = emptyList()
         ): Person {
-            val personJurist = jurist.medFødselsnummer(dto.fødselsnummer)
             val arbeidsgivere = mutableListOf<Arbeidsgiver>()
             val grunnlagsdataMap = mutableMapOf<UUID, VilkårsgrunnlagElement>()
             val alder = Alder.gjenopprett(dto.alder)
@@ -123,7 +121,7 @@ class Person private constructor(
                     grunnlagsdataMap
                 ),
                 minimumSykdomsgradsvurdering = MinimumSykdomsgradsvurdering.gjenopprett(dto.minimumSykdomsgradVurdering),
-                jurist = personJurist,
+                jurist = subsumsjonslogg,
                 tidligereBehandlinger = tidligereBehandlinger
             )
             arbeidsgivere.addAll(dto.arbeidsgivere.map {
@@ -133,7 +131,7 @@ class Person private constructor(
                     dto.aktørId,
                     dto.fødselsnummer,
                     it,
-                    personJurist,
+                    subsumsjonslogg,
                     grunnlagsdataMap
                 )
             })
@@ -145,7 +143,7 @@ class Person private constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
-        jurist: MaskinellJurist,
+        subsumsjonslogg: Subsumsjonslogg,
         regler: ArbeidsgiverRegler
     ) : this(
         aktørId,
@@ -156,7 +154,7 @@ class Person private constructor(
         LocalDateTime.now(),
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
-        jurist.medFødselsnummer(personidentifikator.toString()),
+        subsumsjonslogg,
         emptyList<Person>(),
         regler = regler
     )
@@ -165,8 +163,11 @@ class Person private constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
-        jurist: MaskinellJurist
+        jurist: Subsumsjonslogg
     ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker)
+
+    var personidentifikator: Personidentifikator = personidentifikator
+        private set
 
     private val observers = mutableListOf<PersonObserver>()
 

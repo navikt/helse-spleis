@@ -2,7 +2,7 @@ package no.nav.helse.økonomi
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -174,6 +174,6 @@ internal class ØkonomiDagTest {
 
     private fun List<Utbetalingstidslinje>.betal(virkningsdato: LocalDate = 1.januar): List<Utbetalingstidslinje> {
         val periode = virkningsdato til virkningsdato // Brukes ikke når vi eksplisitt setter virkningsdato
-        return MaksimumUtbetalingFilter().betal(this, periode, Aktivitetslogg(), MaskinellJurist())
+        return MaksimumUtbetalingFilter().betal(this, periode, Aktivitetslogg(), EmptyLog)
     }
 }

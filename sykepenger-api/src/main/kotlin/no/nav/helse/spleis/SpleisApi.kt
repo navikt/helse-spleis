@@ -21,7 +21,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.dto.tilSpannerPersonDto
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
@@ -35,7 +35,7 @@ internal fun Application.spannerApi(hendelseDao: HendelseDao, personDao: PersonD
                     val ident = fnr(personDao, spurteDuClient)
                     val serialisertPerson = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(ident) }
-                    val person = Person.gjenopprett(MaskinellJurist(), dto)
+                    val person = Person.gjenopprett(EmptyLog, dto)
                     call.respond(person.dto().tilSpannerPersonDto())
                 }
             }
@@ -69,7 +69,7 @@ internal fun Application.sporingApi(hendelseDao: HendelseDao, personDao: PersonD
                     val fnr =  fnr(personDao)
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     val dto = person.tilPersonDto { hendelseDao.hentAlleHendelser(fnr) }
-                    call.respond(serializePersonForSporing(Person.gjenopprett(MaskinellJurist(), dto)))
+                    call.respond(serializePersonForSporing(Person.gjenopprett(EmptyLog, dto)))
                 }
             }
         }

@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.util.UUID
 import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.inneholder
 import no.nav.helse.person.Vedtaksperiode.Companion.slåSammenForkastedeSykdomstidslinjer
@@ -59,7 +59,7 @@ internal class ForkastetVedtaksperiode(
             arbeidsgiver: Arbeidsgiver,
             organisasjonsnummer: String,
             dto: ForkastetVedtaksperiodeInnDto,
-            arbeidsgiverjurist: MaskinellJurist,
+            subsumsjonslogg: Subsumsjonslogg,
             grunnlagsdata: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
             utbetalinger: Map<UUID, Utbetaling>
         ): ForkastetVedtaksperiode {
@@ -71,7 +71,7 @@ internal class ForkastetVedtaksperiode(
                     arbeidsgiver = arbeidsgiver,
                     organisasjonsnummer = organisasjonsnummer,
                     dto = dto.vedtaksperiode,
-                    arbeidsgiverjurist = arbeidsgiverjurist,
+                    subsumsjonslogg = subsumsjonslogg,
                     grunnlagsdata = grunnlagsdata,
                     utbetalinger = utbetalinger
                 )

@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -24,7 +24,7 @@ class OverstyrArbeidsgiveropplysninger(
     override fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
     override fun dokumentsporing() = Dokumentsporing.overstyrArbeidsgiveropplysninger(meldingsreferanseId())
 
-    override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: MaskinellJurist) {
+    override fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(person: Person, jurist: BehandlingSubsumsjonslogg) {
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
             this,
             this.skjæringstidspunkt,

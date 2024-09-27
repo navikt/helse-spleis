@@ -4,7 +4,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.KontekstType
+import no.nav.helse.etterlevelse.Subsumsjonskontekst
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 3`
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
@@ -193,7 +194,10 @@ class Inntektsmelding(
         person.emitInntektsmeldingIkkeHåndtert(this, organisasjonsnummer, dager.harPeriodeInnenfor16Dager(vedtaksperioder))
     }
     private fun håndtertNå() = håndtertInntekt
-    internal fun jurist(jurist: MaskinellJurist) = jurist.medInntektsmelding(this.meldingsreferanseId())
+    internal fun subsumsjonskontekst() = Subsumsjonskontekst(
+        type = KontekstType.Inntektsmelding,
+        verdi = meldingsreferanseId().toString()
+    )
 
     internal fun skalOppdatereVilkårsgrunnlag(
         sykdomstidslinjeperiode: Periode?,

@@ -12,7 +12,6 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt
@@ -71,7 +70,7 @@ internal class TestPerson(
     private val personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
     private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
     deferredLog: DeferredLog = DeferredLog(),
-    jurist: MaskinellJurist = MaskinellJurist()
+    jurist: SubsumsjonsListLog
 ) {
     internal companion object {
         private val fnrformatter = DateTimeFormatter.ofPattern("ddMMyy")

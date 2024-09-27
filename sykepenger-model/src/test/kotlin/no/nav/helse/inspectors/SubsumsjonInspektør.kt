@@ -2,10 +2,10 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Ledd
-import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
@@ -18,7 +18,7 @@ import no.nav.helse.person.IdInnhenter
 import org.junit.jupiter.api.Assertions.assertEquals
 
 
-internal class SubsumsjonInspektør(jurist: MaskinellJurist) {
+internal class SubsumsjonInspektør(jurist: SubsumsjonsListLog) {
 
     private val subsumsjoner = mutableListOf<Subsumsjon>()
 
@@ -38,7 +38,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) {
     }
 
     init {
-        jurist.subsumsjoner().forEach { subsumsjon ->
+        jurist.subsumsjoner.forEach { subsumsjon ->
             subsumsjoner.add(Subsumsjon(
                 lovverk = subsumsjon.lovverk,
                 paragraf = subsumsjon.paragraf,

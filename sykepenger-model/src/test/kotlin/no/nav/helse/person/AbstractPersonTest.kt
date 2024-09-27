@@ -7,9 +7,10 @@ import no.nav.helse.Alder
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.dsl.SubsumsjonsListLog
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
 import no.nav.helse.gjenopprettFraJSONtekst
@@ -47,7 +48,7 @@ internal abstract class AbstractPersonTest {
         val a3: String = "321987654"
         val a4: String = "456789123"
 
-        private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist).also { person ->
+        private fun overgangFraInfotrygdPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/infotrygdforlengelse.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
@@ -62,7 +63,7 @@ internal abstract class AbstractPersonTest {
                 ),
             )
         }
-        private fun pingPongPerson(jurist: MaskinellJurist) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
+        private fun pingPongPerson(jurist: Subsumsjonslogg) = gjenopprettFraJSON("/personer/pingpong.json", jurist).also { person ->
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
@@ -82,7 +83,7 @@ internal abstract class AbstractPersonTest {
     lateinit var person: Person
     lateinit var observatør: TestObservatør
     lateinit var ugyldigeSituasjonerObservatør: UgyldigeSituasjonerObservatør
-    lateinit var jurist: MaskinellJurist
+    lateinit var jurist: SubsumsjonsListLog
     val inspektør get() = inspektør(ORGNUMMER)
 
     val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this@vedtaksperiode.vedtaksperiode(orgnummer) }
@@ -114,8 +115,8 @@ internal abstract class AbstractPersonTest {
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }
 
-    protected fun createTestPerson(block: (jurist: MaskinellJurist) -> Person) : Person {
-        jurist = MaskinellJurist()
+    protected fun createTestPerson(block: (jurist: Subsumsjonslogg) -> Person) : Person {
+        jurist = SubsumsjonsListLog()
         person = block(jurist)
         observatør = TestObservatør(person)
         ugyldigeSituasjonerObservatør = UgyldigeSituasjonerObservatør(person)

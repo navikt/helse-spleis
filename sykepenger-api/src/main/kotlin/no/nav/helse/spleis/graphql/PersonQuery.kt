@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.SpekematClient
@@ -46,7 +46,7 @@ internal fun personResolver(spekematClient: SpekematClient, personDao: PersonDao
         val spekemat = spekematClient.hentSpekemat(fnr, callId)
         ApiMetrikker.målDeserialisering {
             val dto = serialisertPerson.tilPersonDto { hendelseDao.hentAlleHendelser(fnr.toLong()) }
-            Person.gjenopprett(MaskinellJurist(), dto)
+            Person.gjenopprett(EmptyLog, dto)
         }
             .let { ApiMetrikker.målByggSnapshot { serializePersonForSpeil(it, spekemat) } }
             .let { person -> mapTilDto(person, hendelseDao.hentHendelser(fnr.toLong())) }

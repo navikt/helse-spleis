@@ -2,7 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
-import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.EmptyLog
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.testhelpers.NAV
@@ -33,7 +33,7 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
         val dato = periode.start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
 
-        val resultat = MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
+        val resultat = MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, EmptyLog)
 
         resultat.first().inspektør.also { inspektør ->
             resultat.first().forEach { dag ->

@@ -8,7 +8,7 @@ dependencies {
     api(project(":sykepenger-primitiver"))
     api(project(":sykepenger-utbetaling"))
     api(project(":sykepenger-aktivitetslogg"))
-    api(project(":sykepenger-etterlevelse"))
+    api(project(":sykepenger-etterlevelse-api"))
 
     testImplementation(kotlin("reflect"))
     testImplementation(testFixtures(project(":sykepenger-utbetaling")))

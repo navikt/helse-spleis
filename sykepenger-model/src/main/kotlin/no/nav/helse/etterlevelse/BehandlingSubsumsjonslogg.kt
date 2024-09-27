@@ -1,17 +1,13 @@
 package no.nav.helse.etterlevelse
 
-import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.etterlevelse.MaskinellJurist.SubsumsjonEvent.Companion.paragrafVersjonFormaterer
 
-class MaskinellJurist private constructor(
-    private val parent: MaskinellJurist?,
+class BehandlingSubsumsjonslogg(
+    private val parent: Subsumsjonslogg,
     private val kontekster: List<Subsumsjonskontekst>
 ) : Subsumsjonslogg {
 
-    private val subsumsjoner = mutableListOf<Subsumsjon>()
-
-    constructor() : this(null, emptyList())
+    constructor(subsumsjonslogg: Subsumsjonslogg) : this(subsumsjonslogg, emptyList())
 
     override fun logg(subsumsjon: Subsumsjon) {
         sjekkKontekster()
@@ -27,8 +23,7 @@ class MaskinellJurist private constructor(
     }
 
     private fun leggTil(subsumsjon: Subsumsjon) {
-        subsumsjoner.add(subsumsjon)
-        parent?.leggTil(subsumsjon)
+        parent.logg(subsumsjon)
     }
 
     private fun sjekkKontekster() {
@@ -57,43 +52,5 @@ class MaskinellJurist private constructor(
     fun medInntektsmelding(inntektsmeldingId: UUID) = kopierMedKontekst(listOf(Subsumsjonskontekst(KontekstType.Inntektsmelding, inntektsmeldingId.toString())))
 
     private fun kopierMedKontekst(kontekster: List<Subsumsjonskontekst>) =
-        MaskinellJurist(this, this.kontekster + kontekster)
-
-    fun subsumsjoner() = subsumsjoner.toList()
-
-    fun events() = subsumsjoner.map { subsumsjon ->
-        SubsumsjonEvent(
-            sporing = subsumsjon.kontekster
-                .filterNot { it.type == KontekstType.Fødselsnummer }
-                .groupBy({ it.type }) { it.verdi },
-            lovverk = subsumsjon.lovverk,
-            ikrafttredelse = paragrafVersjonFormaterer.format(subsumsjon.versjon),
-            paragraf = subsumsjon.paragraf.ref,
-            ledd = subsumsjon.ledd?.nummer,
-            punktum = subsumsjon.punktum?.nummer,
-            bokstav = subsumsjon.bokstav?.ref,
-            input = subsumsjon.input,
-            output = subsumsjon.output,
-            utfall = subsumsjon.utfall.name
-        )
-    }
-
-    data class SubsumsjonEvent(
-        val id: UUID = UUID.randomUUID(),
-        val sporing: Map<KontekstType, List<String>>,
-        val lovverk: String,
-        val ikrafttredelse: String,
-        val paragraf: String,
-        val ledd: Int?,
-        val punktum: Int?,
-        val bokstav: Char?,
-        val input: Map<String, Any>,
-        val output: Map<String, Any>,
-        val utfall: String,
-    ) {
-
-        companion object {
-            val paragrafVersjonFormaterer = DateTimeFormatter.ISO_DATE
-        }
-    }
+        BehandlingSubsumsjonslogg(this, this.kontekster + kontekster)
 }
