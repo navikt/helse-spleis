@@ -23,6 +23,10 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
             override fun next() = this@Beløpstidslinje[periodeIterator.next()]
         }
     }
+
+    internal operator fun plus(other: Beløpstidslinje): Beløpstidslinje{
+        return Beløpstidslinje((this.dager + other.dager).toSortedMap())
+    }
 }
 
 sealed interface Dag {
