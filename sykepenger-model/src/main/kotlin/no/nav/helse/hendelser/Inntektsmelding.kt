@@ -8,7 +8,6 @@ import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 3`
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonsfakta
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.inntektsmelding.DagerFraInntektsmelding
 import no.nav.helse.nesteDag
@@ -22,15 +21,12 @@ import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Inntektsmelding
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
-import no.nav.helse.person.inntekt.Inntektsgrunnlag.ArbeidsgiverInntektsopplysningerOverstyringer
-import no.nav.helse.person.refusjon.Kilde
-import no.nav.helse.person.refusjon.Refusjonsfaktabøtte.Refusjonsfakta
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -73,7 +69,6 @@ class Inntektsmelding(
         }
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
     }
-    internal val refusjonsfakta = refusjon.refusjonsfakta(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, mottatt)
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val dager = DagerFraInntektsmelding(
@@ -146,8 +141,6 @@ class Inntektsmelding(
         private val opphørsdato: LocalDate?,
         private val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
-        internal fun refusjonsfakta(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, mottatt: LocalDateTime) =
-            endringerIRefusjon.refusjonsfakta(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato, mottatt)
 
         internal fun leggTilRefusjon(
             refusjonshistorikk: Refusjonshistorikk,
@@ -173,11 +166,6 @@ class Inntektsmelding(
                 private fun startskuddet(førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): LocalDate {
                     if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
                     return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
-                }
-                internal fun List<EndringIRefusjon>.refusjonsfakta(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>, beløp: Inntekt?, opphørsdato: LocalDate?, mottatt: LocalDateTime): List<Refusjonsfakta> {
-                    val refusjonsfakta = listOf(Refusjonsfakta(startskuddet(førsteFraværsdag, arbeidsgiverperioder), opphørsdato, beløp ?: INGEN, Kilde(meldingsreferanseId, ARBEIDSGIVER), mottatt))
-                    if (opphørsdato == null) return refusjonsfakta
-                    return refusjonsfakta + Refusjonsfakta(opphørsdato.nesteDag, null, INGEN, Kilde(meldingsreferanseId, ARBEIDSGIVER), mottatt)
                 }
             }
         }
