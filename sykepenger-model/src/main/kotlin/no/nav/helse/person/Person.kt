@@ -78,6 +78,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.SkattSykepengegrunnlag
+import no.nav.helse.person.view.PersonView
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -168,6 +169,8 @@ class Person private constructor(
     ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker)
 
     private val observers = mutableListOf<PersonObserver>()
+
+    fun view() = PersonView(arbeidsgivere.map{it.view()})
 
     fun håndter(sykmelding: Sykmelding) {
         registrer(sykmelding, "Behandler sykmelding")

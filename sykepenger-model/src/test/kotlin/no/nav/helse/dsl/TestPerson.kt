@@ -100,6 +100,7 @@ internal class TestPerson(
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
     internal fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
+    internal fun view() = person.view()
 
     internal fun arbeidsgiver(orgnummer: String) =
         arbeidsgivere.getOrPut(orgnummer) { TestArbeidsgiver(orgnummer) }

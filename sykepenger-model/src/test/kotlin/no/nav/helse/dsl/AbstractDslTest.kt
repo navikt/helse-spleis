@@ -71,6 +71,8 @@ internal abstract class AbstractDslTest {
         @JvmStatic
         protected val personInspektør = { person: Person -> PersonInspektør(person) }
         @JvmStatic
+        protected val personView = { person: Person -> person.view() }
+        @JvmStatic
         protected val agInspektør = { orgnummer: String -> { person: Person -> TestArbeidsgiverInspektør(person, orgnummer) } }
         @JvmStatic
         protected infix fun String.og(annen: String) = listOf(this, annen)
@@ -92,6 +94,7 @@ internal abstract class AbstractDslTest {
     private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter get() = TestArbeidsgiverAssertions(observatør, inspektør, testperson.inspiser(personInspektør))
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
 
+    protected fun personView() = testperson.view()
     protected fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
     protected fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
     protected fun inspektør(vedtaksperiodeId: UUID) = inspiser(personInspektør).vedtaksperiode(vedtaksperiodeId).inspektør
@@ -359,7 +362,7 @@ internal abstract class AbstractDslTest {
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
     private fun bareÈnArbeidsgiver(orgnr: String): String {
-        check(inspiser(personInspektør).arbeidsgiverteller < 2) {
+        check(testperson.view().arbeidsgivere.size < 2) {
             "Kan ikke bruke forenklet API for én arbeidsgivere når det finnes flere! Det er ikke trygt og kommer til å lage feil!"
         }
         return orgnr
