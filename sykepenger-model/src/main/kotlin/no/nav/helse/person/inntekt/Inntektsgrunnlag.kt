@@ -10,6 +10,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -95,12 +96,12 @@ internal class Inntektsgrunnlag private constructor(
     ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), vurdertInfotrygd, sammenligningsgrunnlag) {
         subsumsjonslogg.apply {
             arbeidsgiverInntektsopplysninger.subsummer(this, forrige = emptyList())
-            `§ 8-10 ledd 2 punktum 1`(
+            logg(`§ 8-10 ledd 2 punktum 1`(
                 erBegrenset = begrensning == ER_6G_BEGRENSET,
                 maksimaltSykepengegrunnlagÅrlig = `6G`.årlig,
                 skjæringstidspunkt = skjæringstidspunkt,
                 beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig
-            )
+            ))
             subsummerMinsteSykepengegrunnlag(alder, skjæringstidspunkt, this)
         }
     }

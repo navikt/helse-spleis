@@ -5,6 +5,7 @@ import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.`§ 8-12 ledd 2`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -110,7 +111,7 @@ internal class MaksimumSykepengedagerfilter(
         val gjenståendeSykepengedager = sisteVurdering.gjenståendeDagerUnder67År(alder, arbeidsgiverRegler)
         // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
         if (harTilstrekkeligOpphold || gjenståendeSykepengedager == 0) {
-            subsumsjonslogg.`§ 8-12 ledd 2`(
+            subsumsjonslogg.logg(`§ 8-12 ledd 2`(
                 oppfylt = harTilstrekkeligOpphold,
                 dato = dagen,
                 gjenståendeSykepengedager = gjenståendeSykepengedager,
@@ -118,7 +119,7 @@ internal class MaksimumSykepengedagerfilter(
                 tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
                 tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
                 beregnetTidslinje = beregnetTidslinjesubsumsjon,
-            )
+            ))
         }
         return harTilstrekkeligOpphold
     }

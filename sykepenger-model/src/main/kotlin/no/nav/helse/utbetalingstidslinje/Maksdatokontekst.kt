@@ -7,6 +7,7 @@ import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
+import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
@@ -158,7 +159,9 @@ internal data class Maksdatokontekst(
                 gjenståendeDager = gjenståendeDagerUnder67År(alder, regler)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.ORDINÆR_RETT
 
-                subsumsjonslogg.`§ 8-12 ledd 1 punktum 1`(vedtaksperiode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, gjenståendeDager, forbrukteDager, maksdato, startdatoSykepengerettighet)
+                `§ 8-12 ledd 1 punktum 1`(vedtaksperiode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, gjenståendeDager, forbrukteDager, maksdato, startdatoSykepengerettighet).forEach {
+                    subsumsjonslogg.logg(it)
+                }
                 førSyttiårsdagen(subsumsjonslogg, vedtaksperiode.endInclusive)
             }
             maksdatoBegrensetRett <= alder.syttiårsdagen.forrigeVirkedagFør() -> {

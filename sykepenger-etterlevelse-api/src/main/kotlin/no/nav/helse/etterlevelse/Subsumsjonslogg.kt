@@ -4,129 +4,26 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
+import no.nav.helse.etterlevelse.Ledd.LEDD_1
+import no.nav.helse.etterlevelse.Ledd.LEDD_2
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_13
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
+import kotlin.streams.asSequence
 
 interface Subsumsjonslogg {
 
     fun logg(subsumsjon: Subsumsjon)
-
-    /**
-     * Vilkår for rett til sykepenger at medlemmet oppholder seg i Norge.
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-9)
-     *
-     * @param oppfylt hvorvidt sykmeldte har oppholdt seg i Norge i søknadsperioden
-     * @param utlandsperioder perioden burker har oppgitt å ha vært i utlandet
-     * @param søknadsperioder perioder i søknaden som ligger til grunn
-     */
-    fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<LocalDate>>, søknadsperioder: List<Map<String, Serializable>>) {}
-
-    /**
-     * Vurdering av maksimalt sykepengegrunnlag
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
-     *
-     * @param erBegrenset dersom hjemlen slår inn ved at [beregningsgrunnlagÅrlig] blir begrenset til [maksimaltSykepengegrunnlagÅrlig]
-     * @param maksimaltSykepengegrunnlagÅrlig maksimalt årlig beløp utbetaling skal beregnes ut fra
-     * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlagÅrlig] settes ut fra
-     * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
-     */
-    fun `§ 8-10 ledd 2 punktum 1`(
-        erBegrenset: Boolean,
-        maksimaltSykepengegrunnlagÅrlig: Double,
-        skjæringstidspunkt: LocalDate,
-        beregningsgrunnlagÅrlig: Double
-    ) {}
-
-    /**
-     * Beregning av inntekt pr. dag
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
-     *
-     * @param årsinntekt inntekt oppgitt fra inntektsmelding omregnet til årlig
-     * @param inntektOmregnetTilDaglig årsinntekt omregnet til daglig inntekt
-     */
-    fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) {}
-
-    /**
-     * Trygden yter ikke sykepenger i lørdag og søndag
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-11)
-     *
-     * @param dato dagen vilkåret ikke er oppfylt for
-     */
-    fun `§ 8-11 ledd 1`(dato: Collection<ClosedRange<LocalDate>>) {}
-
-    /**
-     * Vurdering av maksimalt antall sykepengedager
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
-     *
-     * @param periode aktuell periode som vilkårsprøves
-     * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i inklusiv potensielt utbetalte dager fra Infotrygd
-     * @param beregnetTidslinje sammenslått tidslinje det tas utgangspunkt i når man beregner [gjenståendeSykedager], [forbrukteSykedager] og [maksdato]
-     * @param gjenståendeSykedager antall gjenstående sykepengedager ved siste utbetalte dag i [periode].
-     * @param forbrukteSykedager antall forbrukte sykepengedager ved siste utbetalte dag i [periode].
-     * @param maksdato dato for opphør av rett til sykepenger
-     * @param startdatoSykepengerettighet første NAV-dag i siste 248-dagers sykeforløp
-     */
-    fun `§ 8-12 ledd 1 punktum 1`(
-        periode: ClosedRange<LocalDate>,
-        tidslinjegrunnlag: List<List<Tidslinjedag>>,
-        beregnetTidslinje: List<Tidslinjedag>,
-        gjenståendeSykedager: Int,
-        forbrukteSykedager: Int,
-        maksdato: LocalDate,
-        startdatoSykepengerettighet: LocalDate?
-    ) {}
-
-    /**
-     * Vurdering av ny rett til sykepenger
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
-     *
-     * @param oppfylt **true** dersom det har vært tilstrekelig opphold
-     * @param dato dato vurdering av hjemmel gjøres
-     * @param tilstrekkeligOppholdISykedager antall dager med opphold i ytelsen som nødvendig for å oppnå ny rett til sykepenger
-     * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i ved bygging av [beregnetTidslinje]
-     * @param beregnetTidslinje tidslinje det tas utgangspunkt i ved utbetaling for aktuell vedtaksperiode
-     */
-    fun `§ 8-12 ledd 2`(
-        oppfylt: Boolean,
-        dato: LocalDate,
-        gjenståendeSykepengedager: Int,
-        beregnetAntallOppholdsdager: Int,
-        tilstrekkeligOppholdISykedager: Int,
-        tidslinjegrunnlag: List<List<Tidslinjedag>>,
-        beregnetTidslinje: List<Tidslinjedag>
-    ) {}
-
-    /**
-     * Vurdering av graderte sykepenger
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-13)
-     *
-     * @param periode perioden vilkåret vurderes for
-     * @param avvisteDager dager som vilkåret ikke er oppfylt for, hvis noen
-     * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
-     */
-    fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<ClosedRange<LocalDate>>, tidslinjer: List<List<Tidslinjedag>>) {}
-
-    /**
-     * Vurdering av sykepengenes størrelse
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-13)
-     *
-     * @param periode perioden vilkåret vurderes for
-     * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
-     * @param grense grense brukt til å vurdere [dagerUnderGrensen]
-     * @param dagerUnderGrensen dager som befinner seg under tilstrekkelig uføregrad, gitt av [grense]
-     */
-    fun `§ 8-13 ledd 2`(periode: ClosedRange<LocalDate>, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: Collection<ClosedRange<LocalDate>>) {}
 
     /**
      * Retten til sykepenger etter dette kapitlet faller bort når arbeidsforholdet midlertidig avbrytes i mer enn 14 dager
@@ -552,3 +449,293 @@ fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, 
         output = emptyMap(),
         kontekster = emptyList()
     )
+
+/**
+ * Vilkår for rett til sykepenger at medlemmet oppholder seg i Norge.
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-9)
+ *
+ * @param oppfylt hvorvidt sykmeldte har oppholdt seg i Norge i søknadsperioden
+ * @param utlandsperioder perioden burker har oppgitt å ha vært i utlandet
+ * @param søknadsperioder perioder i søknaden som ligger til grunn
+ */
+fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<LocalDate>>, søknadsperioder: List<Map<String, Serializable>>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = utlandsperioder,
+        lovverk = "folketrygdloven",
+        utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+        versjon = LocalDate.of(2021, 6, 1),
+        paragraf = PARAGRAF_8_9,
+        ledd = LEDD_1,
+        input = mapOf( "soknadsPerioder" to søknadsperioder),
+        kontekster = emptyList()
+    )
+
+/**
+ * Vurdering av maksimalt sykepengegrunnlag
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
+ *
+ * @param erBegrenset dersom hjemlen slår inn ved at [beregningsgrunnlagÅrlig] blir begrenset til [maksimaltSykepengegrunnlagÅrlig]
+ * @param maksimaltSykepengegrunnlagÅrlig maksimalt årlig beløp utbetaling skal beregnes ut fra
+ * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlagÅrlig] settes ut fra
+ * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
+ */
+fun `§ 8-10 ledd 2 punktum 1`(
+    erBegrenset: Boolean,
+    maksimaltSykepengegrunnlagÅrlig: Double,
+    skjæringstidspunkt: LocalDate,
+    beregningsgrunnlagÅrlig: Double
+) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = VILKAR_BEREGNET,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2020, 1, 1),
+        paragraf = PARAGRAF_8_10,
+        ledd = 2.ledd,
+        punktum = 1.punktum,
+        input = mapOf(
+            "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlagÅrlig,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig
+        ),
+        output = mapOf(
+            "erBegrenset" to erBegrenset
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * Beregning av inntekt pr. dag
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
+ *
+ * @param årsinntekt inntekt oppgitt fra inntektsmelding omregnet til årlig
+ * @param inntektOmregnetTilDaglig årsinntekt omregnet til daglig inntekt
+ */
+fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = VILKAR_BEREGNET,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2020, 1, 1),
+        paragraf = PARAGRAF_8_10,
+        ledd = 3.ledd,
+        input = mapOf("årligInntekt" to årsinntekt),
+        output = mapOf("dagligInntekt" to inntektOmregnetTilDaglig),
+        kontekster = emptyList()
+    )
+
+/**
+ * Trygden yter ikke sykepenger i lørdag og søndag
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-11)
+ *
+ * @param dato dagen vilkåret ikke er oppfylt for
+ */
+fun `§ 8-11 ledd 1`(vedtaksperiode: ClosedRange<LocalDate>, dato: Collection<ClosedRange<LocalDate>>) =
+    Subsumsjon.periodisertSubsumsjon(
+        lovverk = "folketrygdloven",
+        perioder = dato,
+        paragraf = PARAGRAF_8_11,
+        ledd = 1.ledd,
+        utfall = VILKAR_IKKE_OPPFYLT,
+        versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+        input = mapOf("periode" to mapOf( "fom" to vedtaksperiode.start, "tom" to vedtaksperiode.endInclusive)),
+        kontekster = emptyList()
+    )
+
+
+/**
+ * Vurdering av maksimalt antall sykepengedager
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
+ *
+ * @param periode aktuell periode som vilkårsprøves
+ * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i inklusiv potensielt utbetalte dager fra Infotrygd
+ * @param beregnetTidslinje sammenslått tidslinje det tas utgangspunkt i når man beregner [gjenståendeSykedager], [forbrukteSykedager] og [maksdato]
+ * @param gjenståendeSykedager antall gjenstående sykepengedager ved siste utbetalte dag i [periode].
+ * @param forbrukteSykedager antall forbrukte sykepengedager ved siste utbetalte dag i [periode].
+ * @param maksdato dato for opphør av rett til sykepenger
+ * @param startdatoSykepengerettighet første NAV-dag i siste 248-dagers sykeforløp
+ */
+fun `§ 8-12 ledd 1 punktum 1`(
+    periode: ClosedRange<LocalDate>,
+    tidslinjegrunnlag: List<List<Tidslinjedag>>,
+    beregnetTidslinje: List<Tidslinjedag>,
+    gjenståendeSykedager: Int,
+    forbrukteSykedager: Int,
+    maksdato: LocalDate,
+    startdatoSykepengerettighet: LocalDate
+): List<Subsumsjon> {
+    val iterator = RangeIterator(periode).subsetFom(startdatoSykepengerettighet)
+    val (dagerOppfylt, dagerIkkeOppfylt) = iterator
+        .asSequence()
+        .partition { it <= maksdato }
+
+    fun lagSubsumsjon(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) =
+            Subsumsjon.enkelSubsumsjon(
+                utfall = utfall,
+                lovverk = "folketrygdloven",
+                versjon = LocalDate.of(2021, 5, 21),
+                paragraf = PARAGRAF_8_12,
+                ledd = 1.ledd,
+                punktum = 1.punktum,
+                input = mapOf(
+                    "fom" to periode.start,
+                    "tom" to periode.endInclusive,
+                    "utfallFom" to utfallFom,
+                    "utfallTom" to utfallTom,
+                    "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager(periode) },
+                    "beregnetTidslinje" to beregnetTidslinje.dager(periode)
+                ),
+                output = mapOf(
+                    "gjenståendeSykedager" to gjenståendeSykedager,
+                    "forbrukteSykedager" to forbrukteSykedager,
+                    "maksdato" to maksdato,
+                ),
+                kontekster = emptyList()
+            )
+
+    val subsumsjoner = mutableListOf<Subsumsjon>()
+    if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last()))
+    if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()))
+    return subsumsjoner
+}
+
+/**
+ * Vurdering av ny rett til sykepenger
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
+ *
+ * @param oppfylt **true** dersom det har vært tilstrekelig opphold
+ * @param dato dato vurdering av hjemmel gjøres
+ * @param tilstrekkeligOppholdISykedager antall dager med opphold i ytelsen som nødvendig for å oppnå ny rett til sykepenger
+ * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i ved bygging av [beregnetTidslinje]
+ * @param beregnetTidslinje tidslinje det tas utgangspunkt i ved utbetaling for aktuell vedtaksperiode
+ */
+fun `§ 8-12 ledd 2`(
+    oppfylt: Boolean,
+    dato: LocalDate,
+    gjenståendeSykepengedager: Int,
+    beregnetAntallOppholdsdager: Int,
+    tilstrekkeligOppholdISykedager: Int,
+    tidslinjegrunnlag: List<List<Tidslinjedag>>,
+    beregnetTidslinje: List<Tidslinjedag>
+) =
+    Subsumsjon.enkelSubsumsjon(
+        lovverk = "folketrygdloven",
+        utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+        versjon = LocalDate.of(2021, 5, 21),
+        paragraf = PARAGRAF_8_12,
+        ledd = 2.ledd,
+        punktum = null,
+        bokstav = null,
+        input = mapOf(
+            "dato" to dato,
+            "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
+            "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager() },
+            "beregnetTidslinje" to beregnetTidslinje.dager()
+        ),
+        output = emptyMap(),
+        kontekster = emptyList()
+    )
+
+/**
+ * Vurdering av graderte sykepenger
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-13)
+ *
+ * @param periode perioden vilkåret vurderes for
+ * @param avvisteDager dager som vilkåret ikke er oppfylt for, hvis noen
+ * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
+ */
+fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<ClosedRange<LocalDate>>, tidslinjer: List<List<Tidslinjedag>>): List<Subsumsjon> {
+    fun lagSubsumsjon(utfall: Utfall, dager: Collection<ClosedRange<LocalDate>>) =
+        Subsumsjon.periodisertSubsumsjon(
+            perioder = dager,
+            lovverk = "folketrygdloven",
+            utfall = utfall,
+            paragraf = PARAGRAF_8_13,
+            ledd = LEDD_1,
+            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+            input = mapOf(
+                "tidslinjegrunnlag" to tidslinjer.map { it.dager(periode) }
+            ),
+            kontekster = emptyList()
+        )
+
+    val subsumsjoner = mutableListOf<Subsumsjon>()
+    val oppfylteDager = avvisteDager.trim(periode)
+    if (oppfylteDager.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, oppfylteDager))
+    if (avvisteDager.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, avvisteDager))
+    return subsumsjoner
+}
+
+/**
+ * Vurdering av sykepengenes størrelse
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-13)
+ *
+ * @param periode perioden vilkåret vurderes for
+ * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
+ * @param grense grense brukt til å vurdere [dagerUnderGrensen]
+ * @param dagerUnderGrensen dager som befinner seg under tilstrekkelig uføregrad, gitt av [grense]
+ */
+fun `§ 8-13 ledd 2`(periode: ClosedRange<LocalDate>, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: Collection<ClosedRange<LocalDate>>): Subsumsjon {
+    val tidslinjegrunnlag = tidslinjer.map { it.dager(periode) }
+    val dagerUnderGrensenMap = dagerUnderGrensen.map {
+        mapOf(
+            "fom" to it.start,
+            "tom" to it.endInclusive
+        )
+    }
+    return Subsumsjon.periodisertSubsumsjon(
+        perioder = listOf(periode),
+        lovverk = "folketrygdloven",
+        utfall = VILKAR_BEREGNET,
+        paragraf = PARAGRAF_8_13,
+        ledd = LEDD_2,
+        versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+        input = mapOf(
+            "tidslinjegrunnlag" to tidslinjegrunnlag,
+            "grense" to grense
+        ),
+        output = mapOf(
+            "dagerUnderGrensen" to dagerUnderGrensenMap
+        ),
+        kontekster = emptyList()
+    )
+}
+
+internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iterator<LocalDate> {
+    private var currentDate = start
+    constructor(range: ClosedRange<LocalDate>) : this(range.start, range.endInclusive)
+    fun subsetFom(fom: LocalDate) = apply {
+        currentDate = maxOf(currentDate, fom)
+    }
+    override fun hasNext() = end >= currentDate
+    override fun next(): LocalDate {
+        check(hasNext())
+        return currentDate.also {
+            currentDate = it.plusDays(1)
+        }
+    }
+}
+
+// forutsetter at <other> er sortert
+private fun Collection<ClosedRange<LocalDate>>.trim(other: ClosedRange<LocalDate>): Collection<ClosedRange<LocalDate>> {
+    return fold(listOf(other)) { result, trimperiode ->
+        result.dropLast(1) + (result.lastOrNull()?.trim(trimperiode) ?: emptyList())
+    }
+}
+
+private fun ClosedRange<LocalDate>.trim(periodeSomSkalTrimmesBort: ClosedRange<LocalDate>): Collection<ClosedRange<LocalDate>> {
+    // fullstendig overlapp
+    if (periodeSomSkalTrimmesBort.start <= this.start && periodeSomSkalTrimmesBort.endInclusive >= this.endInclusive) return emptyList()
+    // <periodeSomSkalTrimmesBort> kan nå enten trimme bort hale, snuten eller midten av <this>. i sistnevnte
+    // situasjon så vil resultatet være to perioder.
+    val result = mutableListOf<ClosedRange<LocalDate>>()
+    if (this.start < periodeSomSkalTrimmesBort.start) result.add(this.start..periodeSomSkalTrimmesBort.start.minusDays(1))
+    if (this.endInclusive > periodeSomSkalTrimmesBort.endInclusive) result.add(periodeSomSkalTrimmesBort.endInclusive.plusDays(1)..this.endInclusive)
+    return result
+}

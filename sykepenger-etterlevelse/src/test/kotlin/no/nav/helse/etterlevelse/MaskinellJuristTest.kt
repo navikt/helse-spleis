@@ -43,7 +43,9 @@ internal class MaskinellJuristTest {
             .medFødselsnummer("10052088033")
             .medOrganisasjonsnummer("123456789")
             .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
-        vedtaksperiodeJurist.`§ 8-13 ledd 1`(1.januar..31.januar, listOf(15.januar..16.januar), emptyList())
+        `§ 8-13 ledd 1`(1.januar..31.januar, listOf(15.januar..16.januar), emptyList()).forEach {
+            vedtaksperiodeJurist.logg(it)
+        }
     }
 
     private fun assertKontekster(subsumsjon: Subsumsjon, vararg kontekster: Pair<String, KontekstType>) {

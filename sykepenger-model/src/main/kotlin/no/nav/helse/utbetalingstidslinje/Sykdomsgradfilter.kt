@@ -2,6 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
+import no.nav.helse.etterlevelse.`§ 8-13 ledd 1`
+import no.nav.helse.etterlevelse.`§ 8-13 ledd 2`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
@@ -35,11 +37,13 @@ internal class Sykdomsgradfilter(private val minimumSykdomsgradsvurdering: Minim
         val avvisteTidslinjer = avvis(oppdaterte, avvistePerioder, listOf(Begrunnelse.MinimumSykdomsgrad))
 
         Prosentdel.subsumsjon(subsumsjonslogg) { grense ->
-            `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, avvistePerioder)
+            logg(`§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, avvistePerioder))
         }
         val avvisteDager = avvisteDager(avvisteTidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
-        subsumsjonslogg.`§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon)
+        `§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }.grupperSammenhengendePerioderMedHensynTilHelg(), tidslinjerForSubsumsjon).forEach {
+            subsumsjonslogg.logg(it)
+        }
         if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)
         else aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
         return avvisteTidslinjer

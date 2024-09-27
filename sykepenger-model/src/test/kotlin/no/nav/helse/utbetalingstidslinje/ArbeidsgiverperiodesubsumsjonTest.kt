@@ -3,9 +3,13 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjon
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
+import no.nav.helse.etterlevelse.folketrygdloven
+import no.nav.helse.etterlevelse.førsteLedd
+import no.nav.helse.etterlevelse.paragraf
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
@@ -214,7 +218,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         utbetalingstidslinje.accept(observatør)
 
         val subsummering = Utbetalingstidslinjesubsumsjon(jurist, tidslinje, utbetalingstidslinje)
-        subsummering.subsummer(ArbeidsgiverRegler.Companion.NormalArbeidstaker)
+        subsummering.subsummer(tidslinje.periode()!!, ArbeidsgiverRegler.Companion.NormalArbeidstaker)
     }
 
     private class Subsumsjonobservatør : Subsumsjonslogg {
@@ -230,8 +234,24 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
 
         private fun ClosedRange<LocalDate>.antallDager() = start.datesUntil(endInclusive.nesteDag).count().toInt()
         private fun Collection<ClosedRange<LocalDate>>.antallDager() = sumOf { it.antallDager() }
+        private val Subsumsjon.perioder get() = output["perioder"]
+            ?.let { it as List<*> }
+            ?.map { it as Map<*, *> }
+            ?.mapNotNull {
+                val fom = it["fom"] as? LocalDate
+                val tom = it["tom"] as? LocalDate
+                if (fom != null && tom != null) fom..tom else null
+            }
+            ?: emptyList()
 
-        override fun logg(subsumsjon: Subsumsjon) {}
+        override fun logg(subsumsjon: Subsumsjon) {
+            when {
+                subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_11).førsteLedd) -> {
+                    subsumsjoner += 1
+                    `§ 8-11 første ledd` += subsumsjon.perioder.antallDager()
+                }
+            }
+        }
 
         override fun `§ 8-17 ledd 1 bokstav a`(
             oppfylt: Boolean,
@@ -246,11 +266,6 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         override fun `§ 8-17 ledd 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {
             subsumsjoner += 1
             `§ 8-17 ledd 2` += dato.antallDager()
-        }
-
-        override fun `§ 8-11 ledd 1`(dato: Collection<ClosedRange<LocalDate>>) {
-            subsumsjoner += 1
-            `§ 8-11 første ledd` += dato.antallDager()
         }
 
         override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {

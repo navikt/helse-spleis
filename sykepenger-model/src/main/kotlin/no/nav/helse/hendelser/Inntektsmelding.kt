@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-10 ledd 3`
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonsfakta
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -96,7 +97,7 @@ class Inntektsmelding(
     }
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, subsumsjonslogg: Subsumsjonslogg): LocalDate {
-        subsumsjonslogg.`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig)
+        subsumsjonslogg.logg(`§ 8-10 ledd 3`(beregnetInntekt.årlig, beregnetInntekt.daglig))
         inntektshistorikk.leggTil(Inntektsmelding(beregnetInntektsdato, meldingsreferanseId(), beregnetInntekt))
         return beregnetInntektsdato
     }

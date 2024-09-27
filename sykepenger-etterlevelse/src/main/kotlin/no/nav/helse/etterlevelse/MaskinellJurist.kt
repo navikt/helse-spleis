@@ -59,7 +59,15 @@ class MaskinellJurist private constructor(
 
     override fun logg(subsumsjon: Subsumsjon) {
         sjekkKontekster()
+        if (tomPeriode(subsumsjon)) return
         leggTil(subsumsjon.copy(kontekster = kontekster))
+    }
+
+    private fun tomPeriode(subsumsjon: Subsumsjon): Boolean {
+        if (subsumsjon.type != Subsumsjon.Subsumsjonstype.PERIODISERT) return false
+        if ("perioder" !in subsumsjon.output) return true
+        val perioder = subsumsjon.output["perioder"] as List<*>
+        return perioder.isEmpty()
     }
 
     private fun leggTil(subsumsjon: Subsumsjon) {
@@ -94,209 +102,6 @@ class MaskinellJurist private constructor(
 
     private fun kopierMedKontekst(kontekster: List<Subsumsjonskontekst>, periode: ClosedRange<LocalDate>? = null) =
         MaskinellJurist(this, this.kontekster + kontekster, periode)
-
-    override fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<LocalDate>>, søknadsperioder: List<Map<String, Serializable>>) {
-        if (utlandsperioder.isEmpty()) return
-        leggTil(Subsumsjon.periodisertSubsumsjon(
-            perioder = utlandsperioder,
-            lovverk = "folketrygdloven",
-            utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-            versjon = LocalDate.of(2021, 6, 1),
-            paragraf = PARAGRAF_8_9,
-            ledd = LEDD_1,
-            input = mapOf( "soknadsPerioder" to søknadsperioder),
-            kontekster = kontekster
-        ))
-    }
-
-    override fun `§ 8-10 ledd 2 punktum 1`(
-        erBegrenset: Boolean,
-        maksimaltSykepengegrunnlagÅrlig: Double,
-        skjæringstidspunkt: LocalDate,
-        beregningsgrunnlagÅrlig: Double
-    ) {
-        leggTil(
-            Subsumsjon.enkelSubsumsjon(
-                utfall = VILKAR_BEREGNET,
-                lovverk = "folketrygdloven",
-                versjon = LocalDate.of(2020, 1, 1),
-                paragraf = PARAGRAF_8_10,
-                ledd = 2.ledd,
-                punktum = 1.punktum,
-                input = mapOf(
-                    "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlagÅrlig,
-                    "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig
-                ),
-                output = mapOf(
-                    "erBegrenset" to erBegrenset
-                ),
-                kontekster = kontekster
-            )
-        )
-    }
-
-    override fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) {
-        leggTil(
-            Subsumsjon.enkelSubsumsjon(
-                utfall = VILKAR_BEREGNET,
-                lovverk = "folketrygdloven",
-                versjon = LocalDate.of(2020, 1, 1),
-                paragraf = PARAGRAF_8_10,
-                ledd = 3.ledd,
-                input = mapOf("årligInntekt" to årsinntekt),
-                output = mapOf("dagligInntekt" to inntektOmregnetTilDaglig),
-                kontekster = kontekster
-            )
-        )
-    }
-
-    override fun `§ 8-11 ledd 1`(dato: Collection<ClosedRange<LocalDate>>) {
-        if (dato.isEmpty()) return
-        leggTil(
-            Subsumsjon.periodisertSubsumsjon(
-                lovverk = "folketrygdloven",
-                perioder = dato,
-                paragraf = PARAGRAF_8_11,
-                ledd = 1.ledd,
-                utfall = VILKAR_IKKE_OPPFYLT,
-                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-                input = mapOf("periode" to mapOf( "fom" to periode().start, "tom" to periode().endInclusive)),
-                kontekster = kontekster
-            )
-        )
-    }
-
-    override fun `§ 8-12 ledd 1 punktum 1`(
-        periode: ClosedRange<LocalDate>,
-        tidslinjegrunnlag: List<List<Tidslinjedag>>,
-        beregnetTidslinje: List<Tidslinjedag>,
-        gjenståendeSykedager: Int,
-        forbrukteSykedager: Int,
-        maksdato: LocalDate,
-        startdatoSykepengerettighet: LocalDate?
-    ) {
-        if (startdatoSykepengerettighet == null) return
-        val iterator = RangeIterator(periode).subsetFom(startdatoSykepengerettighet)
-        val (dagerOppfylt, dagerIkkeOppfylt) = iterator
-            .asSequence()
-            .partition { it <= maksdato }
-
-        fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {
-            leggTil(
-                Subsumsjon.enkelSubsumsjon(
-                    utfall = utfall,
-                    lovverk = "folketrygdloven",
-                    versjon = LocalDate.of(2021, 5, 21),
-                    paragraf = PARAGRAF_8_12,
-                    ledd = 1.ledd,
-                    punktum = 1.punktum,
-                    input = mapOf(
-                        "fom" to periode.start,
-                        "tom" to periode.endInclusive,
-                        "utfallFom" to utfallFom,
-                        "utfallTom" to utfallTom,
-                        "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager(periode) },
-                        "beregnetTidslinje" to beregnetTidslinje.dager(periode)
-                    ),
-                    output = mapOf(
-                        "gjenståendeSykedager" to gjenståendeSykedager,
-                        "forbrukteSykedager" to forbrukteSykedager,
-                        "maksdato" to maksdato,
-                    ),
-                    kontekster = kontekster
-                )
-            )
-        }
-        if (dagerOppfylt.isNotEmpty()) logg(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last())
-        if (dagerIkkeOppfylt.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last())
-    }
-
-    override fun `§ 8-12 ledd 2`(
-        oppfylt: Boolean,
-        dato: LocalDate,
-        gjenståendeSykepengedager: Int,
-        beregnetAntallOppholdsdager: Int,
-        tilstrekkeligOppholdISykedager: Int,
-        tidslinjegrunnlag: List<List<Tidslinjedag>>,
-        beregnetTidslinje: List<Tidslinjedag>
-    ) {
-        leggTil(
-            Subsumsjon.enkelSubsumsjon(
-                lovverk = "folketrygdloven",
-                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                versjon = LocalDate.of(2021, 5, 21),
-                paragraf = PARAGRAF_8_12,
-                ledd = 2.ledd,
-                punktum = null,
-                bokstav = null,
-                input = mapOf(
-                    "dato" to dato,
-                    "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
-                    "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager() },
-                    "beregnetTidslinje" to beregnetTidslinje.dager()
-                ),
-                output = emptyMap(),
-                kontekster = kontekster
-            )
-        )
-    }
-
-    override fun `§ 8-13 ledd 1`(periode: ClosedRange<LocalDate>, avvisteDager: Collection<ClosedRange<LocalDate>>, tidslinjer: List<List<Tidslinjedag>>) {
-        fun logg(utfall: Utfall, dager: Collection<ClosedRange<LocalDate>>) {
-            leggTil(
-                Subsumsjon.periodisertSubsumsjon(
-                    perioder = dager,
-                    lovverk = "folketrygdloven",
-                    utfall = utfall,
-                    paragraf = PARAGRAF_8_13,
-                    ledd = LEDD_1,
-                    versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-                    input = mapOf(
-                        "tidslinjegrunnlag" to tidslinjer.map { it.dager(periode) }
-                    ),
-                    kontekster = kontekster
-                )
-            )
-        }
-
-        val oppfylteDager = avvisteDager.trim(periode)
-        if (oppfylteDager.isNotEmpty()) logg(VILKAR_OPPFYLT, oppfylteDager)
-        if (avvisteDager.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, avvisteDager)
-    }
-
-    override fun `§ 8-13 ledd 2`(
-        periode: ClosedRange<LocalDate>,
-        tidslinjer: List<List<Tidslinjedag>>,
-        grense: Double,
-        dagerUnderGrensen: Collection<ClosedRange<LocalDate>>
-    ) {
-        val tidslinjegrunnlag = tidslinjer.map { it.dager(periode) }
-        val dagerUnderGrensenMap = dagerUnderGrensen.map {
-            mapOf(
-                "fom" to it.start,
-                "tom" to it.endInclusive
-            )
-        }
-        leggTil(
-            Subsumsjon.periodisertSubsumsjon(
-                perioder = listOf(periode),
-                lovverk = "folketrygdloven",
-                utfall = VILKAR_BEREGNET,
-                paragraf = PARAGRAF_8_13,
-                ledd = LEDD_2,
-                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-                input = mapOf(
-                    "tidslinjegrunnlag" to tidslinjegrunnlag,
-                    "grense" to grense
-                ),
-                output = mapOf(
-                    "dagerUnderGrensen" to dagerUnderGrensenMap
-                ),
-                kontekster = kontekster
-            )
-        )
-    }
 
     override fun `§ 8-15`(
         skjæringstidspunkt: LocalDate,

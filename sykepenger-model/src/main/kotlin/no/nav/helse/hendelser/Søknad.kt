@@ -7,6 +7,7 @@ import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
 import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -114,7 +115,7 @@ class Søknad(
 
     private fun valider(subsumsjonslogg: Subsumsjonslogg): IAktivitetslogg {
         val utlandsopphold = perioder.filterIsInstance<Søknadsperiode.Utlandsopphold>().map { it.periode }
-        subsumsjonslogg.`§ 8-9 ledd 1`(false, utlandsopphold, this.perioder.subsumsjonsFormat())
+        subsumsjonslogg.logg(`§ 8-9 ledd 1`(false, utlandsopphold, this.perioder.subsumsjonsFormat()))
         perioder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
         if (tilkomneInntekter.isNotEmpty()) varsel(RV_SV_5)
