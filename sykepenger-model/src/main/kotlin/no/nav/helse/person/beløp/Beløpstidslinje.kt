@@ -16,7 +16,7 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
     internal operator fun get(dato: LocalDate): Dag = dager[dato] ?: UkjentDag
 
     override operator fun iterator(): Iterator<Dag> {
-        if (periode == null) return emptyList<Nothing>().iterator()
+        if (periode == null) return emptyList<Dag>().iterator()
         return object : Iterator<Dag> {
             private val periodeIterator = periode.iterator()
             override fun hasNext() = periodeIterator.hasNext()
@@ -24,9 +24,7 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
         }
     }
 
-    internal operator fun plus(other: Beløpstidslinje): Beløpstidslinje{
-        return Beløpstidslinje((this.dager + other.dager).toSortedMap())
-    }
+    internal operator fun plus(other: Beløpstidslinje) = Beløpstidslinje((this.dager + other.dager).toSortedMap())
 }
 
 sealed interface Dag {
@@ -35,13 +33,14 @@ sealed interface Dag {
     val kilde: Kilde
 }
 
-data class Beløpsdag(override val dato: LocalDate, override val beløp: Inntekt, override val kilde: Kilde) : Dag {}
+data class Beløpsdag(
+    override val dato: LocalDate,
+    override val beløp: Inntekt,
+    override val kilde: Kilde
+): Dag
 
 data object UkjentDag : Dag {
-    override val dato: LocalDate
-        get() = error("En ukjent dag har ikke en dato")
-    override val beløp: Inntekt
-        get() = error("En ukjent dag har ikke et beløp")
-    override val kilde: Kilde
-        get() = error("En ukjent dag har ikke et beløp")
+    override val dato get() = error("En ukjent dag har ikke en dato")
+    override val beløp get() = error("En ukjent dag har ikke et beløp")
+    override val kilde get() = error("En ukjent dag har ikke et kilde")
 }

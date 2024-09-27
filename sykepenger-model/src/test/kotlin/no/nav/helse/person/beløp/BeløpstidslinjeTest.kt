@@ -19,7 +19,7 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `beløpstidlinje lager en tidslinje med beløp og kilde`() {
-        val beløpstidslinje = beløpstidslinjeTull(
+        val beløpstidslinje = beløpstidslinjeMedAvsender(
             Triple(1.januar til 10.januar, INNTEKT, Avsender.ARBEIDSGIVER),
             Triple(11.januar til 31.januar, INNTEKT/2, Avsender.SAKSBEHANDLER)
         )
@@ -30,7 +30,7 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `Hvis man slår opp på en dag som ikke finnes, da skal man få en ukjent dag`() {
-        val beløpstidslinje = beløpstidslinjeTull(Triple(januar, INNTEKT, Avsender.ARBEIDSGIVER))
+        val beløpstidslinje = beløpstidslinjeMedAvsender(Triple(januar, INNTEKT, Avsender.ARBEIDSGIVER))
         assertDoesNotThrow { beløpstidslinje[1.februar] }
         assertEquals(UkjentDag, beløpstidslinje[1.februar])
     }
@@ -44,7 +44,7 @@ internal class BeløpstidslinjeTest {
     @Test
     fun `Man skal ikke kunne opprette en ny tidslinje med overlappende dager`() {
         assertThrows<IllegalArgumentException> {
-            beløpstidslinjeTull(
+            beløpstidslinjeMedAvsender(
                 Triple(januar, INNTEKT, Avsender.ARBEIDSGIVER),
                 Triple(januar, INNTEKT, Avsender.ARBEIDSGIVER)
             )
@@ -55,13 +55,13 @@ internal class BeløpstidslinjeTest {
     fun `Du haver to stykk beløpstidslinje, som du ønsker forent`()  {
         val arbeidsgiverkilde = Kilde(UUID.randomUUID(), Avsender.ARBEIDSGIVER)
         val saksbehandlerkilde = Kilde(UUID.randomUUID(), Avsender.SAKSBEHANDLER)
-        val gammelTidslinje = beløpstidslinje(
+        val gammelTidslinje = beløpstidslinjeMedKilde(
             Triple(januar, INNTEKT, arbeidsgiverkilde),
             Triple(mars, INGEN, arbeidsgiverkilde)
         )
-        val nyTidslinje = beløpstidslinje(Triple(20.januar til 10.mars, INNTEKT, saksbehandlerkilde))
+        val nyTidslinje = beløpstidslinjeMedKilde(Triple(20.januar til 10.mars, INNTEKT, saksbehandlerkilde))
 
-        val forventetTidslinje = beløpstidslinje(
+        val forventetTidslinje = beløpstidslinjeMedKilde(
             Triple(1.januar til 19.januar, INNTEKT, arbeidsgiverkilde),
             Triple(20.januar til 10.mars, INNTEKT, saksbehandlerkilde),
             Triple(11.mars til 31.mars, INGEN, arbeidsgiverkilde)
@@ -69,10 +69,10 @@ internal class BeløpstidslinjeTest {
         assertEquals(forventetTidslinje, gammelTidslinje + nyTidslinje)
     }
 
-    private fun beløpstidslinjeTull(vararg perioder: Triple<Periode, Inntekt, Avsender>) = Beløpstidslinje(
+    private fun beløpstidslinjeMedAvsender(vararg perioder: Triple<Periode, Inntekt, Avsender>) = Beløpstidslinje(
         perioder.flatMap { (periode, inntekt, avsender) -> periode.map { dato -> Beløpsdag(dato, inntekt, Kilde(UUID.randomUUID(), avsender)) } }
     )
-    private fun beløpstidslinje(vararg perioder: Triple<Periode, Inntekt, Kilde>) = Beløpstidslinje(
+    private fun beløpstidslinjeMedKilde(vararg perioder: Triple<Periode, Inntekt, Kilde>) = Beløpstidslinje(
         perioder.flatMap { (periode, inntekt, kilde) -> periode.map { dato -> Beløpsdag(dato, inntekt, kilde) } }
     )
 }
