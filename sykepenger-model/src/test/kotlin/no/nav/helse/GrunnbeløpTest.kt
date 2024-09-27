@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -209,11 +210,12 @@ internal class GrunnbeløpTest {
             if (oppfylt) return null
             return Begrunnelse.MinimumInntektOver67
         }
-        subsumsjonslogg.`§ 8-3 ledd 2 punktum 1`(
+        subsumsjonslogg.logg(`§ 8-3 ledd 2 punktum 1`(
             oppfylt = oppfylt,
             skjæringstidspunkt = skjæringstidspunkt,
             beregningsgrunnlagÅrlig = inntekt.årlig,
-            minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig)
+            minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
+        ))
         if (oppfylt) return null
         return Begrunnelse.MinimumInntekt
     }

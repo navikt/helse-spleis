@@ -10,6 +10,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
 import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -117,11 +118,12 @@ internal class Inntektsgrunnlag private constructor(
                 beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
                 minimumInntektÅrlig = minsteinntekt.årlig)
         else
-            subsumsjonslogg.`§ 8-3 ledd 2 punktum 1`(
+            subsumsjonslogg.logg(`§ 8-3 ledd 2 punktum 1`(
                 oppfylt = oppfyllerMinsteinntektskrav,
                 skjæringstidspunkt = skjæringstidspunkt,
                 beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                minimumInntektÅrlig = minsteinntekt.årlig)
+                minimumInntektÅrlig = minsteinntekt.årlig
+            ))
     }
 
     internal companion object {

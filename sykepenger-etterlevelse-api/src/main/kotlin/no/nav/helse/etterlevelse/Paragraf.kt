@@ -25,7 +25,7 @@ enum class Paragraf(val ref: String) {
     KJENNELSE_2006_4023("2006-4023");
 
     override fun toString(): String {
-        return "§$ref"
+        return "§ $ref"
     }
 }
 
@@ -77,6 +77,10 @@ enum class Bokstav(val ref: Char) {
     init {
         val regex = "[a-zæøå]".toRegex()
         require(regex.matches(ref.toString())) { "En bokstav må være en bokstav i det norske alfabetet" }
+    }
+
+    override fun toString(): String {
+        return "bokstav $ref"
     }
 }
 

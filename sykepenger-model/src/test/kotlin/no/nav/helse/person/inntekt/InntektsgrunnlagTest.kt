@@ -8,10 +8,18 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
+import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.Paragraf
+import no.nav.helse.etterlevelse.Punktum
 import no.nav.helse.etterlevelse.Subsumsjon
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg.Companion.NullObserver
+import no.nav.helse.etterlevelse.annetLedd
+import no.nav.helse.etterlevelse.folketrygdloven
+import no.nav.helse.etterlevelse.førstePunktum
+import no.nav.helse.etterlevelse.paragraf
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -873,15 +881,11 @@ internal class InntektsgrunnlagTest {
         var `§ 8-3 ledd 2 punktum 1` by Delegates.notNull<Boolean>()
         var `§ 8-51 ledd 2` by Delegates.notNull<Boolean>()
 
-        override fun logg(subsumsjon: Subsumsjon) {}
-
-        override fun `§ 8-3 ledd 2 punktum 1`(
-            oppfylt: Boolean,
-            skjæringstidspunkt: LocalDate,
-            beregningsgrunnlagÅrlig: Double,
-            minimumInntektÅrlig: Double
-        ) {
-            this.`§ 8-3 ledd 2 punktum 1` = oppfylt
+        override fun logg(subsumsjon: Subsumsjon) {
+            when {
+                subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_3).annetLedd.førstePunktum) ->
+                    this.`§ 8-3 ledd 2 punktum 1` = subsumsjon.utfall == VILKAR_OPPFYLT
+            }
         }
 
         override fun `§ 8-51 ledd 2`(

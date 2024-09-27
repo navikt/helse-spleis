@@ -15,6 +15,13 @@ data class Subsumsjon(
     val output: Map<String, Any>,
     val kontekster: List<Subsumsjonskontekst>
 ) {
+    val lovreferanse = Lovreferanse(
+        lovverk = lovverk,
+        paragraf = paragraf,
+        ledd = ledd,
+        punktum = punktum,
+        bokstav = bokstav
+    )
     companion object {
         fun enkelSubsumsjon(
             utfall: Utfall,
@@ -86,7 +93,39 @@ data class Subsumsjon(
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
     }
 
+    fun er(lovreferanse: Lovreferanse) = this.lovreferanse == lovreferanse
+
     override fun toString(): String {
-        return "$paragraf $ledd ${if (punktum == null) "" else punktum} ${if (bokstav == null) "" else bokstav} [$utfall]"
+        return "$lovreferanse [$utfall]"
     }
 }
+
+data class Lovreferanse(val lovverk: String, val paragraf: Paragraf?, val ledd: Ledd?, val punktum: Punktum?, val bokstav: Bokstav?) {
+    override fun toString(): String {
+        val parts = listOfNotNull(lovverk, paragraf?.toString(), ledd?.toString(), punktum?.toString(), bokstav?.toString())
+        return parts.joinToString(separator = " ")
+    }
+}
+
+val folketrygdloven = Lovreferanse(lovverk = "folketrygdloven", paragraf = null, ledd = null, punktum = null, bokstav = null)
+
+fun Lovreferanse.paragraf(paragraf: Paragraf) = copy(paragraf = paragraf)
+
+val Lovreferanse.førsteLedd get() = copy(ledd = Ledd.LEDD_1)
+val Lovreferanse.annetLedd get() = copy(ledd = Ledd.LEDD_2)
+val Lovreferanse.tredjeLedd get() = copy(ledd = Ledd.LEDD_3)
+val Lovreferanse.fjerdeLedd get() = copy(ledd = Ledd.LEDD_4)
+val Lovreferanse.femteLedd get() = copy(ledd = Ledd.LEDD_5)
+val Lovreferanse.sjetteLedd get() = copy(ledd = Ledd.LEDD_6)
+
+val Lovreferanse.førstePunktum get() = copy(punktum = Punktum.PUNKTUM_1)
+val Lovreferanse.annetPunktum get() = copy(punktum = Punktum.PUNKTUM_2)
+val Lovreferanse.tredjePunktum get() = copy(punktum = Punktum.PUNKTUM_3)
+val Lovreferanse.fjerdePunktum get() = copy(punktum = Punktum.PUNKTUM_4)
+val Lovreferanse.femtePunktum get() = copy(punktum = Punktum.PUNKTUM_5)
+val Lovreferanse.sjettePunktum get() = copy(punktum = Punktum.PUNKTUM_6)
+val Lovreferanse.syvendePunktum get() = copy(punktum = Punktum.PUNKTUM_7)
+
+val Lovreferanse.bokstavA get() = copy(bokstav = Bokstav.BOKSTAV_A)
+val Lovreferanse.bokstavB get() = copy(bokstav = Bokstav.BOKSTAV_B)
+val Lovreferanse.bokstavC get() = copy(bokstav = Bokstav.BOKSTAV_C)

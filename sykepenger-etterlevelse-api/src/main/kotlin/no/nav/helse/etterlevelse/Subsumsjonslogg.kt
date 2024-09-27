@@ -5,48 +5,14 @@ import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
+import no.nav.helse.etterlevelse.Punktum.Companion.punktum
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 
 interface Subsumsjonslogg {
 
     fun logg(subsumsjon: Subsumsjon)
-
-    /**
-     * Vurdering av rett til sykepenger ved fylte 70 år
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-3)
-     *
-     * @param oppfylt hvorvidt sykmeldte har fylt 70 år. Oppfylt så lenge sykmeldte ikke er 70 år eller eldre
-     * @param syttiårsdagen dato sykmeldte fyller 70 år
-     * @param utfallFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
-     * @param utfallTom til-og-med-dato [oppfylt]-vurderingen gjelder for
-     * @param tidslinjeFom fra-og-med-dato vurderingen gjøres for
-     * @param tidslinjeTom til-og-med-dato vurderingen gjøres for
-     * @param avvistePerioder alle dager vurderingen ikke er [oppfylt] for. Tom dersom sykmeldte ikke fyller 70 år mellom [tidslinjeFom] og [tidslinjeTom]
-     */
-    fun `§ 8-3 ledd 1 punktum 2`(
-        oppfylt: Boolean,
-        syttiårsdagen: LocalDate,
-        utfallFom: LocalDate,
-        utfallTom: LocalDate,
-        tidslinjeFom: LocalDate,
-        tidslinjeTom: LocalDate,
-        avvistePerioder: Collection<ClosedRange<LocalDate>>
-    ) {}
-
-    /**
-     * Vurdering av krav til minimum inntekt
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-3)
-     *
-     * @param oppfylt hvorvidt sykmeldte har inntekt lik eller større enn minimum inntekt
-     * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
-     * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
-     * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
-     */
-    fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlagÅrlig: Double, minimumInntektÅrlig: Double) {}
-
 
     /**
      * Vilkår for rett til sykepenger at medlemmet oppholder seg i Norge.
@@ -520,3 +486,69 @@ fun `§ 8-2 ledd 1`(
     output = mapOf("antallOpptjeningsdager" to antallOpptjeningsdager),
     kontekster = emptyList()
 )
+
+/**
+ * Vurdering av rett til sykepenger ved fylte 70 år
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-3)
+ *
+ * @param oppfylt hvorvidt sykmeldte har fylt 70 år. Oppfylt så lenge sykmeldte ikke er 70 år eller eldre
+ * @param syttiårsdagen dato sykmeldte fyller 70 år
+ * @param utfallFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
+ * @param utfallTom til-og-med-dato [oppfylt]-vurderingen gjelder for
+ * @param tidslinjeFom fra-og-med-dato vurderingen gjøres for
+ * @param tidslinjeTom til-og-med-dato vurderingen gjøres for
+ * @param avvistePerioder alle dager vurderingen ikke er [oppfylt] for. Tom dersom sykmeldte ikke fyller 70 år mellom [tidslinjeFom] og [tidslinjeTom]
+ */
+fun `§ 8-3 ledd 1 punktum 2`(
+    oppfylt: Boolean,
+    syttiårsdagen: LocalDate,
+    utfallFom: LocalDate,
+    utfallTom: LocalDate,
+    tidslinjeFom: LocalDate,
+    tidslinjeTom: LocalDate,
+    avvistePerioder: Collection<ClosedRange<LocalDate>>
+) = Subsumsjon.enkelSubsumsjon(
+    utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+    lovverk = "folketrygdloven",
+    versjon = LocalDate.of(2011, 12, 16),
+    paragraf = PARAGRAF_8_3,
+    ledd = 1.ledd,
+    punktum = 2.punktum,
+    input = mapOf(
+        "syttiårsdagen" to syttiårsdagen,
+        "utfallFom" to utfallFom,
+        "utfallTom" to utfallTom,
+        "tidslinjeFom" to tidslinjeFom,
+        "tidslinjeTom" to tidslinjeTom
+    ),
+    output = mapOf("avvisteDager" to avvistePerioder),
+    kontekster = emptyList()
+)
+
+/**
+ * Vurdering av krav til minimum inntekt
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-3)
+ *
+ * @param oppfylt hvorvidt sykmeldte har inntekt lik eller større enn minimum inntekt
+ * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
+ * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
+ * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
+ */
+fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlagÅrlig: Double, minimumInntektÅrlig: Double) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2011, 12, 16),
+        paragraf = PARAGRAF_8_3,
+        ledd = 2.ledd,
+        punktum = 1.punktum,
+        input = mapOf(
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
+            "minimumInntekt" to minimumInntektÅrlig
+        ),
+        output = emptyMap(),
+        kontekster = emptyList()
+    )

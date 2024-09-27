@@ -95,56 +95,6 @@ class MaskinellJurist private constructor(
     private fun kopierMedKontekst(kontekster: List<Subsumsjonskontekst>, periode: ClosedRange<LocalDate>? = null) =
         MaskinellJurist(this, this.kontekster + kontekster, periode)
 
-    override fun `§ 8-3 ledd 1 punktum 2`(
-        oppfylt: Boolean,
-        syttiårsdagen: LocalDate,
-        utfallFom: LocalDate,
-        utfallTom: LocalDate,
-        tidslinjeFom: LocalDate,
-        tidslinjeTom: LocalDate,
-        avvistePerioder: Collection<ClosedRange<LocalDate>>
-    ) {
-        leggTil(
-            Subsumsjon.enkelSubsumsjon(
-                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                lovverk = "folketrygdloven",
-                versjon = LocalDate.of(2011, 12, 16),
-                paragraf = PARAGRAF_8_3,
-                ledd = 1.ledd,
-                punktum = 2.punktum,
-                input = mapOf(
-                    "syttiårsdagen" to syttiårsdagen,
-                    "utfallFom" to utfallFom,
-                    "utfallTom" to utfallTom,
-                    "tidslinjeFom" to tidslinjeFom,
-                    "tidslinjeTom" to tidslinjeTom
-                ),
-                output = mapOf("avvisteDager" to avvistePerioder),
-                kontekster = kontekster
-            )
-        )
-    }
-
-    override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlagÅrlig: Double, minimumInntektÅrlig: Double) {
-        leggTil(
-            Subsumsjon.enkelSubsumsjon(
-                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                lovverk = "folketrygdloven",
-                versjon = LocalDate.of(2011, 12, 16),
-                paragraf = PARAGRAF_8_3,
-                ledd = 2.ledd,
-                punktum = 1.punktum,
-                input = mapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
-                    "minimumInntekt" to minimumInntektÅrlig
-                ),
-                output = emptyMap(),
-                kontekster = kontekster
-            )
-        )
-    }
-
     override fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperioder: Collection<ClosedRange<LocalDate>>, søknadsperioder: List<Map<String, Serializable>>) {
         if (utlandsperioder.isEmpty()) return
         leggTil(Subsumsjon.periodisertSubsumsjon(

@@ -7,6 +7,7 @@ import java.time.LocalDate
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
+import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -128,7 +129,7 @@ internal data class Maksdatokontekst(
         }
 
         val førSyttiårsdagen = fun (subsumsjonslogg: Subsumsjonslogg, utfallTom: LocalDate) {
-            subsumsjonslogg.`§ 8-3 ledd 1 punktum 2`(
+            subsumsjonslogg.logg(`§ 8-3 ledd 1 punktum 2`(
                 oppfylt = true,
                 syttiårsdagen = alder.syttiårsdagen,
                 utfallFom = vedtaksperiode.start,
@@ -136,7 +137,7 @@ internal data class Maksdatokontekst(
                 tidslinjeFom = vedtaksperiode.start,
                 tidslinjeTom = vedtaksperiode.endInclusive,
                 avvistePerioder = emptyList()
-            )
+            ))
         }
 
         val harNåddMaks = erDagerOver67ÅrForbrukte(alder, regler) || erDagerUnder67ÅrForbrukte(alder, regler)
@@ -179,7 +180,7 @@ internal data class Maksdatokontekst(
 
                 val avvisteDagerFraOgMedSøtti = avslåtteDager.filter { alder.mistetSykepengerett(it) }
                 if (avvisteDagerFraOgMedSøtti.isNotEmpty()) {
-                    subsumsjonslogg.`§ 8-3 ledd 1 punktum 2`(
+                    subsumsjonslogg.logg(`§ 8-3 ledd 1 punktum 2`(
                         oppfylt = false,
                         syttiårsdagen = alder.syttiårsdagen,
                         utfallFom = maxOf(alder.syttiårsdagen, vedtaksperiode.start),
@@ -187,7 +188,7 @@ internal data class Maksdatokontekst(
                         tidslinjeFom = vedtaksperiode.start,
                         tidslinjeTom = vedtaksperiode.endInclusive,
                         avvistePerioder = avvisteDagerFraOgMedSøtti.grupperSammenhengendePerioder()
-                    )
+                    ))
                 }
             }
         }
