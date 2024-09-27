@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.somPeriode
@@ -66,7 +67,7 @@ data class Arbeidsgiverperioderesultat(
 
         // første utbetalingsdag skal subsummeres med § 8-17 ledd 1 bokstav a (oppfylt = true)
         utbetalingsperioder.firstOrNull()?.firstOrNull { !it.erHelg() }?.takeIf { it in vedtaksperiode }?.also {
-            subsumsjonslogg.`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = listOf(it.rangeTo(it)), sykdomstidslinjesubsumsjon)
+            subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a`(oppfylt = true, dagen = listOf(it.rangeTo(it)), sykdomstidslinjesubsumsjon))
         }
 
         // siste oppholdsdag som medfører at agp avbrytes subsummeres med § 8-19 fjerde ledd

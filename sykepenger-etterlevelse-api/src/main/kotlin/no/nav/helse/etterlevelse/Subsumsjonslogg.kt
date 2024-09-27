@@ -3,6 +3,8 @@ package no.nav.helse.etterlevelse
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.Year
+import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
+import no.nav.helse.etterlevelse.Inntektsubsumsjon.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
@@ -10,6 +12,9 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_13
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_15
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_16
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_17
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
@@ -19,78 +24,10 @@ import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
-import kotlin.streams.asSequence
 
 interface Subsumsjonslogg {
 
     fun logg(subsumsjon: Subsumsjon)
-
-    /**
-     * Retten til sykepenger etter dette kapitlet faller bort når arbeidsforholdet midlertidig avbrytes i mer enn 14 dager
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-15)
-     *
-     * @param skjæringstidspunkt dato som aktive arbeidsforhold beregnes for
-     * @param organisasjonsnummer arbeidsgiveren som vurderes
-     * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
-     * @param forklaring saksbehandler sin forklaring for overstyring av arbeidsforhold
-     * @param oppfylt **true** dersom [organisasjonsnummer] har avbrudd mer enn 14 dager
-     */
-    fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntekterSisteTreMåneder: List<Inntektsubsumsjon>, forklaring: String, oppfylt: Boolean){}
-
-    /**
-     * Fastsettelse av dekningsgrunnlag
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)
-     *
-     * @param dato dagen [dekningsgrunnlag] beregnes for
-     * @param dekningsgrad hvor stor andel av inntekten det ytes sykepenger av
-     * @param inntekt inntekt for aktuell arbeidsgiver
-     * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
-     */
-    fun `§ 8-16 ledd 1`(dato: Collection<ClosedRange<LocalDate>>, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {}
-
-    /**
-     * Vurdering av når utbetaling av sykepenger tidligst skal starte
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
-     *
-     * @param oppfylt **true** dersom [dagen] er etter arbeidsgiverperioden
-     * @param dagen aktuelle dagen for vurdering
-     */
-    fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {}
-
-    /**
-     * Vurdering av når utbetaling av sykepenger tidligst skal starte
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
-     *
-     * @param periode arbeidsgiversøknad-perioden
-     */
-    fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(
-        periode: ClosedRange<LocalDate>,
-        sykdomstidslinje: List<Tidslinjedag>
-    ) {}
-
-    /**
-     * Vurdering av når utbetaling av sykepenger tidligst skal starte
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
-     *
-     * @param dato Nav utbetaler første 16 dager
-     */
-    fun `§ 8-17 ledd 1`(
-        dato: Collection<ClosedRange<LocalDate>>
-    ) {}
-
-    /**
-     * Trygden yter ikke sykepenger for lovpålagt ferie og permisjon
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
-     *
-     * @param dato dagen vilkåret blir vurdert for
-     */
-    fun `§ 8-17 ledd 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {}
 
     /**
      * Arbeidsgiverperioden teller 16 sykedager
@@ -706,6 +643,139 @@ fun `§ 8-13 ledd 2`(periode: ClosedRange<LocalDate>, tidslinjer: List<List<Tids
         kontekster = emptyList()
     )
 }
+
+/**
+ * Retten til sykepenger etter dette kapitlet faller bort når arbeidsforholdet midlertidig avbrytes i mer enn 14 dager
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-15)
+ *
+ * @param skjæringstidspunkt dato som aktive arbeidsforhold beregnes for
+ * @param organisasjonsnummer arbeidsgiveren som vurderes
+ * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
+ * @param forklaring saksbehandler sin forklaring for overstyring av arbeidsforhold
+ * @param oppfylt **true** dersom [organisasjonsnummer] har avbrudd mer enn 14 dager
+ */
+fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntekterSisteTreMåneder: List<Inntektsubsumsjon>, forklaring: String, oppfylt: Boolean) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(1998, 12, 18),
+        paragraf = PARAGRAF_8_15,
+        ledd = null,
+        punktum = null,
+        bokstav = null,
+        input = mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "inntekterSisteTreMåneder" to inntekterSisteTreMåneder.subsumsjonsformat(),
+            "forklaring" to forklaring
+        ),
+        output = if (oppfylt) {
+            mapOf("arbeidsforholdAvbrutt" to organisasjonsnummer)
+        } else {
+            mapOf("aktivtArbeidsforhold" to organisasjonsnummer)
+        },
+        kontekster = emptyList(),
+    )
+
+/**
+ * Fastsettelse av dekningsgrunnlag
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)
+ *
+ * @param dato dagen [dekningsgrunnlag] beregnes for
+ * @param dekningsgrad hvor stor andel av inntekten det ytes sykepenger av
+ * @param inntekt inntekt for aktuell arbeidsgiver
+ * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
+ */
+fun `§ 8-16 ledd 1`(dato: Collection<ClosedRange<LocalDate>>, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = dato,
+        lovverk = "folketrygdloven",
+        input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
+        output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
+        utfall = VILKAR_BEREGNET,
+        paragraf = PARAGRAF_8_16,
+        ledd = 1.ledd,
+        versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+        kontekster = emptyList()
+    )
+
+/**
+ * Vurdering av når utbetaling av sykepenger tidligst skal starte
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
+ *
+ * @param oppfylt **true** dersom [dagen] er etter arbeidsgiverperioden
+ * @param dagen aktuelle dagen for vurdering
+ */
+fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = dagen,
+        utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2018, 1, 1),
+        paragraf = PARAGRAF_8_17,
+        ledd = 1.ledd,
+        bokstav = BOKSTAV_A,
+        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager()),
+        kontekster = emptyList()
+    )
+
+/**
+ * Vurdering av når utbetaling av sykepenger tidligst skal starte
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
+ *
+ * @param periode arbeidsgiversøknad-perioden
+ */
+fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(
+    periode: ClosedRange<LocalDate>,
+    sykdomstidslinje: List<Tidslinjedag>
+) = `§ 8-17 ledd 1 bokstav a`(false, listOf(periode), sykdomstidslinje)
+
+/**
+ * Vurdering av når utbetaling av sykepenger tidligst skal starte
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
+ *
+ * @param dato Nav utbetaler første 16 dager
+ */
+fun `§ 8-17 ledd 1`(
+    dato: Collection<ClosedRange<LocalDate>>
+) = Subsumsjon.periodisertSubsumsjon(
+    perioder = dato,
+    lovverk = "folketrygdloven",
+    versjon = LocalDate.of(2018, 1, 1),
+    utfall = VILKAR_OPPFYLT,
+    paragraf = PARAGRAF_8_17,
+    ledd = LEDD_1,
+    input = emptyMap(),
+    kontekster = emptyList()
+)
+
+/**
+ * Trygden yter ikke sykepenger for lovpålagt ferie og permisjon
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
+ *
+ * @param dato dagen vilkåret blir vurdert for
+ */
+fun `§ 8-17 ledd 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = dato,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2018, 1, 1),
+        utfall = VILKAR_IKKE_OPPFYLT,
+        paragraf = PARAGRAF_8_17,
+        ledd = LEDD_2,
+        input = mapOf(
+            "beregnetTidslinje" to sykdomstidslinje.dager()
+        ),
+        kontekster = emptyList()
+    )
+
+
 
 internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iterator<LocalDate> {
     private var currentDate = start

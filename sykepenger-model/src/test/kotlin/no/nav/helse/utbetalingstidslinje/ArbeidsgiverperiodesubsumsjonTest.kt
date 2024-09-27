@@ -5,8 +5,11 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjon
+import no.nav.helse.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
+import no.nav.helse.etterlevelse.annetLedd
+import no.nav.helse.etterlevelse.bokstavA
 import no.nav.helse.etterlevelse.folketrygdloven
 import no.nav.helse.etterlevelse.førsteLedd
 import no.nav.helse.etterlevelse.paragraf
@@ -250,22 +253,16 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
                     subsumsjoner += 1
                     `§ 8-11 første ledd` += subsumsjon.perioder.antallDager()
                 }
+                subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_17).førsteLedd.bokstavA) -> {
+                    subsumsjoner += 1
+                    if (subsumsjon.utfall == Utfall.VILKAR_OPPFYLT) `§ 8-17 første ledd bokstav a - oppfylt` += subsumsjon.perioder.antallDager()
+                    else `§ 8-17 første ledd bokstav a - ikke oppfylt` += subsumsjon.perioder.antallDager()
+                }
+                subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_17).annetLedd) -> {
+                    subsumsjoner += 1
+                    `§ 8-17 ledd 2` += subsumsjon.perioder.antallDager()
+                }
             }
-        }
-
-        override fun `§ 8-17 ledd 1 bokstav a`(
-            oppfylt: Boolean,
-            dagen: Collection<ClosedRange<LocalDate>>,
-            sykdomstidslinje: List<Tidslinjedag>
-        ) {
-            subsumsjoner += 1
-            if (oppfylt) `§ 8-17 første ledd bokstav a - oppfylt` += dagen.antallDager()
-            else `§ 8-17 første ledd bokstav a - ikke oppfylt` += dagen.antallDager()
-        }
-
-        override fun `§ 8-17 ledd 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {
-            subsumsjoner += 1
-            `§ 8-17 ledd 2` += dato.antallDager()
         }
 
         override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {

@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-15`
 import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsgiver
@@ -77,13 +78,13 @@ sealed class Inntektsopplysning(
         forklaring: String,
         oppfylt: Boolean
     ) = apply {
-        subsumsjonslogg.`§ 8-15`(
+        subsumsjonslogg.logg(`§ 8-15`(
             skjæringstidspunkt = dato,
             organisasjonsnummer = organisasjonsnummer,
             inntekterSisteTreMåneder = emptyList(),
             forklaring = forklaring,
             oppfylt = oppfylt
-        )
+        ))
     }
 
     internal open fun gjenbrukbarInntekt(beløp: Inntekt? = null): Inntektsmelding? = null

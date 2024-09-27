@@ -12,6 +12,7 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.etterlevelse.MaskinellJurist
+import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.ArbeidstakerHendelse
 import no.nav.helse.hendelser.Avsender
@@ -835,7 +836,7 @@ internal class Vedtaksperiode private constructor(
         dokumentsporing: Set<UUID>
     ) {
         if (finnArbeidsgiverperiode()?.dekkesAvArbeidsgiver(periode) != false) {
-            jurist.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode, sykdomstidslinje.subsumsjonsformat())
+            jurist.logg(`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode, sykdomstidslinje.subsumsjonsformat()))
         }
         person.avsluttetUtenVedtak(PersonObserver.AvsluttetUtenVedtakEvent(
             fødselsnummer = fødselsnummer,

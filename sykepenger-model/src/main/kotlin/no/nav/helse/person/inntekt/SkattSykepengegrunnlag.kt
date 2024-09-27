@@ -7,6 +7,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
+import no.nav.helse.etterlevelse.`§ 8-15`
 import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -117,13 +118,13 @@ internal class SkattSykepengegrunnlag private constructor(
         forklaring: String,
         oppfylt: Boolean
     ) = apply {
-        subsumsjonslogg.`§ 8-15`(
+        subsumsjonslogg.logg(`§ 8-15`(
             skjæringstidspunkt = dato,
             organisasjonsnummer = organisasjonsnummer,
             inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
             forklaring = forklaring,
             oppfylt = oppfylt
-        )
+        ))
     }
 
     override fun erSamme(other: Inntektsopplysning): Boolean {
