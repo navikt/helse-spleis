@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.økonomi.Inntekt
 
 data class Beløpstidslinje private constructor(private val dager: SortedMap<LocalDate, Beløpsdag>) : Iterable<Dag> {
+    private constructor(dager: Map<LocalDate, Beløpsdag>): this(dager.toSortedMap())
 
     private val periode = if (dager.isEmpty()) null else dager.firstKey() til dager.lastKey()
 
@@ -24,7 +25,9 @@ data class Beløpstidslinje private constructor(private val dager: SortedMap<Loc
         }
     }
 
-    internal operator fun plus(other: Beløpstidslinje) = Beløpstidslinje((this.dager + other.dager).toSortedMap())
+    internal operator fun plus(other: Beløpstidslinje) = Beløpstidslinje((this.dager + other.dager))
+    internal operator fun minus(datoer: Iterable<LocalDate>) = Beløpstidslinje(this.dager.filterKeys { it !in datoer })
+    internal operator fun minus(dato: LocalDate) = Beløpstidslinje(this.dager.filterKeys { it != dato })
 }
 
 sealed interface Dag {

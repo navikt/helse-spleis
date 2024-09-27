@@ -1,5 +1,6 @@
 package no.nav.helse.person.beløp
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
@@ -10,6 +11,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -69,10 +71,35 @@ internal class BeløpstidslinjeTest {
         assertEquals(forventetTidslinje, gammelTidslinje + nyTidslinje)
     }
 
-    private fun beløpstidslinjeMedAvsender(vararg perioder: Triple<Periode, Inntekt, Avsender>) = Beløpstidslinje(
-        perioder.flatMap { (periode, inntekt, avsender) -> periode.map { dato -> Beløpsdag(dato, inntekt, Kilde(UUID.randomUUID(), avsender)) } }
-    )
-    private fun beløpstidslinjeMedKilde(vararg perioder: Triple<Periode, Inntekt, Kilde>) = Beløpstidslinje(
-        perioder.flatMap { (periode, inntekt, kilde) -> periode.map { dato -> Beløpsdag(dato, inntekt, kilde) } }
-    )
+
+    @Test
+    fun `Trekke fra dager på en beløpstidslinje`() {
+        val tidslinje = (1.daglig fra 1.januar til 2.januar) + (2.daglig fra 4.januar til 5.januar)
+        assertEquals(1.daglig, tidslinje[1.januar].beløp)
+        assertEquals(UkjentDag, tidslinje[3.januar])
+        assertEquals(2.daglig, tidslinje[4.januar].beløp)
+
+        val forventet = (1.daglig kun 2.januar) + (2.daglig kun 5.januar)
+
+        val fratrukket = tidslinje - 4.januar - 1.januar
+
+        assertEquals(forventet, fratrukket)
+
+        assertEquals(UkjentDag, fratrukket[1.januar])
+        assertEquals(UkjentDag, fratrukket[4.januar])
+    }
+
+    private companion object {
+        private fun beløpstidslinjeMedAvsender(vararg perioder: Triple<Periode, Inntekt, Avsender>) = Beløpstidslinje(
+            perioder.flatMap { (periode, inntekt, avsender) -> periode.map { dato -> Beløpsdag(dato, inntekt, Kilde(UUID.randomUUID(), avsender)) } }
+        )
+        private fun beløpstidslinjeMedKilde(vararg perioder: Triple<Periode, Inntekt, Kilde>) = Beløpstidslinje(
+            perioder.flatMap { (periode, inntekt, kilde) -> periode.map { dato -> Beløpsdag(dato, inntekt, kilde) } }
+        )
+
+        private val EnHardkodenKilde = Kilde(UUID.fromString("00000000-0000-0000-0000-000000000000"), Avsender.SYSTEM)
+        infix fun Inntekt.fra(fra: LocalDate) = this to fra
+        infix fun Inntekt.kun(fra: LocalDate) = this fra fra til fra
+        infix fun Pair<Inntekt, LocalDate>.til(til: LocalDate) = Beløpstidslinje((second til til).map { Beløpsdag(it, first, EnHardkodenKilde) })
+    }
 }
