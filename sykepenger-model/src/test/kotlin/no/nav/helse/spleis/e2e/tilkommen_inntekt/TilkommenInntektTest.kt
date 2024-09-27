@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.tilkommen_inntekt
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -8,6 +9,8 @@ import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.TilkommenInntekt
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -234,13 +237,13 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                     skjæringstidspunkt = 1.januar,
                 ),
                 arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(
+                    Arbeidsforhold(
                         a1,
                         LocalDate.EPOCH,
                         null,
                         Arbeidsforholdtype.ORDINÆRT
                     ),
-                    Vilkårsgrunnlag.Arbeidsforhold(
+                    Arbeidsforhold(
                         a2,
                         1.januar,
                         null,
@@ -327,4 +330,77 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             }
         }
     }
+
+    @Test
+    fun `markering av en arbeidsgiver og tilkommen inntekt`() {
+        a1 {
+            nyttVedtak(januar)
+            assertIkkeTilkommenInntektTag(1.vedtaksperiode)
+            assertTrue(tags(1.vedtaksperiode).contains("EnArbeidsgiver"))
+
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar,"a3", 100.daglig)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            assertTilkommenInntektTag(2.vedtaksperiode)
+            assertTrue(tags(2.vedtaksperiode).contains("EnArbeidsgiver"))
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(21.januar, 21.januar))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            assertIkkeTilkommenInntektTag(1.vedtaksperiode)
+            assertTrue(tags(1.vedtaksperiode).contains("EnArbeidsgiver"))
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterYtelser(2.vedtaksperiode)
+            assertTilkommenInntektTag(2.vedtaksperiode)
+            assertTrue(tags(2.vedtaksperiode).contains("EnArbeidsgiver"))
+        }
+    }
+
+
+    @Test
+    fun `markering av flere arbeidsgivere og tilkommen inntekt`() {
+        listOf(a1).nyeVedtak(
+            periode = januar,
+            inntekt = 20000.månedlig,
+            sykepengegrunnlagSkatt = lagStandardSykepengegrunnlag(listOf(a1 to 20000.månedlig, a2 to 20000.månedlig), 1.januar),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT),
+                Arbeidsforhold(a2, LocalDate.EPOCH, null, Arbeidsforholdtype.ORDINÆRT)
+            )
+        )
+        a1 {
+            assertIkkeTilkommenInntektTag(1.vedtaksperiode)
+            assertTrue(tags(1.vedtaksperiode).contains("FlereArbeidsgivere"))
+
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), tilkomneInntekter = listOf(TilkommenInntekt(1.februar, 28.februar,"a3", 100.daglig)))
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            assertTilkommenInntektTag(2.vedtaksperiode)
+            assertTrue(tags(2.vedtaksperiode).contains("FlereArbeidsgivere"))
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(21.januar, 21.januar))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+
+            assertIkkeTilkommenInntektTag(1.vedtaksperiode)
+            assertTrue(tags(1.vedtaksperiode).contains("FlereArbeidsgivere"))
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            håndterYtelser(2.vedtaksperiode)
+            assertTilkommenInntektTag(2.vedtaksperiode)
+            assertTrue(tags(2.vedtaksperiode).contains("FlereArbeidsgivere"))
+        }
+    }
+
+    private fun tags(vedtaksperiode: UUID) = observatør.utkastTilVedtakEventer.last { it.vedtaksperiodeId == vedtaksperiode }.tags
+    private fun assertIkkeTilkommenInntektTag(vedtaksperiode: UUID) = assertFalse(tags(vedtaksperiode).contains("TilkommenInntekt"))
+    private fun assertTilkommenInntektTag(vedtaksperiode: UUID) = assertTrue(tags(vedtaksperiode).contains("TilkommenInntekt"))
 }

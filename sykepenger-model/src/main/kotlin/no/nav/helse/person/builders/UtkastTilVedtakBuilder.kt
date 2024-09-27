@@ -97,13 +97,11 @@ internal class UtkastTilVedtakBuilder(
     private lateinit var beregningsgrunnlag: Inntekt
     private var totalOmregnetÅrsinntekt by Delegates.notNull<Double>()
     private var seksG by Delegates.notNull<Double>()
-    private var inngangsvilkårFraInfotrygd by Delegates.notNull<Boolean>()
     internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt, beregningsgrunnlag: Inntekt, totalOmregnetÅrsinntekt: Inntekt, seksG: Inntekt, toG: Inntekt, inngangsvilkårFraInfotrygd: Boolean) = apply {
         this.sykepengegrunnlag = sykepengegrunnlag.årlig
         this.beregningsgrunnlag = beregningsgrunnlag
         this.totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt.årlig
         this.seksG = seksG.årlig
-        this.inngangsvilkårFraInfotrygd = inngangsvilkårFraInfotrygd
 
         if (!inngangsvilkårFraInfotrygd && beregningsgrunnlag > seksG) tags.add(Tag.`6GBegrenset`)
         if (sykepengegrunnlag < toG) tags.add(Tag.SykepengegrunnlagUnder2G)
@@ -112,7 +110,7 @@ internal class UtkastTilVedtakBuilder(
 
     private data class Arbeidsgiverinntekt(val arbeidsgiver: String, val omregnedeÅrsinntekt: Double, val skjønnsfastsatt: Double?, val gjelder: Periode)
     private val arbeidsgiverinntekter = mutableSetOf<Arbeidsgiverinntekt>()
-    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode) {
+    internal fun arbeidsgiverinntekt(arbeidsgiver: String, omregnedeÅrsinntekt: Inntekt, skjønnsfastsatt: Inntekt?, gjelder: Periode) = apply {
         arbeidsgiverinntekter.add(Arbeidsgiverinntekt(arbeidsgiver, omregnedeÅrsinntekt.årlig, skjønnsfastsatt?.årlig, gjelder))
     }
 
@@ -150,46 +148,38 @@ internal class UtkastTilVedtakBuilder(
     internal fun buildAvsluttedMedVedtak(vedtakFattet: LocalDateTime, historiskeHendelseIder: Set<UUID>) = build.avsluttetMedVedtak(vedtakFattet, historiskeHendelseIder)
 
     private inner class Build {
-        private val arbeidsgiverinntekterPåSkjæringstidspunktet = arbeidsgiverinntekter.filter { it.gjelder.start == skjæringstidspunkt }
-        private val skjønnsmessigeFastsattArbeidsgiverinntekterPåSkjæringstidspunktet = arbeidsgiverinntekterPåSkjæringstidspunktet.filter { it.skjønnsfastsatt != null }
+        private val arbeidsgivere = arbeidsgiverinntekter.partition { it.gjelder.start > skjæringstidspunkt }
+        private val tilkomneArbeidsgivere = arbeidsgivere.first
+        private val arbeidsgivereISykepengegrunnlaget = arbeidsgivere.second.also {
+            check(it.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
+        }
+        private val skjønnsfastsatt = arbeidsgivereISykepengegrunnlaget.any { it.skjønnsfastsatt != null }.also {
+            if (it) check(arbeidsgivereISykepengegrunnlaget.all { arbeidsgiver -> arbeidsgiver.skjønnsfastsatt != null }) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }
+        }
         private val perioderMedSammeSkjæringstidspunkt = relevantePerioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
-        // Til ettertanke: Nå tagges flere arbeidsgivere også ved tilkommen. Er det gæli?
-        // Men beholder den tolkningen om det er bøgg eller ei.
-        // Om vi her bytter til arbeidsgiverinntekterPåSkjæringstidspunktet.size så tar vi ikke med tilkommen.
-        private val enArbeidsgiver = arbeidsgiverinntekter.size == 1
-
         init {
-            check(arbeidsgiverinntekterPåSkjæringstidspunktet.isNotEmpty()) {
-                "Forventet ikke at arbeidsgiverinntekterPåSkjæringstidspunktet er en tom liste"
-            }
-            check(emptyList<Arbeidsgiverinntekt>() == skjønnsmessigeFastsattArbeidsgiverinntekterPåSkjæringstidspunktet || arbeidsgiverinntekterPåSkjæringstidspunktet == skjønnsmessigeFastsattArbeidsgiverinntekterPåSkjæringstidspunktet) {
-                "Enten må ingen eller alle arbeidsgiverinntekter på skjæringstidspunktet være skjønnsmessig fastsatt"
-            }
-
-            if (arbeidsgiverinntekter.any { it.gjelder.start > skjæringstidspunkt }) tags.add(Tag.TilkommenInntekt)
-
-            if (enArbeidsgiver) tags.add(Tag.EnArbeidsgiver)
-            else tags.add(Tag.FlereArbeidsgivere)
+            if (tilkomneArbeidsgivere.any { it.gjelder.overlapperMed(periode) }) tags.add(Tag.TilkommenInntekt)
+            if (arbeidsgivereISykepengegrunnlaget.size == 1) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
         }
 
         private val sykepengegrunnlagsfakta: PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta = when {
-            inngangsvilkårFraInfotrygd -> PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd(totalOmregnetÅrsinntekt)
-            skjønnsmessigeFastsattArbeidsgiverinntekterPåSkjæringstidspunktet.isEmpty() -> PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel(
+            tags.contains(Tag.InngangsvilkårFraInfotrygd) -> PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd(totalOmregnetÅrsinntekt)
+            skjønnsfastsatt ->  PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
                 `6G`= seksG,
-                arbeidsgivere = arbeidsgiverinntekterPåSkjæringstidspunktet.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel.Arbeidsgiver(
-                    arbeidsgiver = it.arbeidsgiver,
-                    omregnetÅrsinntekt = it.omregnedeÅrsinntekt
-                )}
-            )
-            else -> PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn(
-                omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
-                `6G`= seksG,
-                arbeidsgivere = arbeidsgiverinntekterPåSkjæringstidspunktet.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn.Arbeidsgiver(
+                arbeidsgivere = arbeidsgivereISykepengegrunnlaget.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn.Arbeidsgiver(
                     arbeidsgiver = it.arbeidsgiver,
                     omregnetÅrsinntekt = it.omregnedeÅrsinntekt,
                     skjønnsfastsatt = it.skjønnsfastsatt!!
+                )}
+            )
+            else -> PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel(
+                omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
+                `6G`= seksG,
+                arbeidsgivere = arbeidsgivereISykepengegrunnlaget.map { PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel.Arbeidsgiver(
+                    arbeidsgiver = it.arbeidsgiver,
+                    omregnetÅrsinntekt = it.omregnedeÅrsinntekt
                 )}
             )
         }
@@ -212,21 +202,21 @@ internal class UtkastTilVedtakBuilder(
             "periodetype" to periodetypeForGodkjenningsbehov,
             "førstegangsbehandling" to tags.contains(Tag.Førstegangsbehandling),
             "utbetalingtype" to if (revurdering) "REVURDERING" else "UTBETALING",
-            "inntektskilde" to if (enArbeidsgiver) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
+            "inntektskilde" to if (tags.contains(Tag.EnArbeidsgiver)) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
             "orgnummereMedRelevanteArbeidsforhold" to (arbeidsgiverinntekter.map { it.arbeidsgiver }).toSet(),
             "tags" to tags.utgående,
             "kanAvvises" to kanForkastes,
-            "omregnedeÅrsinntekter" to arbeidsgiverinntekterPåSkjæringstidspunktet.map {
+            "omregnedeÅrsinntekter" to arbeidsgivereISykepengegrunnlaget.map {
                 mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnedeÅrsinntekt)
             },
-            "behandlingId" to behandlingId.toString(),
+            "behandlingId" to "$behandlingId",
             "hendelser" to hendelseIder,
             "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
                 mapOf(
-                    "vedtaksperiodeId" to it.vedtaksperiodeId.toString(),
-                    "behandlingId" to it.behandlingId.toString(),
-                    "fom" to it.periode.start.toString(),
-                    "tom" to it.periode.endInclusive.toString()
+                    "vedtaksperiodeId" to "${it.vedtaksperiodeId}",
+                    "behandlingId" to "${it.behandlingId}",
+                    "fom" to "${it.periode.start}",
+                    "tom" to "${it.periode.endInclusive}"
                 )
             },
             "sykepengegrunnlagsfakta" to when (sykepengegrunnlagsfakta) {

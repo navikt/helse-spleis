@@ -137,7 +137,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractEndToEndTest() {
             periodeTom = 28.februar,
             periodeType = "FORLENGELSE",
             førstegangsbehandling = false,
-            inntektskilde = "FLERE_ARBEIDSGIVERE",
+            inntektskilde = "EN_ARBEIDSGIVER",
             orgnummere = setOf(a1, a2),
             behandlingId = inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.behandlinger.last().id,
             vedtaksperiodeId = 2.vedtaksperiode.id(a1),
