@@ -396,7 +396,6 @@ internal class Inntektsgrunnlag private constructor(
             beregningsgrunnlag = beregningsgrunnlag,
             totalOmregnetÅrsinntekt = omregnetÅrsinntekt,
             seksG = `6G`,
-            toG = `2G`.beløp(skjæringstidspunkt, LocalDate.now()),
             inngangsvilkårFraInfotrygd = vurdertInfotrygd
         )
         arbeidsgiverInntektsopplysninger.berik(builder)

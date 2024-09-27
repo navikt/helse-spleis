@@ -97,12 +97,13 @@ internal class UtkastTilVedtakBuilder(
     private lateinit var beregningsgrunnlag: Inntekt
     private var totalOmregnetÅrsinntekt by Delegates.notNull<Double>()
     private var seksG by Delegates.notNull<Double>()
-    internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt, beregningsgrunnlag: Inntekt, totalOmregnetÅrsinntekt: Inntekt, seksG: Inntekt, toG: Inntekt, inngangsvilkårFraInfotrygd: Boolean) = apply {
+    internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt, beregningsgrunnlag: Inntekt, totalOmregnetÅrsinntekt: Inntekt, seksG: Inntekt, inngangsvilkårFraInfotrygd: Boolean) = apply {
         this.sykepengegrunnlag = sykepengegrunnlag.årlig
         this.beregningsgrunnlag = beregningsgrunnlag
         this.totalOmregnetÅrsinntekt = totalOmregnetÅrsinntekt.årlig
         this.seksG = seksG.årlig
 
+        val toG = seksG/3
         if (!inngangsvilkårFraInfotrygd && beregningsgrunnlag > seksG) tags.add(Tag.`6GBegrenset`)
         if (sykepengegrunnlag < toG) tags.add(Tag.SykepengegrunnlagUnder2G)
         if (inngangsvilkårFraInfotrygd) tags.add(Tag.InngangsvilkårFraInfotrygd)
