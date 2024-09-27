@@ -165,7 +165,9 @@ internal class UtkastTilVedtakBuilder(
         }
 
         private val sykepengegrunnlagsfakta: PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta = when {
-            tags.contains(Tag.InngangsvilkårFraInfotrygd) -> PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd(totalOmregnetÅrsinntekt)
+            tags.contains(Tag.InngangsvilkårFraInfotrygd) -> PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd(totalOmregnetÅrsinntekt).also {
+                check(Tag.FlereArbeidsgivere !in tags) { "Skal ikke være mulig med vilkårsgrunnlag fra Infotrygd og flere arbeidsgivere!" }
+            }
             skjønnsfastsatt ->  PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn(
                 omregnetÅrsinntekt = totalOmregnetÅrsinntekt,
                 `6G`= seksG,
@@ -195,6 +197,8 @@ internal class UtkastTilVedtakBuilder(
 
         private val periodetypeForGodkjenningsbehov = sykepengegrunnlagsfakta.periodetypeForGodkjenningsbehov(tags)
 
+        private val omregnedeÅrsinntekterForGodkjenningsbehov = sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov(arbeidsgiver)
+
         val godkjenningsbehov = mapOf(
             "periodeFom" to "${periode.start}",
             "periodeTom" to "${periode.endInclusive}",
@@ -204,12 +208,11 @@ internal class UtkastTilVedtakBuilder(
             "førstegangsbehandling" to tags.contains(Tag.Førstegangsbehandling),
             "utbetalingtype" to if (revurdering) "REVURDERING" else "UTBETALING",
             "inntektskilde" to if (tags.contains(Tag.EnArbeidsgiver)) "EN_ARBEIDSGIVER" else "FLERE_ARBEIDSGIVERE",
+            // Til ettertanke: Her kan det være orgnummer på tilkomnde arbeidsgivere i tillegg til de som er i "sykepengegrunnlagsfakta". Kanskje finne på noe smartere der?
             "orgnummereMedRelevanteArbeidsforhold" to (arbeidsgiverinntekter.map { it.arbeidsgiver }).toSet(),
             "tags" to tags.utgående,
             "kanAvvises" to kanForkastes,
-            "omregnedeÅrsinntekter" to arbeidsgivereISykepengegrunnlaget.map {
-                mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnedeÅrsinntekt)
-            },
+            "omregnedeÅrsinntekter" to omregnedeÅrsinntekterForGodkjenningsbehov,
             "behandlingId" to "$behandlingId",
             "hendelser" to hendelseIder,
             "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt.map {
@@ -352,6 +355,12 @@ internal class UtkastTilVedtakBuilder(
                 this is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> if (erForlengelse) "INFOTRYGDFORLENGELSE" else "OVERGANG_FRA_IT"
                 else -> if (erForlengelse) "FORLENGELSE" else "FØRSTEGANGSBEHANDLING"
             }
+        }
+
+        private fun PersonObserver.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta.omregnedeÅrsinntekterForGodkjenningsbehov(arbeidsgiver: String): List<Map<String, Any>> = when (val fakta = this) {
+            is PersonObserver.UtkastTilVedtakEvent.FastsattIInfotrygd -> listOf(mapOf("organisasjonsnummer" to arbeidsgiver, "beløp" to fakta.omregnetÅrsinntekt))
+            is PersonObserver.UtkastTilVedtakEvent.FastsattEtterHovedregel -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt ) }
+            is PersonObserver.UtkastTilVedtakEvent.FastsattEtterSkjønn -> fakta.arbeidsgivere.map { mapOf("organisasjonsnummer" to it.arbeidsgiver, "beløp" to it.omregnetÅrsinntekt ) } // Nei, ikke bug at det er omregnetÅrsinntekt
         }
     }
 }
