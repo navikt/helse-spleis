@@ -13,7 +13,7 @@ internal class MaskinellJuristTest {
         val vedtaksperiodeJurist = MaskinellJurist()
             .medFødselsnummer("10052088033")
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyList(), 1.januar..31.januar)
+            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyList())
 
         vedtaksperiodeJurist.logg(`§ 8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1))
 
@@ -42,7 +42,7 @@ internal class MaskinellJuristTest {
         val vedtaksperiodeJurist = MaskinellJurist()
             .medFødselsnummer("10052088033")
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
+            .medVedtaksperiode(UUID.randomUUID(), emptyList())
         `§ 8-13 ledd 1`(1.januar..31.januar, listOf(15.januar..16.januar), emptyList()).forEach {
             vedtaksperiodeJurist.logg(it)
         }

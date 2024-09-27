@@ -4,10 +4,15 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.Year
 import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_A
+import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_B
+import no.nav.helse.etterlevelse.Bokstav.BOKSTAV_C
 import no.nav.helse.etterlevelse.Inntektsubsumsjon.Companion.subsumsjonsformat
 import no.nav.helse.etterlevelse.Ledd.Companion.ledd
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Ledd.LEDD_2
+import no.nav.helse.etterlevelse.Ledd.LEDD_3
+import no.nav.helse.etterlevelse.Ledd.LEDD_5
+import no.nav.helse.etterlevelse.Paragraf.KJENNELSE_2006_4023
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_10
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_11
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_12
@@ -17,7 +22,11 @@ import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_16
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_17
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_19
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_2
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_28
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_29
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_3
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_48
+import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_51
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
 import no.nav.helse.etterlevelse.Punktum.Companion.punktum
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
@@ -29,211 +38,6 @@ import no.nav.helse.etterlevelse.Tidslinjedag.Companion.dager
 interface Subsumsjonslogg {
 
     fun logg(subsumsjon: Subsumsjon)
-
-    /**
-     * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer
-     * innrapportert inntekt til a-ordningen for de tre siste månedene før skjæringstidspunktet
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
-     *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
-     * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
-     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [inntekterSisteTreMåneder]
-     * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [inntekterSisteTreMåneder]
-     */
-    fun `§ 8-28 ledd 3 bokstav a`(
-        organisasjonsnummer: String,
-        inntekterSisteTreMåneder: List<Inntektsubsumsjon>,
-        grunnlagForSykepengegrunnlagÅrlig: Double,
-        grunnlagForSykepengegrunnlagMånedlig: Double,
-        skjæringstidspunkt: LocalDate
-    ) {}
-
-    /**
-     * I arbeidsforhold som har vart så kort tid at det ikke er rapportert inntekt til a-ordningen
-     * for tre hele kalendermåneder, skal dette kortere tidsrommet legges til grunn.
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
-     *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
-     * @param startdatoArbeidsforhold startdato hos arbeidsgiver [organisasjonsnummer]
-     * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) b
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
-     * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
-     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
-     * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
-     */
-    fun `§ 8-28 ledd 3 bokstav b`(
-        organisasjonsnummer: String,
-        startdatoArbeidsforhold: LocalDate,
-        overstyrtInntektFraSaksbehandler: Map<String, Any>,
-        skjæringstidspunkt: LocalDate,
-        forklaring: String,
-        grunnlagForSykepengegrunnlagÅrlig: Double,
-        grunnlagForSykepengegrunnlagMånedlig: Double
-    ) {}
-
-    /**
-     * I et arbeidsforhold der arbeidstakeren har fått varig lønnsendring i løpet av eller etter beregningsperioden,
-     * men før arbeidsuførhetstidspunktet, skal tidsrommet etter lønnsendringen legges til grunn.
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
-     *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
-     * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) c
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
-     * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
-     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
-     * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
-     */
-    fun `§ 8-28 ledd 3 bokstav c`(
-        organisasjonsnummer: String,
-        overstyrtInntektFraSaksbehandler: Map<String, Any>,
-        skjæringstidspunkt: LocalDate,
-        forklaring: String,
-        grunnlagForSykepengegrunnlagÅrlig: Double,
-        grunnlagForSykepengegrunnlagMånedlig: Double
-    ) {}
-
-    /**
-     * Dersom rapporteringen til a-ordningen er mangelfull eller uriktig,
-     * fastsettes sykepengegrunnlaget ut fra den inntekten arbeidsgiver skulle ha rapportert til a-ordningen i beregningsperioden.
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
-     *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
-     * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) c
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
-     * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
-     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
-     * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
-     */
-    fun `§ 8-28 ledd 5`(
-        organisasjonsnummer: String,
-        overstyrtInntektFraSaksbehandler: Map<String, Any>,
-        skjæringstidspunkt: LocalDate,
-        forklaring: String,
-        grunnlagForSykepengegrunnlagÅrlig: Double,
-        grunnlagForSykepengegrunnlagMånedlig: Double
-    ) {}
-
-    /**
-     * Inntekter som legges til grunn for beregning av sykepengegrunnlag
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-29)
-     *
-     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
-     * @param inntektsopplysninger inntekter som ligger til grunn for beregning av [grunnlagForSykepengegrunnlagÅrlig]
-     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
-     * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [inntektsopplysninger]
-     */
-    fun `§ 8-29`(
-        skjæringstidspunkt: LocalDate,
-        grunnlagForSykepengegrunnlagÅrlig: Double,
-        inntektsopplysninger: List<Inntektsubsumsjon>,
-        organisasjonsnummer: String
-    ) {}
-
-    fun `§ 8-33 ledd 1`() {}
-
-    @Suppress("UNUSED_PARAMETER")
-    fun `§ 8-33 ledd 3`(grunnlagForFeriepenger: Int, opptjeningsår: Year, prosentsats: Double, alder: Int, feriepenger: Double) {}
-
-    /**
-     * Vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
-     *
-     * @param oppfylt dersom vedkommende har inntekt større enn eller lik to ganger grunnbeløpet. Det er en forutsetning at vedkommende er mellom 67 og 70 år
-     * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
-     * @param alderPåSkjæringstidspunkt alder på skjæringstidspunktet
-     * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
-     * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
-     */
-    fun `§ 8-51 ledd 2`(
-        oppfylt: Boolean,
-        skjæringstidspunkt: LocalDate,
-        alderPåSkjæringstidspunkt: Int,
-        beregningsgrunnlagÅrlig: Double,
-        minimumInntektÅrlig: Double
-    ) {}
-
-    /**
-     * Løpende vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år, trer i kraft når vedkommende fyller 67 år i løpet av sykefraværstilfellet0
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
-     *
-     * @param oppfylt dersom vedkommende fyller 67 år i løpet av sykefraværstilfellet og har inntekt større enn eller lik to ganger grunnbeløpet.
-     * @param utfallFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
-     * @param utfallTom til-og-med-dato [oppfylt]-vurderingen gjelder for
-     * @param sekstisyvårsdag dato vedkommene fyller 67 år
-     * @param periodeFom fra-og-med-dato for perioden til behandling som vurderer kravet om minimum inntekt
-     * @param periodeTom til-og-med-dato for perioden til behandling som vurderer kravet om minimum inntekt
-     * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
-     * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
-     */
-    fun `§ 8-51 ledd 2`(
-        oppfylt: Boolean,
-        utfallFom: LocalDate,
-        utfallTom: LocalDate,
-        periodeFom: LocalDate,
-        periodeTom: LocalDate,
-        sekstisyvårsdag: LocalDate,
-        beregningsgrunnlagÅrlig: Double,
-        minimumInntektÅrlig: Double
-    ) {}
-
-    /**
-     * Vurdering av maksimalt antall sykepengedager ved fytle 67 år
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
-     *
-     * @param periode aktuell periode som vilkårsprøves
-     * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i inklusiv potensielt utbetalte dager fra Infotrygd
-     * @param beregnetTidslinje sammenslått tidslinje det tas utgangspunkt i når man beregner [gjenståendeSykedager], [forbrukteSykedager] og [maksdato]
-     * @param gjenståendeSykedager antall gjenstående sykepengedager ved siste utbetalte dag i [periode].
-     * @param forbrukteSykedager antall forbrukte sykepengedager ved siste utbetalte dag i [periode].
-     * @param maksdato dato for opphør av rett til sykepenger
-     * @param startdatoSykepengerettighet første NAV-dag i siste 248-dagers sykeforløp
-     */
-    fun `§ 8-51 ledd 3`(
-        periode: ClosedRange<LocalDate>,
-        tidslinjegrunnlag: List<List<Tidslinjedag>>,
-        beregnetTidslinje: List<Tidslinjedag>,
-        gjenståendeSykedager: Int,
-        forbrukteSykedager: Int,
-        maksdato: LocalDate,
-        startdatoSykepengerettighet: LocalDate?
-    ) {}
-
-    /**
-     * Vurdering av foreldelse
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§22-13)
-     */
-    fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: Collection<ClosedRange<LocalDate>>) {}
-
-    /**
-     * Omgjøring av vedtak uten klage
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§22-13)
-     */
-    fun `fvl § 35 ledd 1`() {}
-
-    /**
-     * Arbeidsavklaringspenger istedenfor sykepenger
-     *
-     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-48)
-     */
-    fun `§ 8-48 ledd 2 punktum 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {}
-
-    /**
-     * Annen livsoppsoppholdsytelse istedenfor sykepenger
-     *
-     *  Lovdata: [lenke](https://lovdata.no/dokument/TRR/avgjorelse/trr-2006-4023)
-     */
-    fun `Trygderettens kjennelse 2006-4023`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) {}
 
     class SammenligningsgrunnlagDTO(
         val sammenligningsgrunnlag: Double,
@@ -826,6 +630,405 @@ fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>
         kontekster = emptyList()
     )
 
+/**
+ * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer
+ * innrapportert inntekt til a-ordningen for de tre siste månedene før skjæringstidspunktet
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
+ *
+ * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
+ * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
+ * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
+ * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [inntekterSisteTreMåneder]
+ * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [inntekterSisteTreMåneder]
+ */
+fun `§ 8-28 ledd 3 bokstav a`(
+    organisasjonsnummer: String,
+    inntekterSisteTreMåneder: List<Inntektsubsumsjon>,
+    grunnlagForSykepengegrunnlagÅrlig: Double,
+    grunnlagForSykepengegrunnlagMånedlig: Double,
+    skjæringstidspunkt: LocalDate
+) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = VILKAR_BEREGNET,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2019, 1, 1),
+        paragraf = PARAGRAF_8_28,
+        ledd = LEDD_3,
+        bokstav = BOKSTAV_A,
+        input = mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "inntekterSisteTreMåneder" to inntekterSisteTreMåneder.subsumsjonsformat(),
+            "skjæringstidspunkt" to skjæringstidspunkt
+        ),
+        output = mapOf(
+            "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
+            "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * I arbeidsforhold som har vart så kort tid at det ikke er rapportert inntekt til a-ordningen
+ * for tre hele kalendermåneder, skal dette kortere tidsrommet legges til grunn.
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
+ *
+ * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
+ * @param startdatoArbeidsforhold startdato hos arbeidsgiver [organisasjonsnummer]
+ * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) b
+ * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
+ * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
+ * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+ * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+ */
+fun `§ 8-28 ledd 3 bokstav b`(
+    organisasjonsnummer: String,
+    startdatoArbeidsforhold: LocalDate,
+    overstyrtInntektFraSaksbehandler: Map<String, Any>,
+    skjæringstidspunkt: LocalDate,
+    forklaring: String,
+    grunnlagForSykepengegrunnlagÅrlig: Double,
+    grunnlagForSykepengegrunnlagMånedlig: Double
+) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = VILKAR_BEREGNET,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2019, 1, 1),
+        paragraf = PARAGRAF_8_28,
+        ledd = LEDD_3,
+        bokstav = BOKSTAV_B,
+        input = mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "startdatoArbeidsforhold" to startdatoArbeidsforhold,
+            "overstyrtInntektFraSaksbehandler" to overstyrtInntektFraSaksbehandler,
+            "forklaring" to forklaring
+        ),
+        output = mapOf(
+            "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
+            "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * I et arbeidsforhold der arbeidstakeren har fått varig lønnsendring i løpet av eller etter beregningsperioden,
+ * men før arbeidsuførhetstidspunktet, skal tidsrommet etter lønnsendringen legges til grunn.
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
+ *
+ * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
+ * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) c
+ * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
+ * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
+ * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+ * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+ */
+fun `§ 8-28 ledd 3 bokstav c`(
+    organisasjonsnummer: String,
+    overstyrtInntektFraSaksbehandler: Map<String, Any>,
+    skjæringstidspunkt: LocalDate,
+    forklaring: String,
+    grunnlagForSykepengegrunnlagÅrlig: Double,
+    grunnlagForSykepengegrunnlagMånedlig: Double
+) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = VILKAR_BEREGNET,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2019, 1, 1),
+        paragraf = PARAGRAF_8_28,
+        ledd = LEDD_3,
+        bokstav = BOKSTAV_C,
+        input = mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "overstyrtInntektFraSaksbehandler" to overstyrtInntektFraSaksbehandler,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "forklaring" to forklaring
+        ),
+        output = mapOf(
+            "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
+            "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * Dersom rapporteringen til a-ordningen er mangelfull eller uriktig,
+ * fastsettes sykepengegrunnlaget ut fra den inntekten arbeidsgiver skulle ha rapportert til a-ordningen i beregningsperioden.
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
+ *
+ * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
+ * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) c
+ * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
+ * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
+ * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+ * @param grunnlagForSykepengegrunnlagMånedlig beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+ */
+fun `§ 8-28 ledd 5`(
+    organisasjonsnummer: String,
+    overstyrtInntektFraSaksbehandler: Map<String, Any>,
+    skjæringstidspunkt: LocalDate,
+    forklaring: String,
+    grunnlagForSykepengegrunnlagÅrlig: Double,
+    grunnlagForSykepengegrunnlagMånedlig: Double
+) =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = VILKAR_BEREGNET,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2019, 1, 1),
+        paragraf = PARAGRAF_8_28,
+        ledd = LEDD_5,
+        input = mapOf(
+            "organisasjonsnummer" to organisasjonsnummer,
+            "overstyrtInntektFraSaksbehandler" to overstyrtInntektFraSaksbehandler,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "forklaring" to forklaring
+        ),
+        output = mapOf(
+            "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlagÅrlig,
+            "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlagMånedlig
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * Inntekter som legges til grunn for beregning av sykepengegrunnlag
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-29)
+ *
+ * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlagÅrlig] er beregnet for
+ * @param inntektsopplysninger inntekter som ligger til grunn for beregning av [grunnlagForSykepengegrunnlagÅrlig]
+ * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlagÅrlig] beregnes relativt til
+ * @param grunnlagForSykepengegrunnlagÅrlig beregnet grunnlag basert på [inntektsopplysninger]
+ */
+fun `§ 8-29`(
+    skjæringstidspunkt: LocalDate,
+    grunnlagForSykepengegrunnlagÅrlig: Double,
+    inntektsopplysninger: List<Inntektsubsumsjon>,
+    organisasjonsnummer: String
+) =             Subsumsjon.enkelSubsumsjon(
+    utfall = VILKAR_BEREGNET,
+    lovverk = "folketrygdloven",
+    versjon = LocalDate.of(2019, 1, 1),
+    paragraf = PARAGRAF_8_29,
+    ledd = null,
+    input = mapOf(
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "organisasjonsnummer" to organisasjonsnummer,
+        "inntektsopplysninger" to inntektsopplysninger.subsumsjonsformat()
+    ),
+    output = mapOf(
+        "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlagÅrlig
+    ),
+    kontekster = emptyList()
+)
+
+fun `§ 8-33 ledd 1`() {}
+
+fun `§ 8-33 ledd 3`(grunnlagForFeriepenger: Int, opptjeningsår: Year, prosentsats: Double, alder: Int, feriepenger: Double) {}
+
+/**
+ * Vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
+ *
+ * @param oppfylt dersom vedkommende har inntekt større enn eller lik to ganger grunnbeløpet. Det er en forutsetning at vedkommende er mellom 67 og 70 år
+ * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
+ * @param alderPåSkjæringstidspunkt alder på skjæringstidspunktet
+ * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
+ * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
+ */
+fun `§ 8-51 ledd 2`(
+    oppfylt: Boolean,
+    skjæringstidspunkt: LocalDate,
+    alderPåSkjæringstidspunkt: Int,
+    beregningsgrunnlagÅrlig: Double,
+    minimumInntektÅrlig: Double
+) = Subsumsjon.enkelSubsumsjon(
+    utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+    lovverk = "folketrygdloven",
+    versjon = LocalDate.of(2011, 12, 16),
+    paragraf = PARAGRAF_8_51,
+    ledd = LEDD_2,
+    input = mapOf(
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "alderPåSkjæringstidspunkt" to alderPåSkjæringstidspunkt,
+        "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
+        "minimumInntekt" to minimumInntektÅrlig
+    ),
+    output = emptyMap(),
+    kontekster = emptyList()
+)
+
+/**
+ * Løpende vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år, trer i kraft når vedkommende fyller 67 år i løpet av sykefraværstilfellet0
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
+ *
+ * @param oppfylt dersom vedkommende fyller 67 år i løpet av sykefraværstilfellet og har inntekt større enn eller lik to ganger grunnbeløpet.
+ * @param utfallFom fra-og-med-dato [oppfylt]-vurderingen gjelder for
+ * @param utfallTom til-og-med-dato [oppfylt]-vurderingen gjelder for
+ * @param sekstisyvårsdag dato vedkommene fyller 67 år
+ * @param periodeFom fra-og-med-dato for perioden til behandling som vurderer kravet om minimum inntekt
+ * @param periodeTom til-og-med-dato for perioden til behandling som vurderer kravet om minimum inntekt
+ * @param beregningsgrunnlagÅrlig total inntekt på tvers av alle relevante arbeidsgivere
+ * @param minimumInntektÅrlig minimum beløp [beregningsgrunnlagÅrlig] må være lik eller større enn for at vilkåret skal være [oppfylt]
+ */
+fun `§ 8-51 ledd 2`(
+    oppfylt: Boolean,
+    utfallFom: LocalDate,
+    utfallTom: LocalDate,
+    periodeFom: LocalDate,
+    periodeTom: LocalDate,
+    sekstisyvårsdag: LocalDate,
+    beregningsgrunnlagÅrlig: Double,
+    minimumInntektÅrlig: Double
+) = Subsumsjon.enkelSubsumsjon(
+    utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+    lovverk = "folketrygdloven",
+    versjon = LocalDate.of(2011, 12, 16),
+    paragraf = PARAGRAF_8_51,
+    ledd = LEDD_2,
+    input = mapOf(
+        "sekstisyvårsdag" to sekstisyvårsdag,
+        "utfallFom" to utfallFom,
+        "utfallTom" to utfallTom,
+        "periodeFom" to periodeFom,
+        "periodeTom" to periodeTom,
+        "grunnlagForSykepengegrunnlag" to beregningsgrunnlagÅrlig,
+        "minimumInntekt" to minimumInntektÅrlig
+    ),
+    output = emptyMap(),
+    kontekster = emptyList()
+)
+
+/**
+ * Vurdering av maksimalt antall sykepengedager ved fytle 67 år
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
+ *
+ * @param periode aktuell periode som vilkårsprøves
+ * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i inklusiv potensielt utbetalte dager fra Infotrygd
+ * @param beregnetTidslinje sammenslått tidslinje det tas utgangspunkt i når man beregner [gjenståendeSykedager], [forbrukteSykedager] og [maksdato]
+ * @param gjenståendeSykedager antall gjenstående sykepengedager ved siste utbetalte dag i [periode].
+ * @param forbrukteSykedager antall forbrukte sykepengedager ved siste utbetalte dag i [periode].
+ * @param maksdato dato for opphør av rett til sykepenger
+ * @param startdatoSykepengerettighet første NAV-dag i siste 248-dagers sykeforløp
+ */
+fun `§ 8-51 ledd 3`(
+    periode: ClosedRange<LocalDate>,
+    tidslinjegrunnlag: List<List<Tidslinjedag>>,
+    beregnetTidslinje: List<Tidslinjedag>,
+    gjenståendeSykedager: Int,
+    forbrukteSykedager: Int,
+    maksdato: LocalDate,
+    startdatoSykepengerettighet: LocalDate
+): List<Subsumsjon> {
+    val iterator = RangeIterator(periode).subsetFom(startdatoSykepengerettighet)
+    val (dagerOppfylt, dagerIkkeOppfylt) = iterator.asSequence().partition { it <= maksdato }
+
+    fun lagSubsumsjon(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) =
+        Subsumsjon.enkelSubsumsjon(
+            utfall = utfall,
+            versjon = LocalDate.of(2011, 12, 16),
+            lovverk = "folketrygdloven",
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            input = mapOf(
+                "fom" to periode.start,
+                "tom" to periode.endInclusive,
+                "utfallFom" to utfallFom,
+                "utfallTom" to utfallTom,
+                "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager() },
+                "beregnetTidslinje" to beregnetTidslinje.dager()
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to gjenståendeSykedager,
+                "forbrukteSykedager" to forbrukteSykedager,
+                "maksdato" to maksdato,
+            ),
+            kontekster = emptyList()
+        )
+    val subsumsjoner = mutableListOf<Subsumsjon>()
+    if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last()))
+    if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()))
+    return subsumsjoner
+}
+
+/**
+ * Vurdering av foreldelse
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§22-13)
+ */
+fun `§ 22-13 ledd 3`(avskjæringsdato: LocalDate, perioder: Collection<ClosedRange<LocalDate>>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = perioder,
+        utfall = VILKAR_IKKE_OPPFYLT,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2011, 12, 16),
+        paragraf = Paragraf.PARAGRAF_22_13,
+        ledd = LEDD_3,
+        input = mapOf(
+            "avskjæringsdato" to avskjæringsdato
+        ),
+        kontekster = emptyList()
+    )
+
+/**
+ * Omgjøring av vedtak uten klage
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§22-13)
+ */
+fun `fvl § 35 ledd 1`() =
+    Subsumsjon.enkelSubsumsjon(
+        utfall = VILKAR_OPPFYLT,
+        lovverk = "forvaltningsloven",
+        versjon = LocalDate.of(2021, 6, 1),
+        paragraf = Paragraf.PARAGRAF_35,
+        ledd = LEDD_1,
+        input = mapOf(
+            "stadfesting" to true
+        ),
+        output = emptyMap(),
+        kontekster = emptyList()
+    )
+
+/**
+ * Arbeidsavklaringspenger istedenfor sykepenger
+ *
+ * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-48)
+ */
+fun `§ 8-48 ledd 2 punktum 2`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = dato,
+        utfall = VILKAR_IKKE_OPPFYLT,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.parse("2021-05-21"),
+        paragraf = PARAGRAF_8_48,
+        ledd = LEDD_2,
+        punktum = Punktum.PUNKTUM_2,
+        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager()),
+        kontekster = emptyList()
+    )
+
+/**
+ * Annen livsoppsoppholdsytelse istedenfor sykepenger
+ *
+ *  Lovdata: [lenke](https://lovdata.no/dokument/TRR/avgjorelse/trr-2006-4023)
+ */
+fun `Trygderettens kjennelse 2006-4023`(dato: Collection<ClosedRange<LocalDate>>, sykdomstidslinje: List<Tidslinjedag>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = dato,
+        utfall = VILKAR_IKKE_OPPFYLT,
+        lovverk = "trygderetten",
+        versjon = LocalDate.parse("2007-03-02"),
+        paragraf = KJENNELSE_2006_4023,
+        ledd = null,
+        input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager()),
+        kontekster = emptyList()
+    )
 
 internal class RangeIterator(start: LocalDate, private val end: LocalDate): Iterator<LocalDate> {
     private var currentDate = start

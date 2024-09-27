@@ -7,6 +7,7 @@ import java.util.*
 import no.nav.helse.Alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
 import no.nav.helse.etterlevelse.`§ 8-9 ledd 1`
 import no.nav.helse.hendelser.Avsender.SYKMELDT
 import no.nav.helse.hendelser.Periode.Companion.delvisOverlappMed
@@ -17,7 +18,6 @@ import no.nav.helse.hendelser.Søknad.TilkommenInntekt.Companion.orgnummereMedTi
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
@@ -122,7 +122,7 @@ class Søknad(
         merknaderFraSykmelding.forEach { it.valider(this) }
         val foreldedeDager = ForeldetSubsumsjonsgrunnlag(sykdomstidslinje).build()
         if (foreldedeDager.isNotEmpty()) {
-            subsumsjonslogg.`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager)
+            subsumsjonslogg.logg(`§ 22-13 ledd 3`(avskjæringsdato(), foreldedeDager))
             varsel(RV_SØ_2)
         }
         if (arbeidUtenforNorge) {

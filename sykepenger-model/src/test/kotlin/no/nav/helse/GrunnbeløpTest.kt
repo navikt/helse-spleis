@@ -6,6 +6,7 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.etterlevelse.MaskinellJurist
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
+import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -20,7 +21,7 @@ internal class GrunnbeløpTest {
     private val jurist = MaskinellJurist()
         .medFødselsnummer("fnr")
         .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
+        .medVedtaksperiode(UUID.randomUUID(), emptyList())
 
     @Test
     fun dagsats() {
@@ -201,12 +202,13 @@ internal class GrunnbeløpTest {
         val oppfylt = gjeldendeGrense.oppfyllerMinsteInntekt(skjæringstidspunkt, inntekt)
 
         if (alder.forhøyetInntektskrav(skjæringstidspunkt)) {
-            subsumsjonslogg.`§ 8-51 ledd 2`(
+            subsumsjonslogg.logg(`§ 8-51 ledd 2`(
                 oppfylt = oppfylt,
                 skjæringstidspunkt = skjæringstidspunkt,
                 alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
                 beregningsgrunnlagÅrlig = inntekt.årlig,
-                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig)
+                minimumInntektÅrlig = gjeldendeGrense.minsteinntekt(skjæringstidspunkt).årlig
+            ))
             if (oppfylt) return null
             return Begrunnelse.MinimumInntektOver67
         }

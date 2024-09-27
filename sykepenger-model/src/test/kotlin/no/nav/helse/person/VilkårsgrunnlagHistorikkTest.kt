@@ -51,7 +51,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     private val jurist = MaskinellJurist()
         .medFødselsnummer("fnr")
         .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
+        .medVedtaksperiode(UUID.randomUUID(), emptyList())
 
     companion object {
         private const val ORGNR = "123456789"

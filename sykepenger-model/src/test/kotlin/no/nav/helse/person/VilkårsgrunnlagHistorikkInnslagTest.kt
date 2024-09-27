@@ -38,7 +38,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     private val jurist = MaskinellJurist()
         .medFødselsnummer("fnr")
         .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
+        .medVedtaksperiode(UUID.randomUUID(), emptyList())
 
     private companion object {
         private val ALDER = 12.februar(1992).alder

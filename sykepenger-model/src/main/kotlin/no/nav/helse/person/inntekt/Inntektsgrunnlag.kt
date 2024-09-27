@@ -12,6 +12,7 @@ import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 8-10 ledd 2 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 2 punktum 1`
+import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
 import no.nav.helse.hendelser.GjenopplivVilkårsgrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
@@ -112,12 +113,13 @@ internal class Inntektsgrunnlag private constructor(
         subsumsjonslogg: Subsumsjonslogg
     ) {
         if (alder.forhøyetInntektskrav(skjæringstidspunkt))
-            subsumsjonslogg.`§ 8-51 ledd 2`(
+            subsumsjonslogg.logg(`§ 8-51 ledd 2`(
                 oppfylt = oppfyllerMinsteinntektskrav,
                 skjæringstidspunkt = skjæringstidspunkt,
                 alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt),
                 beregningsgrunnlagÅrlig = beregningsgrunnlag.årlig,
-                minimumInntektÅrlig = minsteinntekt.årlig)
+                minimumInntektÅrlig = minsteinntekt.årlig
+            ))
         else
             subsumsjonslogg.logg(`§ 8-3 ledd 2 punktum 1`(
                 oppfylt = oppfyllerMinsteinntektskrav,

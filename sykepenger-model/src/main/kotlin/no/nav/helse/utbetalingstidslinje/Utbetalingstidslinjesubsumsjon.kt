@@ -3,12 +3,14 @@ package no.nav.helse.utbetalingstidslinje
 import java.time.LocalDate
 import no.nav.helse.erRettFør
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`Trygderettens kjennelse 2006-4023`
 import no.nav.helse.etterlevelse.`§ 8-11 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-16 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 1 bokstav a`
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
 import no.nav.helse.etterlevelse.`§ 8-19 andre ledd`
+import no.nav.helse.etterlevelse.`§ 8-48 ledd 2 punktum 2`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -85,8 +87,8 @@ internal class Utbetalingstidslinjesubsumsjon(
         subsumsjonslogg.logg(`§ 8-17 ledd 1`(arbeidsgiverperiodeNavdager))
         subsumsjonslogg.logg(`§ 8-11 ledd 1`(vedtaksperiode, helger))
         subsumsjonslogg.logg(`§ 8-17 ledd 2`(fridager, tidslinjesubsumsjonsformat))
-        subsumsjonslogg.`§ 8-48 ledd 2 punktum 2`(aap, tidslinjesubsumsjonsformat)
-        subsumsjonslogg.`Trygderettens kjennelse 2006-4023`(andreYtelser, tidslinjesubsumsjonsformat)
+        subsumsjonslogg.logg(`§ 8-48 ledd 2 punktum 2`(aap, tidslinjesubsumsjonsformat))
+        subsumsjonslogg.logg(`Trygderettens kjennelse 2006-4023`(andreYtelser, tidslinjesubsumsjonsformat))
         // subsummerer alle periodene samlet, så lenge inntekten er lik
         dekningsgrunnlag
             .asSequence()

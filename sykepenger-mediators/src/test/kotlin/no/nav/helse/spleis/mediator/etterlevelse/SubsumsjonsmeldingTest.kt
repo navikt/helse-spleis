@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
 import no.nav.helse.etterlevelse.`§ 8-17 ledd 2`
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.spleis.meldinger.model.MigrateMessage
 
@@ -35,7 +34,7 @@ internal class SubsumsjonsmeldingTest {
         jurist = MaskinellJurist()
             .medFødselsnummer(fnr)
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.randomUUID(), emptyList(), Periode(1.januar, 31.januar))
+            .medVedtaksperiode(UUID.randomUUID(), emptyList())
         val eksempelmelding = MigrateMessage(JsonMessage.newMessage("testevent", mapOf(
             "aktørId" to "1",
             "fødselsnummer" to fnr,

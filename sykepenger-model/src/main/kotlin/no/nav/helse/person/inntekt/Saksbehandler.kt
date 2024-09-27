@@ -9,6 +9,9 @@ import no.nav.helse.etterlevelse.Bokstav
 import no.nav.helse.etterlevelse.Ledd
 import no.nav.helse.etterlevelse.Paragraf
 import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav b`
+import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav c`
+import no.nav.helse.etterlevelse.`§ 8-28 ledd 5`
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.økonomi.Inntekt
 
@@ -57,7 +60,7 @@ class Saksbehandler internal constructor(
             && subsumsjon.bokstav == Bokstav.BOKSTAV_B.ref.toString()
         ) {
             requireNotNull(startdatoArbeidsforhold) { "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken" }
-            subsumsjonslogg.`§ 8-28 ledd 3 bokstav b`(
+            subsumsjonslogg.logg(`§ 8-28 ledd 3 bokstav b`(
                 organisasjonsnummer = organisasjonsnummer,
                 startdatoArbeidsforhold = startdatoArbeidsforhold,
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
@@ -65,28 +68,28 @@ class Saksbehandler internal constructor(
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-            )
+            ))
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
             && subsumsjon.ledd == Ledd.LEDD_3.nummer
             && subsumsjon.bokstav == Bokstav.BOKSTAV_C.ref.toString()
         ) {
-            subsumsjonslogg.`§ 8-28 ledd 3 bokstav c`(
+            subsumsjonslogg.logg(`§ 8-28 ledd 3 bokstav c`(
                 organisasjonsnummer = organisasjonsnummer,
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-            )
+            ))
         } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer) {
-            subsumsjonslogg.`§ 8-28 ledd 5`(
+            subsumsjonslogg.logg(`§ 8-28 ledd 5`(
                 organisasjonsnummer = organisasjonsnummer,
                 overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.månedlig),
                 skjæringstidspunkt = dato,
                 forklaring = forklaring,
                 grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
                 grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-            )
+            ))
         }
     }
 

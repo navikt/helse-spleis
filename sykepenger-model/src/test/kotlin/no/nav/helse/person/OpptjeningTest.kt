@@ -41,7 +41,7 @@ internal class OpptjeningTest {
     private val jurist = MaskinellJurist()
         .medFødselsnummer("fnr")
         .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
+        .medVedtaksperiode(UUID.randomUUID(), emptyList())
 
     @Test
     fun `konkret opptjeningsperiode`() {

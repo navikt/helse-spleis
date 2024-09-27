@@ -65,7 +65,7 @@ internal class InntektsgrunnlagTest {
     private val jurist = MaskinellJurist()
         .medFødselsnummer("fnr")
         .medOrganisasjonsnummer("orgnr")
-        .medVedtaksperiode(UUID.randomUUID(), emptyList(), 1.januar..31.januar)
+        .medVedtaksperiode(UUID.randomUUID(), emptyList())
 
     @Test
     fun equality() {
@@ -885,17 +885,10 @@ internal class InntektsgrunnlagTest {
             when {
                 subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_3).annetLedd.førstePunktum) ->
                     this.`§ 8-3 ledd 2 punktum 1` = subsumsjon.utfall == VILKAR_OPPFYLT
+                subsumsjon.er(folketrygdloven.paragraf(Paragraf.PARAGRAF_8_51).annetLedd) -> {
+                    this.`§ 8-51 ledd 2` = subsumsjon.utfall == VILKAR_OPPFYLT
+                }
             }
-        }
-
-        override fun `§ 8-51 ledd 2`(
-            oppfylt: Boolean,
-            skjæringstidspunkt: LocalDate,
-            alderPåSkjæringstidspunkt: Int,
-            beregningsgrunnlagÅrlig: Double,
-            minimumInntektÅrlig: Double
-        ) {
-            this.`§ 8-51 ledd 2` = oppfylt
         }
     }
 }

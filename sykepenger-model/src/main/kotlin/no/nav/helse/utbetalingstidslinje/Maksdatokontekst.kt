@@ -9,6 +9,7 @@ import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.Tidslinjedag
 import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
 import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
+import no.nav.helse.etterlevelse.`§ 8-51 ledd 3`
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -169,7 +170,9 @@ internal data class Maksdatokontekst(
                 gjenståendeDager = ukedager(forrigeVirkedag, maksdato)
                 hjemmelsbegrunnelse = Maksdatoresultat.Bestemmelse.BEGRENSET_RETT
 
-                subsumsjonslogg.`§ 8-51 ledd 3`(vedtaksperiode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, gjenståendeDager, forbrukteDager, maksdato, startdatoSykepengerettighet)
+                `§ 8-51 ledd 3`(vedtaksperiode, tidslinjegrunnlagsubsumsjon, beregnetTidslinjesubsumsjon, gjenståendeDager, forbrukteDager, maksdato, startdatoSykepengerettighet).forEach {
+                    subsumsjonslogg.logg(it)
+                }
                 førSyttiårsdagen(subsumsjonslogg, alder.syttiårsdagen.forrigeDag)
             }
             else -> {

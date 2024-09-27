@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.til
 import no.nav.helse.dto.AlderDto
+import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -73,7 +74,7 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
         minimumInntektÅrlig: Double,
         jurist: Subsumsjonslogg
     ) {
-        jurist.`§ 8-51 ledd 2`(
+        jurist.logg(`§ 8-51 ledd 2`(
             oppfylt = oppfylt,
             utfallFom = utfallFom,
             utfallTom = utfallTom,
@@ -82,7 +83,7 @@ class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDat
             periodeTom = periodeTom,
             beregningsgrunnlagÅrlig = beregningsgrunnlagÅrlig,
             minimumInntektÅrlig = minimumInntektÅrlig
-        )
+        ))
     }
 
     internal fun avvisDager(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {

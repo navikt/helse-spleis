@@ -8,6 +8,8 @@ import no.nav.helse.dto.AnsattPeriodeDto
 import no.nav.helse.dto.deserialisering.InntektsopplysningInnDto
 import no.nav.helse.dto.serialisering.InntektsopplysningUtDto
 import no.nav.helse.etterlevelse.`§ 8-15`
+import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
+import no.nav.helse.etterlevelse.`§ 8-29`
 import no.nav.helse.person.inntekt.AnsattPeriode.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.sisteMåneder
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -97,19 +99,19 @@ internal class SkattSykepengegrunnlag private constructor(
     }
 
     override fun subsumerSykepengegrunnlag(subsumsjonslogg: Subsumsjonslogg, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
-        subsumsjonslogg.`§ 8-28 ledd 3 bokstav a`(
+        subsumsjonslogg.logg(`§ 8-28 ledd 3 bokstav a`(
             organisasjonsnummer = organisasjonsnummer,
             skjæringstidspunkt = dato,
             inntekterSisteTreMåneder = inntektsopplysninger.subsumsjonsformat(),
             grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
             grunnlagForSykepengegrunnlagMånedlig = fastsattÅrsinntekt().månedlig
-        )
-        subsumsjonslogg.`§ 8-29`(
+        ))
+        subsumsjonslogg.logg(`§ 8-29`(
             skjæringstidspunkt = dato,
             grunnlagForSykepengegrunnlagÅrlig = fastsattÅrsinntekt().årlig,
             inntektsopplysninger = inntektsopplysninger.subsumsjonsformat(),
             organisasjonsnummer = organisasjonsnummer
-        )
+        ))
     }
 
     override fun subsumerArbeidsforhold(
