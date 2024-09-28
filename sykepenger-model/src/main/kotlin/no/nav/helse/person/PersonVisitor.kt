@@ -27,6 +27,7 @@ import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.UtbetalingsdagVisitor
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Avviksprosent
@@ -294,7 +295,7 @@ internal interface BehandlingerVisitor : BehandlingVisitor {
     fun postVisitBehandlinger(behandlinger: List<Behandlinger.Behandling>) {}
 }
 
-internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor {
+internal interface BehandlingVisitor {
     fun preVisitBehandling(
         id: UUID,
         tidsstempel: LocalDateTime,
@@ -304,7 +305,7 @@ internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         avsluttet: LocalDateTime?,
         kilde: Behandlinger.Behandlingkilde
     ) {}
-    fun preVisitBehandlingendring(
+    fun visitBehandlingendring(
         id: UUID,
         tidsstempel: LocalDateTime,
         sykmeldingsperiode: Periode,
@@ -315,20 +316,8 @@ internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistor
         sykdomstidslinje: Sykdomstidslinje,
         skjæringstidspunkt: LocalDate,
         arbeidsgiverperiode: List<Periode>,
-        utbetalingstidslinje: Utbetalingstidslinje
-    ) {}
-    fun postVisitBehandlingendring(
-        id: UUID,
-        tidsstempel: LocalDateTime,
-        sykmeldingsperiode: Periode,
-        periode: Periode,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
-        utbetaling: Utbetaling?,
-        dokumentsporing: Dokumentsporing,
-        sykdomstidslinje: Sykdomstidslinje,
-        skjæringstidspunkt: LocalDate,
-        arbeidsgiverperiode: List<Periode>,
-        utbetalingstidslinje: Utbetalingstidslinje
+        utbetalingstidslinje: Utbetalingstidslinje,
+        maksdatoresultat: Maksdatoresultat
     ) {}
     fun visitBehandlingkilde(
         meldingsreferanseId: UUID,

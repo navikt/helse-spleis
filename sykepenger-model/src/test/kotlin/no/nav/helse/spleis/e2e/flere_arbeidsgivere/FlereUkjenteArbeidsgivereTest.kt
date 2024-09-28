@@ -225,7 +225,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar), orgnummer = a2)
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        assertEquals(listOf(
+        assertEquals(setOf(
             Dokumentsporing.søknad(søknadId),
             Dokumentsporing.inntektsmeldingDager(imId),
             Dokumentsporing.inntektsmeldingInntekt(imId)
@@ -285,7 +285,7 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractEndToEndTest() {
 
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         assertEquals(
-            listOf(
+            setOf(
                 Dokumentsporing.søknad(søknadId),
                 Dokumentsporing.inntektsmeldingDager(imId),
                 Dokumentsporing.inntektsmeldingInntekt(imId)

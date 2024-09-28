@@ -156,7 +156,6 @@ internal class TestPersonTest : AbstractDslTest() {
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Dag.Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[Dag.SykHelgedag::class])
         }
-        Assertions.assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,

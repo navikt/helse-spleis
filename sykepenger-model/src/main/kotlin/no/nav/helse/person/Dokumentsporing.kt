@@ -7,7 +7,7 @@ import no.nav.helse.dto.DokumenttypeDto
 import no.nav.helse.etterlevelse.KontekstType
 import no.nav.helse.etterlevelse.Subsumsjonskontekst
 
-class Dokumentsporing private constructor(private val id: UUID, private val dokumentType: DokumentType) {
+class Dokumentsporing private constructor(val id: UUID, val dokumentType: DokumentType) {
 
     companion object {
         internal fun sykmelding(id: UUID) = Dokumentsporing(id, DokumentType.Sykmelding)

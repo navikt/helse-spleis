@@ -45,7 +45,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     fun `annullere senere periode enn perioden til godkjenning`() {
         nyttVedtak(mars)
         tilGodkjenning(januar, ORGNUMMER)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -58,7 +58,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(2.vedtaksperiode))
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
         håndterUtbetalt()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
@@ -202,7 +202,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode))
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode))
         assertEquals(3, inspektør.utbetalinger.size)
         assertTrue(inspektør.utbetalinger[2].inspektør.erAnnullering)
     }
@@ -223,7 +223,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(2.vedtaksperiode))
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(2.vedtaksperiode))
         assertEquals(2, inspektør.utbetalinger.size)
         assertFalse(inspektør.utbetalinger[1].inspektør.erAnnullering)
     }
@@ -395,15 +395,15 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode)) // Stale
-        håndterAnnullerUtbetaling(utbetalingId = inspektør.utbetalingId(1.vedtaksperiode), opprettet = LocalDateTime.now().plusHours(3))
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode)) // Stale
+        håndterAnnullerUtbetaling(utbetalingId = inspektør.sisteUtbetalingId(1.vedtaksperiode), opprettet = LocalDateTime.now().plusHours(3))
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
 
         assertTrue(inspektør.utbetalinger.last().inspektør.erAnnullering)
         assertEquals(1, observatør.annulleringer.size)
         assertEquals(2,
             person.personLogg.behov()
-                .filter { it.detaljer()["fagsystemId"] == inspektør.fagsystemId(1.vedtaksperiode) }
+                .filter { it.detaljer()["fagsystemId"] == inspektør.sisteArbeidsgiveroppdragFagsystemId(1.vedtaksperiode) }
                 .filter { it.type == Aktivitet.Behov.Behovtype.Utbetaling }
                 .size
         )

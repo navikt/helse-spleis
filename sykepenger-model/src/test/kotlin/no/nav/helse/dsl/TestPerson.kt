@@ -340,11 +340,11 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
-        internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, utbetalingId: UUID = inspektør.utbetalingId { vedtaksperiodeId }, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
+        internal fun håndterVedtakFattet(vedtaksperiodeId: UUID, utbetalingId: UUID = inspektør.sisteUtbetalingId { vedtaksperiodeId }, automatisert: Boolean = true, vedtakFattetTidspunkt: LocalDateTime = LocalDateTime.now()) {
             arbeidsgiverHendelsefabrikk.lagVedtakFattet(vedtaksperiodeId, utbetalingId, automatisert, vedtakFattetTidspunkt)
                 .håndter(Person::håndter)
         }
-        internal fun håndterKanIkkeBehandlesHer(vedtaksperiodeId: UUID, utbetalingId: UUID = inspektør.utbetalingId { vedtaksperiodeId }, automatisert: Boolean = true) {
+        internal fun håndterKanIkkeBehandlesHer(vedtaksperiodeId: UUID, utbetalingId: UUID = inspektør.sisteUtbetalingId { vedtaksperiodeId }, automatisert: Boolean = true) {
             arbeidsgiverHendelsefabrikk.lagKanIkkeBehandlesHer(vedtaksperiodeId, utbetalingId, automatisert)
                 .håndter(Person::håndter)
         }

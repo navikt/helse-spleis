@@ -33,6 +33,7 @@ import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import kotlin.check
 import kotlin.checkNotNull
@@ -296,7 +297,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     }
 
     private class SprøSykdomstidslinjePåEndringer : ArbeidsgiverVisitor {
-        override fun preVisitBehandlingendring(
+        override fun visitBehandlingendring(
             id: UUID,
             tidsstempel: LocalDateTime,
             sykmeldingsperiode: Periode,
@@ -307,7 +308,8 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
             sykdomstidslinje: Sykdomstidslinje,
             skjæringstidspunkt: LocalDate,
             arbeidsgiverperiode: List<Periode>,
-            utbetalingstidslinje: Utbetalingstidslinje
+            utbetalingstidslinje: Utbetalingstidslinje,
+            maksdatoresultat: Maksdatoresultat
         ) {
             val førsteIkkeUkjenteDag = sykdomstidslinje.firstOrNull { it !is UkjentDag }
             val førsteDag = sykdomstidslinje[periode.start]

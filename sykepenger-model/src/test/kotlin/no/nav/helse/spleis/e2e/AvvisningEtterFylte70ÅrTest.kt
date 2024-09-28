@@ -103,7 +103,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        assertEquals(9.januar, inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertEquals(9.januar, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
     }
 
     @Test
@@ -117,7 +117,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        assertEquals(9.januar, inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertEquals(9.januar, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
     }
 
     @Test
@@ -130,7 +130,7 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        assertEquals(12.januar, inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertEquals(12.januar, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
     }
 
     @Test
@@ -143,6 +143,6 @@ internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
 
-        assertEquals(19.januar, inspektør.sisteMaksdato(1.vedtaksperiode))
+        assertEquals(19.januar, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
     }
 }

@@ -68,7 +68,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -206,7 +205,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -396,8 +394,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities()
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -447,8 +443,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
-            assertNotNull(it.sisteMaksdato(1.vedtaksperiode))
-            assertNotNull(it.sisteMaksdato(2.vedtaksperiode))
             assertEquals(8586, it.totalBeløp[0])
             assertEquals(8586, it.nettoBeløp[0])
             assertEquals(32913, it.totalBeløp[1])
@@ -496,7 +490,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities()
-        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(
             2.vedtaksperiode,
@@ -536,8 +529,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(3.januar, it.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(3.januar, it.skjæringstidspunkt(2.vedtaksperiode))
         }
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -577,7 +568,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar))
         håndterSøknad(Sykdom(29.januar, 23.februar, 100.prosent))
 
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -609,7 +599,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities()
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,

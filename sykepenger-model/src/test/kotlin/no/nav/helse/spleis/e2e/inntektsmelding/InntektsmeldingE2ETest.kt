@@ -1651,7 +1651,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
         assertActivities(person)
-        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1729,8 +1728,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertIngenFunksjonelleFeil()
         assertActivities(person)
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1792,8 +1789,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertIngenFunksjonelleFeil()
 
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,

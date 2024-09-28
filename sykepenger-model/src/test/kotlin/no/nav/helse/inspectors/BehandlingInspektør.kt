@@ -12,6 +12,7 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal val Behandlinger.Behandling.inspektør get() = BehandlingInspektør(this)
@@ -100,7 +101,7 @@ internal class BehandlingInspektør(behandling: Behandlinger.Behandling) : Behan
         )
     }
 
-    override fun preVisitBehandlingendring(
+    override fun visitBehandlingendring(
         id: UUID,
         tidsstempel: LocalDateTime,
         sykmeldingsperiode: Periode,
@@ -111,7 +112,8 @@ internal class BehandlingInspektør(behandling: Behandlinger.Behandling) : Behan
         sykdomstidslinje: Sykdomstidslinje,
         skjæringstidspunkt: LocalDate,
         arbeidsgiverperiode: List<Periode>,
-        utbetalingstidslinje: Utbetalingstidslinje
+        utbetalingstidslinje: Utbetalingstidslinje,
+        maksdatoresultat: Maksdatoresultat
     ) {
         behandling = behandling.copy(
             endringer = behandling.endringer.plus(Behandling.Behandlingendring(

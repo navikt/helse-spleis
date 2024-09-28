@@ -95,7 +95,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -355,9 +354,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
 
         assertTilstander(
             1.vedtaksperiode,
@@ -973,28 +969,29 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(5, sykdomstidslinjedagerForAndrePeriode[Arbeidsgiverdag::class])
 
         val maksdatoFør26UkerOpphold = LocalDate.of(2018, 12, 28)
-        assertEquals(maksdatoFør26UkerOpphold, inspektør.maksdatoVedSisteVedtak())
+        assertEquals(maksdatoFør26UkerOpphold, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
 
         nyttVedtak(1.august til 21.august)
 
-        val maksdatoEtter26UkerOpphold = LocalDate.of(2019, 7, 30)
-        assertEquals(maksdatoEtter26UkerOpphold, inspektør.maksdatoVedSisteVedtak())
-        assertEquals(3, inspektør.forbrukteSykedager(1))
-        assertEquals(245, inspektør.gjenståendeSykedager(3.vedtaksperiode))
+        inspektør.sisteMaksdato(3.vedtaksperiode).also {
+            val maksdatoEtter26UkerOpphold = LocalDate.of(2019, 7, 30)
+            assertEquals(maksdatoEtter26UkerOpphold, it.maksdato)
+            assertEquals(3, it.antallForbrukteDager)
+            assertEquals(245, it.gjenståendeDager)
+        }
     }
 
     @Test
     fun `'arbeidGjenopptatt' i løpet av arbeidsgiverperioden i arbeidsgiversøknad medfører ikke forbrukte sykedager`() {
         nyttVedtak(januar)
-        assertEquals(28.desember, inspektør.maksdatoVedSisteVedtak())
+        assertEquals(28.desember, inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 21.mars))
         håndterSøknad(
             Sykdom(1.mars, 21.mars, 100.prosent),
             Arbeid(12.mars, 21.mars)
         )
         håndterInntektsmelding(listOf(1.mars til 16.mars))
-        assertEquals(28.desember, inspektør.maksdatoVedSisteVedtak())
         nyttVedtak(1.mai til 21.mai)
-        assertEquals(12.april(2019), inspektør.maksdatoVedSisteVedtak())
+        assertEquals(12.april(2019), inspektør.sisteMaksdato(3.vedtaksperiode).maksdato)
     }
 }

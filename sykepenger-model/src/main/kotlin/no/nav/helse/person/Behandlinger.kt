@@ -500,7 +500,7 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
             }
 
             internal fun accept(visitor: BehandlingVisitor) {
-                visitor.preVisitBehandlingendring(
+                visitor.visitBehandlingendring(
                     id,
                     tidsstempel,
                     sykmeldingsperiode,
@@ -511,22 +511,8 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                     sykdomstidslinje,
                     skjæringstidspunkt,
                     arbeidsgiverperiode,
-                    utbetalingstidslinje
-                )
-                grunnlagsdata?.accept(visitor)
-                utbetaling?.accept(visitor)
-                visitor.postVisitBehandlingendring(
-                    id,
-                    tidsstempel,
-                    sykmeldingsperiode,
-                    periode,
-                    grunnlagsdata,
-                    utbetaling,
-                    dokumentsporing,
-                    sykdomstidslinje,
-                    skjæringstidspunkt,
-                    arbeidsgiverperiode,
-                    utbetalingstidslinje
+                    utbetalingstidslinje,
+                    maksdatoresultat
                 )
             }
 

@@ -904,16 +904,16 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 16)
 
         nyttVedtak(1.januar til 30.januar)
-        assertEquals(6, inspektør.gjenståendeSykedager(1.vedtaksperiode))
+        assertEquals(6, inspektør.sisteMaksdato(1.vedtaksperiode).gjenståendeDager)
 
         nyttVedtak(1.mai til 24.mai)
-        assertEquals(0, inspektør.gjenståendeSykedager(2.vedtaksperiode))
+        assertEquals(0, inspektør.sisteMaksdato(2.vedtaksperiode).gjenståendeDager)
 
         nyttVedtak(1.mars til 26.mars)
         håndterYtelser(2.vedtaksperiode)
 
         //Når out-of-order perioden for mars kommer inn, så er det dager i mai som skal bli avvist pga maksdato
-        assertEquals(0, inspektør.gjenståendeSykedager(3.vedtaksperiode))
+        assertEquals(0, inspektør.sisteMaksdato(3.vedtaksperiode).gjenståendeDager)
         assertEquals(0, inspektør.utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
         assertEquals(6, inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.avvistDagTeller)
     }
