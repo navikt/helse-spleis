@@ -515,7 +515,6 @@ internal class Behandlinger private constructor(behandlinger: List<Behandling>) 
                 )
                 grunnlagsdata?.accept(visitor)
                 utbetaling?.accept(visitor)
-                sykdomstidslinje.accept(visitor)
                 visitor.postVisitBehandlingendring(
                     id,
                     tidsstempel,

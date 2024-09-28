@@ -66,15 +66,7 @@ class Sykdomshistorikk private constructor(
             forrige?.beregnetSykdomstidslinje?.merge(uhåndtertSykdomstidslinje, Dagturnering.TURNERING::beste) ?: uhåndtertSykdomstidslinje
 
         internal fun accept(visitor: SykdomshistorikkVisitor) {
-            visitor.preVisitSykdomshistorikkElement(this, id, hendelseId, tidsstempel)
-            visitor.preVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje, hendelseId, tidsstempel)
-            hendelseSykdomstidslinje.accept(visitor)
-            visitor.postVisitHendelseSykdomstidslinje(hendelseSykdomstidslinje)
-            visitor.preVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
-            beregnetSykdomstidslinje.accept(visitor)
-            visitor.postVisitBeregnetSykdomstidslinje(beregnetSykdomstidslinje)
-
-            visitor.postVisitSykdomshistorikkElement(this, id, hendelseId, tidsstempel)
+            visitor.visitSykdomshistorikkElement(this, id, hendelseId, tidsstempel, hendelseSykdomstidslinje, beregnetSykdomstidslinje)
         }
 
         override fun compareTo(other: Element) = this.tidsstempel.compareTo(other.tidsstempel)

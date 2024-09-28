@@ -191,7 +191,7 @@ internal class Vedtaksperiode private constructor(
 
     private val sykmeldingsperiode get() = behandlinger.sykmeldingsperiode()
     private val periode get() = behandlinger.periode()
-    private val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
+    internal val sykdomstidslinje get() = behandlinger.sykdomstidslinje()
     private val jurist get() = behandlinger.subsumsjonslogg(subsumsjonslogg, id, fødselsnummer, organisasjonsnummer)
     private val skjæringstidspunkt get() = behandlinger.skjæringstidspunkt()
     private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
@@ -214,7 +214,6 @@ internal class Vedtaksperiode private constructor(
             behandlinger.hendelseIder(),
             egenmeldingsperioder
         )
-        sykdomstidslinje.accept(visitor)
         behandlinger.accept(visitor)
         visitor.postVisitVedtaksperiode(
             this,

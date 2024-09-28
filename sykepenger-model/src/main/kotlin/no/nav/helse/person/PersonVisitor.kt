@@ -26,7 +26,6 @@ import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeDagVisitor
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -112,11 +111,6 @@ internal interface InfotrygdhistorikkVisitor: InfotrygdperiodeVisitor {
     }
 
     fun postVisitInfotrygdhistorikk() {}
-}
-
-internal interface FeriepengeutbetalingsperiodeVisitor {
-    fun visitPersonutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
-    fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
 }
 
 interface RefusjonsopplysningerVisitor {
@@ -323,7 +317,7 @@ internal interface BehandlingerVisitor : BehandlingVisitor {
     fun postVisitBehandlinger(behandlinger: List<Behandlinger.Behandling>) {}
 }
 
-internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor, SykdomstidslinjeVisitor {
+internal interface BehandlingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor {
     fun preVisitBehandling(
         id: UUID,
         tidsstempel: LocalDateTime,
@@ -404,40 +398,19 @@ internal interface VedtaksperiodeVisitor : BehandlingerVisitor, UtbetalingsdagVi
     }
 }
 
-internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
+internal interface SykdomshistorikkVisitor {
     fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
-    fun preVisitSykdomshistorikkElement(
+    fun visitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
         id: UUID,
         hendelseId: UUID?,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun preVisitHendelseSykdomstidslinje(
-        tidslinje: Sykdomstidslinje,
-        hendelseId: UUID?,
-        tidsstempel: LocalDateTime
-    ) {
-    }
-
-    fun postVisitHendelseSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-    fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-    fun postVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {}
-    fun postVisitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
-        id: UUID,
-        hendelseId: UUID?,
-        tidsstempel: LocalDateTime
+        tidsstempel: LocalDateTime,
+        hendelseSykdomstidslinje: Sykdomstidslinje,
+        beregnetSykdomstidslinje: Sykdomstidslinje
     ) {
     }
 
     fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
-}
-
-internal interface SykdomstidslinjeVisitor: SykdomstidslinjeDagVisitor {
-    fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {}
-    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {}
 }
 
 internal interface RefusjonshistorikkVisitor {

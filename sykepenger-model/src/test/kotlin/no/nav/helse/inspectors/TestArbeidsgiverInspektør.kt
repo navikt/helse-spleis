@@ -367,10 +367,7 @@ internal class TestArbeidsgiverInspektør(
             egenmeldingsperioder: List<Periode>
         ) {
             vedtaksperiodeId = id
-        }
-
-        override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
-            vedtaksperiodeSykdomstidslinje[vedtaksperiodeId] = tidslinje
+            vedtaksperiodeSykdomstidslinje[vedtaksperiodeId] = vedtaksperiode.sykdomstidslinje
         }
     }
 

@@ -10,7 +10,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 internal val Sykdomshistorikk.inspektør get() = SykdomshistorikkInspektør(this)
 
 internal class SykdomshistorikkInspektør(historikk: Sykdomshistorikk) : SykdomshistorikkVisitor {
-    private var elementteller = 0
     private val tidslinjer = mutableListOf<Sykdomstidslinje>()
     private val perioderPerHendelse = mutableMapOf<UUID, MutableList<Periode>>()
 
@@ -18,43 +17,21 @@ internal class SykdomshistorikkInspektør(historikk: Sykdomshistorikk) : Sykdoms
         historikk.accept(this)
     }
 
-    fun elementer() = elementteller
+    fun elementer() = tidslinjer.size
     fun perioderPerHendelse() = perioderPerHendelse.toMap()
     fun tidslinje(elementIndeks: Int) = tidslinjer[elementIndeks]
 
-    override fun postVisitSykdomshistorikkElement(
+    override fun visitSykdomshistorikkElement(
         element: Sykdomshistorikk.Element,
         id: UUID,
         hendelseId: UUID?,
-        tidsstempel: LocalDateTime
+        tidsstempel: LocalDateTime,
+        hendelseSykdomstidslinje: Sykdomstidslinje,
+        beregnetSykdomstidslinje: Sykdomstidslinje
     ) {
-        elementteller += 1
         hendelseId?.let {
-            perioderPerHendelse.getOrPut(it) { mutableListOf() }.add(element.inspektør.periode)
+            perioderPerHendelse.getOrPut(it) { mutableListOf() }.add(hendelseSykdomstidslinje.periode()!!)
         }
-    }
-
-
-    override fun preVisitBeregnetSykdomstidslinje(tidslinje: Sykdomstidslinje) {
-        tidslinjer.add(elementteller, tidslinje)
-    }
-}
-
-internal val Sykdomshistorikk.Element.inspektør get() = SykdomshistorikkElementInspektør(this)
-
-internal class SykdomshistorikkElementInspektør(element: Sykdomshistorikk.Element) : SykdomshistorikkVisitor {
-
-    lateinit var periode: Periode
-
-    init {
-        element.accept(this)
-    }
-
-    override fun preVisitHendelseSykdomstidslinje(
-        tidslinje: Sykdomstidslinje,
-        hendelseId: UUID?,
-        tidsstempel: LocalDateTime
-    ) {
-        periode = tidslinje.periode()!!
+        tidslinjer.add(beregnetSykdomstidslinje)
     }
 }

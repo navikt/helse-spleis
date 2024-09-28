@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
@@ -141,29 +140,6 @@ internal class Sykdomstidslinje private constructor(
         if (!this.sisteDag().erRettFør(other.førsteDag())) return false
         val sammenslått = this + other
         return sammenslått.sisteSkjæringstidspunkt(other.periode) == sammenslått.sisteSkjæringstidspunkt(this.periode)
-    }
-
-    internal fun accept(visitor: SykdomstidslinjeVisitor) {
-        visitor.preVisitSykdomstidslinje(this, låstePerioder)
-        periode?.forEach {
-            when (val dag = this[it]) {
-                is AndreYtelser -> dag.accept(visitor)
-                is ArbeidIkkeGjenopptattDag -> dag.accept(visitor)
-                is Arbeidsdag -> dag.accept(visitor)
-                is ArbeidsgiverHelgedag -> dag.accept(visitor)
-                is Arbeidsgiverdag -> dag.accept(visitor)
-                is Feriedag -> dag.accept(visitor)
-                is ForeldetSykedag -> dag.accept(visitor)
-                is FriskHelgedag -> dag.accept(visitor)
-                is Permisjonsdag -> dag.accept(visitor)
-                is ProblemDag -> dag.accept(visitor)
-                is SykHelgedag -> dag.accept(visitor)
-                is Sykedag -> dag.accept(visitor)
-                is SykedagNav -> dag.accept(visitor)
-                is UkjentDag -> dag.accept(visitor)
-            }
-        }
-        visitor.postVisitSykdomstidslinje(this, låstePerioder)
     }
 
     override fun equals(other: Any?): Boolean {
