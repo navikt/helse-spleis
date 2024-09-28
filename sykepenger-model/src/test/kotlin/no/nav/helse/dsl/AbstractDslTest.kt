@@ -27,7 +27,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsledig
 import no.nav.helse.person.Frilans
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Selvstendig
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet
@@ -95,7 +94,7 @@ internal abstract class AbstractDslTest {
     private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør), jurist)
 
     protected fun personView() = testperson.view()
-    protected fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
+    protected fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
     protected fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
     protected fun inspektør(vedtaksperiodeId: UUID) = inspiser(personInspektør).vedtaksperiode(vedtaksperiodeId).inspektør
     protected fun inspektørForkastet(vedtaksperiodeId: UUID) = inspiser(personInspektør).forkastetVedtaksperiode(vedtaksperiodeId).inspektør

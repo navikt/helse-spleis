@@ -74,7 +74,7 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
 
         assertEquals(1.februar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(setOf(1.februar, 10.mars), person.inspektør.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt)
+        assertEquals(setOf(1.februar, 10.mars), person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
 
         assertEquals(listOf(1.februar til 16.februar), inspektør.arbeidsgiverperioder(1.vedtaksperiode))
         // infotrygdendringen påvirker beregning av agp for 2.vedtaksperiode siden den er åpnet opp.

@@ -35,7 +35,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
@@ -98,7 +97,7 @@ internal class TestPerson(
     private val ugyldigeSituasjonerObservatør = UgyldigeSituasjonerObservatør(person)
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
-    internal fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
+    internal fun <INSPEKTØR> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
     internal fun view() = person.view()
 
     internal fun arbeidsgiver(orgnummer: String) =

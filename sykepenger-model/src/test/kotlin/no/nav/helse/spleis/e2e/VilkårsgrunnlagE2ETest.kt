@@ -162,7 +162,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     private fun assertVilkårsgrunnlagFraSpleisFor(vararg skjæringstidspunkt: LocalDate) {
-        assertEquals(skjæringstidspunkt.toSet(), person.inspektør.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt)
+        assertEquals(skjæringstidspunkt.toSet(), person.inspektør.vilkårsgrunnlagHistorikk.aktiveSpleisSkjæringstidspunkt)
     }
     private fun assertIngenVilkårsgrunnlagFraSpleis() = assertVilkårsgrunnlagFraSpleisFor()
 }

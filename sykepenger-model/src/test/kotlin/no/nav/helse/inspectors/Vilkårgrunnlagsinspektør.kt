@@ -22,13 +22,14 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     private var innslag = -1
     internal val aktiveSpleisSkjæringstidspunkt = mutableSetOf<LocalDate>()
     private val grunnlagsdata = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
+    private val vilkårsgrunnlagHistorikkInnslag: MutableList<VilkårsgrunnlagHistorikk.Innslag> = mutableListOf()
 
     init {
         historikk.accept(this)
     }
 
     internal fun antallGrunnlagsdata() = vilkårsgrunnlagTeller.map(Map.Entry<*, Int>::value).sum()
-
+    internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.toList()
     internal fun grunnlagsdata(indeks: Int) = grunnlagsdata[indeks].second
     internal fun grunnlagsdata() = grunnlagsdata.map { it.second }
     internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) = grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
@@ -41,6 +42,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
         this.innslag += 1
         vilkårsgrunnlagTeller[this.innslag] = 0
+        vilkårsgrunnlagHistorikkInnslag.add(innslag)
     }
 
     override fun preVisitGrunnlagsdata(

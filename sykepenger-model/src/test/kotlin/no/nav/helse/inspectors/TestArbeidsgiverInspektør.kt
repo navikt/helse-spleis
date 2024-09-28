@@ -6,16 +6,15 @@ import java.util.UUID
 import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.inntekt.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.inntekt.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -37,7 +36,7 @@ import org.junit.jupiter.api.fail
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
     val orgnummer: String
-) : PersonVisitor {
+) : ArbeidsgiverVisitor {
     internal companion object {
         internal operator fun TestArbeidsgiverInspektør.invoke(blokk: TestArbeidsgiverInspektør.() -> Unit) {
             this.apply(blokk)
@@ -86,36 +85,10 @@ internal class TestArbeidsgiverInspektør(
     private val hendelseIder = mutableMapOf<Int, Set<Dokumentsporing>>()
     private val sykmeldingsperioder = mutableListOf<Periode>()
 
-    internal fun vilkårsgrunnlagHistorikkInnslag() = personInspektør.vilkårsgrunnlagHistorikkInnslag()
+    internal fun vilkårsgrunnlagHistorikkInnslag() = person.vilkårsgrunnlagHistorikk.inspektør.vilkårsgrunnlagHistorikkInnslag()
 
     init {
-        HentAktivitetslogg(person, orgnummer).also { results ->
-            results.arbeidsgiver.accept(this)
-        }
-    }
-
-    private class HentAktivitetslogg(person: Person, private val valgfriOrgnummer: String?) : PersonVisitor {
-        lateinit var aktivitetslogg: Aktivitetslogg
-        lateinit var arbeidsgiver: Arbeidsgiver
-
-        init {
-            person.accept(this)
-        }
-
-        override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
-            this.aktivitetslogg = aktivitetslogg
-        }
-
-        override fun preVisitArbeidsgiver(
-            arbeidsgiver: Arbeidsgiver,
-            id: UUID,
-            organisasjonsnummer: String,
-            sykdomshistorikk: Sykdomshistorikk
-        ) {
-            if (organisasjonsnummer == valgfriOrgnummer) this.arbeidsgiver = arbeidsgiver
-            if (this::arbeidsgiver.isInitialized) return
-            this.arbeidsgiver = arbeidsgiver
-        }
+        person.arbeidsgivere.first { it.organisasjonsnummer() == orgnummer }.accept(this)
     }
 
     override fun preVisitArbeidsgiver(
@@ -458,7 +431,7 @@ internal class TestArbeidsgiverInspektør(
     private fun <R> Collection<R>.singleOrNullOrThrow() = if (size < 2) this.firstOrNull() else throw IllegalStateException("Listen inneholder $size elementer: $this")
 
     internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value) =
-        personInspektør.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.inspektør?.inntektsgrunnlag?.inspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(orgnummer)?.inspektør?.refusjonsopplysninger ?: Refusjonsopplysninger()
+        personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer]?.inspektør?.refusjonsopplysninger ?: Refusjonsopplysninger()
     internal fun refusjonsopplysningerFraRefusjonshistorikk(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value) =
         arbeidsgiver.inspektør.refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 

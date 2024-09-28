@@ -10,7 +10,7 @@ internal class TestPersonAssertions(private val personInspektør: PersonInspekt�
     internal fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) {
         assertEquals(
             arbeidsgivere.toSet(),
-            personInspektør.vilkårsgrunnlagHistorikk.inspektør.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.keys
+            personInspektør.vilkårsgrunnlagHistorikk.grunnlagsdata(skjæringstidspunkt).inspektør.inntektsgrunnlag.inspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.keys
         )
     }
 

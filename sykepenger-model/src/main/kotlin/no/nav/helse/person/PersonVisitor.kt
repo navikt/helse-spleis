@@ -4,26 +4,22 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.util.UUID
-import no.nav.helse.AlderVisitor
-import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
-import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.AktivitetsloggVisitor
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor
 import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysningVisitor
+import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.InntektsmeldingVisitor
 import no.nav.helse.person.inntekt.Refusjonshistorikk
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.person.inntekt.Sammenligningsgrunnlag
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
@@ -36,26 +32,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Avviksprosent
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
-
-internal interface PersonVisitor : AlderVisitor, ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
-    fun preVisitPerson(
-        person: Person,
-        opprettet: LocalDateTime,
-        aktørId: String,
-        personidentifikator: Personidentifikator,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
-    ) {}
-    fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
-    fun preVisitArbeidsgivere() {}
-    fun postVisitArbeidsgivere() {}
-    fun postVisitPerson(
-        person: Person,
-        opprettet: LocalDateTime,
-        aktørId: String,
-        personidentifikator: Personidentifikator,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
-    ) {}
-}
 
 internal interface InfotrygdperiodeVisitor {
     fun visitInfotrygdhistorikkFerieperiode(periode: Friperiode, fom: LocalDate, tom: LocalDate) {}

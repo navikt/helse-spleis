@@ -457,7 +457,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }
-        (inspiser(personInspektør).vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+        inspiser(personInspektør).vilkårsgrunnlagHistorikk.grunnlagsdata(1.januar).inspektør.also { vilkårsgrunnlag ->
             val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
             assertEquals(1116000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
@@ -524,7 +524,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVSLUTTET
             )
         }
-        (inspiser(personInspektør).vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+        inspiser(personInspektør).vilkårsgrunnlagHistorikk.grunnlagsdata(1.januar).inspektør.also { vilkårsgrunnlag ->
             val sykepengegrunnlagInspektør = vilkårsgrunnlag.inntektsgrunnlag.inspektør
 
             assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)

@@ -10,7 +10,7 @@ import no.nav.helse.etterlevelse.`§ 8-51 ledd 2`
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-class Alder(private val fødselsdato: LocalDate, private val dødsdato: LocalDate?) {
+class Alder(val fødselsdato: LocalDate, val dødsdato: LocalDate?) {
     internal val syttiårsdagen: LocalDate = fødselsdato.plusYears(70)
     internal val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)

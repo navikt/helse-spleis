@@ -85,14 +85,14 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import kotlin.math.roundToInt
 
 class Person private constructor(
-    private var aktørId: String,
+    aktørId: String,
     personidentifikator: Personidentifikator,
     internal var alder: Alder,
-    private val arbeidsgivere: MutableList<Arbeidsgiver>,
-    private val aktivitetslogg: Aktivitetslogg,
+    private val _arbeidsgivere: MutableList<Arbeidsgiver>,
+    internal val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
     internal val infotrygdhistorikk: Infotrygdhistorikk,
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
+    internal val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val jurist: Subsumsjonslogg,
     private val tidligereBehandlinger: List<Person> = emptyList(),
     internal val regler: ArbeidsgiverRegler = NormalArbeidstaker,
@@ -111,7 +111,7 @@ class Person private constructor(
                 aktørId = dto.aktørId,
                 personidentifikator = dto.fødselsnummer.somPersonidentifikator(),
                 alder = alder,
-                arbeidsgivere = arbeidsgivere,
+                _arbeidsgivere = arbeidsgivere,
                 aktivitetslogg = Aktivitetslogg(),
                 opprettet = dto.opprettet,
                 infotrygdhistorikk = Infotrygdhistorikk.gjenopprett(dto.infotrygdhistorikk),
@@ -165,6 +165,11 @@ class Person private constructor(
         alder: Alder,
         jurist: Subsumsjonslogg
     ) : this(aktørId, personidentifikator, alder, jurist, NormalArbeidstaker)
+
+    internal val arbeidsgivere: List<Arbeidsgiver> get() = _arbeidsgivere.toList()
+
+    var aktørId: String = aktørId
+        private set
 
     var personidentifikator: Personidentifikator = personidentifikator
         private set
@@ -341,7 +346,7 @@ class Person private constructor(
         }
 
         utbetalingshistorikk.sikreAtArbeidsgivereEksisterer {
-            arbeidsgivere.finnEllerOpprett(Yrkesaktivitet.Arbeidstaker(it), utbetalingshistorikk)
+            _arbeidsgivere.finnEllerOpprett(Yrkesaktivitet.Arbeidstaker(it), utbetalingshistorikk)
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(
             aktørId,
@@ -589,19 +594,6 @@ class Person private constructor(
         infotrygdhistorikk.oppfriskNødvendig(hendelse, arbeidsgivere.tidligsteDato())
     }
 
-    internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this, opprettet, aktørId, personidentifikator, vilkårsgrunnlagHistorikk)
-        alder.accept(visitor)
-        visitor.visitPersonAktivitetslogg(aktivitetslogg)
-        aktivitetslogg.accept(visitor)
-        visitor.preVisitArbeidsgivere()
-        arbeidsgivere.forEach { it.accept(visitor) }
-        visitor.postVisitArbeidsgivere()
-        infotrygdhistorikk.accept(visitor)
-        vilkårsgrunnlagHistorikk.accept(visitor)
-        visitor.postVisitPerson(this, opprettet, aktørId, personidentifikator, vilkårsgrunnlagHistorikk)
-    }
-
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
         return SpesifikkKontekst("Person", mapOf("fødselsnummer" to personidentifikator.toString(), "aktørId" to aktørId))
     }
@@ -615,7 +607,7 @@ class Person private constructor(
         finnEllerOpprettArbeidsgiver(hendelse.organisasjonsnummer().tilYrkesaktivitet(), hendelse)
 
     private fun finnEllerOpprettArbeidsgiver(yrkesaktivitet: Yrkesaktivitet, aktivitetslogg: IAktivitetslogg) =
-        arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
+        _arbeidsgivere.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().tilYrkesaktivitet().let { yrkesaktivitet ->

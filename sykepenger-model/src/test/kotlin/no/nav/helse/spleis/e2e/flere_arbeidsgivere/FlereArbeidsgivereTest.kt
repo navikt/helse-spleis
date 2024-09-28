@@ -831,7 +831,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
 
         inspiser(personInspektør).also { inspektør ->
-            val vilkårsgrunnlagInnslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
+            val vilkårsgrunnlagInnslag = inspektør.vilkårsgrunnlagHistorikk.vilkårsgrunnlagHistorikkInnslag()
             assertEquals(1, vilkårsgrunnlagInnslag.size)
             vilkårsgrunnlagInnslag.single().id
         }
