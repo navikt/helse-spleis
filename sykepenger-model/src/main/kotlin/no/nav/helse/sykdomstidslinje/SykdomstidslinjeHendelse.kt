@@ -34,9 +34,6 @@ abstract class SykdomstidslinjeHendelse internal constructor(
     internal fun noenHarHåndtert() = håndtertAv.isNotEmpty()
 
     internal abstract fun erRelevant(other: Periode): Boolean
-    internal abstract fun sykdomstidslinje(): Sykdomstidslinje
-
-    override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 
     internal fun vurdertTilOgMed(dato: LocalDate) {
         nesteFraOgMed = dato.nesteDag

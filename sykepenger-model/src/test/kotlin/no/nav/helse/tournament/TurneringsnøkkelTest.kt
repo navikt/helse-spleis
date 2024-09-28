@@ -17,10 +17,10 @@ import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.tournament.Turneringsnøkkel.Arbeidsdag_IM
 import no.nav.helse.tournament.Turneringsnøkkel.Arbeidsdag_SØ
 import no.nav.helse.tournament.Turneringsnøkkel.ArbeidsgiverHelgedag_IM
@@ -90,7 +90,7 @@ internal class TurneringsnøkkelTest {
             error("ikke i bruk")
         }
 
-        override fun element(): Sykdomshistorikk.Element {
+        override fun sykdomstidslinje(): Sykdomstidslinje {
             error("ikke i bruk")
         }
 

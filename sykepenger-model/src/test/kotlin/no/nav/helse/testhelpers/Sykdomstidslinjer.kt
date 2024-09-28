@@ -15,7 +15,6 @@ import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Melding
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Companion.INGEN
@@ -212,8 +211,8 @@ internal val Int.FORELDET
 internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje(), private val meldingsreferanseId: UUID = UUID.randomUUID()) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
     override fun dokumentsporing() = error("ikke i bruk")
     override fun oppdaterFom(other: Periode) = other
-    override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, tidslinje)
-    override fun meldingsreferanseId() = error("ikke i bruk")
+    override fun meldingsreferanseId() =  meldingsreferanseId
+    override fun sykdomstidslinje() = tidslinje
     override fun innsendt() = error("ikke i bruk")
     override fun registrert() = error("ikke i bruk")
     override fun avsender() = error("ikke i bruk")

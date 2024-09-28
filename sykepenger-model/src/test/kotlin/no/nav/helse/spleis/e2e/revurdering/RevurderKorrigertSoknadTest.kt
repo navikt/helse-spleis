@@ -486,11 +486,11 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     }
 
     private fun assertRevurderingUtenEndring(vedtakperiodeId: IdInnhenter, orgnummer: String = ORGNUMMER, block:() -> Unit) {
-        val sykdomsHistorikkElementerFør = inspektør(orgnummer).sykdomshistorikk.inspektør.elementer()
+        val sykdomsHistorikkElementerFør = inspektør(orgnummer).sykdomshistorikk.elementer()
         val utbetalingerFør = inspektør(orgnummer).utbetalinger(vedtakperiodeId)
         block()
         val utbetalingerEtter = inspektør(orgnummer).utbetalinger(vedtakperiodeId)
-        val sykdomsHistorikkElementerEtter = inspektør(orgnummer).sykdomshistorikk.inspektør.elementer()
+        val sykdomsHistorikkElementerEtter = inspektør(orgnummer).sykdomshistorikk.elementer()
         assertEquals(1, utbetalingerEtter.size - utbetalingerFør.size) { "Forventet at det skal være opprettet en utbetaling" }
         assertEquals(UEND, utbetalingerEtter.last().inspektør.arbeidsgiverOppdrag.inspektør.endringskode)
         assertEquals(0, utbetalingerEtter.last().inspektør.personOppdrag.size)

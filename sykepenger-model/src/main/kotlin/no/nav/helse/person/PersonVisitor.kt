@@ -220,12 +220,13 @@ internal interface VilkårsgrunnlagHistorikkVisitor : OpptjeningVisitor, Inntekt
     ) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor,
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, VedtaksperiodeVisitor,
     UtbetalingVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, SykmeldingsperioderVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
-        organisasjonsnummer: String
+        organisasjonsnummer: String,
+        sykdomshistorikk: Sykdomshistorikk
     ) {
     }
 
@@ -396,21 +397,6 @@ internal interface VedtaksperiodeVisitor : BehandlingerVisitor, UtbetalingsdagVi
         hendelseIder: Set<Dokumentsporing>
     ) {
     }
-}
-
-internal interface SykdomshistorikkVisitor {
-    fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
-    fun visitSykdomshistorikkElement(
-        element: Sykdomshistorikk.Element,
-        id: UUID,
-        hendelseId: UUID?,
-        tidsstempel: LocalDateTime,
-        hendelseSykdomstidslinje: Sykdomstidslinje,
-        beregnetSykdomstidslinje: Sykdomstidslinje
-    ) {
-    }
-
-    fun postVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {}
 }
 
 internal interface RefusjonshistorikkVisitor {

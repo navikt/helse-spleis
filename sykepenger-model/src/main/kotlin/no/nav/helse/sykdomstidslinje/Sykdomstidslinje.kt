@@ -40,7 +40,7 @@ import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde.Com
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
-internal class Sykdomstidslinje private constructor(
+class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
     periode: Periode? = null,
     private val _låstePerioder: MutableList<Periode> = mutableListOf()

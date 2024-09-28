@@ -694,7 +694,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
 
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
-        inspektør.sykdomshistorikk.inspektør.tidslinje(0)[dato].let {
+        inspektør.sykdomshistorikk.tidslinje(0)[dato].let {
             assertTrue(it is D) { "Forventet ${D::class.simpleName} men var ${it::class.simpleName}"}
         }
         inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {

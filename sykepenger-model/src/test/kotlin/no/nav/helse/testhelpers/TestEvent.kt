@@ -6,8 +6,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 
 internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHendelse, IAktivitetslogg by (Aktivitetslogg()) {
     companion object {
@@ -35,7 +35,7 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomshistorikkHend
         error("ikke i bruk")
     }
 
-    override fun element(): Sykdomshistorikk.Element {
+    override fun sykdomstidslinje(): Sykdomstidslinje {
         error("ikke i bruk")
     }
 

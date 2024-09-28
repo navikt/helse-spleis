@@ -27,7 +27,6 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_23
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -330,8 +329,7 @@ internal class DagerFraInntektsmelding(
         override fun oppdaterFom(other: Periode) =
             other.oppdaterFom(sykdomstidslinje().periode() ?: other)
         override fun dokumentsporing() = Dokumentsporing.inntektsmeldingDager(meldingsreferanseId)
-        internal fun sykdomstidslinje() = sykdomstidslinje
-        override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId, sykdomstidslinje)
+        override fun sykdomstidslinje() = sykdomstidslinje
 
         override fun innsendt() = innsendt
         override fun registrert() = registert

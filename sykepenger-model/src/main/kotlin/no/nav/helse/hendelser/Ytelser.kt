@@ -7,7 +7,6 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.merge
@@ -79,8 +78,8 @@ class Ytelser(
         return other
     }
 
-    override fun element(): Sykdomshistorikk.Element {
-        return Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje)
+    override fun sykdomstidslinje(): Sykdomstidslinje {
+        return sykdomstidslinje
     }
 
     internal fun avgrensTil(periode: Periode): Ytelser {

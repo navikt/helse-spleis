@@ -60,8 +60,8 @@ internal class TestArbeidsgiverInspektør(
     val utbetalingstidslinjeberegningData = mutableListOf<UtbetalingstidslinjeberegningData>()
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver.inspektør.inntektshistorikk)
-    internal lateinit var sykdomshistorikk: Sykdomshistorikk
-    internal lateinit var sykdomstidslinje: Sykdomstidslinje
+    internal lateinit var sykdomshistorikk: SykdomshistorikkInspektør
+    internal val sykdomstidslinje: Sykdomstidslinje get() = sykdomshistorikk.tidslinje(0)
     internal val vedtaksperiodeSykdomstidslinje = mutableMapOf<UUID, Sykdomstidslinje>()
     internal val utbetalinger = mutableListOf<Utbetaling>()
     internal val feriepengeoppdrag = mutableListOf<Feriepengeoppdrag>()
@@ -106,7 +106,12 @@ internal class TestArbeidsgiverInspektør(
             this.aktivitetslogg = aktivitetslogg
         }
 
-        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+        override fun preVisitArbeidsgiver(
+            arbeidsgiver: Arbeidsgiver,
+            id: UUID,
+            organisasjonsnummer: String,
+            sykdomshistorikk: Sykdomshistorikk
+        ) {
             if (organisasjonsnummer == valgfriOrgnummer) this.arbeidsgiver = arbeidsgiver
             if (this::arbeidsgiver.isInitialized) return
             this.arbeidsgiver = arbeidsgiver
@@ -116,9 +121,11 @@ internal class TestArbeidsgiverInspektør(
     override fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,
-        organisasjonsnummer: String
+        organisasjonsnummer: String,
+        sykdomshistorikk: Sykdomshistorikk
     ) {
         this.arbeidsgiver = arbeidsgiver
+        this.sykdomshistorikk = sykdomshistorikk.inspektør
     }
 
     override fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
@@ -338,14 +345,6 @@ internal class TestArbeidsgiverInspektør(
         sendPersonoppdragTilOS: Boolean,
     ) {
         inFeriepengeutbetaling = false
-    }
-
-    override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-        if (inVedtaksperiode) return
-        this.sykdomshistorikk = sykdomshistorikk
-        if (!sykdomshistorikk.isEmpty()) {
-            sykdomstidslinje = sykdomshistorikk.sykdomstidslinje()
-        }
     }
 
     override fun visitSykmeldingsperiode(periode: Periode) {

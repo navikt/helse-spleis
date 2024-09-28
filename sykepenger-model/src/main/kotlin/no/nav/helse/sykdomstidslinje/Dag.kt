@@ -27,13 +27,13 @@ import no.nav.helse.økonomi.Økonomi
 
 internal typealias BesteStrategy = (Dag, Dag) -> Dag
 
-internal sealed class Dag(
+sealed class Dag(
     val dato: LocalDate,
     val kilde: Hendelseskilde
 ) {
     private fun name() = javaClass.canonicalName.split('.').last()
 
-    companion object {
+    internal companion object {
         internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
             if (venstre == høyre) venstre else høyre.problem(venstre)

@@ -340,11 +340,11 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         tilGodkjenning(10.januar til 31.januar, a1) // 1. jan - 9. jan blir omgjort til arbeidsdager ved innsending av IM her
         nullstillTilstandsendringer()
         // Saksbehandler korrigerer; 9.januar var vedkommende syk likevel
-        assertEquals(4, inspektør.sykdomshistorikk.inspektør.elementer())
+        assertEquals(4, inspektør.sykdomshistorikk.elementer())
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(9.januar, Dagtype.Arbeidsdag)
         ), orgnummer = a1)
-        assertEquals(5, inspektør.sykdomshistorikk.inspektør.elementer())
+        assertEquals(5, inspektør.sykdomshistorikk.elementer())
         val dagen = inspektør.sykdomstidslinje[9.januar]
         assertEquals(Dag.Arbeidsdag::class, dagen::class)
         assertTrue(dagen.kommerFra(OverstyrTidslinje::class))
@@ -392,12 +392,12 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         nullstillTilstandsendringer()
-        assertEquals(4, inspektør.sykdomshistorikk.inspektør.elementer())
+        assertEquals(4, inspektør.sykdomshistorikk.elementer())
         håndterOverstyrTidslinje(listOf(
             ManuellOverskrivingDag(9.januar, Dagtype.Sykedag, 100),
             ManuellOverskrivingDag(10.januar, Dagtype.Feriedag)
         ), orgnummer = a1)
-        assertEquals(5, inspektør.sykdomshistorikk.inspektør.elementer())
+        assertEquals(5, inspektør.sykdomshistorikk.elementer())
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         assertSykdomstidslinjedag(9.januar, Dag.Sykedag::class, OverstyrTidslinje::class)

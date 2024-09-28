@@ -15,8 +15,8 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VedtaksperiodeFilter
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
-import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 
@@ -122,7 +122,12 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         if (infotrygdInnslag == 1) infotrygdPerioder.add(fom til tom)
     }
 
-    override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+    override fun preVisitArbeidsgiver(
+        arbeidsgiver: Arbeidsgiver,
+        id: UUID,
+        organisasjonsnummer: String,
+        sykdomshistorikk: Sykdomshistorikk
+    ) {
         this.arbeidsgivere[organisasjonsnummer] = arbeidsgiver
     }
 }

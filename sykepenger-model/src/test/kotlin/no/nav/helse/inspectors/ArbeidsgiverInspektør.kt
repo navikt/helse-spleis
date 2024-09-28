@@ -27,7 +27,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     internal lateinit var refusjonshistorikk: Refusjonshistorikk
         private set
 
-    internal lateinit var sykdomshistorikk: Sykdomshistorikk
+    internal lateinit var sykdomshistorikk: SykdomshistorikkInspektør
         private set
 
     init {
@@ -39,8 +39,14 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
     internal val inntektshistorikk get() = sisteInntektshistorikk!!
 
-    override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+    override fun preVisitArbeidsgiver(
+        arbeidsgiver: Arbeidsgiver,
+        id: UUID,
+        organisasjonsnummer: String,
+        sykdomshistorikk: Sykdomshistorikk
+    ) {
         this.organisasjonsnummer = organisasjonsnummer
+        this.sykdomshistorikk = sykdomshistorikk.inspektør
     }
 
     override fun preVisitVedtaksperiode(
@@ -69,9 +75,5 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
 
     override fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
         this.refusjonshistorikk = refusjonshistorikk
-    }
-
-    override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
-        this.sykdomshistorikk = sykdomshistorikk
     }
 }

@@ -30,6 +30,7 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -233,7 +234,7 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
 
     private fun validerSykdomshistorikk() {
         arbeidsgivere.forEach { arbeidsgiver ->
-            val perioderPerHendelse = arbeidsgiver.inspektør.sykdomshistorikk.inspektør.perioderPerHendelse()
+            val perioderPerHendelse = arbeidsgiver.inspektør.sykdomshistorikk.perioderPerHendelse()
             perioderPerHendelse.forEach { (hendelseId, perioder) ->
                 check(!perioder.overlapper()) {
                     "Sykdomshistorikk inneholder overlappende perioder fra hendelse $hendelseId"
@@ -387,7 +388,12 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         private var orgnr: String? = null
         private var forrigePeriode: Pair<UUID, Periode>? = null
 
-        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
+        override fun preVisitArbeidsgiver(
+            arbeidsgiver: Arbeidsgiver,
+            id: UUID,
+            organisasjonsnummer: String,
+            sykdomshistorikk: Sykdomshistorikk
+        ) {
             orgnr = organisasjonsnummer
         }
 

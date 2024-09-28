@@ -32,7 +32,6 @@ import no.nav.helse.person.inntekt.InntektFraSøknad
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import no.nav.helse.person.inntekt.Refusjonsopplysning
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.SykdomshistorikkHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -96,8 +95,6 @@ class Søknad(
 
     override fun dokumentsporing() =
         Dokumentsporing.søknad(meldingsreferanseId())
-
-    override fun element() = Sykdomshistorikk.Element.opprett(meldingsreferanseId(), sykdomstidslinje())
 
     override fun innsendt() = sendtTilNAVEllerArbeidsgiver
     override fun registrert() = registrert

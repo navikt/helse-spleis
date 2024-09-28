@@ -277,9 +277,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
-        visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
+        visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer, sykdomshistorikk)
         inntektshistorikk.accept(visitor)
-        sykdomshistorikk.accept(visitor)
         sykmeldingsperioder.accept(visitor)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }

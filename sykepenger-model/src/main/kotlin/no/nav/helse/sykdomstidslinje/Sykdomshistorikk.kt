@@ -5,13 +5,12 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.SykdomshistorikkElementDto
 import no.nav.helse.dto.SykdomshistorikkDto
-import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.uhåndtertSykdomstidslinje
 import no.nav.helse.tournament.Dagturnering
 
-class Sykdomshistorikk private constructor(
+internal class Sykdomshistorikk private constructor(
     private val elementer: MutableList<Element>
-) {
+) : Iterable<SykdomshistorikkElementinnslag> {
     internal constructor() : this(mutableListOf())
 
     internal val size get() = elementer.size
@@ -23,7 +22,10 @@ class Sykdomshistorikk private constructor(
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
     internal fun håndter(hendelse: SykdomshistorikkHendelse): Sykdomstidslinje {
-        val nyttElement = hendelse.element()
+        val s = hendelse.sykdomstidslinje()
+        val m = hendelse.meldingsreferanseId()
+
+        val nyttElement = Element.opprett(m, s)
         val uhåndtertSykdomstidslinje = elementer.uhåndtertSykdomstidslinje(hendelse) ?: return sykdomstidslinje()
         elementer.add(0, nyttElement.merge(this, uhåndtertSykdomstidslinje))
         return sykdomstidslinje()
@@ -37,18 +39,27 @@ class Sykdomshistorikk private constructor(
         elementer.add(0, Element.opprettReset(this, perioder))
     }
 
-    internal fun accept(visitor: SykdomshistorikkVisitor) {
-        visitor.preVisitSykdomshistorikk(this)
-        elementer.forEach { it.accept(visitor) }
-        visitor.postVisitSykdomshistorikk(this)
+    override fun iterator() = object : Iterator<SykdomshistorikkElementinnslag> {
+        val iterator = elementer.iterator()
+        override fun hasNext() = iterator.hasNext()
+        override fun next(): SykdomshistorikkElementinnslag {
+            val gjeldendeElement = iterator.next()
+            return SykdomshistorikkElementinnslag(
+                id = gjeldendeElement.id,
+                hendelseId = gjeldendeElement.hendelseId,
+                tidsstempel = gjeldendeElement.tidsstempel,
+                hendelseSykdomstidslinje = gjeldendeElement.hendelseSykdomstidslinje,
+                beregnetSykdomstidslinje = gjeldendeElement.beregnetSykdomstidslinje
+            )
+        }
     }
 
     class Element private constructor(
-        private val id: UUID = UUID.randomUUID(),
-        private val hendelseId: UUID? = null,
-        private val tidsstempel: LocalDateTime = LocalDateTime.now(),
-        private val hendelseSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(),
-        private val beregnetSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(),
+        val id: UUID = UUID.randomUUID(),
+        val hendelseId: UUID? = null,
+        val tidsstempel: LocalDateTime = LocalDateTime.now(),
+        val hendelseSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(),
+        val beregnetSykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje(),
     ) : Comparable<Element> {
 
         internal fun merge(historikk: Sykdomshistorikk, uhåndtertSykdomstidslinje: Sykdomstidslinje): Element {
@@ -65,26 +76,22 @@ class Sykdomshistorikk private constructor(
         private fun mergeTidslinje(forrige: Element?, uhåndtertSykdomstidslinje: Sykdomstidslinje) =
             forrige?.beregnetSykdomstidslinje?.merge(uhåndtertSykdomstidslinje, Dagturnering.TURNERING::beste) ?: uhåndtertSykdomstidslinje
 
-        internal fun accept(visitor: SykdomshistorikkVisitor) {
-            visitor.visitSykdomshistorikkElement(this, id, hendelseId, tidsstempel, hendelseSykdomstidslinje, beregnetSykdomstidslinje)
-        }
-
         override fun compareTo(other: Element) = this.tidsstempel.compareTo(other.tidsstempel)
 
         override fun toString() = beregnetSykdomstidslinje.toString()
 
-        internal fun harHåndtert(hendelse: SykdomshistorikkHendelse) = hendelseId == hendelse.element().hendelseId
+        internal fun harHåndtert(hendelse: SykdomshistorikkHendelse) = hendelseId == hendelse.meldingsreferanseId()
 
         internal fun isEmpty(): Boolean = !beregnetSykdomstidslinje.iterator().hasNext()
 
         companion object {
             internal fun List<Element>.uhåndtertSykdomstidslinje(hendelse: SykdomshistorikkHendelse) : Sykdomstidslinje? {
-                if (hendelse.element().hendelseSykdomstidslinje.periode() == null) return null // tom sykdomstidslinje
-                val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.element().hendelseSykdomstidslinje // Første gang vi ser hendelsen
+                if (hendelse.sykdomstidslinje().periode() == null) return null // tom sykdomstidslinje
+                val tidligere = filter { it.harHåndtert(hendelse) }.takeUnless { it.isEmpty() } ?: return hendelse.sykdomstidslinje() // Første gang vi ser hendelsen
                 val alleredeHåndtertSykdomstidslinje = tidligere.fold(Sykdomstidslinje()) { tidligereHåndtert, element ->
                     tidligereHåndtert + element.hendelseSykdomstidslinje
                 }
-                val uhåndtertSykdomstidslinje = hendelse.element().hendelseSykdomstidslinje - alleredeHåndtertSykdomstidslinje
+                val uhåndtertSykdomstidslinje = hendelse.sykdomstidslinje() - alleredeHåndtertSykdomstidslinje
                 if (uhåndtertSykdomstidslinje.periode() == null) return null // Tom sykdomstidslinje, ikke noe nytt
                 return uhåndtertSykdomstidslinje.also {
                     hendelse.info("Legger til bit nummer ${tidligere.size +1 } for ${it.periode()} i sykdomshistorikken")
@@ -142,3 +149,11 @@ class Sykdomshistorikk private constructor(
         }
     }
 }
+
+internal data class SykdomshistorikkElementinnslag(
+    val id: UUID,
+    val hendelseId: UUID?,
+    val tidsstempel: LocalDateTime,
+    val hendelseSykdomstidslinje: Sykdomstidslinje,
+    val beregnetSykdomstidslinje: Sykdomstidslinje
+)
