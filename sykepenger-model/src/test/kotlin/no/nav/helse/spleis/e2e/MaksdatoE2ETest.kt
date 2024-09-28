@@ -29,10 +29,11 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        val utbetalingInspektør = inspektør(a1).utbetaling(0).inspektør
-        assertEquals(33, utbetalingInspektør.forbrukteSykedager)
-        assertEquals(215, utbetalingInspektør.gjenståendeSykedager)
-        assertEquals(25.januar(2019), utbetalingInspektør.maksdato)
+        inspektør(a1).sisteMaksdato(1.vedtaksperiode).also {
+            assertEquals(33, it.antallForbrukteDager)
+            assertEquals(215, it.gjenståendeDager)
+            assertEquals(25.januar(2019), it.maksdato)
+        }
     }
 
     @Test
@@ -45,10 +46,11 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        val utbetalingInspektør = inspektør(a1).utbetaling(0).inspektør
-        assertEquals(10, utbetalingInspektør.forbrukteSykedager)
-        assertEquals(238, utbetalingInspektør.gjenståendeSykedager)
-        assertEquals(27.februar(2019), utbetalingInspektør.maksdato)
+        inspektør(a1).sisteMaksdato(1.vedtaksperiode).also {
+            assertEquals(10, it.antallForbrukteDager)
+            assertEquals(238, it.gjenståendeDager)
+            assertEquals(27.februar(2019), it.maksdato)
+        }
     }
 
     @Test

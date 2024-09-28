@@ -2,15 +2,15 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.dto.SimuleringResultatDto
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.utbetalingslinjer.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
@@ -18,7 +18,7 @@ import kotlin.properties.Delegates
 
 val Oppdrag.inspektør get() = OppdragInspektør(this)
 
-class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
+class OppdragInspektør(oppdrag: Oppdrag) : OppdragVisitor {
     private var linjeteller = 0
     private val endringskoder = mutableListOf<Endringskode>()
     private lateinit var fagsystemId: String

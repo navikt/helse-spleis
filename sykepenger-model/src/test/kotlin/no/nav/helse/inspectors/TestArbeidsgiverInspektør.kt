@@ -27,7 +27,6 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.Utbetalingstatus
-import no.nav.helse.utbetalingslinjer.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.fail
 
@@ -112,10 +111,6 @@ internal class TestArbeidsgiverInspektør(
         tilstander[vedtaksperiodeindeks] = tilstand.type
     }
 
-    override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje, gjeldendePeriode: Periode?) {
-        utbetalingutbetalingstidslinjer.add(tidslinje)
-    }
-
     override fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -134,10 +129,6 @@ internal class TestArbeidsgiverInspektør(
         this.utbetalinger.addAll(utbetalinger)
     }
 
-    override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
-        arbeidsgiverOppdrag.add(oppdrag)
-    }
-
     override fun preVisitOppdrag(
         oppdrag: Oppdrag,
         fagområde: Fagområde,
@@ -153,10 +144,6 @@ internal class TestArbeidsgiverInspektør(
         simuleringsResultat: SimuleringResultatDto?
     ) {
         if (inFeriepengeutbetaling) feriepengeoppdrag.add(Feriepengeoppdrag(oppdrag.fagsystemId()))
-
-        if (oppdrag != arbeidsgiverOppdrag.lastOrNull()) return
-        this.totalBeløp.add(oppdrag.totalbeløp())
-        this.nettoBeløp.add(nettoBeløp)
     }
 
     override fun visitUtbetalingslinje(
@@ -205,27 +192,14 @@ internal class TestArbeidsgiverInspektør(
         val statuskode: String? = null
     )
 
-    override fun preVisitUtbetaling(
-        utbetaling: Utbetaling,
-        id: UUID,
-        korrelasjonsId: UUID,
-        type: Utbetalingtype,
-        utbetalingstatus: Utbetalingstatus,
-        periode: Periode,
-        tidsstempel: LocalDateTime,
-        oppdatert: LocalDateTime,
-        arbeidsgiverNettoBeløp: Int,
-        personNettoBeløp: Int,
-        maksdato: LocalDate,
-        forbrukteSykedager: Int?,
-        gjenståendeSykedager: Int?,
-        overføringstidspunkt: LocalDateTime?,
-        avsluttet: LocalDateTime?,
-        avstemmingsnøkkel: Long?,
-        annulleringer: Set<UUID>
-    ) {
-        utbetalingIder.add(id)
-        utbetalingstilstander.add(utbetalingstatus)
+    override fun visitUtbetaling(utbetaling: Utbetaling) {
+        utbetalingIder.add(utbetaling.id)
+        utbetalingstilstander.add(utbetaling.inspektør.tilstand)
+        utbetalingutbetalingstidslinjer.add(utbetaling.utbetalingstidslinje)
+
+        this.arbeidsgiverOppdrag.add(utbetaling.arbeidsgiverOppdrag)
+        this.totalBeløp.add(utbetaling.arbeidsgiverOppdrag.totalbeløp())
+        this.nettoBeløp.add(utbetaling.arbeidsgiverOppdrag.nettoBeløp())
     }
 
     override fun preVisitFeriepengeutbetaling(

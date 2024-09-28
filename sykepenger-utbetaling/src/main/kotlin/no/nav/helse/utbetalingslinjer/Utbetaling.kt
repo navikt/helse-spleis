@@ -39,13 +39,13 @@ import org.slf4j.LoggerFactory
 
 class Utbetaling private constructor(
     val id: UUID,
-    private val korrelasjonsId: UUID,
-    private val periode: Periode,
+    val korrelasjonsId: UUID,
+    val periode: Periode,
     val utbetalingstidslinje: Utbetalingstidslinje,
-    private val arbeidsgiverOppdrag: Oppdrag,
-    private val personOppdrag: Oppdrag,
+    val arbeidsgiverOppdrag: Oppdrag,
+    val personOppdrag: Oppdrag,
     private val tidsstempel: LocalDateTime,
-    private var tilstand: Tilstand,
+    tilstand: Tilstand,
     val type: Utbetalingtype,
     private val maksdato: LocalDate,
     private val forbrukteSykedager: Int?,
@@ -89,6 +89,9 @@ class Utbetaling private constructor(
     ) {
         check(annulleringer.all { it.type == ANNULLERING }) { "skal bare ha annulleringer" }
     }
+
+    internal var tilstand: Tilstand = tilstand
+        private set
 
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
@@ -442,52 +445,7 @@ class Utbetaling private constructor(
     }
 
     fun accept(visitor: UtbetalingVisitor) {
-        visitor.preVisitUtbetaling(
-            this,
-            id,
-            korrelasjonsId,
-            type,
-            tilstand.status,
-            periode,
-            tidsstempel,
-            oppdatert,
-            arbeidsgiverOppdrag.nettoBeløp(),
-            personOppdrag.nettoBeløp(),
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager,
-            overføringstidspunkt,
-            avsluttet,
-            avstemmingsnøkkel,
-            annulleringer.map { it.id }.toSet()
-        )
-        utbetalingstidslinje.accept(visitor)
-        visitor.preVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
-        arbeidsgiverOppdrag.accept(visitor)
-        visitor.postVisitArbeidsgiverOppdrag(arbeidsgiverOppdrag)
-        visitor.preVisitPersonOppdrag(personOppdrag)
-        personOppdrag.accept(visitor)
-        visitor.postVisitPersonOppdrag(personOppdrag)
-        vurdering?.accept(visitor)
-        visitor.postVisitUtbetaling(
-            this,
-            id,
-            korrelasjonsId,
-            type,
-            tilstand.status,
-            periode,
-            tidsstempel,
-            oppdatert,
-            arbeidsgiverOppdrag.nettoBeløp(),
-            personOppdrag.nettoBeløp(),
-            maksdato,
-            forbrukteSykedager,
-            gjenståendeSykedager,
-            overføringstidspunkt,
-            avsluttet,
-            avstemmingsnøkkel,
-            annulleringer.map { it.id }.toSet()
-        )
+        visitor.visitUtbetaling(this)
     }
 
     private fun overførBegge(hendelse: IAktivitetslogg) {

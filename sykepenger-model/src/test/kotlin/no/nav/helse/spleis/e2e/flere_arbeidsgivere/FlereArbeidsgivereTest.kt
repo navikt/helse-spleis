@@ -137,9 +137,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            inspektør.utbetalinger.single().inspektør.let {
-                assertEquals(3, it.forbrukteSykedager)
-                assertEquals(245, it.gjenståendeSykedager)
+
+            inspektør.sisteMaksdato(1.vedtaksperiode).also {
+                assertEquals(3, it.antallForbrukteDager)
+                assertEquals(245, it.gjenståendeDager)
+                assertEquals(28.desember, it.maksdato)
             }
         }
         a2 {
@@ -147,9 +149,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            inspektør.utbetalinger.single().inspektør.let {
-                assertEquals(11, it.forbrukteSykedager)
-                assertEquals(237, it.gjenståendeSykedager)
+            inspektør.sisteMaksdato(1.vedtaksperiode).also {
+                assertEquals(11, it.antallForbrukteDager)
+                assertEquals(237, it.gjenståendeDager)
+                assertEquals(28.desember, it.maksdato)
             }
         }
     }

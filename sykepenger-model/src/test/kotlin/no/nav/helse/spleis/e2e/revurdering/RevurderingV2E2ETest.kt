@@ -1056,14 +1056,20 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(januar)
         nyttVedtak(mars)
 
+        inspektør.sisteMaksdato(1.vedtaksperiode).also {
+            assertEquals(11, it.antallForbrukteDager)
+            assertEquals(237, it.gjenståendeDager)
+            assertEquals(28.desember, it.maksdato)
+        }
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Sykedag, 50)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertEquals(28.desember, inspektør.utbetaling(0).inspektør.maksdato)
-        assertEquals(inspektør.utbetaling(0).inspektør.maksdato, inspektør.utbetaling(2).inspektør.maksdato)
-        assertEquals(11, inspektør.utbetaling(0).inspektør.forbrukteSykedager)
-        assertEquals(inspektør.utbetaling(0).inspektør.forbrukteSykedager, inspektør.utbetaling(2).inspektør.forbrukteSykedager)
+        inspektør.sisteMaksdato(1.vedtaksperiode).also {
+            assertEquals(11, it.antallForbrukteDager)
+            assertEquals(237, it.gjenståendeDager)
+            assertEquals(28.desember, it.maksdato)
+        }
     }
 
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
