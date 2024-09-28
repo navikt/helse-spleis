@@ -44,8 +44,9 @@ import no.nav.helse.økonomi.Økonomi
 internal class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
     periode: Periode? = null,
-    private val låstePerioder: MutableList<Periode> = mutableListOf()
+    private val _låstePerioder: MutableList<Periode> = mutableListOf()
 ) : Iterable<Dag> {
+    val låstePerioder get() = _låstePerioder.toList()
 
     // Støtte for at perioden er lengre enn vi har dager for (Map-et er sparse)
     private val periode: Periode? = periode ?: if (dager.size > 0) Periode(dager.firstKey(), dager.lastKey()) else null
@@ -53,7 +54,7 @@ internal class Sykdomstidslinje private constructor(
     internal constructor(dager: Map<LocalDate, Dag> = emptyMap()) : this(dager.toSortedMap())
 
     internal constructor(original: Sykdomstidslinje, spanningPeriode: Periode) :
-        this(original.dager, original.periode?.plus(spanningPeriode), original.låstePerioder)
+        this(original.dager, original.periode?.plus(spanningPeriode), original.låstePerioder.toMutableList())
 
     internal fun periode() = periode
     internal fun førsteDag() = periode!!.start
@@ -108,11 +109,11 @@ internal class Sykdomstidslinje private constructor(
     internal fun lås(periode: Periode) = this.also {
         requireNotNull(this.periode)
         require(periode in this.periode) { "$periode er ikke i ${this.periode}" }
-        låstePerioder.add(periode)
+        _låstePerioder.add(periode)
     }
 
     internal fun låsOpp(periode: Periode) = this.also {
-        låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
+        _låstePerioder.removeIf { it == periode } || throw IllegalArgumentException("Kan ikke låse opp periode $periode")
     }
 
     internal fun bekreftErLåst(periode: Periode) {
@@ -396,7 +397,7 @@ internal class Sykdomstidslinje private constructor(
             return Sykdomstidslinje(
                 dager = dto.dager.associate { it.dato to Dag.gjenopprett(it) }.toSortedMap(),
                 periode = dto.periode?.let { Periode.gjenopprett(it) },
-                låstePerioder = dto.låstePerioder.map { Periode.gjenopprett(it) }.toMutableList()
+                _låstePerioder = dto.låstePerioder.map { Periode.gjenopprett(it) }.toMutableList()
             )
         }
     }

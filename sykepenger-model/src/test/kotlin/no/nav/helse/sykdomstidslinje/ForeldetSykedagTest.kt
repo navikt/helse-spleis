@@ -6,6 +6,7 @@ import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -45,37 +46,37 @@ internal class ForeldetSykedagTest {
 
     @Test fun `omgående innsending`() {
         undersøke(søknad(1.mars)).also {
-            assertEquals(28, it.dagerTeller)
-            assertEquals(20, it.dagstypeTeller[Sykedag::class])
-            assertEquals(8, it.dagstypeTeller[SykHelgedag::class])
-            assertNull(it.dagstypeTeller[ForeldetSykedag::class])
+            assertEquals(28, it.antallDager)
+            assertEquals(20, it.dagteller[Sykedag::class])
+            assertEquals(8, it.dagteller[SykHelgedag::class])
+            assertNull(it.dagteller[ForeldetSykedag::class])
         }
     }
 
     @Test fun `siste dag innlevering`() {
         undersøke(søknad(30.april)).also {
-            assertEquals(28, it.dagerTeller)
-            assertEquals(20, it.dagstypeTeller[Sykedag::class])
-            assertEquals(8, it.dagstypeTeller[SykHelgedag::class])
-            assertNull(it.dagstypeTeller[ForeldetSykedag::class])
+            assertEquals(28, it.antallDager)
+            assertEquals(20, it.dagteller[Sykedag::class])
+            assertEquals(8, it.dagteller[SykHelgedag::class])
+            assertNull(it.dagteller[ForeldetSykedag::class])
         }
     }
 
     @Test fun `Noen dager er ugyldige`() {
         undersøke(søknad(1.mai)).also {
-            assertEquals(28, it.dagerTeller)
-            assertEquals(10, it.dagstypeTeller[Sykedag::class])
-            assertEquals(10, it.dagstypeTeller[ForeldetSykedag::class])
-            assertEquals(8, it.dagstypeTeller[SykHelgedag::class])
+            assertEquals(28, it.antallDager)
+            assertEquals(10, it.dagteller[Sykedag::class])
+            assertEquals(10, it.dagteller[ForeldetSykedag::class])
+            assertEquals(8, it.dagteller[SykHelgedag::class])
         }
     }
 
     @Test fun `Alle dager er ugyldige`() {
         undersøke(søknad(1.juni)).also {
-            assertEquals(28, it.dagerTeller)
-            assertNull(it.dagstypeTeller[Sykedag::class])
-            assertEquals(20, it.dagstypeTeller[ForeldetSykedag::class])
-            assertEquals(8, it.dagstypeTeller[SykHelgedag::class])
+            assertEquals(28, it.antallDager)
+            assertNull(it.dagteller[Sykedag::class])
+            assertEquals(20, it.dagteller[ForeldetSykedag::class])
+            assertEquals(8, it.dagteller[SykHelgedag::class])
         }
     }
 
@@ -84,74 +85,5 @@ internal class ForeldetSykedagTest {
         sendtTilNAVEllerArbeidsgiver = sendtTilNAV
     )
 
-    private fun undersøke(søknad: SykdomstidslinjeHendelse): TestInspektør {
-        return TestInspektør(søknad)
-    }
-
-    private class TestInspektør(søknad: SykdomstidslinjeHendelse) : SykdomstidslinjeVisitor {
-        var dagerTeller = 0
-        val dagstypeTeller = mutableMapOf<KClass<out Dag>, Int>()
-
-        init {
-            søknad.sykdomstidslinje().accept(this)
-        }
-
-        override fun preVisitSykdomstidslinje(
-            tidslinje: Sykdomstidslinje,
-            låstePerioder: List<Periode>
-        ) {
-            dagerTeller = 0
-        }
-
-        private fun inkrementer(klasse: KClass<out Dag>) {
-            dagerTeller += 1
-            dagstypeTeller.compute(klasse) { _, value ->
-                1 + (value ?: 0)
-            }
-        }
-
-        override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag::class)
-        override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag::class)
-        override fun visitDag(
-            dag: Arbeidsgiverdag,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
-        ) = inkrementer(dag::class)
-        override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag::class)
-        override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) = inkrementer(dag::class)
-        override fun visitDag(
-            dag: ArbeidsgiverHelgedag,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
-        ) = inkrementer(dag::class)
-        override fun visitDag(
-            dag: Sykedag,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
-        ) = inkrementer(dag::class)
-        override fun visitDag(
-            dag: ForeldetSykedag,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
-        ) = inkrementer(dag::class)
-        override fun visitDag(
-            dag: SykHelgedag,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            kilde: Hendelseskilde
-        ) = inkrementer(dag::class)
-        override fun visitDag(
-            dag: ProblemDag,
-            dato: LocalDate,
-            kilde: Hendelseskilde,
-            other: Hendelseskilde?,
-            melding: String
-        ) = inkrementer(dag::class)
-
-
-    }
+    private fun undersøke(søknad: SykdomstidslinjeHendelse) = søknad.sykdomstidslinje().inspektør
 }

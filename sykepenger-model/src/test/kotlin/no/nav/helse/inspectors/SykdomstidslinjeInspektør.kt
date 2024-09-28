@@ -1,8 +1,6 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -22,17 +20,35 @@ import kotlin.reflect.KClass
 
 internal val Sykdomstidslinje.inspektør get() = SykdomstidslinjeInspektør(this)
 
-internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
+internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) {
     internal val dager = mutableMapOf<LocalDate, Dag>()
     internal val kilder = mutableMapOf<LocalDate, Hendelseskilde>()
     internal val grader = mutableMapOf<LocalDate, Int>()
     internal val problemdagmeldinger = mutableMapOf<LocalDate, String>()
-    internal val låstePerioder = mutableListOf<Periode>()
+    internal val låstePerioder = tidslinje.låstePerioder
     internal val dagteller = mutableMapOf<KClass<out Dag>, Int>()
     internal val førsteIkkeUkjenteDag get() = dager.filterNot { (_, b) -> b is UkjentDag }.keys.minOrNull()
+    internal val antallDager get() = dager.size
 
     init {
-        tidslinje.accept(this)
+        tidslinje.forEach { dag ->
+            when (dag) {
+                is ArbeidsgiverHelgedag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
+                is Arbeidsgiverdag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
+                is Sykedag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
+                is SykHelgedag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
+                is ForeldetSykedag -> set(dag, dag.dato, dag.økonomi, dag.kilde)
+                is ProblemDag -> set(dag, dag.dato, dag.kilde, dag.melding)
+                is Dag.AndreYtelser,
+                is Dag.ArbeidIkkeGjenopptattDag,
+                is Arbeidsdag,
+                is Feriedag,
+                is FriskHelgedag,
+                is Permisjonsdag,
+                is Dag.SykedagNav,
+                is UkjentDag -> set(dag, dag.dato, dag.kilde)
+            }
+        }
     }
 
     internal operator fun get(dato: LocalDate) = dager[dato]
@@ -53,91 +69,6 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
 
     private fun set(dag: Dag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {
         problemdagmeldinger[dato] = melding
-        set(dag, dato, kilde)
-    }
-
-    override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
-        this.låstePerioder.addAll(låstePerioder)
-    }
-
-    override fun visitDag(dag: Dag.SykedagNav, dato: LocalDate, økonomi: Økonomi, kilde: Hendelseskilde) {
-        set(dag, dato, kilde)
-    }
-
-    override fun visitDag(dag: UkjentDag, dato: LocalDate, kilde: Hendelseskilde) =
-        set(dag, dato, kilde)
-
-    override fun visitDag(dag: Arbeidsdag, dato: LocalDate, kilde: Hendelseskilde) =
-        set(dag, dato, kilde)
-
-    override fun visitDag(
-        dag: Arbeidsgiverdag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) =
-        set(dag, dato, økonomi, kilde)
-
-    override fun visitDag(dag: Feriedag, dato: LocalDate, kilde: Hendelseskilde) =
-        set(dag, dato, kilde)
-
-    override fun visitDag(dag: FriskHelgedag, dato: LocalDate, kilde: Hendelseskilde) =
-        set(dag, dato, kilde)
-
-    override fun visitDag(
-        dag: ArbeidsgiverHelgedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) =
-        set(dag, dato, økonomi, kilde)
-
-    override fun visitDag(
-        dag: Sykedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) =
-        set(dag, dato, økonomi, kilde)
-
-    override fun visitDag(
-        dag: ForeldetSykedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) =
-        set(dag, dato, økonomi, kilde)
-
-    override fun visitDag(
-        dag: SykHelgedag,
-        dato: LocalDate,
-        økonomi: Økonomi,
-        kilde: Hendelseskilde
-    ) =
-        set(dag, dato, økonomi, kilde)
-
-    override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) =
-        set(dag, dato, kilde)
-
-    override fun visitDag(
-        dag: ProblemDag,
-        dato: LocalDate,
-        kilde: Hendelseskilde,
-        other: Hendelseskilde?,
-        melding: String
-    ) =
-        set(dag, dato, kilde, melding)
-
-    override fun visitDag(dag: Dag.ArbeidIkkeGjenopptattDag, dato: LocalDate, kilde: Hendelseskilde) {
-        set(dag, dato, kilde)
-    }
-
-    override fun visitDag(
-        dag: Dag.AndreYtelser,
-        dato: LocalDate,
-        kilde: Hendelseskilde,
-        ytelse: Dag.AndreYtelser.AnnenYtelse
-    ) {
         set(dag, dato, kilde)
     }
 }

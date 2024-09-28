@@ -437,7 +437,7 @@ internal interface SykdomshistorikkVisitor : SykdomstidslinjeVisitor {
 
 internal interface SykdomstidslinjeVisitor: SykdomstidslinjeDagVisitor {
     fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {}
-    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {}
+    fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {}
 }
 
 internal interface RefusjonshistorikkVisitor {
